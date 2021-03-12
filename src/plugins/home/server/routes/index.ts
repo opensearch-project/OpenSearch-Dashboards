@@ -18,7 +18,7 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { registerHitsStatusRoute } from './fetch_es_hits_status';
+import { registerHitsStatusRoute } from './fetch_opensearch_hits_status';
 
 export const registerRoutes = (router: IRouter) => {
   registerHitsStatusRoute(router);

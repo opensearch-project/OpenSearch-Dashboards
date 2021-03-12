@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -37,9 +37,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd functionbeat-{config.kibana.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
     },
     LINUX: {
@@ -56,9 +56,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         }
       ),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
-        'cd functionbeat-{config.kibana.version}-linux-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-linux-x86_64/',
       ],
     },
     WINDOWS: {
@@ -77,7 +77,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, go to the Functionbeat directory:',
           values: {
-            directoryName: '`functionbeat-{config.kibana.version}-windows`',
+            directoryName: '`functionbeat-{config.opensearchDashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             functionbeatLink:
               '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
@@ -96,8 +96,8 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
       textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTextPre', {
         defaultMessage:
           'This installs Functionbeat as a Lambda function.\
-The `setup` command checks the Elasticsearch configuration and loads the \
-Kibana index pattern. It is normally safe to omit this command.',
+The `setup` command checks the opensearch configuration and loads the \
+OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
       }),
       commands: ['./functionbeat setup', './functionbeat deploy fn-cloudwatch-logs'],
     },
@@ -110,8 +110,8 @@ Kibana index pattern. It is normally safe to omit this command.',
         {
           defaultMessage:
             'This installs Functionbeat as a Lambda function.\
-The `setup` command checks the Elasticsearch configuration and loads the \
-Kibana index pattern. It is normally safe to omit this command.',
+The `setup` command checks the opensearch configuration and loads the \
+OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
         }
       ),
       commands: ['.\\functionbeat.exe setup', '.\\functionbeat.exe deploy fn-cloudwatch-logs'],
@@ -129,24 +129,24 @@ Kibana index pattern. It is normally safe to omit this command.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.functionbeatInstructions.config.osxTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -165,24 +165,24 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         }
       ),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.functionbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -338,7 +338,7 @@ export function functionbeatStatusCheck() {
     error: i18n.translate('home.tutorials.common.functionbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received from Functionbeat yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'functionbeat-*',
       query: {
         match_all: {},

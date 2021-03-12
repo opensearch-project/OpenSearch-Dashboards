@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -42,7 +42,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Winlogbeat as a Windows service.',
           values: {
-            directoryName: '`winlogbeat-{config.kibana.version}-windows`',
+            directoryName: '`winlogbeat-{config.opensearchDashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             winlogbeatLink:
               '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
@@ -55,7 +55,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.winlogbeatInstructions.install.windowsTextPost',
         {
           defaultMessage:
-            'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
+            'Modify the settings under `output.opensearch` in the {path} file to point to your opensearch installation.',
           values: { path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`' },
         }
       ),
@@ -68,7 +68,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['.\\winlogbeat.exe setup', 'Start-Service winlogbeat'],
     },
@@ -88,24 +88,24 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         }
       ),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.winlogbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -154,7 +154,7 @@ export function winlogbeatStatusCheck() {
     error: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'winlogbeat-*',
       query: {
         bool: {

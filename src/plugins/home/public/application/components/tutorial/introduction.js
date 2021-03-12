@@ -31,7 +31,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 
 function IntroductionUI({
   description,

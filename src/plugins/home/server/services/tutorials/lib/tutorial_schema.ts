@@ -42,11 +42,11 @@ const dashboardSchema = Joi.object({
 });
 
 const artifactsSchema = Joi.object({
-  // Fields present in Elasticsearch documents created by this product.
+  // Fields present in OpenSearch documents created by this product.
   exportedFields: Joi.object({
     documentationUrl: Joi.string().required(),
   }),
-  // Kibana dashboards created by this product.
+  // OpenSearch Dashboards dashboards created by this product.
   dashboards: Joi.array().items(dashboardSchema).required(),
   application: Joi.object({
     path: Joi.string().required(),
@@ -60,7 +60,7 @@ const statusCheckSchema = Joi.object({
   btnLabel: Joi.string(),
   success: Joi.string(),
   error: Joi.string(),
-  esHitsCheck: Joi.object({
+  opensearchHitsCheck: Joi.object({
     index: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())).required(),
     query: Joi.object().required(),
   }).required(),
@@ -118,16 +118,16 @@ export const tutorialSchema = {
   completionTimeMinutes: Joi.number().integer(),
   previewImagePath: Joi.string(),
 
-  // kibana and elastic cluster running on prem
+  // OpenSearch Dashboards and OpenSearch cluster running on prem
   onPrem: instructionsSchema.required(),
 
-  // kibana and elastic cluster running in elastic's cloud
-  elasticCloud: instructionsSchema,
+  // OpenSearch Dashboards and OpenSearch cluster running in OpenSearch's cloud
+  OpenSearchCloud: instructionsSchema,
 
-  // kibana running on prem and elastic cluster running in elastic's cloud
+  // OpenSearch Dashboards running on prem and OpenSearch cluster running in OpenSearch's cloud
   onPremElasticCloud: instructionsSchema,
 
-  // Elastic stack artifacts produced by product when it is setup and run.
+  // OpenSearch stack artifacts produced by product when it is setup and run.
   artifacts: artifactsSchema,
 
   // saved objects used by data module.

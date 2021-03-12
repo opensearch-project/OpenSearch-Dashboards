@@ -22,12 +22,12 @@ import { shallow } from 'enzyme';
 import { SolutionTitle } from './solution_title';
 
 const solutionEntry = {
-  id: 'kibana',
-  title: 'Kibana',
+  id: 'opensearchDashboards',
+  title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   descriptions: ['Analyze data in dashboards'],
   icon: 'logoKibana',
-  path: 'kibana_landing_page',
+  path: 'opensearch_dashboards_landing_page',
   order: 1,
 };
 

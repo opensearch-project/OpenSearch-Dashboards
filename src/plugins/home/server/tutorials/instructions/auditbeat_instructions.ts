@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -37,9 +37,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf auditbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd auditbeat-{config.kibana.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'cd auditbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
     },
     DEB: {
@@ -53,8 +53,8 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i auditbeat-{config.kibana.version}-amd64.deb',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-amd64.deb',
+        'sudo dpkg -i auditbeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
@@ -74,8 +74,8 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi auditbeat-{config.kibana.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'sudo rpm -vi auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
@@ -103,7 +103,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
             auditbeatLinkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
-            directoryName: 'auditbeat-{config.kibana.version}-windows',
+            directoryName: 'auditbeat-{config.opensearchDashboards.version}-windows',
           },
         }
       ),
@@ -112,9 +112,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.auditbeatInstructions.install.windowsTextPost',
         {
           defaultMessage:
-            'Modify the settings under {propertyName} in the {auditbeatPath} file to point to your Elasticsearch installation.',
+            'Modify the settings under {propertyName} in the {auditbeatPath} file to point to your OpenSearch installation.',
           values: {
-            propertyName: '`output.elasticsearch`',
+            propertyName: '`output.opensearch`',
             auditbeatPath: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
           },
         }
@@ -128,7 +128,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.start.osxTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['./auditbeat setup', './auditbeat -e'],
     },
@@ -138,7 +138,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.start.debTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo auditbeat setup', 'sudo service auditbeat start'],
     },
@@ -148,7 +148,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.start.rpmTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo auditbeat setup', 'sudo service auditbeat start'],
     },
@@ -158,7 +158,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.auditbeatInstructions.start.windowsTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['.\\auditbeat.exe setup', 'Start-Service auditbeat'],
     },
@@ -175,22 +175,22 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -205,22 +205,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -235,22 +235,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -265,24 +265,24 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.auditbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -379,7 +379,7 @@ export function auditbeatStatusCheck() {
     error: i18n.translate('home.tutorials.common.auditbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'auditbeat-*',
       query: {
         bool: {

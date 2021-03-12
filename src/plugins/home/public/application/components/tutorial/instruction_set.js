@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
 class InstructionSetUi extends React.Component {
   constructor(props) {
@@ -92,9 +92,9 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.success
           ? this.props.statusCheckConfig.success
           : this.props.intl.formatMessage({
-              id: 'home.tutorial.instructionSet.successLabel',
-              defaultMessage: 'Success',
-            });
+            id: 'home.tutorial.instructionSet.successLabel',
+            defaultMessage: 'Success',
+          });
         color = 'success';
         break;
       case StatusCheckStates.ERROR:
@@ -102,9 +102,9 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.error
           ? this.props.statusCheckConfig.error
           : this.props.intl.formatMessage({
-              id: 'home.tutorial.instructionSet.noDataLabel',
-              defaultMessage: 'No data found',
-            });
+            id: 'home.tutorial.instructionSet.noDataLabel',
+            defaultMessage: 'No data found',
+          });
         color = 'warning';
         break;
     }

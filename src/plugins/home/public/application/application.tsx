@@ -19,12 +19,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
-import { ScopedHistory, CoreStart } from 'kibana/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { i18n } from '@osd/i18n';
+import { ScopedHistory, CoreStart } from 'opensearch-dashboards/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
-import { getServices } from './kibana_services';
+import { getServices } from './opensearch_dashboards_services';
 
 import './index.scss';
 
@@ -55,9 +55,9 @@ export const renderApp = async (
   });
 
   render(
-    <KibanaContextProvider services={{ ...coreStart }}>
+    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
       <HomeApp directories={directories} solutions={solutions} />
-    </KibanaContextProvider>,
+    </OpenSearchDashboardsContextProvider>,
     element
   );
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger, SavedObjectsServiceStart } from 'kibana/server';
+import { Logger, SavedObjectsServiceStart } from 'opensearch-dashboards/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 
