@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
-  KibanaDatatable,
-  KibanaDatatableColumn,
+  OpensearchDashboardsDatatable,
+  OpensearchDashboardsDatatableColumn,
 } from '../../../expressions/public';
 
 interface Arguments {
@@ -34,7 +34,7 @@ interface Arguments {
 type ExpressionValueVisDimension = ExpressionValueBoxed<
   'vis_dimension',
   {
-    accessor: number | KibanaDatatableColumn;
+    accessor: number | OpensearchDashboardsDatatableColumn;
     format: {
       id?: string;
       params: unknown;
@@ -44,7 +44,7 @@ type ExpressionValueVisDimension = ExpressionValueBoxed<
 
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
-  KibanaDatatable,
+  OpensearchDashboardsDatatable,
   Arguments,
   ExpressionValueVisDimension
 > => ({
@@ -53,7 +53,7 @@ export const visDimension = (): ExpressionFunctionDefinition<
     defaultMessage: 'Generates visConfig dimension object',
   }),
   type: 'vis_dimension',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   args: {
     accessor: {
       types: ['string', 'number'],

@@ -18,17 +18,17 @@
  */
 import {
   SavedObjectLoader,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
 } from '../../../../plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../vis_types';
 
-export interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
+export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations extends SavedObjectOpenSearchDashboardsServices {
   visualizationTypes: TypesStart;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
-export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
+export function createSavedVisLoader(services: SavedObjectOpenSearchDashboardsServicesWithVisualizations) {
   const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {

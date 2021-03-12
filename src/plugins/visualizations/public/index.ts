@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PublicContract } from '@kbn/utility-types';
+import { PublicContract } from '@osd/utility-types';
 import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
 import { VisTypeAlias } from '../../vis_types';

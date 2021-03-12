@@ -272,7 +272,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       ...params,
       ...buildVisConfig.table(schemas, params),
     };
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
+    return `opensearch_dashboards_table ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (params, schemas) => {
     const visConfig = {
@@ -293,7 +293,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       ...params,
       ...buildVisConfig.pie(schemas),
     };
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
+    return `opensearch_dashboards_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
 
@@ -393,7 +393,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { uiState, title } = vis;
 
   // context
-  let pipeline = `kibana | kibana_context `;
+  let pipeline = `opensearch_dashboards | opensearch_dashboards_context `;
   if (query) {
     pipeline += prepareJson('query', query);
   }

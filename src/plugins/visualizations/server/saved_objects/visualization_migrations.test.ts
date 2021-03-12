@@ -18,7 +18,7 @@
  */
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
@@ -27,7 +27,7 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
     const migratedDoc = migrate({
       type: 'area',
       attributes: {
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
             query: {
               match_all: {},
@@ -38,7 +38,7 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
     });
 
     const migratedSearchSource = JSON.parse(
-      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      migratedDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
     );
 
     expect(migratedSearchSource).toEqual({
@@ -53,14 +53,14 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
     const migratedDoc = migrate({
       type: 'area',
       attributes: {
-        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
       },
     });
 
     expect(migratedDoc).toEqual({
       type: 'area',
       attributes: {
-        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
       },
     });
   });
@@ -215,7 +215,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify({ type, aggs }),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
       },
@@ -244,7 +244,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: null,
           },
           savedSearchId: '123',
@@ -255,7 +255,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": null,
             },
             "savedSearchRefName": "search_0",
@@ -280,7 +280,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: undefined,
           },
           savedSearchId: '123',
@@ -291,7 +291,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": undefined,
             },
             "savedSearchRefName": "search_0",
@@ -316,7 +316,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: 123,
           },
           savedSearchId: '123',
@@ -326,7 +326,7 @@ describe('migration visualization', () => {
       expect(migrate(doc)).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": 123,
             },
             "savedSearchRefName": "search_0",
@@ -351,7 +351,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{abc123}',
           },
           savedSearchId: '123',
@@ -361,7 +361,7 @@ describe('migration visualization', () => {
       expect(migrate(doc)).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": "{abc123}",
             },
             "savedSearchRefName": "search_0",
@@ -386,7 +386,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true }),
           },
           savedSearchId: '123',
@@ -397,7 +397,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": "{\\"bar\\":true}",
             },
             "savedSearchRefName": "search_0",
@@ -422,7 +422,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
           },
           savedSearchId: '123',
@@ -433,8 +433,8 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
-              "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+            "opensearchDashboardsSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\\"}",
             },
             "savedSearchRefName": "search_0",
             "visState": "{}",
@@ -443,7 +443,7 @@ describe('migration visualization', () => {
           "references": Array [
             Object {
               "id": "pattern*",
-              "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+              "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
               "type": "index-pattern",
             },
             Object {
@@ -463,7 +463,7 @@ describe('migration visualization', () => {
         type: 'visualization',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               bar: true,
               filter: [
@@ -481,8 +481,8 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
-              "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+            "opensearchDashboardsSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
             },
             "savedSearchRefName": "search_0",
             "visState": "{}",
@@ -491,7 +491,7 @@ describe('migration visualization', () => {
           "references": Array [
             Object {
               "id": "my-index",
-              "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+              "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
               "type": "index-pattern",
             },
             Object {
@@ -553,7 +553,7 @@ describe('migration visualization', () => {
         id: '1',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{}',
           },
         },
@@ -563,7 +563,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": "{}",
             },
             "visState": "{}",
@@ -579,7 +579,7 @@ describe('migration visualization', () => {
         id: '1',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{}',
           },
           savedSearchId: '123',
@@ -590,7 +590,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": "{}",
             },
             "savedSearchRefName": "search_0",
@@ -613,7 +613,7 @@ describe('migration visualization', () => {
         id: '1',
         attributes: {
           visState: '{}',
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{}',
           },
           savedSearchId: '',
@@ -624,7 +624,7 @@ describe('migration visualization', () => {
       expect(migratedDoc).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
-            "kibanaSavedObjectMeta": Object {
+            "opensearchDashboardsSavedObjectMeta": Object {
               "searchSourceJSON": "{}",
             },
             "visState": "{}",
@@ -776,7 +776,7 @@ describe('migration visualization', () => {
           visState: '!/// Intentionally malformed JSON ///!',
           uiStateJSON: '{}',
           version: 1,
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{}',
           },
         },
@@ -1098,13 +1098,13 @@ describe('migration visualization', () => {
             "61ca57f2-469d-11e7-af02-69e470af7417","predict":1}],"separate_axis":0,"axis_position":"right",
             "formatter":"number","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none",
             "label":"Percent Delays","terms_size":"2","terms_field":"OriginCityName"}],"time_field":"timestamp",
-            "index_pattern":"kibana_sample_data_flights","interval":">=12h","axis_position":"left","axis_formatter":
+            "index_pattern":"opensearch_dashboards_sample_data_flights","interval":">=12h","axis_position":"left","axis_formatter":
             "number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier",
-            "template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"kibana_sample_data_flights",
+            "template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"opensearch_dashboards_sample_data_flights",
             "query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39",
             "color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle",
             "ignore_global_filters":1,"ignore_panel_filters":1,"hidden":true}],"legend_position":"bottom",
-            "axis_scale":"normal","default_index_pattern":"kibana_sample_data_flights","default_timefield":"timestamp"},
+            "axis_scale":"normal","default_index_pattern":"opensearch_dashboards_sample_data_flights","default_timefield":"timestamp"},
             "aggs":[]}`,
           },
           migrationVersion: {
@@ -1143,7 +1143,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify({ params }),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
       },
@@ -1282,7 +1282,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify({ params }),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
       },
@@ -1415,7 +1415,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify(visState),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
       },
@@ -1536,7 +1536,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify(params),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: '{}',
         },
       },
@@ -1626,7 +1626,7 @@ describe('migration visualization', () => {
         visState: JSON.stringify(visState),
         uiStateJSON: '{}',
         version: 1,
-        kibanaSavedObjectMeta: {
+        opensearchDashboardsSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
             filter: [],
             query: {
@@ -1645,10 +1645,10 @@ describe('migration visualization', () => {
     it('should remove the search source JSON', () => {
       const timeSeriesDoc = generateDoc({ type: 'metrics' });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
-      const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+      expect(migratedtimeSeriesDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON).toEqual('{}');
+      const { opensearchDashboardsSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
       const {
-        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
+        opensearchDashboardsSavedObjectMeta: oldOpenSearchDashboardsSavedObjectMeta,
         ...oldAttributes
       } = migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);

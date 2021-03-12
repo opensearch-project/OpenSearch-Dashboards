@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Range } from '../../../expressions/public';
+import { i18n } from '@osd/i18n';
+import { ExpressionFunctionDefinition, OpensearchDashboardsDatatable, Range } from '../../../expressions/public';
 
 interface Arguments {
   from: number;
@@ -27,7 +27,7 @@ interface Arguments {
 
 export const range = (): ExpressionFunctionDefinition<
   'range',
-  KibanaDatatable | null,
+  OpensearchDashboardsDatatable | null,
   Arguments,
   Range
 > => ({

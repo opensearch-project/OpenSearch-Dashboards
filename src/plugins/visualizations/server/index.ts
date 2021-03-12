@@ -23,7 +23,7 @@ import { VisualizationsPlugin } from './plugin';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 
 //  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+//  as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
