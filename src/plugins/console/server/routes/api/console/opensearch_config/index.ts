@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
-import { RouteDependencies } from '../../../';
+import { OpenSearchConfigApiResponse } from '../../../../../common/types/api_responses';
+import { RouteDependencies } from '../../..';
 
-export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
-  router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {
+export const registerOpenSearchConfigRoute = ({ router, services }: RouteDependencies): void => {
+  router.get({ path: '/api/console/opensearch_config', validate: false }, async (ctx, req, res) => {
     const {
       hosts: [host],
-    } = await services.esLegacyConfigService.readConfig();
+    } = await services.opensearchLegacyConfigService.readConfig();
 
-    const body: EsConfigApiResponse = { host };
+    const body: OpenSearchConfigApiResponse = { host };
 
     return res.ok({ body });
   });

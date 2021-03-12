@@ -21,17 +21,17 @@ import _ from 'lodash';
 import { populateContext } from '../../autocomplete/engine';
 
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
-import * as kb from '../../kb';
+import * as osd from '../../osd';
 import * as mappings from '../../mappings/mappings';
 
 describe('Knowledge base', () => {
   beforeEach(() => {
     mappings.clear();
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    osd.setActiveApi(osd._test.loadApisFromJson({}));
   });
   afterEach(() => {
     mappings.clear();
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    osd.setActiveApi(osd._test.loadApisFromJson({}));
   });
 
   const MAPPING = {
@@ -72,7 +72,7 @@ describe('Knowledge base', () => {
       context,
       null,
       expectedContext.autoCompleteSet,
-      kb.getTopLevelUrlCompleteComponents('GET')
+      osd.getTopLevelUrlCompleteComponents('GET')
     );
 
     // override context to just check on id
@@ -113,7 +113,7 @@ describe('Knowledge base', () => {
   function indexTest(name, tokenPath, otherTokenValues, expectedContext) {
     test(name, function () {
       // eslint-disable-next-line new-cap
-      const testApi = new kb._test.loadApisFromJson(
+      const testApi = new osd._test.loadApisFromJson(
         {
           indexTest: {
             endpoints: {
@@ -128,10 +128,10 @@ describe('Knowledge base', () => {
             },
           },
         },
-        kb._test.globalUrlComponentFactories
+        osd._test.globalUrlComponentFactories
       );
 
-      kb.setActiveApi(testApi);
+      osd.setActiveApi(testApi);
 
       mappings.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
@@ -162,7 +162,7 @@ describe('Knowledge base', () => {
 
   function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
     test(name, function () {
-      const testApi = kb._test.loadApisFromJson(
+      const testApi = osd._test.loadApisFromJson(
         {
           typeTest: {
             endpoints: {
@@ -172,9 +172,9 @@ describe('Knowledge base', () => {
             },
           },
         },
-        kb._test.globalUrlComponentFactories
+        osd._test.globalUrlComponentFactories
       );
-      kb.setActiveApi(testApi);
+      osd.setActiveApi(testApi);
 
       mappings.loadMappings(MAPPING);
 

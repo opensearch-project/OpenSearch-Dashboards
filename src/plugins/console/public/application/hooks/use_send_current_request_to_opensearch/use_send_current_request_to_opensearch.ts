@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
-import { sendRequestToES } from './send_request_to_es';
+import { sendRequestToOpenSearch } from './send_request_to_opensearch';
 import { track } from './track';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
-export const useSendCurrentRequestToES = () => {
+export const useSendCurrentRequestToOpenSearch = () => {
   const {
     services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
@@ -52,7 +52,7 @@ export const useSendCurrentRequestToES = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToES({ requests });
+      const results = await sendRequestToOpenSearch({ requests });
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
@@ -69,7 +69,7 @@ export const useSendCurrentRequestToES = () => {
 
       const { polling } = settings.toJSON();
       if (polling) {
-        // If the user has submitted a request against ES, something in the fields, indices, aliases,
+        // If the user has submitted a request against OpenSearch, something in the fields, indices, aliases,
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.

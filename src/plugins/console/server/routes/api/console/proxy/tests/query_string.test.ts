@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
 import * as requestModule from '../../../../../lib/proxy_request';
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { createHandler } from '../create_handler';
 
@@ -36,7 +36,7 @@ describe('Console Proxy Route', () => {
       return handler(
         {} as any,
         { headers: {}, query: { method, path } } as any,
-        kibanaResponseFactory
+        opensearchDashboardsResponseFactory
       );
     };
   });

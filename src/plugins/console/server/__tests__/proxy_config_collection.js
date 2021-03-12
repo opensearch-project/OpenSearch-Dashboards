@@ -19,7 +19,7 @@
 
 /* eslint-env mocha */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import sinon from 'sinon';
 import fs from 'fs';
 import { Agent as HttpsAgent } from 'https';
@@ -41,7 +41,7 @@ describe('ProxyConfigCollection', function () {
         protocol: 'https',
         host: 'localhost',
         port: 5601,
-        path: '/.kibana',
+        path: '/.opensearch-dashboards',
       },
 
       timeout: 1,
@@ -92,9 +92,9 @@ describe('ProxyConfigCollection', function () {
     });
   });
 
-  describe('https://localhost:5601/.kibana', function () {
+  describe('https://localhost:5601/.opensearch-dashboards', function () {
     it('defaults to the first matching timeout', function () {
-      expect(getTimeout('https://localhost:5601/.kibana')).to.be(1);
+      expect(getTimeout('https://localhost:5601/.opensearch-dashboards')).to.be(1);
     });
   });
 
@@ -161,7 +161,7 @@ describe('ProxyConfigCollection', function () {
     }
 
     it('verifies for config that produces ssl agent', function () {
-      const conf = makeCollection().configForUri('https://es.internal.org/_search');
+      const conf = makeCollection().configForUri('https://opensearch.internal.org/_search');
       expect(conf.agent.options).to.have.property('rejectUnauthorized', true);
       expect(conf.agent).to.be.an(HttpsAgent);
     });

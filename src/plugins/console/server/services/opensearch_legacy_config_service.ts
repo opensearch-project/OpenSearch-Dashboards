@@ -19,25 +19,25 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ElasticsearchConfig } from 'kibana/server';
+import { OpenSearchConfig } from 'opensearch-dashboards/server';
 
-export class EsLegacyConfigService {
+export class OpenSearchLegacyConfigService {
   /**
-   * The elasticsearch config value at a given point in time.
+   * The OpenSearch config value at a given point in time.
    */
-  private config?: ElasticsearchConfig;
+  private config?: OpenSearchConfig;
 
   /**
-   * An observable that emits elasticsearch config.
+   * An observable that emits OpenSearch config.
    */
-  private config$?: Observable<ElasticsearchConfig>;
+  private config$?: Observable<OpenSearchConfig>;
 
   /**
-   * A reference to the subscription to the elasticsearch observable
+   * A reference to the subscription to the OpenSearch observable
    */
   private configSub?: Subscription;
 
-  setup(config$: Observable<ElasticsearchConfig>) {
+  setup(config$: Observable<OpenSearchConfig>) {
     this.config$ = config$;
     this.configSub = this.config$.subscribe((config) => {
       this.config = config;
@@ -50,9 +50,9 @@ export class EsLegacyConfigService {
     }
   }
 
-  async readConfig(): Promise<ElasticsearchConfig> {
+  async readConfig(): Promise<OpenSearchConfig> {
     if (!this.config$) {
-      throw new Error('Could not read elasticsearch config, this service has not been setup!');
+      throw new Error('Could not read OpenSearch config, this service has not been setup!');
     }
 
     if (!this.config) {

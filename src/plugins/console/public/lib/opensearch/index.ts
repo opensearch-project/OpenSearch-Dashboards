@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { useSendCurrentRequestToES } from './use_send_current_request_to_es';
+export { send, constructOpenSearchUrl, getContentType, getVersion } from './opensearch';

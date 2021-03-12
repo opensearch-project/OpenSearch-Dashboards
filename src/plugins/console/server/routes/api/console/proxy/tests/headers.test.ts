@@ -20,14 +20,14 @@ jest.mock('../../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import * as requestModule from '../../../../../lib/proxy_request';
 
 import { createHandler } from '../create_handler';
@@ -71,7 +71,7 @@ describe('Console Proxy Route', () => {
             path: '/api/console/proxy?method=GET&path=/',
           },
         } as any,
-        kibanaResponseFactory
+        opensearchDashboardsResponseFactory
       );
 
       expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
@@ -32,7 +32,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       home.featureCatalogue.register({
         id: 'console',
         title: i18n.translate('console.devToolsTitle', {
-          defaultMessage: 'Interact with the Elasticsearch API',
+          defaultMessage: 'Interact with the OpenSearch API',
         }),
         description: i18n.translate('console.devToolsDescription', {
           defaultMessage: 'Skip cURL and use a JSON interface to work with your data in Console.',
@@ -73,5 +73,5 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     });
   }
 
-  public start() {}
+  public start() { }
 }

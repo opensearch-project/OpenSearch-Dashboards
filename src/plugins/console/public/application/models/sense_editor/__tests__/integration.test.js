@@ -21,7 +21,7 @@ import { create } from '../create';
 import _ from 'lodash';
 import $ from 'jquery';
 
-import * as kb from '../../../../lib/kb/kb';
+import * as osd from '../../../../lib/osd/osd';
 import * as mappings from '../../../../lib/mappings/mappings';
 
 describe('Integration', () => {
@@ -40,7 +40,7 @@ describe('Integration', () => {
     senseEditor.autocomplete._test.addChangeListener();
   });
 
-  function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
+  function processContextTest(data, mapping, osdSchemes, requestLine, testToRun) {
     test(testToRun.name, async function (done) {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
@@ -58,21 +58,21 @@ describe('Integration', () => {
       mappings.clear();
       mappings.loadMappings(mapping);
       const json = {};
-      json[test.name] = kbSchemes || {};
-      const testApi = kb._test.loadApisFromJson(json);
-      if (kbSchemes) {
-        //  if (kbSchemes.globals) {
-        //    $.each(kbSchemes.globals, function (parent, rules) {
+      json[test.name] = osdSchemes || {};
+      const testApi = osd._test.loadApisFromJson(json);
+      if (osdSchemes) {
+        //  if (osdSchemes.globals) {
+        //    $.each(osdSchemes.globals, function (parent, rules) {
         //      testApi.addGlobalAutocompleteRules(parent, rules);
         //    });
         //  }
-        if (kbSchemes.endpoints) {
-          $.each(kbSchemes.endpoints, function (endpoint, scheme) {
+        if (osdSchemes.endpoints) {
+          $.each(osdSchemes.endpoints, function (endpoint, scheme) {
             testApi.addEndpointDescription(endpoint, scheme);
           });
         }
       }
-      kb.setActiveApi(testApi);
+      osd.setActiveApi(testApi);
       const { cursor } = testToRun;
       await senseEditor.update(editorValue, true);
       senseEditor.getCoreEditor().moveCursorToPosition(cursor);
@@ -81,7 +81,7 @@ describe('Integration', () => {
       //setTimeout(function () {
       senseEditor.completer = {
         base: {},
-        changeListener: function () {},
+        changeListener: function () { },
       }; // mimic auto complete
 
       senseEditor.autocomplete._test.getCompletions(senseEditor, null, cursor, '', function (
@@ -171,16 +171,16 @@ describe('Integration', () => {
     });
   }
 
-  function contextTests(data, mapping, kbSchemes, requestLine, tests) {
+  function contextTests(data, mapping, osdSchemes, requestLine, tests) {
     if (data != null && typeof data !== 'string') {
       data = JSON.stringify(data, null, 3);
     }
     for (let t = 0; t < tests.length; t++) {
-      processContextTest(data, mapping, kbSchemes, requestLine, tests[t]);
+      processContextTest(data, mapping, osdSchemes, requestLine, tests[t]);
     }
   }
 
-  const SEARCH_KB = {
+  const SEARCH_OSD = {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
@@ -217,7 +217,7 @@ describe('Integration', () => {
     },
   };
 
-  contextTests({}, MAPPING, SEARCH_KB, 'POST _search', [
+  contextTests({}, MAPPING, SEARCH_OSD, 'POST _search', [
     {
       name: 'Empty doc',
       cursor: { lineNumber: 1, column: 2 },
@@ -233,7 +233,7 @@ describe('Integration', () => {
     },
   ]);
 
-  contextTests({}, MAPPING, SEARCH_KB, 'POST _no_context', [
+  contextTests({}, MAPPING, SEARCH_OSD, 'POST _no_context', [
     {
       name: 'Missing KB',
       cursor: { lineNumber: 1, column: 2 },
@@ -275,7 +275,7 @@ describe('Integration', () => {
       size: 20,
     },
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST _search',
     [
       {
@@ -327,14 +327,14 @@ describe('Integration', () => {
 
   contextTests(
     '{\n' +
-      '   "query": {\n' +
-      '    "field": "something"\n' +
-      '   },\n' +
-      '   "facets": {},\n' +
-      '   "size": 20 \n' +
-      '}',
+    '   "query": {\n' +
+    '    "field": "something"\n' +
+    '   },\n' +
+    '   "facets": {},\n' +
+    '   "size": 20 \n' +
+    '}',
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST _search',
     [
       {
@@ -461,7 +461,7 @@ describe('Integration', () => {
       size: 20,
     },
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'GET _search',
     [
       {
@@ -875,7 +875,7 @@ describe('Integration', () => {
       '': {},
     },
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST _search',
     [
       {
@@ -940,7 +940,7 @@ describe('Integration', () => {
       size: 20,
     },
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST index1/_search',
     [
       {
@@ -963,7 +963,7 @@ describe('Integration', () => {
   );
 
   // NOTE: This test emits "Can't extract a valid url token path", but that's expected.
-  contextTests('POST _search\n', MAPPING, SEARCH_KB, null, [
+  contextTests('POST _search\n', MAPPING, SEARCH_OSD, null, [
     {
       name: 'initial doc start',
       cursor: { lineNumber: 2, column: 1 },
@@ -976,7 +976,7 @@ describe('Integration', () => {
   contextTests(
     '{\n' + '   "query": {} \n' + '}\n' + '\n' + '\n',
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST _search',
     [
       {
@@ -1232,7 +1232,7 @@ describe('Integration', () => {
       size: 20,
     },
     MAPPING,
-    SEARCH_KB,
+    SEARCH_OSD,
     'POST http://somehost/_search',
     [
       {

@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';

@@ -19,7 +19,7 @@
 
 /* eslint-env mocha */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import sinon from 'sinon';
 import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
@@ -32,7 +32,7 @@ const matchGoogle = {
   path: '/search',
 };
 const parsedGoogle = parseUrl('https://google.com/search');
-const parsedLocalEs = parseUrl('https://localhost:5601/search');
+const parsedLocalOpenSearch = parseUrl('https://localhost:5601/search');
 
 describe('ProxyConfig', function () {
   describe('constructor', function () {
@@ -111,7 +111,7 @@ describe('ProxyConfig', function () {
           timeout: 100,
         });
 
-        expect(config.getForParsedUri(parsedLocalEs)).to.eql({});
+        expect(config.getForParsedUri(parsedLocalOpenSearch)).to.eql({});
       });
     });
 

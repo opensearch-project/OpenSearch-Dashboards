@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'opensearch-dashboards/server';
 import { RouteDependencies } from '../../../';
 
 interface SpecDefinitionsRouteResponse {
-  es: {
+  opensearch: {
     name: string;
     globals: Record<string, any>;
     endpoints: Record<string, any>;
@@ -30,7 +30,7 @@ interface SpecDefinitionsRouteResponse {
 export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependencies) => {
   const handler: RequestHandler = async (ctx, request, response) => {
     const specResponse: SpecDefinitionsRouteResponse = {
-      es: services.specDefinitionService.asJson(),
+      opensearch: services.specDefinitionService.asJson(),
     };
 
     return response.ok({

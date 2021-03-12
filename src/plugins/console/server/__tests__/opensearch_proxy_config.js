@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import moment from 'moment';
-import { getElasticsearchProxyConfig } from '../lib/elasticsearch_proxy_config';
+import { getOpenSearchProxyConfig } from '../lib/opensearch_proxy_config';
 import https from 'https';
 import http from 'http';
 
-const getDefaultElasticsearchConfig = () => {
+const getDefaultOpenSearchConfig = () => {
   return {
     hosts: ['http://localhost:9200', 'http://192.168.1.1:1234'],
     requestTimeout: moment.duration(30000),
@@ -32,26 +32,26 @@ const getDefaultElasticsearchConfig = () => {
 };
 
 describe('plugins/console', function () {
-  describe('#getElasticsearchProxyConfig', function () {
+  describe('#getOpenSearchProxyConfig', function () {
     it('sets timeout', function () {
       const value = 1000;
-      const proxyConfig = getElasticsearchProxyConfig({
-        ...getDefaultElasticsearchConfig(),
+      const proxyConfig = getOpenSearchProxyConfig({
+        ...getDefaultOpenSearchConfig(),
         requestTimeout: moment.duration(value),
       });
       expect(proxyConfig.timeout).to.be(value);
     });
 
     it(`uses https.Agent when url's protocol is https`, function () {
-      const { agent } = getElasticsearchProxyConfig({
-        ...getDefaultElasticsearchConfig(),
+      const { agent } = getOpenSearchProxyConfig({
+        ...getDefaultOpenSearchConfig(),
         hosts: ['https://localhost:9200'],
       });
       expect(agent).to.be.a(https.Agent);
     });
 
     it(`uses http.Agent when url's protocol is http`, function () {
-      const { agent } = getElasticsearchProxyConfig(getDefaultElasticsearchConfig());
+      const { agent } = getOpenSearchProxyConfig(getDefaultOpenSearchConfig());
       expect(agent).to.be.a(http.Agent);
     });
 
@@ -59,13 +59,13 @@ describe('plugins/console', function () {
       let config;
       beforeEach(function () {
         config = {
-          ...getDefaultElasticsearchConfig(),
+          ...getDefaultOpenSearchConfig(),
           hosts: ['https://localhost:9200'],
         };
       });
 
       it('sets rejectUnauthorized to false when verificationMode is none', function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'none' },
         });
@@ -73,7 +73,7 @@ describe('plugins/console', function () {
       });
 
       it('sets rejectUnauthorized to true when verificationMode is certificate', function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'certificate' },
         });
@@ -81,7 +81,7 @@ describe('plugins/console', function () {
       });
 
       it('sets checkServerIdentity to not check hostname when verificationMode is certificate', function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'certificate' },
         });
@@ -100,7 +100,7 @@ describe('plugins/console', function () {
       });
 
       it('sets rejectUnauthorized to true when verificationMode is full', function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'full' },
         });
@@ -109,7 +109,7 @@ describe('plugins/console', function () {
       });
 
       it(`doesn't set checkServerIdentity when verificationMode is full`, function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'full' },
         });
@@ -118,7 +118,7 @@ describe('plugins/console', function () {
       });
 
       it(`sets ca when certificateAuthorities are specified`, function () {
-        const { agent } = getElasticsearchProxyConfig({
+        const { agent } = getOpenSearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, certificateAuthorities: ['content-of-some-path'] },
         });
@@ -128,7 +128,7 @@ describe('plugins/console', function () {
 
       describe('when alwaysPresentCertificate is false', () => {
         it(`doesn't set cert and key when certificate and key paths are specified`, function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
@@ -143,7 +143,7 @@ describe('plugins/console', function () {
         });
 
         it(`doesn't set passphrase when certificate, key and keyPassphrase are specified`, function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
@@ -160,7 +160,7 @@ describe('plugins/console', function () {
 
       describe('when alwaysPresentCertificate is true', () => {
         it(`sets cert and key when certificate and key are specified`, async function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
@@ -175,7 +175,7 @@ describe('plugins/console', function () {
         });
 
         it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
@@ -190,7 +190,7 @@ describe('plugins/console', function () {
         });
 
         it(`doesn't set cert when only certificate path is specified`, async function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
@@ -205,7 +205,7 @@ describe('plugins/console', function () {
         });
 
         it(`doesn't set key when only key path is specified`, async function () {
-          const { agent } = getElasticsearchProxyConfig({
+          const { agent } = getOpenSearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,

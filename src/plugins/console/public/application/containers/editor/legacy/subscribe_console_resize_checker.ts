@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ResizeChecker } from '../../../../../../kibana_utils/public';
+import { ResizeChecker } from '../../../../../../opensearch_dashboards_utils/public';
 
 export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
   const checker = new ResizeChecker(el);

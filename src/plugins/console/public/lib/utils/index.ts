@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { XJson } from '../../../../es_ui_shared/public';
+import { XJson } from '../../../../opensearch_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
