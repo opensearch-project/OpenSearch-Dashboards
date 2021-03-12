@@ -31,13 +31,13 @@ export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartSe
 export { runTests, startServers } from './functional_tests/tasks';
 
 // @ts-ignore not typed yet
-export { KIBANA_ROOT } from './functional_tests/lib/paths';
+export { OPENSEARCH_DASHBOARDS_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
-export { esTestConfig, createLegacyEsTestCluster } from './legacy_es';
+export { opensearchTestConfig, createLegacyEsTestCluster } from './legacy_opensearch';
 
 // @ts-ignore not typed yet
-export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
+export { osdTestConfig, opensearchDashboardsServerTestUser, opensearchDashboardsTestUser, adminTestUser } from './osd';
 
 // @ts-ignore not typed yet
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';

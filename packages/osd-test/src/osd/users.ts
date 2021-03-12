@@ -19,17 +19,17 @@
 
 const env = process.env;
 
-export const kibanaTestUser = {
-  username: env.TEST_KIBANA_USER || 'elastic',
-  password: env.TEST_KIBANA_PASS || 'changeme',
+export const opensearchDashboardsTestUser = {
+  username: env.TEST_OPENSEARCH_DASHBOARDS_USER || 'opensearch',
+  password: env.TEST_OPENSEARCH_DASHBOARDS_PASS || 'changeme',
 };
 
-export const kibanaServerTestUser = {
-  username: env.TEST_KIBANA_SERVER_USER || 'kibana',
-  password: env.TEST_KIBANA_SERVER_PASS || 'changeme',
+export const opensearchDashboardsServerTestUser = {
+  username: env.TEST_OPENSEARCH_DASHBOARDS_SERVER_USER || 'opensearch',
+  password: env.TEST_OPENSEARCH_DASHBOARDS_SERVER_PASS || 'changeme',
 };
 
 export const adminTestUser = {
-  username: env.TEST_ES_USER || 'elastic',
-  password: env.TEST_ES_PASS || 'changeme',
+  username: env.TEST_OPENSEARCH_USER || 'opensearch',
+  password: env.TEST_OPENSEARCH_PASS || 'changeme',
 };

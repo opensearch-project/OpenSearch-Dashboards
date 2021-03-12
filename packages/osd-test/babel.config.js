@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { kbnTestConfig } from './kbn_test_config';
-export { kibanaTestUser, kibanaServerTestUser, adminTestUser } from './users';
+module.exports = {
+  presets: ['@osd/babel-preset/node_preset'],
+  ignore: ['**/*.test.js'],
+};
