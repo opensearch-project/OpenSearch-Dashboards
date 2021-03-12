@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { FailedImportConflict } from '../../../lib/resolve_import_errors';
 import { getDefaultTitle } from '../../../lib';

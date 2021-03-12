@@ -25,7 +25,7 @@ export async function getSavedObjectCounts(
   searchString?: string
 ): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
-    `/api/kibana/management/saved_objects/scroll/counts`,
+    `/api/opensearch-dashboards/management/saved_objects/scroll/counts`,
     { body: JSON.stringify({ typesToInclude, searchString }) }
   );
 }

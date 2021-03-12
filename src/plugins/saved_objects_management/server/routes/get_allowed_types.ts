@@ -22,7 +22,7 @@ import { IRouter } from 'src/core/server';
 export const registerGetAllowedTypesRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/_allowed_types',
+      path: '/api/opensearch-dashboards/management/saved_objects/_allowed_types',
       validate: false,
     },
     async (context, req, res) => {
