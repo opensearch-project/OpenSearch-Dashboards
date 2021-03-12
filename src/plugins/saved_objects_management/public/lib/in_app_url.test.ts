@@ -69,7 +69,7 @@ describe('canViewInApp', () => {
   it('should handle index patterns', () => {
     let uiCapabilities = createCapabilities({
       management: {
-        kibana: {
+        opensearchDashboards: {
           indexPatterns: true,
         },
       },
@@ -80,7 +80,7 @@ describe('canViewInApp', () => {
 
     uiCapabilities = createCapabilities({
       management: {
-        kibana: {
+        opensearchDashboards: {
           indexPatterns: false,
         },
       },

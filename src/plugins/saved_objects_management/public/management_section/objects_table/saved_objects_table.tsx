@@ -45,8 +45,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -55,7 +55,7 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
-import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -499,7 +499,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
     const { applications } = this.props;
     const newIndexPatternUrl = applications.getUrlForApp('management', {
-      path: 'kibana/indexPatterns',
+      path: 'opensearch-dashboards/indexPatterns',
     });
 
     return (

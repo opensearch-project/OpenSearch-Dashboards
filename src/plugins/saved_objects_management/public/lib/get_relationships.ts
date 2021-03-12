@@ -27,7 +27,7 @@ export async function getRelationships(
   id: string,
   savedObjectTypes: string[]
 ): Promise<SavedObjectRelation[]> {
-  const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
+  const url = `/api/opensearch-dashboards/management/saved_objects/relationships/${encodeURIComponent(
     type
   )}/${encodeURIComponent(id)}`;
   try {

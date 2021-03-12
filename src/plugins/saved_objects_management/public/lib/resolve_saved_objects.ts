@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
@@ -176,7 +176,7 @@ export async function resolveIndexPatternConflicts(
 
   for (const { obj, doc } of conflictedIndexPatterns) {
     const serializedSearchSource = JSON.parse(
-      doc._source.kibanaSavedObjectMeta?.searchSourceJSON || '{}'
+      doc._source.opensearchDashboardsSavedObjectMeta?.searchSourceJSON || '{}'
     );
     const oldIndexId = serializedSearchSource.index;
     let allResolved = true;

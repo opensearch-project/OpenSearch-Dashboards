@@ -19,7 +19,7 @@
 
 import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
 import { SimpleSavedObject } from '../../../../core/public';
-import { castEsToKbnFieldTypeName } from '../../../data/public';
+import { castOpenSearchToOsdFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../management_section/types';
 import { SavedObjectLoader } from '../../../saved_objects/public';
 
@@ -95,13 +95,13 @@ const addFieldsFromClass = function (
 ) {
   const fieldMap = keyBy(fields, 'name');
 
-  forOwn(Class.mapping, (esType, name) => {
+  forOwn(Class.mapping, (opensearchType, name) => {
     if (!name || fieldMap[name]) {
       return;
     }
 
     const getFieldTypeFromEsType = () => {
-      switch (castEsToKbnFieldTypeName(esType)) {
+      switch (castOpenSearchToOsdFieldTypeName(opensearchType)) {
         case 'string':
           return 'text';
         case 'number':
@@ -120,9 +120,9 @@ const addFieldsFromClass = function (
     });
   });
 
-  if (Class.searchSource && !fieldMap['kibanaSavedObjectMeta.searchSourceJSON']) {
+  if (Class.searchSource && !fieldMap['opensearchDashboardsSavedObjectMeta.searchSourceJSON']) {
     fields.push({
-      name: 'kibanaSavedObjectMeta.searchSourceJSON',
+      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON',
       type: 'json',
       value: '{}',
     });
