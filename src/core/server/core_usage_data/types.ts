@@ -47,7 +47,7 @@ export interface CoreServicesUsageData {
 }
 
 /**
- * Usage data on this Kibana node's runtime environment.
+ * Usage data on this OpenSearch Dashboards node's runtime environment.
  * @internal
  */
 export interface CoreEnvironmentUsageData {
@@ -64,7 +64,7 @@ export interface CoreEnvironmentUsageData {
  * @internal
  */
 export interface CoreConfigUsageData {
-  elasticsearch: {
+  opensearch: {
     sniffOnStart: boolean;
     sniffIntervalMs?: number;
     sniffOnConnectionFault: boolean;

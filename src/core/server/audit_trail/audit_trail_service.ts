@@ -19,7 +19,7 @@
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { KibanaRequest, LegacyRequest } from '../http';
+import { OpenSearchDashboardsRequest, LegacyRequest } from '../http';
 import { ensureRawRequest } from '../http/router';
 import { Auditor, AuditorFactory, AuditTrailSetup, AuditTrailStart } from './types';
 
@@ -55,7 +55,7 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
 
   start() {
     return {
-      asScoped: (request: KibanaRequest) => {
+      asScoped: (request: OpenSearchDashboardsRequest) => {
         const key = ensureRawRequest(request);
         if (!this.auditors.has(key)) {
           this.auditors.set(key, this.auditor!.asScoped(request));

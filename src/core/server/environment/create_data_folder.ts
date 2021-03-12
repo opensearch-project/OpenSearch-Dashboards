@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PathConfigType } from '@kbn/utils';
+import { PathConfigType } from '@osd/utils';
 import { mkdir } from './fs';
 import { Logger } from '../logging';
 
