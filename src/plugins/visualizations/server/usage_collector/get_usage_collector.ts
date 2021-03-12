@@ -27,7 +27,7 @@ import { getPastDays } from './get_past_days';
 
 const VIS_USAGE_TYPE = 'visualization_types';
 
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type OpenSearchResponse = SearchResponse<{ visualization: { visState: string } }>;
 
 interface VisSummary {
   type: string;
@@ -40,7 +40,7 @@ interface VisSummary {
  */
 async function getStats(callCluster: LegacyAPICaller, index: string) {
   const searchParams = {
-    size: 10000, // elasticsearch index.max_result_window default value
+    size: 10000, // opensearch index.max_result_window default value
     index,
     ignoreUnavailable: true,
     filterPath: [
@@ -54,14 +54,14 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
       },
     },
   };
-  const esResponse: ESResponse = await callCluster('search', searchParams);
-  const size = get(esResponse, 'hits.hits.length', 0);
+  const opensearchResponse: OpenSearchResponse = await callCluster('search', searchParams);
+  const size = get(opensearchResponse, 'hits.hits.length', 0);
   if (size < 1) {
     return;
   }
 
   // `map` to get the raw types
-  const visSummaries: VisSummary[] = esResponse.hits.hits.map((hit) => {
+  const visSummaries: VisSummary[] = opensearchResponse.hits.hits.map((hit) => {
     const spacePhrases = hit._id.split(':');
     const lastUpdated: string = get(hit, '_source.updated_at');
     const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
@@ -95,12 +95,12 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
   });
 }
 
-export function getUsageCollector(config: Observable<{ kibana: { index: string } }>) {
+export function getUsageCollector(config: Observable<{ opensearchDashboards: { index: string } }>) {
   return {
     type: VIS_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
-      const index = (await config.pipe(first()).toPromise()).kibana.index;
+      const index = (await config.pipe(first()).toPromise()).opensearchDashboards.index;
       return await getStats(callCluster, index);
     },
   };

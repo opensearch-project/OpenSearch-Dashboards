@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
@@ -39,7 +39,7 @@ import { registerVisualizationsCollector } from './usage_collector';
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
   private readonly logger: Logger;
-  private readonly config: Observable<{ kibana: { index: string } }>;
+  private readonly config: Observable<{ opensearchDashboards: { index: string } }>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
