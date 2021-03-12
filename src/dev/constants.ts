@@ -18,5 +18,5 @@
  */
 
 // Files in directories of this name will be treated as Jest integration tests with instances of
-// Elasticsearch and the Kibana server.
+// OpenSearch and the OpenSearch Dashboards server.
 export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';

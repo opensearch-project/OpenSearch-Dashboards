@@ -19,7 +19,7 @@
 
 import os from 'os';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import chalk from 'chalk';
 import execa from 'execa';
 import Listr from 'listr';

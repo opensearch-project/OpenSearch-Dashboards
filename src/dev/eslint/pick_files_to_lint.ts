@@ -18,7 +18,7 @@
  */
 import { CLIEngine } from 'eslint';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import { File } from '../file';
 
 /**

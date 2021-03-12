@@ -21,7 +21,7 @@ import chalk from 'chalk';
 import Listr from 'listr';
 import { resolve } from 'path';
 
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 

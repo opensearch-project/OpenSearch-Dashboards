@@ -36,7 +36,7 @@ import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@osd/dev-utils';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
@@ -63,11 +63,11 @@ export function isPropertyWithKey(property, identifierName) {
 }
 
 /**
- * Detect angular i18n service call or `@kbn/i18n` translate function call.
+ * Detect angular i18n service call or `@osd/i18n` translate function call.
  *
  * Service call example: `i18n('message-id', { defaultMessage: 'Message text'})`
  *
- * `@kbn/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
+ * `@osd/i18n` example: `i18n.translate('message-id', { defaultMessage: 'Message text'})`
  */
 export function isI18nTranslateFunction(node) {
   return (

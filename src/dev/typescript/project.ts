@@ -23,7 +23,7 @@ import { basename, dirname, relative, resolve } from 'path';
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -71,7 +71,7 @@ export class Project {
 
     if (files || !include) {
       throw new Error(
-        'tsconfig.json files in the Kibana repo must use "include" keys and not "files"'
+        'tsconfig.json files in the OpenSearch Dashboards repo must use "include" keys and not "files"'
       );
     }
 

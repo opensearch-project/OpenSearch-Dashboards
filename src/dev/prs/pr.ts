@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@osd/dev-utils';
 
 const isNum = (input: string) => {
   return /^\d+$/.test(input);
