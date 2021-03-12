@@ -20,7 +20,7 @@
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { MountWrapper } from '../../utils';
 import { Toast } from './toasts_api';

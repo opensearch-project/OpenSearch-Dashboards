@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import type { AppMountParameters } from '../../application';
 import type { HttpSetup } from '../../http';
 import type { NotificationsSetup } from '../../notifications';

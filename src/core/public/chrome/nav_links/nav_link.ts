@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { pick } from '@kbn/std';
+import { pick } from '@osd/std';
 import { AppCategory } from '../../';
 
 /**

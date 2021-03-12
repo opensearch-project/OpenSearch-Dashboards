@@ -38,12 +38,12 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
   private service?: HttpSetup;
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
-    const kibanaVersion = injectedMetadata.getKibanaVersion();
+    const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
       injectedMetadata.getServerBasePath()
     );
-    const fetchService = new Fetch({ basePath, kibanaVersion });
+    const fetchService = new Fetch({ basePath, opensearchDashboardsVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 

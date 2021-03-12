@@ -18,7 +18,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import testSubjSelector from '@kbn/test-subj-selector';
+import testSubjSelector from '@osd/test-subj-selector';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -37,7 +37,7 @@ describe('FatalErrorsScreen', () => {
 
   const defaultProps = {
     buildNumber: 123,
-    kibanaVersion: 'bar',
+    opensearchDashboardsVersion: 'bar',
     errorInfo$: Rx.of(errorInfoFoo, errorInfoBar),
   };
 

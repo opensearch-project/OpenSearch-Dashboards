@@ -19,7 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { i18n as t } from '@kbn/i18n';
+import { i18n as t } from '@osd/i18n';
 import { EuiModal, EuiConfirmModal, EuiOverlayMask, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -142,7 +142,7 @@ export class ModalService {
           <EuiOverlayMask>
             <i18n.Context>
               <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+                <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
               </EuiModal>
             </i18n.Context>
           </EuiOverlayMask>,
@@ -184,7 +184,7 @@ export class ModalService {
               typeof message === 'string' ? (
                 message
               ) : (
-                <MountWrapper mount={message} className="kbnOverlayMountWrapper" />
+                <MountWrapper mount={message} className="osdOverlayMountWrapper" />
               ),
             onCancel: () => closeModal(false),
             onConfirm: () => closeModal(true),

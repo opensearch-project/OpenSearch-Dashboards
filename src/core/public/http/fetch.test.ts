@@ -36,7 +36,7 @@ const BASE_PATH = 'http://localhost/myBase';
 describe('Fetch', () => {
   const fetchInstance = new Fetch({
     basePath: new BasePath(BASE_PATH),
-    kibanaVersion: 'VERSION',
+    opensearchDashboardsVersion: 'VERSION',
   });
   afterEach(() => {
     fetchMock.restore();
@@ -147,7 +147,7 @@ describe('Fetch', () => {
       await fetchInstance.fetch('/my/path', { headers: { 'Content-Type': undefined } });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-version': 'VERSION',
+        'osd-version': 'VERSION',
       });
     });
 
@@ -166,42 +166,42 @@ describe('Fetch', () => {
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
-        'kbn-version': 'VERSION',
+        'osd-version': 'VERSION',
         myheader: 'foo',
       });
     });
 
-    it('should not allow overwriting of kbn-version header', async () => {
+    it('should not allow overwriting of osd-version header', async () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+          headers: { myHeader: 'foo', 'osd-version': 'CUSTOM!' },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+        `"Invalid fetch headers, headers beginning with \\"osd-\\" are not allowed: [osd-version]"`
       );
     });
 
-    it('should not set kbn-system-request header by default', async () => {
+    it('should not set osd-system-request header by default', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers['osd-system-request']).toBeUndefined();
     });
 
-    it('should not set kbn-system-request header when asSystemRequest: false', async () => {
+    it('should not set osd-system-request header when asSystemRequest: false', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
         headers: { myHeader: 'foo' },
         asSystemRequest: false,
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers['osd-system-request']).toBeUndefined();
     });
 
-    it('should set kbn-system-request header when asSystemRequest: true', async () => {
+    it('should set osd-system-request header when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
         headers: { myHeader: 'foo' },
@@ -209,58 +209,58 @@ describe('Fetch', () => {
       });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-system-request': 'true',
+        'osd-system-request': 'true',
         myheader: 'foo',
       });
     });
 
-    it('should not allow overwriting of kbn-system-request when asSystemRequest: true', async () => {
+    it('should not allow overwriting of osd-system-request when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          headers: { myHeader: 'foo', 'osd-system-request': 'ANOTHER!' },
           asSystemRequest: true,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+        `"Invalid fetch headers, headers beginning with \\"osd-\\" are not allowed: [osd-system-request]"`
       );
     });
 
-    it('should not allow overwriting of kbn-system-request when asSystemRequest: false', async () => {
+    it('should not allow overwriting of osd-system-request when asSystemRequest: false', async () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          headers: { myHeader: 'foo', 'osd-system-request': 'ANOTHER!' },
           asSystemRequest: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+        `"Invalid fetch headers, headers beginning with \\"osd-\\" are not allowed: [osd-system-request]"`
       );
     });
 
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
+    it('should not allow overwriting of osd-system-api when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          headers: { myHeader: 'foo', 'osd-system-api': 'ANOTHER!' },
           asSystemRequest: true,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+        `"Invalid fetch headers, headers beginning with \\"osd-\\" are not allowed: [osd-system-api]"`
       );
     });
 
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
+    it('should not allow overwriting of osd-system-api when asSystemRequest: false', async () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          headers: { myHeader: 'foo', 'osd-system-api': 'ANOTHER!' },
           asSystemRequest: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+        `"Invalid fetch headers, headers beginning with \\"osd-\\" are not allowed: [osd-system-api]"`
       );
     });
 
@@ -299,7 +299,7 @@ describe('Fetch', () => {
         method: 'GET',
         headers: {
           'content-type': 'application/json',
-          'kbn-version': 'VERSION',
+          'osd-version': 'VERSION',
         },
       });
     });

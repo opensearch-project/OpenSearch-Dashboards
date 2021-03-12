@@ -26,7 +26,7 @@ describe('parseAppUrl', () => {
   let basePath: BasePath;
 
   const currentUrl =
-    'https://kibana.local:8080/base-path/app/current/current-path?current-query=true';
+    'https://opensearch-dashboards.local:8080/base-path/app/current/current-path?current-query=true';
 
   const createApp = (props: Partial<App>): App => {
     const app: App = {
@@ -143,7 +143,7 @@ describe('parseAppUrl', () => {
   describe('with relative paths', () => {
     it('works with sibling relative urls', () => {
       expect(
-        parseAppUrl('./foo', basePath, apps, 'https://kibana.local:8080/base-path/app/current')
+        parseAppUrl('./foo', basePath, apps, 'https://opensearch-dashboards.local:8080/base-path/app/current')
       ).toEqual({
         app: 'foo',
         path: undefined,
@@ -155,7 +155,7 @@ describe('parseAppUrl', () => {
           '../custom-bar',
           basePath,
           apps,
-          'https://kibana.local:8080/base-path/app/current'
+          'https://opensearch-dashboards.local:8080/base-path/app/current'
         )
       ).toEqual({
         app: 'bar',
@@ -168,7 +168,7 @@ describe('parseAppUrl', () => {
           '../../custom-bar',
           basePath,
           apps,
-          'https://kibana.local:8080/base-path/app/current/some-path'
+          'https://opensearch-dashboards.local:8080/base-path/app/current/some-path'
         )
       ).toEqual({
         app: 'bar',
@@ -181,7 +181,7 @@ describe('parseAppUrl', () => {
           './foo/path?hello=dolly',
           basePath,
           apps,
-          'https://kibana.local:8080/base-path/app/current'
+          'https://opensearch-dashboards.local:8080/base-path/app/current'
         )
       ).toEqual({
         app: 'foo',
@@ -194,7 +194,7 @@ describe('parseAppUrl', () => {
           '../custom-bar/path#hash?hello=dolly',
           basePath,
           apps,
-          'https://kibana.local:8080/base-path/app/current'
+          'https://opensearch-dashboards.local:8080/base-path/app/current'
         )
       ).toEqual({
         app: 'bar',
@@ -208,7 +208,7 @@ describe('parseAppUrl', () => {
           '../../custom-bar',
           basePath,
           apps,
-          'https://kibana.local:8080/base-path/app/current'
+          'https://opensearch-dashboards.local:8080/base-path/app/current'
         )
       ).toBeUndefined();
     });
@@ -217,13 +217,13 @@ describe('parseAppUrl', () => {
   describe('with absolute urls', () => {
     it('parses the app id', () => {
       expect(
-        parseAppUrl('https://kibana.local:8080/base-path/app/foo', basePath, apps, currentUrl)
+        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/app/foo', basePath, apps, currentUrl)
       ).toEqual({
         app: 'foo',
         path: undefined,
       });
       expect(
-        parseAppUrl('https://kibana.local:8080/base-path/custom-bar', basePath, apps, currentUrl)
+        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/custom-bar', basePath, apps, currentUrl)
       ).toEqual({
         app: 'bar',
         path: undefined,
@@ -232,7 +232,7 @@ describe('parseAppUrl', () => {
     it('parses the path', () => {
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo/some/path',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo/some/path',
           basePath,
           apps,
           currentUrl
@@ -243,7 +243,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar/another/path/',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar/another/path/',
           basePath,
           apps,
           currentUrl
@@ -256,7 +256,7 @@ describe('parseAppUrl', () => {
     it('includes query and hash in the path for default app routes', () => {
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo#hash/bang',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo#hash/bang',
           basePath,
           apps,
           currentUrl
@@ -267,7 +267,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -278,7 +278,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo/path?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo/path?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -289,7 +289,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo/path#hash/bang',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo/path#hash/bang',
           basePath,
           apps,
           currentUrl
@@ -300,7 +300,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/foo/path#hash/bang?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/app/foo/path#hash/bang?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -313,7 +313,7 @@ describe('parseAppUrl', () => {
     it('includes query and hash in the path for custom app route', () => {
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar#hash/bang',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar#hash/bang',
           basePath,
           apps,
           currentUrl
@@ -324,7 +324,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -335,7 +335,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar/path?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar/path?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -346,7 +346,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar/path#hash/bang',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar/path#hash/bang',
           basePath,
           apps,
           currentUrl
@@ -357,7 +357,7 @@ describe('parseAppUrl', () => {
       });
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/custom-bar/path#hash/bang?hello=dolly',
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar/path#hash/bang?hello=dolly',
           basePath,
           apps,
           currentUrl
@@ -370,20 +370,20 @@ describe('parseAppUrl', () => {
     it('returns undefined when the app is not known', () => {
       expect(
         parseAppUrl(
-          'https://kibana.local:8080/base-path/app/non-registered',
+          'https://opensearch-dashboards.local:8080/base-path/app/non-registered',
           basePath,
           apps,
           currentUrl
         )
       ).toEqual(undefined);
       expect(
-        parseAppUrl('https://kibana.local:8080/base-path/unknown-path', basePath, apps, currentUrl)
+        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/unknown-path', basePath, apps, currentUrl)
       ).toEqual(undefined);
     });
     it('returns undefined when origin does not match', () => {
       expect(
         parseAppUrl(
-          'https://other-kibana.external:8080/base-path/app/foo',
+          'https://other-opensearch-dashboards.external:8080/base-path/app/foo',
           basePath,
           apps,
           currentUrl
@@ -391,7 +391,7 @@ describe('parseAppUrl', () => {
       ).toEqual(undefined);
       expect(
         parseAppUrl(
-          'https://other-kibana.external:8080/base-path/custom-bar',
+          'https://other-opensearch-dashboards.external:8080/base-path/custom-bar',
           basePath,
           apps,
           currentUrl
@@ -399,7 +399,7 @@ describe('parseAppUrl', () => {
       ).toEqual(undefined);
     });
     it('returns undefined when the path does not contain the base path', () => {
-      expect(parseAppUrl('https://kibana.local:8080/app/foo', basePath, apps, currentUrl)).toEqual(
+      expect(parseAppUrl('https://opensearch-dashboards.local:8080/app/foo', basePath, apps, currentUrl)).toEqual(
         undefined
       );
     });

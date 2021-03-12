@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze } from '@osd/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface StartDeps {
@@ -28,113 +28,113 @@ interface StartDeps {
 export class DocLinksService {
   public setup() {}
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
-    const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
-    const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const DOC_LINK_VERSION = injectedMetadata.getOpenSearchDashboardsBranch();
+    const OPENSEARCH_WEBSITE_URL = 'https://www.elastic.co/';
+    const OPENSEARCH_DOCS = `${OPENSEARCH_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
-      ELASTIC_WEBSITE_URL,
+      OPENSEARCH_WEBSITE_URL,
       links: {
         dashboard: {
-          drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
-          drilldownsTriggerPicker: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html#url-drilldowns`,
-          urlDrilldownTemplateSyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html`,
-          urlDrilldownVariables: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html#url-template-variables`,
+          drilldowns: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
+          drilldownsTriggerPicker: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html#url-drilldowns`,
+          urlDrilldownTemplateSyntax: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html`,
+          urlDrilldownVariables: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html#url-template-variables`,
         },
         filebeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
-          installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
-          configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
-          elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
-          startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
-          exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
+          installation: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
+          configuration: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
+          elasticsearchOutput: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
+          startup: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
+          exportedFields: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
         },
         auditbeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
         },
         metricbeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
         },
         heartbeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
         },
         logstash: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
         },
         functionbeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
         },
         winlogbeat: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
+          base: `${OPENSEARCH_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
         },
         aggs: {
-          date_histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
-          date_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
-          filter: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filter-aggregation.html`,
-          filters: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filters-aggregation.html`,
-          geohash_grid: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-geohashgrid-aggregation.html`,
-          histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-histogram-aggregation.html`,
-          ip_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-iprange-aggregation.html`,
-          range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-range-aggregation.html`,
-          significant_terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-significantterms-aggregation.html`,
-          terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html`,
-          avg: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-avg-aggregation.html`,
-          avg_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-avg-bucket-aggregation.html`,
-          max_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-max-bucket-aggregation.html`,
-          min_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-min-bucket-aggregation.html`,
-          sum_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-sum-bucket-aggregation.html`,
-          cardinality: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-cardinality-aggregation.html`,
-          count: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-valuecount-aggregation.html`,
-          cumulative_sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
-          derivative: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-derivative-aggregation.html`,
-          geo_bounds: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-geobounds-aggregation.html`,
-          geo_centroid: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-geocentroid-aggregation.html`,
-          max: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-max-aggregation.html`,
-          median: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-aggregation.html`,
-          min: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-min-aggregation.html`,
-          moving_avg: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-movavg-aggregation.html`,
-          percentile_ranks: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-rank-aggregation.html`,
-          serial_diff: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-serialdiff-aggregation.html`,
-          std_dev: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,
-          sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
-          top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
+          date_histogram: `${OPENSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
+          date_range: `${OPENSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
+          filter: `${OPENSEARCH_DOCS}search-aggregations-bucket-filter-aggregation.html`,
+          filters: `${OPENSEARCH_DOCS}search-aggregations-bucket-filters-aggregation.html`,
+          geohash_grid: `${OPENSEARCH_DOCS}search-aggregations-bucket-geohashgrid-aggregation.html`,
+          histogram: `${OPENSEARCH_DOCS}search-aggregations-bucket-histogram-aggregation.html`,
+          ip_range: `${OPENSEARCH_DOCS}search-aggregations-bucket-iprange-aggregation.html`,
+          range: `${OPENSEARCH_DOCS}search-aggregations-bucket-range-aggregation.html`,
+          significant_terms: `${OPENSEARCH_DOCS}search-aggregations-bucket-significantterms-aggregation.html`,
+          terms: `${OPENSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html`,
+          avg: `${OPENSEARCH_DOCS}search-aggregations-metrics-avg-aggregation.html`,
+          avg_bucket: `${OPENSEARCH_DOCS}search-aggregations-pipeline-avg-bucket-aggregation.html`,
+          max_bucket: `${OPENSEARCH_DOCS}search-aggregations-pipeline-max-bucket-aggregation.html`,
+          min_bucket: `${OPENSEARCH_DOCS}search-aggregations-pipeline-min-bucket-aggregation.html`,
+          sum_bucket: `${OPENSEARCH_DOCS}search-aggregations-pipeline-sum-bucket-aggregation.html`,
+          cardinality: `${OPENSEARCH_DOCS}search-aggregations-metrics-cardinality-aggregation.html`,
+          count: `${OPENSEARCH_DOCS}search-aggregations-metrics-valuecount-aggregation.html`,
+          cumulative_sum: `${OPENSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
+          derivative: `${OPENSEARCH_DOCS}search-aggregations-pipeline-derivative-aggregation.html`,
+          geo_bounds: `${OPENSEARCH_DOCS}search-aggregations-metrics-geobounds-aggregation.html`,
+          geo_centroid: `${OPENSEARCH_DOCS}search-aggregations-metrics-geocentroid-aggregation.html`,
+          max: `${OPENSEARCH_DOCS}search-aggregations-metrics-max-aggregation.html`,
+          median: `${OPENSEARCH_DOCS}search-aggregations-metrics-percentile-aggregation.html`,
+          min: `${OPENSEARCH_DOCS}search-aggregations-metrics-min-aggregation.html`,
+          moving_avg: `${OPENSEARCH_DOCS}search-aggregations-pipeline-movavg-aggregation.html`,
+          percentile_ranks: `${OPENSEARCH_DOCS}search-aggregations-metrics-percentile-rank-aggregation.html`,
+          serial_diff: `${OPENSEARCH_DOCS}search-aggregations-pipeline-serialdiff-aggregation.html`,
+          std_dev: `${OPENSEARCH_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,
+          sum: `${OPENSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
+          top_hits: `${OPENSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
         scriptedFields: {
-          scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
-          scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
-          painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
-          painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
-          painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
-          luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
+          scriptFields: `${OPENSEARCH_DOCS}search-request-script-fields.html`,
+          scriptAggs: `${OPENSEARCH_DOCS}search-aggregations.html#_values_source`,
+          painless: `${OPENSEARCH_DOCS}modules-scripting-painless.html`,
+          painlessApi: `${OPENSEARCH_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
+          painlessSyntax: `${OPENSEARCH_DOCS}modules-scripting-painless-syntax.html`,
+          luceneExpressions: `${OPENSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
-          loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
-          introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          loadingData: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
+          introduction: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
         },
-        addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
-        kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        addData: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
+        opensearchDocs: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          guide: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          gettingStarted: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
         },
         query: {
-          eql: `${ELASTICSEARCH_DOCS}eql.html`,
-          luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
-          queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
-          kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
+          eql: `${OPENSEARCH_DOCS}eql.html`,
+          luceneQuerySyntax: `${OPENSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
+          queryDsl: `${OPENSEARCH_DOCS}query-dsl.html`,
+          kueryQuerySyntax: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
         },
         date: {
-          dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
+          dateMath: `${OPENSEARCH_DOCS}common-options.html#date-math`,
         },
         management: {
-          kibanaGeneralSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-general-settings`,
-          kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
-          dashboardSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
+          opensearchDashboardsGeneralSettings: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-general-settings`,
+          opensearchDashboardsSearchSettings: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
+          dashboardSettings: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
         },
         visualize: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
+          guide: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
+          timelionDeprecation: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
         },
       },
     });
@@ -144,7 +144,7 @@ export class DocLinksService {
 /** @public */
 export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
-  readonly ELASTIC_WEBSITE_URL: string;
+  readonly OPENSEARCH_WEBSITE_URL: string;
   readonly links: {
     readonly dashboard: {
       readonly drilldowns: string;
@@ -223,7 +223,7 @@ export interface DocLinksStart {
       readonly introduction: string;
     };
     readonly addData: string;
-    readonly kibana: string;
+    readonly opensearchDashboards: string;
     readonly siem: {
       readonly guide: string;
       readonly gettingStarted: string;

@@ -19,7 +19,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiBasicTable, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import type { FormattedStatus } from '../lib';
 
 interface StatusTableProps {

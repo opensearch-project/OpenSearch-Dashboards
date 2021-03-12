@@ -19,8 +19,8 @@
 
 import * as Rx from 'rxjs';
 import React, { Component, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@osd/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -39,12 +39,12 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
+import { GITHUB_CREATE_ISSUE_LINK, OPENSEARCH_DASHBOARDS_FEEDBACK_LINK } from '../../constants';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
   /**
-   * Creates a link to a new github issue in the Kibana repo
+   * Creates a link to a new github issue in the OpenSearch Dashboards repo
    */
   linkType: 'github';
   /**
@@ -78,7 +78,7 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
   linkType: 'documentation';
   /**
    * URL to documentation page.
-   * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
+   * i.e. `${OPENSEARARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
    */
   href: string;
 };
@@ -108,9 +108,9 @@ interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Rx.Observable<string>;
   intl: InjectedIntl;
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   useDefaultContent?: boolean;
-  kibanaDocLink: string;
+  opensearchDashboardsDocLink: string;
 }
 
 interface State {
@@ -182,15 +182,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   };
 
   public render() {
-    const { intl, kibanaVersion, useDefaultContent, kibanaDocLink } = this.props;
+    const { intl, opensearchDashboardsVersion, useDefaultContent, opensearchDashboardsDocLink } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={opensearchDashboardsDocLink} target="_blank" size="xs" flush="left">
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-            defaultMessage="Kibana documentation"
+            id="core.ui.chrome.headerGlobalNav.helpMenuOpenSearchDashboardsDocumentationTitle"
+            defaultMessage="OpenSearch Dashboards documentation"
           />
         </EuiButtonEmpty>
 
@@ -199,13 +199,13 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask Elastic"
+            defaultMessage="Ask OpenSearch"
           />
         </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={OPENSEARCH_DASHBOARDS_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"
@@ -336,7 +336,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
               <FormattedMessage
                 id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
                 defaultMessage="v {version}"
-                values={{ version: kibanaVersion }}
+                values={{ version: opensearchDashboardsVersion }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

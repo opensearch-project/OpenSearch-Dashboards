@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
-    getKibanaVersion: jest.fn(),
-    getKibanaBranch: jest.fn(),
+    getOpenSearchDashboardsVersion: jest.fn(),
+    getOpenSearchDashboardsBranch: jest.fn(),
     getCspConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
     getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
-    getKibanaBuildNumber: jest.fn(),
+    getOpenSearchDashboardsBuildNumber: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
-  setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
+  setupContract.getOpenSearchDashboardsVersion.mockReturnValue('opensearchDashboardsVersion');
   setupContract.getAnonymousStatusPage.mockReturnValue(false);
   setupContract.getLegacyMetadata.mockReturnValue({
     app: {
