@@ -20,9 +20,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { EventEmitter } from 'events';
 import { parse } from 'query-string';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
@@ -121,7 +121,7 @@ export const useSavedVisInstance = (
       } catch (error) {
         const managementRedirectTarget = {
           app: 'management',
-          path: `kibana/objects/savedVisualizations/${visualizationIdFromUrl}`,
+          path: `opensearch-dashboards/objects/savedVisualizations/${visualizationIdFromUrl}`,
         };
 
         try {

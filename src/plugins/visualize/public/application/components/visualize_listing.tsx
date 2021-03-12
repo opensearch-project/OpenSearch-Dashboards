@@ -20,11 +20,11 @@
 import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
 
-import { useKibana, TableListView } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards, TableListView } from '../../../../opensearch_dashboards_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
@@ -44,7 +44,7 @@ export const VisualizeListing = () => {
       uiSettings,
       visualizeCapabilities,
     },
-  } = useKibana<VisualizeServices>();
+  } = useOpenSearchDashboards<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
   const listingLimit = savedObjectsPublic.settings.getListingLimit();
