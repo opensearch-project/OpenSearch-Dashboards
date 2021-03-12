@@ -19,12 +19,12 @@
 
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { CoreStart, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
-  IEsSearchResponse,
+  IOpenSearchSearchResponse,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
@@ -76,7 +76,7 @@ export class SearchAPI {
     }
   }
 
-  private inspectSearchResult(response: IEsSearchResponse, requestResponder: RequestResponder) {
+  private inspectSearchResult(response: IOpenSearchSearchResponse, requestResponder: RequestResponder) {
     if (requestResponder) {
       requestResponder
         .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))

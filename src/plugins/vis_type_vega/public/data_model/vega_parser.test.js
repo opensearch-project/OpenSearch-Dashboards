@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -142,7 +142,7 @@ describe(`VegaParser._setDefaultColors`, () => {
   );
 });
 
-describe('VegaParser._resolveEsQueries', () => {
+describe('VegaParser._resolveOpenSearchQueries', () => {
   let searchApiStub;
   const data = [
     {
@@ -180,23 +180,23 @@ describe('VegaParser._resolveEsQueries', () => {
 
   test('no data', check({}, {}));
   test('no data2', check({ a: 1 }, { a: 1 }));
-  test('non-es data', check({ data: { a: 10 } }, { data: { a: 10 } }));
+  test('non-opensearch data', check({ data: { a: 10 } }, { data: { a: 10 } }));
   test(
-    'es',
+    'opensearch',
     check(
       { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
       { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }
     )
   );
   test(
-    'es 2',
+    'opensearch 2',
     check(
       { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
       { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42] } }
     )
   );
   test(
-    'es arr',
+    'opensearch arr',
     check(
       { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
       { arr: [{ data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }] }
@@ -245,7 +245,7 @@ describe('VegaParser.parseSchema', () => {
 describe('VegaParser._parseTooltips', () => {
   function check(tooltips, position, padding, centerOnMark) {
     return () => {
-      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      const vp = new VegaParser(tooltips !== undefined ? { config: { opensearchDashboards: { tooltips } } } : {});
       vp._config = vp._parseConfig();
       if (position === undefined) {
         // error
@@ -367,7 +367,7 @@ describe('VegaParser._parseConfig', () => {
 
   test('no config', check({}, {}, {}));
   test('simple config', check({ config: { a: 1 } }, {}));
-  test('kibana config', check({ config: { kibana: { a: 1 } } }, { a: 1 }, { config: {} }));
+  test('opensearchDashboards config', check({ config: { opensearchDashboards: { a: 1 } } }, { a: 1 }, { config: {} }));
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
 });
 

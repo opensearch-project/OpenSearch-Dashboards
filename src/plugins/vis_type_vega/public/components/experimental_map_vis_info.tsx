@@ -20,7 +20,7 @@
 import { parse } from 'hjson';
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Vis } from '../../../visualizations/public';
 
 function ExperimentalMapLayerInfo() {
@@ -59,7 +59,7 @@ export const getInfoMessage = (vis: Vis) => {
     try {
       const spec = parse(vis.params.spec, { legacyRoot: false, keepWsc: true });
 
-      if (spec.config?.kibana?.type === 'map') {
+      if (spec.config?.opensearchDashboards?.type === 'map') {
         return <ExperimentalMapLayerInfo />;
       }
     } catch (e) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'opensearch_dashboards/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { VisTypeVegaPlugin } from './plugin';

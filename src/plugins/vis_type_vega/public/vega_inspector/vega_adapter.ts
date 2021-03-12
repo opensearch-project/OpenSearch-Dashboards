@@ -19,8 +19,8 @@
 import { Observable, ReplaySubject, fromEventPattern, merge, timer } from 'rxjs';
 import { map, switchMap, filter, debounce } from 'rxjs/operators';
 import { View, Runtime, Spec } from 'vega';
-import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+import { i18n } from '@osd/i18n';
+import { Assign } from '@osd/utility-types';
 
 interface DebugValues {
   view: View;

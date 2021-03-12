@@ -23,7 +23,7 @@ import _ from 'lodash';
 
 // Some of this code was adapted from https://github.com/vega/vega-tooltip
 
-const tooltipId = 'vega-kibana-tooltip';
+const tooltipId = 'vega-opensearch-dashboards-tooltip';
 
 /**
  * Simulate the result of the DOM's getBoundingClientRect()
