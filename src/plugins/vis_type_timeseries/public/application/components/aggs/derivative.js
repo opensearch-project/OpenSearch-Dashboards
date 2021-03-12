@@ -34,7 +34,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export const DerivativeAgg = (props) => {
   const { siblings } = props;

@@ -35,7 +35,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
 const StandardSiblingAggUi = (props) => {
   const { siblings, intl } = props;

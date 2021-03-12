@@ -18,9 +18,9 @@
  */
 import { getTimerange } from '../../helpers/get_timerange';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function query(req, panel, esQueryConfig, indexPatternObject) {
+export function query(req, panel, opensearchQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     const { timeField } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { from, to } = getTimerange(req);
@@ -29,7 +29,7 @@ export function query(req, panel, esQueryConfig, indexPatternObject) {
 
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    doc.query = opensearchQuery.buildOpenSearchQuery(indexPatternObject, queries, filters, opensearchQueryConfig);
 
     const timerange = {
       range: {
@@ -43,7 +43,7 @@ export function query(req, panel, esQueryConfig, indexPatternObject) {
     doc.query.bool.must.push(timerange);
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(indexPatternObject, [panel.filter], [], opensearchQueryConfig)
       );
     }
 

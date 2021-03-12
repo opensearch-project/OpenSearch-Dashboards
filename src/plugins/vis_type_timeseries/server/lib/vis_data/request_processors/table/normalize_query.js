@@ -22,7 +22,7 @@ const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(fi
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* Last query handler in the chain. You can use this handler
- * as the last place where you can modify the "doc" (request body) object before sending it to ES.
+ * as the last place where you can modify the "doc" (request body) object before sending it to OpenSearch.
 
  * Important: for Sibling Pipeline aggregation we cannot apply this logic
  *

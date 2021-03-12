@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FakeRequest, RequestHandlerContext } from 'kibana/server';
+import { FakeRequest, RequestHandlerContext } from 'opensearch-dashboards/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
@@ -72,11 +72,11 @@ export function getVisData(
     payload: request.body,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    getEsShardTimeout: async () => {
+    getOpenSearchShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
           first(),
-          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.opensearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },

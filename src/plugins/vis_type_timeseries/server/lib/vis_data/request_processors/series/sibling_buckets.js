@@ -26,7 +26,7 @@ export function siblingBuckets(
   req,
   panel,
   series,
-  esQueryConfig,
+  opensearchQueryConfig,
   indexPatternObject,
   capabilities
 ) {

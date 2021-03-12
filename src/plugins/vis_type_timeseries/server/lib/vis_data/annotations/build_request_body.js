@@ -26,7 +26,7 @@ import { processors } from '../request_processors/annotations';
  *   req: {Object} - a request object,
  *   panel: {Object} - a panel object,
  *   annotation: {Object} - an annotation object,
- *   esQueryConfig: {Object} - es query config object,
+ *   opensearchQueryConfig: {Object} - opensearch query config object,
  *   indexPatternObject: {Object} - an index pattern object,
  *   capabilities: {Object} - a search capabilities object
  * ]

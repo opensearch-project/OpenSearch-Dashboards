@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { IRouter, KibanaRequest } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { IRouter, OpenSearchDashboardsRequest } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from '../../common/vis_schema';
 import { ValidationTelemetryServiceSetup } from '../index';
@@ -47,14 +47,14 @@ export const visDataRoutes = (
           (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
           'unavailable';
         framework.logger.warn(
-          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
+          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/opensearch-dashboards/issues/new?template=Bug_report.md`
         );
       }
 
       try {
         const results = await getVisData(
           requestContext,
-          request as KibanaRequest<{}, {}, GetVisDataOptions>,
+          request as OpenSearchDashboardsRequest<{}, {}, GetVisDataOptions>,
           framework
         );
         return response.ok({ body: results });

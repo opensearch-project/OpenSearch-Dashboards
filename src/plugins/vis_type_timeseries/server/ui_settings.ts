@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import { UiSettingsParams } from 'opensearch-dashboards/server';
 
 import { MAX_BUCKETS_SETTING } from '../common/constants';
 

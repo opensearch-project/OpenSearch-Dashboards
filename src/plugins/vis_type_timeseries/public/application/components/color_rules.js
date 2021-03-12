@@ -31,8 +31,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 class ColorRulesUI extends Component {
   constructor(props) {

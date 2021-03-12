@@ -20,9 +20,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@osd/i18n/react';
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;

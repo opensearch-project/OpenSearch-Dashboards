@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const lookup = {
   count: i18n.translate('visTypeTimeseries.aggLookup.countLabel', { defaultMessage: 'Count' }),

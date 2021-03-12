@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { TypeOptions } from '@kbn/config-schema/target/types/types';
+import { schema } from '@osd/config-schema';
+import { TypeOptions } from '@osd/config-schema/target/types/types';
 
 const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
 

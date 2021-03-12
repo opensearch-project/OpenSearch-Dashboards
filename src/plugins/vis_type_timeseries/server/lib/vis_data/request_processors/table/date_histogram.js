@@ -26,7 +26,7 @@ import { calculateAggRoot } from './calculate_agg_root';
 import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(req, panel, opensearchQueryConfig, indexPatternObject, capabilities) {
   return (next) => (doc) => {
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {

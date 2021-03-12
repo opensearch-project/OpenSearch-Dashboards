@@ -35,7 +35,7 @@ import {
   EuiComboBox,
   EuiFieldText,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { FIELD_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 

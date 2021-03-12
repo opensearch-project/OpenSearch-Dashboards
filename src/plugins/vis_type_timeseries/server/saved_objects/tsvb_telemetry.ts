@@ -18,7 +18,7 @@
  */
 
 import { flow } from 'lodash';
-import { SavedObjectMigrationFn, SavedObjectsType } from 'kibana/server';
+import { SavedObjectMigrationFn, SavedObjectsType } from 'opensearch-dashboards/server';
 
 const resetCount: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
