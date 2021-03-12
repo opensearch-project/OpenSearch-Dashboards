@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Type } from '@kbn/config-schema';
+import { Type } from '@osd/config-schema';
 
 /**
  * UI element type to represent the settings.
