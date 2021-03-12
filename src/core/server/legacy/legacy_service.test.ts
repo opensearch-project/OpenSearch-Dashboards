@@ -17,15 +17,15 @@
  * under the License.
  */
 
-jest.mock('../../../legacy/server/kbn_server');
+jest.mock('../../../legacy/server/osd_server');
 jest.mock('./cluster_manager');
 
 import { BehaviorSubject, throwError } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 
 // @ts-expect-error js file to remove TS dependency on cli
 import { ClusterManager as MockClusterManager } from './cluster_manager';
-import KbnServer from '../../../legacy/server/kbn_server';
+import OsdServer from '../../../legacy/server/osd_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
@@ -48,7 +48,7 @@ import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 
-const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
+const MockOsdServer: jest.Mock<OsdServer> = OsdServer as any;
 
 let coreId: symbol;
 let env: Env;
@@ -68,14 +68,14 @@ beforeEach(() => {
   configService = configServiceMock.create();
   environmentSetup = environmentServiceMock.createSetupContract();
 
-  MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
-  MockKbnServer.prototype.listen = jest.fn();
+  MockOsdServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
+  MockOsdServer.prototype.listen = jest.fn();
 
   setupDeps = {
     core: {
       capabilities: capabilitiesServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
-      elasticsearch: { legacy: {} } as any,
+      opensearch: { legacy: {} } as any,
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
         ...httpServiceMock.createInternalSetupContract(),
@@ -123,7 +123,7 @@ beforeEach(() => {
 
   config$ = new BehaviorSubject<Config>(
     new ObjectToConfigAdapter({
-      elasticsearch: { hosts: ['http://127.0.0.1'] },
+      opensearch: { hosts: ['http://127.0.0.1'] },
       server: { autoListen: true },
     })
   );
@@ -137,7 +137,7 @@ afterEach(() => {
 });
 
 describe('once LegacyService is set up with connection info', () => {
-  test('creates legacy kbnServer and calls `listen`.', async () => {
+  test('creates legacy osdServer and calls `listen`.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
     const legacyService = new LegacyService({
       coreId,
@@ -150,25 +150,25 @@ describe('once LegacyService is set up with connection info', () => {
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
-    expect(MockKbnServer).toHaveBeenCalledTimes(1);
-    expect(MockKbnServer).toHaveBeenCalledWith(
+    expect(MockOsdServer).toHaveBeenCalledTimes(1);
+    expect(MockOsdServer).toHaveBeenCalledWith(
       { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object)
     );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual(
+    expect(MockOsdServer.mock.calls[0][1].get()).toEqual(
       expect.objectContaining({
         path: expect.objectContaining({ autoListen: true }),
         server: expect.objectContaining({ autoListen: true }),
       })
     );
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
-    expect(mockKbnServer.listen).toHaveBeenCalledTimes(1);
-    expect(mockKbnServer.close).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances;
+    expect(mockOsdServer.listen).toHaveBeenCalledTimes(1);
+    expect(mockOsdServer.close).not.toHaveBeenCalled();
   });
 
-  test('creates legacy kbnServer but does not call `listen` if `autoListen: false`.', async () => {
+  test('creates legacy osdServer but does not call `listen` if `autoListen: false`.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
 
     const legacyService = new LegacyService({
@@ -181,26 +181,26 @@ describe('once LegacyService is set up with connection info', () => {
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
-    expect(MockKbnServer).toHaveBeenCalledTimes(1);
-    expect(MockKbnServer).toHaveBeenCalledWith(
+    expect(MockOsdServer).toHaveBeenCalledTimes(1);
+    expect(MockOsdServer).toHaveBeenCalledWith(
       { path: { autoListen: false }, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object)
     );
 
-    const legacyConfig = MockKbnServer.mock.calls[0][1].get();
+    const legacyConfig = MockOsdServer.mock.calls[0][1].get();
     expect(legacyConfig.path.autoListen).toBe(false);
     expect(legacyConfig.server.autoListen).toBe(true);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
-    expect(mockKbnServer.ready).toHaveBeenCalledTimes(1);
-    expect(mockKbnServer.listen).not.toHaveBeenCalled();
-    expect(mockKbnServer.close).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances;
+    expect(mockOsdServer.ready).toHaveBeenCalledTimes(1);
+    expect(mockOsdServer.listen).not.toHaveBeenCalled();
+    expect(mockOsdServer.close).not.toHaveBeenCalled();
   });
 
-  test('creates legacy kbnServer and closes it if `listen` fails.', async () => {
+  test('creates legacy osdServer and closes it if `listen` fails.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
-    MockKbnServer.prototype.listen.mockRejectedValue(new Error('something failed'));
+    MockOsdServer.prototype.listen.mockRejectedValue(new Error('something failed'));
     const legacyService = new LegacyService({
       coreId,
       env,
@@ -214,9 +214,9 @@ describe('once LegacyService is set up with connection info', () => {
       `"something failed"`
     );
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
-    expect(mockKbnServer.listen).toHaveBeenCalled();
-    expect(mockKbnServer.close).toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances;
+    expect(mockOsdServer.listen).toHaveBeenCalled();
+    expect(mockOsdServer.close).toHaveBeenCalled();
   });
 
   test('throws if fails to retrieve initial config.', async () => {
@@ -238,7 +238,7 @@ describe('once LegacyService is set up with connection info', () => {
       `"Legacy service is not setup yet."`
     );
 
-    expect(MockKbnServer).not.toHaveBeenCalled();
+    expect(MockOsdServer).not.toHaveBeenCalled();
     expect(MockClusterManager).not.toHaveBeenCalled();
   });
 
@@ -253,12 +253,12 @@ describe('once LegacyService is set up with connection info', () => {
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
-    expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances as Array<jest.Mocked<OsdServer>>;
+    expect(mockOsdServer.applyLoggingConfiguration).not.toHaveBeenCalled();
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
 
-    expect(mockKbnServer.applyLoggingConfiguration.mock.calls).toMatchSnapshot(
+    expect(mockOsdServer.applyLoggingConfiguration.mock.calls).toMatchSnapshot(
       `applyLoggingConfiguration params`
     );
   });
@@ -274,12 +274,12 @@ describe('once LegacyService is set up with connection info', () => {
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
-    expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances as Array<jest.Mocked<OsdServer>>;
+    expect(mockOsdServer.applyLoggingConfiguration).not.toHaveBeenCalled();
     expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
-    mockKbnServer.applyLoggingConfiguration.mockImplementation(() => {
+    mockOsdServer.applyLoggingConfiguration.mockImplementation(() => {
       throw configError;
     });
 
@@ -299,14 +299,14 @@ describe('once LegacyService is set up with connection info', () => {
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
-    const [mockKbnServer] = MockKbnServer.mock.instances;
-    expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances;
+    expect(mockOsdServer.applyLoggingConfiguration).not.toHaveBeenCalled();
     expect(loggingSystemMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     config$.error(configError);
 
-    expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
+    expect(mockOsdServer.applyLoggingConfiguration).not.toHaveBeenCalled();
     expect(loggingSystemMock.collect(logger).error).toEqual([[configError]]);
   });
 });
@@ -320,14 +320,14 @@ describe('once LegacyService is set up without connection info', () => {
     await legacyService.start(startDeps);
   });
 
-  test('creates legacy kbnServer with `autoListen: false`.', () => {
-    expect(MockKbnServer).toHaveBeenCalledTimes(1);
-    expect(MockKbnServer).toHaveBeenCalledWith(
+  test('creates legacy osdServer with `autoListen: false`.', () => {
+    expect(MockOsdServer).toHaveBeenCalledTimes(1);
+    expect(MockOsdServer).toHaveBeenCalledWith(
       { path: {}, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object)
     );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual(
+    expect(MockOsdServer.mock.calls[0][1].get()).toEqual(
       expect.objectContaining({
         server: expect.objectContaining({ autoListen: true }),
       })
@@ -335,12 +335,12 @@ describe('once LegacyService is set up without connection info', () => {
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
-    const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
-    expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
+    const [mockOsdServer] = MockOsdServer.mock.instances as Array<jest.Mocked<OsdServer>>;
+    expect(mockOsdServer.applyLoggingConfiguration).not.toHaveBeenCalled();
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
 
-    expect(mockKbnServer.applyLoggingConfiguration.mock.calls).toMatchSnapshot(
+    expect(mockOsdServer.applyLoggingConfiguration.mock.calls).toMatchSnapshot(
       `applyLoggingConfiguration params`
     );
   });

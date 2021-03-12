@@ -65,7 +65,7 @@ export interface HttpAuth {
 }
 
 /**
- * Kibana HTTP Service provides own abstraction for work with HTTP stack.
+ * OpenSearch Dashboards HTTP Service provides own abstraction for work with HTTP stack.
  * Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover,
  * plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood.
  * This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins.
@@ -78,10 +78,10 @@ export interface HttpAuth {
  * const router = httpSetup.createRouter();
  * ```
  *
- * - Use `@kbn/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
+ * - Use `@osd/config-schema` package to create a schema to validate the request `params`, `query`, and `body`. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler.
  * To opt out of validating the request, specify `false`.
  * ```ts
- * import { schema, TypeOf } from '@kbn/config-schema';
+ * import { schema, TypeOf } from '@osd/config-schema';
  * const validate = {
  *   params: schema.object({
  *     id: schema.string(),
@@ -94,7 +94,7 @@ export interface HttpAuth {
  * And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
  * Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
  * ```ts
- * const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
+ * const handler = async (context: RequestHandlerContext, request: OpenSearchDashboardsRequest, response: ResponseFactory) => {
  *   const data = await findObject(request.params.id);
  *   // creates a command to respond with 'not found' error
  *   if (!data) return response.notFound();
@@ -110,7 +110,7 @@ export interface HttpAuth {
  *
  * - Register route handler for GET request to 'path/{id}' path
  * ```ts
- * import { schema, TypeOf } from '@kbn/config-schema';
+ * import { schema, TypeOf } from '@osd/config-schema';
  * const router = httpSetup.createRouter();
  *
  * const validate = {
@@ -206,7 +206,7 @@ export interface HttpServiceSetup {
   registerOnPreResponse: (handler: OnPreResponseHandler) => void;
 
   /**
-   * Access or manipulate the Kibana base path
+   * Access or manipulate the OpenSearch Dashboards base path
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
@@ -220,7 +220,7 @@ export interface HttpServiceSetup {
   auth: HttpAuth;
 
   /**
-   * The CSP config used for Kibana.
+   * The CSP config used for OpenSearch Dashboards.
    */
   csp: ICspConfig;
 
@@ -250,7 +250,7 @@ export interface HttpServiceSetup {
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
-   *       return await context.elasticsearch.client.asCurrentUser.find(id);
+   *       return await context.opensearch.client.asCurrentUser.find(id);
    *     }
    *     return { search };
    *    }
@@ -293,7 +293,7 @@ export interface InternalHttpServiceSetup
 /** @public */
 export interface HttpServiceStart {
   /**
-   * Access or manipulate the Kibana base path
+   * Access or manipulate the OpenSearch Dashboards base path
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
@@ -318,7 +318,7 @@ export interface InternalHttpServiceStart extends HttpServiceStart {
 
 /** @public */
 export interface HttpServerInfo {
-  /** The name of the Kibana server */
+  /** The name of the OpenSearch Dashboards server */
   name: string;
   /** The hostname of the server */
   hostname: string;

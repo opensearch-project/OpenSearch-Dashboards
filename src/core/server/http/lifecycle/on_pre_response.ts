@@ -21,7 +21,7 @@ import { Lifecycle, Request, ResponseObject, ResponseToolkit as HapiResponseTool
 import Boom from 'boom';
 import { Logger } from '../../logging';
 
-import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
+import { HapiResponseAdapter, OpenSearchDashboardsRequest, ResponseHeaders } from '../router';
 
 enum ResultType {
   render = 'render',
@@ -108,7 +108,7 @@ const toolkit: OnPreResponseToolkit = {
  * @public
  */
 export type OnPreResponseHandler = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   preResponse: OnPreResponseInfo,
   toolkit: OnPreResponseToolkit
 ) => OnPreResponseResult | Promise<OnPreResponseResult>;
@@ -132,7 +132,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           ? response.output.statusCode
           : response.statusCode;
 
-        const result = await fn(KibanaRequest.from(request), { statusCode }, toolkit);
+        const result = await fn(OpenSearchDashboardsRequest.from(request), { statusCode }, toolkit);
 
         if (preResponseResult.isNext(result)) {
           if (result.headers) {

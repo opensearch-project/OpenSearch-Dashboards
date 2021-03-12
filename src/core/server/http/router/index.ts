@@ -20,13 +20,13 @@
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
 export { Router, RequestHandler, RequestHandlerWrapper, IRouter, RouteRegistrar } from './router';
 export {
-  KibanaRequest,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  isKibanaRequest,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsRequestEvents,
+  OpenSearchDashboardsRequestRoute,
+  OpenSearchDashboardsRequestRouteOptions,
+  OpenSearchDashboardsRouteOptions,
+  OpenSearchDashboardsRequestState,
+  isOpenSearchDashboardsRequest,
   isRealRequest,
   LegacyRequest,
   ensureRawRequest,
@@ -51,16 +51,16 @@ export {
   RedirectResponseOptions,
   ResponseError,
   ResponseErrorAttributes,
-  KibanaResponse,
-  IKibanaResponse,
-  kibanaResponseFactory,
-  KibanaResponseFactory,
+  OpenSearchDashboardsResponse,
+  IOpenSearchDashboardsResponse,
+  opensearchDashboardsResponseFactory,
+  OpenSearchDashboardsResponseFactory,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
-  isKibanaResponse,
+  isOpenSearchDashboardsResponse,
 } from './response';
 
-export { IKibanaSocket } from './socket';
+export { IOpenSearchDashboardsSocket } from './socket';
 
 export {
   RouteValidatorConfig,

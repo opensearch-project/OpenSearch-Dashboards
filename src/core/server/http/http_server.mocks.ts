@@ -21,16 +21,16 @@ import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import {
-  KibanaRequest,
+  OpenSearchDashboardsRequest,
   LifecycleResponseFactory,
   RouteMethod,
-  KibanaResponseFactory,
+  OpenSearchDashboardsResponseFactory,
   RouteValidationSpec,
-  KibanaRouteOptions,
-  KibanaRequestState,
+  OpenSearchDashboardsRouteOptions,
+  OpenSearchDashboardsRequestState,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
@@ -46,8 +46,8 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
-  kibanaRouteOptions?: KibanaRouteOptions;
-  kibanaRequestState?: KibanaRequestState;
+  opensearchDashboardsRouteOptions?: OpenSearchDashboardsRouteOptions;
+  opensearchDashboardsRequestState?: OpenSearchDashboardsRequestState;
   routeAuthRequired?: false;
   validation?: {
     params?: RouteValidationSpec<P>;
@@ -56,7 +56,7 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   };
 }
 
-function createKibanaRequestMock<P = any, Q = any, B = any>({
+function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -67,15 +67,15 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeTags,
   routeAuthRequired,
   validation = {},
-  kibanaRouteOptions = { xsrfRequired: true },
-  kibanaRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+  opensearchDashboardsRouteOptions = { xsrfRequired: true },
+  opensearchDashboardsRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
-  return KibanaRequest.from<P, Q, B>(
+  return OpenSearchDashboardsRequest.from<P, Q, B>(
     createRawRequestMock({
-      app: kibanaRequestState,
+      app: opensearchDashboardsRequestState,
       auth,
       headers,
       params,
@@ -90,12 +90,12 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
         search: queryString ? `?${queryString}` : queryString,
       },
       route: {
-        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteOptions },
+        settings: { tags: routeTags, auth: routeAuthRequired, app: opensearchDashboardsRouteOptions },
       },
       raw: {
         req: {
           socket,
-          // these are needed to avoid an error when consuming KibanaRequest.events
+          // these are needed to avoid an error when consuming OpenSearchDashboardsRequest.events
           on: jest.fn(),
           off: jest.fn(),
         },
@@ -145,7 +145,7 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   ) as Request;
 }
 
-const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
+const createResponseFactoryMock = (): jest.Mocked<OpenSearchDashboardsResponseFactory> => ({
   ok: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
@@ -182,7 +182,7 @@ const createToolkitMock = (): ToolkitMock => {
 };
 
 export const httpServerMock = {
-  createKibanaRequest: createKibanaRequestMock,
+  createOpenSearchDashboardsRequest: createOpenSearchDashboardsRequestMock,
   createRawRequest: createRawRequestMock,
   createResponseFactory: createResponseFactoryMock,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,

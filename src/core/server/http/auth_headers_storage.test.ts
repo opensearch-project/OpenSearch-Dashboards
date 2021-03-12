@@ -17,16 +17,16 @@
  * under the License.
  */
 import { AuthHeadersStorage } from './auth_headers_storage';
-import { KibanaRequest } from './router';
+import { OpenSearchDashboardsRequest } from './router';
 import { httpServerMock } from './http_server.mocks';
 describe('AuthHeadersStorage', () => {
   describe('stores authorization headers', () => {
-    it('retrieves a copy of headers associated with Kibana request', () => {
+    it('retrieves a copy of headers associated with OpenSearchDashboards request', () => {
       const headers = { authorization: 'token' };
       const storage = new AuthHeadersStorage();
       const rawRequest = httpServerMock.createRawRequest();
-      storage.set(KibanaRequest.from(rawRequest), headers);
-      expect(storage.get(KibanaRequest.from(rawRequest))).toEqual(headers);
+      storage.set(OpenSearchDashboardsRequest.from(rawRequest), headers);
+      expect(storage.get(OpenSearchDashboardsRequest.from(rawRequest))).toEqual(headers);
     });
 
     it('retrieves a copy of headers associated with Legacy.Request', () => {
@@ -37,12 +37,12 @@ describe('AuthHeadersStorage', () => {
       expect(storage.get(rawRequest)).toEqual(headers);
     });
 
-    it('retrieves a copy of headers associated with both KibanaRequest & Legacy.Request', () => {
+    it('retrieves a copy of headers associated with both OpenSearchDashboardsRequest & Legacy.Request', () => {
       const headers = { authorization: 'token' };
       const storage = new AuthHeadersStorage();
       const rawRequest = httpServerMock.createRawRequest();
 
-      storage.set(KibanaRequest.from(rawRequest), headers);
+      storage.set(OpenSearchDashboardsRequest.from(rawRequest), headers);
       expect(storage.get(rawRequest)).toEqual(headers);
     });
   });

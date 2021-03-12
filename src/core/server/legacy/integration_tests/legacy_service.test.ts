@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 
 describe('legacy service', () => {
   describe('http server', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeEach(() => {
-      root = kbnTestServer.createRoot({
+      root = osdTestServer.createRoot({
         migrations: { skip: true },
         plugins: { initialize: false },
       });
@@ -41,16 +41,16 @@ describe('legacy service', () => {
       await root.start();
 
       const legacyPlatformUrl = `${rootUrl}/legacy-platform`;
-      const kbnServer = kbnTestServer.getKbnServer(root);
-      kbnServer.server.route({
+      const osdServer = osdTestServer.getOsdServer(root);
+      osdServer.server.route({
         method: 'GET',
         path: legacyPlatformUrl,
         handler: () => 'ok from legacy server',
       });
 
-      await kbnTestServer.request.get(root, '/route/new-platform').expect(200, 'from-new-platform');
+      await osdTestServer.request.get(root, '/route/new-platform').expect(200, 'from-new-platform');
 
-      await kbnTestServer.request.get(root, legacyPlatformUrl).expect(200, 'ok from legacy server');
+      await osdTestServer.request.get(root, legacyPlatformUrl).expect(200, 'ok from legacy server');
     });
     it('throws error if Legacy and New platforms register handler for the same route', async () => {
       const { http } = await root.setup();
@@ -62,9 +62,9 @@ describe('legacy service', () => {
 
       await root.start();
 
-      const kbnServer = kbnTestServer.getKbnServer(root);
+      const osdServer = osdTestServer.getOsdServer(root);
       expect(() =>
-        kbnServer.server.route({
+        osdServer.server.route({
           method: 'GET',
           path: rootUrl,
           handler: () => 'ok from legacy server',

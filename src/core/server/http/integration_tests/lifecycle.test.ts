@@ -19,7 +19,7 @@
 
 import supertest from 'supertest';
 import request from 'request';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
@@ -204,7 +204,7 @@ describe('OnPreRouting', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPreRouting. Expected OnPreRoutingResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -342,7 +342,7 @@ describe('OnPreAuth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -508,7 +508,7 @@ describe('OnPostAuth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -1038,7 +1038,7 @@ describe('Auth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -1147,7 +1147,7 @@ describe('OnPreResponse', () => {
     registerOnPreResponse((req, res, t) =>
       t.next({
         headers: {
-          'x-kibana-header': 'value',
+          'x-opensearch-dashboards-header': 'value',
         },
       })
     );
@@ -1155,7 +1155,7 @@ describe('OnPreResponse', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(200);
 
-    expect(result.header['x-kibana-header']).toBe('value');
+    expect(result.header['x-opensearch-dashboards-header']).toBe('value');
     expect(result.header['x-my-header']).toBe('foo');
   });
 
@@ -1167,12 +1167,12 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
       res.ok({
-        headers: { 'x-kibana-header': 'value' },
+        headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
     registerOnPreResponse((req, res, t) =>
       t.next({
-        headers: { 'x-kibana-header': 'value' },
+        headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
     await server.start();
@@ -1182,7 +1182,7 @@ describe('OnPreResponse', () => {
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "onPreResponseHandler rewrote a response header [x-kibana-header].",
+          "onPreResponseHandler rewrote a response header [x-opensearch-dashboards-header].",
         ],
       ]
     `);

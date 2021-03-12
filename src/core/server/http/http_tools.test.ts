@@ -44,7 +44,7 @@ import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@osd/config-schema';
 
 const emptyOutput = {
   statusCode: 400,
