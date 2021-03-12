@@ -27,7 +27,7 @@ import execa from 'execa';
 import { YarnLock, resolveDepsForProject } from './yarn_lock';
 import { ProjectMap } from '../utils/projects';
 import { Project } from '../utils/project';
-import { OpenSearchDashboards } from './opensearch_dashboards';
+import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { Log } from '../utils/log';
 
 export type ChecksumMap = Map<string, string | undefined>;

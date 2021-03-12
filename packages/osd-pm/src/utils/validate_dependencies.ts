@@ -23,7 +23,7 @@ import dedent from 'dedent';
 import chalk from 'chalk';
 
 import { writeFile } from './fs';
-import { OpenSearchDashboards } from './opensearch_dashboards';
+import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';
 import { Project } from './project';

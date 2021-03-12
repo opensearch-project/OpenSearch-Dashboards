@@ -21,7 +21,7 @@
 import { parse as parseLockfile } from '@yarnpkg/lockfile';
 
 import { readFile } from '../utils/fs';
-import { OpenSearchDashboards } from './opensearch_dashboards';
+import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { Project } from '../utils/project';
 import { Log } from '../utils/log';
 

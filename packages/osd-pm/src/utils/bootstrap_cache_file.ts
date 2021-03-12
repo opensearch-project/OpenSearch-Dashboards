@@ -22,7 +22,7 @@ import Path from 'path';
 
 import { ChecksumMap } from './project_checksums';
 import { Project } from '../utils/project';
-import { OpenSearchDashboards } from './opensearch_dashboards';
+import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 
 export class BootstrapCacheFile {
   private readonly path: string;
