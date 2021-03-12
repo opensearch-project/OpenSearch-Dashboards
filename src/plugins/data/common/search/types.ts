@@ -18,22 +18,22 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common/search';
+import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../../common/search';
 
 export type ISearch = (
-  request: IKibanaSearchRequest,
+  request: IOpenSearchDashboardsSearchRequest,
   options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
+) => Observable<IOpenSearchDashboardsSearchResponse>;
 
 export type ISearchGeneric = <
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
->(
+  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+  >(
   request: SearchStrategyRequest,
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
 
-export interface IKibanaSearchResponse<RawResponse = any> {
+export interface IOpenSearchDashboardsSearchResponse<RawResponse = any> {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
    */
@@ -64,7 +64,7 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   rawResponse: RawResponse;
 }
 
-export interface IKibanaSearchRequest<Params = any> {
+export interface IOpenSearchDashboardsSearchRequest<Params = any> {
   /**
    * An id can be used to uniquely identify this request.
    */

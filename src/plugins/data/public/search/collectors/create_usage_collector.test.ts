@@ -22,7 +22,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { usageCollectionPluginMock, Setup } from '../../../../usage_collection/public/mocks';
 import { createUsageCollector } from './create_usage_collector';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE } from '@osd/analytics';
 import { from } from 'rxjs';
 
 describe('Search Usage Collector', () => {

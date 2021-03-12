@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
-import { withKibana } from '../../../../kibana_react/public';
+import { injectI18n } from '@osd/i18n/react';
+import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;
@@ -31,6 +31,6 @@ const WrappedSearchBar = (props: SearchBarProps) => (
   </React.Suspense>
 );
 
-export const SearchBar = injectI18n(withKibana(WrappedSearchBar));
+export const SearchBar = injectI18n(withOpenSearchDashboards(WrappedSearchBar));
 export { StatefulSearchBarProps } from './create_search_bar';
 export type { SearchBarProps, SearchBarOwnProps } from './search_bar';

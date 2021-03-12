@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isValidEsInterval } from './is_valid_es_interval';
+import { isValidOpenSearchInterval } from './is_valid_opensearch_interval';
 import { leastCommonInterval } from './least_common_interval';
 
 // When base interval is set, check for least common interval and allow
@@ -36,6 +36,6 @@ export function isValidInterval(value: string, baseInterval?: string) {
   if (baseInterval) {
     return parseWithBase(value, baseInterval);
   } else {
-    return isValidEsInterval(value);
+    return isValidOpenSearchInterval(value);
   }
 }

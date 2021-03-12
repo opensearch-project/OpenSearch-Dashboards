@@ -47,14 +47,14 @@ describe('date_range params', () => {
       },
       typeMeta: hasIncludeTypeMeta
         ? {
-            aggs: {
-              date_range: {
-                bytes: {
-                  time_zone: 'defaultTimeZone',
-                },
+          aggs: {
+            date_range: {
+              bytes: {
+                time_zone: 'defaultTimeZone',
               },
             },
-          }
+          },
+        }
         : undefined,
     } as any;
 
@@ -106,10 +106,10 @@ describe('date_range params', () => {
       expect(params.time_zone).toBe('defaultTimeZone');
     });
 
-    test('should use the Kibana time_zone if no parameter specified', () => {
+    test('should use the OpenSearch Dashboards time_zone if no parameter specified', () => {
       aggTypesDependencies = {
         ...aggTypesDependencies,
-        getConfig: () => 'kibanaTimeZone' as any,
+        getConfig: () => 'opensearchDashboardsTimeZone' as any,
       };
 
       const aggConfigs = getAggConfigs(
@@ -121,7 +121,7 @@ describe('date_range params', () => {
       const dateRange = aggConfigs.aggs[0];
       const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
 
-      expect(params.time_zone).toBe('kibanaTimeZone');
+      expect(params.time_zone).toBe('opensearchDashboardsTimeZone');
     });
   });
 });

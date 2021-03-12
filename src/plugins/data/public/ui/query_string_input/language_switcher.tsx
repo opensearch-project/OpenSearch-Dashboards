@@ -29,9 +29,9 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface Props {
   language: string;
@@ -40,8 +40,8 @@ interface Props {
 }
 
 export function QueryLanguageSwitcher(props: Props) {
-  const kibana = useKibana();
-  const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
+  const opensearchDashboards = useOpenSearchDashboards();
+  const kueryQuerySyntaxDocs = opensearchDashboards.services.docLinks!.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const luceneLabel = (
     <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />
@@ -52,7 +52,7 @@ export function QueryLanguageSwitcher(props: Props) {
   const kqlFullName = (
     <FormattedMessage
       id="data.query.queryBar.kqlFullLanguageName"
-      defaultMessage="Kibana Query Language"
+      defaultMessage="OpenSearch Dashboards Query Language"
     />
   );
 
@@ -92,7 +92,7 @@ export function QueryLanguageSwitcher(props: Props) {
               id="data.query.queryBar.syntaxOptionsDescription"
               defaultMessage="The {docsLink} (KQL) offers a simplified query
               syntax and support for scripted fields. KQL also provides autocomplete if you have
-              a Basic license or above. If you turn off KQL, Kibana uses Lucene."
+              a Basic license or above. If you turn off KQL, OpenSearch Dashboards uses Lucene."
               values={{
                 docsLink: (
                   <EuiLink href={kueryQuerySyntaxDocs} target="_blank">

@@ -16,7 +16,7 @@
 
   &:not(.globalFilterItem-isDisabled) {
     @include euiFormControlDefaultShadow;
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
+    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $osdGlobalFilterItemBorderColor; // Make the actual border more visible
   }
 
   &:focus-within {
@@ -62,7 +62,7 @@
     bottom: 0;
     left: 0;
     width: $euiSizeXS;
-    background-color: $kbnGlobalFilterItemBorderColor;
+    background-color: $osdGlobalFilterItemBorderColor;
     border-top-left-radius: $euiBorderRadius / 2;
     border-bottom-left-radius: $euiBorderRadius / 2;
   }
@@ -70,10 +70,10 @@
 
 .globalFilterItem-isExcluded {
   &:not(.globalFilterItem-isDisabled) {
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColorExcluded;
+    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $osdGlobalFilterItemBorderColorExcluded;
 
     &::before {
-      background-color: $kbnGlobalFilterItemPinnedColorExcluded;
+      background-color: $osdGlobalFilterItemPinnedColorExcluded;
     }
   }
 }

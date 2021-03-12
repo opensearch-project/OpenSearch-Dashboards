@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string) {
-  return aggregatable && !['text', 'geo_shape'].includes(esType) && !esType.startsWith('_');
+export function shouldReadFieldFromDocValues(aggregatable: boolean, opensearchType: string) {
+  return aggregatable && !['text', 'geo_shape'].includes(opensearchType) && !opensearchType.startsWith('_');
 }

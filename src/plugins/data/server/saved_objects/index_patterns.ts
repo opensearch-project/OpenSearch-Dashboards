@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 export const indexPatternSavedObjectType: SavedObjectsType = {
@@ -32,12 +32,12 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'management.kibana.indexPatterns',
+        path: `/app/management/opensearch-dashboards/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
       };
     },
   },

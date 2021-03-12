@@ -23,8 +23,8 @@ import { identity, shuffle, sortBy } from 'lodash';
 
 import { getFieldCapabilities } from '../field_capabilities';
 
-import { callFieldCapsApi } from '../es_api';
-import * as callFieldCapsApiNS from '../es_api';
+import { callFieldCapsApi } from '../opensearch_api';
+import * as callFieldCapsApiNS from '../opensearch_api';
 
 import { readFieldCapsResponse } from './field_caps_response';
 import * as readFieldCapsResponseNS from './field_caps_response';
@@ -48,9 +48,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   };
 
   const stubDeps = (options = {}) => {
-    const { esResponse = {}, fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
+    const { opensearchResponse = {}, fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
 
-    sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => esResponse);
+    sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => opensearchResponse);
     sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);
     sandbox.stub(mergeOverridesNS, 'mergeOverrides').callsFake(mergeOverrides);
   };
@@ -66,9 +66,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   });
 
   describe('calls `readFieldCapsResponse`', () => {
-    it('passes exact es response', async () => {
+    it('passes exact opensearch response', async () => {
       stubDeps({
-        esResponse: footballs[0],
+        opensearchResponse: footballs[0],
       });
 
       await getFieldCapabilities();

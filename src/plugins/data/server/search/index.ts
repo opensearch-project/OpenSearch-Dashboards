@@ -19,7 +19,7 @@
 
 export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-export * from './es_search';
+export * from './opensearch_search';
 
 export { usageProvider, SearchUsage } from './collectors';
 

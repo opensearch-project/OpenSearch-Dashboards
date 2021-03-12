@@ -18,7 +18,7 @@
  */
 
 import { fetchProvider } from './fetch';
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
@@ -38,7 +38,7 @@ function setupMockCallCluster(
     if (params && 'id' in params && params.id === 'kql-telemetry:kql-telemetry') {
       if (optCount === null) {
         return Promise.resolve({
-          _index: '.kibana_1',
+          _index: '.opensearch-dashboards_1',
           _type: 'doc',
           _id: 'kql-telemetry:kql-telemetry',
           found: false,
@@ -85,10 +85,10 @@ function setupMockCallCluster(
 describe('makeKQLUsageCollector', () => {
   describe('fetch method', () => {
     beforeEach(() => {
-      fetch = fetchProvider('.kibana');
+      fetch = fetchProvider('.opensearch-dashboards');
     });
 
-    it('should return opt in data from the .kibana/kql-telemetry doc', async () => {
+    it('should return opt in data from the .opensearch-dashboards/kql-telemetry doc', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(1);
@@ -102,7 +102,7 @@ describe('makeKQLUsageCollector', () => {
     });
 
     // Indicates the user has modified the setting at some point but the value is currently the default
-    it('should return the kibana default query language if the config value is null', async () => {
+    it('should return the OpenSearch Dashboards default query language if the config value is null', async () => {
       setupMockCallCluster({ optInCount: 1 }, null);
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.defaultQueryLanguage).toBe('lucene');
@@ -114,14 +114,14 @@ describe('makeKQLUsageCollector', () => {
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
     });
 
-    it('should default to 0 opt in counts if the .kibana/kql-telemetry doc does not exist', async () => {
+    it('should default to 0 opt in counts if the .opensearch-dashboards/kql-telemetry doc does not exist', async () => {
       setupMockCallCluster(null, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(0);
       expect(fetchResponse.optOutCount).toBe(0);
     });
 
-    it('should default to the kibana default language if the config document does not exist', async () => {
+    it('should default to the OpenSearch Dashboards default language if the config document does not exist', async () => {
       setupMockCallCluster(null, 'missingConfigDoc');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');

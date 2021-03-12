@@ -19,7 +19,7 @@
 
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
-import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
+import { OSD_FIELD_TYPES, FieldFormat } from '../../../common';
 import { FieldSpec } from '../types';
 
 describe('Field', function () {
@@ -37,7 +37,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'lang',
     count: 1,
-    esTypes: ['text'],
+    opensearchTypes: ['text'],
     aggregatable: true,
     filterable: true,
     searchable: true,
@@ -128,7 +128,7 @@ describe('Field', function () {
     const field = getField({ name: '_score' });
     expect(field.sortable).toEqual(true);
 
-    const fieldB = getField({ indexed: true, type: KBN_FIELD_TYPES.STRING });
+    const fieldB = getField({ indexed: true, type: OSD_FIELD_TYPES.STRING });
     expect(fieldB.sortable).toEqual(true);
 
     const fieldC = getField({ indexed: false, aggregatable: false, scripted: false });
@@ -142,7 +142,7 @@ describe('Field', function () {
     const fieldB = getField({ scripted: true });
     expect(fieldB.filterable).toEqual(true);
 
-    const fieldC = getField({ indexed: true, type: KBN_FIELD_TYPES.STRING });
+    const fieldC = getField({ indexed: true, type: OSD_FIELD_TYPES.STRING });
     expect(fieldC.filterable).toEqual(true);
 
     const fieldD = getField({ scripted: false, indexed: false, searchable: false });
@@ -157,14 +157,14 @@ describe('Field', function () {
   it('spec snapshot', () => {
     const field = new IndexPatternField(fieldValues, 'displayName');
     const getFormatterForField = () =>
-      ({
-        toJSON: () => ({
-          id: 'number',
-          params: {
-            pattern: '$0,0.[00]',
-          },
-        }),
-      } as FieldFormat);
+    ({
+      toJSON: () => ({
+        id: 'number',
+        params: {
+          pattern: '$0,0.[00]',
+        },
+      }),
+    } as FieldFormat);
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

@@ -19,8 +19,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
 
 export class QueryStringManager {
@@ -35,7 +35,7 @@ export class QueryStringManager {
 
   private getDefaultLanguage() {
     return (
-      this.storage.get('kibana.userQueryLanguage') ||
+      this.storage.get('opensearchDashboards.userQueryLanguage') ||
       this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
     );
   }

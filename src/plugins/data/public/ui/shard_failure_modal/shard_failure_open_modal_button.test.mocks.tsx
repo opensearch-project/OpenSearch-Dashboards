@@ -18,7 +18,7 @@
  */
 
 import { setOverlays } from '../../services';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from 'opensearch-dashboards/public';
 
 export const openModal = jest.fn();
 

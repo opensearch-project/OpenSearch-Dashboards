@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
@@ -72,7 +72,7 @@ export const aggPercentileRanks = (): FunctionDefinition => ({
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.percentile_ranks.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+        defaultMessage: 'Advanced json to include when the agg is sent to OpenSearch',
       }),
     },
     customLabel: {

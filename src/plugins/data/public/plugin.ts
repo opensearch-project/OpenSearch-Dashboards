@@ -21,7 +21,7 @@ import './index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -51,7 +51,7 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
+import { opensearchaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -84,12 +84,12 @@ declare module '../../ui_actions/public' {
 
 export class DataPublicPlugin
   implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    > {
+  Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+  > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
@@ -110,7 +110,7 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
+    expressions.registerFunction(opensearchaggs);
     expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({

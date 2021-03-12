@@ -19,7 +19,7 @@
 
 import { stubIndexPattern, stubFields } from '../../stubs';
 import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
-import { IUiSettingsClient, CoreSetup } from 'kibana/public';
+import { IUiSettingsClient, CoreSetup } from 'opensearch-dashboards/public';
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
@@ -65,7 +65,7 @@ export const siblingPipelineAggHelper = {
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customBucket'
         ),
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'customMetric',

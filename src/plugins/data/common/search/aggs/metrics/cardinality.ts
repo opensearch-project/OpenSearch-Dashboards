@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {
@@ -50,8 +50,8 @@ export const getCardinalityMetricAgg = () =>
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-          (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
+        filterFieldTypes: Object.values(OSD_FIELD_TYPES).filter(
+          (type) => type !== OSD_FIELD_TYPES.HISTOGRAM
         ),
       },
     ],

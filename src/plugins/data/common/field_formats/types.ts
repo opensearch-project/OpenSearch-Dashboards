@@ -72,7 +72,7 @@ export enum FIELD_FORMAT_IDS {
 export interface FieldFormatConfig {
   id: FieldFormatId;
   params: Record<string, any>;
-  es?: boolean;
+  opensearch?: boolean;
 }
 
 export type FieldFormatsGetConfigFn = GetConfigFn;

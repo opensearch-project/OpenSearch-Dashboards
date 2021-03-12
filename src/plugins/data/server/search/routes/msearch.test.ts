@@ -59,7 +59,7 @@ describe('msearch route', () => {
     };
     const mockBody = { searches: [{ header: {}, body: {} }] };
     const mockQuery = {};
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });
@@ -105,7 +105,7 @@ describe('msearch route', () => {
     };
     const mockBody = { searches: [{ header: {}, body: {} }] };
     const mockQuery = {};
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });

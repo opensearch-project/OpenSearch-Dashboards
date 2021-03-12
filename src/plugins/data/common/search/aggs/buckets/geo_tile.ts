@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { noop } from 'lodash';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
 import { BaseAggParams } from '../types';
 
@@ -44,7 +44,7 @@ export const getGeoTitleBucketAgg = () =>
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+        filterFieldTypes: OSD_FIELD_TYPES.GEO_POINT,
       },
       {
         name: 'useGeocentroid',

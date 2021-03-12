@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
 import type { FilterLabelStatus } from '../../filter_item';

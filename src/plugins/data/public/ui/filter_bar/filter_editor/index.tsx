@@ -32,8 +32,8 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -327,7 +327,7 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
-          defaultMessage: 'Elasticsearch Query DSL',
+          defaultMessage: 'OpenSearch Query DSL',
         })}
       >
         <EuiCodeEditor

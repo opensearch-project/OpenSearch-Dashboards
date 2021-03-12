@@ -17,7 +17,7 @@
  * under the License.
  */
 import { each, union } from 'lodash';
-import { Filter } from '../../es_query';
+import { Filter } from '../../opensearch_query';
 import { dedupFilters } from './dedup_filters';
 
 /**

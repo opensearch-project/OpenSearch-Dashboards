@@ -60,7 +60,7 @@ describe('brushEvent', () => {
     baseEvent = {
       column: 0,
       table: {
-        type: 'kibana_datatable',
+        type: 'opensearch_dashboards_datatable',
         columns: [
           {
             id: '1',

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../kibana_react/public';
+import { i18n } from '@osd/i18n';
+import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import type { IEmbeddable } from '../../../embeddable/public';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
+import { Filter, FilterManager, TimefilterContract, opensearchFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 
@@ -96,13 +96,13 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = opensearchFilters.extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+          opensearchFilters.changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);

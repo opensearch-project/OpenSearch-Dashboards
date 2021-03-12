@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreSetup, SharedGlobalConfig } from 'kibana/server';
+import { CoreSetup, SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
 export function registerRoutes({ http }: CoreSetup, config$: Observable<SharedGlobalConfig>): void {

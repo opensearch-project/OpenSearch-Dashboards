@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
 import { querySavedObjectType } from '../saved_objects';
 
 export class QueryService implements Plugin<void> {
@@ -25,5 +25,5 @@ export class QueryService implements Plugin<void> {
     core.savedObjects.registerType(querySavedObjectType);
   }
 
-  public start() {}
+  public start() { }
 }

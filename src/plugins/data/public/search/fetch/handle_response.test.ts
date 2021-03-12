@@ -20,12 +20,12 @@
 import { handleResponse } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
 import { SearchResponse } from 'elasticsearch';
 
-jest.mock('@kbn/i18n', () => {
+jest.mock('@osd/i18n', () => {
   return {
     i18n: {
       translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
