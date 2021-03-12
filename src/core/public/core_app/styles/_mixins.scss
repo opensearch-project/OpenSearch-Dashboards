@@ -9,7 +9,7 @@
 }
 
 // EUITODO: Add this
-@mixin kibanaCircleLogo() {
+@mixin opensearchDashboardsCircleLogo() {
   display: inline-block;
   @include size($euiSizeXXL * 2);
   line-height: $euiSizeXXL * 2;
@@ -24,7 +24,7 @@
 }
 
 // Standardizes the look and layout of resizable area handles
-@mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
+@mixin osdResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
   position: relative;
   display: flex;
   flex: 0 0 $size;
@@ -40,7 +40,7 @@
     height: $size;
     width: 100%;
   } @else {
-    @warn("Direction unknown for kbnResizer");
+    @warn("Direction unknown for osdResizer");
   }
 
   &:hover {
@@ -69,7 +69,7 @@
   }
 }
 
-@mixin kibanaFullScreenGraphics($euiZLevel: $euiZLevel9) {
+@mixin opensearchDashboardsFullScreenGraphics($euiZLevel: $euiZLevel9) {
   position: fixed;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@
   background-color: $euiPageBackgroundColor;
   opacity: 0;
   overflow: auto;
-  animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
+  animation: opensearchDashboardsFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
 
   &::before {
     position: absolute;
@@ -102,7 +102,7 @@
     content: url(lightOrDarkTheme('~core_app_image_assets/bg_bottom_branded.svg', '~core_app_image_assets/bg_bottom_branded_dark.svg'));
   }
 
-  @keyframes kibanaFullScreenGraphics_FadeIn {
+  @keyframes opensearchDashboardsFullScreenGraphics_FadeIn {
     from {
       opacity: 0;
     }

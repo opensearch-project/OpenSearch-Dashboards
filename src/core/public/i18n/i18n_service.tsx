@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EuiContext } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import { getEuiContextMapping } from './i18n_eui_mapping';
 
@@ -63,7 +63,7 @@ export class I18nService {
 }
 
 /**
- * I18nStart.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
+ * I18nStart.Context is required by any localizable React component from \@osd/i18n and \@elastic/eui packages
  * and is supposed to be used as the topmost component for any i18n-compatible React tree.
  *
  * @public

@@ -37,7 +37,7 @@ export function HeaderNavControls({ navControls$, side }: Props) {
   }
 
   // It should be performant to use the index as the key since these are unlikely
-  // to change while Kibana is running.
+  // to change while OpenSearch Dashboards is running.
   return (
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (

@@ -18,7 +18,7 @@
  */
 
 import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React from 'react';
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
@@ -55,7 +55,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   }
 
   render() {
-    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
+    const className = classNames(!this.state.visible && 'osdLoadingIndicator-hidden');
 
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'

@@ -18,7 +18,7 @@
  */
 
 /**
- * The Kibana Core APIs for client-side plugins.
+ * The OpenSearch Dashboards Core APIs for client-side plugins.
  *
  * A plugin's `public/index` file must contain a named import, `plugin`, that
  * implements {@link PluginInitializer} which returns an object that implements
@@ -326,4 +326,4 @@ export {
   NavType,
 };
 
-export { __kbnBootstrap__ } from './kbn_bootstrap';
+export { __osdBootstrap__ } from './osd_bootstrap';

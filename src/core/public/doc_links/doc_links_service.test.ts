@@ -23,11 +23,11 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 describe('DocLinksService#start()', () => {
   it('templates the doc links with the branch information from injectedMetadata', () => {
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
+    injectedMetadata.getOpenSearchDashboardsBranch.mockReturnValue('test-branch');
     const service = new DocLinksService();
     const api = service.start({ injectedMetadata });
     expect(api.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(api.links.kibana).toEqual(
+    expect(api.links.opensearchDashboards).toEqual(
       'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
     );
   });

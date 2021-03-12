@@ -27,7 +27,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/i18n/react', () => {
+jest.mock('@osd/i18n/react', () => {
   return {
     I18nProvider: function MockI18nProvider() {
       // no-op

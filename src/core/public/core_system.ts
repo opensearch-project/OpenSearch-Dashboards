@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { pick } from '@kbn/std';
+import { pick } from '@osd/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -73,7 +73,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
- * of Kibana in the UI, including the LegacyPlatform which is managed
+ * of OpenSearch Dashboards in the UI, including the LegacyPlatform which is managed
  * by the LegacyPlatformService. As we migrate more things to the new
  * platform the CoreSystem will get many more Services.
  *
@@ -194,7 +194,7 @@ export class CoreSystem {
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
-      coreUiTargetDomElement.id = 'kibana-body';
+      coreUiTargetDomElement.id = 'opensearch-dashboards-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 

@@ -20,7 +20,7 @@
 import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
-describe('setup.getKibanaBuildNumber()', () => {
+describe('setup.getOpenSearchDashboardsBuildNumber()', () => {
   it('returns buildNumber from injectedMetadata', () => {
     const setup = new InjectedMetadataService({
       injectedMetadata: {
@@ -28,7 +28,7 @@ describe('setup.getKibanaBuildNumber()', () => {
       },
     } as any).setup();
 
-    expect(setup.getKibanaBuildNumber()).toBe('foo');
+    expect(setup.getOpenSearchDashboardsBuildNumber()).toBe('foo');
   });
 });
 

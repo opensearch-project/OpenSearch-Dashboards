@@ -19,7 +19,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import type { FormattedStatus } from '../lib';
 
 interface ServerStateProps {
@@ -34,9 +34,9 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
         <h2 data-test-subj="serverStatusTitle">
           <FormattedMessage
             id="core.statusPage.serverStatus.statusTitle"
-            defaultMessage="Kibana status is {kibanaStatus}"
+            defaultMessage="OpenSearch Dashboards status is {opensearchDashboardsStatus}"
             values={{
-              kibanaStatus: (
+              opensearchDashboardsStatus: (
                 <EuiBadge
                   data-test-subj="serverStatusTitleBadge"
                   color={serverState.uiColor}

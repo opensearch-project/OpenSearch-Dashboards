@@ -125,7 +125,7 @@ export class UiSettingsApi {
 
       changes.callback(
         undefined,
-        await this.sendRequest('POST', '/api/kibana/settings', {
+        await this.sendRequest('POST', '/api/opensearch-dashboards/settings', {
           changes: changes.values,
         })
       );

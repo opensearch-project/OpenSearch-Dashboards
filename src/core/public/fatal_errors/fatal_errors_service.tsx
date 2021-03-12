@@ -33,15 +33,15 @@ interface Deps {
 }
 
 /**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
+ * FatalErrors stop the OpenSearch Dashboards Public Core and displays a fatal error screen
+ * with details about the OpenSearch Dashboards build and the error.
  *
  * @public
  */
 export interface FatalErrorsSetup {
   /**
-   * Add a new fatal error. This will stop the Kibana Public Core and display
-   * a fatal error screen with details about the Kibana build and the error.
+   * Add a new fatal error. This will stop the OpenSearch Dashboards Public Core and display
+   * a fatal error screen with details about the OpenSearch Dashboards build and the error.
    *
    * @param error - The error to display
    * @param source - Adds a prefix of the form `${source}: ` to the error message
@@ -55,8 +55,8 @@ export interface FatalErrorsSetup {
 }
 
 /**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
+ * FatalErrors stop the OpenSearch Dashboards Public Core and displays a fatal error screen
+ * with details about the OpenSearch Dashboards build and the error.
  *
  * @public
  */
@@ -134,8 +134,8 @@ export class FatalErrorsService {
     render(
       <i18n.Context>
         <FatalErrorsScreen
-          buildNumber={injectedMetadata.getKibanaBuildNumber()}
-          kibanaVersion={injectedMetadata.getKibanaVersion()}
+          buildNumber={injectedMetadata.getOpenSearchDashboardsBuildNumber()}
+          opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           errorInfo$={this.errorInfo$}
         />
       </i18n.Context>,
