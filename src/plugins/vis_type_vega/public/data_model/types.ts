@@ -21,7 +21,7 @@ import { SearchResponse, SearchParams } from 'elasticsearch';
 
 import { Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
-import { EsQueryParser } from './es_query_parser';
+import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
@@ -69,8 +69,8 @@ interface Mark {
 
 type Renderer = 'svg' | 'canvas';
 
-interface VegaSpecConfig extends KibanaConfig {
-  kibana?: KibanaConfig;
+interface VegaSpecConfig extends OpenSearchDashboards {
+  opensearchDashboards?: OpenSearchDashboards;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
@@ -96,7 +96,7 @@ type ContextVarsObjectProps =
 
 type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
 
-export interface KibanaConfig {
+export interface OpenSearchDashboards {
   controlsLocation: ControlsLocation;
   controlsDirection: ControlsDirection;
   hideWarnings: boolean;
@@ -116,7 +116,7 @@ export interface VegaSpec {
   width?: number | 'container';
   height?: number | 'container';
   padding?: number | Padding;
-  _hostConfig?: KibanaConfig;
+  _hostConfig?: OpenSearchDashboards;
   config: VegaSpecConfig;
 }
 
@@ -193,7 +193,7 @@ interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<
   dataObject: TRequestDataObject;
 }
 
-export type EsQueryRequest = Requests;
+export type OpenSearchQueryRequest = Requests;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
@@ -238,7 +238,7 @@ export interface VegaConfig extends DstObj {
 
 export interface UrlParserConfig {
   [index: string]: any;
-  elasticsearch: EsQueryParser;
+  opensearch: OpenSearchQueryParser;
   emsfile: EmsFileParser;
   url: UrlParser;
 }

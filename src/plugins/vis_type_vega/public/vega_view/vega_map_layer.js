@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { KibanaMapLayer } from '../../../maps_legacy/public';
+import { OpenSearchDashboardsMapLayer } from '../../../maps_legacy/public';
 
-export class VegaMapLayer extends KibanaMapLayer {
+export class VegaMapLayer extends OpenSearchDashboardsMapLayer {
   constructor(spec, options, leaflet) {
     super();
 

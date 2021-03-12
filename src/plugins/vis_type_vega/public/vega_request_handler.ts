@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, esQuery, TimeRange, Query } from '../../data/public';
+import { Filter, opensearchQuery, TimeRange, Query } from '../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
@@ -67,8 +67,8 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
-    const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(uiSettings);
+    const filtersDsl = opensearchQuery.buildOpenSearchQuery(undefined, query, filters, opensearchQueryConfigs);
     const { VegaParser } = await import('./data_model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
 
