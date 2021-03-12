@@ -45,7 +45,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   shouldShow?(agg: TAggConfig): boolean;
 
   /**
-   *  A function that will be called before an aggConfig is serialized and sent to ES.
+   *  A function that will be called before an aggConfig is serialized and sent to OpenSearch.
    *  Allows aggConfig to retrieve values needed for serialization
    *  Example usage: an aggregation needs to know the min/max of a field to determine an appropriate interval
    *
@@ -81,7 +81,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.toExpressionAst = config.toExpressionAst;
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
-      config.modifyAggConfigOnSearchRequestStart || function () {};
+      config.modifyAggConfigOnSearchRequestStart || function () { };
     this.valueType = config.valueType || config.type;
   }
 }

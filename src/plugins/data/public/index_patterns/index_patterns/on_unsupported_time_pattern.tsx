@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { CoreStart } from 'kibana/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 export const onUnsupportedTimePattern = (
   toasts: CoreStart['notifications']['toasts'],
@@ -38,14 +38,14 @@ export const onUnsupportedTimePattern = (
     values: { title, index },
   });
 
-  // kbnUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
+  // osdUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
   // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
-  // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
+  // to preserve the functionality from #35262 we need to get the injector here just for osdUrl.
   // This has all been removed as of 8.0.
 
-  // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
+  // 2019-12-01 The usage of osdUrl had to be removed due to the transition to NP.
   // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
-  // Once kbnUrl is migrated to NP, this can be updated.
+  // Once osdUrl is migrated to NP, this can be updated.
 
   toasts.addWarning({
     title: warningTitle,
@@ -58,7 +58,7 @@ export const onUnsupportedTimePattern = (
               size="s"
               onClick={() =>
                 navigateToApp('management', {
-                  path: `/kibana/index_patterns/index_pattern/${id! || ''}`,
+                  path: `/opensearch-dashboards/index_patterns/index_pattern/${id! || ''}`,
                 })
               }
             >

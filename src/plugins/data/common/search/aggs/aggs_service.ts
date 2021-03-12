@@ -54,8 +54,8 @@ export interface AggsCommonStartDependencies {
 
 /**
  * The aggs service provides a means of modeling and manipulating the various
- * Elasticsearch aggregations supported by Kibana, providing the ability to
- * output the correct DSL when you are ready to send your request to ES.
+ * OpenSearch aggregations supported by OpenSearch Dashboards, providing the ability to
+ * output the correct DSL when you are ready to send your request to OpenSearch.
  */
 export class AggsCommonService {
   private readonly aggTypesRegistry = new AggTypesRegistry();

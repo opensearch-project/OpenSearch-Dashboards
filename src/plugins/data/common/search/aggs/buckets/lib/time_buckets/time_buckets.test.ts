@@ -72,8 +72,8 @@ describe('TimeBuckets', () => {
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('20 minutes');
-    expect(interval.esValue).toEqual(20);
-    expect(interval.esUnit).toEqual('m');
+    expect(interval.opensearchValue).toEqual(20);
+    expect(interval.opensearchUnit).toEqual('m');
     expect(interval.expression).toEqual('20m');
   });
 
@@ -88,16 +88,16 @@ describe('TimeBuckets', () => {
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('day');
-    expect(interval.esValue).toEqual(1);
-    expect(interval.esUnit).toEqual('d');
+    expect(interval.opensearchValue).toEqual(1);
+    expect(interval.opensearchUnit).toEqual('d');
     expect(interval.expression).toEqual('1d');
     expect(interval.scaled).toBeTruthy();
     expect(interval.scale).toEqual(0.013888888888888888);
 
     if (interval.preScaled) {
       expect(interval.preScaled.description).toEqual('20 minutes');
-      expect(interval.preScaled.esValue).toEqual(20);
-      expect(interval.preScaled.esUnit).toEqual('m');
+      expect(interval.preScaled.opensearchValue).toEqual(20);
+      expect(interval.preScaled.opensearchUnit).toEqual('m');
       expect(interval.preScaled.expression).toEqual('20m');
     }
   });
@@ -108,8 +108,8 @@ describe('TimeBuckets', () => {
     const interval = timeBuckets.getInterval();
 
     expect(interval.description).toEqual('0 milliseconds');
-    expect(interval.esValue).toEqual(0);
-    expect(interval.esUnit).toEqual('ms');
+    expect(interval.opensearchValue).toEqual(0);
+    expect(interval.opensearchUnit).toEqual('ms');
     expect(interval.expression).toEqual('0ms');
   });
 

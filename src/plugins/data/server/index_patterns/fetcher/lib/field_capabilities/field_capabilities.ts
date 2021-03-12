@@ -19,8 +19,8 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { LegacyAPICaller } from 'kibana/server';
-import { callFieldCapsApi } from '../es_api';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { callFieldCapsApi } from '../opensearch_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
@@ -29,7 +29,7 @@ import { FieldDescriptor } from '../../index_patterns_fetcher';
  *  Get the field capabilities for field in `indices`, excluding
  *  all internal/underscore-prefixed fields that are not in `metaFields`
  *
- *  @param  {Function} callCluster bound function for accessing an es client
+ *  @param  {Function} callCluster bound function for accessing an opensearch client
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
  *  @param  {Object} fieldCapsOptions
@@ -41,12 +41,12 @@ export async function getFieldCapabilities(
   metaFields: string[] = [],
   fieldCapsOptions?: { allowNoIndices: boolean }
 ) {
-  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(
+  const opensearchFieldCaps: FieldCapsResponse = await callFieldCapsApi(
     callCluster,
     indices,
     fieldCapsOptions
   );
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps), 'name');
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(opensearchFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))

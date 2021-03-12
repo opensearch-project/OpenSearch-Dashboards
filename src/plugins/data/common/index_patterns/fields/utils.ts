@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { getFilterableKbnTypeNames } from '../../kbn_field_types';
+import { getFilterableOsdTypeNames } from '../../osd_field_types';
 import { IFieldType } from './types';
 
-const filterableTypes = getFilterableKbnTypeNames();
+const filterableTypes = getFilterableOsdTypeNames();
 
 export function isFilterable(field: IFieldType): boolean {
   return (

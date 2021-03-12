@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
+import { OpenSearchDashboardsDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
 import { IAggConfig } from '../../../../common';
 import { IndexPattern } from '../../../index_patterns';
 import { getSearchService } from '../../../../public/services';
 
 /** @internal */
-export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
+export const serializeAggConfig = (aggConfig: IAggConfig): OpenSearchDashboardsDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
     indexPatternId: aggConfig.getIndexPattern().id,

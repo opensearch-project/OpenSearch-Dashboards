@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';
@@ -61,7 +61,7 @@ export const getPercentilesMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
+        filterFieldTypes: [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.DATE, OSD_FIELD_TYPES.HISTOGRAM],
       },
       {
         name: 'percents',

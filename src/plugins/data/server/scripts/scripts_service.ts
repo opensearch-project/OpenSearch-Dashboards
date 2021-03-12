@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
 import { registerScriptsRoute } from './route';
 
 export class ScriptsService implements Plugin<void> {
@@ -25,5 +25,5 @@ export class ScriptsService implements Plugin<void> {
     registerScriptsRoute(http.createRouter());
   }
 
-  public start() {}
+  public start() { }
 }

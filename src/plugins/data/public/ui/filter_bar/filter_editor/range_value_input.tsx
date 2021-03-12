@@ -19,10 +19,10 @@
 
 import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
-import { useKibana } from '../../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IFieldType } from '../../..';
 import { ValueInputType } from './value_input_type';
 
@@ -41,9 +41,9 @@ interface Props {
 }
 
 function RangeValueInputUI(props: Props) {
-  const kibana = useKibana();
+  const opensearchDashboards = useOpenSearchDashboards();
   const type = props.field ? props.field.type : 'string';
-  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+  const tzConfig = opensearchDashboards.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') return value;

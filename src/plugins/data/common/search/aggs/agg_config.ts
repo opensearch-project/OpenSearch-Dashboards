@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { Assign, Ensure } from '@kbn/utility-types';
+import { i18n } from '@osd/i18n';
+import { Assign, Ensure } from '@osd/utility-types';
 
 import { ISearchSource } from 'src/plugins/data/public';
 import {
@@ -27,7 +27,7 @@ import {
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
-import { ISearchOptions } from '../es_search';
+import { ISearchOptions } from '../opensearch_search';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
@@ -408,9 +408,9 @@ export class AggConfig {
     if (!this.type) return '';
     return percentageMode
       ? i18n.translate('data.search.aggs.percentageOfLabel', {
-          defaultMessage: 'Percentage of {label}',
-          values: { label: this.type.makeLabel(this) },
-        })
+        defaultMessage: 'Percentage of {label}',
+        values: { label: this.type.makeLabel(this) },
+      })
       : `${this.type.makeLabel(this)}`;
   }
 

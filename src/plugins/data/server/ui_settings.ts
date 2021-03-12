@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from 'kibana/server';
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
+import { UiSettingsParams } from 'opensearch-dashboards/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
@@ -128,7 +128,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: DEFAULT_QUERY_LANGUAGE,
       description: i18n.translate('data.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
+          'Query language used by the query bar. KQL is a new language built specifically for OpenSearch Dashboards.',
       }),
       type: 'select',
       options: ['lucene', 'kuery'],
@@ -255,7 +255,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       type: 'number',
       description: i18n.translate('data.advancedSettings.courier.maxRequestsText', {
         defaultMessage:
-          'Controls the {maxRequestsLink} setting used for _msearch requests sent by Kibana. ' +
+          'Controls the {maxRequestsLink} setting used for _msearch requests sent by OpenSearch Dashboards. ' +
           'Set to 0 to disable this config and use the Elasticsearch default.',
         values: {
           maxRequestsLink: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
@@ -278,9 +278,9 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       deprecation: {
         message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
+          defaultMessage: 'This setting is deprecated and will be removed in OpenSearch Dashboards 8.0.',
         }),
-        docLinksKey: 'kibanaSearchSettings',
+        docLinksKey: 'opensearchDashboardsSearchSettings',
       },
       category: ['search'],
       schema: schema.boolean(),
@@ -344,7 +344,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: `{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
-  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
+  "date_nanos": { "id": "date_nanos", "params": {}, "opensearch": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
@@ -371,7 +371,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         date_nanos: schema.object({
           id: schema.string(),
           params: schema.object({}),
-          es: schema.boolean(),
+          opensearch: schema.boolean(),
         }),
         number: schema.object({
           id: schema.string(),
@@ -536,7 +536,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+        defaultMessage: 'The timefilter selection to use when OpenSearch Dashboards is started without one',
       }),
       requiresPageReload: true,
       schema: schema.object({

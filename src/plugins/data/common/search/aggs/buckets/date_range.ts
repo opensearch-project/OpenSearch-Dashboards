@@ -19,14 +19,14 @@
 
 import { get } from 'lodash';
 import moment from 'moment-timezone';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { DateRangeKey } from './lib/date_range';
 
-import { KBN_FIELD_TYPES } from '../../../../common/kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../../osd_field_types/types';
 import { BaseAggParams } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
@@ -70,7 +70,7 @@ export const getDateRangeBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.DATE,
+        filterFieldTypes: OSD_FIELD_TYPES.DATE,
         default(agg: IBucketAggConfig) {
           return agg.getIndexPattern().timeFieldName;
         },

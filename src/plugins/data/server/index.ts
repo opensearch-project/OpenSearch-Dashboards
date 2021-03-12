@@ -37,7 +37,7 @@ import {
  * Filter helper namespace:
  */
 
-export const esFilters = {
+export const opensearchFilters = {
   buildQueryFilter,
   buildCustomFilter,
   buildEmptyFilter,
@@ -50,31 +50,31 @@ export const esFilters = {
 };
 
 /*
- * esQuery and esKuery:
+ * opensearchQuery and opensearchKuery:
  */
 
 import {
   nodeTypes,
   fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
+  toOpenSearchQuery,
+  buildOpenSearchQuery,
   buildQueryFromFilters,
-  getEsQueryConfig,
+  getOpenSearchQueryConfig,
 } from '../common';
 
-export const esKuery = {
+export const opensearchKuery = {
   nodeTypes,
   fromKueryExpression,
-  toElasticsearchQuery,
+  toOpenSearchQuery,
 };
 
-export const esQuery = {
+export const opensearchQuery = {
   buildQueryFromFilters,
-  getEsQueryConfig,
-  buildEsQuery,
+  getOpenSearchQueryConfig,
+  buildOpenSearchQuery,
 };
 
-export { EsQueryConfig, KueryNode } from '../common';
+export { OpenSearchQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formats:
@@ -139,8 +139,8 @@ export {
 export {
   IFieldType,
   IFieldSubType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
@@ -162,12 +162,12 @@ import {
   siblingPipelineType,
   termsAggFilter,
   dateHistogramInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
+  InvalidOpenSearchCalendarIntervalError,
+  InvalidOpenSearchIntervalFormatError,
   Ipv4Address,
-  isValidEsInterval,
+  isValidOpenSearchInterval,
   isValidInterval,
-  parseEsInterval,
+  parseOpenSearchInterval,
   parseInterval,
   toAbsoluteDates,
   // expressions utils
@@ -188,7 +188,7 @@ export {
   AggParamType,
   AggConfigOptions,
   BUCKET_TYPES,
-  EsaggsExpressionFunctionDefinition,
+  OpenSearchaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
@@ -200,9 +200,9 @@ export {
   ParsedInterval,
   // search
   ISearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  OPENSEARCH_SEARCH_STRATEGY,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -230,16 +230,16 @@ export const search = {
     CidrMask,
     dateHistogramInterval,
     intervalOptions,
-    InvalidEsCalendarIntervalError,
-    InvalidEsIntervalFormatError,
+    InvalidOpenSearchCalendarIntervalError,
+    InvalidOpenSearchIntervalFormatError,
     Ipv4Address,
     isNumberType,
     isStringType,
     isType,
-    isValidEsInterval,
+    isValidOpenSearchInterval,
     isValidInterval,
     parentPipelineType,
-    parseEsInterval,
+    parseOpenSearchInterval,
     parseInterval,
     propFilter,
     siblingPipelineType,
@@ -258,8 +258,8 @@ export const search = {
  */
 
 export {
-  // kbn field types
-  castEsToKbnFieldTypeName,
+  // osd field types
+  castOpenSearchToOsdFieldTypeName,
   // query
   Filter,
   getTime,

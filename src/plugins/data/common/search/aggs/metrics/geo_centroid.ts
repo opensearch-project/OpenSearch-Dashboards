@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 export interface AggParamsGeoCentroid extends BaseAggParams {
@@ -44,7 +44,7 @@ export const getGeoCentroidMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+        filterFieldTypes: OSD_FIELD_TYPES.GEO_POINT,
       },
     ],
     getValue(agg, bucket) {

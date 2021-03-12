@@ -20,8 +20,8 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { I18nProvider } from '@osd/i18n/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
@@ -71,7 +71,7 @@ const mockIndexPattern = {
     {
       name: 'response',
       type: 'number',
-      esTypes: ['integer'],
+      opensearchTypes: ['integer'],
       aggregatable: true,
       filterable: true,
       searchable: true,
@@ -106,9 +106,9 @@ function wrapSearchBarInContext(testProps: any) {
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
 }

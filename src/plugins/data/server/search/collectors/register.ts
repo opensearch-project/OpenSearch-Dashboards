@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
@@ -44,6 +44,6 @@ export async function registerUsageCollector(
     });
     usageCollection.registerCollector(collector);
   } catch (err) {
-    return; // kibana plugin is not enabled (test environment)
+    return; // OpenSearch Dashboards plugin is not enabled (test environment)
   }
 }

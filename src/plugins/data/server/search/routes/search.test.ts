@@ -70,7 +70,7 @@ describe('Search service', () => {
     const mockContext = {};
     const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       params: mockParams,
     });
@@ -101,7 +101,7 @@ describe('Search service', () => {
     const mockContext = {};
     const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       params: mockParams,
     });

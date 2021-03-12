@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { OpenSearchDashboardsDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
-import { esFilters, Filter } from '../../../public';
+import { opensearchFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import type { ValueClickContext } from '../../../../embeddable/public';
 
@@ -33,7 +33,7 @@ import type { ValueClickContext } from '../../../../embeddable/public';
  * @return {array} - array of terms to filter against
  */
 const getOtherBucketFilterTerms = (
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
+  table: Pick<OpenSearchDashboardsDatatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
@@ -71,7 +71,7 @@ const getOtherBucketFilterTerms = (
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
 const createFilter = async (
-  table: Pick<KibanaDatatable, 'rows' | 'columns'>,
+  table: Pick<OpenSearchDashboardsDatatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
@@ -126,7 +126,7 @@ export const createFiltersFromValueClickAction = async ({
         if (filter) {
           filter.forEach((f) => {
             if (negate) {
-              f = esFilters.toggleFilterNegated(f);
+              f = opensearchFilters.toggleFilterNegated(f);
             }
             filters.push(f);
           });
@@ -134,5 +134,5 @@ export const createFiltersFromValueClickAction = async ({
       })
   );
 
-  return esFilters.mapAndFlattenFilters(filters);
+  return opensearchFilters.mapAndFlattenFilters(filters);
 };

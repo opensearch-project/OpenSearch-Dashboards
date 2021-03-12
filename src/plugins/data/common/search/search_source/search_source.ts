@@ -22,9 +22,9 @@
  *
  * @description A promise-based stream of search results that can inherit from other search sources.
  *
- * Because filters/queries in Kibana have different levels of persistence and come from different
+ * Because filters/queries in OpenSearch Dashboards have different levels of persistence and come from different
  * places, it is important to keep track of where filters come from for when they are saved back to
- * the savedObject store in the Kibana index. To do this, we create trees of searchSource objects
+ * the savedObject store in the OpenSearch Dashboards index. To do this, we create trees of searchSource objects
  * that can have associated query parameters (index, query, filter, etc) which can also inherit from
  * other searchSource objects.
  *
@@ -34,8 +34,8 @@
  * single set of query parameters is created for each active searchSource (a searchSource with
  * subscribers).
  *
- * That set of query parameters is then sent to elasticsearch. This is how the filter hierarchy
- * works in Kibana.
+ * That set of query parameters is then sent to OpenSearch. This is how the filter hierarchy
+ * works in OpenSearch Dashboards.
  *
  * Visualize, starting from a new search:
  *
@@ -46,7 +46,7 @@
  *    they will be stored directly on the `savedVis.searchSource`.
  *  - Any interaction with the time filter will be written to the `rootSearchSource`, so those
  *    filters will not be saved by the `savedVis`.
- *  - When the `savedVis` is saved to elasticsearch, it takes with it all the filters that are
+ *  - When the `savedVis` is saved to OpenSearch, it takes with it all the filters that are
  *    defined on it directly, but none of the ones that it inherits from other places.
  *
  * Visualize, starting from an existing search:
@@ -55,7 +55,7 @@
  *  - The `savedVis.searchSource` is set to inherit from the `saveSearch.searchSource` and set as
  *    the `appSearchSource`.
  *  - The `savedSearch.searchSource`, is set to inherit from the `rootSearchSource`.
- *  - Then the `savedVis` is written to elasticsearch it will be flattened and only include the
+ *  - Then the `savedVis` is written to OpenSearch it will be flattened and only include the
  *    filters created in the visualize application and will reconnect the filters from the
  *    `savedSearch` at runtime to prevent losing the relationship
  *
@@ -73,14 +73,14 @@ import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
-import { fieldWildcardFilter } from '../../../../kibana_utils/common';
+import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../..';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
+import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
+import { getOpenSearchQueryConfig, buildOpenSearchQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
@@ -105,9 +105,9 @@ export interface SearchSourceDependencies extends FetchHandlers {
   // Types are nearly identical to ISearchGeneric, except we are making
   // search options required here and returning a promise instead of observable.
   search: <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-  >(
+    SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    >(
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;
@@ -496,8 +496,8 @@ export class SearchSource {
       );
     }
 
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+    const opensearchQueryConfigs = getOpenSearchQueryConfig({ get: getConfig });
+    body.query = buildOpenSearchQuery(index, query, filters, opensearchQueryConfigs);
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
@@ -534,8 +534,8 @@ export class SearchSource {
    * Use this method to get a representation of the search source which can be stored in a saved object.
    *
    * The references returned by this function can be mixed with other references in the same object,
-   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
-   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+   * however make sure there are no name-collisions. The references will be named `opensearchDashboardsSavedObjectMeta.searchSourceJSON.index`
+   * and `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
    *
    * Using `createSearchSource`, the instance can be re-created.
    * @public */

@@ -20,16 +20,16 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
-import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
+import { callIndexAliasApi, IndicesAliasResponse } from './opensearch_api';
 
 /**
  *  Convert a time pattern into a list of indexes it could
  *  have matched and ones it did match.
  *
- *  @param  {Function} callCluster bound function for accessing an es client
+ *  @param  {Function} callCluster bound function for accessing an opensearch client
  *  @param  {String} timePattern
  *  @return {Promise<Object>} object that lists the indices that match based
  *                            on a wildcard version of the time pattern (all)

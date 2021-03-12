@@ -21,8 +21,8 @@
 import sinon from 'sinon';
 import { noop } from 'lodash';
 
-import { callIndexAliasApi } from './es_api';
-import * as callIndexAliasApiNS from './es_api';
+import { callIndexAliasApi } from './opensearch_api';
+import * as callIndexAliasApiNS from './opensearch_api';
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import * as timePatternToWildcardNS from './time_pattern_to_wildcard';
 

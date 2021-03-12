@@ -18,7 +18,7 @@
  */
 
 import { uniq } from 'lodash';
-import { castEsToKbnFieldTypeName } from '../../../../../common';
+import { castOpenSearchToOsdFieldTypeName } from '../../../../../common';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../../../fetcher';
 
@@ -44,8 +44,8 @@ export interface FieldCapsResponse {
  *  {
  *    "fields": {
  *      "<fieldName>": {
- *        "<esType>": {
- *          "type": "<esType>",
+ *        "<opensearchType>": {
+ *          "type": "<opensearchType>",
  *          "searchable": true,
  *          "aggregatable": false,
  *          // "indices" is only included when multiple
@@ -54,8 +54,8 @@ export interface FieldCapsResponse {
  *            "<index>"
  *          ]
  *        },
- *        "<esType2>": {
- *          "type": "<esType2>",
+ *        "<opensearchType2>": {
+ *          "type": "<opensearchType2>",
  *          "searchable": true,
  *          ...
  *
@@ -65,7 +65,7 @@ export interface FieldCapsResponse {
  *
  *    {
  *      "name": "<fieldName>"
- *      "type": "<kbnType>",
+ *      "type": "<osdType>",
  *      "aggregatable": <bool>,
  *      "searchable": <bool>,
  *    }
@@ -79,10 +79,10 @@ export interface FieldCapsResponse {
  *      "aggregatable": false,
  *      "searchable": false,
  *      conflictDescriptions: {
- *        "<esType1>": [
+ *        "<opensearchType1>": [
  *          "<index1>"
  *        ],
- *        "<esType2>": [
+ *        "<opensearchType2>": [
  *          "<index2>"
  *        ]
  *      }
@@ -94,7 +94,7 @@ export interface FieldCapsResponse {
 export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
 
-  const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
+  const opensearchDashboardsFormattedCaps = Object.keys(capsByNameThenType).reduce<{
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;
   }>(
@@ -119,21 +119,21 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         );
       });
 
-      // If there are multiple types but they all resolve to the same kibana type
+      // If there are multiple types but they all resolve to the same OpenSearch Dashboards type
       // ignore the conflict and carry on (my wayward son)
-      const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
-      if (uniqueKibanaTypes.length > 1) {
+      const uniqueOpenSearchDashboardsTypes = uniq(types.map(castOpenSearchToOsdFieldTypeName));
+      if (uniqueOpenSearchDashboardsTypes.length > 1) {
         const field = {
           name: fieldName,
           type: 'conflict',
-          esTypes: types,
+          opensearchTypes: types,
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
           conflictDescriptions: types.reduce(
-            (acc, esType) => ({
+            (acc, opensearchType) => ({
               ...acc,
-              [esType]: capsByType[esType].indices,
+              [opensearchType]: capsByType[opensearchType].indices,
             }),
             {}
           ),
@@ -144,14 +144,14 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         return agg;
       }
 
-      const esType = types[0];
+      const opensearchType = types[0];
       const field = {
         name: fieldName,
-        type: castEsToKbnFieldTypeName(esType),
-        esTypes: types,
+        type: castOpenSearchToOsdFieldTypeName(opensearchType),
+        opensearchTypes: types,
         searchable: isSearchable,
         aggregatable: isAggregatable,
-        readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
+        readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, opensearchType),
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
@@ -165,7 +165,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
   );
 
   // Get all types of sub fields. These could be multi fields or children of nested/object types
-  const subFields = kibanaFormattedCaps.array.filter((field) => {
+  const subFields = opensearchDashboardsFormattedCaps.array.filter((field) => {
     return field.name.includes('.');
   });
 
@@ -178,7 +178,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         return parentFieldNameParts.slice(0, index + 1).join('.');
       });
     const parentFieldCaps = parentFieldNames.map(
-      (parentFieldName) => kibanaFormattedCaps.hash[parentFieldName]
+      (parentFieldName) => opensearchDashboardsFormattedCaps.hash[parentFieldName]
     );
     const parentFieldCapsAscending = parentFieldCaps.reverse();
 
@@ -204,7 +204,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
     }
   });
 
-  return kibanaFormattedCaps.array.filter((field) => {
+  return opensearchDashboardsFormattedCaps.array.filter((field) => {
     return !['object', 'nested'].includes(field.type);
   });
 }

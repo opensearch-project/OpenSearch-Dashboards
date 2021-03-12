@@ -18,7 +18,7 @@
  */
 
 import { isAutoInterval } from '../_interval_options';
-import { ES_FIELD_TYPES } from '../../../../types';
+import { OPENSEARCH_FIELD_TYPES } from '../../../../types';
 
 interface IntervalValuesRange {
   min: number;
@@ -29,7 +29,7 @@ export interface CalculateHistogramIntervalParams {
   interval: string;
   maxBucketsUiSettings: number;
   maxBucketsUserInput?: number | '';
-  esTypes: ES_FIELD_TYPES[];
+  opensearchTypes: OPENSEARCH_FIELD_TYPES[];
   intervalBase?: number;
   values?: IntervalValuesRange;
 }
@@ -79,7 +79,7 @@ const calculateForGivenInterval = (
      - The lower power of 10, times 2
      - The lower power of 10, times 5
  **/
-const calculateAutoInterval = (diff: number, maxBars: number, esTypes: ES_FIELD_TYPES[]) => {
+const calculateAutoInterval = (diff: number, maxBars: number, opensearchTypes: OPENSEARCH_FIELD_TYPES[]) => {
   const exactInterval = diff / maxBars;
 
   // For integer fields that are less than maxBars, we should use 1 as the value of interval
@@ -87,13 +87,13 @@ const calculateAutoInterval = (diff: number, maxBars: number, esTypes: ES_FIELD_
   // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
   if (
     diff < maxBars &&
-    esTypes.every((esType) =>
+    opensearchTypes.every((opensearchType) =>
       [
-        ES_FIELD_TYPES.INTEGER,
-        ES_FIELD_TYPES.LONG,
-        ES_FIELD_TYPES.SHORT,
-        ES_FIELD_TYPES.BYTE,
-      ].includes(esType)
+        OPENSEARCH_FIELD_TYPES.INTEGER,
+        OPENSEARCH_FIELD_TYPES.LONG,
+        OPENSEARCH_FIELD_TYPES.SHORT,
+        OPENSEARCH_FIELD_TYPES.BYTE,
+      ].includes(opensearchType)
     )
   ) {
     return 1;
@@ -121,7 +121,7 @@ export const calculateHistogramInterval = ({
   maxBucketsUserInput,
   intervalBase,
   values,
-  esTypes,
+  opensearchTypes,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
   let calculatedInterval = isAuto ? 0 : parseFloat(interval);
@@ -137,12 +137,12 @@ export const calculateHistogramInterval = ({
     if (diff) {
       calculatedInterval = isAuto
         ? calculateAutoInterval(
-            diff,
+          diff,
 
-            // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
-            Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
-            esTypes
-          )
+          // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
+          Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
+          opensearchTypes
+        )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }
   }

@@ -18,7 +18,7 @@
  */
 
 export * from './query/types';
-export * from './kbn_field_types/types';
+export * from './osd_field_types/types';
 export * from './index_patterns/types';
 
 /**

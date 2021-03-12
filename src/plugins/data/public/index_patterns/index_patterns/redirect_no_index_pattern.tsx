@@ -18,10 +18,10 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React from 'react';
-import { CoreStart } from 'kibana/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 let bannerId: string;
 
@@ -30,8 +30,8 @@ export const onRedirectNoIndexPattern = (
   navigateToApp: CoreStart['application']['navigateToApp'],
   overlays: CoreStart['overlays']
 ) => () => {
-  const canManageIndexPatterns = capabilities.management.kibana.indexPatterns;
-  const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
+  const canManageIndexPatterns = capabilities.management.opensearchDashboards.indexPatterns;
+  const redirectTarget = canManageIndexPatterns ? '/management/opensearch-dashboards/indexPatterns' : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
 
   if (timeoutId) {
@@ -40,7 +40,7 @@ export const onRedirectNoIndexPattern = (
 
   const bannerMessage = i18n.translate('data.indexPatterns.ensureDefaultIndexPattern.bannerLabel', {
     defaultMessage:
-      'To visualize and explore data in Kibana, you must create an index pattern to retrieve data from Elasticsearch.',
+      'To visualize and explore data in OpenSearch Dashboards, you must create an index pattern to retrieve data from OpenSearch.',
   });
 
   // Avoid being hostile to new users who don't have an index pattern setup yet
@@ -60,7 +60,7 @@ export const onRedirectNoIndexPattern = (
     navigateToApp('home');
   } else {
     navigateToApp('management', {
-      path: `/kibana/indexPatterns?bannerMessage=${bannerMessage}`,
+      path: `/opensearch-dashboards/indexPatterns?bannerMessage=${bannerMessage}`,
     });
   }
 

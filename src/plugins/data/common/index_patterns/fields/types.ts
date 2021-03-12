@@ -25,9 +25,9 @@ export interface IFieldType {
   script?: string;
   lang?: string;
   count?: number;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
+  // opensearchTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
+  opensearchTypes?: string[];
   aggregatable?: boolean;
   filterable?: boolean;
   searchable?: boolean;

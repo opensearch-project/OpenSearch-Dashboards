@@ -32,7 +32,7 @@ import {
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../osd_field_types/types';
 import { UI_SETTINGS } from '../constants';
 import { FieldFormatNotFoundError } from '../field_formats';
 
@@ -62,15 +62,15 @@ export class FieldFormatsRegistry {
    * Get the id of the default type for this field type
    * using the format:defaultTypeMap config map
    *
-   * @param  {KBN_FIELD_TYPES} fieldType - the field type
-   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
+   * @param  {OSD_FIELD_TYPES} fieldType - the field type
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes - Array of OpenSearch data types
    * @return {FieldType}
    */
   getDefaultConfig = (
-    fieldType: KBN_FIELD_TYPES,
-    esTypes?: ES_FIELD_TYPES[]
+    fieldType: OSD_FIELD_TYPES,
+    opensearchTypes?: OPENSEARCH_FIELD_TYPES[]
   ): FieldFormatConfig => {
-    const type = this.getDefaultTypeName(fieldType, esTypes);
+    const type = this.getDefaultTypeName(fieldType, opensearchTypes);
 
     return (
       (this.defaultMap && this.defaultMap[type]) || { id: FIELD_FORMAT_IDS.STRING, params: {} }
@@ -106,49 +106,49 @@ export class FieldFormatsRegistry {
    * a field type, using the format:defaultTypeMap.
    * used by the field editor
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
+   * @param  {OSD_FIELD_TYPES} fieldType
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes - Array of OpenSearch data types
    * @return {FieldFormatInstanceType | undefined}
    */
   getDefaultType = (
-    fieldType: KBN_FIELD_TYPES,
-    esTypes?: ES_FIELD_TYPES[]
+    fieldType: OSD_FIELD_TYPES,
+    opensearchTypes?: OPENSEARCH_FIELD_TYPES[]
   ): FieldFormatInstanceType | undefined => {
-    const config = this.getDefaultConfig(fieldType, esTypes);
+    const config = this.getDefaultConfig(fieldType, opensearchTypes);
 
     return this.getType(config.id);
   };
 
   /**
-   * Get the name of the default type for ES types like date_nanos
+   * Get the name of the default type for OpenSearch types like date_nanos
    * using the format:defaultTypeMap config map
    *
-   * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {ES_FIELD_TYPES | undefined}
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes - Array of OpenSearch data types
+   * @return {OPENSEARCH_FIELD_TYPES | undefined}
    */
-  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[] | undefined): ES_FIELD_TYPES | undefined => {
-    if (!Array.isArray(esTypes)) {
+  getTypeNameByOpenSearchTypes = (opensearchTypes: OPENSEARCH_FIELD_TYPES[] | undefined): OPENSEARCH_FIELD_TYPES | undefined => {
+    if (!Array.isArray(opensearchTypes)) {
       return undefined;
     }
 
-    return esTypes.find((type) => this.defaultMap[type] && this.defaultMap[type].es);
+    return opensearchTypes.find((type) => this.defaultMap[type] && this.defaultMap[type].opensearch);
   };
 
   /**
    * Get the default FieldFormat type name for
    * a field type, using the format:defaultTypeMap.
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {ES_FIELD_TYPES | KBN_FIELD_TYPES}
+   * @param  {OSD_FIELD_TYPES} fieldType
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes
+   * @return {OPENSEARCH_FIELD_TYPES | OSD_FIELD_TYPES}
    */
   getDefaultTypeName = (
-    fieldType: KBN_FIELD_TYPES,
-    esTypes?: ES_FIELD_TYPES[]
-  ): ES_FIELD_TYPES | KBN_FIELD_TYPES => {
-    const esType = this.getTypeNameByEsTypes(esTypes);
+    fieldType: OSD_FIELD_TYPES,
+    opensearchTypes?: OPENSEARCH_FIELD_TYPES[]
+  ): OPENSEARCH_FIELD_TYPES | OSD_FIELD_TYPES => {
+    const opensearchType = this.getTypeNameByOpenSearchTypes(opensearchTypes);
 
-    return esType || fieldType;
+    return opensearchType || fieldType;
   };
 
   /**
@@ -177,16 +177,16 @@ export class FieldFormatsRegistry {
   /**
    * Get the default fieldFormat instance for a field format.
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes
+   * @param  {OSD_FIELD_TYPES} fieldType
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes
    * @return {FieldFormat}
    */
   getDefaultInstancePlain = (
-    fieldType: KBN_FIELD_TYPES,
-    esTypes?: ES_FIELD_TYPES[],
+    fieldType: OSD_FIELD_TYPES,
+    opensearchTypes?: OPENSEARCH_FIELD_TYPES[],
     params: Record<string, any> = {}
   ): FieldFormat => {
-    const conf = this.getDefaultConfig(fieldType, esTypes);
+    const conf = this.getDefaultConfig(fieldType, opensearchTypes);
     const instanceParams = {
       ...conf.params,
       ...params,
@@ -196,29 +196,29 @@ export class FieldFormatsRegistry {
   };
   /**
    * Returns a cache key built by the given variables for caching in memoized
-   * Where esType contains fieldType, fieldType is returned
-   * -> kibana types have a higher priority in that case
-   * -> would lead to failing tests that match e.g. date format with/without esTypes
+   * Where opensearchType contains fieldType, fieldType is returned
+   * -> OpenSearch Dashboards types have a higher priority in that case
+   * -> would lead to failing tests that match e.g. date format with/without opensearchTypes
    * https://lodash.com/docs#memoize
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes
+   * @param  {OSD_FIELD_TYPES} fieldType
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes
    * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): string {
+  getDefaultInstanceCacheResolver(fieldType: OSD_FIELD_TYPES, opensearchTypes: OPENSEARCH_FIELD_TYPES[]): string {
     // @ts-ignore
-    return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
-      ? [fieldType, ...esTypes].join('-')
+    return Array.isArray(opensearchTypes) && opensearchTypes.indexOf(fieldType) === -1
+      ? [fieldType, ...opensearchTypes].join('-')
       : fieldType;
   }
 
   /**
    * Get filtered list of field formats by format type
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
+   * @param  {OSD_FIELD_TYPES} fieldType
    * @return {FieldFormatInstanceType[]}
    */
-  getByFieldType(fieldType: KBN_FIELD_TYPES): FieldFormatInstanceType[] {
+  getByFieldType(fieldType: OSD_FIELD_TYPES): FieldFormatInstanceType[] {
     return [...this.fieldFormats.values()]
       .filter(
         (format: FieldFormatInstanceType) => format && format.fieldType.indexOf(fieldType) !== -1
@@ -233,8 +233,8 @@ export class FieldFormatsRegistry {
    * Get the default fieldFormat instance for a field format.
    * It's a memoized function that builds and reads a cache
    *
-   * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes
+   * @param  {OSD_FIELD_TYPES} fieldType
+   * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes
    * @return {FieldFormat}
    */
   getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);

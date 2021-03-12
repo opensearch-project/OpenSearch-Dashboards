@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const minTitle = i18n.translate('data.search.aggs.metrics.minTitle', {
@@ -45,7 +45,7 @@ export const getMinMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+        filterFieldTypes: [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.DATE],
       },
     ],
   });

@@ -22,7 +22,7 @@ import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
-import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
+import { BaseStateContainer, createStateContainer, Storage } from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
 import { connectToQueryState } from './connect_to_query_state';

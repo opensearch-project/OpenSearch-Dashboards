@@ -75,15 +75,15 @@ describe('IndexPatterns', () => {
     indexPatterns = new IndexPatternsService({
       uiSettings: ({
         get: () => Promise.resolve(false),
-        getAll: () => {},
+        getAll: () => { },
       } as any) as UiSettingsCommon,
       savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
-      onNotification: () => {},
-      onError: () => {},
-      onRedirectNoIndexPattern: () => {},
-      onUnsupportedTimePattern: () => {},
+      onNotification: () => { },
+      onError: () => { },
+      onRedirectNoIndexPattern: () => { },
+      onUnsupportedTimePattern: () => { },
     });
   });
 
@@ -172,7 +172,7 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
-    const title = 'kibana-*';
+    const title = 'opensearch-dashboards-*';
     indexPatterns.refreshFields = jest.fn();
 
     const indexPattern = await indexPatterns.create({ title }, true);
@@ -185,7 +185,7 @@ describe('IndexPatterns', () => {
   });
 
   test('createAndSave', async () => {
-    const title = 'kibana-*';
+    const title = 'opensearch-dashboards-*';
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
@@ -198,7 +198,7 @@ describe('IndexPatterns', () => {
       id: 'id',
       version: 'version',
       attributes: {
-        title: 'kibana-*',
+        title: 'opensearch-dashboards-*',
         timeFieldName: '@timestamp',
         fields: '[]',
         sourceFilters: '[{"value":"item1"},{"value":"item2"}]',

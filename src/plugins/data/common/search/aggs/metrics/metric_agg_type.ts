@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
@@ -48,12 +48,12 @@ export type IMetricAggType = MetricAggType;
 export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig> extends AggType<
   TMetricAggConfig,
   MetricAggParam<TMetricAggConfig>
-> {
+  > {
   subtype: string;
   isScalable: () => boolean;
   type = metricType;
 
-  getKey = () => {};
+  getKey = () => { };
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);

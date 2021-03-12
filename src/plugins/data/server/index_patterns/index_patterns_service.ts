@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, KibanaRequest, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, OpenSearchDashboardsRequest, Logger } from 'opensearch-dashboards/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -29,7 +29,7 @@ import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
-    kibanaRequest: KibanaRequest
+    opensearchDashboardsRequest: OpenSearchDashboardsRequest
   ) => Promise<IndexPatternsCommonService>;
 }
 
@@ -50,8 +50,8 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     const { uiSettings, savedObjects } = core;
 
     return {
-      indexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
-        const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+      indexPatternsServiceFactory: async (opensearchDashboardsRequest: OpenSearchDashboardsRequest) => {
+        const savedObjectsClient = savedObjects.getScopedClient(opensearchDashboardsRequest);
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
