@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import {
   EuiFlexItem,
@@ -28,7 +28,7 @@ import {
   CommonProps,
 } from '@elastic/eui';
 import { VegaAdapter } from '../vega_adapter';
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '../../../../opensearch_dashboards_react/public';
 
 interface SpecViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;

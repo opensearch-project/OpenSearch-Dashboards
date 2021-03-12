@@ -18,11 +18,11 @@
  */
 
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,
-  KibanaContext,
+  OpenSearchDashboardsContext,
   Render,
 } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
@@ -31,7 +31,7 @@ import { VegaInspectorAdapters } from './vega_inspector/index';
 import { TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
-type Input = KibanaContext | null;
+type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
@@ -57,7 +57,7 @@ export const createVegaFn = (
 > => ({
   name: 'vega',
   type: 'render',
-  inputTypes: ['kibana_context', 'null'],
+  inputTypes: ['opensearch_dashboards_context', 'null'],
   help: i18n.translate('visTypeVega.function.help', {
     defaultMessage: 'Vega visualization',
   }),

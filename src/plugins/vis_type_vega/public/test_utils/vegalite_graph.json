@@ -38,5 +38,5 @@
   "autosize": { "type": "fit" },
   "width": 512,
   "height": 512,
-  "config": { "kibana": { "renderer": "svg" }}
+  "config": { "opensearchDashboards": { "renderer": "svg" }}
 }

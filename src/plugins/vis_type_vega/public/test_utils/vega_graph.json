@@ -74,5 +74,5 @@
   "autosize": { "type": "none" },
   "width": 512,
   "height": 512,
-  "config": { "kibana": { "renderer": "svg" }}
+  "config": { "opensearchDashboards": { "renderer": "svg" }}
 }

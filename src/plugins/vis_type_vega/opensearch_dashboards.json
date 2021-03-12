@@ -1,9 +1,9 @@
 {
   "id": "visTypeVega",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector"],
   "optionalPlugins": ["home","usageCollection"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "visDefaultEditor"]
 }

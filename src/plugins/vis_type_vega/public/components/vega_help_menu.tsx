@@ -19,8 +19,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 function VegaHelpMenu() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -47,7 +47,7 @@ function VegaHelpMenu() {
     >
       <FormattedMessage
         id="visTypeVega.editor.vegaHelpLinkText"
-        defaultMessage="Kibana Vega help"
+        defaultMessage="OpenSearch Dashboards Vega help"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
