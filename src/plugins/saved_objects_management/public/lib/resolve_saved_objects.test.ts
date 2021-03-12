@@ -257,7 +257,7 @@ describe('resolveSavedObjects', () => {
           },
           doc: {
             _source: {
-              kibanaSavedObjectMeta: {
+              opensearchDashboardsSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
                   index: '1',
                 }),
@@ -271,7 +271,7 @@ describe('resolveSavedObjects', () => {
           },
           doc: {
             _source: {
-              kibanaSavedObjectMeta: {
+              opensearchDashboardsSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
                   index: '3',
                 }),
@@ -319,7 +319,7 @@ describe('resolveSavedObjects', () => {
           },
           doc: {
             _source: {
-              kibanaSavedObjectMeta: {
+              opensearchDashboardsSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
                   index: '1',
                   filter: [{ meta: { index: 'filterIndex' } }],
@@ -334,7 +334,7 @@ describe('resolveSavedObjects', () => {
           },
           doc: {
             _source: {
-              kibanaSavedObjectMeta: {
+              opensearchDashboardsSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
                   index: '3',
                 }),

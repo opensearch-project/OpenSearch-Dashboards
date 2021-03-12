@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { SavedObjectEdition } from './object_view';

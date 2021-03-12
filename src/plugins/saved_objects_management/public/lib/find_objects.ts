@@ -33,7 +33,7 @@ export async function findObjects(
   findOptions: SavedObjectsFindOptions
 ): Promise<SavedObjectsFindResponse> {
   const response = await http.get<Record<string, any>>(
-    '/api/kibana/management/saved_objects/_find',
+    '/api/opensearch-dashboards/management/saved_objects/_find',
     {
       query: findOptions as Record<string, any>,
     }
@@ -48,6 +48,6 @@ export async function findObject(
   id: string
 ): Promise<SavedObjectWithMetadata> {
   return await http.get<SavedObjectWithMetadata>(
-    `/api/kibana/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
+    `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
   );
 }

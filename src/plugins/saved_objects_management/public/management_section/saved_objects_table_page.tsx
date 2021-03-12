@@ -19,7 +19,7 @@
 
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {

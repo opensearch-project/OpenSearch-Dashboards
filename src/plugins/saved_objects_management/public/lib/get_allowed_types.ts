@@ -25,7 +25,7 @@ interface GetAllowedTypesResponse {
 
 export async function getAllowedTypes(http: HttpStart) {
   const response = await http.get<GetAllowedTypesResponse>(
-    '/api/kibana/management/saved_objects/_allowed_types'
+    '/api/opensearch-dashboards/management/saved_objects/_allowed_types'
   );
   return response.types;
 }
