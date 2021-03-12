@@ -25,7 +25,7 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 export FORCE_COLOR=1
 
 ###
-### check that we seem to be in a opensearch-dashboards project
+### check that we seem to be in a OpenSearch Dashboards project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
   echo "Setting up node.js and yarn in $dir"
