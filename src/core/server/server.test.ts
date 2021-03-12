@@ -18,7 +18,7 @@
  */
 
 import {
-  mockElasticsearchService,
+  mockOpenSearchService,
   mockHttpService,
   mockLegacyService,
   mockPluginsService,
@@ -35,7 +35,7 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
@@ -62,7 +62,7 @@ test('sets up services on "setup"', async () => {
   const server = new Server(rawConfigService, env, logger);
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockOpenSearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ test('sets up services on "setup"', async () => {
   await server.setup();
 
   expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
-  expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
+  expect(mockOpenSearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
@@ -152,7 +152,7 @@ test('stops services on "stop"', async () => {
   await server.setup();
 
   expect(mockHttpService.stop).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
+  expect(mockOpenSearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ test('stops services on "stop"', async () => {
   await server.stop();
 
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
-  expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
+  expect(mockOpenSearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
@@ -184,7 +184,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockOpenSearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
@@ -206,7 +206,7 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   );
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockOpenSearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();

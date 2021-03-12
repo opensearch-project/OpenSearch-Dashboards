@@ -18,9 +18,9 @@
  */
 
 /**
- * The Kibana Core APIs for server-side plugins.
+ * The OpenSearch Dashboards Core APIs for server-side plugins.
  *
- * A plugin requires a `kibana.json` file at it's root directory that follows
+ * A plugin requires a `opensearch_dashboards.json` file at it's root directory that follows
  * {@link PluginManifest | the manfiest schema} to define static plugin
  * information required to load the plugin.
  *
@@ -39,14 +39,14 @@
  * @packageDocumentation
  */
 
-import { Type } from '@kbn/config-schema';
+import { Type } from '@osd/config-schema';
 import {
-  ElasticsearchServiceSetup,
+  OpenSearchServiceSetup,
   ILegacyScopedClusterClient,
-  configSchema as elasticsearchConfigSchema,
-  ElasticsearchServiceStart,
+  configSchema as opensearchsearchConfigSchema,
+  OpenSearchServiceStart,
   IScopedClusterClient,
-} from './elasticsearch';
+} from './opensearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
@@ -105,21 +105,21 @@ export {
   ILegacyCustomClusterClient,
   LegacyScopedClusterClient,
   ILegacyScopedClusterClient,
-  ElasticsearchConfig,
-  LegacyElasticsearchClientConfig,
-  LegacyElasticsearchError,
-  LegacyElasticsearchErrorHelpers,
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
+  OpenSearchConfig,
+  LegacyOpenSearchClientConfig,
+  LegacyOpenSearchError,
+  LegacyOpenSearchErrorHelpers,
+  OpenSearchServiceSetup,
+  OpenSearchServiceStart,
+  OpenSearchStatusMeta,
   NodesVersionCompatibility,
   LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
-  ElasticsearchClient,
+  OpenSearchClient,
   IClusterClient,
   ICustomClusterClient,
-  ElasticsearchClientConfig,
+  OpenSearchClientConfig,
   IScopedClusterClient,
   SearchResponse,
   CountResponse,
@@ -128,8 +128,8 @@ export {
   Explanation,
   GetResponse,
   DeleteDocumentResponse,
-} from './elasticsearch';
-export * from './elasticsearch/legacy/api_types';
+} from './opensearch';
+export * from './opensearch/legacy/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -155,13 +155,13 @@ export {
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
-  IKibanaSocket,
+  IOpenSearchDashboardsSocket,
   IsAuthenticated,
-  KibanaRequest,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  IKibanaResponse,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsRequestEvents,
+  OpenSearchDashboardsRequestRoute,
+  OpenSearchDashboardsRequestRouteOptions,
+  IOpenSearchDashboardsResponse,
   LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
@@ -184,8 +184,8 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
-  kibanaResponseFactory,
-  KibanaResponseFactory,
+  opensearchDashboardsResponseFactory,
+  OpenSearchDashboardsResponseFactory,
   RouteConfig,
   IRouter,
   RouteRegistrar,
@@ -372,9 +372,9 @@ export { CoreUsageDataStart } from './core_usage_data';
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
+ *    - {@link IScopedClusterClient | opensearch.client} - OpenSearch
  *      data client which uses the credentials of the incoming request
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
+ *    - {@link LegacyScopedClusterClient | opensearch.legacy.client} - The legacy OpenSearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
@@ -388,7 +388,7 @@ export interface RequestHandlerContext {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
     };
-    elasticsearch: {
+    opensearch: {
       client: IScopedClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
@@ -415,8 +415,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
-  /** {@link ElasticsearchServiceSetup} */
-  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link OpenSearchServiceSetup} */
+  opensearch: OpenSearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
     /** {@link HttpResources} */
@@ -459,8 +459,8 @@ export type StartServicesAccessor<
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
-  /** {@link ElasticsearchServiceStart} */
-  elasticsearch: ElasticsearchServiceStart;
+  /** {@link OpenSearchServiceStart} */
+  opensearch: OpenSearchServiceStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
@@ -492,8 +492,8 @@ export {
  * @alpha
  */
 export const config = {
-  elasticsearch: {
-    schema: elasticsearchConfigSchema,
+  opensearch: {
+    schema: opensearchsearchConfigSchema,
   },
   logging: {
     appenders: appendersSchema as Type<AppenderConfigType>,

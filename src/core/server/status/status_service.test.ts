@@ -50,7 +50,7 @@ describe('StatusService', () => {
   type SetupDeps = Parameters<StatusService['setup']>[0];
   const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
     return {
-      elasticsearch: {
+      opensearch: {
         status$: of(available),
       },
       savedObjects: {
@@ -69,7 +69,7 @@ describe('StatusService', () => {
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
+            opensearch: {
               status$: of(available),
             },
             savedObjects: {
@@ -78,7 +78,7 @@ describe('StatusService', () => {
           })
         );
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
-          elasticsearch: available,
+          opensearch: available,
           savedObjects: degraded,
         });
       });
@@ -86,7 +86,7 @@ describe('StatusService', () => {
       it('replays last event', async () => {
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
+            opensearch: {
               status$: of(available),
             },
             savedObjects: {
@@ -98,26 +98,26 @@ describe('StatusService', () => {
         const subResult2 = await setup.core$.pipe(first()).toPromise();
         const subResult3 = await setup.core$.pipe(first()).toPromise();
         expect(subResult1).toEqual({
-          elasticsearch: available,
+          opensearch: available,
           savedObjects: degraded,
         });
         expect(subResult2).toEqual({
-          elasticsearch: available,
+          opensearch: available,
           savedObjects: degraded,
         });
         expect(subResult3).toEqual({
-          elasticsearch: available,
+          opensearch: available,
           savedObjects: degraded,
         });
       });
 
       it('does not emit duplicate events', async () => {
-        const elasticsearch$ = new BehaviorSubject(available);
+        const opensearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
-              status$: elasticsearch$,
+            opensearch: {
+              status$: opensearch$,
             },
             savedObjects: {
               status$: savedObjects$,
@@ -128,9 +128,9 @@ describe('StatusService', () => {
         const statusUpdates: CoreStatus[] = [];
         const subscription = setup.core$.subscribe((status) => statusUpdates.push(status));
 
-        elasticsearch$.next(available);
-        elasticsearch$.next(available);
-        elasticsearch$.next({
+        opensearch$.next(available);
+        opensearch$.next(available);
+        opensearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
@@ -142,7 +142,7 @@ describe('StatusService', () => {
         expect(statusUpdates).toMatchInlineSnapshot(`
           Array [
             Object {
-              "elasticsearch": Object {
+              "opensearch": Object {
                 "level": available,
                 "summary": "Available",
               },
@@ -152,7 +152,7 @@ describe('StatusService', () => {
               },
             },
             Object {
-              "elasticsearch": Object {
+              "opensearch": Object {
                 "level": available,
                 "summary": "Wow another summary",
               },
@@ -162,7 +162,7 @@ describe('StatusService', () => {
               },
             },
             Object {
-              "elasticsearch": Object {
+              "opensearch": Object {
                 "level": available,
                 "summary": "Wow another summary",
               },
@@ -180,7 +180,7 @@ describe('StatusService', () => {
       it('exposes an overall summary', async () => {
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
+            opensearch: {
               status$: of(degraded),
             },
             savedObjects: {
@@ -197,7 +197,7 @@ describe('StatusService', () => {
       it('replays last event', async () => {
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
+            opensearch: {
               status$: of(degraded),
             },
             savedObjects: {
@@ -223,12 +223,12 @@ describe('StatusService', () => {
       });
 
       it('does not emit duplicate events', async () => {
-        const elasticsearch$ = new BehaviorSubject(available);
+        const opensearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
-              status$: elasticsearch$,
+            opensearch: {
+              status$: opensearch$,
             },
             savedObjects: {
               status$: savedObjects$,
@@ -240,11 +240,11 @@ describe('StatusService', () => {
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
-        elasticsearch$.next(available);
+        opensearch$.next(available);
         await delay(500);
-        elasticsearch$.next(available);
+        opensearch$.next(available);
         await delay(500);
-        elasticsearch$.next({
+        opensearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
@@ -284,7 +284,7 @@ describe('StatusService', () => {
         const savedObjects$ = new BehaviorSubject(available);
         const setup = await service.setup(
           setupDeps({
-            elasticsearch: {
+            opensearch: {
               status$: new BehaviorSubject(available),
             },
             savedObjects: {

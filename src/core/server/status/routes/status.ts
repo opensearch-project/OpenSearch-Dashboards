@@ -19,7 +19,7 @@
 
 import { Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { IRouter } from '../../http';
 import { MetricsServiceSetup } from '../../metrics';
@@ -105,7 +105,7 @@ interface StatusHttpBody {
 
 export const registerStatusRoute = ({ router, config, metrics, status }: Deps) => {
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
-  // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
+  // the plugins status when OpenSearch Dashboards starts up so this endpoint responds quickly on first boot.
   const combinedStatus$ = new ReplaySubject<
     [ServiceStatus<unknown>, CoreStatus, Record<string, ServiceStatus<unknown>>]
   >(1);

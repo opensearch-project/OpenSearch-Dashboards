@@ -30,9 +30,9 @@ jest.doMock('./plugins/plugins_service', () => ({
 }));
 
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export const mockElasticsearchService = elasticsearchServiceMock.create();
+export const mockOpenSearchService = elasticsearchServiceMock.create();
 jest.doMock('./elasticsearch/elasticsearch_service', () => ({
-  ElasticsearchService: jest.fn(() => mockElasticsearchService),
+  OpenSearchService: jest.fn(() => mockOpenSearchService),
 }));
 
 import { legacyServiceMock } from './legacy/legacy_service.mock';
@@ -41,11 +41,11 @@ jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
-const realKbnConfig = jest.requireActual('@kbn/config');
+const realKbnConfig = jest.requireActual('@osd/config');
 
 import { configServiceMock } from './config/mocks';
 export const mockConfigService = configServiceMock.create();
-jest.doMock('@kbn/config', () => ({
+jest.doMock('@osd/config', () => ({
   ...realKbnConfig,
   ConfigService: jest.fn(() => mockConfigService),
 }));

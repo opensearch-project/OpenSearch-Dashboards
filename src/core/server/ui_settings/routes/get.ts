@@ -21,7 +21,7 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
 export function registerGetRoute(router: IRouter) {
   router.get(
-    { path: '/api/kibana/settings', validate: false },
+    { path: '/api/opensearch-dashboards/settings', validate: false },
     async (context, request, response) => {
       try {
         const uiSettingsClient = context.core.uiSettings.client;

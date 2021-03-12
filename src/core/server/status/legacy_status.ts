@@ -18,8 +18,8 @@
  */
 
 import { pick } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { deepFreeze } from '@kbn/std';
+import { i18n } from '@osd/i18n';
+import { deepFreeze } from '@osd/std';
 
 import { ServiceStatusLevels, ServiceStatus, CoreStatus } from './types';
 import { PluginName } from '../plugins';

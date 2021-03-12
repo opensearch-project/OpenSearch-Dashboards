@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'opensearch-dsahboards/server';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
