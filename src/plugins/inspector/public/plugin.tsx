@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { toMountPoint } from '../../kibana_react/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
