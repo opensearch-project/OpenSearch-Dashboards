@@ -18,7 +18,7 @@
  */
 
 import { createVisualizeUrlGenerator } from './url_generator';
-import { esFilters } from '../../data/public';
+import { opensearchFilters } from '../../data/public';
 
 const APP_BASE_PATH: string = 'test/app/visualize';
 const VISUALIZE_ID: string = '13823000-99b9-11ea-9eb6-d9e8adceb647';
@@ -85,7 +85,7 @@ describe('visualize url generator', () => {
           },
           query: { query: 'q1' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: opensearchFilters.FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

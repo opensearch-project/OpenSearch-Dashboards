@@ -18,7 +18,7 @@
  */
 
 import { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EventEmitter } from 'events';
 
 import { Filter } from 'src/plugins/data/public';

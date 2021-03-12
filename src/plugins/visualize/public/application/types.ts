@@ -34,13 +34,13 @@ import {
   ToastsStart,
   ScopedHistory,
   AppMountParameters,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
   Storage,
-  IKbnUrlStateStorage,
+  IOsdUrlStateStorage,
   ReduxLikeStateContainer,
-} from 'src/plugins/kibana_utils/public';
+} from 'src/plugins/opensearch_dashboards_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
@@ -95,7 +95,7 @@ export interface EditorRenderProps {
 export interface VisualizeServices extends CoreStart {
   embeddable: EmbeddableStart;
   history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
   urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;

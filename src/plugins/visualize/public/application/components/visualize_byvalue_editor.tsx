@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { VisualizeInput } from 'src/plugins/visualizations/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   useChromeVisibility,
   useVisByValue,
@@ -36,7 +36,7 @@ import { VisualizeAppProps } from '../app';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
-  const { services } = useKibana<VisualizeServices>();
+  const { services } = useOpenSearchDashboards<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();

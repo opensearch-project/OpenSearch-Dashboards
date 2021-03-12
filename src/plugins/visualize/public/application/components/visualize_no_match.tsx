@@ -18,23 +18,23 @@
  */
 
 import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useKibana, toMountPoint } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards, toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 
 let bannerId: string;
 
 export const VisualizeNoMatch = () => {
-  const { services } = useKibana<VisualizeServices>();
+  const { services } = useOpenSearchDashboards<VisualizeServices>();
 
   useEffect(() => {
     services.restorePreviousUrl();
 
-    const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
+    const { navigated } = services.urlForwarding.navigateToLegacyOpenSearchDashboardsUrl(
       services.history.location.pathname
     );
 

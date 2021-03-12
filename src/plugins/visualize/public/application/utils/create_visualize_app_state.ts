@@ -23,14 +23,14 @@ import { migrateAppState } from './migrate_app_state';
 import {
   createStateContainer,
   syncState,
-  IKbnUrlStateStorage,
-} from '../../../../kibana_utils/public';
+  IOsdUrlStateStorage,
+} from '../../../../opensearch_dashboards_utils/public';
 import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../types';
 
 const STATE_STORAGE_KEY = '_a';
 
 interface Arguments {
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
   stateDefaults: VisualizeAppState;
   byValue?: boolean;
 }
@@ -84,8 +84,8 @@ function createVisualizeByValueAppState(stateDefaults: VisualizeAppState) {
   return { stateContainer, stopStateSync };
 }
 
-function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
-  const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
+function createDefaultVisualizeAppState({ stateDefaults, osdUrlStateStorage }: Arguments) {
+  const urlState = osdUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
   const initialState = migrateAppState({
     ...stateDefaults,
     ...urlState,
@@ -97,7 +97,7 @@ function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: A
      we update the state format at all and want to handle BWC, we must not only migrate the
      data stored with saved vis, but also any old state in the url.
    */
-  kbnUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
+  osdUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(
     initialState,
     pureTransitions
@@ -113,16 +113,16 @@ function createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: A
         }
       },
     },
-    stateStorage: kbnUrlStateStorage,
+    stateStorage: osdUrlStateStorage,
   });
   // start syncing the appState with the ('_a') url
   startStateSync();
   return { stateContainer, stopStateSync };
 }
 
-export function createVisualizeAppState({ stateDefaults, kbnUrlStateStorage, byValue }: Arguments) {
+export function createVisualizeAppState({ stateDefaults, osdUrlStateStorage, byValue }: Arguments) {
   if (byValue) {
     return createVisualizeByValueAppState(stateDefaults);
   }
-  return createDefaultVisualizeAppState({ stateDefaults, kbnUrlStateStorage });
+  return createDefaultVisualizeAppState({ stateDefaults, osdUrlStateStorage });
 }

@@ -1,6 +1,6 @@
 {
   "id": "visualize",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -15,8 +15,8 @@
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact",
     "home",
     "discover",
     "visDefaultEditor"

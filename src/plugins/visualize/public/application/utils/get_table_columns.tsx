@@ -20,10 +20,10 @@
 import React from 'react';
 import { History } from 'history';
 import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 
 const getBadge = (item: VisualizationListItem) => {

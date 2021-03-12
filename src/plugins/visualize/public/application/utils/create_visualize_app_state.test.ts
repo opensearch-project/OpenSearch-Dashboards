@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { visualizeAppStateStub } from './stubs';
@@ -25,7 +25,7 @@ import { visualizeAppStateStub } from './stubs';
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
 
-jest.mock('../../../../kibana_utils/public', () => ({
+jest.mock('../../../../opensearch_dashboards_utils/public', () => ({
   createStateContainer: jest.fn(() => 'stateContainer'),
   syncState: jest.fn(() => ({
     start: mockStartStateSync,
@@ -36,27 +36,27 @@ jest.mock('./migrate_app_state', () => ({
   migrateAppState: jest.fn(() => 'migratedAppState'),
 }));
 
-const { createStateContainer, syncState } = jest.requireMock('../../../../kibana_utils/public');
+const { createStateContainer, syncState } = jest.requireMock('../../../../opensearch_dashboards_utils/public');
 
 describe('createVisualizeAppState', () => {
-  const kbnUrlStateStorage = ({
+  const osdUrlStateStorage = ({
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
-  } as unknown) as IKbnUrlStateStorage;
+  } as unknown) as IOsdUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({
     stateDefaults: visualizeAppStateStub,
-    kbnUrlStateStorage,
+    osdUrlStateStorage,
   });
   const transitions = createStateContainer.mock.calls[0][1];
 
   test('should initialize visualize app state', () => {
-    expect(kbnUrlStateStorage.get).toHaveBeenCalledWith('_a');
+    expect(osdUrlStateStorage.get).toHaveBeenCalledWith('_a');
     expect(migrateAppState).toHaveBeenCalledWith({
       ...visualizeAppStateStub,
       linked: false,
     });
-    expect(kbnUrlStateStorage.set).toHaveBeenCalledWith('_a', 'migratedAppState', {
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', 'migratedAppState', {
       replace: true,
     });
     expect(createStateContainer).toHaveBeenCalled();
