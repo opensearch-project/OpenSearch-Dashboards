@@ -30,7 +30,7 @@ interface Props {
 }
 
 export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
-  const appTitle = useObservable(appTitle$, 'Kibana');
+  const appTitle = useObservable(appTitle$, 'OpenSearchDashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 

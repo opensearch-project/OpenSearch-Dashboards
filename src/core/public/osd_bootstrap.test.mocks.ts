@@ -42,9 +42,9 @@ jest.doMock('./apm_system', () => ({
 }));
 
 export const i18nLoad = jest.fn().mockResolvedValue(undefined);
-jest.doMock('@kbn/i18n', () => ({
+jest.doMock('@osd/i18n', () => ({
   i18n: {
-    ...jest.requireActual('@kbn/i18n').i18n,
+    ...jest.requireActual('@osd/i18n').i18n,
     load: i18nLoad,
   },
 }));

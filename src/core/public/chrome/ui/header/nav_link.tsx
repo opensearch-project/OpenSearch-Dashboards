@@ -18,7 +18,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
@@ -95,7 +95,7 @@ export interface RecentNavLink {
  * Add saved object type info to recently links
  * TODO #64541 - set return type to EuiListGroupItemProps
  *
- * Recent nav links are similar to normal nav links but are missing some Kibana Platform magic and
+ * Recent nav links are similar to normal nav links but are missing some OpenSearch Dashboards Platform magic and
  * because of legacy reasons have slightly different properties.
  * @param recentLink
  * @param navLinks

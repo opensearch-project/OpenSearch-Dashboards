@@ -31,7 +31,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
-const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
+const { opensearchDashboards, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
 function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
   return {
@@ -107,12 +107,12 @@ describe('CollapsibleNav', () => {
   it('renders links grouped by category', () => {
     // just a test of category functionality, categories are not accurate
     const navLinks = [
-      mockLink({ title: 'discover', category: kibana }),
+      mockLink({ title: 'discover', category: opensearchDashboards }),
       mockLink({ title: 'siem', category: security }),
       mockLink({ title: 'metrics', category: observability }),
       mockLink({ title: 'monitoring', category: management }),
-      mockLink({ title: 'visualize', category: kibana }),
-      mockLink({ title: 'dashboard', category: kibana }),
+      mockLink({ title: 'visualize', category: opensearchDashboards }),
+      mockLink({ title: 'dashboard', category: opensearchDashboards }),
       mockLink({ title: 'canvas' }), // links should be able to be rendered top level as well
       mockLink({ title: 'logs', category: observability }),
     ];
@@ -134,7 +134,7 @@ describe('CollapsibleNav', () => {
   });
 
   it('remembers collapsible section state', () => {
-    const navLinks = [mockLink({ category: kibana }), mockLink({ category: observability })];
+    const navLinks = [mockLink({ category: opensearchDashboards }), mockLink({ category: observability })];
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
@@ -145,7 +145,7 @@ describe('CollapsibleNav', () => {
       />
     );
     expectShownNavLinksCount(component, 3);
-    clickGroup(component, 'kibana');
+    clickGroup(component, 'opensearchDashboards');
     clickGroup(component, 'recentlyViewed');
     expectShownNavLinksCount(component, 1);
     component.setProps({ isNavOpen: false });
@@ -156,7 +156,7 @@ describe('CollapsibleNav', () => {
 
   it('closes the nav after clicking a link', () => {
     const onClose = sinon.spy();
-    const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
+    const navLinks = [mockLink({ category: opensearchDashboards }), mockLink({ title: 'categoryless' })];
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
@@ -177,7 +177,7 @@ describe('CollapsibleNav', () => {
     expect(onClose.callCount).toEqual(1);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });
-    component.find('[data-test-subj="collapsibleNavGroup-kibana"] a').simulate('click');
+    component.find('[data-test-subj="collapsibleNavGroup-opensearchDashboards"] a').simulate('click');
     expect(onClose.callCount).toEqual(2);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });

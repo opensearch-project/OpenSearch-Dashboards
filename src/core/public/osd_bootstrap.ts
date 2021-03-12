@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
 
 /** @internal */
-export async function __kbnBootstrap__() {
+export async function __osdBootstrap__() {
   const injectedMetadata = JSON.parse(
-    document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
+    document.querySelector('osd-injected-metadata')!.getAttribute('data')!
   );
 
   let i18nError: Error | undefined;
@@ -41,7 +41,7 @@ export async function __kbnBootstrap__() {
   const coreSystem = new CoreSystem({
     injectedMetadata,
     rootDomElement: document.body,
-    browserSupportsCsp: !(window as any).__kbnCspNotEnforced__,
+    browserSupportsCsp: !(window as any).__osdCspNotEnforced__,
   });
 
   const setup = await coreSystem.setup();

@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { History } from 'history';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import { RecursiveReadonly } from '@osd/utility-types';
 
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
@@ -728,10 +728,10 @@ export interface ApplicationStart {
    *
    * @example
    * ```ts
-   * // current url: `https://kibana:8080/base-path/s/my-space/app/dashboard`
+   * // current url: `https://opensearch-dashboards:8080/base-path/s/my-space/app/dashboard`
    *
    * // will call `application.navigateToApp('discover', { path: '/some-path?foo=bar'})`
-   * application.navigateToUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.navigateToUrl('https://opensearch-dashboards:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
    * application.navigateToUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
    * application.navigateToUrl('./discover/some-path?foo=bar')
    *

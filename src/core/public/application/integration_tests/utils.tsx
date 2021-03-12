@@ -20,7 +20,7 @@
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import { AppMountParameters } from '../types';
 import { MockedMounterTuple, Mountable } from '../test_types';

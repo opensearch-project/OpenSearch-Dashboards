@@ -19,7 +19,7 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 
 import {
   SavedObject,
@@ -162,8 +162,8 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 };
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing plugin state. The client-side
+ * Saved Objects is OpenSearchDashboards's data persisentence mechanism allowing plugins to
+ * use OpenSearchsearch for storing plugin state. The client-side
  * SavedObjectsClient is a thin convenience library around the SavedObjects
  * HTTP API for interacting with Saved Objects.
  *
@@ -309,7 +309,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} options.type
    * @property {string} options.search
-   * @property {string} options.searchFields - see Elasticsearch Simple Query String
+   * @property {string} options.searchFields - see OpenSearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]

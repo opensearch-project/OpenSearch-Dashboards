@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from '@kbn/std';
+import { modifyUrl } from '@osd/std';
 
 export class BasePath {
   constructor(

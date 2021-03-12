@@ -18,7 +18,7 @@
  */
 import { Sha256 } from '../../utils/';
 export async function createLogKey(type: string, optionalIdentifier?: string) {
-  const baseKey = `kibana.history.${type}`;
+  const baseKey = `opensearchDashboards.history.${type}`;
 
   if (!optionalIdentifier) {
     return baseKey;

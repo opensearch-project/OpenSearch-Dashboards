@@ -23,7 +23,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { LoadingIndicator } from './loading_indicator';
 
-describe('kbnLoadingIndicator', () => {
+describe('osdLoadingIndicator', () => {
   it('is hidden by default', () => {
     const wrapper = shallow(<LoadingIndicator loadingCount$={new BehaviorSubject(0)} />);
     expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator-hidden');

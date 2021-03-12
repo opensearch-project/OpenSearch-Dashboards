@@ -36,13 +36,13 @@ function mockProps() {
 
   return {
     application,
-    kibanaVersion: '1.0.0',
+    opensearchDashboardsVersion: '1.0.0',
     appTitle$: new BehaviorSubject('test'),
     badge$: new BehaviorSubject(undefined),
     breadcrumbs$: new BehaviorSubject([]),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
-    kibanaDocLink: '/docs',
+    opensearchDashboardsDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
@@ -71,7 +71,7 @@ describe('Header', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
+      { id: 'opensearchDashboards', title: 'opensearchDashboards', baseUrl: '', href: '' },
     ]);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',

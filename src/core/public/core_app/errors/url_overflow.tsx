@@ -20,8 +20,8 @@
 import React from 'react';
 import { History, Location } from 'history';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { mountReactNode } from '../../utils';
 import { IToasts } from '../../notifications';
@@ -71,7 +71,7 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
     } else if (absUrlLength >= URL_WARNING_LENGTH) {
       toasts.addWarning({
         title: i18n.translate('core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle', {
-          defaultMessage: 'The URL is big and Kibana might stop working',
+          defaultMessage: 'The URL is big and OpenSearch Dashboards might stop working',
         }),
         text: mountReactNode(
           <FormattedMessage
@@ -81,7 +81,7 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
             values={{
               storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
               advancedSettingsLink: (
-                <a href={basePath.prepend('/app/management/kibana/settings')}>
+                <a href={basePath.prepend('/app/management/opensearch-dashboards/settings')}>
                   <FormattedMessage
                     id="core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                     defaultMessage="advanced settings"

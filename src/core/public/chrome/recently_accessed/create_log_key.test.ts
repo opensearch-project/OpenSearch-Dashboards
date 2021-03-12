@@ -20,16 +20,16 @@
 import { createLogKey } from './create_log_key';
 
 describe('createLogKey', () => {
-  it('should create a key starting with "kibana.history"', async () => {
-    expect(await createLogKey('foo', 'bar')).toMatch(/^kibana\.history/);
+  it('should create a key starting with "opensearchDashboards.history"', async () => {
+    expect(await createLogKey('foo', 'bar')).toMatch(/^opensearchDashboards\.history/);
   });
 
   it('should include a hashed suffix of the identifier when present', async () => {
     const expectedSuffix = `/N4rLtula/QIYB+3If6bXDONEO5CnqBPrlURto+/j7k=`;
-    expect(await createLogKey('foo', 'bar')).toMatch(`kibana.history.foo-${expectedSuffix}`);
+    expect(await createLogKey('foo', 'bar')).toMatch(`opensearchDashboards.history.foo-${expectedSuffix}`);
   });
 
   it('should not include a hashed suffix if the identifier is not present', async () => {
-    expect(await createLogKey('foo')).toEqual('kibana.history.foo');
+    expect(await createLogKey('foo')).toEqual('opensearchDashboards.history.foo');
   });
 });

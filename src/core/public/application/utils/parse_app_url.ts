@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getUrlOrigin } from '@kbn/std';
+import { getUrlOrigin } from '@osd/std';
 import { resolve } from 'url';
 import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
@@ -29,11 +29,11 @@ import { App, ParsedAppUrl } from '../types';
  * - an absolute path containing the basePath,
  *   e.g `/base-path/app/my-app/some-path`
  *
- * - an absolute URL matching the `origin` of the Kibana instance (as seen by the browser),
- *   e.g `https://kibana:8080/base-path/app/my-app/some-path`
+ * - an absolute URL matching the `origin` of the OpenSearch Dashboards instance (as seen by the browser),
+ *   e.g `https://opensearch-dashboards:8080/base-path/app/my-app/some-path`
  *
  * - a path relative to the provided `currentUrl`.
- *   e.g with `currentUrl` being `https://kibana:8080/base-path/app/current-app/some-path`
+ *   e.g with `currentUrl` being `https://opensearch-dashboards:8080/base-path/app/current-app/some-path`
  *   `../other-app/other-path` will be converted to `/base-path/app/other-app/other-path`
  */
 export const parseAppUrl = (

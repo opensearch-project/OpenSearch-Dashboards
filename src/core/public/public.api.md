@@ -7,8 +7,8 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
-import { ConfigPath } from '@kbn/config';
-import { EnvironmentMode } from '@kbn/config';
+import { ConfigPath } from '@osd/config';
+import { EnvironmentMode } from '@osd/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -17,32 +17,32 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { OpenSearchDashboardsClient } from '@elastic/elasticsearch/api/kibana';
+import { OpenSearchDashboardsConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
-import { Logger } from '@kbn/logging';
-import { LogMeta } from '@kbn/logging';
-import { MaybePromise } from '@kbn/utility-types';
+import { Logger } from '@osd/logging';
+import { LogMeta } from '@osd/logging';
+import { MaybePromise } from '@osd/utility-types';
 import { Observable } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
+import { PackageInfo } from '@osd/config';
 import { Path } from 'history';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@osd/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import { RecursiveReadonly } from '@osd/utility-types';
 import * as Rx from 'rxjs';
-import { ShallowPromise } from '@kbn/utility-types';
+import { ShallowPromise } from '@osd/utility-types';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import { Type } from '@kbn/config-schema';
-import { TypeOf } from '@kbn/config-schema';
+import { Type } from '@osd/config-schema';
+import { TypeOf } from '@osd/config-schema';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
-export function __kbnBootstrap__(): Promise<void>;
+export function __osdBootstrap__(): Promise<void>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> {

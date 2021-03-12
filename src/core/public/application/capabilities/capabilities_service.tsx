@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
+import { RecursiveReadonly } from '@osd/utility-types';
+import { deepFreeze } from '@osd/std';
 
 import { Capabilities } from '../../../types/capabilities';
 import { HttpStart } from '../../http';
