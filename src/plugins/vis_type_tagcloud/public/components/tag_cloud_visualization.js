@@ -21,7 +21,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import { getFormatService } from '../services';
 
