@@ -17,9 +17,9 @@
  * under the License.
  */
 
-// TODO: Replace this logic with KibanaURL once it is available.
+// TODO: Replace this logic with OpenSearchDashboardsURL once it is available.
 // https://github.com/elastic/kibana/issues/64497
-export class KibanaURL {
+export class OpenSearchDashboardsURL {
   public readonly path: string;
   public readonly appName: string;
   public readonly appPath: string;

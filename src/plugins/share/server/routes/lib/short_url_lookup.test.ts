@@ -18,14 +18,14 @@
  */
 
 import { shortUrlLookupProvider, ShortUrlLookupService, UrlAttributes } from './short_url_lookup';
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/server';
 
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
   const TYPE = 'url';
-  const URL = 'http://elastic.co';
+  const URL = 'http://opensearch.co';
 
   let savedObjects: jest.Mocked<SavedObjectsClientContract>;
   let deps: { savedObjects: SavedObjectsClientContract };

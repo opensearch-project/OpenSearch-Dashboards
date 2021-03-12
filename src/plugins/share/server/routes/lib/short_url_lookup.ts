@@ -20,7 +20,7 @@
 import crypto from 'crypto';
 import { get } from 'lodash';
 
-import { Logger, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { Logger, SavedObject, SavedObjectsClientContract } from 'opensearch-dashboards/server';
 
 export interface ShortUrlLookupService {
   generateUrlId(url: string, deps: { savedObjects: SavedObjectsClientContract }): Promise<string>;
