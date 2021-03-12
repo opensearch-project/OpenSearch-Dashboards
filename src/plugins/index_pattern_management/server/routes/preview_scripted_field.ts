@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 
 export function registerPreviewScriptedFieldRoute(router: IRouter): void {
@@ -35,7 +35,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = context.core.opensearch.client.asCurrentUser;
       const { index, name, script, query, additionalFields } = request.body;
 
       try {

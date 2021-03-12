@@ -22,14 +22,14 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName: string }>;
 
 const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
-  const { setBreadcrumbs, data } = useKibana<IndexPatternManagmentContext>().services;
+  const { setBreadcrumbs, data } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {

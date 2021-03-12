@@ -22,7 +22,7 @@ import moment from 'moment';
 
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
 
 import { FormatEditorSamples } from '../../samples';

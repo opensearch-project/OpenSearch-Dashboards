@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 interface DeleteFilterConfirmationModalProps {

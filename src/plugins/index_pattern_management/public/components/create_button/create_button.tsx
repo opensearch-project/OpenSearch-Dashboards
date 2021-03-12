@@ -32,7 +32,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface State {
   isPopoverOpen: boolean;

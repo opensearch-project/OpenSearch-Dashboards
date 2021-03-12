@@ -21,8 +21,8 @@ import React from 'react';
 
 import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface AdvancedOptionsProps {
   isVisible: boolean;
@@ -67,7 +67,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           helpText={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepTime.options.patternLabel"
-              defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
+              defaultMessage="OpenSearch Dashboards will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
             enter a custom one."
             />
           }

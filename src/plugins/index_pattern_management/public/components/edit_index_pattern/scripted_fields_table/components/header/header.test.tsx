@@ -20,7 +20,7 @@
 import React from 'react';
 import { render } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'opensearch-dashboards/public';
 import { scopedHistoryMock } from '../../../../../../../../core/public/mocks';
 
 import { Header } from './header';

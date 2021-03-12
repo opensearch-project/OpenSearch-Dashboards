@@ -21,10 +21,10 @@ import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
+import { FormattedMessage } from '@osd/i18n/react';
+import { ScopedHistory } from 'opensearch-dashboards/public';
 
-import { reactRouterNavigate } from '../../../../../../../kibana_react/public';
+import { reactRouterNavigate } from '../../../../../../../opensearch_dashboards_react/public';
 
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;

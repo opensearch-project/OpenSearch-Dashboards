@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
 import { SimpleSavedObject } from 'src/core/public';
 
@@ -42,11 +42,11 @@ export class IndexPatternListConfig {
   ): IndexPatternTag[] {
     return isDefault
       ? [
-          {
-            key: 'default',
-            name: defaultIndexPatternListName,
-          },
-        ]
+        {
+          key: 'default',
+          name: defaultIndexPatternListName,
+        },
+      ]
       : [];
   }
 

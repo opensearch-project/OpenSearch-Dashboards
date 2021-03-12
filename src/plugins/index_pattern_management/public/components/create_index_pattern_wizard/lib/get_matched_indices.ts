@@ -41,7 +41,7 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
   const acceptableIndices = isIncludingSystemIndices
     ? indices
     : // All system indices begin with a period.
-      indices.filter((index) => !isSystemIndex(index.name));
+    indices.filter((index) => !isSystemIndex(index.name));
 
   return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
 }
@@ -62,7 +62,7 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
     used when the query does not end in an `*` and represents potential matches in the UI
  - `unfilteredExactMatchedIndices
     This is the result of searching against a query that already ends in `*`.
-    We call this `exact` matches because ES is telling us exactly what it matches
+    We call this `exact` matches because OpenSearch is telling us exactly what it matches
  */
 
 import { MatchedItem } from '../types';
