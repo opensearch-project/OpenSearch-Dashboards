@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -40,10 +40,10 @@ import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
-  KibanaContextProvider,
-  KibanaReactContext,
-  KibanaReactContextValue,
-} from '../../../../kibana_react/public';
+  OpenSearchDashboardsContextProvider,
+  OpenSearchDashboardsReactContext,
+  OpenSearchDashboardsReactContextValue,
+} from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
@@ -91,8 +91,8 @@ export interface DashboardContainerOptions {
   uiActions: UiActionsStart;
 }
 
-export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;
-export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions>;
+export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<DashboardContainerOptions>;
+export type DashboardReactContext = OpenSearchDashboardsReactContext<DashboardContainerOptions>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
@@ -215,13 +215,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public render(dom: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <KibanaContextProvider services={this.options}>
+        <OpenSearchDashboardsContextProvider services={this.options}>
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}
             PanelComponent={this.embeddablePanel}
           />
-        </KibanaContextProvider>
+        </OpenSearchDashboardsContextProvider>
       </I18nProvider>,
       dom
     );

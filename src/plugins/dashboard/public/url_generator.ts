@@ -25,7 +25,7 @@ import {
   QueryState,
   RefreshInterval,
 } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
@@ -124,7 +124,7 @@ export const createDashboardUrlGenerator = (
       ...state.filters,
     ];
 
-    const appStateUrl = setStateToKbnUrl(
+    const appStateUrl = setStateToOsdUrl(
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
@@ -135,7 +135,7 @@ export const createDashboardUrlGenerator = (
       `${appBasePath}#/${hash}`
     );
 
-    return setStateToKbnUrl<QueryState>(
+    return setStateToOsdUrl<QueryState>(
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,

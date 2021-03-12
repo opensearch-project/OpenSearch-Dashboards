@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';

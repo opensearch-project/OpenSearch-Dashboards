@@ -18,8 +18,8 @@
  */
 
 import semver from 'semver';
-import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@osd/i18n';
+import { METRIC_TYPE } from '@osd/analytics';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { DashboardAppState, SavedDashboardPanel } from '../../types';
@@ -40,7 +40,7 @@ import {
  */
 export function migrateAppState(
   appState: { [key: string]: any } & DashboardAppState,
-  kibanaVersion: string,
+  opensearchDashboardsVersion: string,
   usageCollection?: UsageCollectionSetup
 ): DashboardAppState {
   if (!appState.panels) {
@@ -80,7 +80,7 @@ export function migrateAppState(
         | SavedDashboardPanel630
         | SavedDashboardPanel640To720
       >,
-      kibanaVersion,
+      opensearchDashboardsVersion,
       appState.useMargins as boolean,
       appState.uiState as Record<string, Record<string, unknown>>
     ) as SavedDashboardPanel[];

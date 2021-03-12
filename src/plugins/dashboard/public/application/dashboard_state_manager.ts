@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
@@ -40,11 +40,11 @@ import {
 } from '../types';
 import {
   createStateContainer,
-  IKbnUrlStateStorage,
+  IOsdUrlStateStorage,
   ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../kibana_utils/public';
+} from '../../../opensearch_dashboards_utils/public';
 import { SavedObjectDashboard } from '../saved_dashboards';
 import { DashboardContainer } from './embeddable';
 
@@ -64,7 +64,7 @@ export class DashboardStateManager {
   };
   private stateDefaults: DashboardAppStateDefaults;
   private hideWriteControls: boolean;
-  private kibanaVersion: string;
+  private opensearchDashboardsVersion: string;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
 
@@ -82,7 +82,7 @@ export class DashboardStateManager {
   >;
   private readonly stateContainerChangeSub: Subscription;
   private readonly STATE_STORAGE_KEY = '_a';
-  private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
+  private readonly osdUrlStateStorage: IOsdUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly history: History;
   private readonly usageCollection: UsageCollectionSetup | undefined;
@@ -91,26 +91,26 @@ export class DashboardStateManager {
    *
    * @param savedDashboard
    * @param hideWriteControls true if write controls should be hidden.
-   * @param kibanaVersion current kibanaVersion
+   * @param opensearchDashboardsVersion current opensearchDashboardsVersion
    * @param
    */
   constructor({
     savedDashboard,
     hideWriteControls,
-    kibanaVersion,
-    kbnUrlStateStorage,
+    opensearchDashboardsVersion,
+    osdUrlStateStorage,
     history,
     usageCollection,
   }: {
     savedDashboard: SavedObjectDashboard;
     hideWriteControls: boolean;
-    kibanaVersion: string;
-    kbnUrlStateStorage: IKbnUrlStateStorage;
+    opensearchDashboardsVersion: string;
+    osdUrlStateStorage: IOsdUrlStateStorage;
     history: History;
     usageCollection?: UsageCollectionSetup;
   }) {
     this.history = history;
-    this.kibanaVersion = kibanaVersion;
+    this.opensearchDashboardsVersion = opensearchDashboardsVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
     this.usageCollection = usageCollection;
@@ -118,20 +118,20 @@ export class DashboardStateManager {
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
       getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
-      kibanaVersion,
+      opensearchDashboardsVersion,
       usageCollection
     );
 
-    this.kbnUrlStateStorage = kbnUrlStateStorage;
+    this.osdUrlStateStorage = osdUrlStateStorage;
 
     // setup initial state by merging defaults with state from url
     // also run migration, as state in url could be of older version
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
-        ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+        ...this.osdUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
       },
-      kibanaVersion,
+      opensearchDashboardsVersion,
       usageCollection
     );
 
@@ -198,7 +198,7 @@ export class DashboardStateManager {
           }
         },
       },
-      stateStorage: this.kbnUrlStateStorage,
+      stateStorage: this.osdUrlStateStorage,
     });
   }
 
@@ -236,7 +236,7 @@ export class DashboardStateManager {
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
         panelState,
-        this.kibanaVersion
+        this.opensearchDashboardsVersion
       );
 
       if (
@@ -314,7 +314,7 @@ export class DashboardStateManager {
     // now.  TODO: revisit this!
     this.stateDefaults = migrateAppState(
       getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
-      this.kibanaVersion,
+      this.opensearchDashboardsVersion,
       this.usageCollection
     );
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
@@ -572,12 +572,12 @@ export class DashboardStateManager {
    */
   private saveState({ replace }: { replace: boolean }): boolean {
     // schedules setting current state to url
-    this.kbnUrlStateStorage.set<DashboardAppStateInUrl>(
+    this.osdUrlStateStorage.set<DashboardAppStateInUrl>(
       this.STATE_STORAGE_KEY,
       this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
-    return this.kbnUrlStateStorage.flush({ replace });
+    return this.osdUrlStateStorage.flush({ replace });
   }
 
   // TODO: find nicer solution for this

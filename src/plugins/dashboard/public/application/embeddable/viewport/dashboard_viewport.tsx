@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../../../kibana_react/public';
+import { context } from '../../../../../opensearch_dashboards_react/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
