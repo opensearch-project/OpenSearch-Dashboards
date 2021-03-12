@@ -17,26 +17,26 @@
  * under the License.
  */
 import { Client } from 'elasticsearch';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@osd/dev-utils';
 import {
-  createLegacyEsTestCluster,
+  createLegacyOpenSearchTestCluster,
   DEFAULT_SUPERUSER_PASS,
-  esTestConfig,
-  kbnTestConfig,
-  kibanaServerTestUser,
-  kibanaTestUser,
+  opensearchTestConfig,
+  osdTestConfig,
+  opensearchDashboardsServerTestUser,
+  opensearchDashboardsTestUser,
   setupUsers,
-} from '@kbn/test';
+} from '@osd/test';
 import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { CoreStart } from 'src/core/server';
-import { LegacyAPICaller } from '../server/elasticsearch';
+import { LegacyAPICaller } from '../server/opensearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
-import KbnServer from '../../legacy/server/kbn_server';
+import OsdServer from '../../legacy/server/osd_server';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -55,10 +55,10 @@ const DEFAULTS_SETTINGS = {
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
-  elasticsearch: {
-    hosts: [esTestConfig.getUrl()],
-    username: kibanaServerTestUser.username,
-    password: kibanaServerTestUser.password,
+  opensearch: {
+    hosts: [opensearchTestConfig.getUrl()],
+    username: opensearchDashboardsServerTestUser.username,
+    password: opensearchDashboardsServerTestUser.password,
   },
 };
 
@@ -100,7 +100,7 @@ export function createRootWithSettings(
  * @param path
  */
 export function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
+  const testUserCredentials = Buffer.from(`${opensearchDashboardsTestUser.username}:${opensearchDashboardsTestUser.password}`);
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
@@ -129,11 +129,11 @@ export function createRootWithCorePlugins(settings = {}) {
 }
 
 /**
- * Returns `kbnServer` instance used in the "legacy" Kibana.
+ * Returns `osdServer` instance used in the "legacy" OpenSearch Dashboards.
  * @param root
  */
-export function getKbnServer(root: Root): KbnServer {
-  return (root as any).server.legacy.kbnServer;
+export function getOsdServer(root: Root): OsdServer {
+  return (root as any).server.legacy.osdServer;
 }
 
 export const request: Record<
@@ -147,9 +147,9 @@ export const request: Record<
   put: (root, path) => getSupertest(root, 'put', path),
 };
 
-export interface TestElasticsearchServer {
+export interface TestOpenSearchhServer {
   getStartTimeout: () => number;
-  start: (esArgs: string[], esEnvVars: Record<string, string>) => Promise<void>;
+  start: (opensearchArgs: string[], opensearchEnvVars: Record<string, string>) => Promise<void>;
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => Client;
@@ -157,29 +157,29 @@ export interface TestElasticsearchServer {
   getUrl: () => string;
 }
 
-export interface TestElasticsearchUtils {
+export interface TestOpenSearchUtils {
   stop: () => Promise<void>;
-  es: TestElasticsearchServer;
+  opensearch: TestOpenSearchhServer;
   hosts: string[];
   username: string;
   password: string;
 }
 
-export interface TestKibanaUtils {
+export interface TestOpenSearchDashboardsUtils {
   root: Root;
   coreStart: CoreStart;
-  kbnServer: KbnServer;
+  osdServer: OsdServer;
   stop: () => Promise<void>;
 }
 
 export interface TestUtils {
-  startES: () => Promise<TestElasticsearchUtils>;
-  startKibana: () => Promise<TestKibanaUtils>;
+  startOpenSearch: () => Promise<TestOpenSearchUtils>;
+  startOpenSearchDashboards: () => Promise<TestOpenSearchDashboardsUtils>;
 }
 
 /**
  * Creates an instance of the Root, including all of the core "legacy" plugins,
- * with default configuration tailored for unit tests, and starts es.
+ * with default configuration tailored for unit tests, and starts opensearch.
  *
  * @param options
  * @prop settings Any config overrides for this instance.
@@ -192,11 +192,11 @@ export function createTestServers({
 }: {
   adjustTimeout: (timeout: number) => void;
   settings?: {
-    es?: {
+    opensearch?: {
       license: 'oss' | 'basic' | 'gold' | 'trial';
       [key: string]: any;
     };
-    kbn?: {
+    osd?: {
       /**
        * An array of directories paths, passed in via absolute path strings
        */
@@ -207,7 +207,7 @@ export function createTestServers({
       [key: string]: any;
     };
     /**
-     * Users passed in via this prop are created in ES in adition to the standard elastic and kibana users.
+     * Users passed in via this prop are created in OpenSearch in adition to the standard opensearch and opensearchDashboards users.
      * Note, this prop is ignored when using an oss, or basic license
      */
     users?: Array<{ username: string; password: string; roles: string[] }>;
@@ -216,7 +216,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get(settings, 'es.license', 'oss');
+  const license = get(settings, 'opensearch.license', 'oss');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
@@ -232,11 +232,11 @@ export function createTestServers({
   });
 
   log.indent(6);
-  log.info('starting elasticsearch');
+  log.info('starting opensearch');
   log.indent(4);
 
-  const es = createLegacyEsTestCluster(
-    defaultsDeep({}, get(settings, 'es', {}), {
+  const opensearch = createLegacyOpenSearchTestCluster(
+    defaultsDeep({}, get(settings, 'opensearch', {}), {
       log,
       license,
       password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
@@ -245,55 +245,55 @@ export function createTestServers({
 
   log.indent(-4);
 
-  // Add time for KBN and adding users
-  adjustTimeout(es.getStartTimeout() + 100000);
+  // Add time for OSD and adding users
+  adjustTimeout(opensearch.getStartTimeout() + 100000);
 
-  const kbnSettings: any = get(settings, 'kbn', {});
+  const osdSettings: any = get(settings, 'osd', {});
 
   return {
-    startES: async () => {
-      await es.start(get(settings, 'es.esArgs', []));
+    startOpenSearch: async () => {
+      await opensearch.start(get(settings, 'opensearch.opensearchArgs', []));
 
       if (['gold', 'trial'].includes(license)) {
         await setupUsers({
           log,
-          esPort: esTestConfig.getUrlParts().port,
+          opensearchPort: opensearchTestConfig.getUrlParts().port,
           updates: [
             ...usersToBeAdded,
             // user elastic
-            esTestConfig.getUrlParts(),
-            // user kibana
-            kbnTestConfig.getUrlParts(),
+            opensearchTestConfig.getUrlParts(),
+            // user openSearchDashboards
+            osdTestConfig.getUrlParts(),
           ],
         });
 
         // Override provided configs, we know what the elastic user is now
-        kbnSettings.elasticsearch = {
-          hosts: [esTestConfig.getUrl()],
-          username: kibanaServerTestUser.username,
-          password: kibanaServerTestUser.password,
+        osdSettings.opensearch = {
+          hosts: [opensearchTestConfig.getUrl()],
+          username: opensearchDashboardsServerTestUser.username,
+          password: opensearchDashboardsServerTestUser.password,
         };
       }
 
       return {
-        stop: async () => await es.cleanup(),
-        es,
-        hosts: [esTestConfig.getUrl()],
-        username: kibanaServerTestUser.username,
-        password: kibanaServerTestUser.password,
+        stop: async () => await opensearch.cleanup(),
+        opensearch,
+        hosts: [opensearchTestConfig.getUrl()],
+        username: opensearchDashboardsServerTestUser.username,
+        password: opensearchDashboardsServerTestUser.password,
       };
     },
-    startKibana: async () => {
-      const root = createRootWithCorePlugins(kbnSettings);
+    startOpenSearchDashboards: async () => {
+      const root = createRootWithCorePlugins(osdSettings);
 
       await root.setup();
       const coreStart = await root.start();
 
-      const kbnServer = getKbnServer(root);
+      const osdServer = getOsdServer(root);
 
       return {
         root,
-        kbnServer,
+        osdServer,
         coreStart,
         stop: async () => await root.shutdown(),
       };

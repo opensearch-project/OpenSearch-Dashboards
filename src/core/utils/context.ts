@@ -18,8 +18,8 @@
  */
 
 import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
-import { pick } from '@kbn/std';
+import { ShallowPromise } from '@osd/utility-types';
+import { pick } from '@osd/std';
 import type { CoreId, PluginOpaqueId } from '../server';
 
 /**
