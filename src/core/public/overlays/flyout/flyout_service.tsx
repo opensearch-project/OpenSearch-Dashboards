@@ -130,7 +130,7 @@ export class FlyoutService {
         render(
           <i18n.Context>
             <EuiFlyout {...options} onClose={() => flyout.close()}>
-              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+              <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
             </EuiFlyout>
           </i18n.Context>,
           this.targetDomElement

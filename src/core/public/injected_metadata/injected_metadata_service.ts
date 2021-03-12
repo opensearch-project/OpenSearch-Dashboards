@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze } from '@osd/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -99,7 +99,7 @@ export class InjectedMetadataService {
         return this.state.anonymousStatusPage;
       },
 
-      getKibanaVersion: () => {
+      getOpenSearchDashboardsVersion: () => {
         return this.state.version;
       },
 
@@ -123,11 +123,11 @@ export class InjectedMetadataService {
         return this.state.vars;
       },
 
-      getKibanaBuildNumber: () => {
+      getOpenSearchDashboardsBuildNumber: () => {
         return this.state.buildNumber;
       },
 
-      getKibanaBranch: () => {
+      getOpenSearchDashboardsBranch: () => {
         return this.state.branch;
       },
     };
@@ -142,9 +142,9 @@ export class InjectedMetadataService {
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
-  getKibanaBuildNumber: () => number;
-  getKibanaBranch: () => string;
-  getKibanaVersion: () => string;
+  getOpenSearchDashboardsBuildNumber: () => number;
+  getOpenSearchDashboardsBranch: () => string;
+  getOpenSearchDashboardsVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };

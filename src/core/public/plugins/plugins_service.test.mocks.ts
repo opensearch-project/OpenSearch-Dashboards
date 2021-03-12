@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginName } from 'kibana/server';
+import { PluginName } from 'opensearch-dashboards/server';
 import { Plugin } from './plugin';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, Record<string, unknown>>, any>;

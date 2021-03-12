@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { withTimeout } from '@kbn/std';
+import { withTimeout } from '@osd/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';

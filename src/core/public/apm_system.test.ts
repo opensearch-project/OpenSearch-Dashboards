@@ -56,7 +56,7 @@ describe('ApmSystem', () => {
         windowSpy = jest.spyOn(global as any, 'window', 'get').mockImplementation(() => ({
           location: {
             protocol: 'http:',
-            hostname: 'mykibanadomain.com',
+            hostname: 'myopensearch-dashboardsdomain.com',
             port: '5601',
           },
         }));
@@ -93,7 +93,7 @@ describe('ApmSystem', () => {
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:5601/asdf/qwerty',
+            name: 'GET http://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /asdf/qwerty' });
 
@@ -101,21 +101,21 @@ describe('ApmSystem', () => {
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET https://mykibanadomain.com:5601/asdf/qwerty',
+            name: 'GET https://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
           } as Transaction)
         ).toEqual({
           type: 'http-request',
-          name: 'GET https://mykibanadomain.com:5601/asdf/qwerty',
+          name: 'GET https://myopensearch-dashboardsdomain.com:5601/asdf/qwerty',
         });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:9200/asdf/qwerty',
+            name: 'GET http://myopensearch-dashboardsdomain.com:9200/asdf/qwerty',
           } as Transaction)
         ).toEqual({
           type: 'http-request',
-          name: 'GET http://mykibanadomain.com:9200/asdf/qwerty',
+          name: 'GET http://myopensearch-dashboardsdomain.com:9200/asdf/qwerty',
         });
 
         expect(
@@ -138,28 +138,28 @@ describe('ApmSystem', () => {
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:5601/alpha',
+            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:5601/alpha/',
+            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:5601/alpha/beta',
+            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/beta',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta' });
 
         expect(
           wrappedObserver({
             type: 'http-request',
-            name: 'GET http://mykibanadomain.com:5601/alpha/beta/',
+            name: 'GET http://myopensearch-dashboardsdomain.com:5601/alpha/beta/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta/' });
 

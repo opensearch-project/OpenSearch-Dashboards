@@ -27,7 +27,7 @@ import {
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -53,7 +53,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 
 export interface HeaderProps {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
@@ -61,7 +61,7 @@ export interface HeaderProps {
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
-  kibanaDocLink: string;
+  opensearchDashboardsDocLink: string;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
@@ -77,8 +77,8 @@ export interface HeaderProps {
 }
 
 export function Header({
-  kibanaVersion,
-  kibanaDocLink,
+  opensearchDashboardsVersion,
+  opensearchDashboardsDocLink,
   application,
   basePath,
   onIsLockedUpdate,
@@ -135,8 +135,8 @@ export function Header({
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
-                    kibanaDocLink={kibanaDocLink}
-                    kibanaVersion={kibanaVersion}
+                    opensearchDashboardsDocLink={opensearchDashboardsDocLink}
+                    opensearchDashboardsVersion={opensearchDashboardsVersion}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],

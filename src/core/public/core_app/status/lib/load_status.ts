@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { UnwrapPromise } from '@kbn/utility-types';
+import { i18n } from '@osd/i18n';
+import type { UnwrapPromise } from '@osd/utility-types';
 import type { ServerStatus, StatusResponse } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';

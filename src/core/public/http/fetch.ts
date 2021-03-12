@@ -36,7 +36,7 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
 interface Params {
   basePath: IBasePath;
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
 }
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -133,7 +133,7 @@ export class Fetch {
       headers: removedUndefined({
         'Content-Type': 'application/json',
         ...options.headers,
-        'kbn-version': this.params.kibanaVersion,
+        'osd-version': this.params.opensearchDashboardsVersion,
       }),
     };
 
@@ -144,7 +144,7 @@ export class Fetch {
 
     // Make sure the system request header is only present if `asSystemRequest` is true.
     if (asSystemRequest) {
-      fetchOptions.headers['kbn-system-request'] = 'true';
+      fetchOptions.headers['osd-system-request'] = 'true';
     }
 
     return new Request(url, fetchOptions as RequestInit);
@@ -216,11 +216,11 @@ const validateFetchArguments = (
   }
 
   const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
-    headerName.startsWith('kbn-')
+    headerName.startsWith('osd-')
   );
   if (invalidHeaders.length) {
     throw new Error(
-      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
+      `Invalid fetch headers, headers beginning with "osd-" are not allowed: [${invalidHeaders.join(
         ','
       )}]`
     );
