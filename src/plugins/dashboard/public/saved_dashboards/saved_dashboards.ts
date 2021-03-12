@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
+import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../plugins/data/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';

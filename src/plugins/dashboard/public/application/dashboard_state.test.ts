@@ -22,7 +22,7 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { createOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 import { DashboardContainer, DashboardContainerInput } from '.';
 import { DashboardContainerOptions } from './embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
@@ -45,8 +45,8 @@ describe('DashboardState', function () {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       hideWriteControls: false,
-      kibanaVersion: '7.0.0',
-      kbnUrlStateStorage: createKbnUrlStateStorage(),
+      opensearchDashboardsVersion: '7.0.0',
+      osdUrlStateStorage: createOsdUrlStateStorage(),
       history: createBrowserHistory(),
     });
   }

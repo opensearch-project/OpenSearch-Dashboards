@@ -21,9 +21,9 @@
  * Returns dashboard id from URL
  * literally looks from id after `dashboard/` string and before `/`, `?` and end of string
  * @param url to extract dashboardId from
- * input: http://localhost:5601/lib/app/kibana#/dashboard?param1=x&param2=y&param3=z
+ * input: http://localhost:5601/lib/app/opensearch-dashboards#/dashboard?param1=x&param2=y&param3=z
  * output: undefined
- * input: http://localhost:5601/lib/app/kibana#/dashboard/39292992?param1=x&param2=y&param3=z
+ * input: http://localhost:5601/lib/app/opensearch-dashboards#/dashboard/39292992?param1=x&param2=y&param3=z
  * output: 39292992
  */
 export function getDashboardIdFromUrl(url: string): string | undefined {

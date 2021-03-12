@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { CoreStart } from 'opensearch-dashboards/public';
 
 export function addHelpMenuToAppChrome(
   chrome: CoreStart['chrome'],

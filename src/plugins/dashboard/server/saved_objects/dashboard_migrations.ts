@@ -19,13 +19,13 @@
 
 import { get, flow } from 'lodash';
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720 } from '../../common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return;
   }
@@ -37,7 +37,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     return;
   }
   if (searchSource.index) {
-    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    searchSource.indexRefName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
       type: 'index-pattern',
@@ -50,7 +50,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       if (!filterRow.meta || !filterRow.meta.index) {
         return;
       }
-      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      filterRow.meta.indexRefName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
@@ -59,7 +59,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       delete filterRow.meta.index;
     });
   }
-  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
 const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To720 => {
@@ -107,7 +107,7 @@ export const dashboardSavedObjectTypeMigrations = {
    * released. Thus a user who already had 7.0.0 installed already got the 7.0.0 migrations below running,
    * so we need a version higher than that. But this fix was backported to the 6.7 release, meaning if we
    * would only have the 7.0.1 migration in here a user on the 6.7 release will migrate their saved objects
-   * to the 7.0.1 state, and thus when updating their Kibana to 7.0, will never run the 7.0.0 migrations introduced
+   * to the 7.0.1 state, and thus when updating their OpenSearch Dashboards to 7.0, will never run the 7.0.0 migrations introduced
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */

@@ -18,8 +18,8 @@
  */
 
 import { createDashboardUrlGenerator } from './url_generator';
-import { hashedItemStore } from '../../kibana_utils/public';
-import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
+import { hashedItemStore } from '../../opensearch_dashboards_utils/public';
+import { mockStorage } from '../../opensearch_dashboards_utils/public/storage/hashed_item_store/mock';
 import { esFilters, Filter } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 

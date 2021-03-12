@@ -1,4 +1,4 @@
-[[kibana-dashboard-plugin]]
+[[opensearch-dashboards-dashboard-plugin]]
 == Dashboard plugin
 
 - Registers the dashboard application.

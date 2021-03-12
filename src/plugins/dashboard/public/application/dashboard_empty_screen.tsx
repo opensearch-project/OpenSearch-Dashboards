@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import {
   EuiLink,
   EuiSpacer,
@@ -28,7 +28,7 @@ import {
   EuiText,
   EuiButton,
 } from '@elastic/eui';
-import { IUiSettingsClient, HttpStart } from 'kibana/public';
+import { IUiSettingsClient, HttpStart } from 'opensearch-dashboards/public';
 import * as constants from './dashboard_empty_screen_constants';
 
 export interface DashboardEmptyScreenProps {

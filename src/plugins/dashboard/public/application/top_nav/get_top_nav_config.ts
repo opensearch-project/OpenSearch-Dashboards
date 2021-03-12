@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { ViewMode } from '../../embeddable_plugin';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
@@ -39,15 +39,15 @@ export function getTopNavConfig(
     case ViewMode.VIEW:
       return hideWriteControls
         ? [
-            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            getShareConfig(actions[TopNavIds.SHARE]),
-          ]
+          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+          getShareConfig(actions[TopNavIds.SHARE]),
+        ]
         : [
-            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            getShareConfig(actions[TopNavIds.SHARE]),
-            getCloneConfig(actions[TopNavIds.CLONE]),
-            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
-          ];
+          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+          getShareConfig(actions[TopNavIds.SHARE]),
+          getCloneConfig(actions[TopNavIds.CLONE]),
+          getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
+        ];
     case ViewMode.EDIT:
       return [
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
@@ -77,7 +77,7 @@ function getFullScreenConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getEditConfig(action: NavAction) {
   return {
@@ -99,7 +99,7 @@ function getEditConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getSaveConfig(action: NavAction) {
   return {
@@ -116,7 +116,7 @@ function getSaveConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getViewConfig(action: NavAction) {
   return {
@@ -133,7 +133,7 @@ function getViewConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getCloneConfig(action: NavAction) {
   return {
@@ -150,7 +150,7 @@ function getCloneConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getAddConfig(action: NavAction) {
   return {
@@ -167,7 +167,7 @@ function getAddConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getCreateNewConfig(action: NavAction) {
   return {
@@ -186,7 +186,7 @@ function getCreateNewConfig(action: NavAction) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getShareConfig(action: NavAction | undefined) {
   return {
@@ -205,7 +205,7 @@ function getShareConfig(action: NavAction | undefined) {
 }
 
 /**
- * @returns {kbnTopNavConfig}
+ * @returns {osdTopNavConfig}
  */
 function getOptionsConfig(action: NavAction) {
   return {

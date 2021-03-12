@@ -28,7 +28,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -69,7 +69,7 @@ beforeEach(async () => {
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+    firstName: 'opensearchDashboards',
   });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {

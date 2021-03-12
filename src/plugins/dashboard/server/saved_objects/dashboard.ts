@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 
 export const dashboardSavedObjectType: SavedObjectsType = {
@@ -32,7 +32,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
@@ -45,7 +45,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
       optionsJSON: { type: 'text', index: false },
