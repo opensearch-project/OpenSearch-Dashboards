@@ -21,8 +21,8 @@ import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
-  KibanaResponse,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
 } from '../router';
@@ -60,10 +60,10 @@ export interface OnPostAuthToolkit {
  * @public
  */
 export type OnPostAuthHandler = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
+) => OnPostAuthResult | OpenSearchDashboardsResponse | Promise<OnPostAuthResult | OpenSearchDashboardsResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
@@ -82,8 +82,8 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }
       if (postAuthResult.isNext(result)) {
@@ -91,7 +91,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
       }
 
       throw new Error(
-        `Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: ${result}.`
+        `Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);

@@ -29,7 +29,7 @@ jest.mock('os', () => {
 
   return {
     ...original,
-    hostname: () => 'kibana-hostname',
+    hostname: () => 'opensearch-dashboards-hostname',
   };
 });
 
@@ -162,7 +162,7 @@ test('accepts only valid uuids for server.uuid', () => {
 test('uses os.hostname() as default for server.name', () => {
   const httpSchema = config.schema;
   const validated = httpSchema.validate({});
-  expect(validated.name).toEqual('kibana-hostname');
+  expect(validated.name).toEqual('opensearch-dashboards-hostname');
 });
 
 test('throws if xsrf.whitelist element does not start with a slash', () => {

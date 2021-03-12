@@ -19,7 +19,7 @@
 import { Stream } from 'stream';
 import Boom from 'boom';
 import supertest from 'supertest';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { HttpService } from '../http_service';
 
@@ -592,7 +592,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
+          [Error: Unexpected result from Route Handler. Expected OpenSearchDashboardsResponse, but given: string.],
         ],
       ]
     `);
@@ -896,7 +896,7 @@ describe('Response factory', () => {
           body: 'value',
           headers: {
             etag: '1234',
-            'x-kibana': 'key',
+            'x-opensearch-dashboards': 'key',
           },
         });
       });
@@ -907,7 +907,7 @@ describe('Response factory', () => {
 
       expect(result.text).toEqual('value');
       expect(result.header.etag).toBe('1234');
-      expect(result.header['x-kibana']).toBe('key');
+      expect(result.header['x-opensearch-dashboards']).toBe('key');
     });
 
     it('accepted headers are case-insensitive.', async () => {
@@ -1026,7 +1026,7 @@ describe('Response factory', () => {
           body: 'The document has moved',
           headers: {
             location: '/new-url',
-            'x-kibana': 'tag',
+            'x-opensearch-dashboards': 'tag',
           },
         });
       });
@@ -1037,7 +1037,7 @@ describe('Response factory', () => {
 
       expect(result.text).toBe('The document has moved');
       expect(result.header.location).toBe('/new-url');
-      expect(result.header['x-kibana']).toBe('tag');
+      expect(result.header['x-opensearch-dashboards']).toBe('tag');
     });
 
     it('throws if redirection url not provided', async () => {
@@ -1047,7 +1047,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.redirected({
           headers: {
-            'x-kibana': 'tag',
+            'x-opensearch-dashboards': 'tag',
           },
         } as any); // location headers is required
       });
@@ -1182,7 +1182,7 @@ describe('Response factory', () => {
         });
     });
 
-    it('@kbn/config-schema validation in body', async () => {
+    it('@osd/config-schema validation in body', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/foo');
 

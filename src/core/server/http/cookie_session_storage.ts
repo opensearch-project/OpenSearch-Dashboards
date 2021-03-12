@@ -22,7 +22,7 @@ import hapiAuthCookie from 'hapi-auth-cookie';
 // @ts-expect-error no TS definitions
 import Statehood from 'statehood';
 
-import { KibanaRequest, ensureRawRequest } from './router';
+import { OpenSearchDashboardsRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 import { Logger } from '..';
 
@@ -162,7 +162,7 @@ export async function createCookieSessionStorageFactory<T>(
   if (cookieOptions.sameSite === 'None') {
     log.debug('Patching Statehood.prepareValue');
     const originalPrepareValue = Statehood.prepareValue;
-    Statehood.prepareValue = function kibanaStatehoodPrepareValueWrapper(
+    Statehood.prepareValue = function opensearchDashboardsStatehoodPrepareValueWrapper(
       name: string,
       value: unknown,
       options: any
@@ -175,7 +175,7 @@ export async function createCookieSessionStorageFactory<T>(
   }
 
   return {
-    asScoped(request: KibanaRequest) {
+    asScoped(request: OpenSearchDashboardsRequest) {
       return new ScopedCookieSessionStorage<T>(log, server, ensureRawRequest(request));
     },
   };

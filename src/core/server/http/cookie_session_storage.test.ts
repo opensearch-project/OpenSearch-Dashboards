@@ -18,13 +18,13 @@
  */
 import request from 'request';
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { REPO_ROOT } from '@osd/dev-utils';
+import { ByteSizeValue } from '@osd/config-schema';
 import { BehaviorSubject } from 'rxjs';
 
 import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
-import { KibanaRequest } from './router';
+import { OpenSearchDashboardsRequest } from './router';
 import { Env } from '../config';
 
 import { contextServiceMock } from '../context/context_service.mock';
@@ -322,7 +322,7 @@ describe('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(OpenSearchDashboardsRequest.from(mockRequest)).get();
       expect(session).toBe(null);
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -353,7 +353,7 @@ describe('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(OpenSearchDashboardsRequest.from(mockRequest)).get();
       expect(session).toBe('foo');
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -382,7 +382,7 @@ describe('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(OpenSearchDashboardsRequest.from(mockRequest)).get();
       expect(session).toBe(null);
 
       expect(loggingSystemMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);

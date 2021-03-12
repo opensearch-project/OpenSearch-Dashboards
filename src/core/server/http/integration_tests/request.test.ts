@@ -28,7 +28,7 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 let server: HttpService;
 
@@ -50,7 +50,7 @@ afterEach(async () => {
 });
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-describe('KibanaRequest', () => {
+describe('OpenSearchDashboardsRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
       it('returns false if no auth interceptor was registered', async () => {

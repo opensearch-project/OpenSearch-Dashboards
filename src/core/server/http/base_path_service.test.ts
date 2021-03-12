@@ -18,7 +18,7 @@
  */
 
 import { BasePath } from './base_path_service';
-import { KibanaRequest } from './router';
+import { OpenSearchDashboardsRequest } from './router';
 import { httpServerMock } from './http_server.mocks';
 
 describe('BasePath', () => {
@@ -43,20 +43,20 @@ describe('BasePath', () => {
       expect(basePath.get(request)).toBe('/baz/');
     });
 
-    it('returns base path associated with an incoming KibanaRequest', () => {
+    it('returns base path associated with an incoming OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest();
       const basePath = new BasePath();
 
-      basePath.set(KibanaRequest.from(request, undefined), '/baz/');
-      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
+      basePath.set(OpenSearchDashboardsRequest.from(request, undefined), '/baz/');
+      expect(basePath.get(OpenSearchDashboardsRequest.from(request, undefined))).toBe('/baz/');
     });
 
-    it('operates with both Legacy.Request/KibanaRequest requests', () => {
+    it('operates with both Legacy.Request/OpenSearchDashboardsRequest requests', () => {
       const request = httpServerMock.createRawRequest();
       const basePath = new BasePath();
 
       basePath.set(request, '/baz/');
-      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
+      expect(basePath.get(OpenSearchDashboardsRequest.from(request, undefined))).toBe('/baz/');
     });
 
     it('is based on server base path', () => {

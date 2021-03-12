@@ -18,8 +18,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { REPO_ROOT } from '@osd/dev-utils';
+import { ByteSizeValue } from '@osd/config-schema';
 import { Env } from '../config';
 import { HttpService } from './http_service';
 import { CoreContext } from '../core_context';

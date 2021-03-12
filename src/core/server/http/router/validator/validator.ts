@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ValidationError, ObjectType, Type, schema, isConfigSchema } from '@kbn/config-schema';
+import { ValidationError, ObjectType, Type, schema, isConfigSchema } from '@osd/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
@@ -34,7 +34,7 @@ export interface RouteValidationResultFactory {
 }
 
 /**
- * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
+ * The custom validation function if @osd/config-schema is not a valid solution for your specific plugin requirements.
  *
  * @example
  *
@@ -72,7 +72,7 @@ export type RouteValidationFunction<T> = (
     };
 
 /**
- * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
+ * Allowed property validation options: either @osd/config-schema validations or custom validation functions
  *
  * See {@link RouteValidationFunction} for custom validation.
  *

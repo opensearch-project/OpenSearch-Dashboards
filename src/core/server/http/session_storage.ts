@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaRequest } from './router';
+import { OpenSearchDashboardsRequest } from './router';
 /**
  * Provides an interface to store and retrieve data across requests.
  * @public
@@ -42,5 +42,5 @@ export interface SessionStorage<T> {
  * SessionStorage factory to bind one to an incoming request
  * @public */
 export interface SessionStorageFactory<T> {
-  asScoped: (request: KibanaRequest) => SessionStorage<T>;
+  asScoped: (request: OpenSearchDashboardsRequest) => SessionStorage<T>;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
