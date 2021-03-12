@@ -1,10 +1,10 @@
 {
   "id": "savedObjectsManagement",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data"],
   "optionalPlugins": ["dashboard", "visualizations", "discover", "home"],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["kibanaReact", "home"]
+  "requiredBundles": ["opensearchDashboardsReact", "home"]
 }

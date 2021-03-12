@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 import { findRelationships } from '../lib';
 import { ISavedObjectsManagement } from '../services';
@@ -28,7 +28,7 @@ export const registerRelationshipsRoute = (
 ) => {
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
+      path: '/api/opensearch-dashboards/management/saved_objects/relationships/{type}/{id}',
       validate: {
         params: schema.object({
           type: schema.string(),

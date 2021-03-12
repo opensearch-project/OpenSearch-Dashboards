@@ -24,7 +24,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportAmbiguousConflictError,
 } from 'src/core/public';
-import { Required } from '@kbn/utility-types';
+import { Required } from '@osd/utility-types';
 import { FailedImport, ProcessedImportResponse } from './process_import_response';
 
 // the HTTP route requires type and ID; all other field are optional
