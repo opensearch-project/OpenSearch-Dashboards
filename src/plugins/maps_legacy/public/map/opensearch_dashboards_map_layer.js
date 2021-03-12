@@ -19,7 +19,7 @@
 
 import { EventEmitter } from 'events';
 
-export class KibanaMapLayer extends EventEmitter {
+export class OpenSearchDashboardsMapLayer extends EventEmitter {
   constructor() {
     super();
     this._leafletLayer = null;

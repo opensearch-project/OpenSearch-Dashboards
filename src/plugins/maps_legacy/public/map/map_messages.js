@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import { toMountPoint } from '../../../kibana_react/public';
+import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export const createZoomWarningMsg = (function () {
   let disableZoomMsg = false;
@@ -39,10 +39,10 @@ export const createZoomWarningMsg = (function () {
         <div>
           <p>
             <FormattedMessage
-              id="maps_legacy.kibanaMap.zoomWarning"
+              id="maps_legacy.opensearchDashboardsMap.zoomWarning"
               defaultMessage="You've reached the maximum number of zoom
               levels. To zoom all the way in, upgrade to the
-              {defaultDistribution} of Elasticsearch and Kibana. You'll get
+              {defaultDistribution} of OpenSearch and OpenSearch Dashboards. You'll get
               access to additional zoom levels for free through the {ems}.
               Or, you can configure your own map server. Please go to
               { wms } or { configSettings} for more information."
@@ -54,7 +54,7 @@ export const createZoomWarningMsg = (function () {
                 ),
                 ems: (
                   <a target="_blank" href="https://www.elastic.co/elastic-maps-service">
-                    {`Elastic Maps Service`}
+                    {`OpenSearch Maps Service`}
                   </a>
                 ),
                 wms: (
