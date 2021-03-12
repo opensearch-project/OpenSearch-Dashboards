@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { UnwrapPromiseOrReturn } from '@osd/utility-types';
 import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
 import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
   ExpressionFunctionFont,
-  ExpressionFunctionKibanaContext,
-  ExpressionFunctionKibana,
+  ExpressionFunctionOpenSearchDashboardsContext,
+  ExpressionFunctionOpenSearchDashboards,
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
@@ -41,7 +41,7 @@ export interface ExpressionFunctionDefinition<
   Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+  > {
   /**
    * The name of the function, as will be used in expression.
    */
@@ -119,8 +119,8 @@ export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export interface ExpressionFunctionDefinitions {
   clog: ExpressionFunctionClog;
   font: ExpressionFunctionFont;
-  kibana_context: ExpressionFunctionKibanaContext;
-  kibana: ExpressionFunctionKibana;
+  opensearch_dashboards_context: ExpressionFunctionOpenSearchDashboardsContext;
+  opensearchDashboards: ExpressionFunctionOpenSearchDashboards;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;

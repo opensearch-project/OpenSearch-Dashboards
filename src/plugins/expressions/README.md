@@ -13,15 +13,15 @@ one of the *renderers* registered in `expressions` plugin.
 Expressions power visualizations in Dashboard and Lens, as well as, every
 *element* in Canvas is backed by an expression.
 
-Below is an example of one Canvas element that fetches data using `essql` function,
+Below is an example of one Canvas element that fetches data using `opensearchsql` function,
 pipes it further to `math` and `metric` functions, and final `render` function
 renders the result.
 
 ```
 filters
-| essql
+| opensearchsql
   query="SELECT COUNT(timestamp) as total_errors
-    FROM kibana_sample_data_logs
+    FROM opensearch_dashboards_sample_data_logs
     WHERE tags LIKE '%warning%' OR tags LIKE '%error%'"
 | math "total_errors"
 | metric "TOTAL ISSUES"
