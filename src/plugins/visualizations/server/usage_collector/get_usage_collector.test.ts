@@ -121,7 +121,7 @@ const enlargedMockSavedObjects = [
 ];
 
 describe('Visualizations usage collector', () => {
-  const configMock = of({ kibana: { index: '' } });
+  const configMock = of({ opensearchDashboards: { index: '' } });
   const usageCollector = getUsageCollector(configMock);
   const getMockCallCluster = (hits: unknown[]) =>
     (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;

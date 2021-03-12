@@ -28,7 +28,7 @@ import {
   SavedObjectsStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/kibana_utils/public';
+import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
 import {
   DataPublicPluginStart,
   FilterManager,

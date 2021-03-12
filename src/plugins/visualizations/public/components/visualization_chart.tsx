@@ -22,7 +22,7 @@ import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import { PersistedState } from '../../../../plugins/visualizations/public';
 import { VisualizationController } from '../types';
-import { ResizeChecker } from '../../../../plugins/kibana_utils/public';
+import { ResizeChecker } from '../../../../plugins/opensearch_dashboards_utils/public';
 import { ExprVis } from '../expressions/vis';
 
 interface VisualizationChartProps {
@@ -76,7 +76,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
   public render() {
     return (
-      <div className="visChart__container kbn-resetFocusState" tabIndex={0} ref={this.containerDiv}>
+      <div className="visChart__container osd-resetFocusState" tabIndex={0} ref={this.containerDiv}>
         <div className="visChart" ref={this.chartDiv} />
       </div>
     );
