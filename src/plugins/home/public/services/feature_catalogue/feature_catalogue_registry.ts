@@ -43,7 +43,7 @@ export interface FeatureCatalogueEntry {
   readonly icon: IconType;
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
-  /** Whether or not this link should be shown on the front page of Kibana. */
+  /** Whether or not this link should be shown on the front page of OpenSearch Dashboards. */
   readonly showOnHomePage: boolean;
   /** An ordinal used to sort features relative to one another for display on the home page */
   readonly order?: number;

@@ -44,8 +44,8 @@ import { crowdstrikeLogsSpecProvider } from './crowdstrike_logs';
 import { cylanceLogsSpecProvider } from './cylance_logs';
 import { dockerMetricsSpecProvider } from './docker_metrics';
 import { dropwizardMetricsSpecProvider } from './dropwizard_metrics';
-import { elasticsearchLogsSpecProvider } from './elasticsearch_logs';
-import { elasticsearchMetricsSpecProvider } from './elasticsearch_metrics';
+import { opensearchLogsSpecProvider } from './opensearch_logs';
+import { opensearchMetricsSpecProvider } from './opensearch_metrics';
 import { envoyproxyLogsSpecProvider } from './envoyproxy_logs';
 import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 import { etcdMetricsSpecProvider } from './etcd_metrics';
@@ -68,8 +68,8 @@ import { iptablesLogsSpecProvider } from './iptables_logs';
 import { juniperLogsSpecProvider } from './juniper_logs';
 import { kafkaLogsSpecProvider } from './kafka_logs';
 import { kafkaMetricsSpecProvider } from './kafka_metrics';
-import { kibanaLogsSpecProvider } from './kibana_logs';
-import { kibanaMetricsSpecProvider } from './kibana_metrics';
+import { opensearchDashboardsLogsSpecProvider } from './opensearch_dashboards_logs';
+import { opensearchDashboardsMetricsSpecProvider } from './opensearch_dashboards_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { logstashLogsSpecProvider } from './logstash_logs';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
@@ -131,7 +131,7 @@ export const builtInTutorials = [
   systemMetricsSpecProvider,
   apacheLogsSpecProvider,
   apacheMetricsSpecProvider,
-  elasticsearchLogsSpecProvider,
+  opensearchLogsSpecProvider,
   iisLogsSpecProvider,
   kafkaLogsSpecProvider,
   logstashLogsSpecProvider,
@@ -157,11 +157,11 @@ export const builtInTutorials = [
   aerospikeMetricsSpecProvider,
   couchbaseMetricsSpecProvider,
   dropwizardMetricsSpecProvider,
-  elasticsearchMetricsSpecProvider,
+  opensearchMetricsSpecProvider,
   etcdMetricsSpecProvider,
   haproxyMetricsSpecProvider,
   kafkaMetricsSpecProvider,
-  kibanaMetricsSpecProvider,
+  opensearchDashboardsMetricsSpecProvider,
   memcachedMetricsSpecProvider,
   muninMetricsSpecProvider,
   vSphereMetricsSpecProvider,
@@ -219,7 +219,7 @@ export const builtInTutorials = [
   impervaLogsSpecProvider,
   infobloxLogsSpecProvider,
   juniperLogsSpecProvider,
-  kibanaLogsSpecProvider,
+  opensearchDashboardsLogsSpecProvider,
   microsoftLogsSpecProvider,
   mispLogsSpecProvider,
   mongodbLogsSpecProvider,

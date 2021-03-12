@@ -46,13 +46,13 @@ const mockFeatures = [
   },
   {
     category: 'admin',
-    description: 'Add and manage your fleet of Elastic Agents and integrations.',
+    description: 'Add and manage your fleet of OpenSearch Agents and integrations.',
     showOnHomePage: true,
     icon: 'indexManagementApp',
     id: 'ingestManager',
     order: 510,
     path: '/app/ingestManager',
-    title: 'Add Elastic Agent',
+    title: 'Add OpenSearch Agent',
   },
   {
     category: 'data',

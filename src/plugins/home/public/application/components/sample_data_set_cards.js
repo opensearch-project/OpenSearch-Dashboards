@@ -24,7 +24,7 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 import { SampleDataSetCard, INSTALLED_STATUS, UNINSTALLED_STATUS } from './sample_data_set_card';
 
-import { getServices } from '../kibana_services';
+import { getServices } from '../opensearch_dashboards_services';
 
 import {
   listSampleDataSets,
@@ -32,7 +32,7 @@ import {
   uninstallSampleDataSet,
 } from '../sample_data_client';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export class SampleDataSetCards extends React.Component {
   constructor(props) {

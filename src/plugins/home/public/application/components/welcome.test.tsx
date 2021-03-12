@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 
-jest.mock('../kibana_services', () => ({
+jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},

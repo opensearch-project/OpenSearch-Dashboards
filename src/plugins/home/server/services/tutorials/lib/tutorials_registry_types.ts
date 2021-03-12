@@ -17,7 +17,7 @@
  * under the License.
  */
 import { IconType } from '@elastic/eui';
-import { KibanaRequest } from 'src/core/server';
+import { OpenSearchDashboardsRequest } from 'src/core/server';
 
 /** @public */
 export enum TutorialsCategory {
@@ -88,13 +88,13 @@ export interface TutorialSchema {
   completionTimeMinutes?: number;
   previewImagePath?: string;
 
-  // kibana and elastic cluster running on prem
+  // OpenSearch Dashboards and elastic cluster running on prem
   onPrem: InstructionsSchema;
 
-  // kibana and elastic cluster running in elastic's cloud
+  // OpenSearch Dashboards and elastic cluster running in elastic's cloud
   elasticCloud?: InstructionsSchema;
 
-  // kibana running on prem and elastic cluster running in elastic's cloud
+  // OpenSearch Dashboards running on prem and elastic cluster running in elastic's cloud
   onPremElasticCloud?: InstructionsSchema;
 
   // Elastic stack artifacts produced by product when it is setup and run.
@@ -108,5 +108,5 @@ export interface TutorialContext {
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;
-export type TutorialContextFactory = (req: KibanaRequest) => { [key: string]: unknown };
+export type TutorialContextFactory = (req: OpenSearchDashboardsRequest) => { [key: string]: unknown };
 export type ScopedTutorialContextFactory = (...args: any[]) => any;

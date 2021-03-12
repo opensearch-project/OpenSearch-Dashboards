@@ -23,8 +23,8 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+} from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
 
 import {
@@ -37,7 +37,7 @@ import {
   TutorialServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
-import { setServices } from './application/kibana_services';
+import { setServices } from './application/opensearch_dashboards_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
@@ -58,17 +58,17 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-    Plugin<
-      HomePublicPluginSetup,
-      HomePublicPluginStart,
-      HomePluginSetupDependencies,
-      HomePluginStartDependencies
-    > {
+  Plugin<
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  HomePluginSetupDependencies,
+  HomePluginStartDependencies
+  > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) { }
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
@@ -80,15 +80,15 @@ export class HomePublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
-          ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
-          : () => {};
+          ? usageCollection.reportUiStats.bind(usageCollection, 'OpenSearch_Dashboards_home')
+          : () => { };
         const [
           coreStart,
           { telemetry, data, urlForwarding: urlForwardingStart },
         ] = await core.getStartServices();
         setServices({
           trackUiMetric,
-          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
           toastNotifications: core.notifications.toasts,
           banners: coreStart.overlays.banners,
@@ -146,7 +146,7 @@ export class HomePublicPlugin
   ) {
     this.featuresCatalogueRegistry.start({ capabilities });
 
-    // If the home app is the initial location when loading Kibana...
+    // If the home app is the initial location when loading OpenSearch Dashboards...
     if (
       window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
       window.location.hash === ''
@@ -154,7 +154,7 @@ export class HomePublicPlugin
       // ...wait for the app to mount initially and then...
       currentAppId$.pipe(first()).subscribe((appId) => {
         if (appId === 'home') {
-          // ...navigate to default app set by `kibana.defaultAppId`.
+          // ...navigate to default app set by `opensearchDashboards.defaultAppId`.
           // This doesn't do anything as along as the default settings are kept.
           urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }

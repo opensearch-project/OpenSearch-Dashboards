@@ -19,7 +19,7 @@
 
 /*
  * The UI and related logic for the welcome screen that *should* show only
- * when it is enabled (the default) and there is no Kibana-consumed data
+ * when it is enabled (the default) and there is no OpenSearch Dashboards-consumed data
  * in Elasticsearch.
  */
 
@@ -34,9 +34,9 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices } from '../kibana_services';
+import { METRIC_TYPE } from '@osd/analytics';
+import { FormattedMessage } from '@osd/i18n/react';
+import { getServices } from '../opensearch_dashboards_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 
 import { SampleDataCard } from './sample_data';
@@ -100,7 +100,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementDisableCollection"
             defaultMessage=" To stop collection, "
           />
-          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
+          <EuiLink href={this.services.addBasePath('management/opensearch-dashboards/settings')}>
             <FormattedMessage
               id="home.dataManagementDisableCollectionLink"
               defaultMessage="disable usage data here."
@@ -115,7 +115,7 @@ export class Welcome extends React.Component<Props> {
             id="home.dataManagementEnableCollection"
             defaultMessage=" To start collection, "
           />
-          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
+          <EuiLink href={this.services.addBasePath('management/opensearch-dashboards/settings')}>
             <FormattedMessage
               id="home.dataManagementEnableCollectionLink"
               defaultMessage="enable usage data here."
@@ -139,7 +139,7 @@ export class Welcome extends React.Component<Props> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
+                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to OpenSearch" />
                 </h1>
               </EuiTitle>
               <EuiSpacer size="m" />

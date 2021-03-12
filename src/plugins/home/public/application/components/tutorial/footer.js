@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiButton } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export function Footer({ url, label }) {
   return (

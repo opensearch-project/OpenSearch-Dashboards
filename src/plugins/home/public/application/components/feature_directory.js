@@ -33,8 +33,8 @@ import {
 
 import { FeatureCatalogueCategory } from '../../services';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 const ALL_TAB_ID = 'all';

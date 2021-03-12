@@ -29,17 +29,17 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   title: 'Dashboard',
   description: 'Display and share a collection of visualizations and saved searches.',
   icon: 'dashboardApp',
-  path: `/app/kibana#dashboard`,
+  path: `/app/opensearch-dashboards#dashboard`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 };
 
-const KIBANA_SOLUTION: FeatureCatalogueSolution = {
-  id: 'kibana',
-  title: 'Kibana',
+const OPENSEARCH_DASHBOARDS_SOLUTION: FeatureCatalogueSolution = {
+  id: 'opensearchDashboards',
+  title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   appDescriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
-  icon: 'kibanaApp',
+  icon: 'opensearchDashboardsApp',
   path: `/app/home`,
 };
 
@@ -55,9 +55,9 @@ describe('FeatureCatalogueRegistry', () => {
 
     test('throws when registering a solution with a duplicate id', () => {
       const setup = new FeatureCatalogueRegistry().setup();
-      setup.registerSolution(KIBANA_SOLUTION);
-      expect(() => setup.registerSolution(KIBANA_SOLUTION)).toThrowErrorMatchingInlineSnapshot(
-        `"Solution with id [kibana] has already been registered. Use a unique id."`
+      setup.registerSolution(OPENSEARCH_DASHBOARDS_SOLUTION);
+      expect(() => setup.registerSolution(OPENSEARCH_DASHBOARDS_SOLUTION)).toThrowErrorMatchingInlineSnapshot(
+        `"Solution with id [opensearchDashboards] has already been registered. Use a unique id."`
       );
     });
   });
