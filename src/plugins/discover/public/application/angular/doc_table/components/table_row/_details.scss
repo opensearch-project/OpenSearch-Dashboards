@@ -1,13 +1,13 @@
 /**
  * 1. Visually align the actions with the tabs. We can improve this by using flexbox instead, at a later point.
  */
-.kbnDocTableDetails__actions {
+.osdDocTableDetails__actions {
   float: right;
   padding-top: $euiSizeS; /* 1 */
 }
 
 // Overwrite the border on the bootstrap table
-.kbnDocTableDetails__row {
+.osdDocTableDetails__row {
 
   > td {
     // Offsets negative margins from an inner flex group

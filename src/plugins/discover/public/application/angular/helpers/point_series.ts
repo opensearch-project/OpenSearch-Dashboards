@@ -40,8 +40,8 @@ export interface Table {
 interface HistogramParams {
   date: true;
   interval: Duration;
-  intervalESValue: number;
-  intervalESUnit: Unit;
+  intervalOpenSearchValue: number;
+  intervalOpenSearchUnit: Unit;
   format: string;
   bounds: {
     min: Moment;
@@ -61,8 +61,8 @@ export interface Dimensions {
 interface Ordered {
   date: true;
   interval: Duration;
-  intervalESUnit: string;
-  intervalESValue: number;
+  intervalOpenSearchUnit: string;
+  intervalOpenSearchValue: number;
   min: Moment;
   max: Moment;
 }
@@ -88,12 +88,12 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   chart.xAxisFormat = x.format;
   chart.xAxisLabel = table.columns[x.accessor].name;
 
-  const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
+  const { intervalOpenSearchUnit, intervalOpenSearchValue, interval, bounds } = x.params;
   chart.ordered = {
     date: true,
     interval,
-    intervalESUnit,
-    intervalESValue,
+    intervalOpenSearchUnit,
+    intervalOpenSearchValue,
     min: bounds.min,
     max: bounds.max,
   };

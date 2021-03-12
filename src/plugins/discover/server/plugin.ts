@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/server';
 import { uiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { searchSavedObjectType } from './saved_objects';
@@ -35,5 +35,5 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

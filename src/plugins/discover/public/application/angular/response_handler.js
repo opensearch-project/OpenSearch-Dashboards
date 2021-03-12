@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getServices } from '../../kibana_services';
+import { getServices } from '../../opensearch_dashboards_services';
 import { buildPointSeriesData } from './helpers';
 
 function tableResponseHandler(table, dimensions) {

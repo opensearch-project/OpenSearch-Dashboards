@@ -18,15 +18,15 @@
  */
 import _ from 'lodash';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from 'opensearch-dashboards/public';
 import {
   createStateContainer,
-  createKbnUrlStateStorage,
+  createOsdUrlStateStorage,
   syncStates,
   BaseStateContainer,
   withNotifyOnErrors,
-} from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+} from '../../../../opensearch_dashboards_utils/public';
+import { opensearchFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
 export interface AppState {
   /**
@@ -80,7 +80,7 @@ interface GetStateParams {
   /**
    * Core's notifications.toasts service
    * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * osdUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
 }
@@ -134,7 +134,7 @@ export function getState({
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
-  const stateStorage = createKbnUrlStateStorage({
+  const stateStorage = createOsdUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
@@ -229,7 +229,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return opensearchFilters.compareFilters(filtersA, filtersB, opensearchFilters.COMPARE_ALL_OPTIONS);
 }
 
 /**
@@ -246,7 +246,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return (
     _.isEqual(stateAPartial, stateBPartial) &&
-    esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
+    opensearchFilters.compareFilters(stateAFilters, stateBFilters, opensearchFilters.COMPARE_ALL_OPTIONS)
   );
 }
 

@@ -17,8 +17,8 @@
  * under the License.
  */
 import dateMath from '@elastic/datemath';
-import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { ToastsStart } from 'opensearch-dashboards/public';
 
 /**
  * Validates a given time filter range, provided by URL or UI

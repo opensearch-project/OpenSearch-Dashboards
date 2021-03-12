@@ -21,11 +21,11 @@ import {
   TimeRange,
   Filter,
   Query,
-  esFilters,
+  opensearchFilters,
   QueryState,
   RefreshInterval,
 } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
@@ -76,7 +76,7 @@ interface Params {
 
 export class DiscoverUrlGenerator
   implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
-  constructor(private readonly params: Params) {}
+  constructor(private readonly params: Params) { }
 
   public readonly id = DISCOVER_APP_URL_GENERATOR;
 
@@ -99,17 +99,17 @@ export class DiscoverUrlGenerator
 
     if (query) appState.query = query;
     if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+      appState.filters = filters?.filter((f) => !opensearchFilters.isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
 
     if (timeRange) queryState.time = timeRange;
     if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+      queryState.filters = filters?.filter((f) => opensearchFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
-    url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);
-    url = setStateToKbnUrl('_a', appState, { useHash }, url);
+    url = setStateToOsdUrl<QueryState>('_g', queryState, { useHash }, url);
+    url = setStateToOsdUrl('_a', appState, { useHash }, url);
 
     return url;
   };

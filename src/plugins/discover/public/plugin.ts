@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -29,20 +29,20 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { OpenSearchDashboardsLegacySetup, OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
+import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
@@ -60,7 +60,7 @@ import {
   getScopedHistory,
   syncHistoryLocations,
   getServices,
-} from './kibana_services';
+} from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
@@ -120,7 +120,7 @@ export interface DiscoverSetupPlugins {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
@@ -137,7 +137,7 @@ export interface DiscoverStartPlugins {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
@@ -147,13 +147,13 @@ const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
 
 /**
- * Contains Discover, one of the oldest parts of Kibana
+ * Contains Discover, one of the oldest parts of OpenSearch Dashboards
  * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
  * Discover provides embeddables, those contain a slimmer Angular
  */
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) { }
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
@@ -205,7 +205,7 @@ export class DiscoverPlugin
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
       restorePreviousUrl,
-    } = createKbnUrlTracker({
+    } = createOsdUrlTracker({
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
       // this prevents redundant `#` when not in discover app
@@ -217,14 +217,14 @@ export class DiscoverPlugin
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
-          kbnUrlKey: '_g',
+          osdUrlKey: '_g',
           stateUpdate$: plugins.data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
             }))
           ),
         },
@@ -243,7 +243,7 @@ export class DiscoverPlugin
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -391,7 +391,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
-      getServices().kibanaLegacy.loadFontAwesome();
+      getServices().opensearchDashboardsLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
       getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');

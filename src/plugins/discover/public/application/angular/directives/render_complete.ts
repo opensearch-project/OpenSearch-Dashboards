@@ -17,7 +17,7 @@
  * under the License.
  */
 import { IScope } from 'angular';
-import { RenderCompleteListener } from '../../../../../kibana_utils/public';
+import { RenderCompleteListener } from '../../../../../opensearch_dashboards_utils/public';
 
 export function createRenderCompleteDirective() {
   return {

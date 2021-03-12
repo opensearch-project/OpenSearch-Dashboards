@@ -32,7 +32,7 @@ import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     history: () => ({
       location: {

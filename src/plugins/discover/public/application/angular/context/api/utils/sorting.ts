@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../../kibana_services';
+import { IndexPattern } from '../../../../../opensearch_dashboards_services';
 
 export enum SortDirection {
   asc = 'asc',

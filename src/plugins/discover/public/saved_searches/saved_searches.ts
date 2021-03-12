@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectLoader, SavedObjectKibanaServices } from '../../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectOpenSearchDashboardsServices } from '../../../saved_objects/public';
 import { createSavedSearchClass } from './_saved_search';
 
-export function createSavedSearchesLoader(services: SavedObjectKibanaServices) {
+export function createSavedSearchesLoader(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedSearchClass = createSavedSearchClass(services);
   const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, services.savedObjectsClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .

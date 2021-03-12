@@ -17,13 +17,13 @@
  * under the License.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
+import { buildSearchBody, useOpenSearchDocSearch, OpenSearchRequestState } from './use_opensearch_doc_search';
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 
 const mockSearchResult = new Observable();
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     data: {
       search: {
@@ -58,7 +58,7 @@ describe('Test of <Doc /> helper / hook', () => {
     `);
   });
 
-  test('useEsDocSearch', async () => {
+  test('useOpenSearchDocSearch', async () => {
     const indexPattern = {
       getComputedFields: () => [],
     };
@@ -73,10 +73,10 @@ describe('Test of <Doc /> helper / hook', () => {
     } as DocProps;
     let hook;
     await act(async () => {
-      hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
+      hook = renderHook((p: DocProps) => useOpenSearchDocSearch(p), { initialProps: props });
     });
     // @ts-ignore
-    expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, indexPattern]);
+    expect(hook.result.current).toEqual([OpenSearchRequestState.Loading, null, indexPattern]);
     expect(indexPatternService.get).toHaveBeenCalled();
   });
 });

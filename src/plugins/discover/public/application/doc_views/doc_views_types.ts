@@ -28,7 +28,7 @@ export interface AngularDirective {
 
 export type AngularScope = IScope;
 
-export type ElasticSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number];
+export type OpenSearchSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number];
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -47,7 +47,7 @@ export type DocViewFilterFn = (
 export interface DocViewRenderProps {
   columns?: string[];
   filter?: DocViewFilterFn;
-  hit: ElasticSearchHit;
+  hit: OpenSearchSearchHit;
   indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
@@ -63,12 +63,12 @@ export interface DocViewInput {
   directive?: AngularDirective;
   order: number;
   render?: DocViewRenderFn;
-  shouldShow?: (hit: ElasticSearchHit) => boolean;
+  shouldShow?: (hit: OpenSearchSearchHit) => boolean;
   title: string;
 }
 
 export interface DocView extends DocViewInput {
-  shouldShow: (hit: ElasticSearchHit) => boolean;
+  shouldShow: (hit: OpenSearchSearchHit) => boolean;
 }
 
 export type DocViewInputFn = () => DocViewInput;

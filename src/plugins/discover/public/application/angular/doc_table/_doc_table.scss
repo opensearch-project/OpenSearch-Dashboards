@@ -22,11 +22,11 @@ doc-table {
   }
 }
 
-.kbnDocTable__container.loading {
+.osdDocTable__container.loading {
   opacity: 0.5;
 }
 
-.kbnDocTable {
+.osdDocTable {
   font-size: $euiFontSizeXS;
 
   th {
@@ -39,10 +39,10 @@ doc-table {
   }
 }
 
-.kbn-table,
-.kbnDocTable {
+.osd-table,
+.osdDocTable {
   /**
-  *  Style ES document _source in table view <dt>key:<dt><dd>value</dd>
+  *  Style OpenSearch document _source in table view <dt>key:<dt><dd>value</dd>
   *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
   *  row in the Context Log.
   */
@@ -68,39 +68,39 @@ doc-table {
   }
 }
 
-.kbnDocTable__row {
+.osdDocTable__row {
   td {
     position: relative;
 
     &:hover {
-      .kbnDocTableRowFilterButton {
+      .osdDocTableRowFilterButton {
         opacity: 1;
       }
     }
   }
 }
 
-.kbnDocTable__row--highlight {
+.osdDocTable__row--highlight {
   td,
-  .kbnDocTableRowFilterButton {
+  .osdDocTableRowFilterButton {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
 }
 
-.kbnDocTable__bar {
+.osdDocTable__bar {
   margin: $euiSizeXS $euiSizeXS 0;
 }
 
-.kbnDocTable__bar--footer {
+.osdDocTable__bar--footer {
   position: relative;
   margin: -($euiSize * 3) $euiSizeXS 0;
 }
 
-.kbnDocTable__padBottom {
+.osdDocTable__padBottom {
   padding-bottom: $euiSizeXL;
 }
 
-.kbnDocTable__error {
+.osdDocTable__error {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -119,7 +119,7 @@ doc-table {
   }
 }
 
-.kbn-table {
+.osd-table {
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0;

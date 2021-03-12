@@ -17,9 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export interface Props {
   onClick: () => void;
@@ -58,7 +58,7 @@ export function DocViewTableRowBtnFilterExists({
           defaultMessage: 'Filter for field present',
         })}
         onClick={onClick}
-        className="kbnDocViewer__actionButton"
+        className="osdDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
         disabled={disabled}
         iconType={'indexOpen'}

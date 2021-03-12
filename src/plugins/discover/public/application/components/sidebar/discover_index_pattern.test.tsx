@@ -22,7 +22,7 @@ import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from 'opensearch-dashboards/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
