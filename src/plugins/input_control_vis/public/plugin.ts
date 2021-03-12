@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
@@ -55,7 +55,7 @@ export interface InputControlVisPluginStartDependencies {
 export class InputControlVisPlugin implements Plugin<void, void> {
   private cachedSettings: InputControlSettings | undefined = undefined;
 
-  constructor(public initializerContext: PluginInitializerContext) {}
+  constructor(public initializerContext: PluginInitializerContext) { }
 
   public setup(
     core: InputControlVisCoreSetup,
