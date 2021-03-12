@@ -20,7 +20,7 @@
 import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../data/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');

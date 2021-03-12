@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 import { HomeServerPluginSetup } from '../../home/server';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 
-export type ConfigObservable = Observable<{ kibana: { index: string } }>;
+export type ConfigObservable = Observable<{ opensearchDashboards: { index: string } }>;
 
 export interface VegaSavedObjectAttributes {
   title: string;

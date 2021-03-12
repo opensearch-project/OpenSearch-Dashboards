@@ -22,7 +22,7 @@ import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
 import 'brace/mode/hjson';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { getNotifications } from '../services';

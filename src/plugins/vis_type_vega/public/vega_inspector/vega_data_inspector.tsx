@@ -22,7 +22,7 @@ import './vega_data_inspector.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { VegaInspectorAdapters } from './vega_inspector';
 import { DataViewer, SignalViewer, SpecViewer } from './components';
 import { InspectorViewProps } from '../../../inspector/public';

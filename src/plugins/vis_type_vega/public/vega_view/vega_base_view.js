@@ -23,9 +23,9 @@ import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../data/public';
+import { opensearchFilters } from '../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -36,17 +36,17 @@ vega.scheme('elastic', euiPaletteColorBlind());
 // we forward execution to the instance-specific handler
 // This functions must be declared in the VegaBaseView class
 const vegaFunctions = {
-  kibanaAddFilter: 'addFilterHandler',
-  kibanaRemoveFilter: 'removeFilterHandler',
-  kibanaRemoveAllFilters: 'removeAllFiltersHandler',
-  kibanaSetTimeFilter: 'setTimeFilterHandler',
+  opensearchDashboardsAddFilter: 'addFilterHandler',
+  opensearchDashboardsRemoveFilter: 'removeFilterHandler',
+  opensearchDashboardsRemoveAllFilters: 'removeAllFiltersHandler',
+  opensearchDashboardsSetTimeFilter: 'setTimeFilterHandler',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
   if (!vega.expressionFunction(funcName)) {
     vega.expressionFunction(funcName, function handlerFwd(...args) {
       const view = this.context.dataflow;
-      view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
+      view.runAfter(() => view._opensearchDashboardsView.vegaFunctionsHandler(funcName, ...args));
     });
   }
 }
@@ -188,10 +188,10 @@ export class VegaBaseView {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
             defaultMessage:
-              'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
+              'External URLs are not enabled. Add   {enableExternalUrls}   to {opensearchDashboardsConfigFileName}',
             values: {
               enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
-              kibanaConfigFileName: 'kibana.yml',
+              opensearchDashboardsConfigFileName: 'opensearch_dashboards.yml',
             },
           })
         );
@@ -256,11 +256,11 @@ export class VegaBaseView {
 
     if (view) {
       // Global vega expression handler uses it to call custom functions
-      view._kibanaView = this;
+      view._opensearchDashboardsView = this;
 
       if (this._parser.tooltips) {
         // position and padding can be specified with
-        // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
+        // {config:{opensearchDashboards:{tooltips: {position: 'top', padding: 15 } }}}
         const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
 
         // Vega bug workaround - need to destroy tooltip by hand
@@ -300,26 +300,26 @@ export class VegaBaseView {
 
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-   * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
    */
   async addFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = opensearchFilters.buildQueryFilter(query, indexId);
 
     this._applyFilter({ filters: [filter] });
   }
 
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-   * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
    */
   async removeFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = opensearchFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
     const existingFilter = currentFilters.find((filter) =>
-      esFilters.compareFilters(filter, filterToRemove)
+      opensearchFilters.compareFilters(filter, filterToRemove)
     );
 
     if (!existingFilter) return;
@@ -425,7 +425,7 @@ export class VegaBaseView {
 
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
-        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+        console.log('%cWelcome to OpenSearch Dashboards Vega Plugin!', 'font-size: 16px; font-weight: bold;');
         console.log(
           'You can access the Vega view with VEGA_DEBUG. ' +
             'Learn more at https://vega.github.io/vega/docs/api/debugging/.'

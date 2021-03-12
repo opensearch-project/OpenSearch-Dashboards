@@ -29,7 +29,7 @@ import {
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
 
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type OpenSearchResponse = SearchResponse<{ visualization: { visState: string } }>;
 type VegaType = 'vega' | 'vega-lite';
 
 const VEGA_USAGE_TYPE = 'vis_type_vega';
@@ -82,8 +82,8 @@ const getStats = async (
       },
     },
   };
-  const esResponse: ESResponse = await callCluster('search', searchParams);
-  const size = esResponse?.hits?.hits?.length ?? 0;
+  const opensearchResponse: OpenSearchResponse = await callCluster('search', searchParams);
+  const size = opensearchResponse?.hits?.hits?.length ?? 0;
   let shouldPublishTelemetry = false;
 
   if (!size) {
@@ -94,7 +94,7 @@ const getStats = async (
   // in order to have more accurate results
   const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
 
-  const finalTelemetry = esResponse.hits.hits.reduce(
+  const finalTelemetry = opensearchResponse.hits.hits.reduce(
     (telemetry, hit) => {
       const visualization = hit._source?.visualization;
       const visState = JSON.parse(visualization?.visState ?? '{}');
@@ -111,7 +111,7 @@ const getStats = async (
             if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
               telemetry.vega_lite_lib_specs_total++;
             }
-            if (spec.config?.kibana?.type === 'map') {
+            if (spec.config?.opensearchDashboards?.type === 'map') {
               telemetry.vega_use_map_total++;
             }
           }
@@ -139,7 +139,7 @@ export function getUsageCollector(
     type: VEGA_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
+      const { index } = (await config.pipe(first()).toPromise()).opensearchDashboards;
 
       return await getStats(callCluster, index, dependencies);
     },
