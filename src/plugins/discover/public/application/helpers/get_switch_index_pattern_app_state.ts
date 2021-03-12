@@ -18,7 +18,7 @@
  */
 import { getSortArray } from '../angular/doc_table';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { IndexPattern } from '../../kibana_services';
+import { IndexPattern } from '../../opensearch_dashboards_services';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -33,9 +33,9 @@ export function getSwitchIndexPatternAppState(
 ) {
   const nextColumns = modifyColumns
     ? currentColumns.filter(
-        (column) =>
-          nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
-      )
+      (column) =>
+        nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
+    )
     : currentColumns;
   const nextSort = getSortArray(currentSort, nextIndexPattern);
   return {

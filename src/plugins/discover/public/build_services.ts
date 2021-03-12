@@ -26,7 +26,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import {
   FilterManager,
   TimefilterContract,
@@ -37,12 +37,12 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
-import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
+import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
-import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { getHistory } from './opensearch_dashboards_services';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
@@ -61,7 +61,7 @@ export interface DiscoverServices {
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
@@ -78,7 +78,7 @@ export async function buildServices(
   context: PluginInitializerContext,
   getEmbeddableInjector: any
 ): Promise<DiscoverServices> {
-  const services: SavedObjectKibanaServices = {
+  const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
     search: plugins.data.search,
@@ -107,7 +107,7 @@ export async function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
-    kibanaLegacy: plugins.kibanaLegacy,
+    opensearchDashboardsLegacy: plugins.opensearchDashboardsLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,

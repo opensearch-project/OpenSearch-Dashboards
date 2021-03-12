@@ -17,7 +17,7 @@
  * under the License.
  */
 import { TableHeader } from './table_header/table_header';
-import { getServices } from '../../../../kibana_services';
+import { getServices } from '../../../../opensearch_dashboards_services';
 import { SORT_DEFAULT_ORDER_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import { UI_SETTINGS } from '../../../../../../data/public';
 

@@ -18,7 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
@@ -31,7 +31,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 
 // eslint-disable-next-line react/prefer-stateless-function
 export class DiscoverNoResults extends Component {
@@ -157,7 +157,7 @@ export class DiscoverNoResults extends Component {
             <p>
               <FormattedMessage
                 id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
-                defaultMessage="The search bar at the top uses Elasticsearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
+                defaultMessage="The search bar at the top uses OpenSearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
                 Here are some examples of how you can search for web server logs that have been parsed into a few fields."
                 values={{
                   queryStringSyntaxLink: (

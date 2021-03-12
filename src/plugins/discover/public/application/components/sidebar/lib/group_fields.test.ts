@@ -26,7 +26,7 @@ describe('group_fields', function () {
       {
         name: 'category',
         type: 'string',
-        esTypes: ['text'],
+        opensearchTypes: ['text'],
         count: 1,
         scripted: false,
         searchable: true,
@@ -36,7 +36,7 @@ describe('group_fields', function () {
       {
         name: 'currency',
         type: 'string',
-        esTypes: ['keyword'],
+        opensearchTypes: ['keyword'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -46,7 +46,7 @@ describe('group_fields', function () {
       {
         name: 'customer_birth_date',
         type: 'date',
-        esTypes: ['date'],
+        opensearchTypes: ['date'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -70,7 +70,7 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 1,
-            "esTypes": Array [
+            "opensearchTypes": Array [
               "text",
             ],
             "name": "category",
@@ -84,7 +84,7 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
-            "esTypes": Array [
+            "opensearchTypes": Array [
               "keyword",
             ],
             "name": "currency",
@@ -98,7 +98,7 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
-            "esTypes": Array [
+            "opensearchTypes": Array [
               "date",
             ],
             "name": "customer_birth_date",

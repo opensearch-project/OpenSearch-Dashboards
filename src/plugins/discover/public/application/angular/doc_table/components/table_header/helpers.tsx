@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../../../kibana_services';
+import { IndexPattern } from '../../../../../opensearch_dashboards_services';
 import { shortenDottedString } from '../../../../helpers';
 
 export type SortOrder = [string, string];

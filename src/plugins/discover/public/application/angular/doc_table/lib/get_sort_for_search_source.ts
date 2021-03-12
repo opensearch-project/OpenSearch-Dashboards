@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EsQuerySortValue, IndexPattern } from '../../../../kibana_services';
+import { OpenSearchQuerySortValue, IndexPattern } from '../../../../opensearch_dashboards_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
 
 /**
- * Prepares sort for search source, that's sending the request to ES
+ * Prepares sort for search source, that's sending the request to OpenSearch
  * - Adds default sort if necessary
  * - Handles the special case when there's sorting by date_nanos typed fields
  *   the addon of the numeric_type guarantees the right sort order
@@ -32,7 +32,7 @@ export function getSortForSearchSource(
   sort?: SortOrder[],
   indexPattern?: IndexPattern,
   defaultDirection: string = 'desc'
-): EsQuerySortValue[] {
+): OpenSearchQuerySortValue[] {
   if (!sort || !indexPattern) {
     return [];
   } else if (Array.isArray(sort) && sort.length === 0) {
@@ -46,8 +46,8 @@ export function getSortForSearchSource(
           order: sortPair[timeFieldName],
           numeric_type: 'date_nanos',
         },
-      } as EsQuerySortValue;
+      } as OpenSearchQuerySortValue;
     }
-    return sortPair as EsQuerySortValue;
+    return sortPair as OpenSearchQuerySortValue;
   });
 }

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { getServices } from '../../../kibana_services';
+import { i18n } from '@osd/i18n';
+import { getServices } from '../../../opensearch_dashboards_services';
 const { docLinks } = getServices();
 
 export function addHelpMenuToAppChrome(chrome) {

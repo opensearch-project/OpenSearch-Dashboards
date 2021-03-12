@@ -18,15 +18,15 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React from 'react';
-import { getServices } from '../../../../kibana_services';
+import { getServices } from '../../../../opensearch_dashboards_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
-import { MarkdownSimple } from '../../../../../../kibana_react/public';
+import { MarkdownSimple } from '../../../../../../opensearch_dashboards_react/public';
 
 export function QueryActionsProvider(Promise) {
   const { filterManager, indexPatterns, data } = getServices();
@@ -38,21 +38,21 @@ export function QueryActionsProvider(Promise) {
   );
 
   const setFailedStatus = (state) => (subject, details = {}) =>
-    (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.FAILED,
-      reason: FAILURE_REASONS.UNKNOWN,
-      ...details,
-    });
+  (state.loadingStatus[subject] = {
+    status: LOADING_STATUS.FAILED,
+    reason: FAILURE_REASONS.UNKNOWN,
+    ...details,
+  });
 
   const setLoadedStatus = (state) => (subject) =>
-    (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.LOADED,
-    });
+  (state.loadingStatus[subject] = {
+    status: LOADING_STATUS.LOADED,
+  });
 
   const setLoadingStatus = (state) => (subject) =>
-    (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.LOADING,
-    });
+  (state.loadingStatus[subject] = {
+    status: LOADING_STATUS.LOADING,
+  });
 
   const fetchAnchorRow = (state) => () => {
     const {
@@ -173,11 +173,11 @@ export function QueryActionsProvider(Promise) {
   };
 
   const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) =>
-    (state.rows.all = [
-      ...(predecessorRows || []),
-      ...(anchorRow ? [anchorRow] : []),
-      ...(successorRows || []),
-    ]);
+  (state.rows.all = [
+    ...(predecessorRows || []),
+    ...(anchorRow ? [anchorRow] : []),
+    ...(successorRows || []),
+  ]);
 
   return {
     fetchAllRows,

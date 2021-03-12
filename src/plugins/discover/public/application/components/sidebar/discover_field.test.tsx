@@ -27,7 +27,7 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     history: () => ({
       location: {
@@ -76,7 +76,7 @@ function getComponent({
       {
         name: 'bytes',
         type: 'number',
-        esTypes: ['long'],
+        opensearchTypes: ['long'],
         count: 10,
         scripted: false,
         searchable: true,
@@ -122,7 +122,7 @@ describe('discover sidebar field', function () {
       {
         name: '_source',
         type: '_source',
-        esTypes: ['_source'],
+        opensearchTypes: ['_source'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,

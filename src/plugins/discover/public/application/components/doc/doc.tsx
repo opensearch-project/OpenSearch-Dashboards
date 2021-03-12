@@ -17,20 +17,20 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
-import { getServices } from '../../../kibana_services';
+import { OpenSearchRequestState, useOpenSearchDocSearch } from './use_opensearch_doc_search';
+import { getServices } from '../../../opensearch_dashboards_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 
 export interface DocProps {
   /**
-   * Id of the doc in ES
+   * Id of the doc in OpenSearch
    */
   id: string;
   /**
-   * Index in ES to query
+   * Index in OpenSearch to query
    */
   index: string;
   /**
@@ -45,12 +45,12 @@ export interface DocProps {
 }
 
 export function Doc(props: DocProps) {
-  const [reqState, hit, indexPattern] = useEsDocSearch(props);
+  const [reqState, hit, indexPattern] = useOpenSearchDocSearch(props);
 
   return (
     <I18nProvider>
       <EuiPageContent>
-        {reqState === ElasticRequestState.NotFoundIndexPattern && (
+        {reqState === OpenSearchRequestState.NotFoundIndexPattern && (
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-notFoundIndexPattern`}
@@ -64,7 +64,7 @@ export function Doc(props: DocProps) {
             }
           />
         )}
-        {reqState === ElasticRequestState.NotFound && (
+        {reqState === OpenSearchRequestState.NotFound && (
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-notFound`}
@@ -83,7 +83,7 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Error && (
+        {reqState === OpenSearchRequestState.Error && (
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-error`}
@@ -114,14 +114,14 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Loading && (
+        {reqState === OpenSearchRequestState.Loading && (
           <EuiCallOut data-test-subj={`doc-msg-loading`}>
             <EuiLoadingSpinner size="m" />{' '}
             <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
+        {reqState === OpenSearchRequestState.Found && hit !== null && indexPattern && (
           <div data-test-subj="doc-hit">
             <DocViewer hit={hit} indexPattern={indexPattern} />
           </div>

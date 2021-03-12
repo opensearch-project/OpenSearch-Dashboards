@@ -36,7 +36,7 @@ discover-app {
   padding-top: $euiSizeXS;
   background-color: $euiColorEmptyShade;
 
-  .kbn-table {
+  .osd-table {
     margin-bottom: 0;
   }
 }
@@ -81,7 +81,7 @@ discover-app {
   overflow: auto;
 
   // SASSTODO: add a monospace modifier to the doc-table component
-  .kbnDocTable__row {
+  .osdDocTable__row {
     font-family: $euiCodeFontFamily;
     font-size: $euiFontSizeXS;
   }

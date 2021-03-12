@@ -18,9 +18,9 @@
  */
 
 import { auto } from 'angular';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../../opensearch_dashboards_services';
 import {
   EmbeddableFactoryDefinition,
   Container,

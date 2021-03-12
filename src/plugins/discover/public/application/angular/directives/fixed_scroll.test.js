@@ -23,7 +23,7 @@ import $ from 'jquery';
 
 import sinon from 'sinon';
 
-import { initAngularBootstrap } from '../../../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../../../opensearch_dashboards_legacy/public';
 import { FixedScrollProvider } from './fixed_scroll';
 
 const testModuleName = 'fixedScroll';

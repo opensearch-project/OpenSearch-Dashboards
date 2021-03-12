@@ -1,10 +1,10 @@
-.kbnDocViewerTable {
+.osdDocViewerTable {
   margin-top: $euiSizeS;
 }
 
-.kbnDocViewer {
+.osdDocViewer {
   pre,
-  .kbnDocViewer__value {
+  .osdDocViewer__value {
     display: inline-block;
     word-break: break-all;
     word-wrap: break-word;
@@ -13,7 +13,7 @@
     vertical-align: top;
     padding-top: 2px;
   }
-  .kbnDocViewer__field {
+  .osdDocViewer__field {
     padding-top: 8px;
   }
 
@@ -31,33 +31,33 @@
   }
 
   tr:hover {
-    .kbnDocViewer__actionButton {
+    .osdDocViewer__actionButton {
       opacity: 1;
     }
   }
 }
 
-.kbnDocViewer__buttons,
-.kbnDocViewer__field {
+.osdDocViewer__buttons,
+.osdDocViewer__field {
   white-space: nowrap;
 }
-.kbnDocViewer__buttons {
+.osdDocViewer__buttons {
   width: 60px;
 
   // Show all icons if one is focused,
   // IE doesn't support, but the fallback is just the focused button becomes visible
   &:focus-within {
-    .kbnDocViewer__actionButton {
+    .osdDocViewer__actionButton {
       opacity: 1;
     }
   }
 }
 
-.kbnDocViewer__field {
+.osdDocViewer__field {
   width: 160px;
 }
 
-.kbnDocViewer__actionButton {
+.osdDocViewer__actionButton {
   opacity: 0;
 
   &:focus {
@@ -65,7 +65,7 @@
   }
 }
 
-.kbnDocViewer__warning {
+.osdDocViewer__warning {
   margin-right: $euiSizeS;
 }
 

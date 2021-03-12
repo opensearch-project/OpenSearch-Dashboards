@@ -1,12 +1,12 @@
-.kbnDocTableCell__dataField {
+.osdDocTableCell__dataField {
   white-space: pre-wrap;
 }
 
-.kbnDocTableCell__toggleDetails {
+.osdDocTableCell__toggleDetails {
   padding: 4px 0 0 0!important;
 }
 
-.kbnDocTableCell__filter {
+.osdDocTableCell__filter {
   position: absolute;
   white-space: nowrap;
   right: 0;
@@ -18,7 +18,7 @@
  * 3. Show on focus to enable keyboard accessibility.
  */
 
-.kbnDocTableRowFilterButton {
+.osdDocTableRowFilterButton {
   appearance: none;
   background-color: $euiColorEmptyShade;
   border: none;

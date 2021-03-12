@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule } from '../../../../../kibana_services';
+import { getAngularModule } from '../../../../../opensearch_dashboards_services';
 import { ActionBar } from './action_bar';
 
 getAngularModule().directive('contextActionBar', function (reactDirective: any) {

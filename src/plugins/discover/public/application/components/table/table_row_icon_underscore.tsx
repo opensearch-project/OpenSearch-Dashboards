@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export function DocViewTableRowIconUnderscore() {
   const ariaLabel = i18n.translate(
@@ -41,7 +41,7 @@ export function DocViewTableRowIconUnderscore() {
       content={tooltipContent}
       color="warning"
       iconProps={{
-        className: 'kbnDocViewer__warning',
+        className: 'osdDocViewer__warning',
         'data-test-subj': 'underscoreWarning',
       }}
       size="s"
