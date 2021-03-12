@@ -1,8 +1,8 @@
 {
   "id": "inspector",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": false,
   "ui": true,
   "extraPublicDirs": ["common", "common/adapters/request"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["opensearchDashboardsReact"]
 }

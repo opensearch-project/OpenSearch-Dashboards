@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
 import { RequestDetailsRequest, RequestDetailsResponse, RequestDetailsStats } from './details';
