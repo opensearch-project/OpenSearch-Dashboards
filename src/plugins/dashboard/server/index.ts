@@ -29,7 +29,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 //  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+//  as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

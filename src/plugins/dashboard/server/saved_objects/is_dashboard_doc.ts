@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from 'opensearch-dashboards/server';
 import { DashboardDoc730ToLatest } from '../../common';
 
 function isDoc(

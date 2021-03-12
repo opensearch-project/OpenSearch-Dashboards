@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import {
   IEmbeddable,

@@ -27,7 +27,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { LibraryNotificationAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ErrorEmbeddable, IContainer, ViewMode } from '../../../../embeddable/public';
@@ -64,7 +64,7 @@ beforeEach(async () => {
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
+    firstName: 'opensearchDashboards',
   });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {
@@ -75,7 +75,7 @@ beforeEach(async () => {
     ContactCardEmbeddableInput
   >(contactCardEmbeddable, {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+    mockedByValueInput: { firstName: 'opensearchDashboards', id: contactCardEmbeddable.id },
   });
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
 });

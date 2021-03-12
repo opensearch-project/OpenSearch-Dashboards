@@ -23,7 +23,7 @@ import { History } from 'history';
 
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { IIndexPattern, TimeRange, Query, Filter, SavedQuery } from 'src/plugins/data/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 
 import { DashboardAppState, SavedDashboardPanel } from '../types';
 import { DashboardAppController } from './dashboard_app_controller';
@@ -59,7 +59,7 @@ export interface DashboardAppScope extends ng.IScope {
   topNavMenu: any;
   showAddPanel: any;
   showSaveQuery: boolean;
-  kbnTopNav: any;
+  osdTopNav: any;
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
   isVisible: boolean;
@@ -75,7 +75,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
       $routeParams: {
         id?: string;
       },
-      kbnUrlStateStorage: IKbnUrlStateStorage,
+      osdUrlStateStorage: IOsdUrlStateStorage,
       history: History
     ) =>
       new DashboardAppController({
@@ -83,7 +83,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $scope,
         $routeParams,
         indexPatterns: deps.data.indexPatterns,
-        kbnUrlStateStorage,
+        osdUrlStateStorage,
         history,
         ...deps,
       }),

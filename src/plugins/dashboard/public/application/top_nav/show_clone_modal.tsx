@@ -19,8 +19,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { I18nProvider } from '@osd/i18n/react';
 import { DashboardCloneModal } from './clone_modal';
 
 export function showCloneModal(

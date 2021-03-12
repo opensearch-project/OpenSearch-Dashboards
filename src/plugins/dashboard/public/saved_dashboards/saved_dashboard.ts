@@ -19,7 +19,7 @@
 import {
   createSavedObjectClass,
   SavedObject,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
 } from '../../../../plugins/saved_objects/public';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
@@ -45,14 +45,14 @@ export interface SavedObjectDashboard extends SavedObject {
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
-  services: SavedObjectKibanaServices
+  services: SavedObjectOpenSearchDashboardsServices
 ): new (id: string) => SavedObjectDashboard {
   const SavedObjectClass = createSavedObjectClass(services);
   class SavedDashboard extends SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
 
-    // if type:dashboard has no mapping, we push this mapping into ES
+    // if type:dashboard has no mapping, we push this mapping into OpenSearch
     public static mapping = {
       title: 'text',
       hits: 'integer',

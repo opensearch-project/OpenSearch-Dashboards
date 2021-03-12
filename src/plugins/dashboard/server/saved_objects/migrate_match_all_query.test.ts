@@ -17,7 +17,7 @@
  * under the License.
  */
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
@@ -26,7 +26,7 @@ describe('migrate match_all query', () => {
     const migratedDoc = migrateMatchAllQuery(
       {
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               query: {
                 match_all: {},
@@ -39,7 +39,7 @@ describe('migrate match_all query', () => {
     );
 
     const migratedSearchSource = JSON.parse(
-      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      migratedDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
     );
 
     expect(migratedSearchSource).toEqual({
@@ -54,7 +54,7 @@ describe('migrate match_all query', () => {
     const migratedDoc = migrateMatchAllQuery(
       {
         attributes: {
-          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+          opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
         },
       } as Parameters<SavedObjectMigrationFn>[0],
       savedObjectMigrationContext
@@ -62,7 +62,7 @@ describe('migrate match_all query', () => {
 
     expect(migratedDoc).toEqual({
       attributes: {
-        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
       },
     });
   });

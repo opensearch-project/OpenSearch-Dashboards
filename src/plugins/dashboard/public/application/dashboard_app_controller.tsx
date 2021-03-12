@@ -18,7 +18,7 @@
  */
 
 import _, { uniqBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import React, { useState, ReactElement } from 'react';
@@ -82,13 +82,13 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
+import { IOsdUrlStateStorage, unhashUrl } from '../../../opensearch_dashboards_utils/public';
 import {
   addFatalError,
   AngularHttpError,
-  KibanaLegacyStart,
+  OpenSearchDashboardsLegacyStart,
   subscribeWithScope,
-} from '../../../kibana_legacy/public';
+} from '../../../opensearch_dashboards_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
@@ -96,9 +96,9 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
+  dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
   navigation: NavigationStart;
 }
 
@@ -154,7 +154,7 @@ export class DashboardAppController {
     },
     history,
     setHeaderActionMenu,
-    kbnUrlStateStorage,
+    osdUrlStateStorage,
     usageCollection,
     navigation,
   }: DashboardAppControllerDependencies) {
@@ -185,8 +185,8 @@ export class DashboardAppController {
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      kibanaVersion: pluginInitializerContext.env.packageInfo.version,
-      kbnUrlStateStorage,
+      opensearchDashboardsVersion: pluginInitializerContext.env.packageInfo.version,
+      osdUrlStateStorage,
       history,
       usageCollection,
     });
@@ -224,7 +224,7 @@ export class DashboardAppController {
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
     if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-      const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
+      const initialGlobalStateInUrl = osdUrlStateStorage.get<QueryState>('_g');
       if (!initialGlobalStateInUrl?.time) {
         dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
       }
@@ -238,7 +238,7 @@ export class DashboardAppController {
     // otherwise it will case redundant browser history records
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       queryService,
-      kbnUrlStateStorage
+      osdUrlStateStorage
     );
 
     // starts syncing `_a` portion of url
@@ -690,7 +690,7 @@ export class DashboardAppController {
       return {
         appName: 'dashboard',
         config: showTopNavMenu ? $scope.topNavMenu : undefined,
-        className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
+        className: isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined,
         screenTitle,
         showTopNavMenu,
         showSearchBar,
@@ -768,7 +768,7 @@ export class DashboardAppController {
         }
 
         // Angular's $location skips this update because of history updates from syncState which happen simultaneously
-        // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
+        // when calling osdUrl.change() angular schedules url update and when angular finally starts to process it,
         // the update is considered outdated and angular skips it
         // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
         dashboardStateManager.changeDashboardUrl(
@@ -831,7 +831,7 @@ export class DashboardAppController {
 
             if (dash.id !== $routeParams.id) {
               // Angular's $location skips this update because of history updates from syncState which happen simultaneously
-              // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
+              // when calling osdUrl.change() angular schedules url update and when angular finally starts to process it,
               // the update is considered outdated and angular skips it
               // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
               dashboardStateManager.changeDashboardUrl(createDashboardEditUrl(dash.id));
