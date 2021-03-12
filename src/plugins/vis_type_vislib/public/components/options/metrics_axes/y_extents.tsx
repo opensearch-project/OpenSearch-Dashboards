@@ -19,7 +19,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { Scale } from '../../../types';
 import { ScaleTypes } from '../../../utils/collections';

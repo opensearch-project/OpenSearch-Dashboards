@@ -22,7 +22,7 @@ import moment from 'moment';
 import { getUniqKeys } from './uniq_keys';
 
 /*
- * Accepts a Kibana data object and returns
+ * Accepts a OpenSearch Dashboards data object and returns
  * an array of x axis values.
  * values sorted by timestamp if isDate and Date Histogram agg
  * else values sorted by index

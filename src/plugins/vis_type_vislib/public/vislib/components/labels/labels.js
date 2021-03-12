@@ -22,7 +22,7 @@ import { dataArray as createArr } from './data_array';
 import { uniqLabels as getArrOfUniqLabels } from './uniq_labels';
 
 /*
- * Accepts a Kibana data object and returns an array of unique labels (strings).
+ * Accepts a OpenSearch Dashboards data object and returns an array of unique labels (strings).
  * Extracts the field formatter from the raw object and passes it to the
  * getArrOfUniqLabels function.
  *

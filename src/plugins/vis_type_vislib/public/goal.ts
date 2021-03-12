@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes } from './utils/collections';

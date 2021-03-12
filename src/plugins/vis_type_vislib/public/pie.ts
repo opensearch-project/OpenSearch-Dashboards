@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';

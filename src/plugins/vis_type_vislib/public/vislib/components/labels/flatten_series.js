@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 /*
- * Accepts a Kibana data object with a rows or columns key
+ * Accepts a OpenSearch Dashboards data object with a rows or columns key
  * and returns an array of flattened series values.
  */
 export function flattenSeries(obj) {

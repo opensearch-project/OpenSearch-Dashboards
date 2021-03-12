@@ -20,8 +20,8 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { Axis } from '../../../types';
 import { TruncateLabelsOption } from '../../common';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/server';
 import { uiSettings } from './ui_settings';
 
 export class VisTypeVislibServerPlugin implements Plugin<object, object> {

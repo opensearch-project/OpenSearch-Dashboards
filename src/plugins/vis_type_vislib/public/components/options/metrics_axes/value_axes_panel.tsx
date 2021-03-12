@@ -28,8 +28,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { Vis } from '../../../../../visualizations/public';
 import { SeriesParam, ValueAxis } from '../../../types';
