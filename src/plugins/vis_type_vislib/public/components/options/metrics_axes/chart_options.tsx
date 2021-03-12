@@ -19,7 +19,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { Vis } from '../../../../../visualizations/public';

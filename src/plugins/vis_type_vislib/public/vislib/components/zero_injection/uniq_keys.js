@@ -21,7 +21,7 @@ import { isObject, isNumber } from 'lodash';
 import { flattenData } from './flatten_data';
 
 /*
- * Accepts a Kibana data object.
+ * Accepts a OpenSearch Dashboards data object.
  * Returns an object with unique x axis values as keys with an object of
  * their index numbers and an isNumber boolean as their values.
  * e.g. { 'xAxisValue': { index: 1, isNumber: false }}, ...

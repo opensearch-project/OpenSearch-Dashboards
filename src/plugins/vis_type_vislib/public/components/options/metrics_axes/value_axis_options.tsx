@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { Vis } from '../../../../../visualizations/public';

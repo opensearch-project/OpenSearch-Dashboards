@@ -19,10 +19,10 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { i18n } from '@kbn/i18n';
-import { KbnError } from '../../../kibana_utils/public';
+import { i18n } from '@osd/i18n';
+import { OsdError } from '../../../opensearch_dashboards_utils/public';
 
-export class VislibError extends KbnError {
+export class VislibError extends OsdError {
   constructor(message: string) {
     super(message);
   }
