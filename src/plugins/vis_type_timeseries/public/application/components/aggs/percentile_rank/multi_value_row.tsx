@@ -18,7 +18,7 @@
  */
 import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   htmlIdGenerator,
   EuiFieldNumber,

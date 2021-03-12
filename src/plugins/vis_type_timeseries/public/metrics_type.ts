@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
@@ -30,8 +30,8 @@ import { getDataStart } from './services';
 
 export const metricsVisDefinition = {
   name: 'metrics',
-  title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
-  description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
+  title: i18n.translate('visTypeTimeseries.osdVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
+  description: i18n.translate('visTypeTimeseries.osdVisTypes.metricsDescription', {
     defaultMessage: 'Build time-series using a visual pipeline interface',
   }),
   icon: 'visVisualBuilder',
@@ -44,7 +44,7 @@ export const metricsVisDefinition = {
           id: '61ca57f1-469d-11e7-af02-69e470af7417',
           color: '#68BC00',
           split_mode: 'everything',
-          split_color_mode: 'kibana',
+          split_color_mode: 'opensearchDashboards',
           metrics: [
             {
               id: '61ca57f2-469d-11e7-af02-69e470af7417',

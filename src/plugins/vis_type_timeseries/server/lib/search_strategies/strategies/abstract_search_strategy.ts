@@ -22,15 +22,15 @@ import {
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from 'opensearch-dashboards/server';
 import { Framework } from '../../../plugin';
 import { IndexPatternsFetcher } from '../../../../../data/server';
 
 /**
- * ReqFacade is a regular KibanaRequest object extended with additional service
+ * ReqFacade is a regular OpenSearchDashboardsRequest object extended with additional service
  * references to ensure backwards compatibility for existing integrations.
  *
- * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
+ * This will be replaced by standard OpenSearchDashboardsRequest and RequestContext objects in a later version.
  */
 export type ReqFacade = FakeRequest & {
   requestContext: RequestHandlerContext;
@@ -41,7 +41,7 @@ export type ReqFacade = FakeRequest & {
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
-  getEsShardTimeout: () => Promise<number>;
+  getOpenSearchShardTimeout: () => Promise<number>;
 };
 
 export class AbstractSearchStrategy {

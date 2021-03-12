@@ -43,7 +43,7 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 function newAnnotation() {
   return {

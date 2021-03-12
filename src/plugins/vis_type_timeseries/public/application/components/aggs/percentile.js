@@ -32,7 +32,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { Percentiles, newPercentile } from './percentile_ui';
 

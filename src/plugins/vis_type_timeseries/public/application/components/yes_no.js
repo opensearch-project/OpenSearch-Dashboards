@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export function YesNo(props) {
   const { name, value, disabled, 'data-test-subj': dataTestSubj } = props;

@@ -20,7 +20,7 @@
 import React from 'react';
 import { last } from 'lodash';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
 import { MetricsItemsSchema } from '../../../../common/types';

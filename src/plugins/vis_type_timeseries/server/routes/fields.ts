@@ -18,7 +18,7 @@
  */
 
 import { isBoom } from 'boom';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { getFields } from '../lib/get_fields';
 import { Framework } from '../plugin';
 

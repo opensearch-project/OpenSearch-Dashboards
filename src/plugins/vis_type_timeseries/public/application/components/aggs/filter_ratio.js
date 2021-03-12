@@ -32,7 +32,7 @@ import {
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 import { getDataStart } from '../../../services';

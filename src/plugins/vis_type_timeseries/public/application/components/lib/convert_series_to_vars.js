@@ -60,7 +60,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
          * Common case is the value is a date string (e.x. "2020-08-21T20:36:58.000Z") or a boolean stringified value ("true"/"false").
          * Try to convert the value into a moment object and format it with "dateFormat" from UI settings,
          * if the "key_as_string" value is recognized by a known format in Moments.js https://momentjs.com/docs/#/parsing/string/ .
-         * If not, return a formatted value from elasticsearch
+         * If not, return a formatted value from opensearch
          */
         if (row.labelFormatted) {
           const momemntObj = moment(row.labelFormatted);

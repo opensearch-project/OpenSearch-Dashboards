@@ -33,7 +33,7 @@ function validAnnotation(annotation) {
 
 export async function getAnnotations({
   req,
-  esQueryConfig,
+  opensearchQueryConfig,
   searchStrategy,
   panel,
   capabilities,
@@ -44,7 +44,7 @@ export async function getAnnotations({
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
   const bodiesPromises = annotations.map((annotation) =>
-    getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities)
+    getAnnotationRequestParams(req, panel, annotation, opensearchQueryConfig, capabilities)
   );
 
   const searches = (await Promise.all(bodiesPromises)).reduce(

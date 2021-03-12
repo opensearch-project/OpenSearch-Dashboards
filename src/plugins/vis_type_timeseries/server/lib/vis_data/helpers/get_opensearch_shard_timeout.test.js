@@ -17,6 +17,18 @@
  * under the License.
  */
 
-export async function getEsShardTimeout(req) {
-  return await req.getEsShardTimeout();
-}
+import { getOpenSearchShardTimeout } from './get_opensearch_shard_timeout';
+
+describe('getOpenSearchShardTimeout', () => {
+  test('should return the opensearch.shardTimeout', async () => {
+    const req = {
+      getOpenSearchShardTimeout: async () => {
+        return 12345;
+      },
+    };
+
+    const timeout = await getOpenSearchShardTimeout(req);
+
+    expect(timeout).toEqual(12345);
+  });
+});

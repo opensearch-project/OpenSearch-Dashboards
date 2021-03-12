@@ -35,7 +35,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];

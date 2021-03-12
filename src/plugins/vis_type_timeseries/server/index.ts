@@ -25,12 +25,12 @@ export { VisTypeTimeseriesSetup } from './plugin';
 
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   deprecations: ({ unused, renameFromRoot }) => [
-    // In Kibana v7.8 plugin id was renamed from 'metrics' to 'vis_type_timeseries':
+    // In OpenSearch Dashboards v7.8 plugin id was renamed from 'metrics' to 'vis_type_timeseries':
     renameFromRoot('metrics.enabled', 'vis_type_timeseries.enabled', true),
     renameFromRoot('metrics.chartResolution', 'vis_type_timeseries.chartResolution', true),
     renameFromRoot('metrics.minimumBucketSize', 'vis_type_timeseries.minimumBucketSize', true),
 
-    // Unused properties which should be removed after releasing Kibana v8.0:
+    // Unused properties which should be removed after releasing OpenSearch Dashboards v8.0:
     unused('chartResolution'),
     unused('minimumBucketSize'),
   ],

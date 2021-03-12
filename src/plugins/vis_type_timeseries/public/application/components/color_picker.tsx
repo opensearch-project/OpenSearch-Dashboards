@@ -27,7 +27,7 @@ import {
   EuiColorPickerProps,
   EuiColorPickerSwatch,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
 
