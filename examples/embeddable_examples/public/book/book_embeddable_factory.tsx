@@ -148,7 +148,7 @@ export class BookEmbeddableFactoryDefinition
         title: props.newTitle,
         copyOnSave: false,
         lastSavedTitle: '',
-        getEsType: () => this.type,
+        getOpenSearchType: () => this.type,
         getDisplayName: this.getDisplayName || (() => this.type),
       },
       props.isTitleDuplicateConfirmed,

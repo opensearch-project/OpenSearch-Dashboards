@@ -121,7 +121,7 @@ export const SearchExamplesApp = ({
     if (!indexPattern || !selectedField) return;
 
     // Constuct the query portion of the search request
-    const query = data.query.getEsQuery(indexPattern);
+    const query = data.query.getOpenSearchQuery(indexPattern);
 
     // Constuct the aggregations portion of the search request by using the `data.search.aggs` service.
     const aggs = [{ type: 'avg', params: { field: selectedField.name } }];
