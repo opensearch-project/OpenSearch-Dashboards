@@ -20,7 +20,7 @@
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import xml2js from 'xml2js';
 
 import { TestReport, makeFailedTestCaseIter } from './test_report';

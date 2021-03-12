@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable @osd/eslint/require-license-header */
 
 /* @notice
  * This product bundles code based on probot-metadata@1.0.0 which is
@@ -29,7 +29,7 @@
  * `prefix` is a string that can be used to namespace the metadata, defaults to `ci`.
  */
 const PREFIX = 'failed-test';
-const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
+const REGEX = /\n\n<!-- OpenSearchDashboardsCiData = (.*) -->/;
 
 function safeJsonParse(json: string, onError: any) {
   try {
@@ -65,5 +65,5 @@ export function updateIssueMetadata(body: string, values: Record<string, any>) {
     });
   }
 
-  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [PREFIX]: values })} -->`;
+  return `${body}\n\n<!-- OpenSearchDashboardsCiData = ${JSON.stringify({ [PREFIX]: values })} -->`;
 }
