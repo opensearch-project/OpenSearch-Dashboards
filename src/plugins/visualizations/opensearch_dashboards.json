@@ -1,9 +1,9 @@
 {
   "id": "visualizations",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "expressions", "uiActions", "embeddable", "inspector", "dashboard"],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaUtils", "discover", "savedObjects"]
+  "requiredBundles": ["opensearchDashboardsUtils", "discover", "savedObjects"]
 }

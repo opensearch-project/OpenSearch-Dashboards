@@ -20,13 +20,13 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
   TimeRange,
   Query,
-  esFilters,
+  opensearchFilters,
   Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
@@ -232,7 +232,7 @@ export class VisualizeEmbeddable
     }
 
     // Check if filters has changed
-    if (!esFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+    if (!opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       this.filters = this.input.filters;
       dirty = true;
     }
