@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V.. under one or more contributor
+ * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V.. licenses this file to you under
+ * ownership. Elasticsearch B.V. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_opensearch_version';
+import { mapNodesVersionCompatibility, pollOpenSearchNodesVersion, NodesInfo } from './ensure_opensearch_version';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { opensearchClientMock } from '../client/mocks';
 import { take, delay } from 'rxjs/operators';
@@ -28,8 +28,8 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 const OPENSEARCH_DASHBOARDS_VERSION = '5.1.0';
 
-const createEsSuccess = opensearchClientMock.createSuccessTransportRequestPromise;
-const createEsError = opensearchClientMock.createErrorTransportRequestPromise;
+const createOpenSearchSuccess = opensearchClientMock.createSuccessTransportRequestPromise;
+const createOpenSearchError = opensearchClientMock.createErrorTransportRequestPromise;
 
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
@@ -114,7 +114,7 @@ describe('mapNodesVersionCompatibility', () => {
   });
 });
 
-describe('pollEsNodesVersion', () => {
+describe('pollOpenSearchNodesVersion', () => {
   let internalClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
@@ -126,10 +126,10 @@ describe('pollEsNodesVersion', () => {
   });
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
+    internalClient.nodes.info.mockImplementationOnce(() => createOpenSearchSuccess(infos));
   };
   const nodeInfosErrorOnce = (error: any) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
+    internalClient.nodes.info.mockImplementationOnce(() => createOpenSearchError(error));
   };
 
   it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
@@ -141,7 +141,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosErrorOnce('mock request error');
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
 
-    pollEsNodesVersion({
+    pollOpenSearchNodesVersion({
       internalClient,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -164,7 +164,7 @@ describe('pollEsNodesVersion', () => {
 
     nodeInfosSuccessOnce(nodes);
 
-    pollEsNodesVersion({
+    pollOpenSearchNodesVersion({
       internalClient,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -190,7 +190,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
 
-    pollEsNodesVersion({
+    pollOpenSearchNodesVersion({
       internalClient,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -220,7 +220,7 @@ describe('pollEsNodesVersion', () => {
     getTestScheduler().run(({ expectObservable }) => {
       const expected = 'a 99ms (b|)';
 
-      const opensearchNodesCompatibility$ = pollEsNodesVersion({
+      const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
         opensearchVersionCheckInterval: 100,
         ignoreVersionMismatch: false,
@@ -258,7 +258,7 @@ describe('pollEsNodesVersion', () => {
         of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
 
-      const opensearchNodesCompatibility$ = pollEsNodesVersion({
+      const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
         opensearchVersionCheckInterval: 10,
         ignoreVersionMismatch: false,

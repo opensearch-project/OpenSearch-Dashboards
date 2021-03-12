@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V.. under one or more contributor
+ * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V.. licenses this file to you under
+ * ownership. Elasticsearch B.V. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -354,7 +354,7 @@ describe('#stop', () => {
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
+  it('stops pollOpenSearchNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(2);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;

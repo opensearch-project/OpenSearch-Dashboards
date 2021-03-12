@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V.. under one or more contributor
+ * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V.. licenses this file to you under
+ * ownership. Elasticsearch B.V. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ import {
 import { Logger } from '../../logging';
 import type { OpenSearchClient } from '../client';
 
-export interface PollEsNodesVersionOptions {
+export interface PollOpenSearchNodesVersionOptions {
   internalClient: OpenSearchClient;
   log: Logger;
   opensearchDashboardsVersion: string;
@@ -136,13 +136,13 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
   );
 }
 
-export const pollEsNodesVersion = ({
+export const pollOpenSearchNodesVersion = ({
   internalClient,
   log,
   opensearchDashboardsVersion,
   ignoreVersionMismatch,
   opensearchVersionCheckInterval: healthCheckInterval,
-}: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
+}: PollOpenSearchNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking OpenSearch version');
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
