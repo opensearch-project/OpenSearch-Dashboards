@@ -36,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/console'),
       require.resolve('./apps/home'),
       require.resolve('./apps/filter_panel'),
-      require.resolve('./apps/opensearch_dashboardsoverview'),
+      require.resolve('./apps/opensearch_dashboards_overview'),
     ],
     pageObjects,
     services,
