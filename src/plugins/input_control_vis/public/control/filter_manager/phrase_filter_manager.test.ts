@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
@@ -183,7 +183,7 @@ describe('PhraseFilterManager', function () {
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
-    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
+    test('should return undefined when filter value can not be extracted from OpenSearch Dashboards filter', function () {
       filterManager.setMockFilters([
         {
           query: {

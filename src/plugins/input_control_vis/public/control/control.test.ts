@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { Control } from './control';
 import { ControlParams } from '../editor_utils';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
@@ -36,7 +36,7 @@ const mockFilterManager: BaseFilterManager = {
     return valueFromFilterBar;
   },
   createFilter: (value: any) => {
-    return `mockKbnFilter:${value}` as any;
+    return `mockOsdFilter:${value}` as any;
   },
   getIndexPattern: () => {
     return 'mockIndexPattern';
@@ -48,7 +48,7 @@ class ControlMock extends Control<BaseFilterManager> {
     return Promise.resolve();
   }
 
-  destroy() {}
+  destroy() { }
 }
 
 describe('hasChanged', () => {
@@ -165,7 +165,7 @@ describe('ancestors', () => {
 
     const ancestorFilters = childControl.getAncestorFilters();
     expect(ancestorFilters.length).to.be(2);
-    expect(ancestorFilters[0]).to.eql('mockKbnFilter:myParentValue');
-    expect(ancestorFilters[1]).to.eql('mockKbnFilter:myGrandParentValue');
+    expect(ancestorFilters[0]).to.eql('mockOsdFilter:myParentValue');
+    expect(ancestorFilters[1]).to.eql('mockOsdFilter:myGrandParentValue');
   });
 });

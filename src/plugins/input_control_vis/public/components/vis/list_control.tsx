@@ -20,9 +20,9 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
 import { EuiFieldText, EuiComboBox } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { FormRow } from './form_row';
 
 interface ListControlUiState {
@@ -170,7 +170,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
       {
         defaultMessage:
           'Terms list might be incomplete because the request is taking too long. ' +
-          'Adjust the autocomplete settings in kibana.yml for complete results.',
+          'Adjust the autocomplete settings in opensearch_dashboards.yml for complete results.',
       }
     );
 
