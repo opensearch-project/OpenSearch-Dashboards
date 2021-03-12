@@ -19,7 +19,7 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@osd/dev-utils';
 import {
-  createLegacyEsTestCluster,
+  createLegacyOpenSearchTestCluster,
   DEFAULT_SUPERUSER_PASS,
   opensearchTestConfig,
   osdTestConfig,
@@ -235,7 +235,7 @@ export function createTestServers({
   log.info('starting opensearch');
   log.indent(4);
 
-  const opensearch = createLegacyEsTestCluster(
+  const opensearch = createLegacyOpenSearchTestCluster(
     defaultsDeep({}, get(settings, 'opensearch', {}), {
       log,
       license,
