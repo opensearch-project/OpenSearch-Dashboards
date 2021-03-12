@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { i18n } from '@osd/i18n';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
 
@@ -33,14 +33,14 @@ interface RenderValue {
 }
 
 export const createPieVisFn = (): ExpressionFunctionDefinition<
-  'kibana_pie',
-  KibanaDatatable,
+  'opensearch_dashboards_pie',
+  OpenSearchDashboardsDatatable,
   Arguments,
   Render<RenderValue>
 > => ({
-  name: 'kibana_pie',
+  name: 'opensearch_dashboards_pie',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),

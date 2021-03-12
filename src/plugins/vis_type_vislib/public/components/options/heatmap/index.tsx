@@ -20,8 +20,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import {

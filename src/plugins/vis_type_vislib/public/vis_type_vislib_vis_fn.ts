@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { i18n } from '@osd/i18n';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
@@ -36,13 +36,13 @@ interface RenderValue {
 
 export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
   'vislib',
-  KibanaDatatable,
+  OpenSearchDashboardsDatatable,
   Arguments,
   Render<RenderValue>
 > => ({
   name: 'vislib',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),
