@@ -351,7 +351,7 @@ export class SavedObjectsService
     this.logger.debug('Starting SavedObjects service');
 
     const opensearchDashboardsConfig = await this.coreContext.configService
-      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboard')
+      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboards')
       .pipe(first())
       .toPromise();
     const client = opensearch.client;
