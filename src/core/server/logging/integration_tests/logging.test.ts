@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 import { InternalCoreSetup } from '../../internal_types';
 import { LoggerContextConfigInput } from '../logging_config';
 import { Subject } from 'rxjs';
 
 function createRoot() {
-  return kbnTestServer.createRoot({
+  return osdTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
+      silent: true, // set "true" in osdTestServer
       appenders: {
         'test-console': {
           kind: 'console',
@@ -154,7 +154,7 @@ describe('logging service', () => {
       enable ? loggingConfig$.next(CUSTOM_LOGGING_CONFIG) : loggingConfig$.next({});
     beforeAll(async () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
-      root = kbnTestServer.createRoot();
+      root = osdTestServer.createRoot();
 
       setup = await root.setup();
       setup.logging.configure(['plugins', 'myplugin'], loggingConfig$);

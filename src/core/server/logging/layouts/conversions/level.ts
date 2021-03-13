@@ -18,7 +18,7 @@
  */
 
 import chalk from 'chalk';
-import { LogRecord, LogLevel } from '@kbn/logging';
+import { LogRecord, LogLevel } from '@osd/logging';
 
 import { Conversion } from './type';
 

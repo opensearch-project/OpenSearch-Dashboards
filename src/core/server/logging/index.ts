@@ -27,7 +27,7 @@ export {
   Logger,
   LogLevelId,
   LogLevel,
-} from '@kbn/logging';
+} from '@osd/logging';
 export {
   config,
   LoggingConfigType,

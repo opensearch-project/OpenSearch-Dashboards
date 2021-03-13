@@ -20,7 +20,7 @@
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { pick } from '@kbn/std';
+import { pick } from '@osd/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';

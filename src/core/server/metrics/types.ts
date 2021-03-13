@@ -55,7 +55,7 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
 
 /**
  * Regroups metrics gathered by all the collectors.
- * This contains metrics about the os/runtime, the kibana process and the http server.
+ * This contains metrics about the os/runtime, the OpenSearch Dashboards process and the http server.
  *
  * @public
  */

@@ -34,12 +34,12 @@ const fsStatAsync = promisify(stat);
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
  */
-const MANIFEST_FILE_NAME = 'kibana.json';
+const MANIFEST_FILE_NAME = 'opensearch_dashboards.json';
 
 /**
- * The special "kibana" version can be used by the plugins to be always compatible.
+ * The special "opensearchDashboards" version can be used by the plugins to be always compatible.
  */
-const ALWAYS_COMPATIBLE_VERSION = 'kibana';
+const ALWAYS_COMPATIBLE_VERSION = 'opensearchDashboards';
 
 /**
  * Names of the known manifest fields.
@@ -50,7 +50,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
   // We do this once at run time, so performance impact is negligible.
   const manifestFields: { [P in keyof PluginManifest]: boolean } = {
     id: true,
-    kibanaVersion: true,
+    opensearchDashboardsVersion: true,
     version: true,
     configPath: true,
     requiredPlugins: true,
@@ -69,7 +69,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param pluginPath Path to the plugin directory where manifest should be loaded from.
- * @param packageInfo Kibana package info.
+ * @param packageInfo OpenSearch Dashboards package info.
  * @internal
  */
 export async function parseManifest(
@@ -149,15 +149,15 @@ export async function parseManifest(
     );
   }
 
-  const expectedKibanaVersion =
-    typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
-      ? manifest.kibanaVersion
+  const expectedOpenSearchDashboardsVersion =
+    typeof manifest.opensearchDashboardsVersion === 'string' && manifest.opensearchDashboardsVersion
+      ? manifest.opensearchDashboardsVersion
       : manifest.version;
-  if (!isVersionCompatible(expectedKibanaVersion, packageInfo.version)) {
+  if (!isVersionCompatible(expectedOpenSearchDashboardsVersion, packageInfo.version)) {
     throw PluginDiscoveryError.incompatibleVersion(
       manifestPath,
       new Error(
-        `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
+        `Plugin "${manifest.id}" is only compatible with OpenSearch Dashboards version "${expectedOpenSearchDashboardsVersion}", but used OpenSearch Dashboards version is "${packageInfo.version}".`
       )
     );
   }
@@ -188,7 +188,7 @@ export async function parseManifest(
   return {
     id: manifest.id,
     version: manifest.version,
-    kibanaVersion: expectedKibanaVersion,
+    opensearchDashboardsVersion: expectedOpenSearchDashboardsVersion,
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
@@ -200,7 +200,7 @@ export async function parseManifest(
 }
 
 /**
- * Checks whether specified folder contains Kibana new platform plugin. It's only
+ * Checks whether specified folder contains OpenSearch Dashboards new platform plugin. It's only
  * intended to be used by the legacy systems when they need to check whether specific
  * plugin path is handled by the core plugin system or not.
  * @param pluginPath Path to the plugin.
@@ -215,25 +215,25 @@ export async function isNewPlatformPlugin(pluginPath: string) {
 }
 
 /**
- * Checks whether plugin expected Kibana version is compatible with the used Kibana version.
- * @param expectedKibanaVersion Kibana version expected by the plugin.
- * @param actualKibanaVersion Used Kibana version.
+ * Checks whether plugin expected OpenSearch Dashboards version is compatible with the used OpenSearch Dashboards version.
+ * @param expectedOpenSearchDashboardsVersion OpenSearch Dashboards version expected by the plugin.
+ * @param actualOpenSearchDashboardsVersion Used OpenSearch Dashboards version.
  */
-function isVersionCompatible(expectedKibanaVersion: string, actualKibanaVersion: string) {
-  if (expectedKibanaVersion === ALWAYS_COMPATIBLE_VERSION) {
+function isVersionCompatible(expectedOpenSearchDashboardsVersion: string, actualOpenSearchDashboardsVersion: string) {
+  if (expectedOpenSearchDashboardsVersion === ALWAYS_COMPATIBLE_VERSION) {
     return true;
   }
 
-  const coercedActualKibanaVersion = coerce(actualKibanaVersion);
-  if (coercedActualKibanaVersion == null) {
+  const coercedActualOpenSearchDashboardsVersion = coerce(actualOpenSearchDashboardsVersion);
+  if (coercedActualOpenSearchDashboardsVersion == null) {
     return false;
   }
 
-  const coercedExpectedKibanaVersion = coerce(expectedKibanaVersion);
-  if (coercedExpectedKibanaVersion == null) {
+  const coercedExpectedOpenSearchDashboardsVersion = coerce(expectedOpenSearchDashboardsVersion);
+  if (coercedExpectedOpenSearchDashboardsVersion == null) {
     return false;
   }
 
   // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
-  return coercedActualKibanaVersion.compare(coercedExpectedKibanaVersion) === 0;
+  return coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) === 0;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
+import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@osd/logging';
 
 function isError(x: any): x is Error {
   return x instanceof Error;
