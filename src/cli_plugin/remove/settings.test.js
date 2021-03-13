@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import { parse } from './settings';
 

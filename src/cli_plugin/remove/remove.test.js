@@ -27,7 +27,7 @@ import del from 'del';
 import { Logger } from '../lib/logger';
 import { remove } from './remove';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin remover', function () {
     const pluginDir = join(__dirname, '.test.data.remove');
     let processExitStub;

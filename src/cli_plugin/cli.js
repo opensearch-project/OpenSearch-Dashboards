@@ -23,16 +23,16 @@ import { listCommand } from './list';
 import { installCommand } from './install';
 import { removeCommand } from './remove';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
+const argv = process.env.osdWorkerArgv
+  ? JSON.parse(process.env.osdWorkerArgv)
   : process.argv.slice();
-const program = new Command('bin/kibana-plugin');
+const program = new Command('bin/opensearch-dashboards-plugin');
 
 program
   .version(pkg.version)
   .description(
-    'The Kibana plugin manager enables you to install and remove plugins that ' +
-      'provide additional functionality to Kibana'
+    'The OpenSearch Dashboards plugin manager enables you to install and remove plugins that ' +
+      'provide additional functionality to OpenSearch Dashboards'
   );
 
 listCommand(program);
