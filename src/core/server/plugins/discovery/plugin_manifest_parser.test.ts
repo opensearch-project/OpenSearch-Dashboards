@@ -27,7 +27,7 @@ import { parseManifest } from './plugin_manifest_parser';
 
 const logger = loggingSystemMock.createLogger();
 const pluginPath = resolve('path', 'existent-dir');
-const pluginManifestPath = resolve(pluginPath, 'kibana.json');
+const pluginManifestPath = resolve(pluginPath, 'opensearch_dashboards.json');
 const packageInfo = {
   branch: 'master',
   buildNum: 1,
@@ -102,7 +102,7 @@ test('return error when plugin id includes `.` characters', async () => {
 
 test('logs warning if pluginId is not in camelCase format', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })));
   });
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
@@ -118,7 +118,7 @@ test('logs warning if pluginId is not in camelCase format', async () => {
 
 test('does not log pluginId format warning in dist mode', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })));
   });
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
@@ -138,28 +138,28 @@ test('return error when plugin version is missing', async () => {
   });
 });
 
-test('return error when plugin expected Kibana version is lower than actual version', async () => {
+test('return error when plugin expected OpenSearch Dashboards version is lower than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "6.4.2", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
 });
 
-test('return error when plugin expected Kibana version cannot be interpreted as semver', async () => {
+test('return error when plugin expected OpenSearch Dashboards version cannot be interpreted as semver', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', kibanaVersion: 'non-sem-ver' }))
+      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', opensearchDashboardsVersion: 'non-sem-ver' }))
     );
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with Kibana version "non-sem-ver", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "non-sem-ver", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -192,13 +192,13 @@ test('return error when plugin config path is an array that contains non-string 
   });
 });
 
-test('return error when plugin expected Kibana version is higher than actual version', async () => {
+test('return error when plugin expected OpenSearch Dashboards version is higher than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "7.0.1", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -309,7 +309,7 @@ test('set defaults for all missing optional fields', async () => {
     id: 'someId',
     configPath: 'some_id',
     version: '7.0.0',
-    kibanaVersion: '7.0.0',
+    opensearchDashboardsVersion: '7.0.0',
     optionalPlugins: [],
     requiredPlugins: [],
     requiredBundles: [],
@@ -327,7 +327,7 @@ test('return all set optional fields as they are in manifest', async () => {
           id: 'someId',
           configPath: ['some', 'path'],
           version: 'some-version',
-          kibanaVersion: '7.0.0',
+          opensearchDashboardsVersion: '7.0.0',
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
@@ -340,7 +340,7 @@ test('return all set optional fields as they are in manifest', async () => {
     id: 'someId',
     configPath: ['some', 'path'],
     version: 'some-version',
-    kibanaVersion: '7.0.0',
+    opensearchDashboardsVersion: '7.0.0',
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
@@ -349,7 +349,7 @@ test('return all set optional fields as they are in manifest', async () => {
   });
 });
 
-test('return manifest when plugin expected Kibana version matches actual version', async () => {
+test('return manifest when plugin expected OpenSearch Dashboards version matches actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
@@ -358,7 +358,7 @@ test('return manifest when plugin expected Kibana version matches actual version
           id: 'someId',
           configPath: 'some-path',
           version: 'some-version',
-          kibanaVersion: '7.0.0-alpha2',
+          opensearchDashboardsVersion: '7.0.0-alpha2',
           requiredPlugins: ['some-required-plugin'],
           server: true,
         })
@@ -370,7 +370,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     id: 'someId',
     configPath: 'some-path',
     version: 'some-version',
-    kibanaVersion: '7.0.0-alpha2',
+    opensearchDashboardsVersion: '7.0.0-alpha2',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
@@ -379,7 +379,7 @@ test('return manifest when plugin expected Kibana version matches actual version
   });
 });
 
-test('return manifest when plugin expected Kibana version is `kibana`', async () => {
+test('return manifest when plugin expected OpenSearch Dashboards version is `opensearchDashboards`', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
@@ -387,7 +387,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
         JSON.stringify({
           id: 'someId',
           version: 'some-version',
-          kibanaVersion: 'kibana',
+          opensearchDashboardsVersion: 'opensearch-dashboards',
           requiredPlugins: ['some-required-plugin'],
           server: true,
           ui: true,
@@ -400,7 +400,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     id: 'someId',
     configPath: 'some_id',
     version: 'some-version',
-    kibanaVersion: 'kibana',
+    opensearchDashboardsVersion: 'opensearch-dashboards',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],

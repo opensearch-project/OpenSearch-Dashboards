@@ -18,7 +18,7 @@
  */
 
 // Test helpers to simplify mocking logs and collecting all their outputs
-import { LoggerFactory } from '@kbn/logging';
+import { LoggerFactory } from '@osd/logging';
 import { ILoggingSystem } from './logging_system';
 import { loggerMock, MockedLogger } from './logger.mock';
 

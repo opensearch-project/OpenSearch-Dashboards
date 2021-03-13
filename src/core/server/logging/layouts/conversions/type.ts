@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogRecord } from '@kbn/logging';
+import { LogRecord } from '@osd/logging';
 
 export interface Conversion {
   pattern: RegExp;

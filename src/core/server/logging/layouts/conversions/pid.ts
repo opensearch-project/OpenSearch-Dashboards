@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogRecord } from '@kbn/logging';
+import { LogRecord } from '@osd/logging';
 import { Conversion } from './type';
 
 export const PidConversion: Conversion = {

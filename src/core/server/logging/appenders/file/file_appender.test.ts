@@ -19,7 +19,7 @@
 
 import { mockCreateWriteStream } from './file_appender.test.mocks';
 
-import { LogRecord, LogLevel } from '@kbn/logging';
+import { LogRecord, LogLevel } from '@osd/logging';
 import { FileAppender } from './file_appender';
 
 const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

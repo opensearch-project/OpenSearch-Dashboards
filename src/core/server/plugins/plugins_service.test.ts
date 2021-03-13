@@ -21,8 +21,8 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
-import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
+import { schema } from '@osd/config-schema';
+import { createAbsolutePathSerializer, REPO_ROOT } from '@osd/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
@@ -67,7 +67,7 @@ const createPlugin = (
     requiredPlugins = [],
     requiredBundles = [],
     optionalPlugins = [],
-    kibanaVersion = '7.0.0',
+    opensearchDashboardsVersion = '7.0.0',
     configPath = [path],
     server = true,
     ui = true,
@@ -78,7 +78,7 @@ const createPlugin = (
     requiredPlugins?: string[];
     requiredBundles?: string[];
     optionalPlugins?: string[];
-    kibanaVersion?: string;
+    opensearchDashboardsVersion?: string;
     configPath?: ConfigPath;
     server?: boolean;
     ui?: boolean;
@@ -90,7 +90,7 @@ const createPlugin = (
       id,
       version,
       configPath: `${configPath}${disabled ? '-disabled' : ''}`,
-      kibanaVersion,
+      opensearchDashboardsVersion,
       requiredPlugins,
       requiredBundles,
       optionalPlugins,
@@ -154,7 +154,7 @@ describe('PluginsService', () => {
       `);
     });
 
-    it('throws if plugin required Kibana version is incompatible with the current version', async () => {
+    it('throws if plugin required OpenSearch Dashboards version is incompatible with the current version', async () => {
       mockDiscover.mockReturnValue({
         error$: from([
           PluginDiscoveryError.incompatibleVersion('path-3', new Error('Incompatible version')),
@@ -390,7 +390,7 @@ describe('PluginsService', () => {
             resolve(process.cwd(), 'src', 'plugins'),
             resolve(process.cwd(), 'x-pack', 'plugins'),
             resolve(process.cwd(), 'plugins'),
-            resolve(process.cwd(), '..', 'kibana-extra'),
+            resolve(process.cwd(), '..', 'opensearch-dashboards-extra'),
           ],
         },
         { coreId, env, logger, configService },

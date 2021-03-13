@@ -19,8 +19,8 @@
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
-import { PathConfigType, config as pathConfig } from '@kbn/utils';
-import { pick, deepFreeze } from '@kbn/std';
+import { PathConfigType, config as pathConfig } from '@osd/utils';
+import { pick, deepFreeze } from '@osd/std';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -30,11 +30,11 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
+import { OpenSearchDashboardsConfigType, config as opensearchDashboardsConfig } from '../opensearch_dashboards_config';
 import {
-  ElasticsearchConfigType,
-  config as elasticsearchConfig,
-} from '../elasticsearch/elasticsearch_config';
+  OpenSearchConfigType,
+  config as opensearchConfig,
+} from '../opensearch/opensearch_config';
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -51,7 +51,7 @@ export interface InstanceInfo {
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
- * @param coreContext Kibana core context
+ * @param coreContext OpenSearch Dashboards core context
  * @param pluginManifest The manifest of the plugin we're building these values for.
  * @internal
  */
@@ -93,15 +93,15 @@ export function createPluginInitializerContext(
          * @deprecated
          */
         globalConfig$: combineLatest([
-          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
-          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
+          coreContext.configService.atPath<OpenSearchDashboardsConfigType> opensearchDashboardsConfig.path),
+          coreContext.configService.atPath<OpenSearchConfigType>(opensearchConfig.path),
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
         ]).pipe(
-          map(([kibana, elasticsearch, path, savedObjects]) =>
+          map(([opensearchDashboards, opensearch, path, savedObjects]) =>
             deepFreeze({
-              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
-              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+              opensearchDashboards: pick(opensearchDashboards, SharedGlobalConfigKeys.opensearchDashboards),
+              opensearch: pick(opensearch, SharedGlobalConfigKeys.opensearch),
               path: pick(path, SharedGlobalConfigKeys.path),
               savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
             })
@@ -135,7 +135,7 @@ export function createPluginInitializerContext(
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
- * @param coreContext Kibana core context
+ * @param coreContext OpenSearch Dashboards core context
  * @param plugin The plugin we're building these values for.
  * @param deps Dependencies that Plugins services gets during setup.
  * @internal
@@ -155,8 +155,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
-    elasticsearch: {
-      legacy: deps.elasticsearch.legacy,
+    opensearch: {
+      legacy: deps.opensearch.legacy,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
@@ -212,7 +212,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
  * This is called for each plugin when it starts, so each plugin gets its own
  * version of these values.
  *
- * @param coreContext Kibana core context
+ * @param coreContext OpenSearch Dashboards core context
  * @param plugin The plugin we're building these values for.
  * @param deps Dependencies that Plugins services gets during start.
  * @internal
@@ -226,10 +226,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    elasticsearch: {
-      client: deps.elasticsearch.client,
-      createClient: deps.elasticsearch.createClient,
-      legacy: deps.elasticsearch.legacy,
+    opensearch: {
+      client: deps.opensearch.client,
+      createClient: deps.opensearch.createClient,
+      legacy: deps.opensearch.legacy,
     },
     http: {
       auth: deps.http.auth,
