@@ -19,7 +19,7 @@
 
 /**
  * This file is nothing more than type signatures for the subset of
- * opensearch.js that migrations use. There is no actual logic /
+ * elasticsearch.js that migrations use. There is no actual logic /
  * funcationality contained here.
  */
 
