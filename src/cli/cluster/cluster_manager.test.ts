@@ -139,9 +139,9 @@ describe('CLI cluster manager', () => {
       });
 
       describe('delayUntil()', () => {
-        test('returns an observable which emits when the server and kbnOptimizer are ready and completes', async () => {
+        test('returns an observable which emits when the server and osdOptimizer are ready and completes', async () => {
           clusterManager.serverReady$.next(false);
-          clusterManager.kbnOptimizerReady$.next(false);
+          clusterManager.osdOptimizerReady$.next(false);
 
           const events: Array<string | Error> = [];
           delayUntil().subscribe(
@@ -153,7 +153,7 @@ describe('CLI cluster manager', () => {
           clusterManager.serverReady$.next(true);
           expect(events).toEqual([]);
 
-          clusterManager.kbnOptimizerReady$.next(true);
+          clusterManager.osdOptimizerReady$.next(true);
           expect(events).toEqual(['next', 'complete']);
         });
       });

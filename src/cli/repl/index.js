@@ -25,11 +25,11 @@ const PRINT_DEPTH = 5;
 /**
  * Starts an interactive REPL with a global `server` object.
  *
- * @param {KibanaServer} kbnServer
+ * @param {OpenSearch DashboardsServer} osdServer
  */
-export function startRepl(kbnServer) {
+export function startRepl(osdServer) {
   const replServer = repl.start({
-    prompt: 'Kibana> ',
+    prompt: 'OpenSearch Dashboards> ',
     useColors: true,
     writer: promiseFriendlyWriter({
       displayPrompt: () => replServer.displayPrompt(),
@@ -38,8 +38,8 @@ export function startRepl(kbnServer) {
   });
 
   const initializeContext = () => {
-    replServer.context.kbnServer = kbnServer;
-    replServer.context.server = kbnServer.server;
+    replServer.context.osdServer = osdServer;
+    replServer.context.server = osdServer.server;
     replServer.context.repl = {
       printDepth: PRINT_DEPTH,
       print(obj, depth = null) {

@@ -22,16 +22,16 @@ import { pkg } from '../core/server/utils';
 import Command from './command';
 import serveCommand from './serve/serve';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
+const argv = process.env.osdWorkerArgv
+  ? JSON.parse(process.env.osdWorkerArgv)
   : process.argv.slice();
-const program = new Command('bin/kibana');
+const program = new Command('bin/opensearch-dashboards');
 
 program
   .version(pkg.version)
   .description(
-    'Kibana is an open source (Apache Licensed), browser ' +
-      'based analytics and search dashboard for Elasticsearch.'
+    'OpenSearch Dashboards is an open source (Apache Licensed), browser ' +
+      'based analytics and search dashboard for OpenSearch.'
   );
 
 // attach commands
