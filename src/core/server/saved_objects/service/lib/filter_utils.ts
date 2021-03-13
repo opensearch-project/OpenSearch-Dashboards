@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
-import { esKuery } from '../../es_query';
+import { opensearchKuery } from '../../opensearch_query';
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -34,7 +34,7 @@ export const validateConvertFilterToKueryNode = (
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
+      typeof filter === 'string' ? opensearchKuery.fromKueryExpression(filter) : filter;
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -71,8 +71,8 @@ export const validateConvertFilterToKueryNode = (
           set(
             filterKueryNode,
             path,
-            esKuery.nodeTypes.function.buildNode('and', [
-              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
+            opensearchKuery.nodeTypes.function.buildNode('and', [
+              opensearchKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
               existingKueryNode,
             ])
           );

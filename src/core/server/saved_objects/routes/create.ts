@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 
 export const registerCreateRoute = (router: IRouter) => {

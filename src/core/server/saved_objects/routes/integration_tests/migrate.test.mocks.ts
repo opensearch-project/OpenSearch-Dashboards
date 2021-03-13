@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from '../../migrations/kibana/opensearch_dashboards_migrator.mock';
 
-export const migratorInstanceMock = mockKibanaMigrator.create();
-export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('../../migrations/kibana/kibana_migrator', () => ({
-  KibanaMigrator: KibanaMigratorMock,
+export const migratorInstanceMock = mockOpenSearchDashboardsMigrator.create();
+export const OpenSearchDashboardsMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
+jest.doMock('../../migrations/opensearch-dashboards/opensearch_dashboards_migrator', () => ({
+  OpenSearchDashboardsMigrator: OpenSearchDashboardsMigratorMock,
 }));

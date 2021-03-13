@@ -19,7 +19,7 @@
 
 /*
  * This file contains the logic for transforming saved objects to / from
- * the raw document format as stored in ElasticSearch.
+ * the raw document format as stored in OpenSearch.
  */
 
 export {

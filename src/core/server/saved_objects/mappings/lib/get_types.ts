@@ -20,7 +20,7 @@
 import { IndexMapping } from '../types';
 
 /**
- *  Get the names of the types defined in the EsMappingsDsl
+ *  Get the names of the types defined in the OpenSearchMappingsDsl
  */
 export function getTypes(mappings: IndexMapping) {
   return Object.keys(mappings).filter((type) => type !== '_default_');

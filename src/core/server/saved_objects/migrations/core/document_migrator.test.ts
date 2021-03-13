@@ -46,7 +46,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 describe('DocumentMigrator', () => {
   function testOpts() {
     return {
-      kibanaVersion: '25.2.3',
+      opensearchDashboardsVersion: '25.2.3',
       typeRegistry: createRegistry(),
       log: mockLogger,
     };
@@ -54,7 +54,7 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration definitions', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: _.noop as any,
@@ -68,7 +68,7 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration semvers', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -84,7 +84,7 @@ describe('DocumentMigrator', () => {
 
   it('validates the migration function', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -277,10 +277,10 @@ describe('DocumentMigrator', () => {
     });
   });
 
-  it('rejects docs that belong to a newer Kibana instance', () => {
+  it('rejects docs that belong to a newer OpenSearch Dashboards instance', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      kibanaVersion: '8.0.1',
+      opensearchDashboardsVersion: '8.0.1',
     });
     expect(() =>
       migrator.migrate({
@@ -290,7 +290,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dog: '10.2.0' },
       })
     ).toThrow(
-      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
+      /Document "smelly" has property "dog" which belongs to a more recent version of OpenSearch Dashboards \[10\.2\.0\]\. The last known version is \[undefined\]/i
     );
   });
 
@@ -312,7 +312,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dawg: '1.2.4' },
       })
     ).toThrow(
-      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+      /Document "fleabag" has property "dawg" which belongs to a more recent version of OpenSearch Dashboards \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
     );
   });
 

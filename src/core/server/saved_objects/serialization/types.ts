@@ -65,7 +65,7 @@ interface Referencable {
 }
 
 /**
- * Describes Saved Object documents from Kibana < 7.0.0 which don't have a
+ * Describes Saved Object documents from OpenSearch Dashboards < 7.0.0 which don't have a
  * `references` root property defined. This type should only be used in
  * migrations.
  *

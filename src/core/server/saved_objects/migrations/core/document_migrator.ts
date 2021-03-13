@@ -49,7 +49,7 @@
  * they could transform a type from "foo 1.0.0" to  "bar 3.0.0".
  *
  * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
- * This is because Kibana UI and other clients really can't be expected build the migrationVersion
+ * This is because OpenSearch Dashboards UI and other clients really can't be expected build the migrationVersion
  * in a reliable way. Instead, callers of our APIs are expected to send us up-to-date documents,
  * and those documents are simply given a stamp of approval by this transformer. This is why it is
  * important for migration authors to *also* write a saved object validation that will prevent this
@@ -74,7 +74,7 @@ import { SavedObjectMigrationFn } from '../types';
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
 interface DocumentMigratorOptions {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
   log: Logger;
 }
@@ -108,17 +108,17 @@ export class DocumentMigrator implements VersionedTransformer {
    * Creates an instance of DocumentMigrator.
    *
    * @param {DocumentMigratorOptions} opts
-   * @prop {string} kibanaVersion - The current version of Kibana
+   * @prop {string} opensearchDashboardsVersion - The current version of OpenSearchDashboards
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, opensearchDashboardsVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
-      kibanaVersion,
+      opensearchDashboardsVersion,
       migrations: this.migrations,
     });
   }
@@ -227,7 +227,7 @@ function buildActiveMigrations(
 function buildDocumentTransform({
   migrations,
 }: {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   migrations: ActiveMigrations;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
@@ -331,15 +331,15 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
       return false;
     }
 
-    // We verify that the version is not greater than the version supported by Kibana.
+    // We verify that the version is not greater than the version supported by OpenSearchDashboards.
     // If we didn't, this would cause an infinite loop, as we'd be unable to migrate the property
     // but it would continue to show up as unmigrated.
     // If we have a docVersion and the latestVersion is smaller than it or does not exist,
-    // we are dealing with a document that belongs to a future Kibana / plugin version.
+    // we are dealing with a document that belongs to a future OpenSearch Dashboards / plugin version.
     if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana [${docVersion}]. The last known version is [${latestVersion}]`,
+          ` version of OpenSearch Dashboards [${docVersion}]. The last known version is [${latestVersion}]`,
         doc
       );
     }

@@ -21,7 +21,7 @@ function toArray(value: string | string[]): string[] {
   return typeof value === 'string' ? [value] : value;
 }
 /**
- * Provides an array of paths for ES source filtering
+ * Provides an array of paths for OpenSearch source filtering
  */
 export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
   if (!fields || fields.length === 0) {

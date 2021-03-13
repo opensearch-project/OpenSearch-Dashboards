@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 
 import {
   SavedObjectsService,

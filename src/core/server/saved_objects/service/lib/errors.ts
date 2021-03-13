@@ -35,10 +35,10 @@ const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
 // 429 - Too Many Requests
 const CODE_TOO_MANY_REQUESTS = 'SavedObjectsClient/tooManyRequests';
-// 400 - Es Cannot Execute Script
-const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
-// 503 - Es Unavailable
-const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
+// 400 - OpenSearch Cannot Execute Script
+const CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
+// 503 - OpenSearch Unavailable
+const CODE_OPENSEARCH_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
@@ -176,20 +176,20 @@ export class SavedObjectsErrorHelpers {
     return isSavedObjectsClientError(error) && error[code] === CODE_TOO_MANY_REQUESTS;
   }
 
-  public static decorateEsCannotExecuteScriptError(error: Error, reason?: string) {
-    return decorate(error, CODE_ES_CANNOT_EXECUTE_SCRIPT, 400, reason);
+  public static decorateOpenSearchCannotExecuteScriptError(error: Error, reason?: string) {
+    return decorate(error, CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT, 400, reason);
   }
 
-  public static isEsCannotExecuteScriptError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_ES_CANNOT_EXECUTE_SCRIPT;
+  public static isOpenSearchCannotExecuteScriptError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT;
   }
 
-  public static decorateEsUnavailableError(error: Error, reason?: string) {
-    return decorate(error, CODE_ES_UNAVAILABLE, 503, reason);
+  public static decorateOpenSearchUnavailableError(error: Error, reason?: string) {
+    return decorate(error, CODE_OPENSEARCH_UNAVAILABLE, 503, reason);
   }
 
-  public static isEsUnavailableError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_ES_UNAVAILABLE;
+  public static isOpenSearchUnavailableError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_OPENSEARCH_UNAVAILABLE;
   }
 
   public static decorateGeneralError(error: Error, reason?: string) {

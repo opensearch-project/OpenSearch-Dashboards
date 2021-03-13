@@ -20,7 +20,7 @@
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { IKibanaMigrator } from '../migrations';
+import { IOpenSearchDashboardsMigrator } from '../migrations';
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
@@ -44,7 +44,7 @@ export function registerRoutes({
   http: InternalHttpServiceSetup;
   logger: Logger;
   config: SavedObjectConfig;
-  migratorPromise: Promise<IKibanaMigrator>;
+  migratorPromise: Promise<IOpenSearchDashboardsMigrator>;
 }) {
   const router = http.createRouter('/api/saved_objects/');
 

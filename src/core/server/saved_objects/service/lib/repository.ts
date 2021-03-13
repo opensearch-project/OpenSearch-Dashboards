@@ -20,18 +20,18 @@
 import { omit } from 'lodash';
 import uuid from 'uuid';
 import {
-  ElasticsearchClient,
+  OpenSearchClient,
   DeleteDocumentResponse,
   GetResponse,
   SearchResponse,
-} from '../../../elasticsearch/';
+} from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
-import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
+import { createRepositoryOpenSearchClient, RepositoryOpenSearchClient } from './repository_opensearch_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
-import { IKibanaMigrator } from '../../migrations';
+import { IOpenSearchDashboardsMigrator } from '../../migrations';
 import {
   SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
@@ -88,10 +88,10 @@ const isRight = (either: Either): either is Right => either.tag === 'Right';
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
-  client: ElasticsearchClient;
+  client: OpenSearchClient;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
-  migrator: IKibanaMigrator;
+  migrator: IOpenSearchDashboardsMigrator;
   allowedTypes: string[];
 }
 
@@ -100,7 +100,7 @@ export interface SavedObjectsRepositoryOptions {
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -109,7 +109,7 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  * @public
  */
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch supports only boolean flag for this operation */
+  /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
 
@@ -126,12 +126,12 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
  * @public
  */
 export class SavedObjectsRepository {
-  private _migrator: IKibanaMigrator;
+  private _migrator: IOpenSearchDashboardsMigrator;
   private _index: string;
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private readonly client: RepositoryEsClient;
+  private readonly client: RepositoryOpenSearchClient;
   private _serializer: SavedObjectsSerializer;
 
   /**
@@ -143,10 +143,10 @@ export class SavedObjectsRepository {
    * @internal
    */
   public static createRepository(
-    migrator: IKibanaMigrator,
+    migrator: IOpenSearchDashboardsMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
-    client: ElasticsearchClient,
+    client: OpenSearchClient,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -188,7 +188,7 @@ export class SavedObjectsRepository {
 
     // It's important that we migrate documents / mark them as up-to-date
     // prior to writing them to the index. Otherwise, we'll cause unnecessary
-    // index migrations to run at Kibana startup, and those will probably fail
+    // index migrations to run at OpenSearch Dashboards startup, and those will probably fail
     // due to invalidly versioned documents in the index.
     //
     // The migrator performs double-duty, and validates the documents prior
@@ -197,7 +197,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._registry = typeRegistry;
-    this.client = createRepositoryEsClient(client);
+    this.client = createRepositoryOpenSearchClient(client);
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
@@ -352,14 +352,14 @@ export class SavedObjectsRepository {
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
 
     const bulkGetDocs = expectedResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .filter(({ value }) => value.opensearchRequestIndex !== undefined)
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
@@ -387,13 +387,13 @@ export class SavedObjectsRepository {
       let savedObjectNamespaces;
       let versionProperties;
       const {
-        esRequestIndex,
+        opensearchRequestIndex,
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
-      if (esRequestIndex !== undefined) {
+      if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+        const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
         if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
           const { id, type } = object;
@@ -422,7 +422,7 @@ export class SavedObjectsRepository {
       }
 
       const expectedResult = {
-        esRequestIndex: bulkRequestIndexCounter++,
+        opensearchRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
@@ -466,9 +466,9 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+        const { requestedId, rawMigratedDoc, opensearchRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex]
+          bulkResponse?.body.items[opensearchRequestIndex]
         )[0] as any;
 
         if (error) {
@@ -524,7 +524,7 @@ export class SavedObjectsRepository {
         value: {
           type,
           id,
-          esRequestIndex: bulkGetRequestIndexCounter++,
+          opensearchRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
@@ -552,8 +552,8 @@ export class SavedObjectsRepository {
         return;
       }
 
-      const { type, id, esRequestIndex } = expectedResult.value;
-      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      const { type, id, opensearchRequestIndex } = expectedResult.value;
+      const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc.found) {
         errors.push({
           id,
@@ -627,7 +627,7 @@ export class SavedObjectsRepository {
     }
 
     throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+      `Unexpected OpenSearch DELETE response: ${JSON.stringify({
         type,
         id,
         response: { body, statusCode },
@@ -689,7 +689,7 @@ export class SavedObjectsRepository {
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
    * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
+   * @property {Array<string>} [options.searchFields] - see OpenSearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
@@ -770,7 +770,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const esOptions = {
+    const opensearchOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
       from: perPage * (page - 1),
@@ -795,7 +795,7 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+    const { body, statusCode } = await this.client.search<SearchResponse<any>>(opensearchOptions, {
       ignore: [404],
     });
     if (statusCode === 404) {
@@ -867,7 +867,7 @@ export class SavedObjectsRepository {
           type,
           id,
           fields,
-          esRequestIndex: bulkGetRequestIndexCounter++,
+          opensearchRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
@@ -896,8 +896,8 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { type, id, esRequestIndex } = expectedResult.value;
-        const doc = bulkGetResponse?.body.docs[esRequestIndex];
+        const { type, id, opensearchRequestIndex } = expectedResult.value;
+        const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
 
         if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
@@ -1099,7 +1099,7 @@ export class SavedObjectsRepository {
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
     // there should never be a case where a multi-namespace object does not have any existing namespaces
-    // however, it is a possibility if someone manually modifies the document in Elasticsearch
+    // however, it is a possibility if someone manually modifies the document in OpenSearch
     const time = this._getCurrentTime();
 
     const doc = {
@@ -1221,7 +1221,7 @@ export class SavedObjectsRepository {
       }
 
       throw new Error(
-        `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+        `Unexpected OpenSearch DELETE response: ${JSON.stringify({
           type,
           id,
           response: { body, statusCode },
@@ -1293,7 +1293,7 @@ export class SavedObjectsRepository {
           version,
           documentToSave,
           objectNamespace,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
@@ -1307,7 +1307,7 @@ export class SavedObjectsRepository {
 
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .filter(({ value }) => value.opensearchRequestIndex !== undefined)
       .map(({ value: { type, id, objectNamespace } }) => ({
         _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
         _index: this.getIndexForType(type),
@@ -1335,7 +1335,7 @@ export class SavedObjectsRepository {
         }
 
         const {
-          esRequestIndex,
+          opensearchRequestIndex,
           id,
           type,
           version,
@@ -1345,9 +1345,9 @@ export class SavedObjectsRepository {
 
         let namespaces;
         let versionProperties;
-        if (esRequestIndex !== undefined) {
+        if (opensearchRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
-          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
           if (
             !docFound ||
@@ -1378,7 +1378,7 @@ export class SavedObjectsRepository {
           type,
           id,
           namespaces,
-          esRequestIndex: bulkUpdateRequestIndexCounter++,
+          opensearchRequestIndex: bulkUpdateRequestIndexCounter++,
           documentToSave: expectedBulkGetResult.value.documentToSave,
         };
 
@@ -1412,8 +1412,8 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex];
+        const { type, id, namespaces, documentToSave, opensearchRequestIndex } = expectedResult.value;
+        const response = bulkUpdateResponse?.body.items[opensearchRequestIndex];
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
@@ -1576,7 +1576,7 @@ export class SavedObjectsRepository {
    * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
    * document's `namespaces` value includes the string representation of the given namespace.
    *
-   * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
+   * WARNING: This should only be used for documents that were retrieved from OpenSearch. Otherwise, the guarantees of the document ID
    * format mentioned above do not apply.
    */
   private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace?: string) {
@@ -1604,7 +1604,7 @@ export class SavedObjectsRepository {
    * @param namespace The target namespace.
    * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
    * newly-created object will include. Value may be undefined if an existing saved object has no namespaces attribute; this should not
-   * happen in normal operations, but it is possible if the Elasticsearch document is manually modified.
+   * happen in normal operations, but it is possible if the OpenSearch document is manually modified.
    * @throws Will throw an error if the saved object exists and it does not include the target namespace.
    */
   private async preflightGetNamespaces(type: string, id: string, namespace?: string) {
@@ -1640,7 +1640,7 @@ export class SavedObjectsRepository {
    * @param type The type of the saved object.
    * @param id The ID of the saved object.
    * @param namespace The target namespace.
-   * @returns Raw document from Elasticsearch.
+   * @returns Raw document from OpenSearch.
    * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
    */
   private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
@@ -1680,7 +1680,7 @@ function getBulkOperationError(error: { type: string; reason?: string }, type: s
 }
 
 /**
- * Returns an object with the expected version properties. This facilitates Elasticsearch's Optimistic Concurrency Control.
+ * Returns an object with the expected version properties. This facilitates OpenSearch's Optimistic Concurrency Control.
  *
  * @param version Optional version specified by the consumer.
  * @param document Optional existing document that was obtained in a preflight operation.
@@ -1700,7 +1700,7 @@ function getExpectedVersionProperties(version?: string, document?: SavedObjectsR
 /**
  * Returns a string array of namespaces for a given saved object. If the saved object is undefined, the result is an array that contains the
  * current namespace. Value may be undefined if an existing saved object has no namespaces attribute; this should not happen in normal
- * operations, but it is possible if the Elasticsearch document is manually modified.
+ * operations, but it is possible if the OpenSearch document is manually modified.
  *
  * @param namespace The current namespace.
  * @param document Optional existing saved object that was obtained in a preflight operation.
