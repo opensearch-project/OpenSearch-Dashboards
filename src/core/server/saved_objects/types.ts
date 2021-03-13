@@ -76,9 +76,9 @@ export interface SavedObjectsFindOptions {
    * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
    */
   fields?: string[];
-  /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
+  /** Search documents using the OpenSearch Simple Query String syntax. See OpenSearch Simple Query String `query` argument for more information */
   search?: string;
-  /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
+  /** The fields to perform the parsed query against. See OpenSearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
@@ -92,12 +92,12 @@ export interface SavedObjectsFindOptions {
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
    * object client wrapper.
-   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
+   * If this is defined, it supersedes the `type` and `namespaces` fields when building the OpenSearch query.
    * Any types that are not included in this map will be excluded entirely.
    * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
    */
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  /** An optional ES preference value to be used for the query **/
+  /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
 }
 
@@ -111,14 +111,14 @@ export interface SavedObjectsBaseOptions {
 }
 
 /**
- * Elasticsearch Refresh setting for mutating operation
+ * OpenSearch Refresh setting for mutating operation
  * @public
  */
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing plugin state.
+ * Saved Objects is OpenSearchDashboards's data persisentence mechanism allowing plugins to
+ * use OpenSearch for storing plugin state.
  *
  * ## SavedObjectsClient errors
  *
@@ -137,7 +137,7 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * responses from the `SavedObjectsClient`.
  *
  * Type 2 errors are decorated versions of the source error, so if
- * the elasticsearch client threw an error it will be decorated based
+ * the opensearch client threw an error it will be decorated based
  * on its type. That means that rather than looking for `error.body.error.type` or
  * doing substring checks on `error.body.error.reason`, just use the helpers to
  * understand the meaning of the error:
@@ -159,7 +159,7 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  *
  * From the perspective of application code and APIs the SavedObjectsClient is
  * a black box that persists objects. One of the internal details that users have
- * no control over is that we use an elasticsearch index for persistance and that
+ * no control over is that we use an opensearch index for persistance and that
  * index might be missing.
  *
  * At the time of writing we are in the process of transitioning away from the

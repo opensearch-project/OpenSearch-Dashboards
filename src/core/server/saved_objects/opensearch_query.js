@@ -16,5 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { KibanaMigrator, IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+// a temporary file to remove circular deps in TS code between platform & data plugin
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+export { opensearchKuery } from '../../../plugins/data/server';

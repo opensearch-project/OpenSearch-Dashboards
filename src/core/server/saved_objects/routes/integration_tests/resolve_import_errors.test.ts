@@ -19,7 +19,7 @@
 
 import { mockUuidv4 } from '../../import/__mocks__';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer, createExportableType } from '../test_utils';

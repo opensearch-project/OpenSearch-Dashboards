@@ -321,35 +321,35 @@ describe('savedObjectsClient/errorTypes', () => {
     });
   });
 
-  describe('EsCannotExecuteScript error', () => {
-    describe('decorateEsCannotExecuteScriptError', () => {
+  describe('OpenSearchCannotExecuteScript error', () => {
+    describe('decorateOpenSearchCannotExecuteScriptError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error)).toBe(error);
       });
 
-      it('makes the error identifiable as a EsCannotExecuteScript error', () => {
+      it('makes the error identifiable as a OpenSearchCannotExecuteScript error', () => {
         const error = new Error();
-        expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
-        SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error);
-        expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isOpenSearchCannotExecuteScriptError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error);
+        expect(SavedObjectsErrorHelpers.isOpenSearchCannotExecuteScriptError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(new Error());
         expect(error).toHaveProperty('isBoom', true);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(
             new Error('foobar')
           );
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
 
         it('prefixes message with passed reason', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(
             new Error('foobar'),
             'biz'
           );
@@ -357,7 +357,7 @@ describe('savedObjectsClient/errorTypes', () => {
         });
 
         it('sets statusCode to 501', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(
             new Error('foo')
           );
           expect(error.output).toHaveProperty('statusCode', 400);
@@ -365,40 +365,40 @@ describe('savedObjectsClient/errorTypes', () => {
 
         it('preserves boom properties of input', () => {
           const error = Boom.notFound();
-          SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error);
+          SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error);
           expect(error.output).toHaveProperty('statusCode', 404);
         });
       });
     });
   });
 
-  describe('EsUnavailable error', () => {
-    describe('decorateEsUnavailableError', () => {
+  describe('OpenSearchUnavailable error', () => {
+    describe('decorateOpenSearchUnavailableError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(SavedObjectsErrorHelpers.decorateEsUnavailableError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(error)).toBe(error);
       });
 
-      it('makes the error identifiable as a EsUnavailable error', () => {
+      it('makes the error identifiable as a OpenSearchUnavailable error', () => {
         const error = new Error();
-        expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
-        SavedObjectsErrorHelpers.decorateEsUnavailableError(error);
-        expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(error);
+        expect(SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(new Error());
         expect(error).toHaveProperty('isBoom', true);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
 
         it('prefixes message with passed reason', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(
             new Error('foobar'),
             'biz'
           );
@@ -406,13 +406,13 @@ describe('savedObjectsClient/errorTypes', () => {
         });
 
         it('sets statusCode to 503', () => {
-          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 503);
         });
 
         it('preserves boom properties of input', () => {
           const error = Boom.notFound();
-          SavedObjectsErrorHelpers.decorateEsUnavailableError(error);
+          SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(error);
           expect(error.output).toHaveProperty('statusCode', 404);
         });
       });

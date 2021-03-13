@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 import { extname } from 'path';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';

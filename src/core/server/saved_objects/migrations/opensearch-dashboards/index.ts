@@ -16,6 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// a temporary file to remove circular deps in TS code between platform & data plugin
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { esKuery } from '../../../plugins/data/server';
+
+export { OpenSearchDashboardsMigrator, IOpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './opensearch_dashboards_migrator';

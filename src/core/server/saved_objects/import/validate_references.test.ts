@@ -88,7 +88,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
-  test('removes references that exist within es', async () => {
+  test('removes references that exist within opensearch', async () => {
     const savedObjects = [
       {
         id: '2',
@@ -477,7 +477,7 @@ describe('validateReferences()', () => {
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
-  test(`doesn't return errors when references exist in Elasticsearch`, async () => {
+  test(`doesn't return errors when references exist in OpenSearch`, async () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
         {

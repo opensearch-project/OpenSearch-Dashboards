@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/opensearch/lib/Transport';
 
-import { ElasticsearchClient } from '../../../elasticsearch/';
-import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
-import { decorateEsError } from './decorate_es_error';
+import { OpenSearchClient } from '../../../opensearch/';
+import { retryCallCluster } from '../../../opensearch/client/retry_call_cluster';
+import { decorateOpenSearchError } from './decorate_opensearch_error';
 
 const methods = [
   'bulk',
@@ -36,10 +36,10 @@ const methods = [
 
 type MethodName = typeof methods[number];
 
-export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName>;
+export type RepositoryOpenSearchClient = Pick<OpenSearchClient, MethodName>;
 
-export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
-  return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
+export function createRepositoryOpenSearchClient(client: OpenSearchClient): RepositoryOpenSearchClient {
+  return methods.reduce((acc: RepositoryOpenSearchClient, key: MethodName) => {
     Object.defineProperty(acc, key, {
       value: async (params?: unknown, options?: TransportRequestOptions) => {
         try {
@@ -47,10 +47,10 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
             (client[key] as Function)(params, { maxRetries: 0, ...options })
           );
         } catch (e) {
-          throw decorateEsError(e);
+          throw decorateOpenSearchError(e);
         }
       },
     });
     return acc;
-  }, {} as RepositoryEsClient);
+  }, {} as RepositoryOpenSearchClient);
 }

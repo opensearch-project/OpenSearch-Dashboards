@@ -18,8 +18,8 @@
  */
 import { take } from 'rxjs/operators';
 
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
+import { opensearchClientMock } from '../../../opensearch/client/mocks';
+import { OpenSearchDashboardsMigratorOptions, OpenSearchDashboardsMigrator } from './opensearch_dashboards_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
@@ -39,7 +39,7 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   return registry;
 };
 
-describe('KibanaMigrator', () => {
+describe('OpenSearchDashboardsMigrator', () => {
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const options = mockOptions();
@@ -59,7 +59,7 @@ describe('KibanaMigrator', () => {
         },
       ]);
 
-      const mappings = new KibanaMigrator(options).getActiveMappings();
+      const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
       expect(mappings).toMatchSnapshot();
     });
   });
@@ -69,19 +69,19 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
+        opensearchClientMock.createSuccessTransportRequestPromise(
           { templates: [] },
           { statusCode: 404 }
         )
       );
       options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
       options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      const migrator = new KibanaMigrator(options);
+      const migrator = new OpenSearchDashboardsMigrator(options);
 
       await migrator.runMigrations();
       await migrator.runMigrations();
@@ -93,19 +93,19 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
+        opensearchClientMock.createSuccessTransportRequestPromise(
           { templates: [] },
           { statusCode: 404 }
         )
       );
       options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
       options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      const migrator = new KibanaMigrator(options);
+      const migrator = new OpenSearchDashboardsMigrator(options);
       const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
       await migrator.runMigrations();
       const { status, result } = await migratorStatus;
@@ -126,14 +126,14 @@ describe('KibanaMigrator', () => {
   });
 });
 
-type MockedOptions = KibanaMigratorOptions & {
-  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+type MockedOptions = OpenSearchDashboardsMigratorOptions & {
+  client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
 const mockOptions = () => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
-    kibanaVersion: '8.2.3',
+    opensearchDashboardsVersion: '8.2.3',
     typeRegistry: createRegistry([
       {
         name: 'testtype',
@@ -159,17 +159,17 @@ const mockOptions = () => {
         migrations: {},
       },
     ]),
-    kibanaConfig: {
+    opensearchDashboardsConfig: {
       enabled: true,
       index: '.my-index',
-    } as KibanaMigratorOptions['kibanaConfig'],
+    } as OpenSearchDashboardsMigratorOptions['opensearchDashboardsConfig'],
     savedObjectsConfig: {
       batchSize: 20,
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
     },
-    client: elasticsearchClientMock.createElasticsearchClient(),
+    client: opensearchClientMock.createOpenSearchClient(),
   };
   return options;
 };

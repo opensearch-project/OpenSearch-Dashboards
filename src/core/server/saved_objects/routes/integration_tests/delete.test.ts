@@ -18,7 +18,7 @@
  */
 
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { registerDeleteRoute } from '../delete';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';

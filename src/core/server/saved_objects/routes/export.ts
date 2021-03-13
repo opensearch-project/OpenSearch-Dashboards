@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
 import { IRouter } from '../../http';
