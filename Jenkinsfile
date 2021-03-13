@@ -19,8 +19,8 @@ pipeline {
           DOCKER_IMAGE.inside {
               stage('bootstrap') {
                   echo "Bootstrap here"
-                  sh 'yarn kbn bootstrap'
-                  sh 'node scripts/build_kibana_platform_plugins --oss --no-examples --workers 10'
+                  sh 'yarn osd bootstrap'
+                  sh 'node scripts/build_opensearch_dashboards_platform_plugins --oss --no-examples --workers 10'
               }
           }
         }
@@ -79,10 +79,10 @@ def functionalDynamicParallelSteps(image){
               "CI=1",
               "CI_GROUP=${currentCiGroup}",
               "GCS_UPLOAD_PREFIX=fake",
-              "TEST_KIBANA_HOST=localhost",
-              "TEST_KIBANA_PORT=6610",
-              "TEST_ES_TRANSPORT_PORT=9403",
-              "TEST_ES_PORT=9400",
+              "TEST_OPENSEARCh_DASHBOARDS_HOST=localhost",
+              "TEST_OPENSEARCh_DASHBOARDS_PORT=6610",
+              "TEST_OPENSEARCH_TRANSPORT_PORT=9403",
+              "TEST_OPENSEARCH_PORT=9400",
               "CI_PARALLEL_PROCESS_NUMBER=${currentStep}",
               "JOB=ci${currentStep}",
               "CACHE_DIR=${currentCiGroup}"
