@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Reporter, METRIC_TYPE } from '@kbn/analytics';
+import { Reporter, METRIC_TYPE } from '@osd/analytics';
 import { Subject, merge } from 'rxjs';
-import { Storage } from '../../kibana_utils/public';
+import { Storage } from '../../opensearch_dashboards_utils/public';
 import { createReporter } from './services';
 import {
   PluginInitializerContext,
@@ -43,7 +43,7 @@ export interface UsageCollectionSetup {
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
     /**
-     * Legacy handler so we can report the actual app being used inside "kibana#/{appId}".
+     * Legacy handler so we can report the actual app being used inside "opensearchDashboards#/{appId}".
      * To be removed when we get rid of the legacy world
      *
      * @deprecated
@@ -103,7 +103,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     }
 
     if (this.trackUserAgent) {
-      this.reporter.reportUserAgent('kibana');
+      this.reporter.reportUserAgent('opensearchDashboards');
     }
 
     reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);

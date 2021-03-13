@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { schema } from '@osd/config-schema';
+import { i18n } from '@osd/i18n';
 import defaultsDeep from 'lodash/defaultsDeep';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
-  ElasticsearchClient,
+  OpenSearchClient,
   IRouter,
   LegacyAPICaller,
   MetricsServiceSetup,
@@ -49,8 +49,8 @@ export function registerStatsRoute({
   router: IRouter;
   config: {
     allowAnonymous: boolean;
-    kibanaIndex: string;
-    kibanaVersion: string;
+    opensearchDashboardsIndex: string;
+    opensearchDashboardsVersion: string;
     uuid: string;
     server: {
       name: string;
@@ -64,9 +64,9 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     callCluster: LegacyAPICaller,
-    esClient: ElasticsearchClient
+    opensearchClient: OpenSearchClient
   ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient);
+    const usage = await collectorSet.bulkFetchUsage(callCluster, opensearchClient);
     return collectorSet.toObject(usage);
   };
 
@@ -99,8 +99,8 @@ export function registerStatsRoute({
 
       let extended;
       if (isExtended) {
-        const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const callCluster = context.core.opensearch.legacy.client.callAsCurrentUser;
+        const opensearchClient = context.core.opensearch.client.asCurrentUser;
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
           if (!collectorsReady) {
@@ -108,7 +108,7 @@ export function registerStatsRoute({
           }
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
+        const usagePromise = shouldGetUsage ? getUsage(callCluster, opensearchClient) : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
 
         let modifiedUsage = usage;
@@ -119,7 +119,7 @@ export function registerStatsRoute({
           // wasn't true, we need to be backwards compatible with how the legacy data
           // looked and support those use cases here.
           modifiedUsage = Object.keys(usage).reduce((accum, usageKey) => {
-            if (usageKey === 'kibana') {
+            if (usageKey === 'opensearchDashboards') {
               accum = {
                 ...accum,
                 ...usage[usageKey],
@@ -160,17 +160,17 @@ export function registerStatsRoute({
         .toPromise();
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
-      const kibanaStats = collectorSet.toApiFieldNames({
+      const opensearchDashboardsStats = collectorSet.toApiFieldNames({
         ...lastMetrics,
-        kibana: {
+        opensearchDashboards: {
           uuid: config.uuid,
           name: config.server.name,
-          index: config.kibanaIndex,
+          index: config.opensearchDashboardsIndex,
           host: config.server.hostname,
           locale: i18n.getLocale(),
           transport_address: `${config.server.hostname}:${config.server.port}`,
-          version: config.kibanaVersion.replace(SNAPSHOT_REGEX, ''),
-          snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
+          version: config.opensearchDashboardsVersion.replace(SNAPSHOT_REGEX, ''),
+          snapshot: SNAPSHOT_REGEX.test(config.opensearchDashboardsVersion),
           status: ServiceStatusToLegacyState[overallStatus.level.toString()],
         },
         last_updated: collectedAt.toISOString(),
@@ -179,7 +179,7 @@ export function registerStatsRoute({
 
       return res.ok({
         body: {
-          ...kibanaStats,
+          ...opensearchDashboardsStats,
           ...extended,
         },
       });

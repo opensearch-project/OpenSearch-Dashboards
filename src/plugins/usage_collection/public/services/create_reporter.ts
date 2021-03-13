@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Reporter, Storage } from '@kbn/analytics';
-import { HttpSetup } from 'kibana/public';
+import { Reporter, Storage } from '@osd/analytics';
+import { HttpSetup } from 'opensearch-dashboard/spublic';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;

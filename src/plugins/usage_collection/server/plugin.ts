@@ -25,7 +25,7 @@ import {
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
-} from 'kibana/server';
+} from 'opensearch-dashboards/server';
 import { ConfigType } from './config';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
@@ -60,8 +60,8 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       collectorSet,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
-        kibanaIndex: globalConfig.kibana.index,
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        opensearchDashboardsIndex: globalConfig.opensearchDashboards.index,
+        opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
         server: core.http.getServerInfo(),
         uuid: this.initializerContext.env.instanceUuid,
       },

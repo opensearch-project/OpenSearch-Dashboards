@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export const KIBANA_STATS_TYPE = 'kibana_stats';
+export const OPENSEARCH_DASHBOARDS_STATS_TYPE = 'opensearch_dashboards_stats';
 export const DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S = 60;
