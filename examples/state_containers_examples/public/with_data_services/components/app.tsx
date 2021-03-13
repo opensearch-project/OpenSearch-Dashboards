@@ -19,7 +19,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { History } from 'history';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { Router } from 'react-router-dom';
 
 import {
@@ -40,7 +40,7 @@ import {
   IIndexPattern,
   QueryState,
   Filter,
-  esFilters,
+  opensearchFilters,
   Query,
 } from '../../../../../src/plugins/data/public';
 import {
@@ -48,10 +48,10 @@ import {
   BaseStateContainer,
   createStateContainer,
   createStateContainerReactHelpers,
-  IKbnUrlStateStorage,
+  IOsdUrlStateStorage,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../../../src/plugins/kibana_utils/public';
+} from '../../../../../src/plugins/opensearch_dashboards_utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
 
 interface StateDemoAppDeps {
@@ -60,7 +60,7 @@ interface StateDemoAppDeps {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
 }
 
 interface AppState {
@@ -78,12 +78,12 @@ const {
   useContainer: useAppStateContainer,
 } = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps) => {
+const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps) => {
   const appStateContainer = useAppStateContainer();
   const appState = useAppState();
 
-  useGlobalStateSyncing(data.query, kbnUrlStateStorage);
-  useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
+  useGlobalStateSyncing(data.query, osdUrlStateStorage);
+  useAppStateSyncing(appStateContainer, data.query, osdUrlStateStorage);
 
   const indexPattern = useIndexPattern(data);
   if (!indexPattern)
@@ -168,22 +168,22 @@ function useIndexPattern(data: DataPublicPluginStart) {
 
 function useGlobalStateSyncing(
   query: DataPublicPluginStart['query'],
-  kbnUrlStateStorage: IKbnUrlStateStorage
+  osdUrlStateStorage: IOsdUrlStateStorage
 ) {
   // setup sync state utils
   useEffect(() => {
     // sync global filters, time filters, refresh interval from data.query to url '_g'
-    const { stop } = syncQueryStateWithUrl(query, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(query, osdUrlStateStorage);
     return () => {
       stop();
     };
-  }, [query, kbnUrlStateStorage]);
+  }, [query, osdUrlStateStorage]);
 }
 
 function useAppStateSyncing<AppState extends QueryState>(
   appStateContainer: BaseStateContainer<AppState>,
   query: DataPublicPluginStart['query'],
-  kbnUrlStateStorage: IKbnUrlStateStorage
+  osdUrlStateStorage: IOsdUrlStateStorage
 ) {
   // setup sync state utils
   useEffect(() => {
@@ -191,13 +191,13 @@ function useAppStateSyncing<AppState extends QueryState>(
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       query,
       appStateContainer,
-      { filters: esFilters.FilterStateStore.APP_STATE, query: true }
+      { filters: opensearchFilters.FilterStateStore.APP_STATE, query: true }
     );
 
     // sets up syncing app state container with url
     const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
       storageKey: '_a',
-      stateStorage: kbnUrlStateStorage,
+      stateStorage: osdUrlStateStorage,
       stateContainer: {
         ...appStateContainer,
         // stateSync utils requires explicit handling of default state ("null")
@@ -208,13 +208,13 @@ function useAppStateSyncing<AppState extends QueryState>(
     // merge initial state from app state container and current state in url
     const initialAppState: AppState = {
       ...appStateContainer.get(),
-      ...kbnUrlStateStorage.get<AppState>('_a'),
+      ...osdUrlStateStorage.get<AppState>('_a'),
     };
     // trigger state update. actually needed in case some data was in url
     appStateContainer.set(initialAppState);
 
     // set current url to whatever is in app state container
-    kbnUrlStateStorage.set<AppState>('_a', initialAppState);
+    osdUrlStateStorage.set<AppState>('_a', initialAppState);
 
     // finally start syncing state containers with url
     startSyncingAppStateWithUrl();
@@ -223,5 +223,5 @@ function useAppStateSyncing<AppState extends QueryState>(
       stopSyncingQueryAppStateWithStateContainer();
       stopSyncingAppStateWithUrl();
     };
-  }, [query, kbnUrlStateStorage, appStateContainer]);
+  }, [query, osdUrlStateStorage, appStateContainer]);
 }

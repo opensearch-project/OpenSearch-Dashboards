@@ -62,7 +62,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./with_data_services/application');
-        // Get start services as specified in kibana.json
+        // Get start services as specified in opensearch_dashboards.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginDependencies, params);
@@ -73,14 +73,14 @@ export class StateContainersExamplesPlugin implements Plugin {
       appId: 'stateContainersExampleBrowserHistory',
       title: 'State containers using browser history',
       description: `An example todo app that uses browser history and state container utilities like createStateContainerReactHelpers,
-       createStateContainer, createKbnUrlStateStorage, createSessionStorageStateStorage,
-       syncStates and getStateFromKbnUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
+       createStateContainer, createOsdUrlStateStorage, createSessionStorageStateStorage,
+       syncStates and getStateFromOsdUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
        state should be preserved.`,
       links: [
         {
           label: 'README',
           href:
-            'https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers/README.md',
+            'https://github.com/elastic/kibana/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -92,14 +92,14 @@ export class StateContainersExamplesPlugin implements Plugin {
       appId: 'stateContainersExampleHashHistory',
       title: 'State containers using hash history',
       description: `An example todo app that uses hash history and state container utilities like createStateContainerReactHelpers,
-       createStateContainer, createKbnUrlStateStorage, createSessionStorageStateStorage,
-       syncStates and getStateFromKbnUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
+       createStateContainer, createOsdUrlStateStorage, createSessionStorageStateStorage,
+       syncStates and getStateFromOsdUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
        state should be preserved.`,
       links: [
         {
           label: 'README',
           href:
-            'https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers/README.md',
+            'https://github.com/elastic/kibana/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -110,7 +110,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     developerExamples.register({
       appId: PLUGIN_ID,
       title: 'Sync state from a query bar with the url',
-      description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from kibana_utils to
+      description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from opensearch_dashboards_utils to
       show a query bar that stores state in the url and is kept in  sync. 
       `,
       links: [

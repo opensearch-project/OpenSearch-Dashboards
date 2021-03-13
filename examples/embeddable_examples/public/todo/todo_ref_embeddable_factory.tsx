@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import {
   IContainer,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer } from 'opensearch-dashboards/public';
 import { RoutingExamplePlugin } from './plugin';
 
 export const plugin: PluginInitializer<{}, {}> = () => new RoutingExamplePlugin();

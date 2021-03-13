@@ -1,6 +1,6 @@
 ## Developer examples
 
-Owner: Kibana application architecture team
+Owner: OpenSearch Dashboards application architecture team
 
 The developer examples app is a landing page where developers go to search for working, tested examples of various developer 
 services. Add your a link to your example using the developerExamples `register` function offered on the `setup` contract:
@@ -25,7 +25,7 @@ services. Add your a link to your example using the developerExamples `register`
   }
 ```
 
-Run Kibana with developer examples via:
+Run OpenSearch Dashboards with developer examples via:
 
 ```
 yarn start --run-examples

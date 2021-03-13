@@ -19,8 +19,8 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
-import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
+import { CoreSetup, CoreStart, AppMountParameters } from 'opensearch-dashboards/public';
+import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
 import { App } from './containers/app';
 
@@ -38,9 +38,9 @@ export const mount = (
   const [core, plugins] = await coreSetup.getStartServices();
   const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
   const reactElement = (
-    <KibanaContextProvider services={deps}>
+    <OpenSearchDashboardsContextProvider services={deps}>
       <App />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
