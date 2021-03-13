@@ -28,7 +28,7 @@ import { analyzeArchive, extractArchive } from './zip';
 
 const getMode = (path) => (fs.statSync(path).mode & parseInt('777', 8)).toString(8);
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('zip', function () {
     const repliesPath = path.resolve(__dirname, '__fixtures__', 'replies');
     const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
@@ -51,8 +51,8 @@ describe('kibana cli', function () {
           Array [
             Object {
               "id": "testPlugin",
-              "kibanaVersion": "1.0.0",
-              "stripPrefix": "kibana/test-plugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/test-plugin",
             },
           ]
         `);
@@ -62,14 +62,14 @@ describe('kibana cli', function () {
     describe('extractArchive', () => {
       it('extracts files using the extractPath filter', async () => {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
-        await extractArchive(archive, tempPath, 'kibana/test-plugin');
+        await extractArchive(archive, tempPath, 'opensearch-dashboards/test-plugin');
 
         expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
           Array [
             "bin",
             "bin/executable",
             "bin/not-executable",
-            "kibana.json",
+            "opensearch_dashboards.json",
             "node_modules",
             "node_modules/some-package",
             "node_modules/some-package/index.js",
@@ -86,7 +86,7 @@ describe('kibana cli', function () {
       it.skip('verify consistency of modes of files', async () => {
         const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
 
-        await extractArchive(archivePath, tempPath, 'kibana/test-plugin/bin');
+        await extractArchive(archivePath, tempPath, 'opensearch-dashboards/test-plugin/bin');
 
         expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
           Array [
