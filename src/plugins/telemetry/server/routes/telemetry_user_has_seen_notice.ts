@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'opensearch-dashboards/server';
 import {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,

@@ -28,7 +28,7 @@ export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patte
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
 export const DATA_DATASETS_INDEX_PATTERNS = [
-  // Enterprise Search - Elastic
+  // Enterprise Search - OpenSearch
   { pattern: '.ent-search-*', patternName: 'enterprise-search' },
   { pattern: '.app-search-*', patternName: 'app-search' },
   // Enterprise Search - 3rd party
@@ -48,7 +48,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*weebly*', patternName: 'weebly' },
   { pattern: '*acquia*', patternName: 'acquia' },
 
-  // Observability - Elastic
+  // Observability - OpenSearch
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
   { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
   { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
@@ -64,7 +64,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
   // { pattern: '*logs*', patternName: 'third-party-logs' }, Disabled for now
 
-  // Security - Elastic
+  // Security - OpenSearch
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
   { pattern: 'endgame-*', patternName: 'endgame', shipper: 'endgame' },
   { pattern: 'logs-endpoint.*', patternName: 'logs-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case

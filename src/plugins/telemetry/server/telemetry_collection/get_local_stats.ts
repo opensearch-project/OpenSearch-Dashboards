@@ -21,9 +21,9 @@ import {
   StatsGetter,
   StatsCollectionContext,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
+import { getClusterInfo, OpenSearchClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import { getOpenSearchDashboards, handleOpenSearchDashboardsStats, OpenSearchDashboardsUsageStats } from './get_opensearch_dashboards';
 import { getNodesUsage } from './get_nodes_usage';
 import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
 
@@ -34,13 +34,13 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param {Object} server ??
  * @param {Object} clusterInfo Cluster info (GET /)
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
- * @param {Object} kibana The Kibana Usage stats
+ * @param {Object} opensearchDashboards The OpenSearchDashboards Usage stats
  */
 export function handleLocalStats(
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  { cluster_name, cluster_uuid, version }: ESClusterInfo,
+  { cluster_name, cluster_uuid, version }: OpenSearchClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
-  kibana: KibanaUsageStats | undefined,
+  opensearchDashboards: OpenSearchDashboardsUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,
   context: StatsCollectionContext
 ) {
@@ -53,7 +53,7 @@ export function handleLocalStats(
     collection: 'local',
     stack_stats: {
       [DATA_TELEMETRY_ID]: dataTelemetry,
-      kibana: handleKibanaStats(context, kibana),
+      opensearch_dashboards: handleOpenSearchDashboardsStats(context, opensearchDashboards),
     },
   };
 }
@@ -61,26 +61,26 @@ export function handleLocalStats(
 export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
- * Get statistics for all products joined by Elasticsearch cluster.
+ * Get statistics for all products joined by OpenSearch cluster.
  * @param {Array} cluster uuids
- * @param {Object} config contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+ * @param {Object} config contains the new opensearchClient already scoped contains usageCollection, callCluster, opensearchClient, start, end
  * @param {Object} StatsCollectionContext contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   clustersDetails, // array of cluster uuid's
-  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+  config, // contains the new opensearchClient already scoped contains usageCollection, callCluster, opensearchClient, start, end
   context // StatsCollectionContext contains logger and version (string)
 ) => {
-  const { callCluster, usageCollection, esClient } = config;
+  const { callCluster, usageCollection, opensearchClient } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
-      const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
-        getClusterInfo(esClient), // cluster info
-        getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
-        getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, callCluster, esClient),
-        getDataTelemetry(esClient),
+      const [clusterInfo, clusterStats, nodesUsage, opensearchDashboards, dataTelemetry] = await Promise.all([
+        getClusterInfo(opensearchClient), // cluster info
+        getClusterStats(opensearchClient), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(opensearchClient), // nodes_usage info
+        getOpenSearchDashboards(usageCollection, callCluster, opensearchClient),
+        getDataTelemetry(opensearchClient),
       ]);
       return handleLocalStats(
         clusterInfo,
@@ -88,7 +88,7 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
           ...clusterStats,
           nodes: { ...clusterStats.nodes, usage: nodesUsage },
         },
-        kibana,
+        opensearchDashboards,
         dataTelemetry,
         context
       );

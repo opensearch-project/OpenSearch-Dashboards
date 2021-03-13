@@ -19,15 +19,15 @@
 
 import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { OpenSearchClient } from 'src/core/server';
 
-export interface KibanaUsageStats {
-  kibana: {
+export interface OpenSearchDashboardsUsageStats {
+  opensearch_dashboards: {
     index: string;
   };
-  kibana_stats: {
+  opensearch_dashboards_stats: {
     os: {
       // These should be provided
       platform: string | undefined;
@@ -41,20 +41,20 @@ export interface KibanaUsageStats {
   [plugin: string]: any;
 }
 
-export function handleKibanaStats(
+export function handleOpenSearchDashboardsStats(
   { logger, version: serverVersion }: StatsCollectionContext,
-  response?: KibanaUsageStats
+  response?: OpenSearchDashboardsUsageStats
 ) {
   if (!response) {
-    logger.warn('No Kibana stats returned from usage collectors');
+    logger.warn('No OpenSearchDashboards stats returned from usage collectors');
     return;
   }
-  const { kibana, kibana_stats: kibanaStats, ...plugins } = response;
+  const { opensearch_dashboards, opensearch_dashboards_stats: opensearchDashboardsStats, ...plugins } = response;
 
   const os = {
     platform: 'unknown',
     platformRelease: 'unknown',
-    ...kibanaStats.os,
+    ...opensearchDashboardsStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
     if (typeof value !== 'string') {
@@ -72,7 +72,7 @@ export function handleKibanaStats(
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry
   return {
-    ...omit(kibana, 'index'), // discard index
+    ...omit(opensearch_dashboards, 'index'), // discard index
     count: 1,
     indices: 1,
     os: formattedOsStats,
@@ -81,11 +81,11 @@ export function handleKibanaStats(
   };
 }
 
-export async function getKibana(
+export async function getOpenSearchDashboards(
   usageCollection: UsageCollectionSetup,
   callWithInternalUser: LegacyAPICaller,
-  asInternalUser: ElasticsearchClient
-): Promise<KibanaUsageStats> {
+  asInternalUser: OpenSearchClient
+): Promise<OpenSearchDashboardsUsageStats> {
   const usage = await usageCollection.bulkFetch(callWithInternalUser, asInternalUser);
   return usageCollection.toObject(usage);
 }

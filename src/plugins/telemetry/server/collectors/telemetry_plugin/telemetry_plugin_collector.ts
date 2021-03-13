@@ -32,13 +32,13 @@ export interface TelemetryUsageStats {
 }
 
 export interface TelemetryPluginUsageCollectorOptions {
-  currentKibanaVersion: string;
+  currentOpenSearchDashboardsVersion: string;
   config$: Observable<TelemetryConfigType>;
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined;
 }
 
 export function createCollectorFetch({
-  currentKibanaVersion,
+  currentOpenSearchDashboardsVersion,
   config$,
   getSavedObjectsClient,
 }: TelemetryPluginUsageCollectorOptions) {
@@ -62,7 +62,7 @@ export function createCollectorFetch({
 
     return {
       opt_in_status: getTelemetryOptIn({
-        currentKibanaVersion,
+        currentOpenSearchDashboardsVersion,
         telemetrySavedObject,
         allowChangingOptInStatus,
         configTelemetryOptIn,

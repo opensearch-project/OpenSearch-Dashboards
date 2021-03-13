@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 interface RenderBannerConfig {
   overlays: CoreStart['overlays'];

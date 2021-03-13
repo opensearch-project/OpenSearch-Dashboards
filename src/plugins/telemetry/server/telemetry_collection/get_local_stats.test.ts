@@ -21,18 +21,18 @@ import { merge, omit } from 'lodash';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import { usageCollectionPluginMock } from '../../../usage_collection/server/mocks';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { opensearchServiceMock } from '../../../../../src/core/server/mocks';
 
-function mockUsageCollection(kibanaUsage = {}) {
+function mockUsageCollection(opensearchDashboardsUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
-  usageCollection.bulkFetch = jest.fn().mockResolvedValue(kibanaUsage);
+  usageCollection.bulkFetch = jest.fn().mockResolvedValue(opensearchDashboardsUsage);
   usageCollection.toObject = jest.fn().mockImplementation((data: any) => data);
   return usageCollection;
 }
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
+  const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
+  opensearchClient.info
     // @ts-ignore we only care about the response body
     .mockResolvedValue(
       // @ts-ignore we only care about the response body
@@ -40,10 +40,10 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
         body: { ...clusterInfo },
       }
     );
-  esClient.cluster.stats
+  opensearchClient.cluster.stats
     // @ts-ignore we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue(
+  opensearchClient.nodes.usage.mockResolvedValue(
     // @ts-ignore we only care about the response body
     {
       body: {
@@ -73,10 +73,10 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
     }
   );
   // @ts-ignore we only care about the response body
-  esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
+  opensearchClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
   // @ts-ignore we only care about the response body
-  esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
-  return esClient;
+  opensearchClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
+  return opensearchClient;
 }
 
 describe.skip('get_local_stats', () => {
@@ -118,12 +118,12 @@ describe.skip('get_local_stats', () => {
     random: 123,
   };
 
-  const kibana = {
-    kibana: {
+  const opensearchDashboards = {
+    opensearch_dashboards: {
       great: 'googlymoogly',
       versions: [{ version: '8675309', count: 1 }],
     },
-    kibana_stats: {
+    opensearch_dashboards_stats: {
       os: {
         platform: 'rocky',
         platformRelease: 'iv',
@@ -152,7 +152,7 @@ describe.skip('get_local_stats', () => {
     version,
     cluster_stats: omit(clusterStatsWithNodesUsage, '_nodes', 'cluster_name'),
     stack_stats: {
-      kibana: {
+      opensearch_dashboards: {
         great: 'googlymoogly',
         count: 1,
         indices: 1,
@@ -182,7 +182,7 @@ describe.skip('get_local_stats', () => {
   };
 
   describe.skip('handleLocalStats', () => {
-    it('returns expected object without xpack or kibana data', () => {
+    it('returns expected object without xpack or OpenSearch Dashboards data', () => {
       const result = handleLocalStats(
         clusterInfo,
         clusterStatsWithNodesUsage,
@@ -196,7 +196,7 @@ describe.skip('get_local_stats', () => {
       expect(result.version).toEqual('2.3.4');
       expect(result.collection).toEqual('local');
       expect(Object.keys(result)).not.toContain('license');
-      expect(result.stack_stats).toEqual({ kibana: undefined, data: undefined });
+      expect(result.stack_stats).toEqual({ opensearch_dashboards: undefined, data: undefined });
     });
 
     it('returns expected object with xpack', () => {
@@ -212,7 +212,7 @@ describe.skip('get_local_stats', () => {
       expect(cluster.collection).toBe(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).toBe(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).toBe(combinedStatsResult.cluster_name);
-      expect(stack.kibana).toBe(undefined); // not mocked for this test
+      expect(stack.opensearch_dashboards).toBe(undefined); // not mocked for this test
       expect(stack.data).toBe(undefined); // not mocked for this test
 
       expect(cluster.version).toEqual(combinedStatsResult.version);
@@ -223,13 +223,13 @@ describe.skip('get_local_stats', () => {
   });
 
   describe.skip('getLocalStats', () => {
-    it('returns expected object with kibana data', async () => {
+    it('returns expected object with OpenSearch Dashboards data', async () => {
       const callCluster = jest.fn();
-      const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
+      const usageCollection = mockUsageCollection(opensearchDashboards);
+      const opensearchClient = mockGetLocalStats(clusterInfo, clusterStats);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
+        { callCluster, usageCollection, opensearchClient, start: '', end: '' },
         context
       );
       const result = response[0];
@@ -245,11 +245,11 @@ describe.skip('get_local_stats', () => {
 
     it('returns an empty array when no cluster uuid is provided', async () => {
       const callCluster = jest.fn();
-      const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
+      const usageCollection = mockUsageCollection(opensearchDashboards);
+      const opensearchClient = mockGetLocalStats(clusterInfo, clusterStats);
       const response = await getLocalStats(
         [],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
+        { callCluster, usageCollection, opensearchClient, start: '', end: '' },
         context
       );
       expect(response).toBeDefined();

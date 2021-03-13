@@ -67,8 +67,8 @@ export interface TelemetryPluginSetup {
 
 export interface TelemetryPluginStart {
   /**
-   * Resolves `true` if the user has opted into send Elastic usage data.
-   * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
+   * Resolves `true` if the user has opted into send OpenSearch usage data.
+   * Resolves `false` if the user explicitly opted out of sending usage data to OpenSearch Dashboards
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    */
   getIsOptedIn: () => Promise<boolean>;
@@ -78,7 +78,7 @@ type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly logger: Logger;
-  private readonly currentKibanaVersion: string;
+  private readonly currentOpenSearchDashboardsVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
@@ -87,12 +87,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private readonly oldUiSettingsHandled$ = new AsyncSubject();
   private savedObjectsClient?: ISavedObjectsRepository;
-  private elasticsearchClient?: IClusterClient;
+  private opensearchClient?: IClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
-    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
+    this.currentOpenSearchDashboardsVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();
     this.fetcherTask = new FetcherTask({
       ...initializerContext,
@@ -101,22 +101,22 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { elasticsearch, http, savedObjects }: CoreSetup,
+    { opensearch , http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
-    const currentKibanaVersion = this.currentKibanaVersion;
+    const currentOpenSearchDashboardsVersion = this.currentOpenSearchDashboardsVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
     registerCollection(
       telemetryCollectionManager,
-      elasticsearch.legacy.client,
-      () => this.elasticsearchClient
+      opensearch .legacy.client,
+      () => this.opensearchClient
     );
     const router = http.createRouter();
 
     registerRoutes({
       config$,
-      currentKibanaVersion,
+      currentOpenSearchDashboardsVersion,
       isDev,
       logger: this.logger,
       router,
@@ -135,10 +135,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings, elasticsearch } = core;
+    const { savedObjects, uiSettings, opensearch  } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
-    this.elasticsearchClient = elasticsearch.client;
+    this.opensearchClient = opensearch .client;
 
     // Not catching nor awaiting these promises because they should never reject
     this.handleOldUiSettings(uiSettings);
@@ -152,9 +152,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
-        const currentKibanaVersion = this.currentKibanaVersion;
+        const currentOpenSearchDashboardsVersion = this.currentOpenSearchDashboardsVersion;
         const isOptedIn = getTelemetryOptIn({
-          currentKibanaVersion,
+          currentOpenSearchDashboardsVersion,
           telemetrySavedObject,
           allowChangingOptInStatus,
           configTelemetryOptIn,
@@ -226,7 +226,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const getSavedObjectsClient = () => this.savedObjectsClient;
 
     registerTelemetryPluginUsageCollector(usageCollection, {
-      currentKibanaVersion: this.currentKibanaVersion,
+      currentOpenSearchDashboardsVersion: this.currentOpenSearchDashboardsVersion,
       config$: this.config$,
       getSavedObjectsClient,
     });
