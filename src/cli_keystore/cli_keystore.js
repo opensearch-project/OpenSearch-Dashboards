@@ -29,14 +29,14 @@ import { addCli } from './add';
 import { removeCli } from './remove';
 import { getKeystore } from './get_keystore';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
+const argv = process.env.osdWorkerArgv
+  ? JSON.parse(process.env.osdWorkerArgv)
   : process.argv.slice();
-const program = new Command('bin/kibana-keystore');
+const program = new Command('bin/opensearch-dashboards-keystore');
 
 program
   .version(pkg.version)
-  .description('A tool for managing settings stored in the Kibana keystore');
+  .description('A tool for managing settings stored in the OpenSearch Dashboards keystore');
 
 const keystore = new Keystore(getKeystore());
 
