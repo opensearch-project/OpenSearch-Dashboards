@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Reporter } from '@kbn/analytics';
+import { Reporter } from '@osd/analytics';
 import { Subject } from 'rxjs';
 
 import { reportApplicationUsage } from './application_usage';
@@ -61,7 +61,7 @@ describe('application_usage', () => {
     reportApplicationUsage(currentAppId$, reporterMock);
 
     currentAppId$.next('');
-    currentAppId$.next('kibana');
+    currentAppId$.next('opensearchDashboards');
     currentAppId$.next(undefined);
 
     expect(reporterMock.reportApplicationUsage).toHaveBeenCalledTimes(0);

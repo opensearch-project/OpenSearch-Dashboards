@@ -22,7 +22,7 @@ import {
   ISavedObjectsRepository,
   MetricsServiceSetup,
   ServiceStatus,
-} from 'kibana/server';
+} from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
 import { registerUiMetricRoute } from './report_metrics';
@@ -37,8 +37,8 @@ export function setupRoutes({
   getSavedObjects: () => ISavedObjectsRepository | undefined;
   config: {
     allowAnonymous: boolean;
-    kibanaIndex: string;
-    kibanaVersion: string;
+    opensearchDashboardsIndex: string;
+    opensearchDashboardsVersion: string;
     uuid: string;
     server: {
       name: string;

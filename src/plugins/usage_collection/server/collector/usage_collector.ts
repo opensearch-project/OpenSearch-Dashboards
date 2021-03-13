@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KIBANA_STATS_TYPE } from '../../common/constants';
+import { OPENSEARCH_DASHBOARDS_STATS_TYPE } from '../../common/constants';
 import { Collector } from './collector';
 
 export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
@@ -26,7 +26,7 @@ export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> ex
 > {
   protected defaultFormatterForBulkUpload(result: T) {
     return {
-      type: KIBANA_STATS_TYPE,
+      type: OPENSEARCH_DASHBOARDS_STATS_TYPE,
       payload: ({
         usage: {
           [this.type]: result,

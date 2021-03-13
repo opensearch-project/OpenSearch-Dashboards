@@ -124,7 +124,7 @@ describe('collector', () => {
         fetch: () => fetchOutput,
       });
       expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'kibana_stats',
+        type: 'opensearch_dashboards_stats',
         payload: { usage: { my_test_collector: fetchOutput } },
       });
     });
