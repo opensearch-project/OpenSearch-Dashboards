@@ -26,20 +26,20 @@ import Del from 'del';
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
 import { safeDump } from 'js-yaml';
-import { getConfigFromFiles } from '@kbn/config';
+import { getConfigFromFiles } from '@osd/config';
 
-const legacyConfig = follow('__fixtures__/reload_logging_config/kibana.test.yml');
+const legacyConfig = follow('__fixtures__/reload_logging_config/opensearch_dashboards.test.yml');
 const configFileLogConsole = follow(
-  '__fixtures__/reload_logging_config/kibana_log_console.test.yml'
+  '__fixtures__/reload_logging_config/opensearch_dashboards_log_console.test.yml'
 );
-const configFileLogFile = follow('__fixtures__/reload_logging_config/kibana_log_file.test.yml');
+const configFileLogFile = follow('__fixtures__/reload_logging_config/opensearch_dashboards_log_file.test.yml');
 
-const kibanaPath = follow('../../../../scripts/kibana.js');
+const opensearchDashboardsPath = follow('../../../../scripts/opensearch_dashboards.js');
 
 const second = 1000;
 const minute = second * 60;
 
-const tempDir = Path.join(Os.tmpdir(), 'kbn-reload-test');
+const tempDir = Path.join(Os.tmpdir(), 'osd-reload-test');
 
 function follow(file: string) {
   return Path.relative(process.cwd(), Path.resolve(__dirname, file));
@@ -110,11 +110,11 @@ describe('Server logging configuration', function () {
     it(
       'should be reloadable via SIGHUP process signaling',
       async function () {
-        const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+        const configFilePath = Path.resolve(tempDir, 'opensearch_dashboards.yml');
         Fs.copyFileSync(legacyConfig, configFilePath);
 
         child = Child.spawn(process.execPath, [
-          kibanaPath,
+          opensearchDashboardsPath,
           '--oss',
           '--config',
           configFilePath,
@@ -156,11 +156,11 @@ describe('Server logging configuration', function () {
     it(
       'should recreate file handle on SIGHUP',
       async function () {
-        const logPath = Path.resolve(tempDir, 'kibana.log');
-        const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
+        const logPath = Path.resolve(tempDir, 'opensearch_dashboards.log');
+        const logPathArchived = Path.resolve(tempDir, 'opensearch_dashboards_archive.log');
 
         child = Child.spawn(process.execPath, [
-          kibanaPath,
+          opensearchDashboardsPath,
           '--oss',
           '--config',
           legacyConfig,
@@ -184,10 +184,10 @@ describe('Server logging configuration', function () {
     it(
       'should be reloadable via SIGHUP process signaling',
       async function () {
-        const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+        const configFilePath = Path.resolve(tempDir, 'opensearch_dashboards.yml');
         Fs.copyFileSync(configFileLogConsole, configFilePath);
 
-        child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
+        child = Child.spawn(process.execPath, [opensearchDashboardsPath, '--oss', '--config', configFilePath]);
 
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
@@ -222,18 +222,18 @@ describe('Server logging configuration', function () {
     it(
       'should recreate file handle on SIGHUP',
       async function () {
-        const configFilePath = Path.resolve(tempDir, 'kibana.yml');
+        const configFilePath = Path.resolve(tempDir, 'opensearch_dashboards.yml');
         Fs.copyFileSync(configFileLogFile, configFilePath);
 
-        const logPath = Path.resolve(tempDir, 'kibana.log');
-        const logPathArchived = Path.resolve(tempDir, 'kibana_archive.log');
+        const logPath = Path.resolve(tempDir, 'opensearch_dashboards.log');
+        const logPathArchived = Path.resolve(tempDir, 'opensearch_dashboards_archive.log');
 
         createConfigManager(configFilePath).modify((oldConfig) => {
           oldConfig.logging.appenders.file.path = logPath;
           return oldConfig;
         });
 
-        child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
+        child = Child.spawn(process.execPath, [opensearchDashboardsPath, '--oss', '--config', configFilePath]);
 
         await watchFileUntil(logPath, /setting up root/, 30 * second);
         // once the server is running, archive the log file and issue SIGHUP

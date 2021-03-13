@@ -19,21 +19,21 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   pickLevelFromFlags,
   ToolingLogTextWriter,
   parseLogLevel,
-} from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+} from '@osd/dev-utils';
+import { runOptimizer, OptimizerConfig, logOptimizerState } from '@osd/optimizer';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
 
 type SomeCliArgs = Pick<CliArgs, 'watch' | 'cache' | 'dist' | 'oss' | 'runExamples'>;
 
-export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
+export function runOsdOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
     watch: !!opts.watch,
@@ -46,7 +46,7 @@ export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
   });
 
   const dim = Chalk.dim('np bld');
-  const name = Chalk.magentaBright('@kbn/optimizer');
+  const name = Chalk.magentaBright('@osd/optimizer');
   const time = () => moment().format('HH:mm:ss.SSS');
   const level = (msgType: string) => {
     switch (msgType) {
