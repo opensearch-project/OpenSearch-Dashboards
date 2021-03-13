@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useKibana } from '../../../../src/plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { BfetchDeps } from '../mount';
 
-export const useDeps = () => useKibana().services as BfetchDeps;
+export const useDeps = () => useOpenSearchDashboards().services as BfetchDeps;

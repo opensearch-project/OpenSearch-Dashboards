@@ -22,14 +22,14 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginDependencies } from './types';
 import { StateDemoApp } from './components/app';
-import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/public/';
+import { createOsdUrlStateStorage } from '../../../../src/plugins/opensearch_dashboards_utils/public/';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
   { navigation, data }: AppPluginDependencies,
   { element, history }: AppMountParameters
 ) => {
-  const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+  const osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 
   ReactDOM.render(
     <StateDemoApp
@@ -38,7 +38,7 @@ export const renderApp = (
       navigation={navigation}
       data={data}
       history={history}
-      kbnUrlStateStorage={kbnUrlStateStorage}
+      osdUrlStateStorage={osdUrlStateStorage}
     />,
     element
   );

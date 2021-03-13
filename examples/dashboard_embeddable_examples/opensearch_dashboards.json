@@ -1,10 +1,10 @@
 {
   "id": "dashboardEmbeddableExamples",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": ["embeddable", "embeddableExamples", "dashboard", "developerExamples"],
   "optionalPlugins": [],
-  "requiredBundles": ["esUiShared"]
+  "requiredBundles": ["opensearchUiShared"]
 }

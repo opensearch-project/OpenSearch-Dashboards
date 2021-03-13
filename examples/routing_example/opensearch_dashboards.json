@@ -1,7 +1,7 @@
 {
   "id": "routingExample",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["developerExamples"],

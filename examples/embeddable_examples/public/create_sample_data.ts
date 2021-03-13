@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { TodoSavedObjectAttributes, BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../common';
 
 export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {

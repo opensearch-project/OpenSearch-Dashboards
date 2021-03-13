@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreStart, HttpFetchError } from 'kibana/public';
+import { CoreStart, HttpFetchError } from 'opensearch-dashboards/public';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,

@@ -34,22 +34,22 @@ import {
 import {
   BaseStateContainer,
   INullableBaseStateContainer,
-  createKbnUrlStateStorage,
+  createOsdUrlStateStorage,
   createSessionStorageStateStorage,
   createStateContainer,
   createStateContainerReactHelpers,
   PureTransition,
   syncStates,
-  getStateFromKbnUrl,
+  getStateFromOsdUrl,
   BaseState,
-} from '../../../../src/plugins/kibana_utils/public';
-import { useUrlTracker } from '../../../../src/plugins/kibana_react/public';
+} from '../../../../src/plugins/opensearch_dashboards_utils/public';
+import { useUrlTracker } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+} from '../../../../src/plugins/opensearch_dashboards_utils/demos/state_containers/todomvc';
 
 interface GlobalState {
   text: string;
@@ -197,7 +197,7 @@ export const TodoAppPage: React.FC<{
   useEffect(() => {
     // have to sync with history passed to react-router
     // history v5 will be singleton and this will not be needed
-    const kbnUrlStateStorage = createKbnUrlStateStorage({
+    const osdUrlStateStorage = createOsdUrlStateStorage({
       useHash: useHashedUrl,
       history: props.history,
     });
@@ -210,11 +210,11 @@ export const TodoAppPage: React.FC<{
      * It restores state both from url and from session storage
      */
     const globalStateKey = `_g`;
-    const globalStateFromInitialUrl = getStateFromKbnUrl<GlobalState>(
+    const globalStateFromInitialUrl = getStateFromOsdUrl<GlobalState>(
       globalStateKey,
       initialAppUrl.current
     );
-    const globalStateFromCurrentUrl = kbnUrlStateStorage.get<GlobalState>(globalStateKey);
+    const globalStateFromCurrentUrl = osdUrlStateStorage.get<GlobalState>(globalStateKey);
     const globalStateFromSessionStorage = sessionStorageStateStorage.get<GlobalState>(
       globalStateKey
     );
@@ -226,7 +226,7 @@ export const TodoAppPage: React.FC<{
       ...globalStateFromInitialUrl,
     };
     globalStateContainer.set(initialGlobalState);
-    kbnUrlStateStorage.set(globalStateKey, initialGlobalState, { replace: true });
+    osdUrlStateStorage.set(globalStateKey, initialGlobalState, { replace: true });
     sessionStorageStateStorage.set(globalStateKey, initialGlobalState);
 
     /**
@@ -236,23 +236,23 @@ export const TodoAppPage: React.FC<{
      */
     const appStateKey = `_todo-${props.appInstanceId}`;
     const initialAppState: TodoState =
-      getStateFromKbnUrl<TodoState>(appStateKey, initialAppUrl.current) ||
-      kbnUrlStateStorage.get<TodoState>(appStateKey) ||
+      getStateFromOsdUrl<TodoState>(appStateKey, initialAppUrl.current) ||
+      osdUrlStateStorage.get<TodoState>(appStateKey) ||
       defaultState;
     container.set(initialAppState);
-    kbnUrlStateStorage.set(appStateKey, initialAppState, { replace: true });
+    osdUrlStateStorage.set(appStateKey, initialAppState, { replace: true });
 
     // start syncing only when made sure, that state in synced
     const { stop, start } = syncStates([
       {
         stateContainer: withDefaultState(container, defaultState),
         storageKey: appStateKey,
-        stateStorage: kbnUrlStateStorage,
+        stateStorage: osdUrlStateStorage,
       },
       {
         stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),
         storageKey: globalStateKey,
-        stateStorage: kbnUrlStateStorage,
+        stateStorage: osdUrlStateStorage,
       },
       {
         stateContainer: withDefaultState(globalStateContainer, defaultGlobalState),

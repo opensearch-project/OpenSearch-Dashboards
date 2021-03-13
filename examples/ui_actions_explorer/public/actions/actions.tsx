@@ -17,10 +17,10 @@
  * under the License.
  */
 import React from 'react';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from 'opensearch-dashboards/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   ActionExecutionContext,
   createAction,

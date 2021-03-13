@@ -20,7 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   Embeddable,
   IContainer,
