@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, LogRecord } from '@osd/logging';
 import { stripAnsiSnapshotSerializer } from '../../../test_helpers/strip_ansi_snapshot_serializer';
 import { PatternLayout, patternSchema } from './pattern_layout';
 
@@ -310,8 +310,8 @@ describe('schema', () => {
 
       it('fails on %date with predefined date format and invalid timezone', () => {
         expect(() =>
-          patternSchema.validate('%date{ISO8601_TZ}{Europe/Kibana}')
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/Kibana"`);
+          patternSchema.validate('%date{ISO8601_TZ}{Europe/OpenSearchDashboards}')
+        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/OpenSearchDashboards"`);
       });
 
       it('validates several %date in pattern', () => {

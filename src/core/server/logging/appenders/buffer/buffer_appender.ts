@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogRecord, DisposableAppender } from '@kbn/logging';
+import { LogRecord, DisposableAppender } from '@osd/logging';
 
 /**
  * Simple appender that just buffers `LogRecord` instances it receives. It is a *reserved* appender

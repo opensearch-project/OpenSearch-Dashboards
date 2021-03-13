@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { withTimeout } from '@kbn/std';
+import { withTimeout } from '@osd/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';

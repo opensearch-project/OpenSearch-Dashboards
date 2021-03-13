@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogLevel, Appender } from '@kbn/logging';
+import { LogLevel, Appender } from '@osd/logging';
 import { LoggingConfig } from './logging_config';
 import { BaseLogger } from './logger';
 

@@ -19,8 +19,8 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { schema } from '@kbn/config-schema';
+import { REPO_ROOT } from '@osd/dev-utils';
+import { schema } from '@osd/config-schema';
 
 import { Env } from '../config';
 import { CoreContext } from '../core_context';
@@ -55,7 +55,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     id: 'some-plugin-id',
     version: 'some-version',
     configPath: 'path',
-    kibanaVersion: '7.0.0',
+    opensearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],

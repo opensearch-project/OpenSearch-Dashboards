@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, LogRecord } from '@osd/logging';
 import { JsonLayout } from './json_layout';
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
@@ -207,7 +207,7 @@ test('format() meta can merge override logs', () => {
         pid: 3,
         meta: {
           log: {
-            kbn_custom_field: 'hello',
+            osd_custom_field: 'hello',
           },
         },
       })
@@ -218,7 +218,7 @@ test('format() meta can merge override logs', () => {
     log: {
       level: 'ERROR',
       logger: 'bar',
-      kbn_custom_field: 'hello',
+      osd_custom_field: 'hello',
     },
     process: {
       pid: 3,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogLevel, LogRecord } from '@kbn/logging';
+import { LogLevel, LogRecord } from '@osd/logging';
 import { BufferAppender } from './buffer_appender';
 
 test('`flush()` does not return any record buffered at the beginning.', () => {

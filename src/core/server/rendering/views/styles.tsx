@@ -51,7 +51,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             display: block;
           }
 
-          .kbnWelcomeView {
+          .osdWelcomeView {
             line-height: 1.5;
             background-color: ${darkMode ? '#1D1E24' : '#FFF'};
             height: 100%;
@@ -78,7 +78,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                     justify-content: center;
           }
 
-          .kbnWelcomeTitle {
+          .osdWelcomeTitle {
             color: #000;
             font-size: 20px;
             font-family: sans-serif;
@@ -89,7 +89,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             animation-delay: 1.0s;
           }
 
-          .kbnWelcomeText {
+          .osdWelcomeText {
             font-family:
             display: inline-block;
             font-size: 14px;
@@ -100,7 +100,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             color: ${darkMode ? '#98A2B3' : '#69707D'};
           }
 
-          .kbnLoaderWrap {
+          .osdLoaderWrap {
             text-align: center;
             line-height: 1;
             text-align: center;
@@ -112,18 +112,18 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             font-weight: 400;
           }
 
-          .kbnLoaderWrap svg {
+          .osdLoaderWrap svg {
             width: 64px;
             height: 64px;
             margin: auto;
             line-height: 1;
           }
 
-          .kbnLoader path {
+          .osdLoader path {
             stroke: white;
           }
 
-          .kbnProgress {
+          .osdProgress {
             display: inline-block;
             position: relative;
             width: 32px;
@@ -133,7 +133,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             line-height: 1;
           }
 
-          .kbnProgress:before {
+          .osdProgress:before {
             position: absolute;
             content: '';
             height: 4px;
@@ -142,11 +142,11 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             bottom: 0;
             left: 0;
             transform: scaleX(0) translateX(0%);
-            animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+            animation: osdProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
             background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
 
-          @keyframes kbnProgress {
+          @keyframes osdProgress {
             0% {
               transform: scaleX(1) translateX(-100%);
             }

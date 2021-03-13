@@ -45,7 +45,7 @@ const INJECTED_METADATA = {
   },
 };
 
-const { createKibanaRequest, createRawRequest } = httpServerMock;
+const { createOpenSearchDashboardsRequest, createRawRequest } = httpServerMock;
 
 describe('RenderingService', () => {
   let service: RenderingService;
@@ -69,9 +69,9 @@ describe('RenderingService', () => {
       });
 
       it('renders "core" page', async () => {
-        const content = await render(createKibanaRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -79,28 +79,28 @@ describe('RenderingService', () => {
       it('renders "core" page for blank basepath', async () => {
         mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
 
-        const content = await render(createKibanaRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
       it('renders "core" page driven by settings', async () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
-        const content = await render(createKibanaRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
       it('renders "core" with excluded user settings', async () => {
-        const content = await render(createKibanaRequest(), uiSettings, {
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
         });
         const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -108,7 +108,7 @@ describe('RenderingService', () => {
       it('renders "core" from legacy request', async () => {
         const content = await render(createRawRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });

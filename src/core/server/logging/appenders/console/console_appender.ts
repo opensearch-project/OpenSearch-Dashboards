@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
+import { schema } from '@osd/config-schema';
+import { Layout, LogRecord, DisposableAppender } from '@osd/logging';
 import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 const { literal, object } = schema;

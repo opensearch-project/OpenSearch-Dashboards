@@ -74,7 +74,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic</title>
+        <title>OpenSearch</title>
         <Fonts url={uiPublicUrl} />
         {/* Favicons (generated from http://realfavicongenerator.net/) */}
         <link
@@ -110,43 +110,43 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="add-scripts-here" />
       </head>
       <body>
-        {createElement('kbn-csp', {
+        {createElement('osd-csp', {
           data: JSON.stringify({ strictCsp }),
         })}
-        {createElement('kbn-injected-metadata', { data: JSON.stringify(injectedMetadata) })}
+        {createElement('osd-injected-metadata', { data: JSON.stringify(injectedMetadata) })}
         <div
-          className="kbnWelcomeView"
-          id="kbn_loading_message"
+          className="osdWelcomeView"
+          id="osd_loading_message"
           style={{ display: 'none' }}
-          data-test-subj="kbnLoadingMessage"
+          data-test-subj="osdLoadingMessage"
         >
-          <div className="kbnLoaderWrap">
+          <div className="osdLoaderWrap">
             {logo}
             <div
-              className="kbnWelcomeText"
+              className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
                 defaultMessage:
-                  'Elastic did not load properly. Check the server output for more information.',
+                  'OpenSearch did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading OpenSearch' })}
             </div>
-            <div className="kbnProgress" />
+            <div className="osdProgress" />
           </div>
         </div>
 
-        <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
+        <div className="osdWelcomeView" id="osd_legacy_browser_error" style={{ display: 'none' }}>
           {logo}
 
-          <h2 className="kbnWelcomeTitle">
+          <h2 className="osdWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',
             })}
           </h2>
-          <div className="kbnWelcomeText">
+          <div className="osdWelcomeText">
             {i18n('core.ui.legacyBrowserMessage', {
               defaultMessage:
-                'This Elastic installation has strict security requirements enabled that your current browser does not meet.',
+                'This OpenSearch installation has strict security requirements enabled that your current browser does not meet.',
             })}
           </div>
         </div>
@@ -155,9 +155,9 @@ export const Template: FunctionComponent<Props> = ({
           {`
             // Since this is an unsafe inline script, this code will not run
             // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __kbnCspNotEnforced__ in
+            // intentional as we check for the existence of __osdCspNotEnforced__ in
             // bootstrap.
-            window.__kbnCspNotEnforced__ = true;
+            window.__osdCspNotEnforced__ = true;
           `}
         </script>
         <script src={bootstrapScriptUrl} />

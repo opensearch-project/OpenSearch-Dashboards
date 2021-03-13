@@ -18,7 +18,7 @@
  */
 import moment from 'moment-timezone';
 import { last } from 'lodash';
-import { LogRecord } from '@kbn/logging';
+import { LogRecord } from '@osd/logging';
 
 import { Conversion } from './type';
 
