@@ -1,10 +1,10 @@
 {
   "id": "uiActionsExplorer",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": ["uiActions", "uiActionsExamples", "developerExamples"],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["opensearchDashboardsReact"]
 }

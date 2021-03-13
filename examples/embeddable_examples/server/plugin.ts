@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 import { todoSavedObject } from './todo_saved_object';
 import { bookSavedObject } from './book_saved_object';
 

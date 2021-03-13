@@ -20,7 +20,7 @@ import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
 import { BookEmbeddableInput, BookEmbeddableOutput, BookEmbeddable } from './book_embeddable';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 import { registerRoutes } from './routes';
 
 export class RoutingExamplePlugin implements Plugin<{}, {}> {

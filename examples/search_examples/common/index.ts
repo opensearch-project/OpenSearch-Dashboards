@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { IEsSearchResponse, IEsSearchRequest } from '../../../src/plugins/data/common';
+import { IOpenSearchSearchResponse, IOpenSearchSearchRequest } from '../../../src/plugins/data/common';
 
 export const PLUGIN_ID = 'searchExamples';
 export const PLUGIN_NAME = 'Search Examples';
 
-export interface IMyStrategyRequest extends IEsSearchRequest {
+export interface IMyStrategyRequest extends IOpenSearchSearchRequest {
   get_cool: boolean;
 }
-export interface IMyStrategyResponse extends IEsSearchResponse {
+export interface IMyStrategyResponse extends IOpenSearchSearchResponse {
   cool: string;
 }
 

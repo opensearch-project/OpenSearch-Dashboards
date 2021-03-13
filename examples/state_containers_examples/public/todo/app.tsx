@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { createHashHistory } from 'history';
