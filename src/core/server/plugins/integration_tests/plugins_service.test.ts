@@ -18,7 +18,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
@@ -48,7 +48,7 @@ describe('PluginsService', () => {
       requiredPlugins = [],
       requiredBundles = [],
       optionalPlugins = [],
-      kibanaVersion = '7.0.0',
+      opensearchDashboardsVersion = '7.0.0',
       configPath = [path],
       server = true,
       ui = true,
@@ -59,7 +59,7 @@ describe('PluginsService', () => {
       requiredPlugins?: string[];
       requiredBundles?: string[];
       optionalPlugins?: string[];
-      kibanaVersion?: string;
+      opensearchDashboardsVersion?: string;
       configPath?: ConfigPath;
       server?: boolean;
       ui?: boolean;
@@ -71,7 +71,7 @@ describe('PluginsService', () => {
         id,
         version,
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
-        kibanaVersion,
+        opensearchDashboardsVersion,
         requiredPlugins,
         requiredBundles,
         optionalPlugins,

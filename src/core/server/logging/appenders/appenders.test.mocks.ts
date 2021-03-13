@@ -20,7 +20,7 @@
 export const mockCreateLayout = jest.fn();
 jest.mock('../layouts/layouts', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
+  const { schema } = require('@osd/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({ kind: schema.literal('mock') }),

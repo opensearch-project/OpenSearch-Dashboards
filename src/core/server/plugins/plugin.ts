@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { isConfigSchema } from '@kbn/config-schema';
+import { isConfigSchema } from '@osd/config-schema';
 
 import { Logger } from '../logging';
 import {

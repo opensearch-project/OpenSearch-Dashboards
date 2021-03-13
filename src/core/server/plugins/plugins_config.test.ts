@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { getEnvOptions } from '../config/mocks';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { Env } from '../config';

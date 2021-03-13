@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import type { PublicMethodsOf } from '@osd/utility-types';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@osd/logging';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LogRecord, Logger, LogMeta } from '@kbn/logging';
+import { LogRecord, Logger, LogMeta } from '@osd/logging';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
@@ -27,7 +27,7 @@ export class LoggerAdapter implements Logger {
    * The current logger can be updated "on the fly", e.g. when the log config
    * has changed.
    *
-   * This is not intended for external use, only internally in Kibana
+   * This is not intended for external use, only internally in OpenSearch Dashboards
    *
    * @internal
    */

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { loggerMock, MockedLogger } from '@kbn/logging/target/mocks';
+export { loggerMock, MockedLogger } from '@osd/logging/target/mocks';

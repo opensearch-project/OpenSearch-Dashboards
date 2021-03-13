@@ -46,9 +46,9 @@ export interface OpsProcessMetrics {
   };
   /** node event loop delay */
   event_loop_delay: number;
-  /** pid of the kibana process */
+  /** pid of the OpenSearch Dashboards process */
   pid: number;
-  /** uptime of the kibana process */
+  /** uptime of the OpenSearch Dashboards process */
   uptime_in_millis: number;
 }
 

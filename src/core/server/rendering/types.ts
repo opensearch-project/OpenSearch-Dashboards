@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
-import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
+import { InternalHttpServiceSetup, OpenSearchDashboardsRequest, LegacyRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
@@ -90,7 +90,7 @@ export interface IRenderOptions {
 /** @internal */
 export interface InternalRenderingServiceSetup {
   /**
-   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
+   * Generate a `OpenSearchDashboardsResponse` which renders an HTML page bootstrapped
    * with the `core` bundle or the ID of another specified legacy bundle.
    *
    * @example
@@ -98,7 +98,7 @@ export interface InternalRenderingServiceSetup {
    * const html = await rendering.render(request, uiSettings);
    * ```
    */
-  render<R extends KibanaRequest | LegacyRequest>(
+  render<R extends OpenSearchDashboardsRequest | LegacyRequest>(
     request: R,
     uiSettings: IUiSettingsClient,
     options?: IRenderOptions

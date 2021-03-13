@@ -19,7 +19,7 @@
 
 import fs from 'fs';
 import { join as joinPath } from 'path';
-import { Logger } from '@kbn/logging';
+import { Logger } from '@osd/logging';
 import { MetricsCollector, OpsOsMetrics } from './types';
 
 type OsCgroupMetrics = Pick<OpsOsMetrics, 'cpu' | 'cpuacct'>;

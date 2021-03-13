@@ -18,14 +18,14 @@
  */
 
 import { Observable } from 'rxjs';
-import { Type } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { PathConfigType } from '@kbn/utils';
+import { Type } from '@osd/config-schema';
+import { RecursiveReadonly } from '@osd/utility-types';
+import { PathConfigType } from '@osd/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
-import { KibanaConfigType } from '../kibana_config';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
+import { OpenSearchConfigType } from '../opensearch/opensearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -42,8 +42,8 @@ export type PluginConfigSchema<T> = Type<T>;
  * @example
  * ```typescript
  * // my_plugin/server/index.ts
- * import { schema, TypeOf } from '@kbn/config-schema';
- * import { PluginConfigDescriptor } from 'kibana/server';
+ * import { schema, TypeOf } from '@osd/config-schema';
+ * import { PluginConfigDescriptor } from 'opensearch_dashboards/server';
  *
  * const configSchema = schema.object({
  *   secret: schema.string({ defaultValue: 'Only on server' }),
@@ -123,9 +123,9 @@ export interface PluginManifest {
   readonly version: string;
 
   /**
-   * The version of Kibana the plugin is compatible with, defaults to "version".
+   * The version of OpenSearch Dashboards the plugin is compatible with, defaults to "version".
    */
-  readonly kibanaVersion: string;
+  readonly opensearchDashboardsVersion: string;
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
@@ -149,7 +149,7 @@ export interface PluginManifest {
    *
    * @remarks
    * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * disabled. Required by `@osd/optimizer` to support cross-plugin imports.
    * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */
@@ -175,7 +175,7 @@ export interface PluginManifest {
 
   /**
    * Specifies directory names that can be imported by other ui-plugins built
-   * using the same instance of the @kbn/optimizer. A temporary measure we plan
+   * using the same instance of the @osd/optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
    * @deprecated
    */
@@ -217,7 +217,7 @@ export interface DiscoveredPlugin {
    *
    * @remarks
    * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * disabled. Required by `@osd/optimizer` to support cross-plugin imports.
    * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */
@@ -261,8 +261,8 @@ export interface Plugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
+  opensearchDashboards: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
+  opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
 };
@@ -271,8 +271,8 @@ export const SharedGlobalConfigKeys = {
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
-  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+  opensearchDashboards: Pick<OpenSearchDashboardsConfigType, typeof SharedGlobalConfigKeys.opensearchDashboards[number]>;
+  opensearch: Pick<OpenSearchConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;

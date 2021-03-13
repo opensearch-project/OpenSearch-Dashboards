@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { Layout } from '@kbn/logging';
-import { assertNever } from '@kbn/std';
+import { schema } from '@osd/config-schema';
+import { Layout } from '@osd/logging';
+import { assertNever } from '@osd/std';
 
 import { JsonLayout, JsonLayoutConfigType } from './json_layout';
 import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';

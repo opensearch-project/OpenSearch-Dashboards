@@ -18,7 +18,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -32,31 +32,31 @@ import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
 
-const KIBANA_ROOT = process.cwd();
+const OPENSEARCH_DASHBOARDS_ROOT = process.cwd();
 
 const Plugins = {
   invalid: () => ({
-    'kibana.json': 'not-json',
+    'opensearch_dashboards.json': 'not-json',
   }),
   incomplete: () => ({
-    'kibana.json': JSON.stringify({ version: '1' }),
+    'opensearch_dashboards.json': JSON.stringify({ version: '1' }),
   }),
   incompatible: () => ({
-    'kibana.json': JSON.stringify({ id: 'plugin', version: '1' }),
+    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '1' }),
   }),
   missingManifest: () => ({}),
   inaccessibleManifest: () => ({
-    'kibana.json': mockFs.file({
+    'opensearch_dashboards.json': mockFs.file({
       mode: 0, // 0000,
       content: JSON.stringify({ id: 'plugin', version: '1' }),
     }),
   }),
   valid: (id: string) => ({
-    'kibana.json': JSON.stringify({
+    'opensearch_dashboards.json': JSON.stringify({
       id,
       configPath: ['plugins', id],
       version: '1',
-      kibanaVersion: '1.2.3',
+      opensearchDashboardsVersion: '1.2.3',
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
@@ -75,7 +75,7 @@ const packageMock = {
 };
 
 const manifestPath = (...pluginPath: string[]) =>
-  resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
+  resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins', ...pluginPath, 'opensearch_dashboards.json');
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -139,9 +139,9 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
       },
       { createCwd: false }
     );
@@ -162,10 +162,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
       },
       { createCwd: false }
     );
@@ -188,7 +188,7 @@ describe('plugins discovery system', () => {
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
           'plugin_b'
         )})`,
-        `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${manifestPath(
+        `Error: Plugin "plugin" is only compatible with OpenSearch Dashboards version "1", but used OpenSearch Dashboards version is "1.2.3". (incompatible-version, ${manifestPath(
           'plugin_c'
         )})`,
       ])
@@ -204,7 +204,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins`]: mockFs.directory({
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins`]: mockFs.directory({
           mode: 0, // 0000
           items: {
             plugin_a: Plugins.valid('pluginA'),
@@ -224,8 +224,8 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const srcPluginsPath = resolve(KIBANA_ROOT, 'src', 'plugins');
-    const xpackPluginsPath = resolve(KIBANA_ROOT, 'x-pack', 'plugins');
+    const srcPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins');
+    const xpackPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'x-pack', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
         `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
@@ -243,7 +243,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: {
           ...Plugins.inaccessibleManifest(),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -278,10 +278,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
       },
       { createCwd: false }
     );
@@ -315,7 +315,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: {
           ...Plugins.valid('pluginA'),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -334,12 +334,12 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
           'plugin6'
         ),
       },
@@ -358,11 +358,11 @@ describe('plugins discovery system', () => {
   it('works with symlinks', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
+    const pluginFolder = resolve(OPENSEARCH_DASHBOARDS_ROOT, '..', 'ext-plugins');
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/plugins`]: mockFs.symlink({
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/plugins`]: mockFs.symlink({
           path: '../ext-plugins',
         }),
         [pluginFolder]: {
