@@ -36,17 +36,17 @@ export function existingInstall(settings, logger) {
 }
 
 export function assertVersion(settings) {
-  if (!settings.plugins[0].kibanaVersion) {
+  if (!settings.plugins[0].opensearchDashboardsVersion) {
     throw new Error(
-      `Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional).`
+      `Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional).`
     );
   }
 
-  const actual = cleanVersion(settings.plugins[0].kibanaVersion);
+  const actual = cleanVersion(settings.plugins[0].opensearchDashboardsVersion);
   const expected = cleanVersion(settings.version);
   if (!versionSatisfies(actual, expected)) {
     throw new Error(
-      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with Kibana [${expected}]`
+      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]`
     );
   }
 }

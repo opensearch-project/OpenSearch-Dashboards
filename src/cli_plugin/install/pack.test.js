@@ -28,7 +28,7 @@ import { Logger } from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('pack', function () {
     let testNum = 0;
     const workingPathRoot = join(__dirname, '.test.data.pack');
@@ -75,7 +75,7 @@ describe('kibana cli', function () {
     }
 
     describe('extract', function () {
-      // Also only extracts the content from the kibana folder.
+      // Also only extracts the content from the opensearch-dashboards folder.
       // Ignores the others.
       it('successfully extract a valid zip', async () => {
         await copyReplyFile('test_plugin.zip');
@@ -88,7 +88,7 @@ describe('kibana cli', function () {
             "bin",
             "bin/executable",
             "bin/not-executable",
-            "kibana.json",
+            "opensearch_dashboards.json",
             "node_modules",
             "node_modules/some-package",
             "node_modules/some-package/index.js",
@@ -108,22 +108,22 @@ describe('kibana cli', function () {
           Array [
             Object {
               "id": "testPlugin",
-              "kibanaVersion": "1.0.0",
-              "stripPrefix": "kibana/test-plugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/test-plugin",
             },
           ]
         `);
       });
 
-      it('populate settings.plugin.kibanaVersion', async () => {
+      it('populate settings.plugin.opensearchDashboardsVersion', async () => {
         await copyReplyFile('test_plugin_different_version.zip');
         await getPackData(settings, logger);
         expect(settings.plugins).toMatchInlineSnapshot(`
           Array [
             Object {
               "id": "testPlugin",
-              "kibanaVersion": "5.0.1",
-              "stripPrefix": "kibana/test-plugin",
+              "opensearchDashboardsVersion": "5.0.1",
+              "stripPrefix": "opensearch-dashboards/test-plugin",
             },
           ]
         `);
@@ -136,27 +136,27 @@ describe('kibana cli', function () {
           Array [
             Object {
               "id": "fungerPlugin",
-              "kibanaVersion": "1.0.0",
-              "stripPrefix": "kibana/funger-plugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/funger-plugin",
             },
             Object {
               "id": "pdf",
-              "kibanaVersion": "1.0.0",
-              "stripPrefix": "kibana/pdf",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/pdf",
             },
             Object {
               "id": "testPlugin",
-              "kibanaVersion": "1.0.0",
-              "stripPrefix": "kibana/test-plugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/test-plugin",
             },
           ]
         `);
       });
 
-      it('throw an error if there is no kibana plugin', async () => {
-        await copyReplyFile('test_plugin_no_kibana.zip');
+      it('throw an error if there is no opensearch-dashboards plugin', async () => {
+        await copyReplyFile('test_plugin_no_opensearch_dashboards.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"No kibana plugins found in archive"`
+          `"No opensearch-dashboards plugins found in archive"`
         );
       });
 
@@ -170,7 +170,7 @@ describe('kibana cli', function () {
       it('throw an error if there an invalid plugin name', async () => {
         await copyReplyFile('invalid_name.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid plugin name [invalid name] in kibana.json, expected it to be valid camelCase"`
+          `"Invalid plugin name [invalid name] in opensearch_dashboards.json, expected it to be valid camelCase"`
         );
       });
     });
