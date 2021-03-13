@@ -33,13 +33,13 @@ export function isCamelCase(candidate) {
 function assertValidPackageName(plugin) {
   if (!isCamelCase(plugin.id)) {
     throw new Error(
-      `Invalid plugin name [${plugin.id}] in kibana.json, expected it to be valid camelCase`
+      `Invalid plugin name [${plugin.id}] in opensearch_dashboards.json, expected it to be valid camelCase`
     );
   }
 }
 
 /**
- * Returns the detailed information about each kibana plugin in the pack.
+ * Returns the detailed information about each opensearch-dashboards plugin in the pack.
  *  TODO: If there are platform specific folders, determine which one to use.
  *
  * @param {object} settings - a plugin installer settings object
@@ -56,7 +56,7 @@ export async function getPackData(settings, logger) {
   }
 
   if (packages.length === 0) {
-    throw new Error('No kibana plugins found in archive');
+    throw new Error('No opensearch-dashboards plugins found in archive');
   }
 
   packages.forEach(assertValidPackageName);

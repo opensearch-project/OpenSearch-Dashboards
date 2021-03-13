@@ -24,7 +24,7 @@ import del from 'del';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { Logger } from '../lib/logger';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin installer', function () {
     describe('pluginCleaner', function () {
       const settings = {

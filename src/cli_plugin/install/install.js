@@ -28,7 +28,7 @@ import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
-import { existingInstall, assertVersion } from './kibana';
+import { existingInstall, assertVersion } from './opensearch_dashboards';
 
 const mkdir = promisify(Fs.mkdir);
 

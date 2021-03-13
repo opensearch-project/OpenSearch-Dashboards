@@ -30,7 +30,7 @@ import { Logger } from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin downloader', function () {
     const testWorkingPath = join(__dirname, '.test.data.download');
     const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
