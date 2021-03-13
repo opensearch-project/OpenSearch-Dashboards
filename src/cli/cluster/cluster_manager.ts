@@ -20,12 +20,12 @@
 import { resolve } from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { FSWatcher } from 'chokidar';
 import * as Rx from 'rxjs';
 import { startWith, mapTo, filter, map, take, tap } from 'rxjs/operators';
 
-import { runKbnOptimizer } from './run_kbn_optimizer';
+import { runOsdOptimizer } from './run_osd_optimizer';
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
 import { BasePathProxyServer } from '../../core/server/http';
@@ -33,7 +33,7 @@ import { BasePathProxyServer } from '../../core/server/http';
 import { Log } from './log';
 import { Worker } from './worker';
 
-process.env.kbnWorkerType = 'managr';
+process.env.osdWorkerType = 'managr';
 
 export type SomeCliArgs = Pick<
   CliArgs,
@@ -68,28 +68,28 @@ export class ClusterManager {
   // exposed for testing
   public readonly serverReady$ = new Rx.ReplaySubject<boolean>(1);
   // exposed for testing
-  public readonly kbnOptimizerReady$ = new Rx.ReplaySubject<boolean>(1);
+  public readonly osdOptimizerReady$ = new Rx.ReplaySubject<boolean>(1);
 
   constructor(opts: SomeCliArgs, config: LegacyConfig, basePathProxy?: BasePathProxyServer) {
     this.log = new Log(opts.quiet, opts.silent);
     this.inReplMode = !!opts.repl;
     this.basePathProxy = basePathProxy;
 
-    // run @kbn/optimizer and write it's state to kbnOptimizerReady$
+    // run @osd/optimizer and write it's state to osdOptimizerReady$
     if (opts.disableOptimizer) {
-      this.kbnOptimizerReady$.next(true);
+      this.osdOptimizerReady$.next(true);
     } else {
-      runKbnOptimizer(opts, config)
+      runOsdOptimizer(opts, config)
         .pipe(
           map(({ state }) => state.phase === 'success' || state.phase === 'issue'),
           tap({
             error: (error) => {
-              this.log.bad('@kbn/optimizer error', error.stack);
+              this.log.bad('@osd/optimizer error', error.stack);
               process.exit(1);
             },
           })
         )
-        .subscribe(this.kbnOptimizerReady$);
+        .subscribe(this.osdOptimizerReady$);
     }
 
     const serverArgv = [];
@@ -107,7 +107,7 @@ export class ClusterManager {
         type: 'server',
         log: this.log,
         argv: serverArgv,
-        apmServiceName: 'kibana',
+        apmServiceName: 'opensearch-dashboards',
       })),
     ];
 
@@ -177,7 +177,7 @@ export class ClusterManager {
     }
     if (this.basePathProxy) {
       this.basePathProxy.start({
-        delayUntil: () => firstAllTrue(this.serverReady$, this.kbnOptimizerReady$),
+        delayUntil: () => firstAllTrue(this.serverReady$, this.osdOptimizerReady$),
 
         shouldRedirectFromOldBasePath: (path: string) => {
           // strip `s/{id}` prefix when checking for need to redirect

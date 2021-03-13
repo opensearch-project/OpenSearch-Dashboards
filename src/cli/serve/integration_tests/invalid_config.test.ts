@@ -19,7 +19,7 @@
 
 import { spawnSync } from 'child_process';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 
 const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
 
@@ -34,10 +34,10 @@ describe('cli invalid config support', function () {
     'exits with statusCode 64 and logs a single line when config is invalid',
     function () {
       // Unused keys only throw once LegacyService starts, so disable migrations so that Core
-      // will finish the start lifecycle without a running Elasticsearch instance.
+      // will finish the start lifecycle without a running OpenSearch instance.
       const { error, status, stdout, stderr } = spawnSync(
         process.execPath,
-        ['scripts/kibana', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        ['scripts/opensearch_dashboards', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
         {
           cwd: REPO_ROOT,
         }
