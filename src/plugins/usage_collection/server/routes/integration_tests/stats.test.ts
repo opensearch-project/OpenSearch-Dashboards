@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 
 import {
   MetricsServiceSetup,
@@ -63,11 +63,11 @@ describe('/api/stats', () => {
       }),
       config: {
         allowAnonymous: true,
-        kibanaIndex: '.kibana-test',
-        kibanaVersion: '8.8.8-SNAPSHOT',
+        opensearchDashboardsIndex: '.opensearch-dashboards-test',
+        opensearchDashboardsVersion: '8.8.8-SNAPSHOT',
         server: {
-          name: 'mykibana',
-          hostname: 'mykibana.com',
+          name: 'myopensearchDashboards',
+          hostname: 'myopensearchDashboards.com',
           port: 1234,
         },
         uuid: 'xxx-xxxxx',
@@ -86,13 +86,13 @@ describe('/api/stats', () => {
   it('successfully returns data', async () => {
     const response = await supertest(httpSetup.server.listener).get('/api/stats').expect(200);
     expect(response.body).toMatchObject({
-      kibana: {
+      opensearchDashboards: {
         uuid: 'xxx-xxxxx',
-        name: 'mykibana',
-        index: '.kibana-test',
-        host: 'mykibana.com',
+        name: 'myopensearchDashboards',
+        index: '.opensearch-dashboards-test',
+        host: 'myopensearchDashboards.com',
         locale: 'en',
-        transport_address: `mykibana.com:1234`,
+        transport_address: `myopensearchDashboards.com:1234`,
         version: '8.8.8',
         snapshot: true,
         status: 'green',
