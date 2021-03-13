@@ -18,7 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -123,11 +123,11 @@ export class CollectorSet {
   };
 
   // all collections eventually pass through bulkFetch.
-  // the shape of the response is different when using the new ES client as is the error handling.
+  // the shape of the response is different when using the new OpenSearch client as is the error handling.
   // We'll handle the refactor for using the new client in a follow up PR.
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
-    esClient: ElasticsearchClient,
+    opensearchClient: OpenSearchClient,
     collectors: Map<string, Collector<any, any>> = this.collectors
   ) => {
     const responses = await Promise.all(
@@ -136,7 +136,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the response appropriately.
+            result: await collector.fetch(callCluster, opensearchClient), // each collector must ensure they handle the response appropriately.
           };
         } catch (err) {
           this.logger.warn(err);
@@ -158,9 +158,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller, esClient: ElasticsearchClient) => {
+  public bulkFetchUsage = async (callCluster: LegacyAPICaller, opensearchClient: OpenSearchClient) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, esClient, usageCollectors.collectors);
+    return await this.bulkFetch(callCluster, opensearchClient, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

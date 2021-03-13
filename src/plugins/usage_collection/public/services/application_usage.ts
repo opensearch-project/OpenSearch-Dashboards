@@ -19,12 +19,12 @@
 
 import { Observable } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
-import { Reporter } from '@kbn/analytics';
+import { Reporter } from '@osd/analytics';
 
 /**
  * List of appIds not to report usage from (due to legacy hacks)
  */
-const DO_NOT_REPORT = ['kibana'];
+const DO_NOT_REPORT = ['opensearchDashboards'];
 
 export function reportApplicationUsage(
   currentAppId$: Observable<string | undefined>,

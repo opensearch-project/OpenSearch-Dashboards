@@ -1,10 +1,10 @@
 {
   "id": "usageCollection",
   "configPath": ["usageCollection"],
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredBundles": [
-    "kibanaUtils"
+    "opensearchDashboardsUtils"
   ]
 }
