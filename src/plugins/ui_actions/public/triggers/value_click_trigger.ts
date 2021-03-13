@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Trigger } from '.';
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';

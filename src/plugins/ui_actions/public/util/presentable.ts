@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 
 /**
  * Represents something that can be displayed to user in UI.

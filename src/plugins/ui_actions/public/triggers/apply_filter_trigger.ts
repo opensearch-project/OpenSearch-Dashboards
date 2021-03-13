@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Trigger } from '.';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
@@ -27,6 +27,6 @@ export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
     defaultMessage: 'Apply filter',
   }),
   description: i18n.translate('uiActions.triggers.applyFilterDescription', {
-    defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
+    defaultMessage: 'When OpenSearch Dashboards filter is applied. Could be a single value or a range filter.',
   }),
 };
