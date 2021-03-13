@@ -1,7 +1,7 @@
-# Kibana Style Guide
+# OpenSearch Dashboards Style Guide
 
-This guide applies to all development within the Kibana project and is
-recommended for the development of all Kibana plugins.
+This guide applies to all development within the OpenSearch Dashboards project and is
+recommended for the development of all OpenSearch Dashboards plugins.
 
 - [General](#general)
 - [HTML](#html)
@@ -11,7 +11,7 @@ recommended for the development of all Kibana plugins.
 - [React](#react)
 
 Besides the content in this style guide, the following style guides may also apply
-to all development within the Kibana project. Please make sure to also read them:
+to all development within the OpenSearch Dashboards project. Please make sure to also read them:
 
 - [Accessibility style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/accessibility)
 - [SASS style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/sass)
@@ -22,9 +22,9 @@ to all development within the Kibana project. Please make sure to also read them
 
 All filenames should use `snake_case`.
 
-**Right:** `src/kibana/index_patterns/index_pattern.js`
+**Right:** `src/opensearch-dashboards/index_patterns/index_pattern.js`
 
-**Wrong:** `src/kibana/IndexPatterns/IndexPattern.js`
+**Wrong:** `src/opensearch-dashboards/IndexPatterns/IndexPattern.js`
 
 ### Do not comment out code
 
@@ -33,7 +33,7 @@ remove it, don't simply comment it out.
 
 ### Prettier and Linting
 
-We are gradually moving the Kibana code base over to Prettier. All TypeScript code
+We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
 can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
@@ -145,12 +145,12 @@ API routes must start with the `/api/` path segment, and should be followed by t
 
 ### snake_case
 
-Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
+OpenSearch Dashboards uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
 
 _Right:_
 
 ```
-POST /api/kibana/index_patterns
+POST /api/opensearch-dashboards/index_patterns
 {
   "id": "...",
   "time_field_name": "...",
@@ -593,7 +593,7 @@ Do not use setters, they cause more problems than they can solve.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
+All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
