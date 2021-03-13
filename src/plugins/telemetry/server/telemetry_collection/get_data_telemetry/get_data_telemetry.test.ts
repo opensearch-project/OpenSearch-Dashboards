@@ -19,7 +19,7 @@
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { opensearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 describe.skip('get_data_telemetry', () => {
   describe.skip('DATA_DATASETS_INDEX_PATTERNS', () => {
@@ -52,7 +52,7 @@ describe.skip('get_data_telemetry', () => {
       expect(
         buildDataTelemetryPayload([
           { name: 'no__way__this__can_match_anything', sizeInBytes: 10 },
-          { name: '.kibana-event-log-8.0.0' },
+          { name: '.opensearch-dashboards-event-log-8.0.0' },
         ])
       ).toStrictEqual([]);
     });
@@ -196,15 +196,15 @@ describe.skip('get_data_telemetry', () => {
 
   describe.skip('getDataTelemetry', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
-      const esClient = mockEsClient();
-      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
-      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
+      const opensearchClient = mockOpenSearchClient();
+      await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([]);
+      expect(opensearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(opensearchClient.indices.stats).toHaveBeenCalledTimes(1);
     });
 
     test('can only see the index mappings, but not the stats', async () => {
-      const esClient = mockEsClient(['filebeat-12314']);
-      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
+      const opensearchClient = mockOpenSearchClient(['filebeat-12314']);
+      await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
           shipper: 'filebeat',
@@ -212,12 +212,12 @@ describe.skip('get_data_telemetry', () => {
           ecs_index_count: 0,
         },
       ]);
-      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
+      expect(opensearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(opensearchClient.indices.stats).toHaveBeenCalledTimes(1);
     });
 
     test('can see the mappings and the stats', async () => {
-      const esClient = mockEsClient(
+      const opensearchClient = mockOpenSearchClient(
         ['filebeat-12314'],
         { isECS: true },
         {
@@ -226,7 +226,7 @@ describe.skip('get_data_telemetry', () => {
           },
         }
       );
-      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
+      await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
           shipper: 'filebeat',
@@ -239,7 +239,7 @@ describe.skip('get_data_telemetry', () => {
     });
 
     test('find an index that does not match any index pattern but has mappings metadata', async () => {
-      const esClient = mockEsClient(
+      const opensearchClient = mockOpenSearchClient(
         ['cannot_match_anything'],
         { isECS: true, dataStreamType: 'traces', shipper: 'my-beat' },
         {
@@ -250,7 +250,7 @@ describe.skip('get_data_telemetry', () => {
           },
         }
       );
-      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
+      await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([
         {
           data_stream: { dataset: undefined, type: 'traces' },
           shipper: 'my-beat',
@@ -263,21 +263,21 @@ describe.skip('get_data_telemetry', () => {
     });
 
     test('return empty array when there is an error', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
-      esClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
-      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
+      const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
+      opensearchClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
+      opensearchClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
+      await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([]);
     });
   });
 });
-function mockEsClient(
+function mockOpenSearchClient(
   indicesMappings: string[] = [], // an array of `indices` to get mappings from.
   { isECS = false, dataStreamDataset = '', dataStreamType = '', shipper = '' } = {},
   indexStats: any = {}
 ) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
   // @ts-ignore
-  esClient.indices.getMapping.mockImplementationOnce(async () => {
+  opensearchClient.indices.getMapping.mockImplementationOnce(async () => {
     const body = Object.fromEntries(
       indicesMappings.map((index) => [
         index,
@@ -306,8 +306,8 @@ function mockEsClient(
     return { body };
   });
   // @ts-ignore
-  esClient.indices.stats.mockImplementationOnce(async () => {
+  opensearchClient.indices.stats.mockImplementationOnce(async () => {
     return { body: indexStats };
   });
-  return esClient;
+  return opensearchClient;
 }

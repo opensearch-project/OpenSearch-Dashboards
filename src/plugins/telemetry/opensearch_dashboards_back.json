@@ -1,6 +1,6 @@
 {
   "id": "telemetry",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -9,7 +9,7 @@
   ],
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact"
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact"
   ]
 }

@@ -33,14 +33,14 @@ const licenseSchema: MakeSchemaFrom<LicenseUsage> = {
 
 export const staticTelemetrySchema: MakeSchemaFrom<StaticTelemetryUsage> = {
   ece: {
-    kb_uuid: { type: 'keyword' },
-    es_uuid: { type: 'keyword' },
+    opensearch_dashboards_uuid: { type: 'keyword' },
+    opensearch_uuid: { type: 'keyword' },
     account_id: { type: 'keyword' },
     license: licenseSchema,
   },
   ess: {
-    kb_uuid: { type: 'keyword' },
-    es_uuid: { type: 'keyword' },
+    opensearch_dashboards_uuid: { type: 'keyword' },
+    opensearch_uuid: { type: 'keyword' },
     account_id: { type: 'keyword' },
     license: licenseSchema,
   },

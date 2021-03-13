@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { OpenSearchClient } from 'src/core/server';
 
-// This can be removed when the ES client improves the types
-export interface ESClusterInfo {
+// This can be removed when the OpenSearch client improves the types
+export interface OpenSearchClusterInfo {
   cluster_uuid: string;
   cluster_name: string;
   version: {
@@ -40,9 +40,9 @@ export interface ESClusterInfo {
  *
  * This is the equivalent to GET /
  *
- * @param {function} esClient The asInternalUser handler (exposed for testing)
+ * @param {function} opensearchClient The asInternalUser handler (exposed for testing)
  */
-export async function getClusterInfo(esClient: ElasticsearchClient) {
-  const { body } = await esClient.info<ESClusterInfo>();
+export async function getClusterInfo(opensearchClient: OpenSearchClusterInfo) {
+  const { body } = await opensearchClient.info<OpenSearchClusterInfo>();
   return body;
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ElasticsearchClient } from 'src/core/server';
+import { OpenSearchClient } from 'src/core/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
@@ -101,7 +101,7 @@ function findMatchingDescriptors({
   // Otherwise, try with the list of known index patterns
   return DATA_DATASETS_INDEX_PATTERNS_UNIQUE.filter(({ pattern }) => {
     if (!pattern.startsWith('.') && name.startsWith('.')) {
-      // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
+      // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.opensearch-dashboards-log-...`)
       return false;
     }
     return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(name);
@@ -224,7 +224,7 @@ interface IndexMappings {
   };
 }
 
-export async function getDataTelemetry(esClient: ElasticsearchClient) {
+export async function getDataTelemetry(opensearchClient: OpenSearchClient) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
@@ -262,8 +262,8 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       filter_path: ['indices.*.total'],
     };
     const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
-      esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
-      esClient.indices.stats<IndexStats>(indicesStatsParams),
+      opensearchClient.indices.getMapping<IndexMappings>(indexMappingsParams),
+      opensearchClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });

@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from 'opensearch-dashboards/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
@@ -30,7 +30,7 @@ interface RegisterRoutesParams {
   isDev: boolean;
   logger: Logger;
   config$: Observable<TelemetryConfigType>;
-  currentKibanaVersion: string;
+  currentOpenSearchDashboardsVersion: string;
   router: IRouter;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
 }

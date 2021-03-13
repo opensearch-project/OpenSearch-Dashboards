@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { getConfigPath } from '@kbn/utils';
+import { schema, TypeOf } from '@osd/config-schema';
+import { getConfigPath } from '@osd/utils';
 import { ENDPOINT_VERSION } from '../common/constants';
 
 export const configSchema = schema.object({

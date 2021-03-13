@@ -21,7 +21,7 @@ import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import { TelemetrySavedObject } from './types';
 
 describe('getTelemetrySendUsageFrom', () => {
-  it('returns kibana.yml config when saved object not found', () => {
+  it('returns opensearch_dashboards.yml config when saved object not found', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedObjectNotFound: true,
       configSendUsageFrom: 'browser',
@@ -32,7 +32,7 @@ describe('getTelemetrySendUsageFrom', () => {
     expect(result).toBe('browser');
   });
 
-  it('returns kibana.yml config when saved object forbidden', () => {
+  it('returns opensearch_dashboards.yml config when saved object forbidden', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedObjectForbidden: true,
       configSendUsageFrom: 'browser',
@@ -43,7 +43,7 @@ describe('getTelemetrySendUsageFrom', () => {
     expect(result).toBe('browser');
   });
 
-  it('returns kibana.yml config when saved object sendUsageFrom is undefined', () => {
+  it('returns opensearch_dashboards.yml config when saved object sendUsageFrom is undefined', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedSendUsagefrom: undefined,
       configSendUsageFrom: 'server',

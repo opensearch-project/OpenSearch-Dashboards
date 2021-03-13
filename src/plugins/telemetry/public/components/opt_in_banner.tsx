@@ -19,7 +19,7 @@
 
 import * as React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { OptInMessage } from './opt_in_message';
 
 interface Props {
@@ -32,7 +32,7 @@ export class OptInBanner extends React.PureComponent<Props> {
     const title = (
       <FormattedMessage
         id="telemetry.welcomeBanner.title"
-        defaultMessage="Help us improve the Elastic Stack"
+        defaultMessage="Help us improve the OpenSearch Stack"
       />
     );
     return (

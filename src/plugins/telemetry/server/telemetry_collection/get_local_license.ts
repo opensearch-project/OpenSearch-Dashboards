@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { OpenSearchLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
+import { OpenSearchClient } from 'src/core/server';
 
-let cachedLicense: ESLicense | undefined;
+let cachedLicense: OpenSearchLicense | undefined;
 
-async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
-  const { body } = await esClient.license.get({
+async function fetchLicense(opensearchClient: OpenSearchClient, local: boolean) {
+  const { body } = await opensearchClient.license.get({
     local,
     // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
     accept_enterprise: true,
@@ -37,15 +37,15 @@ async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *
- * In OSS we'll get a 400 response using the new elasticsearch client.
+ * In OSS we'll get a 400 response using the new opensearch  client.
  */
-async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
+async function getLicenseFromLocalOrMaster(opensearchClient: OpenSearchClient) {
   // Fetching the local license is cheaper than getting it from the master node and good enough
-  const { license } = await fetchLicense(esClient, true).catch(async (err) => {
+  const { license } = await fetchLicense(opensearchClient, true).catch(async (err) => {
     if (cachedLicense) {
       try {
         // Fallback to the master node's license info
-        const response = await fetchLicense(esClient, false);
+        const response = await fetchLicense(opensearchClient, false);
         return response;
       } catch (masterError) {
         if ([400, 404].includes(masterError.statusCode)) {
@@ -65,8 +65,8 @@ async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient) {
   return license;
 }
 
-export const getLocalLicense: LicenseGetter = async (clustersDetails, { esClient }) => {
-  const license = await getLicenseFromLocalOrMaster(esClient);
+export const getLocalLicense: LicenseGetter = async (clustersDetails, { opensearchClient }) => {
+  const license = await getLicenseFromLocalOrMaster(opensearchClient);
   // It should be called only with 1 cluster element in the clustersDetails array, but doing reduce just in case.
   return clustersDetails.reduce((acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }), {});
 };

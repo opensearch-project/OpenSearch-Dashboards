@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 /**
  * config options opt into telemetry
@@ -31,7 +31,7 @@ export const getConfigTelemetryDesc = () => {
   // Can't find where it's used but copying it over from the legacy code just in case...
   return i18n.translate('telemetry.telemetryConfigDescription', {
     defaultMessage:
-      'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
+      'Help us improve the OpenSearch Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
   });
 };
 
@@ -49,10 +49,10 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to Advanced Settings.
  */
-export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
+export const PATH_TO_ADVANCED_SETTINGS = 'management/opensearch-dashboards/settings';
 
 /**
- * Link to the Elastic Telemetry privacy statement.
+ * Link to the OpenSearch Telemetry privacy statement.
  */
 export const PRIVACY_STATEMENT_URL = ``;
 

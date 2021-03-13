@@ -27,7 +27,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { take } from 'rxjs/operators';
 import { TelemetryConfigType } from '../../config';
 
-// look for telemetry.yml in the same places we expect kibana.yml
+// look for telemetry.yml in the same places we expect opensearch_dashboards.yml
 import { ensureDeepObject } from './ensure_deep_object';
 import { staticTelemetrySchema } from './schema';
 
@@ -95,14 +95,14 @@ export interface LicenseUsage {
 
 export interface StaticTelemetryUsage {
   ece?: {
-    kb_uuid: string;
-    es_uuid: string;
+    opensearch_dashboards_uuid: string;
+    opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
   };
   ess?: {
-    kb_uuid: string;
-    es_uuid: string;
+    opensearch_dashboards_uuid: string;
+    opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
   };

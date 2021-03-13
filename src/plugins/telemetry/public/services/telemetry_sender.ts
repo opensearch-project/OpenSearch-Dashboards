@@ -19,7 +19,7 @@
 
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import { Storage } from '../../../kibana_utils/public';
+import { Storage } from '../../../opensearch_dashboards_utils/public';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
