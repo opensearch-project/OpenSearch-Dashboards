@@ -58,12 +58,12 @@ describe('repl', () => {
     };
     const replServer = startRepl(testServer);
     expect(replServer.context.server).toBe(testServer.server);
-    expect(replServer.context.kbnServer).toBe(testServer);
+    expect(replServer.context.osdServer).toBe(testServer);
   });
 
-  test('it prompts with Kibana>', () => {
+  test('it prompts with OpenSearch Dashboards>', () => {
     const { startRepl } = require('.');
-    expect(startRepl({}).opts.prompt).toBe('Kibana> ');
+    expect(startRepl({}).opts.prompt).toBe('OpenSearch Dashboards> ');
   });
 
   test('it colorizes raw values', () => {
@@ -113,11 +113,11 @@ describe('repl', () => {
     const replServer = startRepl(testServer);
     replServer.context.foo = 'bar';
     expect(replServer.context.server).toBe(testServer.server);
-    expect(replServer.context.kbnServer).toBe(testServer);
+    expect(replServer.context.osdServer).toBe(testServer);
     expect(replServer.context.foo).toBe('bar');
     mockRepl.clear();
     expect(replServer.context.server).toBe(testServer.server);
-    expect(replServer.context.kbnServer).toBe(testServer);
+    expect(replServer.context.osdServer).toBe(testServer);
     expect(replServer.context.foo).toBeUndefined();
   });
 

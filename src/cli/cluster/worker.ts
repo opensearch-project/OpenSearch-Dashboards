@@ -88,9 +88,9 @@ export class Worker extends EventEmitter {
 
     this.env = {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
-      kbnWorkerType: this.type,
-      kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
-      ELASTIC_APM_SERVICE_NAME: opts.apmServiceName || '',
+      osdWorkerType: this.type,
+      osdWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
+      OPENSEARCH_APM_SERVICE_NAME: opts.apmServiceName || '',
     };
   }
 
