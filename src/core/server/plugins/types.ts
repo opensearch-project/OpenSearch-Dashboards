@@ -25,7 +25,7 @@ import { PathConfigType } from '@osd/utils';
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
-import { ConfigType } from '../opensearch/opensearch_config';
+import { OpenSearchConfigType } from '../opensearch/opensearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -272,7 +272,7 @@ export const SharedGlobalConfigKeys = {
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
   opensearchDashboards: Pick<OpenSearchDashboardsConfigType, typeof SharedGlobalConfigKeys.opensearchDashboards[number]>;
-  opensearch: Pick<ConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
+  opensearch: Pick<OpenSearchConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;

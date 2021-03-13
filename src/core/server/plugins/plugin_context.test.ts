@@ -43,7 +43,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     id: 'some-plugin-id',
     version: 'some-version',
     configPath: 'path',
-    OpenSearchDashboardsVersion: '7.0.0',
+    opensearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
@@ -82,7 +82,7 @@ describe('createPluginInitializerContext', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      OpenSearchDashboards: {
+      opensearchDashboards: {
         index: '.opensearch-dashboards',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),

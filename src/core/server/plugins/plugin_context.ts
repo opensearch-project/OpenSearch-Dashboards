@@ -30,7 +30,7 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { OpenSearchDashboardsConfigType, config as OpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
+import { OpenSearchDashboardsConfigType, config as opensearchDashboardsConfig } from '../opensearch_dashboards_config';
 import {
   OpenSearchConfigType,
   config as opensearchConfig,
@@ -93,7 +93,7 @@ export function createPluginInitializerContext(
          * @deprecated
          */
         globalConfig$: combineLatest([
-          coreContext.configService.atPath<OpenSearchDashboardsConfigType> OpenSearchDashboardsConfig.path),
+          coreContext.configService.atPath<OpenSearchDashboardsConfigType> opensearchDashboardsConfig.path),
           coreContext.configService.atPath<OpenSearchConfigType>(opensearchConfig.path),
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),

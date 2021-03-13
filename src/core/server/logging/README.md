@@ -86,7 +86,7 @@ Example of `%logger` output:
 ```bash
 server
 server.http
-server.http.opensearchDashboards
+server.http.OpenSearchDashboards
 ```
 
 #### message
