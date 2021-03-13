@@ -18,7 +18,7 @@
  */
 
 // @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -148,7 +148,7 @@ describe('#getQueryParams', () => {
       it('includes the specified Kuery clause', () => {
         const test = (kueryNode: KueryNode) => {
           const result = getQueryParams({ registry, kueryNode });
-          const expected = esKuery.toElasticsearchQuery(kueryNode);
+          const expected = opensearchKuery.toOpenSearchQuery(kueryNode);
           expect(result.query.bool.filter).toHaveLength(2);
           expectResult(result, expected);
         };

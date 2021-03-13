@@ -22,37 +22,37 @@ import { encodeVersion } from './encode_version';
 describe('encodeVersion', () => {
   it('throws if primaryTerm is not an integer', () => {
     expect(() => encodeVersion(1, undefined as any)).toThrowErrorMatchingInlineSnapshot(
-      `"_primary_term from elasticsearch must be an integer"`
+      `"_primary_term from opensearch must be an integer"`
     );
     expect(() => encodeVersion(1, null as any)).toThrowErrorMatchingInlineSnapshot(
-      `"_primary_term from elasticsearch must be an integer"`
+      `"_primary_term from opensearch must be an integer"`
     );
     expect(() => encodeVersion(1, {} as any)).toThrowErrorMatchingInlineSnapshot(
-      `"_primary_term from elasticsearch must be an integer"`
+      `"_primary_term from opensearch must be an integer"`
     );
     expect(() => encodeVersion(1, [] as any)).toThrowErrorMatchingInlineSnapshot(
-      `"_primary_term from elasticsearch must be an integer"`
+      `"_primary_term from opensearch must be an integer"`
     );
     expect(() => encodeVersion(1, 2.5 as any)).toThrowErrorMatchingInlineSnapshot(
-      `"_primary_term from elasticsearch must be an integer"`
+      `"_primary_term from opensearch must be an integer"`
     );
   });
 
   it('throws if seqNo is not an integer', () => {
     expect(() => encodeVersion(undefined as any, 1)).toThrowErrorMatchingInlineSnapshot(
-      `"_seq_no from elasticsearch must be an integer"`
+      `"_seq_no from opensearch must be an integer"`
     );
     expect(() => encodeVersion(null as any, 1)).toThrowErrorMatchingInlineSnapshot(
-      `"_seq_no from elasticsearch must be an integer"`
+      `"_seq_no from opensearch must be an integer"`
     );
     expect(() => encodeVersion({} as any, 1)).toThrowErrorMatchingInlineSnapshot(
-      `"_seq_no from elasticsearch must be an integer"`
+      `"_seq_no from opensearch must be an integer"`
     );
     expect(() => encodeVersion([] as any, 1)).toThrowErrorMatchingInlineSnapshot(
-      `"_seq_no from elasticsearch must be an integer"`
+      `"_seq_no from opensearch must be an integer"`
     );
     expect(() => encodeVersion(2.5 as any, 1)).toThrowErrorMatchingInlineSnapshot(
-      `"_seq_no from elasticsearch must be an integer"`
+      `"_seq_no from opensearch must be an integer"`
     );
   });
 

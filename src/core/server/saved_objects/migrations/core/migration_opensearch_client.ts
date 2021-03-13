@@ -20,8 +20,8 @@ import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transpo
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { migrationRetryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
+import { OpenSearchClient } from '../../../opensearch';
+import { migrationRetryCallCluster } from '../../../opensearch/client/retry_call_cluster';
 import { Logger } from '../../../logging';
 
 const methods = [
@@ -44,40 +44,40 @@ const methods = [
 
 type MethodName = typeof methods[number];
 
-export interface MigrationEsClient {
-  bulk: ElasticsearchClient['bulk'];
+export interface MigrationOpenSearchClient {
+  bulk: OpenSearchClient['bulk'];
   cat: {
-    templates: ElasticsearchClient['cat']['templates'];
+    templates: OpenSearchClient['cat']['templates'];
   };
-  clearScroll: ElasticsearchClient['clearScroll'];
-  count: ElasticsearchClient['count'];
+  clearScroll: OpenSearchClient['clearScroll'];
+  count: OpenSearchClient['count'];
   indices: {
-    create: ElasticsearchClient['indices']['create'];
-    delete: ElasticsearchClient['indices']['delete'];
-    deleteTemplate: ElasticsearchClient['indices']['deleteTemplate'];
-    get: ElasticsearchClient['indices']['get'];
-    getAlias: ElasticsearchClient['indices']['getAlias'];
-    refresh: ElasticsearchClient['indices']['refresh'];
-    updateAliases: ElasticsearchClient['indices']['updateAliases'];
+    create: OpenSearchClient['indices']['create'];
+    delete: OpenSearchClient['indices']['delete'];
+    deleteTemplate: OpenSearchClient['indices']['deleteTemplate'];
+    get: OpenSearchClient['indices']['get'];
+    getAlias: OpenSearchClient['indices']['getAlias'];
+    refresh: OpenSearchClient['indices']['refresh'];
+    updateAliases: OpenSearchClient['indices']['updateAliases'];
   };
-  reindex: ElasticsearchClient['reindex'];
-  search: ElasticsearchClient['search'];
-  scroll: ElasticsearchClient['scroll'];
+  reindex: OpenSearchClient['reindex'];
+  search: OpenSearchClient['search'];
+  scroll: OpenSearchClient['scroll'];
   tasks: {
-    get: ElasticsearchClient['tasks']['get'];
+    get: OpenSearchClient['tasks']['get'];
   };
 }
 
-export function createMigrationEsClient(
-  client: ElasticsearchClient,
+export function createMigrationOpenSearchClient(
+  client: OpenSearchClient,
   log: Logger,
   delay?: number
-): MigrationEsClient {
-  return methods.reduce((acc: MigrationEsClient, key: MethodName) => {
+): MigrationOpenSearchClient {
+  return methods.reduce((acc: MigrationOpenSearchClient, key: MethodName) => {
     set(acc, key, async (params?: unknown, options?: TransportRequestOptions) => {
       const fn = get(client, key);
       if (!fn) {
-        throw new Error(`unknown ElasticsearchClient client method [${key}]`);
+        throw new Error(`unknown OpenSearchClient client method [${key}]`);
       }
       return await migrationRetryCallCluster(
         () => fn.call(client, params, { maxRetries: 0, ...options }),
@@ -86,5 +86,5 @@ export function createMigrationEsClient(
       );
     });
     return acc;
-  }, {} as MigrationEsClient);
+  }, {} as MigrationOpenSearchClient);
 }

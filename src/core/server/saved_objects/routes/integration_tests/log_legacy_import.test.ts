@@ -18,7 +18,7 @@
  */
 
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { registerLogLegacyImportRoute } from '../log_legacy_import';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { setupServer } from '../test_utils';

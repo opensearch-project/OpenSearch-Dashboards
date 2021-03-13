@@ -19,12 +19,12 @@
 
 /*
  * This module contains various functions for querying and manipulating
- * elasticsearch indices.
+ * opensearch indices.
  */
 
 import _ from 'lodash';
-import { MigrationEsClient } from './migration_es_client';
-import { CountResponse, SearchResponse } from '../../../elasticsearch';
+import { MigrationOpenSearchClient } from './migration_opensearch_client';
+import { CountResponse, SearchResponse } from '../../../opensearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
@@ -43,7 +43,7 @@ export interface FullIndexInfo {
  * A slight enhancement to indices.get, that adds indexName, and validates that the
  * index mappings are somewhat what we expect.
  */
-export async function fetchInfo(client: MigrationEsClient, index: string): Promise<FullIndexInfo> {
+export async function fetchInfo(client: MigrationOpenSearchClient, index: string): Promise<FullIndexInfo> {
   const { body, statusCode } = await client.indices.get({ index }, { ignore: [404] });
 
   if (statusCode === 404) {
@@ -62,7 +62,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
 /**
  * Creates a reader function that serves up batches of documents from the index. We aren't using
- * an async generator, as that feature currently breaks Kibana's tooling.
+ * an async generator, as that feature currently breaks OpenSearchDashboards's tooling.
  *
  * @param {CallCluster} callCluster - The elastic search connection
  * @param {string} - The index to be read from
@@ -71,7 +71,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
  * @prop {string} scrollDuration - The scroll duration used for scrolling through the index
  */
 export function reader(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   index: string,
   { batchSize = 10, scrollDuration = '15m' }: { batchSize: number; scrollDuration: string }
 ) {
@@ -114,7 +114,7 @@ export function reader(
  * @param {string} index
  * @param {RawDoc[]} docs
  */
-export async function write(client: MigrationEsClient, index: string, docs: RawDoc[]) {
+export async function write(client: MigrationOpenSearchClient, index: string, docs: RawDoc[]) {
   const { body } = await client.bulk({
     body: docs.reduce((acc: object[], doc: RawDoc) => {
       acc.push({
@@ -155,7 +155,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
  * @param {SavedObjectsMigrationVersion} migrationVersion - The latest versions of the migrations
  */
 export async function migrationsUpToDate(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   index: string,
   migrationVersion: SavedObjectsMigrationVersion,
   retryCount: number = 10
@@ -210,7 +210,7 @@ export async function migrationsUpToDate(
 }
 
 export async function createIndex(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   index: string,
   mappings?: IndexMapping
 ) {
@@ -220,7 +220,7 @@ export async function createIndex(
   });
 }
 
-export async function deleteIndex(client: MigrationEsClient, index: string) {
+export async function deleteIndex(client: MigrationOpenSearchClient, index: string) {
   await client.indices.delete({ index });
 }
 
@@ -229,12 +229,12 @@ export async function deleteIndex(client: MigrationEsClient, index: string) {
  * is a concrete index. This function will reindex `alias` into a new index, delete the `alias`
  * index, and then create an alias `alias` that points to the new index.
  *
- * @param {CallCluster} callCluster - The connection to ElasticSearch
+ * @param {CallCluster} callCluster - The connection to OpenSearch
  * @param {FullIndexInfo} info - Information about the mappings and name of the new index
  * @param {string} alias - The name of the index being converted to an alias
  */
 export async function convertToAlias(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   info: FullIndexInfo,
   alias: string,
   batchSize: number,
@@ -261,7 +261,7 @@ export async function convertToAlias(
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call
  */
 export async function claimAlias(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   index: string,
   alias: string,
   aliasActions: AliasAction[] = []
@@ -281,10 +281,10 @@ export async function claimAlias(
 
 /**
  * This is a rough check to ensure that the index being migrated satisfies at least
- * some rudimentary expectations. Past Kibana indices had multiple root documents, etc
+ * some rudimentary expectations. Past OpenSearch Dashboards indices had multiple root documents, etc
  * and the migration system does not (yet?) handle those indices. They need to be upgraded
  * via v5 -> v6 upgrade tools first. This file contains index-agnostic logic, and this
- * check is itself index-agnostic, though the error hint is a bit Kibana specific.
+ * check is itself index-agnostic, though the error hint is a bit OpenSearch Dashboards specific.
  *
  * @param {FullIndexInfo} indexInfo
  */
@@ -294,7 +294,7 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
 
   if (!isV7Index) {
     throw new Error(
-      `Index ${indexInfo.indexName} belongs to a version of Kibana ` +
+      `Index ${indexInfo.indexName} belongs to a version of OpenSearch Dashboards ` +
         `that cannot be automatically migrated. Reset it or use the X-Pack upgrade assistant.`
     );
   }
@@ -318,7 +318,7 @@ function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
   if (failed > 0) {
     throw new Error(
       `Re-index failed :: ${failed} of ${_shards.total} shards failed. ` +
-        `Check Elasticsearch cluster health for more information.`
+        `Check OpenSearch cluster health for more information.`
     );
   }
 }
@@ -327,14 +327,14 @@ function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
  * Reindexes from source to dest, polling for the reindex completion.
  */
 async function reindex(
-  client: MigrationEsClient,
+  client: MigrationOpenSearchClient,
   source: string,
   dest: string,
   batchSize: number,
   script?: string
 ) {
   // We poll instead of having the request wait for completion, as for large indices,
-  // the request times out on the Elasticsearch side of things. We have a relatively tight
+  // the request times out on the OpenSearch side of things. We have a relatively tight
   // polling interval, as the request is fairly efficent, and we don't
   // want to block index migrations for too long on this.
   const pollInterval = 250;

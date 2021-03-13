@@ -46,7 +46,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
@@ -117,7 +117,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  */
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
   /**
-   * The Elasticsearch `_score` of this result.
+   * The OpenSearch `_score` of this result.
    */
   score: number;
 }
@@ -167,7 +167,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -178,7 +178,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
 export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -196,7 +196,7 @@ export interface SavedObjectsAddToNamespacesResponse {
  * @public
  */
 export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -214,7 +214,7 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
  * @public
  */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -223,7 +223,7 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
+  /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
   /** Force deletion of an object that exists in multiple namespaces */
   force?: boolean;

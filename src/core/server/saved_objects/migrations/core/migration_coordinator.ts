@@ -18,20 +18,20 @@
  */
 
 /*
- * This provides a mechanism for preventing multiple Kibana instances from
+ * This provides a mechanism for preventing multiple OpenSearch Dashboards instances from
  * simultaneously running migrations on the same index. It synchronizes this
  * by handling index creation conflicts, and putting this instance into a
  * poll loop that periodically checks to see if the index is migrated.
  *
- * The reason we have to coordinate this, rather than letting each Kibana instance
- * perform duplicate work, is that if we allowed each Kibana to simply run migrations in
+ * The reason we have to coordinate this, rather than letting each OpenSearch Dashboards instance
+ * perform duplicate work, is that if we allowed each OpenSearch Dashboards to simply run migrations in
  * parallel, they would each try to reindex and each try to create the destination index.
- * If those indices already exist, it may be due to contention between multiple Kibana
+ * If those indices already exist, it may be due to contention between multiple OpenSearchDashboards
  * instances (which is safe to ignore), but it may be due to a partially completed migration,
- * or someone tampering with the Kibana alias. In these cases, it's not clear that we should
+ * or someone tampering with the OpenSearch Dashboards alias. In these cases, it's not clear that we should
  * just migrate data into an existing index. Such an action could result in data loss. Instead,
- * we should probably fail, and the Kibana sys-admin should clean things up before relaunching
- * Kibana.
+ * we should probably fail, and the OpenSearch Dashboards sys-admin should clean things up before relaunching
+ * OpenSearchDashboards.
  */
 
 import _ from 'lodash';
@@ -86,7 +86,7 @@ export async function coordinateMigration(opts: Opts): Promise<MigrationResult> 
 /**
  * If the specified error is an index exists error, this logs a warning,
  * and is the cue for us to fall into a polling loop, waiting for some
- * other Kibana instance to complete the migration.
+ * other OpenSearch Dashboards instance to complete the migration.
  */
 function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
   const isIndexExistsError =
@@ -98,10 +98,10 @@ function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
   const index = _.get(error, 'body.error.index');
 
   log.warning(
-    `Another Kibana instance appears to be migrating the index. Waiting for ` +
-      `that migration to complete. If no other Kibana instance is attempting ` +
+    `Another OpenSearch Dashboards instance appears to be migrating the index. Waiting for ` +
+      `that migration to complete. If no other OpenSearch Dashboards instance is attempting ` +
       `migrations, you can get past this message by deleting index ${index} and ` +
-      `restarting Kibana.`
+      `restarting OpenSearchDashboards.`
   );
 
   return true;

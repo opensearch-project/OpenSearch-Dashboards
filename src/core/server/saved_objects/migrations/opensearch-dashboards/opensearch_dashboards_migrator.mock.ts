@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 
-import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+import { OpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './opensearch_dashboards_migrator';
 import { buildActiveMappings } from '../core';
-const { mergeTypes } = jest.requireActual('./kibana_migrator');
+const { mergeTypes } = jest.requireActual('./opensearch_dashboards_migrator');
 import { SavedObjectsType } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 
@@ -45,19 +45,19 @@ const createMigrator = (
     types: SavedObjectsType[];
   } = { types: defaultSavedObjectTypes }
 ) => {
-  const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
+  const mockMigrator: jest.Mocked<PublicMethodsOf<OpenSearchDashboardsMigrator>> = {
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),
     getStatus$: jest.fn(
       () =>
-        new BehaviorSubject<KibanaMigratorStatus>({
+        new BehaviorSubject<OpenSearchDashboardsMigratorStatus>({
           status: 'completed',
           result: [
             {
               status: 'migrated',
-              destIndex: '.test-kibana_2',
-              sourceIndex: '.test-kibana_1',
+              destIndex: '.test-opensearch-dashboards_2',
+              sourceIndex: '.test-opensearch-dashboards_1',
               elapsedMs: 10,
             },
           ],
@@ -70,6 +70,6 @@ const createMigrator = (
   return mockMigrator;
 };
 
-export const mockKibanaMigrator = {
+export const mockOpenSearchDashboardsMigrator = {
   create: createMigrator,
 };

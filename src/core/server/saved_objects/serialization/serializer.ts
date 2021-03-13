@@ -42,7 +42,7 @@ export class SavedObjectsSerializer {
   /**
    * Determines whether or not the raw document can be converted to a saved object.
    *
-   * @param {SavedObjectsRawDoc} rawDoc - The raw ES document to be tested
+   * @param {SavedObjectsRawDoc} rawDoc - The raw OpenSearch document to be tested
    */
   public isRawSavedObject(rawDoc: SavedObjectsRawDoc) {
     const { type, namespace } = rawDoc._source;
@@ -56,9 +56,9 @@ export class SavedObjectsSerializer {
   }
 
   /**
-   * Converts a document from the format that is stored in elasticsearch to the saved object client format.
+   * Converts a document from the format that is stored in opensearch to the saved object client format.
    *
-   *  @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   *  @param {SavedObjectsRawDoc} doc - The raw OpenSearch document to be converted to saved object format.
    */
   public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
     const { _id, _source, _seq_no, _primary_term } = doc;
@@ -84,9 +84,9 @@ export class SavedObjectsSerializer {
   }
 
   /**
-   * Converts a document from the saved object client format to the format that is stored in elasticsearch.
+   * Converts a document from the saved object client format to the format that is stored in opensearch.
    *
-   * @param {SavedObjectSanitizedDoc} savedObj - The saved object to be converted to raw ES format.
+   * @param {SavedObjectSanitizedDoc} savedObj - The saved object to be converted to raw OpenSearch format.
    */
   public savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc {
     const {

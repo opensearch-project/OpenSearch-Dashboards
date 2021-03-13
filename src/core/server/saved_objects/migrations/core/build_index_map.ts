@@ -21,7 +21,7 @@ import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 export interface CreateIndexMapOptions {
-  kibanaIndexName: string;
+  opensearchDashboardsIndexName: string;
   registry: ISavedObjectTypeRegistry;
   indexMap: SavedObjectsTypeMappingDefinitions;
 }
@@ -36,13 +36,13 @@ export interface IndexMap {
 /*
  * This file contains logic to convert savedObjectSchemas into a dictionary of indexes and documents
  */
-export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIndexMapOptions) {
+export function createIndexMap({ opensearchDashboardsIndexName, registry, indexMap }: CreateIndexMapOptions) {
   const map: IndexMap = {};
   Object.keys(indexMap).forEach((type) => {
     const typeDef = registry.getType(type);
     const script = typeDef?.convertToAliasScript;
-    // Defaults to kibanaIndexName if indexPattern isn't defined
-    const indexPattern = typeDef?.indexPattern || kibanaIndexName;
+    // Defaults to opensearchDashboardsIndexName if indexPattern isn't defined
+    const indexPattern = typeDef?.indexPattern || opensearchDashboardsIndexName;
     if (!map.hasOwnProperty(indexPattern as string)) {
       map[indexPattern] = { typeMappings: {} };
     }

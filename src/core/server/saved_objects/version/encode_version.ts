@@ -26,11 +26,11 @@ import { encodeBase64 } from './base64';
  */
 export function encodeVersion(seqNo: number, primaryTerm: number) {
   if (!Number.isInteger(primaryTerm)) {
-    throw new TypeError('_primary_term from elasticsearch must be an integer');
+    throw new TypeError('_primary_term from opensearch must be an integer');
   }
 
   if (!Number.isInteger(seqNo)) {
-    throw new TypeError('_seq_no from elasticsearch must be an integer');
+    throw new TypeError('_seq_no from opensearch must be an integer');
   }
 
   return encodeBase64(JSON.stringify([seqNo, primaryTerm]));

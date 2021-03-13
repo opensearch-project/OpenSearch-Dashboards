@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
+import { errors as opensearchErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 
 const responseErrors = {
@@ -30,19 +30,19 @@ const responseErrors = {
   isBadRequest: (statusCode: number) => statusCode === 400,
   isTooManyRequests: (statusCode: number) => statusCode === 429,
 };
-const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
+const { ConnectionError, NoLivingConnectionsError, TimeoutError } = opensearchErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
 
 import { SavedObjectsErrorHelpers } from './errors';
 
-type EsErrors =
-  | esErrors.ConnectionError
-  | esErrors.NoLivingConnectionsError
-  | esErrors.TimeoutError
-  | esErrors.ResponseError;
+type OpenSearchErrors =
+  | opensearchErrors.ConnectionError
+  | opensearchErrors.NoLivingConnectionsError
+  | opensearchErrors.TimeoutError
+  | opensearchErrors.ResponseError;
 
-export function decorateEsError(error: EsErrors) {
+export function decorateOpenSearchError(error: OpenSearchErrors) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
@@ -54,7 +54,7 @@ export function decorateEsError(error: EsErrors) {
     error instanceof TimeoutError ||
     responseErrors.isServiceUnavailable(error.statusCode)
   ) {
-    return SavedObjectsErrorHelpers.decorateEsUnavailableError(error, reason);
+    return SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(error, reason);
   }
 
   if (responseErrors.isConflict(error.statusCode)) {
@@ -86,7 +86,7 @@ export function decorateEsError(error: EsErrors) {
       SCRIPT_CONTEXT_DISABLED_REGEX.test(reason || '') ||
       reason === INLINE_SCRIPTS_DISABLED_MESSAGE
     ) {
-      return SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error, reason);
+      return SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error, reason);
     }
     return SavedObjectsErrorHelpers.decorateBadRequestError(error, reason);
   }

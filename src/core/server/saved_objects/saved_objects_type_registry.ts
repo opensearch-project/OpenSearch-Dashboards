@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze } from '@osd/std';
 import { SavedObjectsType } from './types';
 
 /**

@@ -18,11 +18,11 @@
  */
 
 import { IRouter } from '../../http';
-import { IKibanaMigrator } from '../migrations';
+import { IOpenSearchDashboardsMigrator } from '../migrations';
 
 export const registerMigrateRoute = (
   router: IRouter,
-  migratorPromise: Promise<IKibanaMigrator>
+  migratorPromise: Promise<IOpenSearchDashboardsMigrator>
 ) => {
   router.post(
     {

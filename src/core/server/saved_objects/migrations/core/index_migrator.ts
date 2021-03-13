@@ -17,7 +17,7 @@
  * under the License.
  */
 import { diffMappings } from './build_active_mappings';
-import * as Index from './elastic_index';
+import * as Index from './opensearch_index';
 import { migrateRawDocs } from './migrate_raw_docs';
 import { Context, migrationContext, MigrationOpts } from './migration_context';
 import { coordinateMigration, MigrationResult } from './migration_coordinator';
@@ -38,7 +38,7 @@ export class IndexMigrator {
   }
 
   /**
-   * Migrates the index, or, if another Kibana instance appears to be running the migration,
+   * Migrates the index, or, if another OpenSearch Dashboards instance appears to be running the migration,
    * waits for the migration to complete.
    *
    * @returns {Promise<MigrationResult>}

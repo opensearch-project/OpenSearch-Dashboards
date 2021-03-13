@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
@@ -27,14 +27,14 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
-    client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+    client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
   };
 
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
-      client: elasticsearchClientMock.createElasticsearchClient(),
-      index: '.kibana',
+      client: opensearchClientMock.createOpenSearchClient(),
+      index: '.opensearch-dashboards',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
@@ -92,7 +92,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_1',
+      index: '.opensearch-dashboards_1',
     });
   });
 
@@ -104,8 +104,8 @@ describe('IndexMigrator', () => {
     const result = await new IndexMigrator(testOpts).migrate();
 
     expect(result).toMatchObject({
-      destIndex: '.kibana_1',
-      sourceIndex: '.kibana',
+      destIndex: '.opensearch-dashboards_1',
+      sourceIndex: '.opensearch-dashboards',
       status: 'migrated',
     });
   });
@@ -115,7 +115,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             foo: { properties: {} },
@@ -139,7 +139,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             poc: {
@@ -164,7 +164,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -214,7 +214,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_2',
+      index: '.opensearch-dashboards_2',
     });
   });
 
@@ -225,7 +225,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -275,7 +275,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_2',
+      index: '.opensearch-dashboards_2',
     });
   });
 
@@ -288,7 +288,7 @@ describe('IndexMigrator', () => {
 
     expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
-      body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
+      body: { actions: [{ add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } }] },
     });
   });
 
@@ -307,8 +307,8 @@ describe('IndexMigrator', () => {
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
-          { remove: { alias: '.kibana', index: '.kibana_1' } },
-          { add: { alias: '.kibana', index: '.kibana_2' } },
+          { remove: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } },
+          { add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_2' } },
         ],
       },
     });
@@ -358,13 +358,13 @@ describe('IndexMigrator', () => {
     expect(client.bulk).toHaveBeenCalledTimes(2);
     expect(client.bulk).toHaveBeenNthCalledWith(1, {
       body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2' } },
+        { index: { _id: 'foo:1', _index: '.opensearch-dashboards_2' } },
         { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
     expect(client.bulk).toHaveBeenNthCalledWith(2, {
       body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2' } },
+        { index: { _id: 'foo:2', _index: '.opensearch-dashboards_2' } },
         { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
@@ -396,12 +396,12 @@ describe('IndexMigrator', () => {
 });
 
 function withIndex(
-  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>,
+  client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>,
   opts: any = {}
 ) {
   const defaultIndex = {
-    '.kibana_1': {
-      aliases: { '.kibana': {} },
+    '.opensearch-dashboards_1': {
+      aliases: { '.opensearch-dashboards': {} },
       mappings: {
         dynamic: 'strict',
         properties: {
@@ -411,7 +411,7 @@ function withIndex(
     },
   };
   const defaultAlias = {
-    '.kibana_1': {},
+    '.opensearch-dashboards_1': {},
   };
   const { numOutOfDate = 0 } = opts;
   const { alias = defaultAlias } = opts;
@@ -431,32 +431,32 @@ function withIndex(
   let scrollCallCounter = 1;
 
   client.indices.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(index, {
+    opensearchClientMock.createSuccessTransportRequestPromise(index, {
       statusCode: index.statusCode,
     })
   );
   client.indices.getAlias.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(alias, {
+    opensearchClientMock.createSuccessTransportRequestPromise(alias, {
       statusCode: index.statusCode,
     })
   );
   client.reindex.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
+    opensearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
     })
   );
   client.tasks.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+    opensearchClientMock.createSuccessTransportRequestPromise({ completed: true })
   );
   client.search.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+    opensearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
   );
   client.bulk.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+    opensearchClientMock.createSuccessTransportRequestPromise({ items: [] })
   );
   client.count.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
+    opensearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
     })
@@ -465,8 +465,8 @@ function withIndex(
     if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);
       scrollCallCounter++;
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(result);
+      return opensearchClientMock.createSuccessTransportRequestPromise(result);
     }
-    return elasticsearchClientMock.createSuccessTransportRequestPromise({});
+    return opensearchClientMock.createSuccessTransportRequestPromise({});
   });
 }

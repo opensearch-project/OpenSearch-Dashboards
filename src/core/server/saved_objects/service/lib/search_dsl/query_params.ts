@@ -17,7 +17,7 @@
  * under the License.
  */
 // @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -196,7 +196,7 @@ export function getQueryParams({
 
   const bool: any = {
     filter: [
-      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
+      ...(kueryNode != null ? [opensearchKuery.toOpenSearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference ? [getClauseForReference(hasReference)] : undefined,
