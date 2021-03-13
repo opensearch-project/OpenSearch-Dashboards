@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
