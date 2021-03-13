@@ -21,8 +21,8 @@ import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { run, createFlagError, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { run, createFlagError, createFailError } from '@osd/dev-utils';
 
 import { FORMATS, SomeFormat } from './formats';
 import {

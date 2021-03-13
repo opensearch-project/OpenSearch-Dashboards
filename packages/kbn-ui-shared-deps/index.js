@@ -30,9 +30,9 @@ exports.darkV8CssDistFilename = 'kbn-ui-shared-deps.v8.dark.css';
 exports.externals = {
   // stateful deps
   angular: '__kbnSharedDeps__.Angular',
-  '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
-  '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
-  '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
+  '@osd/i18n': '__kbnSharedDeps__.KbnI18n',
+  '@osd/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
+  '@osd/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -42,8 +42,8 @@ exports.externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
-  '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
-  '@kbn/ui-shared-deps/theme': '__kbnSharedDeps__.Theme',
+  '@osd/monaco': '__kbnSharedDeps__.KbnMonaco',
+  '@osd/ui-shared-deps/theme': '__kbnSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 

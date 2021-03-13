@@ -1,4 +1,4 @@
-/* eslint-disable-line @kbn/eslint/require-license-header */
+/* eslint-disable-line @osd/eslint/require-license-header */
 /*
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.

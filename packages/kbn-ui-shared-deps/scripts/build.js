@@ -20,7 +20,7 @@
 const Path = require('path');
 const Fs = require('fs');
 
-const { run, createFailError, CiStatsReporter } = require('@kbn/dev-utils');
+const { run, createFailError, CiStatsReporter } = require('@osd/dev-utils');
 const webpack = require('webpack');
 const Stats = require('webpack/lib/Stats');
 const del = require('del');
@@ -50,17 +50,17 @@ run(
 
           const metrics = [
             {
-              group: '@kbn/ui-shared-deps asset size',
+              group: '@osd/ui-shared-deps asset size',
               id: 'kbn-ui-shared-deps.js',
               value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.js')).size,
             },
             {
-              group: '@kbn/ui-shared-deps asset size',
+              group: '@osd/ui-shared-deps asset size',
               id: 'kbn-ui-shared-deps.@elastic.js',
               value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.@elastic.js')).size,
             },
             {
-              group: '@kbn/ui-shared-deps asset size',
+              group: '@osd/ui-shared-deps asset size',
               id: 'css',
               value:
                 Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.css')).size +
@@ -125,7 +125,7 @@ run(
     );
   },
   {
-    description: 'build @kbn/ui-shared-deps',
+    description: 'build @osd/ui-shared-deps',
     flags: {
       boolean: ['watch', 'dev'],
       help: `

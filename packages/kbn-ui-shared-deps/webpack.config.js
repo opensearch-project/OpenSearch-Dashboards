@@ -21,7 +21,7 @@ const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const { REPO_ROOT } = require('@kbn/utils');
+const { REPO_ROOT } = require('@osd/utils');
 const webpack = require('webpack');
 
 const UiSharedDeps = require('./index');
@@ -72,7 +72,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           {
             loader: 'babel-loader',
             options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
             },
           },
         ],

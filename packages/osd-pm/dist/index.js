@@ -191,7 +191,7 @@ function help() {
 
       Global options:
 
-        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @osd/pm'.
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --oss                   Do not include the x-pack when running command.
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
@@ -57944,7 +57944,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /**
  * Helper class for dealing with a set of projects as children of
- * the Kibana project. The kbn/pm is currently implemented to be
+ * the Kibana project. The osd/pm is currently implemented to be
  * more generic, where everything is an operation of generic projects,
  * but that leads to exceptions where we need the kibana project and
  * do things like `project.get('kibana')!`.

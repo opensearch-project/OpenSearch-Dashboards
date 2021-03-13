@@ -37,11 +37,11 @@ import { createSelectHandler } from '../../lib/create_select_handler';
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { IFieldType, OSD_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
+const RESTRICT_FIELDS = [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.HISTOGRAM];
 
 interface PercentileRankAggProps {
   disableDelete: boolean;
