@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { opensearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 
 export function mockGetClusterInfo(clusterInfo: any) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
+  const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
+  opensearchClient.info
     // @ts-ignore we only care about the response body
     .mockResolvedValue(
       // @ts-ignore we only care about the response body
@@ -30,11 +30,11 @@ export function mockGetClusterInfo(clusterInfo: any) {
         body: { ...clusterInfo },
       }
     );
-  return esClient;
+  return opensearchClient;
 }
 
-describe.skip('get_cluster_info using the elasticsearch client', () => {
-  it('uses the esClient to get info API', async () => {
+describe.skip('get_cluster_info using the opensearch client', () => {
+  it('uses the opensearchClient to get info API', async () => {
     const clusterInfo = {
       cluster_uuid: '1234',
       cluster_name: 'testCluster',
@@ -50,8 +50,8 @@ describe.skip('get_cluster_info using the elasticsearch client', () => {
         minimum_index_compatibility_version: '6.0.0-beta1',
       },
     };
-    const esClient = mockGetClusterInfo(clusterInfo);
+    const opensearchClient = mockGetClusterInfo(clusterInfo);
 
-    expect(await getClusterInfo(esClient)).toStrictEqual(clusterInfo);
+    expect(await getClusterInfo(opensearchClient)).toStrictEqual(clusterInfo);
   });
 });

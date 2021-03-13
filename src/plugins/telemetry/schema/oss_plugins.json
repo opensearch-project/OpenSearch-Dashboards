@@ -168,7 +168,7 @@
             }
           }
         },
-        "kibana": {
+        "opensearchDashboards": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1303,7 +1303,7 @@
         }
       }
     },
-    "kibana": {
+    "opensearchDashboards": {
       "properties": {
         "index": {
           "type": "keyword"
@@ -1651,7 +1651,7 @@
             }
           }
         },
-        "Kibana_home": {
+        "OpenSearchDashboards_home": {
           "type": "array",
           "items": {
             "properties": {
@@ -1898,7 +1898,7 @@
             }
           }
         },
-        "kibana": {
+        "opensearchDashboards": {
           "type": "array",
           "items": {
             "properties": {
@@ -2385,10 +2385,10 @@
       "properties": {
         "ece": {
           "properties": {
-            "kb_uuid": {
+            "opensearch_dashboards_uuid": {
               "type": "keyword"
             },
-            "es_uuid": {
+            "opensearch_uuid": {
               "type": "keyword"
             },
             "account_id": {
@@ -2426,10 +2426,10 @@
         },
         "ess": {
           "properties": {
-            "kb_uuid": {
+            "opensearch_dashboards_uuid": {
               "type": "keyword"
             },
-            "es_uuid": {
+            "opensearch_uuid": {
               "type": "keyword"
             },
             "account_id": {

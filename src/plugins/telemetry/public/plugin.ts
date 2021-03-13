@@ -66,7 +66,7 @@ export interface TelemetryPluginConfig {
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
-  private readonly currentKibanaVersion: string;
+  private readonly currentOpenSearchDashboardsVersion: string;
   private readonly config: TelemetryPluginConfig;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
@@ -74,7 +74,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private canUserChangeSettings: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
-    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
+    this.currentOpenSearchDashboardsVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get();
   }
 
@@ -182,7 +182,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const configTelemetryOptIn = this.config.optIn as boolean;
     const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
 
-    const currentKibanaVersion = this.currentKibanaVersion;
+    const currentOpenSearchDashboardsVersion = this.currentOpenSearchDashboardsVersion;
 
     const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
       configTelemetryAllowChangingOptInStatus,
@@ -193,7 +193,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       configTelemetryOptIn,
       allowChangingOptInStatus,
       telemetrySavedObject,
-      currentKibanaVersion,
+      currentOpenSearchDashboardsVersion,
     });
 
     const sendUsageFrom = getTelemetrySendUsageFrom({

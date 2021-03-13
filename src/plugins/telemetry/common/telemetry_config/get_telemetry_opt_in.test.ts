@@ -67,22 +67,22 @@ describe('getTelemetryOptIn', () => {
   type VersionCheckTable = Array<Partial<CallGetTelemetryOptInParams>>;
 
   const EnabledFalseVersionChecks: VersionCheckTable = [
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0', result: false },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.1', result: false },
-    { lastVersionChecked: '8.0.1', currentKibanaVersion: '8.0.0', result: false },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.1.0', result: null },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '9.0.0', result: null },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '7.0.0', result: false },
-    { lastVersionChecked: '8.1.0', currentKibanaVersion: '8.0.0', result: false },
-    { lastVersionChecked: '8.0.0-X', currentKibanaVersion: '8.0.0', result: false },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: '8.0.0-X', result: false },
-    { lastVersionChecked: null, currentKibanaVersion: '8.0.0', result: null },
-    { lastVersionChecked: undefined, currentKibanaVersion: '8.0.0', result: null },
-    { lastVersionChecked: 5, currentKibanaVersion: '8.0.0', result: null },
-    { lastVersionChecked: '8.0.0', currentKibanaVersion: 'beta', result: null },
-    { lastVersionChecked: 'beta', currentKibanaVersion: '8.0.0', result: null },
-    { lastVersionChecked: 'beta', currentKibanaVersion: 'beta', result: false },
-    { lastVersionChecked: 'BETA', currentKibanaVersion: 'beta', result: null },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '8.0.1', result: false },
+    { lastVersionChecked: '8.0.1', currentOpenSearchDashboardsVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '8.1.0', result: null },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '9.0.0', result: null },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '7.0.0', result: false },
+    { lastVersionChecked: '8.1.0', currentOpenSearchDashboardsVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0-X', currentOpenSearchDashboardsVersion: '8.0.0', result: false },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: '8.0.0-X', result: false },
+    { lastVersionChecked: null, currentOpenSearchDashboardsVersion: '8.0.0', result: null },
+    { lastVersionChecked: undefined, currentOpenSearchDashboardsVersion: '8.0.0', result: null },
+    { lastVersionChecked: 5, currentOpenSearchDashboardsVersion: '8.0.0', result: null },
+    { lastVersionChecked: '8.0.0', currentOpenSearchDashboardsVersion: 'beta', result: null },
+    { lastVersionChecked: 'beta', currentOpenSearchDashboardsVersion: '8.0.0', result: null },
+    { lastVersionChecked: 'beta', currentOpenSearchDashboardsVersion: 'beta', result: false },
+    { lastVersionChecked: 'BETA', currentOpenSearchDashboardsVersion: 'beta', result: null },
   ].map((el) => ({ ...el, enabled: false }));
 
   // build a table of tests with version checks, with results for enabled true/null/undefined
@@ -124,7 +124,7 @@ interface CallGetTelemetryOptInParams {
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
   lastVersionChecked?: any; // should be a string, but test with non-strings
-  currentKibanaVersion: string;
+  currentOpenSearchDashboardsVersion: string;
   result?: boolean | null;
   enabled: boolean | null | undefined;
   configTelemetryOptIn: boolean | null;
@@ -136,7 +136,7 @@ const DefaultParams = {
   savedObjectForbidden: false,
   enabled: true,
   lastVersionChecked: '8.0.0',
-  currentKibanaVersion: '8.0.0',
+  currentOpenSearchDashboardsVersion: '8.0.0',
   configTelemetryOptIn: null,
   allowChangingOptInStatus: true,
 };
@@ -148,10 +148,10 @@ function getCallGetTelemetryOptInParams(
 }
 
 function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
-  const { currentKibanaVersion, configTelemetryOptIn, allowChangingOptInStatus } = params;
+  const { currentOpenSearchDashboardsVersion, configTelemetryOptIn, allowChangingOptInStatus } = params;
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
   return getTelemetryOptIn({
-    currentKibanaVersion,
+    currentOpenSearchDashboardsVersion,
     telemetrySavedObject,
     allowChangingOptInStatus,
     configTelemetryOptIn,

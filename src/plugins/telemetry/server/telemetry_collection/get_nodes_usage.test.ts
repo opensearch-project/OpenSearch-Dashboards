@@ -19,7 +19,7 @@
 
 import { getNodesUsage } from './get_nodes_usage';
 import { TIMEOUT } from './constants';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { opensearchServiceMock } from '../../../../../src/core/server/mocks';
 
 const mockedNodesFetchResponse = {
   cluster_name: 'test cluster',
@@ -49,15 +49,15 @@ const mockedNodesFetchResponse = {
 describe.skip('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
     const response = Promise.resolve({ body: mockedNodesFetchResponse });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.nodes.usage.mockImplementationOnce(
+    const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
+    opensearchClient.nodes.usage.mockImplementationOnce(
       // @ts-ignore
       async (_params = { timeout: TIMEOUT }) => {
         return response;
       }
     );
-    const item = await getNodesUsage(esClient);
-    expect(esClient.nodes.usage).toHaveBeenCalledWith({ timeout: TIMEOUT });
+    const item = await getNodesUsage(opensearchClient);
+    expect(opensearchClient.nodes.usage).toHaveBeenCalledWith({ timeout: TIMEOUT });
     expect(item).toStrictEqual({
       nodes: [
         {

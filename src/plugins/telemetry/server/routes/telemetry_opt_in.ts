@@ -20,8 +20,8 @@
 import moment from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { IRouter, Logger } from 'opensearch-dashboards/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
@@ -38,7 +38,7 @@ import {
 import { TelemetryConfigType } from '../config';
 
 interface RegisterOptInRoutesParams {
-  currentKibanaVersion: string;
+  currentOpenSearchDashboardsVersion: string;
   router: IRouter;
   logger: Logger;
   config$: Observable<TelemetryConfigType>;
@@ -49,7 +49,7 @@ export function registerTelemetryOptInRoutes({
   config$,
   logger,
   router,
-  currentKibanaVersion,
+  currentOpenSearchDashboardsVersion,
   telemetryCollectionManager,
 }: RegisterOptInRoutesParams) {
   router.post(
@@ -63,7 +63,7 @@ export function registerTelemetryOptInRoutes({
       const newOptInStatus = req.body.enabled;
       const attributes: TelemetrySavedObjectAttributes = {
         enabled: newOptInStatus,
-        lastVersionChecked: currentKibanaVersion,
+        lastVersionChecked: currentOpenSearchDashboardsVersion,
       };
       const config = await config$.pipe(take(1)).toPromise();
       const telemetrySavedObject = await getTelemetrySavedObject(context.core.savedObjects.client);
