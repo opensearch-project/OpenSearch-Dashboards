@@ -13,7 +13,7 @@
   "private": true,
   "version": "7.10.3",
   "branch": "7.10",
-  "types": "./kibana.d.ts",
+  "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
@@ -23,7 +23,7 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
-  "kibana": {
+  "opensearchDashboards": {
     "clean": {
       "extraPatterns": [
         "build",
@@ -52,8 +52,8 @@
     "checkLicenses": "node scripts/check_licenses --dev",
     "build": "node scripts/build --all-platforms",
     "start": "node scripts/opensearch_dashboards --dev",
-    "debug": "node --nolazy --inspect scripts/kibana --dev",
-    "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
+    "debug": "node --nolazy --inspect scripts/opensearch_dashboards --dev",
+    "debug-break": "node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:sass",
     "lint:es": "node scripts/eslint",
     "lint:sass": "node scripts/sasslint",
@@ -71,7 +71,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elastic/kibana.git"
+    "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
     "**/@types/node": ">=10.17.17 <10.20.0",
@@ -232,9 +232,9 @@
     "@elastic/ui-ace": "0.2.3",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
-    "@osd/es": "1.0.0",
-    "@osd/es-archiver": "1.0.0",
-    "@osd/eslint-import-resolver-kibana": "2.0.0",
+    "@osd/opensearch": "1.0.0",
+    "@osd/opensearch-archiver": "1.0.0",
+    "@osd/eslint-import-resolver-opensearch-dashboards": "2.0.0",
     "@osd/eslint-plugin-eslint": "1.0.0",
     "@osd/expect": "1.0.0",
     "@osd/optimizer": "1.0.0",

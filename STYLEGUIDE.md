@@ -150,7 +150,7 @@ OpenSearch Dashboards uses `snake_case` for the entire API, just like Elasticsea
 _Right:_
 
 ```
-POST /api/kibana/index_patterns
+POST /api/opensearch-dashboards/index_patterns
 {
   "id": "...",
   "time_field_name": "...",

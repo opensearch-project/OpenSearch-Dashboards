@@ -34,7 +34,7 @@ import * as LegacyOpenSearchDashboardsServer from './src/legacy/server/osd_serve
  *  Re-export legacy types under a namespace.
  */
 export namespace Legacy {
-  export type OpenSearchDashboardsConfig = LegacyOpenSearchDashboardsServer.KibanaConfig;
+  export type OpenSearchDashboardsConfig = LegacyOpenSearchDashboardsServer.OpenSearchDashboardsConfig;
   export type Request = LegacyOpenSearchDashboardsServer.Request;
   export type ResponseToolkit = LegacyOpenSearchDashboardsServer.ResponseToolkit;
   export type Server = LegacyOpenSearchDashboardsServer.Server;

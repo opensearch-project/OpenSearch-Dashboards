@@ -4,7 +4,7 @@
     "tsBuildInfoFile": "./build/tsbuildinfo/opensearch-dashboards"
   },
   "include": [
-    "opensearch_dashboards.tsdashboards.d.ts",
+    "opensearch_dashboards.d.ts",
     "src/**/*",
     "typings/**/*",
     "test_utils/**/*"

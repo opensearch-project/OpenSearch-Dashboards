@@ -13,7 +13,7 @@
     "home": "src/plugins/home",
     "flot": "packages/osd-ui-shared-deps/flot_charts",
     "charts": "src/plugins/charts",
-    "esUi": "src/plugins/es_ui_shared",
+    "opensearchUi": "src/plugins/opensearch_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
     "inputControl": "src/plugins/input_control_vis",

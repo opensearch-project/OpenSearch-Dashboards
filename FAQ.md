@@ -7,9 +7,9 @@
 **A:** Please join us at [discuss.elastic.co](https://discuss.elastic.co) with questions. Your problem might be a bug, but it might just be a misunderstanding, or a feature we could improve. We're also available on Freenode in #opensearch-dashboards
 
 **Q:** Ok, we talked about it and its definitely a bug
-**A:** Doh, ok, let's get that fixed. File an issue on [github.com/elastic/kibana](https://github.com/elastic/kibana). I'd recommend reading the beginning of the CONTRIBUTING.md, just so you know how we'll handle the issue.
+**A:** Doh, ok, let's get that fixed. File an issue on [github.com/opensearch-project/opensearch-dashboards](https://github.com/opensearch-project/opensearch-dashboards). I'd recommend reading the beginning of the CONTRIBUTING.md, just so you know how we'll handle the issue.
 
-### Kibana 3 Migration
+### OpenSearch Dashboards 3 Migration
 **Q:** Where is feature X that I loved from OpenSearch Dashboards 3?
 **A:** It might be coming! We’ve published our immediate roadmap as tickets. Check out the beta milestones on GitHub to see if the feature you’re missing is coming soon.
 

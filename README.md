@@ -1,9 +1,9 @@
 # OpenSearch Dashboards
 
-OpenSearch Dashboards is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for OpenSearch.
+OpenSearch Dashboards is your window into the [OpenSearch Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for OpenSearch.
 
 - [Getting Started](#getting-started)
-  - [Using a OpenSearch Dashboards Release](#using-a-kibana-release)
+  - [Using a OpenSearch Dashboards Release](#using-a-opensearch-dashboards-release)
   - [Building and Running OpenSearch Dashboards, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
 - [Documentation](#documentation)
 - [Version Compatibility with OpenSearch](#version-compatibility-with-elasticsearch)
@@ -11,7 +11,7 @@ OpenSearch Dashboards is your window into the [Elastic Stack](https://www.elasti
 
 ## Getting Started
 
-If you just want to try OpenSearch Dashboards out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
+If you just want to try OpenSearch Dashboards out, check out the [OpenSearch Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
 
 If you're interested in diving a bit deeper and getting a taste of OpenSearch Dashboards's capabilities, head over to the [OpenSearch Dashboards Getting Started Page](https://www.elastic.co/guide/en/kibana/current/getting-started.html).
 
@@ -62,4 +62,4 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 - If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
   Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using OpenSearch Dashboards? Ask away on our [OpenSearch Dashboards Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
-Elastic engineer will be glad to help you out.
+OpenSearch Dashboards engineer will be glad to help you out.
