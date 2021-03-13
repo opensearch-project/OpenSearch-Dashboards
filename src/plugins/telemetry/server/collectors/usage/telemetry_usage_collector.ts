@@ -95,13 +95,13 @@ export interface LicenseUsage {
 
 export interface StaticTelemetryUsage {
   ece?: {
-    opensearch_dashboards_uuid: string;
+    osd_uuid: string;
     opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
   };
   ess?: {
-    opensearch_dashboards_uuid: string;
+    osd_uuid: string;
     opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
