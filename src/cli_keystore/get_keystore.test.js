@@ -51,7 +51,7 @@ describe('get_keystore', () => {
     sandbox.assert.calledOnce(Logger.prototype.log);
     sandbox.assert.calledWith(
       Logger.prototype.log,
-      'kibana.keystore located in the data folder is deprecated.  Future versions will use the config folder.'
+      'opensearch_dashboards.keystore located in the data folder is deprecated.  Future versions will use the config folder.'
     );
   });
 });
