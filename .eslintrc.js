@@ -86,7 +86,7 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['packages/kbn-ui-framework/**/*.{js,mjs,ts,tsx}'],
+      files: ['packages/osd-ui-framework/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/no-onchange': 'off',
       },
@@ -98,37 +98,18 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/opensearch_dashboards_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/opensearch_dashboards_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/plugins/canvas/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-
     /**
      * Files that require Apache 2.0 headers, settings
      * are overridden below for files that require Elastic
@@ -137,13 +118,13 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}', '!plugins/**/*'],
       rules: {
-        '@kbn/eslint/require-license-header': [
+        '@osd/eslint/require-license-header': [
           'error',
           {
             license: APACHE_2_0_LICENSE_HEADER,
           },
         ],
-        '@kbn/eslint/disallow-license-headers': [
+        '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
@@ -168,44 +149,18 @@ module.exports = {
     },
 
     /**
-     * Files that require Elastic license headers instead of Apache 2.0 header
-     */
-    {
-      files: ['x-pack/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        '@kbn/eslint/require-license-header': [
-          'error',
-          {
-            license: ELASTIC_LICENSE_HEADER,
-          },
-        ],
-        '@kbn/eslint/disallow-license-headers': [
-          'error',
-          {
-            licenses: [
-              APACHE_2_0_LICENSE_HEADER,
-              SAFER_LODASH_SET_HEADER,
-              SAFER_LODASH_SET_LODASH_HEADER,
-              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
-            ],
-          },
-        ],
-      },
-    },
-
-    /**
      * safer-lodash-set package requires special license headers
      */
     {
       files: ['packages/elastic-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/require-license-header': [
+        '@osd/eslint/require-license-header': [
           'error',
           {
             license: SAFER_LODASH_SET_LODASH_HEADER,
           },
         ],
-        '@kbn/eslint/disallow-license-headers': [
+        '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
@@ -221,13 +176,13 @@ module.exports = {
     {
       files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/require-license-header': [
+        '@osd/eslint/require-license-header': [
           'error',
           {
             license: SAFER_LODASH_SET_HEADER,
           },
         ],
-        '@kbn/eslint/disallow-license-headers': [
+        '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
@@ -243,13 +198,13 @@ module.exports = {
     {
       files: ['packages/elastic-safer-lodash-set/**/*.d.ts'],
       rules: {
-        '@kbn/eslint/require-license-header': [
+        '@osd/eslint/require-license-header': [
           'error',
           {
             license: SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
           },
         ],
-        '@kbn/eslint/disallow-license-headers': [
+        '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
@@ -269,7 +224,7 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/no-restricted-paths': [
+        '@osd/eslint/no-restricted-paths': [
           'error',
           {
             basePath: __dirname,
@@ -417,7 +372,7 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        'packages/kbn-ui-framework/doc_site/src/**/*.js',
+        'packages/osd-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
@@ -426,10 +381,10 @@ module.exports = {
         'import/core-modules': ['plugins'],
 
         'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
+          '@osd/eslint-import-resolver-opensearch-dashboards': {
             forceNode: false,
-            rootPackageName: 'kibana',
-            kibanaPath: '.',
+            rootPackageName: 'opensearch-dashboards',
+            opensearchDashboardsPath: '.',
             pluginMap: {},
           },
         },
@@ -441,9 +396,9 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ui-framework/**/*.js',
+        'packages/osd-ui-framework/**/*.js',
         'x-pack/**/*.js',
-        'packages/kbn-interpreter/**/*.js',
+        'packages/osd-interpreter/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -461,13 +416,13 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ui-framework/**/*.test.js',
-        'packages/kbn-ui-framework/doc_site/**/*.js',
-        'packages/kbn-ui-framework/generator-kui/**/*.js',
-        'packages/kbn-ui-framework/Gruntfile.js',
-        'packages/kbn-es/src/**/*.js',
-        'packages/kbn-interpreter/tasks/**/*.js',
-        'packages/kbn-interpreter/src/plugin/**/*.js',
+        'packages/osd-ui-framework/**/*.test.js',
+        'packages/osd-ui-framework/doc_site/**/*.js',
+        'packages/osd-ui-framework/generator-kui/**/*.js',
+        'packages/osd-ui-framework/Gruntfile.js',
+        'packages/osd-es/src/**/*.js',
+        'packages/osd-interpreter/tasks/**/*.js',
+        'packages/osd-interpreter/src/plugin/**/*.js',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
         'x-pack/**/*.test.js',
@@ -524,7 +479,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
+        'src/legacy/ui/ui_render/bootstrap/osd_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -556,8 +511,8 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
-        'packages/kbn-eslint-plugin-eslint/**/*',
+        'packages/osd-eslint-import-resolver-opensearch-dashboards/**/*.js',
+        'packages/osd-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
@@ -1079,10 +1034,10 @@ module.exports = {
     },
 
     /**
-     * disable jsx-a11y for kbn-ui-framework
+     * disable jsx-a11y for osd-ui-framework
      */
     {
-      files: ['packages/kbn-ui-framework/**/*.js'],
+      files: ['packages/osd-ui-framework/**/*.js'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/anchor-has-content': 'off',
@@ -1182,7 +1137,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/osd-ui-shared-deps/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1218,7 +1173,7 @@ module.exports = {
         'x-pack/plugins/licensing/**',
         'x-pack/plugins/global_search/**',
         'x-pack/plugins/cloud/**',
-        'packages/kbn-config-schema',
+        'packages/osd-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
       ],
