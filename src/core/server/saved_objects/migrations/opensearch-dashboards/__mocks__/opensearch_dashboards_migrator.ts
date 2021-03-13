@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const retryCallClusterMock = jest.fn((fn) => fn());
-jest.doMock('../../../elasticsearch/client/retry_call_cluster', () => ({
-  retryCallCluster: retryCallClusterMock,
-}));
+
+import { mockOpenSearchDashboardsMigrator } from '../opensearch_dashboards_migrator.mock';
+
+export const mockOpenSearchDashboardsMigratorInstance = mockOpenSearchDashboardsMigrator.create();
+
+const mockConstructor = jest.fn().mockImplementation(() => mockOpenSearchDashboardsMigratorInstance);
+
+export const OpenSearchDashboardsMigrator = mockConstructor;

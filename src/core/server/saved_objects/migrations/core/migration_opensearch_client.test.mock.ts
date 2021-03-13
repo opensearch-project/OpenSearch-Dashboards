@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { mockKibanaMigrator } from '../kibana_migrator.mock';
-
-export const mockKibanaMigratorInstance = mockKibanaMigrator.create();
-
-const mockConstructor = jest.fn().mockImplementation(() => mockKibanaMigratorInstance);
-
-export const KibanaMigrator = mockConstructor;
+export const migrationRetryCallClusterMock = jest.fn((fn) => fn());
+jest.doMock('../../../opensearch/client/retry_call_cluster', () => ({
+  migrationRetryCallCluster: migrationRetryCallClusterMock,
+}));

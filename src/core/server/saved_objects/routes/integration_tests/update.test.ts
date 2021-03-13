@@ -18,7 +18,7 @@
  */
 
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { registerUpdateRoute } from '../update';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';

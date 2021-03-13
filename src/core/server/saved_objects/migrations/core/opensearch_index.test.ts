@@ -18,36 +18,36 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import * as Index from './elastic_index';
+import { opensearchClientMock } from '../../../opensearch/client/mocks';
+import * as Index from './opensearch_index';
 
 describe('ElasticIndex', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticsearchClient();
+    client = opensearchClientMock.createOpenSearchClient();
   });
   describe('fetchInfo', () => {
     test('it handles 404', async () => {
       client.indices.get.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      const info = await Index.fetchInfo(client, '.kibana-test');
+      const info = await Index.fetchInfo(client, '.opensearch-dashboards-test');
       expect(info).toEqual({
         aliases: {},
         exists: false,
-        indexName: '.kibana-test',
+        indexName: '.opensearch-dashboards-test',
         mappings: { dynamic: 'strict', properties: {} },
       });
 
-      expect(client.indices.get).toHaveBeenCalledWith({ index: '.kibana-test' }, { ignore: [404] });
+      expect(client.indices.get).toHaveBeenCalledWith({ index: '.opensearch-dashboards-test' }, { ignore: [404] });
     });
 
     test('fails if the index doc type is unsupported', async () => {
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
+        return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
@@ -63,7 +63,7 @@ describe('ElasticIndex', () => {
     test('fails if there are multiple root types', async () => {
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
+        return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: {
@@ -82,7 +82,7 @@ describe('ElasticIndex', () => {
     test('decorates index info with exists and indexName', async () => {
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
-        return elasticsearchClientMock.createSuccessTransportRequestPromise({
+        return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { dynamic: 'strict', properties: { a: 'b' } },
@@ -132,7 +132,7 @@ describe('ElasticIndex', () => {
   describe('claimAlias', () => {
     test('handles unaliased indices', async () => {
       client.indices.getAlias.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
       await Index.claimAlias(client, '.hola-42', '.hola');
@@ -155,7 +155,7 @@ describe('ElasticIndex', () => {
 
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
@@ -178,7 +178,7 @@ describe('ElasticIndex', () => {
 
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
@@ -206,15 +206,15 @@ describe('ElasticIndex', () => {
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
       client.reindex.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+        opensearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
       );
       client.tasks.get.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+        opensearchClientMock.createSuccessTransportRequestPromise({ completed: true })
       );
 
       const info = {
@@ -280,15 +280,15 @@ describe('ElasticIndex', () => {
 
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
       client.reindex.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+        opensearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
       );
       client.tasks.get.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {
             type: 'search_phase_execution_exception',
@@ -341,7 +341,7 @@ describe('ElasticIndex', () => {
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
       client.bulk.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+        opensearchClientMock.createSuccessTransportRequestPromise({ items: [] })
       );
 
       const index = '.myalias';
@@ -376,7 +376,7 @@ describe('ElasticIndex', () => {
 
     test('fails if any document fails', async () => {
       client.bulk.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
         })
       );
@@ -424,7 +424,7 @@ describe('ElasticIndex', () => {
       ];
 
       client.search = jest.fn().mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
           _shards: { success: 1, total: 1 },
           hits: { hits: _.cloneDeep(batch1) },
@@ -433,14 +433,14 @@ describe('ElasticIndex', () => {
       client.scroll = jest
         .fn()
         .mockReturnValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({
+          opensearchClientMock.createSuccessTransportRequestPromise({
             _scroll_id: 'y',
             _shards: { success: 1, total: 1 },
             hits: { hits: _.cloneDeep(batch2) },
           })
         )
         .mockReturnValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({
+          opensearchClientMock.createSuccessTransportRequestPromise({
             _scroll_id: 'z',
             _shards: { success: 1, total: 1 },
             hits: { hits: [] },
@@ -486,14 +486,14 @@ describe('ElasticIndex', () => {
       ];
 
       client.search = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
           _shards: { success: 1, total: 1 },
           hits: { hits: _.cloneDeep(batch) },
         })
       );
       client.scroll = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'z',
           _shards: { success: 1, total: 1 },
           hits: { hits: [] },
@@ -512,7 +512,7 @@ describe('ElasticIndex', () => {
       const index = '.myalias';
 
       client.search = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _shards: { successful: 1, total: 2 },
         })
       );
@@ -540,13 +540,13 @@ describe('ElasticIndex', () => {
       ];
 
       client.search = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
           hits: { hits: _.cloneDeep(batch) },
         })
       );
       client.scroll = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'z',
           hits: { hits: [] },
         })
@@ -570,12 +570,12 @@ describe('ElasticIndex', () => {
       migrations,
     }: any) {
       client.indices.get = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: { mappings },
         })
       );
       client.count = jest.fn().mockReturnValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        opensearchClientMock.createSuccessTransportRequestPromise({
           count,
           _shards: { success: 1, total: 1 },
         })

@@ -20,7 +20,7 @@
 import supertest from 'supertest';
 import querystring from 'querystring';
 
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';

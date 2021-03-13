@@ -25,21 +25,21 @@ import {
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from './';
-import { KibanaMigrator, IKibanaMigrator } from './migrations';
+import { OpenSearchDashboardsMigrator, IOpenSearchDashboardsMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import {
-  ElasticsearchClient,
+  OpenSearchClient,
   IClusterClient,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-} from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
+  InternalOpenSearchServiceSetup,
+  InternalOpenSearchServiceStart,
+} from '../opensearch';
+import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { KibanaRequest, InternalHttpServiceSetup } from '../http';
+import { OpenSearchDashboardsRequest, InternalHttpServiceSetup } from '../http';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -52,10 +52,10 @@ import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
-import { createMigrationEsClient } from './migrations/core/';
+import { createMigrationOpenSearchClient } from './migrations/core/';
 /**
- * Saved Objects is Kibana's data persistence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
+ * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
+ * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
  * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
  *
  * @remarks
@@ -69,7 +69,7 @@ import { createMigrationEsClient } from './migrations/core/';
  *
  * export class Plugin() {
  *   setup: (core: CoreSetup) => {
- *     core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
+ *     core.savedObjects.setClientFactory(({ request: OpenSearchDashboardsRequest }) => {
  *       return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
  *     })
  *   }
@@ -165,8 +165,8 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
 }
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The
+ * Saved Objects is OpenSearchDashboards's data persisentence mechanism allowing plugins to
+ * use OpenSearch for storing and querying state. The
  * SavedObjectsServiceStart API provides a scoped Saved Objects client for
  * interacting with Saved Objects.
  *
@@ -176,20 +176,20 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. If other plugins have registered Saved Objects client
+   * OpenSearch. If other plugins have registered Saved Objects client
    * wrappers, these will be applied to extend the functionality of the client.
    *
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.
    */
   getScopedClient: (
-    req: KibanaRequest,
+    req: OpenSearchDashboardsRequest,
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch.
+   * OpenSearch.
    *
    * @param req - The request to create the scoped repository from.
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
@@ -199,12 +199,12 @@ export interface SavedObjectsServiceStart {
    * not exposed on {@link SavedObjectsClientContract}
    */
   createScopedRepository: (
-    req: KibanaRequest,
+    req: OpenSearchDashboardsRequest,
     includedHiddenTypes?: string[]
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the internal Kibana user for authenticating with Elasticsearch.
+   * uses the internal OpenSearch Dashboards user for authenticating with OpenSearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
@@ -232,17 +232,17 @@ export interface SavedObjectsRepositoryFactory {
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch.
+   * OpenSearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
   createScopedRepository: (
-    req: KibanaRequest,
+    req: OpenSearchDashboardsRequest,
     includedHiddenTypes?: string[]
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the internal Kibana user for authenticating with Elasticsearch.
+   * uses the internal OpenSearch Dashboards user for authenticating with OpenSearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
@@ -252,7 +252,7 @@ export interface SavedObjectsRepositoryFactory {
 /** @internal */
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
+  opensearch: InternalOpenSearchServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -263,7 +263,7 @@ interface WrappedClientFactoryWrapper {
 
 /** @internal */
 export interface SavedObjectsStartDeps {
-  elasticsearch: InternalElasticsearchServiceStart;
+  opensearch: InternalOpenSearchServiceStart;
   pluginsInitialized?: boolean;
 }
 
@@ -276,7 +276,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private migrator$ = new Subject<IKibanaMigrator>();
+  private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
@@ -309,7 +309,7 @@ export class SavedObjectsService
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        setupDeps.elasticsearch.status$
+        setupDeps.opensearch.status$
       ),
       setClientFactoryProvider: (provider) => {
         if (this.started) {
@@ -341,7 +341,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
+    { opensearch, pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -350,16 +350,16 @@ export class SavedObjectsService
 
     this.logger.debug('Starting SavedObjects service');
 
-    const kibanaConfig = await this.coreContext.configService
-      .atPath<KibanaConfigType>('kibana')
+    const opensearchDashboardsConfig = await this.coreContext.configService
+      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboard')
       .pipe(first())
       .toPromise();
-    const client = elasticsearch.client;
+    const client = opensearch.client;
 
     const migrator = this.createMigrator(
-      kibanaConfig,
+      opensearchDashboardsConfig,
       this.config.migration,
-      elasticsearch.client,
+      opensearch.client,
       migrationsRetryDelay
     );
 
@@ -372,7 +372,7 @@ export class SavedObjectsService
      * HTTP requests.
      *
      * However, our build system optimize step and some tests depend on the
-     * HTTP server running without an Elasticsearch server being available.
+     * HTTP server running without an OpenSearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
      *
      * We also cannot safely run migrations if plugins are not initialized since
@@ -386,17 +386,17 @@ export class SavedObjectsService
       );
     } else {
       this.logger.info(
-        'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
+        'Waiting until all OpenSearch nodes are compatible with OpenSearch Dashboards before starting saved objects migrations...'
       );
 
       // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.subscribe(({ isCompatible, message }) => {
         if (!isCompatible && message) {
           this.logger.error(message);
         }
       });
 
-      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      await this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
@@ -406,14 +406,14 @@ export class SavedObjectsService
     }
 
     const createRepository = (
-      esClient: ElasticsearchClient,
+      opensearchClient: OpenSearchClient,
       includedHiddenTypes: string[] = []
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaConfig.index,
-        esClient,
+        opensearchDashboardsConfig.index,
+        opensearchClient,
         includedHiddenTypes
       );
     };
@@ -421,7 +421,7 @@ export class SavedObjectsService
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (includedHiddenTypes?: string[]) =>
         createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
+      createScopedRepository: (req: OpenSearchDashboardsRequest, includedHiddenTypes?: string[]) =>
         createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
     };
 
@@ -454,18 +454,18 @@ export class SavedObjectsService
   public async stop() {}
 
   private createMigrator(
-    kibanaConfig: KibanaConfigType,
+    opensearchDashboardsConfig: OpenSearchDashboardsConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
     client: IClusterClient,
     migrationsRetryDelay?: number
-  ): IKibanaMigrator {
-    return new KibanaMigrator({
+  ): IOpenSearchDashboardsMigrator {
+    return new OpenSearchDashboardsMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      opensearchDashboardsVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
-      kibanaConfig,
-      client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
+      opensearchDashboardsConfig,
+      client: createMigrationOpenSearchClient(client.asInternalUser, this.logger, migrationsRetryDelay),
     });
   }
 }

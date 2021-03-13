@@ -176,7 +176,7 @@ describe('#rawToSavedObject', () => {
           hello: {},
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from elasticsearch must be an integer"`);
+    ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from opensearch must be an integer"`);
   });
 
   test(`if only _primary_term is throws`, () => {
@@ -189,7 +189,7 @@ describe('#rawToSavedObject', () => {
           hello: {},
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from elasticsearch must be an integer"`);
+    ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from opensearch must be an integer"`);
   });
 
   test('if specified it copies the _source.updated_at property to updated_at', () => {

@@ -16,23 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { retryCallClusterMock } from './repository_es_client.test.mock';
+import { retryCallClusterMock } from './repository_opensearch_client.test.mock';
 
-import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { createRepositoryOpenSearchClient, RepositoryOpenSearchClient } from './repository_opensearch_client';
+import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectsErrorHelpers } from './errors';
 
-describe('RepositoryEsClient', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let repositoryClient: RepositoryEsClient;
+describe('RepositoryOpenSearchClient', () => {
+  let client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
+  let repositoryClient: RepositoryOpenSearchClient;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticsearchClient();
-    repositoryClient = createRepositoryEsClient(client);
+    client = opensearchClientMock.createOpenSearchClient();
+    repositoryClient = createRepositoryOpenSearchClient(client);
     retryCallClusterMock.mockClear();
   });
 
-  it('delegates call to ES client method', async () => {
+  it('delegates call to OpenSearch client method', async () => {
     expect(repositoryClient.bulk).toStrictEqual(expect.any(Function));
     await repositoryClient.bulk({ body: [] });
     expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -52,7 +52,7 @@ describe('RepositoryEsClient', () => {
     );
   });
 
-  it('transform elasticsearch errors into saved objects errors', async () => {
+  it('transform opensearch errors into saved objects errors', async () => {
     expect.assertions(1);
     client.bulk = jest.fn().mockRejectedValue(new Error('reason'));
     try {

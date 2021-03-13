@@ -21,11 +21,11 @@ import { Observable, combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { SavedObjectStatusMeta } from './types';
-import { KibanaMigratorStatus } from './migrations/kibana';
+import { OpenSearchDashboardsMigratorStatus } from './migrations/kibana';
 
 export const calculateStatus$ = (
-  rawMigratorStatus$: Observable<KibanaMigratorStatus>,
-  elasticsearchStatus$: Observable<ServiceStatus>
+  rawMigratorStatus$: Observable<OpenSearchDashboardsMigratorStatus>,
+  opensearchStatus$: Observable<ServiceStatus>
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
   const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
     map((migrationStatus) => {
@@ -62,19 +62,19 @@ export const calculateStatus$ = (
     })
   );
 
-  return combineLatest([elasticsearchStatus$, migratorStatus$]).pipe(
-    map(([esStatus, migratorStatus]) => {
-      if (esStatus.level >= ServiceStatusLevels.unavailable) {
+  return combineLatest([opensearchStatus$, migratorStatus$]).pipe(
+    map(([openSearchStatus, migratorStatus]) => {
+      if (openSearchStatus.level >= ServiceStatusLevels.unavailable) {
         return {
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
         };
       } else if (migratorStatus.level === ServiceStatusLevels.unavailable) {
         return migratorStatus;
-      } else if (esStatus.level === ServiceStatusLevels.degraded) {
+      } else if (openSearchStatus.level === ServiceStatusLevels.degraded) {
         return {
-          level: esStatus.level,
-          summary: `SavedObjects service is degraded due to Elasticsearch: [${esStatus.summary}]`,
+          level: openSearchStatus.level,
+          summary: `SavedObjects service is degraded due to OpenSearch: [${openSearchStatus.summary}]`,
         };
       } else {
         return migratorStatus;

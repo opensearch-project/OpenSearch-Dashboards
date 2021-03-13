@@ -23,7 +23,7 @@ import { calculateStatus$ } from './status';
 import { take } from 'rxjs/operators';
 
 describe('calculateStatus$', () => {
-  const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>
+  const expectUnavailableDueToOpenSearch = (status$: Observable<ServiceStatus>) =>
     expect(status$.pipe(take(1)).toPromise()).resolves.toEqual({
       level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
@@ -35,53 +35,53 @@ describe('calculateStatus$', () => {
       summary: `SavedObjects service is waiting to start migrations`,
     });
 
-  describe('when elasticsearch is unavailable', () => {
-    const esStatus$ = of<ServiceStatus>({
+  describe('when opensearch is unavailable', () => {
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.unavailable,
       summary: 'xxx',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToEs(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable after migrations have ran', async () => {
-      await expectUnavailableDueToEs(
-        calculateStatus$(of({ status: 'completed', result: [] }), esStatus$)
+      await expectUnavailableDueToOpenSearch(
+        calculateStatus$(of({ status: 'completed', result: [] }), openSearchStatus$)
       );
     });
   });
 
-  describe('when elasticsearch is critical', () => {
-    const esStatus$ = of<ServiceStatus>({
+  describe('when opensearch is critical', () => {
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.critical,
       summary: 'xxx',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToEs(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable after migrations have ran', async () => {
-      await expectUnavailableDueToEs(
+      await expectUnavailableDueToOpenSearch(
         calculateStatus$(
           of({ status: 'completed', result: [{ status: 'migrated' } as any] }),
-          esStatus$
+          openSearchStatus$
         )
       );
     });
   });
 
-  describe('when elasticsearch is available', () => {
-    const esStatus$ = of<ServiceStatus>({
+  describe('when opensearch is available', () => {
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'Available',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable while migrations are running', async () => {
       await expect(
-        calculateStatus$(of({ status: 'running' }), esStatus$)
+        calculateStatus$(of({ status: 'running' }), openSearchStatus$)
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
@@ -93,7 +93,7 @@ describe('calculateStatus$', () => {
       await expect(
         calculateStatus$(
           of({ status: 'completed', result: [{ status: 'skipped' }, { status: 'patched' }] }),
-          esStatus$
+          openSearchStatus$
         )
           .pipe(take(2))
           .toPromise()
@@ -111,23 +111,23 @@ describe('calculateStatus$', () => {
     });
   });
 
-  describe('when elasticsearch is degraded', () => {
-    const esStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
+  describe('when opensearch is degraded', () => {
+    const openSearchStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is degraded after migrations have ran', async () => {
       await expect(
         calculateStatus$(
           of<any>([{ status: 'skipped' }]),
-          esStatus$
+          openSearchStatus$
         )
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
         level: ServiceStatusLevels.degraded,
-        summary: 'SavedObjects service is degraded due to Elasticsearch: [xxx]',
+        summary: 'SavedObjects service is degraded due to OpenSearch: [xxx]',
       });
     });
   });

@@ -22,7 +22,7 @@ import { decodeBase64 } from './base64';
 
 /**
  * Decode the "opaque" version string to the sequence params we
- * can use to activate optimistic concurrency in Elasticsearch
+ * can use to activate optimistic concurrency in OpenSearch
  */
 export function decodeVersion(version?: string) {
   try {

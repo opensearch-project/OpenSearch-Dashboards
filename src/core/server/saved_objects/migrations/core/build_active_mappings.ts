@@ -54,7 +54,7 @@ export function buildActiveMappings(
 /**
  * Diffs the actual vs expected mappings. The properties are compared using md5 hashes stored in _meta, because
  * actual and expected mappings *can* differ, but if the md5 hashes stored in actual._meta.migrationMappingPropertyHashes
- * match our expectations, we don't require a migration. This allows ES to tack on additional mappings that Kibana
+ * match our expectations, we don't require a migration. This allows OpenSearch to tack on additional mappings that OpenSearchDashboards
  * doesn't know about or expect, without triggering continual migrations.
  */
 export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
