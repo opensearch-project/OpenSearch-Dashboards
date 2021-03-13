@@ -21,7 +21,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { SavedObjectStatusMeta } from './types';
-import { OpenSearchDashboardsMigratorStatus } from './migrations/kibana';
+import { OpenSearchDashboardsMigratorStatus } from './migrations/opensearch-dashboards';
 
 export const calculateStatus$ = (
   rawMigratorStatus$: Observable<OpenSearchDashboardsMigratorStatus>,

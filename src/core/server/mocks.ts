@@ -22,7 +22,7 @@ import { ByteSizeValue } from '@osd/config-schema';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { opensearchServiceMock } from './opensearch/opensearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
@@ -43,7 +43,7 @@ export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
-export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+export { opensearchServiceMock } from './opensearch/opensearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
@@ -60,12 +60,12 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: {
+    opensearchDashboards: {
       index: '.kibana-tests',
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
     },
-    elasticsearch: {
+    opensearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
       pingTimeout: duration('30s'),
@@ -111,7 +111,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 }
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
-  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
+  opensearch: ReturnType<typeof opensearchServiceMock.createSetup>;
   getStartServices: jest.MockedFunction<StartServicesAccessor<any, any>>;
 };
 
@@ -134,7 +134,7 @@ function createCoreSetupMock({
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createSetup(),
+    opensearch: opensearchServiceMock.createSetup(),
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
@@ -154,7 +154,7 @@ function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     auditTrail: auditTrailServiceMock.createStartContract(),
     capabilities: capabilitiesServiceMock.createStartContract(),
-    elasticsearch: elasticsearchServiceMock.createStart(),
+    opensearch: opensearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
@@ -169,7 +169,7 @@ function createInternalCoreSetupMock() {
   const setupDeps = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
-    elasticsearch: elasticsearchServiceMock.createInternalSetup(),
+    opensearch: opensearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
@@ -187,7 +187,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps = {
     capabilities: capabilitiesServiceMock.createStartContract(),
-    elasticsearch: elasticsearchServiceMock.createInternalStart(),
+    opensearch: opensearchServiceMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
     metrics: metricsServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
@@ -204,10 +204,10 @@ function createCoreRequestHandlerContextMock() {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
-    elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+    opensearch: {
+      client: opensearchServiceMock.createScopedClusterClient(),
       legacy: {
-        client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
+        client: opensearchServiceMock.createLegacyScopedClusterClient(),
       },
     },
     uiSettings: {

@@ -390,13 +390,13 @@ export class SavedObjectsService
       );
 
       // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      this.setupDeps!.opensearch.opensearchNodesCompatibility$.subscribe(({ isCompatible, message }) => {
         if (!isCompatible && message) {
           this.logger.error(message);
         }
       });
 
-      await this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.pipe(
+      await this.setupDeps!.opensearch.opensearchNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();

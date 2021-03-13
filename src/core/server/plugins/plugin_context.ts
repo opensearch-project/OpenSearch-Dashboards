@@ -85,7 +85,7 @@ export function createPluginInitializerContext(
     /**
      * Core configuration functionality, enables fetching a subset of the config.
      */
-    config: {
+     config: {
       legacy: {
         /**
          * Global configuration
@@ -93,15 +93,15 @@ export function createPluginInitializerContext(
          * @deprecated
          */
         globalConfig$: combineLatest([
-          coreContext.configService.atPath<OpenSearchDashboardsConfigType> opensearchDashboardsConfig.path),
+          coreContext.configService.atPath<OpenSearchDashboardsConfigType>(opensearchDashboardsConfig.path),
           coreContext.configService.atPath<OpenSearchConfigType>(opensearchConfig.path),
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
         ]).pipe(
-          map(([opensearchDashboards, opensearch, path, savedObjects]) =>
+          map(([kibana, elasticsearch, path, savedObjects]) =>
             deepFreeze({
-              opensearchDashboards: pick(opensearchDashboards, SharedGlobalConfigKeys.opensearchDashboards),
-              opensearch: pick(opensearch, SharedGlobalConfigKeys.opensearch),
+              opensearchDashboards: pick(kibana, SharedGlobalConfigKeys.opensearchDashboards),
+              opensearch: pick(elasticsearch, SharedGlobalConfigKeys.opensearch),
               path: pick(path, SharedGlobalConfigKeys.path),
               savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
             })

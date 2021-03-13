@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { TransportRequestOptions } from '@elastic/opensearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
 import { OpenSearchClient } from '../../../opensearch/';
 import { retryCallCluster } from '../../../opensearch/client/retry_call_cluster';

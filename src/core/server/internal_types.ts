@@ -23,8 +23,8 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
 import {
-  InternalOpenSearchsearchServiceSetup,
-  InternalOpenSearchsearchServiceStart,
+  InternalOpenSearchServiceSetup,
+  InternalOpenSearchServiceStart,
 } from './opensearch';
 import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
@@ -46,7 +46,7 @@ export interface InternalCoreSetup {
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
   http: InternalHttpServiceSetup;
-  opensearch: InternalOpenSearchsearchServiceSetup;
+  opensearch: InternalOpenSearchServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
@@ -63,7 +63,7 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
-  opensearch: InternalOpenSearchsearchServiceStart;
+  opensearch: InternalOpenSearchServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
