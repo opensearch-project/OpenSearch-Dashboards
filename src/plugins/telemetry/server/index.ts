@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { TelemetryPlugin } from './plugin';
 import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';

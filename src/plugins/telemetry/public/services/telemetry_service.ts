@@ -18,8 +18,8 @@
  */
 
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { TelemetryPluginConfig } from '../plugin';
 
 interface TelemetryServiceConstructor {
@@ -144,7 +144,7 @@ export class TelemetryService {
     }
 
     try {
-      // Report the option to the Kibana server to store the settings.
+      // Report the option to the OpenSearch Dashboards server to store the settings.
       // It returns the encrypted update to send to the telemetry cluster [{cluster_uuid, opt_in_status}]
       const optInPayload = await this.http.post<string[]>('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
