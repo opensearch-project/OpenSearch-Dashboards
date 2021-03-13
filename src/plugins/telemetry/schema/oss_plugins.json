@@ -2385,7 +2385,7 @@
       "properties": {
         "ece": {
           "properties": {
-            "opensearch_dashboards_uuid": {
+            "osd_uuid": {
               "type": "keyword"
             },
             "opensearch_uuid": {
@@ -2426,7 +2426,7 @@
         },
         "ess": {
           "properties": {
-            "opensearch_dashboards_uuid": {
+            "osd_uuid": {
               "type": "keyword"
             },
             "opensearch_uuid": {
