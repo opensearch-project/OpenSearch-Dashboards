@@ -21,7 +21,7 @@
 import React from 'react';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
-import { uiToReactComponent } from '../../../kibana_react/public';
+import { uiToReactComponent } from '../../../opensearch_dashboards_react/public';
 import { ActionType } from '../types';
 
 /**
