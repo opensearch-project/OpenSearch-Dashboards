@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { POST_MESSAGE_ROUTE_PATH, INTERNAL_GET_MESSAGE_BY_ID_ROUTE } from '../../common';
 
 import { IRouter } from '../../../../src/core/server';
@@ -26,10 +26,9 @@ import { IRouter } from '../../../../src/core/server';
  *
  * NOTE: DON'T USE IN MEMORY DATA STRUCTURES TO STORE DATA!
  *
- * That won't work in a system with multiple Kibanas, which is a setup we recommend for
+ * That won't work in a system with multiple OpenSearch Dashboards, which is a setup we recommend for
  * load balancing. I'm only doing so here to simplify the routing example. In real life,
- * Elasticsearch should be used to persist data that can be shared across multiple Kibana
- * instances.
+ * OpenSearch should be used to persist data that can be shared across multiple OpenSearch Dashboards * instances.
  */
 
 const messages: { [key: string]: string } = {};
@@ -59,7 +58,7 @@ export function registerPostMessageRoute(router: IRouter) {
         });
       }
 
-      // See note above. NEVER DO THIS IN REAL CODE! Data should only be persisted in Elasticsearch.
+      // See note above. NEVER DO THIS IN REAL CODE! Data should only be persisted in OpenSearch.
       messages[request.params.id] = request.body.message;
 
       return response.ok();

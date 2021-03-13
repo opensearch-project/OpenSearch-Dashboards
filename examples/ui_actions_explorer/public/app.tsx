@@ -32,7 +32,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiModalBody } from '@elastic/eui';
-import { toMountPoint } from '../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/public';
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';

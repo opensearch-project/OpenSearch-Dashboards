@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const todoSavedObject: SavedObjectsType = {
   name: 'todo',

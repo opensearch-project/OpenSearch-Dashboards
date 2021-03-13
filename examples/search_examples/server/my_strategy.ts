@@ -23,18 +23,18 @@ import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
 export const mySearchStrategyProvider = (
   data: PluginStart
 ): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
-  const es = data.search.getSearchStrategy('es');
+  const opensearch = data.search.getSearchStrategy('opensearch');
   return {
     search: async (context, request, options): Promise<IMyStrategyResponse> => {
-      const esSearchRes = await es.search(context, request, options);
+      const opensearchSearchRes = await opensearch.search(context, request, options);
       return {
-        ...esSearchRes,
+        ...opensearchSearchRes,
         cool: request.get_cool ? 'YES' : 'NOPE',
       };
     },
     cancel: async (context, id) => {
-      if (es.cancel) {
-        es.cancel(context, id);
+      if (opensearch.cancel) {
+        opensearch.cancel(context, id);
       }
     },
   };

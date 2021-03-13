@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'opensearch-dashboards/server';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { registerServerSearchRoute } from './server_search_route';
 

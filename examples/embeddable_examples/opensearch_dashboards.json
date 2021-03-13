@@ -1,11 +1,11 @@
 {
   "id": "embeddableExamples",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["embeddable", "uiActions", "dashboard", "savedObjects"],
   "optionalPlugins": [],
   "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["opensearchDashboardsReact"]
 }

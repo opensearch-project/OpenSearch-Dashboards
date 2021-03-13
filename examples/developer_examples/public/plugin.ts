@@ -39,7 +39,7 @@ export class DeveloperExamplesPlugin implements Plugin<DeveloperExamplesSetup, v
       id: 'developerExamples',
       title: 'Developer examples',
       order: -2000,
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         const [coreStart] = await core.getStartServices();
