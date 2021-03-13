@@ -44,7 +44,7 @@ import { add } from './add';
 import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from './utils/prompt';
 
-describe('Kibana keystore', () => {
+describe('OpenSearch Dashboards keystore', () => {
   describe('add', () => {
     const sandbox = sinon.createSandbox();
 
@@ -62,7 +62,7 @@ describe('Kibana keystore', () => {
 
     it('returns an error for a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      const message = "ERROR: Kibana keystore not found. Use 'create' command to create one.";
+      const message = "ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one.";
 
       await add(keystore, 'foo');
 
@@ -157,13 +157,13 @@ describe('Kibana keystore', () => {
 
       const stdin = new PassThrough();
       process.nextTick(() => {
-        stdin.write('kibana\n');
+        stdin.write('opensearch-dashboards\n');
         stdin.end();
       });
 
       await add(keystore, 'foo', { stdin: true, stdinStream: stdin });
 
-      expect(keystore.data.foo).toEqual('kibana');
+      expect(keystore.data.foo).toEqual('opensearch-dashboards');
     });
   });
 
