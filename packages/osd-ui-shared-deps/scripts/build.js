@@ -51,20 +51,20 @@ run(
           const metrics = [
             {
               group: '@osd/ui-shared-deps asset size',
-              id: 'kbn-ui-shared-deps.js',
-              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.js')).size,
+              id: 'osd-ui-shared-deps.js',
+              value: Fs.statSync(Path.resolve(DIST_DIR, 'osd-ui-shared-deps.js')).size,
             },
             {
               group: '@osd/ui-shared-deps asset size',
-              id: 'kbn-ui-shared-deps.@elastic.js',
-              value: Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.@elastic.js')).size,
+              id: 'osd-ui-shared-deps.@elastic.js',
+              value: Fs.statSync(Path.resolve(DIST_DIR, 'osd-ui-shared-deps.@elastic.js')).size,
             },
             {
               group: '@osd/ui-shared-deps asset size',
               id: 'css',
               value:
-                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.css')).size +
-                Fs.statSync(Path.resolve(DIST_DIR, 'kbn-ui-shared-deps.v7.light.css')).size,
+                Fs.statSync(Path.resolve(DIST_DIR, 'osd-ui-shared-deps.css')).size +
+                Fs.statSync(Path.resolve(DIST_DIR, 'osd-ui-shared-deps.v7.light.css')).size,
             },
           ];
 
