@@ -41,8 +41,8 @@ export const useOpenSearchDashboards = <Extra extends object = {}>(): OpenSearch
 
 export const withOpenSearchDashboards = <Props extends { opensearchDashboards: OpenSearchDashboardsReactContextValue<any> }>(
   type: React.ComponentType<Props>
-): React.FC<Omit<Props, 'opensearch-dashboards'>> => {
-  const EnhancedType: React.FC<Omit<Props, 'opensearch-dashboards'>> = (props: Omit<Props, 'opensearch-dashboards'>) => {
+): React.FC<Omit<Props, 'opensearchDashboards'>> => {
+  const EnhancedType: React.FC<Omit<Props, 'opensearchDashboards'>> = (props: Omit<Props, 'opensearchDashboards'>) => {
     const opensearchDashboards = useOpenSearchDashboards();
     return React.createElement(type, { ...props, opensearchDashboards } as Props);
   };

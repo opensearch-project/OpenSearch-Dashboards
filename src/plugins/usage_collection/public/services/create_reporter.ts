@@ -27,20 +27,20 @@ interface AnalyicsReporterConfig {
 }
 
 export function createReporter(config: AnalyicsReporterConfig): Reporter {
-  const { localStorage, debug, fetch } = config;
+  const { localStorage, debug } = config;
 
   return new Reporter({
     debug,
     storage: localStorage,
-    async http(report) {
-      const response = await fetch.post('/api/ui_metric/report', {
-        body: JSON.stringify({ report }),
-      });
+    // async http(report) {
+    //   const response = await fetch.post('/api/ui_metric/report', {
+    //     body: JSON.stringify({ report }),
+    //   });
 
-      if (response.status !== 'ok') {
-        throw Error('Unable to store report.');
-      }
-      return response;
-    },
+    //   if (response.status !== 'ok') {
+    //     throw Error('Unable to store report.');
+    //   }
+    //   return response;
+    // },
   });
 }

@@ -145,7 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
   public start(
-    { elasticsearch, savedObjects, uiSettings }: CoreStart,
+    { opensearch, savedObjects, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     return {
@@ -185,7 +185,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                */
               const fakeRequestHandlerContext = {
                 core: {
-                  elasticsearch: {
+                  opensearch: {
                     client: opensearchClient,
                   },
                   uiSettings: {
