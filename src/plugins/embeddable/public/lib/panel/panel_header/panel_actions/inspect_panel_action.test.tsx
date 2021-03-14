@@ -29,7 +29,7 @@ import {
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { opensearchFilters } from '../../../../../../../plugins/data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 import { EmbeddableStart } from '../../../../plugin';
 
@@ -43,7 +43,7 @@ const setupTests = async () => {
       panels: {},
       filters: [
         {
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
           meta: { disabled: false, alias: 'name', negate: false },
           query: { match: {} },
         },

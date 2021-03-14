@@ -411,7 +411,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   } else {
     // request handler
     if (vis.type.requestHandler === 'courier') {
-      pipeline += `esaggs
+      pipeline += `opensearchaggs
     ${prepareString('index', indexPattern!.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false}

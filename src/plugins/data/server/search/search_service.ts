@@ -160,7 +160,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       searchSource: {
         asScoped: async (request: OpenSearchDashboardsRequest) => {
-          const opensearchClient = elasticsearch.client.asScoped(request);
+          const opensearchClient = opensearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(request);
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
