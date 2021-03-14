@@ -23,7 +23,7 @@ import d3 from 'd3';
 import { i18n } from '@osd/i18n';
 import * as topojson from 'topojson-client';
 import { getNotifications } from './opensearch_dashboards_services';
-import { colorUtil, OpensearchDashboardsMapLayer } from '../../maps_legacy/public';
+import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps_legacy/public';
 import { truncatedColorMaps } from '../../charts/public';
 
 const EMPTY_STYLE = {
@@ -33,7 +33,7 @@ const EMPTY_STYLE = {
   fillOpacity: 0,
 };
 
-export class ChoroplethLayer extends OpensearchDashboardsMapLayer {
+export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
   static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
     let j = 0;
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {

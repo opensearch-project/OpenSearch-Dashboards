@@ -40,7 +40,7 @@ const makeSuccessMessage = (options) => {
   return (
     '\n\n' +
     dedent`
-      OpenSearch and Opensearch Dashboards are ready for functional testing. Start the functional tests
+      OpenSearch and OpenSearch Dashboards are ready for functional testing. Start the functional tests
       in another terminal session by running this command from this directory:
 
           node ${relative(process.cwd(), OPENSEARCH_DASHBOARDS_FTR_SCRIPT)}${installDirFlag}
@@ -54,7 +54,7 @@ const makeSuccessMessage = (options) => {
  * @param {object} options                   Optional
  * @property {string[]} options.configs      Array of paths to configs
  * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Opensearch Dashboards
+ * @property {string} options.installDir     Optional installation dir from which to run OpenSearch Dashboards
  * @property {boolean} options.bail          Whether to exit test run at the first failure
  * @property {string} options.opensearchFrom         Optionally run from source instead of snapshot
  */
@@ -118,7 +118,7 @@ export async function runTests(options) {
  * @param {object} options                   Optional
  * @property {string} options.config         Path to a config file
  * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Opensearch Dashboards
+ * @property {string} options.installDir     Optional installation dir from which to run OpenSearch Dashboards
  * @property {string} options.opensearchFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
