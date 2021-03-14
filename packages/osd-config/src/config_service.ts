@@ -205,9 +205,7 @@ export class ConfigService {
   }
 
   private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
-    console.log('path', path)
     const namespace = pathToString(path);
-    console.log('namespace', namespace)
     const schema = this.schemas.get(namespace);
     if (!schema) {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
