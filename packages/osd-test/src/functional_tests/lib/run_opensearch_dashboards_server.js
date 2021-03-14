@@ -64,10 +64,10 @@ function getOpenSearchDashboardsCmd(installDir) {
 }
 
 /**
- * When installDir is passed, we run from a built version of OpenSearch Dashboards,
+ * When installDir is passed, we run from a built version of Opensearch Dashboards,
  * which uses different command line arguments. If installDir is not
  * passed, we run from source code. We also allow passing in extra
- * OpenSearch Dashboards server options, so we tack those on here.
+ * Opensearch Dashboards server options, so we tack those on here.
  */
 function collectCliArgs(config, { installDir, extraOsdOpts }) {
   const buildArgs = config.get('osdTestServer.buildArgs') || [];
@@ -119,7 +119,7 @@ function pipe(arr, ...fns) {
 
 /**
  * Checks whether a specific parameter is allowed to appear multiple
- * times in the OpenSearch Dashboards parameters.
+ * times in the Opensearch Dashboards parameters.
  */
 function allowsDuplicate(val) {
   return ['--plugin-path'].includes(val.split('=')[0]);

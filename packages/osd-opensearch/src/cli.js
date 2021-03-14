@@ -32,7 +32,7 @@ function help() {
   console.log(dedent`
     usage: opensearch <command> [<args>]
 
-    Assists with running OpenSearch for OpenSearch Dashboards development
+    Assists with running OpenSearch for Opensearch Dashboards development
 
     Available commands:
 

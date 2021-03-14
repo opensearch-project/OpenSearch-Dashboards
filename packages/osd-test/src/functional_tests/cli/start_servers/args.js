@@ -35,7 +35,7 @@ const options = {
   },
   'opensearch-dashboards-install-dir': {
     arg: '<dir>',
-    desc: 'Run OpenSearch Dashboards from existing install directory instead of from source.',
+    desc: 'Run Opensearch Dashboards from existing install directory instead of from source.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },

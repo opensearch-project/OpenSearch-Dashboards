@@ -48,7 +48,7 @@ export interface TimelionPluginStartDeps {
 }
 
 /**
- * Represents Timelion Plugin instance that will be managed by the OpenSearch Dashboards plugin system.
+ * Represents Timelion Plugin instance that will be managed by the Opensearch Dashboards plugin system.
  */
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}

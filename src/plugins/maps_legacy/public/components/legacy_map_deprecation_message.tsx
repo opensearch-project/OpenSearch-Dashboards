@@ -32,7 +32,7 @@ export function LegacyMapDeprecationMessage(props: Props) {
   const getMapsMessage = !props.isMapsAvailable ? (
     <FormattedMessage
       id="maps_legacy.defaultDistributionMessage"
-      defaultMessage="To get Maps, upgrade to the {defaultDistribution} of OpenSearch and OpenSearch Dashboards."
+      defaultMessage="To get Maps, upgrade to the {defaultDistribution} of OpenSearch and Opensearch Dashboards."
       values={{
         defaultDistribution: (
           <EuiLink

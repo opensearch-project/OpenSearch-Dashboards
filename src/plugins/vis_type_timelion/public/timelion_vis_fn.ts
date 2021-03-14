@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
-  OpenSearchDashboardsContext,
+  OpensearchDashboardsContext,
   Render,
 } from 'src/plugins/expressions/public';
 import {
@@ -32,7 +32,7 @@ import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
 import { Filter, Query, TimeRange } from '../../data/common';
 
-type Input = OpenSearchDashboardsContext | null;
+type Input = OpensearchDashboardsContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
 interface Arguments {
   expression: string;

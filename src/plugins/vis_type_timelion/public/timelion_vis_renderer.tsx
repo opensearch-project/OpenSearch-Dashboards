@@ -21,7 +21,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
+import { OpensearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
@@ -50,14 +50,14 @@ export const getTimelionVisRenderer: (
 
     render(
       <VisualizationContainer showNoResult={showNoResult}>
-        <OpenSearchDashboardsContextProvider services={{ ...deps }}>
+        <OpensearchDashboardsContextProvider services={{ ...deps }}>
           <TimelionVisComponent
             interval={visParams.interval}
             seriesList={seriesList}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
           />
-        </OpenSearchDashboardsContextProvider>
+        </OpensearchDashboardsContextProvider>
       </VisualizationContainer>,
       domNode
     );

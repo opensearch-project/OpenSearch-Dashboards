@@ -62,7 +62,7 @@ const isLikelyIrrelevant = (name: string, failure: string) => {
     return true;
   }
 
-  if (failure.includes('Unable to fetch OpenSearch Dashboards status API response from OpenSearch Dashboards')) {
+  if (failure.includes('Unable to fetch Opensearch Dashboards status API response from Opensearch Dashboards')) {
     return true;
   }
 

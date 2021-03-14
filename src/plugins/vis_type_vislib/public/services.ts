@@ -30,5 +30,5 @@ export const [getFormatService, setFormatService] = createGetterSetter<
 >('vislib data.fieldFormats');
 
 export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
-  'vislib opensearchDashboardsLegacy'
+  'vislib opensearchdashboardslegacy'
 );

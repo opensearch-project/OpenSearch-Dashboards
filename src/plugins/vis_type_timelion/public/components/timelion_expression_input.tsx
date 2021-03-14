@@ -22,7 +22,7 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { monaco } from '@osd/monaco';
 
-import { CodeEditor, useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CodeEditor, useOpensearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
@@ -37,7 +37,7 @@ interface TimelionExpressionInputProps {
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
   const functionList = useRef([]);
-  const opensearchDashboards = useOpenSearchDashboards();
+  const opensearchDashboards = useOpensearchDashboards();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
   const provideCompletionItems = useCallback(
