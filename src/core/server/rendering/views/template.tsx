@@ -68,6 +68,7 @@ export const Template: FunctionComponent<Props> = ({
       </g>
     </svg>
   );
+
   return (
     <html lang={locale}>
       <head>
@@ -137,7 +138,6 @@ export const Template: FunctionComponent<Props> = ({
 
         <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
           {logo}
-
           <h2 className="kbnWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',
