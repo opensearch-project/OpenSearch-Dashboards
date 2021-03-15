@@ -62,7 +62,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           defaultMessage: 'Stack Management',
         }),
         description: i18n.translate('management.stackManagement.managementDescription', {
-          defaultMessage: 'Your center console for managing the Elastic Stack.',
+          defaultMessage: 'Your center console for managing the OpenSearch Stack.',
         }),
         icon: 'managementApp',
         path: '/app/management',

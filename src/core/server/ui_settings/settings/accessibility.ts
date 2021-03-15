@@ -30,7 +30,7 @@ export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => 
       value: false,
       description: i18n.translate('core.ui_settings.params.disableAnimationsText', {
         defaultMessage:
-          'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
+          'Turn off all unnecessary animations in the OpenSearch Dashboards UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
       requiresPageReload: true,

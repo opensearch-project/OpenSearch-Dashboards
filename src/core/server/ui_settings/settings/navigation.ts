@@ -43,8 +43,8 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
       }),
       description: i18n.translate('core.ui_settings.params.defaultRoute.defaultRouteText', {
         defaultMessage:
-          'This setting specifies the default route when opening Kibana. ' +
-          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'This setting specifies the default route when opening OpenSearch Dashboards. ' +
+          'You can use this setting to modify the landing page when opening OpenSearch Dashboards. ' +
           'The route must be a relative URL.',
       }),
     },
