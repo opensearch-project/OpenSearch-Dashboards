@@ -66,7 +66,7 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses an <<index-patterns,index pattern>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
+To view the ecommerce sample data, make sure the index pattern is set to **opensearch_dashboards_sample_data_ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-index-pattern.png[How to set the index pattern in Discover]

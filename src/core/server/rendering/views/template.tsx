@@ -39,7 +39,7 @@ export const Template: FunctionComponent<Props> = ({
   },
 }) => {
   const logo = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" viewBox="0 0 0 0">
       <g fill="none">
         <path
           fill="#FDD009"
@@ -68,40 +68,41 @@ export const Template: FunctionComponent<Props> = ({
       </g>
     </svg>
   );
+
   return (
     <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic</title>
+        <title>OpenSearch</title>
         <Fonts url={uiPublicUrl} />
         {/* Favicons (generated from http://realfavicongenerator.net/) */}
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
+          href={`${uiPublicUrl}/favicons/apple-touch-icon-heatmap.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
+          href={`${uiPublicUrl}/favicons/favicon-heatmap-32x32.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
+          href={`${uiPublicUrl}/favicons/favicon-heatmap-16x16.png`}
         />
         <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
         <link
           rel="mask-icon"
           color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
+          href={`${uiPublicUrl}/favicons/safari-pinned-tab-heatmap.svg`}
         />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon-heatmap.ico`} />
+        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig-heatmap.xml`} />
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
 
@@ -129,7 +130,7 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading OpenSearch' })}
             </div>
             <div className="kbnProgress" />
           </div>
@@ -137,7 +138,6 @@ export const Template: FunctionComponent<Props> = ({
 
         <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
           {logo}
-
           <h2 className="kbnWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',

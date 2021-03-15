@@ -47,7 +47,7 @@ export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountP
           <EuiText size="s">
             <FormattedMessage
               id="security.checkup.insecureClusterMessage"
-              defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
+              defaultMessage="Don't lose one bit. Secure your data for free with OpenSearch."
             />
           </EuiText>
           <EuiSpacer />
