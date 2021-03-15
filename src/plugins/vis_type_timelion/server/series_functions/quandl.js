@@ -47,7 +47,7 @@ export default new Datasource('quandl', {
   help: i18n.translate('timelion.help.functions.quandlHelpText', {
     defaultMessage: `
     [experimental]
-    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Opensearch Dashboards's
+    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in OpenSearch Dashboards's
     Advanced Settings. The API has a really low rate limit without a key.`,
     values: {
       quandlKeyField: '"timelion:quandl.key"',
