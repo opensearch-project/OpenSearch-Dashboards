@@ -62,7 +62,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
               <h2 id="kbnOverviewGettingStarted__title">
                 <FormattedMessage
                   id="kibanaOverview.gettingStarted.title"
-                  defaultMessage="Getting started with Kibana"
+                  defaultMessage="Getting started with OpenSearch Dashboards"
                 />
               </h2>
             </EuiTitle>

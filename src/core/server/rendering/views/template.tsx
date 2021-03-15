@@ -39,7 +39,7 @@ export const Template: FunctionComponent<Props> = ({
   },
 }) => {
   const logo = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" viewBox="0 0 0 0">
       <g fill="none">
         <path
           fill="#FDD009"
@@ -129,7 +129,7 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading OpenSearch' })}
             </div>
             <div className="kbnProgress" />
           </div>

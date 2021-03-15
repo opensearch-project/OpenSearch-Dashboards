@@ -45,11 +45,11 @@ By default, the element is connected to the demo data, which enables you to expe
 
 .. In the *Query* field, enter the following:
 +
-`SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"`
+`SELECT sum(taxless_total_price) AS sum_total_price FROM "opensearch_dashboards_sample_data_ecommerce"`
 
 .. Click *Save*.
 +
-The query selects the total price field and sets it to the sum_total_price field. All fields are pulled from the kibana_sample_data_ecommerce index.
+The query selects the total price field and sets it to the sum_total_price field. All fields are pulled from the opensearch_dashboards_sample_data_ecommerce index.
 
 . At this point, the element appears as an error, so you need to change the element display options.
 
@@ -83,7 +83,7 @@ To show what your data can do, add charts, graphs, progress monitors, and more t
 
 .. To obtain the taxless total price by date, enter the following in the *Query* field:
 +
-`SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date`
+`SELECT order_date, taxless_total_price FROM "opensearch_dashboards_sample_data_ecommerce" ORDER BY order_date`
 
 .. Click *Save*.
 

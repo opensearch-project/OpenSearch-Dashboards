@@ -96,7 +96,7 @@ export class KibanaOverviewPlugin
       home.featureCatalogue.registerSolution({
         id: 'kibana',
         title: i18n.translate('kibanaOverview.kibana.solution.title', {
-          defaultMessage: 'Kibana',
+          defaultMessage: 'OpenSearch Dashboards',
         }),
         subtitle: i18n.translate('kibanaOverview.kibana.solution.subtitle', {
           defaultMessage: 'Visualize & analyze',
@@ -121,7 +121,7 @@ export class KibanaOverviewPlugin
             defaultMessage: 'Reveal patterns and relationships.',
           }),
         ],
-        icon: 'logoKibana',
+        icon: 'logoAWS',
         path: PLUGIN_PATH,
         order: 400,
       });

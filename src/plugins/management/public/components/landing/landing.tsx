@@ -55,7 +55,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
           <EuiText>
             <FormattedMessage
               id="management.landing.subhead"
-              defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+              defaultMessage="Manage your indices, index patterns, saved objects, OpenSearch Dashboards settings, and more."
             />
           </EuiText>
         </div>

@@ -861,7 +861,7 @@ Query Elasticsearch for the number of hits matching the specified query.
 [source,js]
 ----
 escount index="logstash-*"
-escount "currency:"EUR"" index="kibana_sample_data_ecommerce"
+escount "currency:"EUR"" index="opensearch_dashboards_sample_data_ecommerce"
 escount query="response:404" index="kibana_sample_data_logs"
 ----
 
@@ -913,7 +913,7 @@ Query Elasticsearch for raw documents. Specify the fields you want to retrieve, 
 [source,js]
 ----
 esdocs index="logstash-*"
-esdocs "currency:"EUR"" index="kibana_sample_data_ecommerce"
+esdocs "currency:"EUR"" index="opensearch_dashboards_sample_data_ecommerce"
 esdocs query="response:404" index="kibana_sample_data_logs"
 esdocs index="kibana_sample_data_flights" count=100
 esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
@@ -923,7 +923,7 @@ esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
 [source,text]
 ----
 filters
-| esdocs index="kibana_sample_data_ecommerce"
+| esdocs index="opensearch_dashboards_sample_data_ecommerce"
   fields="customer_gender, taxful_total_price, order_date"
   sort="order_date, asc"
   count=10000
@@ -935,7 +935,7 @@ filters
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render
 ----
-This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
+This retrieves the first 10000 documents data from the `opensearch_dashboards_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 

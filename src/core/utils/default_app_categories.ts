@@ -25,9 +25,9 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   kibana: {
     id: 'kibana',
     label: i18n.translate('core.ui.kibanaNavList.label', {
-      defaultMessage: 'Kibana',
+      defaultMessage: 'OpenSearch Dashboards',
     }),
-    euiIconType: 'logoKibana',
+    euiIconType: 'logoAWS',
     order: 1000,
   },
   enterpriseSearch: {
