@@ -111,8 +111,8 @@ export class Plugin {
         }),
         value: '_all',
         description: i18n.translate('timelion.uiSettings.defaultIndexDescription', {
-          defaultMessage: 'Default elasticsearch index to search with {esParam}',
-          values: { esParam: '.es()' },
+          defaultMessage: 'Default OpenSearch index to search with {esParam}',
+          values: { esParam: '.opensearch()' },
         }),
         category: ['timelion'],
         schema: schema.string(),
