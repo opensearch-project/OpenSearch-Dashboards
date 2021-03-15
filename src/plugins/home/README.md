@@ -38,7 +38,7 @@ Replaces the sample data mixin putting functions on the global `server` object.
 3) Kibana uses bulk insert to ingest the new-line delimited json into the Elasticsearch index. Kibana migrates timestamps provided in new-line delimited json to the current time frame for any date field defined in `timeFields`
 4) Kibana will install all saved objects for sample data set. This will override any saved objects previouslly installed for sample data set.
 
-Elasticsearch index names are prefixed with `kibana_sample_data_`. For more details see [createIndexName](/src/plugins/home/server/services/sample_data/lib/create_index_name.js)
+Elasticsearch index names are prefixed with `opensearch_dashboards_sample_data_`. For more details see [createIndexName](/src/plugins/home/server/services/sample_data/lib/create_index_name.js)
 
 Sample data sets typically provide data that spans 5 weeks from the past and 5 weeks into the future so users see data relative to `now` for a few weeks after installing sample data sets.
 

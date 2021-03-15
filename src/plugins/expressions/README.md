@@ -21,7 +21,7 @@ renders the result.
 filters
 | essql
   query="SELECT COUNT(timestamp) as total_errors
-    FROM kibana_sample_data_logs
+    FROM opensearch_dashboards_sample_data_logs
     WHERE tags LIKE '%warning%' OR tags LIKE '%error%'"
 | math "total_errors"
 | metric "TOTAL ISSUES"

@@ -18,7 +18,7 @@
  */
 
 export const KIBANA_FEEDBACK_LINK =
-  'https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback';
+  'https://aws.amazon.com/premiumsupport/?nc2=h_ql_ce_spt-a';
 export const KIBANA_ASK_ELASTIC_LINK =
-  'https://www.elastic.co/products/kibana/ask-elastic?blade=kibanaaskelastic';
-export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';
+  'https://aws.amazon.com/elasticsearch-service/faqs/?nc=sn&loc=6';
+export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/opendistro-for-elasticsearch';

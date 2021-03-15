@@ -1098,13 +1098,13 @@ describe('migration visualization', () => {
             "61ca57f2-469d-11e7-af02-69e470af7417","predict":1}],"separate_axis":0,"axis_position":"right",
             "formatter":"number","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none",
             "label":"Percent Delays","terms_size":"2","terms_field":"OriginCityName"}],"time_field":"timestamp",
-            "index_pattern":"kibana_sample_data_flights","interval":">=12h","axis_position":"left","axis_formatter":
+            "index_pattern":"opensearch_dashboards_sample_data_flights","interval":">=12h","axis_position":"left","axis_formatter":
             "number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier",
-            "template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"kibana_sample_data_flights",
+            "template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"opensearch_dashboards_sample_data_flights",
             "query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39",
             "color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle",
             "ignore_global_filters":1,"ignore_panel_filters":1,"hidden":true}],"legend_position":"bottom",
-            "axis_scale":"normal","default_index_pattern":"kibana_sample_data_flights","default_timefield":"timestamp"},
+            "axis_scale":"normal","default_index_pattern":"opensearch_dashboards_sample_data_flights","default_timefield":"timestamp"},
             "aggs":[]}`,
           },
           migrationVersion: {
