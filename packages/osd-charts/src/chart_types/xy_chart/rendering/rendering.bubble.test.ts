@@ -761,7 +761,7 @@ describe('Rendering points - bubble', () => {
       expect(points[0]).toEqual(
         MockPointGeometry.default({
           x: 0,
-          y: 100,
+          y: 99.5,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {

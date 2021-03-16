@@ -84,6 +84,7 @@ interface ReactiveChartDispatchProps {
 interface ReactiveChartOwnProps {
   forwardStageRef: RefObject<HTMLCanvasElement>;
 }
+const CLIPPING_MARGINS = 0.5;
 
 type XYChartProps = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
 class XYChartComponent extends React.Component<XYChartProps> {
@@ -130,10 +131,10 @@ class XYChartComponent extends React.Component<XYChartProps> {
     if (this.ctx) {
       const { renderingArea, rotation } = this.props;
       const clippings = {
-        x: 0,
-        y: 0,
-        width: [90, -90].includes(rotation) ? renderingArea.height : renderingArea.width,
-        height: [90, -90].includes(rotation) ? renderingArea.width : renderingArea.height,
+        x: -CLIPPING_MARGINS,
+        y: -CLIPPING_MARGINS,
+        width: ([90, -90].includes(rotation) ? renderingArea.height : renderingArea.width) + CLIPPING_MARGINS * 2,
+        height: ([90, -90].includes(rotation) ? renderingArea.width : renderingArea.height) + CLIPPING_MARGINS * 2,
       };
       renderXYChartCanvas2d(this.ctx, this.devicePixelRatio, clippings, this.props);
     }

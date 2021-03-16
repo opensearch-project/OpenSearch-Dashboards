@@ -42,7 +42,7 @@ interface AreaGeometriesProps {
 
 /** @internal */
 export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometriesProps) {
-  const { sharedStyle, highlightedLegendItem, areas, clippings, rotation, renderingArea } = props;
+  const { sharedStyle, highlightedLegendItem, areas, rotation, clippings, renderingArea } = props;
 
   withContext(ctx, (ctx) => {
     areas.forEach(({ panel, value: area }) => {
@@ -117,5 +117,6 @@ function renderAreaLines(
   const { lines, color, seriesIdentifier, transform, seriesAreaLineStyle, clippedRanges, hideClippedRanges } = glyph;
   const geometryStateStyle = getGeometryStateStyle(seriesIdentifier, sharedStyle, highlightedLegendItem);
   const stroke = buildLineStyles(color, seriesAreaLineStyle, geometryStateStyle);
+
   renderLinePaths(ctx, transform, lines, stroke, clippedRanges, clippings, hideClippedRanges);
 }

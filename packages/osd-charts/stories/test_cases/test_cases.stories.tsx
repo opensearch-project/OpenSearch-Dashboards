@@ -27,3 +27,4 @@ export default {
 };
 
 export { Example as noSeries } from './1_no_series';
+export { Example as chromePathBugFix } from './2_chrome_path_bug_fix';
