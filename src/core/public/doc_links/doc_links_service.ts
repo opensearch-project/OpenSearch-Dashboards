@@ -29,10 +29,8 @@ export class DocLinksService {
   public setup() {}
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
-    //const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
-    const ELASTIC_WEBSITE_URL = 'https://www.google.com/'
-    //const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
-    const ELASTICSEARCH_DOCS = 'https://www.google.com/'
+    const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
+    const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
