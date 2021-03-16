@@ -30,7 +30,7 @@ const color = palette.slice().reverse();
 
 const getLayerSpec = (maxDepth: number = 30) =>
   [...new Array(maxDepth + 1)].map((_, depth) => ({
-    groupByRollup: (d: Datum) => d.layers[depth],
+    groupByRollup: (d: Datum) => data.dictionary[d.layers[depth]],
     nodeLabel: (d: PrimitiveValue) => String(d),
     showAccessor: (d: PrimitiveValue) => d !== undefined,
     shape: {
@@ -45,7 +45,7 @@ export const Example = () => {
       <Settings theme={STORYBOOK_LIGHT_THEME} />
       <Partition
         id="spec_1"
-        data={data}
+        data={data.facts}
         valueAccessor={(d: Datum) => d.value as number}
         valueFormatter={() => ''}
         layers={getLayerSpec()}
