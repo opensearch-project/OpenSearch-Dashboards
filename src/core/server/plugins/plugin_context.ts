@@ -98,10 +98,10 @@ export function createPluginInitializerContext(
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
         ]).pipe(
-          map(([kibana, elasticsearch, path, savedObjects]) =>
+          map(([opensearchDashboards, opensearch, path, savedObjects]) =>
             deepFreeze({
-              opensearchDashboards: pick(kibana, SharedGlobalConfigKeys.opensearchDashboards),
-              opensearch: pick(elasticsearch, SharedGlobalConfigKeys.opensearch),
+              opensearchDashboards: pick(opensearchDashboards, SharedGlobalConfigKeys.opensearchDashboards),
+              opensearch: pick(opensearch, SharedGlobalConfigKeys.opensearch),
               path: pick(path, SharedGlobalConfigKeys.path),
               savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
             })
