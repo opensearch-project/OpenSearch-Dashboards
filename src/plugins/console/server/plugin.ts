@@ -63,7 +63,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
       proxy: {
         proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
-        readLegacyESConfig: async (): Promise<OpenSearchConfigForProxy> => {
+        readLegacyOpenSearchConfig: async (): Promise<OpenSearchConfigForProxy> => {
           const legacyConfig = await this.opensearchLegacyConfigService.readConfig();
           return {
             ...globalConfig.opensearch,

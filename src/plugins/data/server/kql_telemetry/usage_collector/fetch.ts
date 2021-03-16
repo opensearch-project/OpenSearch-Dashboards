@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;

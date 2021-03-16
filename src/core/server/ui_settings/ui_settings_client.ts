@@ -247,13 +247,13 @@ export class UiSettingsClient implements IUiSettingsClient {
   private isIgnorableError(error: Error, ignore401Errors: boolean) {
     const {
       isForbiddenError,
-      isEsUnavailableError,
+      isOpenSearchUnavailableError,
       isNotAuthorizedError,
     } = this.savedObjectsClient.errors;
 
     return (
       isForbiddenError(error) ||
-      isEsUnavailableError(error) ||
+      isOpenSearchUnavailableError(error) ||
       (ignore401Errors && isNotAuthorizedError(error))
     );
   }

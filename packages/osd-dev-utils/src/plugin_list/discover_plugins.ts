@@ -24,7 +24,7 @@ import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
 import { REPO_ROOT } from '@osd/utils';
 
-import { simpleOpenSearchDashboardPlatformPluginDiscovery } from '../simple_opensearch_dashboards_platform_plugin_discovery';
+import { simpleOpenSearchDashboardsPlatformPluginDiscovery } from '../simple_opensearch_dashboards_platform_plugin_discovery';
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
@@ -44,7 +44,7 @@ const getReadmeAsciidocName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
 
 export const discoverPlugins = (pluginsRootDir: string): Plugins =>
-  simpleOpenSearchDashboardsPlatformPluginDiscovery([pluginsRootDir], []).map(
+simpleOpenSearchDashboardsPlatformPluginDiscovery([pluginsRootDir], []).map(
     ({ directory, manifest: { id } }): Plugin => {
       const readmeName = getReadmeName(directory);
       const readmeAsciidocName = getReadmeAsciidocName(directory);

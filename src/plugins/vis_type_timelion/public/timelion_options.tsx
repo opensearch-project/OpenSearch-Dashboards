@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { OpensearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 
 import { TimelionVisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
@@ -49,7 +49,7 @@ function TimelionOptions({
   );
 
   return (
-    <OpensearchDashboardsContextProvider services={services}>
+    <OpenSearchDashboardsContextProvider services={services}>
       <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
         <TimelionInterval
           value={stateParams.interval}
@@ -58,7 +58,7 @@ function TimelionOptions({
         />
         <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
       </EuiPanel>
-    </OpensearchDashboardsContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 }
 

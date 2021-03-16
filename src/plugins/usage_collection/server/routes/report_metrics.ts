@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { schema } from '@osd/config-schema';
+// import { schema } from '@osd/config-schema';
 import { IRouter, ISavedObjectsRepository } from 'opensearch-dashboards/server';
-import { storeReport, reportSchema } from '../report';
+// import { storeReport, reportSchema } from '../report';
 
 export function registerUiMetricRoute(
   router: IRouter,

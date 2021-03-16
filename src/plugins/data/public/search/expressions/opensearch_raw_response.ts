@@ -71,7 +71,7 @@ export type OpenSearchRawResponseExpressionTypeDefinition = ExpressionTypeDefini
   OpenSearchRawResponse
 >;
 
-export const OpenSearchRawResponse: OpenSearchRawResponseExpressionTypeDefinition = {
+export const opensearchRawResponse: OpenSearchRawResponseExpressionTypeDefinition = {
   name,
   to: {
     datatable: (context: OpenSearchRawResponse) => {

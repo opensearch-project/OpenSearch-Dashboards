@@ -34,7 +34,7 @@ export { runTests, startServers } from './functional_tests/tasks';
 export { OPENSEARCH_DASHBOARDS_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
-export { opensearchTestConfig, createLegacyEsTestCluster } from './legacy_opensearch';
+export { opensearchTestConfig, createLegacyOpenSearchTestCluster } from './legacy_opensearch';
 
 // @ts-ignore not typed yet
 export { osdTestConfig, opensearchDashboardsServerTestUser, opensearchDashboardsTestUser, adminTestUser } from './osd';

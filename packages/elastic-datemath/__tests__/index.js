@@ -20,7 +20,7 @@
 const dateMath = require('../index');
 const moment = require('moment');
 const sinon = require('sinon');
-const expect = require('@kbn/expect');
+const expect = require('@osd/expect');
 
 /**
  * Require a new instance of the moment library, bypassing the require cache.

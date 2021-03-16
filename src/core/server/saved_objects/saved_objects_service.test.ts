@@ -217,7 +217,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.opensearopensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
+      ((setupDeps.opensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
         NodesVersionCompatibility
       >).next({
         isCompatible: true,

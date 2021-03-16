@@ -33,7 +33,7 @@ import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { OSD_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import {
   isGteInterval,
@@ -50,7 +50,7 @@ import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/p
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+const RESTRICT_FIELDS = [OSD_FIELD_TYPES.DATE];
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
