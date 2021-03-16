@@ -424,7 +424,7 @@ describe('ui settings', () => {
     it('returns an empty object on OpenSearchUnavailable responses', async () => {
       const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
 
-      const error = SavedObjectsClient.errors.decorateEsUnavailableError(new Error());
+      const error = SavedObjectsClient.errors.decorateOpenSearchUnavailableError(new Error());
       savedObjectsClient.get.mockRejectedValue(error);
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});

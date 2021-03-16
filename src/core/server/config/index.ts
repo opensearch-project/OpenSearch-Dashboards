@@ -38,4 +38,4 @@ export {
   EnvironmentMode,
   PackageInfo,
   LegacyObjectToConfigAdapter,
-} from '@kbn/config';
+} from '@osd/config';

@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 const UNIT_OPTIONS = [
   {
@@ -123,7 +123,7 @@ export const PositiveRateAgg = (props) => {
             <FieldSelect
               fields={props.fields}
               type={model.type}
-              restrict={[KBN_FIELD_TYPES.NUMBER]}
+              restrict={[OSD_FIELD_TYPES.NUMBER]}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}

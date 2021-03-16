@@ -130,42 +130,42 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       throw new Error('Unable to read config valuopensearch. Ensure that setup() has completed.');
     }
 
-    const opensearch = this.opensearchConfig;
+    const opensearchConfig = this.opensearchConfig;
     const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, opensearch);
 
     const http = this.httpConfig;
     return {
       config: {
         opensearch: {
-          apiVersion: opensearch.apiVersion,
-          sniffOnStart: opensearch.sniffOnStart,
-          sniffIntervalMs: opensearch.sniffInterval !== false ? opensearch.sniffInterval.asMilliseconds() : -1,
-          sniffOnConnectionFault: opensearch.sniffOnConnectionFault,
-          numberOfHostsConfigured: Array.isArray(opensearch.hosts)
-            ? opensearch.hosts.length
-            : isConfigured.string(opensearch.hosts)
+          apiVersion: opensearchConfig.apiVersion,
+          sniffOnStart: opensearchConfig.sniffOnStart,
+          sniffIntervalMs: opensearchConfig.sniffInterval !== false ? opensearchConfig.sniffInterval.asMilliseconds() : -1,
+          sniffOnConnectionFault: opensearchConfig.sniffOnConnectionFault,
+          numberOfHostsConfigured: Array.isArray(opensearchConfig.hosts)
+            ? opensearchConfig.hosts.length
+            : isConfigured.string(opensearchConfig.hosts)
             ? 1
             : 0,
-          customHeadersConfigured: isConfigured.record(opensearch.customHeaders),
-          healthCheckDelayMs: opensearch.healthCheck.delay.asMilliseconds(),
-          logQueries: opensearch.logQueries,
-          pingTimeoutMs: opensearch.pingTimeout.asMilliseconds(),
+          customHeadersConfigured: isConfigured.record(opensearchConfig.customHeaders),
+          healthCheckDelayMs: opensearchConfig.healthCheck.delay.asMilliseconds(),
+          logQueries: opensearchConfig.logQueries,
+          pingTimeoutMs: opensearchConfig.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
-            opensearch.requestHeadersWhitelist,
+            opensearchConfig.requestHeadersWhitelist,
             ['authorization']
           ),
-          requestTimeoutMs: opensearch.requestTimeout.asMilliseconds(),
-          shardTimeoutMs: opensearch.shardTimeout.asMilliseconds(),
+          requestTimeoutMs: opensearchConfig.requestTimeout.asMilliseconds(),
+          shardTimeoutMs: opensearchConfig.shardTimeout.asMilliseconds(),
           ssl: {
-            alwaysPresentCertificate: opensearch.ssl.alwaysPresentCertificate,
+            alwaysPresentCertificate: opensearchConfig.ssl.alwaysPresentCertificate,
             certificateAuthoritiesConfigured: isConfigured.stringOrArray(
-              opensearch.ssl.certificateAuthorities
+              opensearchConfig.ssl.certificateAuthorities
             ),
-            certificateConfigured: isConfigured.string(opensearch.ssl.certificate),
-            keyConfigured: isConfigured.string(opensearch.ssl.key),
-            verificationMode: opensearch.ssl.verificationMode,
-            truststoreConfigured: isConfigured.record(opensearch.ssl.truststore),
-            keystoreConfigured: isConfigured.record(opensearch.ssl.keystore),
+            certificateConfigured: isConfigured.string(opensearchConfig.ssl.certificate),
+            keyConfigured: isConfigured.string(opensearchConfig.ssl.key),
+            verificationMode: opensearchConfig.ssl.verificationMode,
+            truststoreConfigured: isConfigured.record(opensearchConfig.ssl.truststore),
+            keystoreConfigured: isConfigured.record(opensearchConfig.ssl.keystore),
           },
         },
         http: {

@@ -113,7 +113,7 @@ export class DocLinksService {
           introduction: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
         },
         addData: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
-        opensearchDocs: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        opensearchDashboards: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         siem: {
           guide: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,

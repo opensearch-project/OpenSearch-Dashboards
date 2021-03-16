@@ -19,10 +19,10 @@
 
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 
 describe('configuration deprecations', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let root: ReturnType<typeof osdTestServer.createRoot>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,7 +35,7 @@ describe('configuration deprecations', () => {
   });
 
   it('should not log deprecation warnings for default configuration', async () => {
-    root = kbnTestServer.createRoot();
+    root = osdTestServer.createRoot();
 
     await root.setup();
 
@@ -44,7 +44,7 @@ describe('configuration deprecations', () => {
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
-    root = kbnTestServer.createRoot({
+    root = osdTestServer.createRoot({
       optimize: {
         lazy: true,
         lazyPort: 9090,

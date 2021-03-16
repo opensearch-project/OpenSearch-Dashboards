@@ -43,7 +43,7 @@ import {
   EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -284,7 +284,7 @@ export class DashboardPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
             }))
           ),
         },

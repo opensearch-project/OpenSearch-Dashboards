@@ -34,7 +34,7 @@ describe('callMsearch', () => {
 
   beforeEach(() => {
     const coreContext = coreMock.createRequestHandlerContext();
-    opensearchClient = coreContext.elasticsearch.client;
+    opensearchClient = coreContext.opensearch.client;
     globalConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
     uiSettings = coreContext.uiSettings.client;
 

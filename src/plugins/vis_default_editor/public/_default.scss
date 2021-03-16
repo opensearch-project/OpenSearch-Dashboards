@@ -54,7 +54,7 @@
  */
 
 .visEditor__resizer {
-  @include kbnResizer($euiSizeM);
+  @include osdResizer($euiSizeM);
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
   }

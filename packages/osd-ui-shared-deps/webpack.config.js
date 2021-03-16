@@ -21,7 +21,7 @@ const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const { REPO_ROOT } = require('@kbn/utils');
+const { REPO_ROOT } = require('@osd/utils');
 const webpack = require('webpack');
 
 const UiSharedDeps = require('./index');
@@ -31,11 +31,11 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
   entry: {
-    'kbn-ui-shared-deps': './entry.js',
-    'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-    'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
-    'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
-    'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
+    'osd-ui-shared-deps': './entry.js',
+    'osd-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
+    'osd-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
+    'osd-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
+    'osd-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,
@@ -44,8 +44,8 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     filename: '[name].js',
     sourceMapFilename: '[file].map',
     devtoolModuleFilenameTemplate: (info) =>
-      `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
-    library: '__kbnSharedDeps__',
+      `osd-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+    library: '__osdSharedDeps__',
   },
 
   module: {
@@ -57,7 +57,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           {
             loader: UiSharedDeps.publicPathLoader,
             options: {
-              key: 'kbn-ui-shared-deps',
+              key: 'osd-ui-shared-deps',
             },
           },
         ],
@@ -72,7 +72,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           {
             loader: 'babel-loader',
             options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
             },
           },
         ],
@@ -110,8 +110,8 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
-        'kbn-ui-shared-deps.@elastic': {
-          name: 'kbn-ui-shared-deps.@elastic',
+        'osd-ui-shared-deps.@elastic': {
+          name: 'osd-ui-shared-deps.@elastic',
           test: (m) => m.resource && m.resource.includes('@elastic'),
           chunks: 'all',
           enforce: true,

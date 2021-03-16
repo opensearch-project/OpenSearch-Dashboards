@@ -85,7 +85,7 @@ export function createPluginInitializerContext(
     /**
      * Core configuration functionality, enables fetching a subset of the config.
      */
-    config: {
+     config: {
       legacy: {
         /**
          * Global configuration
@@ -93,7 +93,7 @@ export function createPluginInitializerContext(
          * @deprecated
          */
         globalConfig$: combineLatest([
-          coreContext.configService.atPath<OpenSearchDashboardsConfigType> opensearchDashboardsConfig.path),
+          coreContext.configService.atPath<OpenSearchDashboardsConfigType>(opensearchDashboardsConfig.path),
           coreContext.configService.atPath<OpenSearchConfigType>(opensearchConfig.path),
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
