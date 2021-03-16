@@ -21,7 +21,7 @@ import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
 import {
   createTestServers,
-  TestOpenSearchsearchUtils,
+  TestOpenSearchUtils,
   TestOpenSearchDashboardsUtils,
   TestUtils,
 } from '../../../../test_helpers/osd_server';
@@ -29,7 +29,7 @@ import { LegacyAPICaller } from '../../../opensearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
-let opensearchServer: TestOpenSearchsearchUtils;
+let opensearchServer: TestOpenSearchUtils;
 let osd: TestOpenSearchDashboardsUtils;
 
 let osdServer: TestOpenSearchDashboardsUtils['osdServer'];
@@ -56,7 +56,7 @@ export async function startServers() {
       },
     },
   });
-  opensearchServer = await servers.startES();
+  opensearchServer = await servers.startOpenSearch();
   osd = await servers.startOpenSearchDashboards();
   osdServer = osd.osdServer;
 }

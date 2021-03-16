@@ -8,7 +8,7 @@ API.txt for details.
 
 */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 (function($) {
 

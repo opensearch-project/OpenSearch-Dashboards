@@ -24,7 +24,7 @@ import gql from 'graphql-tag';
 import * as GraphqlPrinter from 'graphql/language/printer';
 import { DocumentNode } from 'graphql/language/ast';
 import makeTerminalLink from 'terminal-link';
-import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError } from '@osd/dev-utils';
 
 import { Version } from './version';
 import { getFixReferences } from './get_fix_references';
@@ -198,7 +198,7 @@ export class PrApi {
           url: 'https://api.github.com/graphql',
           method: 'POST',
           headers: {
-            'user-agent': '@kbn/release-notes',
+            'user-agent': '@osd/release-notes',
             authorization: `bearer ${this.token}`,
           },
           data: {

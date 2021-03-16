@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createOsdFieldTypes, osdFieldTypeUnknown } from './osd_field_types_factory';
+import { createOsdFieldTypes, OsdFieldTypeUnknown } from './osd_field_types_factory';
 import { OsdFieldType } from './osd_field_type';
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 
@@ -31,7 +31,7 @@ const registeredOsdTypes = createOsdFieldTypes();
  *  @return {OsdFieldType}
  */
 export const getOsdFieldType = (typeName: string): OsdFieldType =>
-  registeredOsdTypes.find((t) => t.name === typeName) || osdFieldTypeUnknown;
+  registeredOsdTypes.find((t) => t.name === typeName) || OsdFieldTypeUnknown;
 
 /**
  *  Get the opensearchTypes known by all osdFieldTypes

@@ -147,8 +147,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var getopts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(getopts__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5);
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5);
+/* harmony import */ var _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(128);
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(502);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(144);
@@ -180,10 +180,10 @@ __webpack_require__.r(__webpack_exports__);
 
 function help() {
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-      usage: kbn <command> [<args>]
+      usage: osd <command> [<args>]
 
-      By default commands are run for Kibana itself, all packages in the 'packages/'
-      folder and for all plugins in './plugins' and '../kibana-extra'.
+      By default commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
+      folder and for all plugins in './plugins' and '../opensearch-dashboards-extra'.
 
       Available commands:
 
@@ -191,10 +191,10 @@ function help() {
 
       Global options:
 
-        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e opensearch-dashboards -e @osd/pm'.
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --oss                   Do not include the x-pack when running command.
-        --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
+        --skip-opensearch-dashboards-plugins   Filter all plugins in ./plugins and ../opensearch-dashboards-extra when running command.
         --no-cache              Disable the bootstrap cache
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
@@ -204,14 +204,14 @@ function help() {
 }
 
 async function run(argv) {
-  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].setLogLevel(Object(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__["pickLevelFromFlags"])(getopts__WEBPACK_IMPORTED_MODULE_1___default()(argv, {
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].setLogLevel(Object(_osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__["pickLevelFromFlags"])(getopts__WEBPACK_IMPORTED_MODULE_1___default()(argv, {
     boolean: ['verbose', 'debug', 'quiet', 'silent']
   }))); // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
 
   if (argv.includes('--')) {
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].error(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`);
+    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].error(`Using "--" is not allowed, as it doesn't work with 'yarn osd'.`);
     process.exit(1);
   }
 
@@ -246,7 +246,7 @@ async function run(argv) {
   const command = _commands__WEBPACK_IMPORTED_MODULE_4__["commands"][commandName];
 
   if (command === undefined) {
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].error(`[${commandName}] is not a valid command, see 'kbn --help'`);
+    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].error(`[${commandName}] is not a valid command, see 'osd --help'`);
     process.exit(1);
   }
 
@@ -8974,7 +8974,7 @@ const BootstrapCommand = {
 
   async run(projects, projectGraph, {
     options,
-    kbn
+    osd
   }) {
     const batchedProjectsByWorkspace = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projects, projectGraph, {
       batchByWorkspace: true
@@ -8997,23 +8997,23 @@ const BootstrapCommand = {
       }
     }
 
-    const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(kbn);
-    await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_7__["validateDependencies"])(kbn, yarnLock);
+    const yarnLock = await Object(_utils_yarn_lock__WEBPACK_IMPORTED_MODULE_6__["readYarnLock"])(osd);
+    await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_7__["validateDependencies"])(osd, yarnLock);
     await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_0__["linkProjectExecutables"])(projects, projectGraph);
     /**
-     * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
+     * At the end of the bootstrapping process we call all `osd:bootstrap` scripts
      * in the list of projects. We do this because some projects need to be
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
 
-    const checksums = await Object(_utils_project_checksums__WEBPACK_IMPORTED_MODULE_4__["getAllChecksums"])(kbn, _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"], yarnLock);
+    const checksums = await Object(_utils_project_checksums__WEBPACK_IMPORTED_MODULE_4__["getAllChecksums"])(osd, _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"], yarnLock);
     const caches = new Map();
     let cachedProjectCount = 0;
 
     for (const project of projects.values()) {
-      if (project.hasScript('kbn:bootstrap')) {
-        const file = new _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_5__["BootstrapCacheFile"](kbn, project, checksums);
+      if (project.hasScript('osd:bootstrap')) {
+        const file = new _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_5__["BootstrapCacheFile"](osd, project, checksums);
         const valid = options.cache && file.isValid();
 
         if (valid) {
@@ -9036,9 +9036,9 @@ const BootstrapCommand = {
       const cache = caches.get(project);
 
       if (cache && !cache.valid) {
-        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running [kbn:bootstrap] script`);
+        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running [osd:bootstrap] script`);
         cache.file.delete();
-        await project.runScriptStreaming('kbn:bootstrap');
+        await project.runScriptStreaming('osd:bootstrap');
         cache.file.write();
         _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${project.name}] bootstrap complete`);
       }
@@ -10827,9 +10827,9 @@ function ncp (source, dest, options, callback) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "log", function() { return log; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Log", function() { return Log; });
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LogLevel", function() { return _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["LogLevel"]; });
+/* harmony import */ var _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
+/* harmony import */ var _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LogLevel", function() { return _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["LogLevel"]; });
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -10853,7 +10853,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  */
 
 
-class Log extends _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLog"] {
+class Log extends _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLog"] {
   constructor() {
     super();
 
@@ -10863,8 +10863,8 @@ class Log extends _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["Tooli
   }
 
   setLogLevel(level) {
-    this.logLevel = Object(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["parseLogLevel"])(level);
-    this.setWriters([new _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLogTextWriter"]({
+    this.logLevel = Object(_osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["parseLogLevel"])(level);
+    this.setWriters([new _osd_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLogTextWriter"]({
       level: this.logLevel.name,
       writeTo: process.stdout
     })]);
@@ -11067,7 +11067,7 @@ function buildProjectGraph(projects) {
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName);
-        const dependentProjectIsInWorkspace = project.isWorkspaceProject || project.json.name === 'kibana';
+        const dependentProjectIsInWorkspace = project.isWorkspaceProject || project.json.name === 'opensearch-dashboards';
         project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
         projectDeps.push(dep);
       }
@@ -14690,10 +14690,10 @@ class Project {
   }
 
   getBuildConfig() {
-    return this.json.kibana && this.json.kibana.build || {};
+    return this.json.opensearchDashboards && this.json.opensearchDashboards.build || {};
   }
   /**
-   * Returns the directory that should be copied into the Kibana build artifact.
+   * Returns the directory that should be copied into the OpenSearch Dashboards build artifact.
    * This config can be specified to only include the project's build artifacts
    * instead of everything located in the project directory.
    */
@@ -14704,11 +14704,11 @@ class Project {
   }
 
   getCleanConfig() {
-    return this.json.kibana && this.json.kibana.clean || {};
+    return this.json.opensearchDashboards && this.json.opensearchDashboards.clean || {};
   }
 
   isFlaggedAsDevOnly() {
-    return !!(this.json.kibana && this.json.kibana.devOnly);
+    return !!(this.json.opensearchDashboards && this.json.opensearchDashboards.devOnly);
   }
 
   hasScript(name) {
@@ -27266,7 +27266,7 @@ __webpack_require__.r(__webpack_exports__);
 function getProjectPaths({
   rootPath,
   ossOnly,
-  skipKibanaPlugins
+  skipOpenSearchDashboardsPlugins
 }) {
   const projectPaths = [rootPath, Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'packages/*')]; // This is needed in order to install the dependencies for the declared
   // plugin functional used in the selenium functional tests.
@@ -27289,10 +27289,10 @@ function getProjectPaths({
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/test/functional_with_es_ssl/fixtures/plugins/*'));
   }
 
-  if (!skipKibanaPlugins) {
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*/packages/*'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*/plugins/*'));
+  if (!skipOpenSearchDashboardsPlugins) {
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../opensearch-dashboards-extra/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../opensearch-dashboards-extra/*/packages/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../opensearch-dashboards-extra/*/plugins/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*/packages/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*/plugins/*'));
@@ -27346,12 +27346,12 @@ const projectBySpecificitySorter = (a, b) => b.path.length - a.path.length;
 /** Get the changed files for a set of projects */
 
 
-async function getChangesForProjects(projects, kbn, log) {
+async function getChangesForProjects(projects, osd, log) {
   log.verbose('getting changed files');
   const {
     stdout
-  } = await execa__WEBPACK_IMPORTED_MODULE_3___default()('git', ['ls-files', '-dmto', '--exclude-standard', '--', ...Array.from(projects.values()).filter(p => kbn.isPartOfRepo(p)).map(p => p.path)], {
-    cwd: kbn.getAbsolute()
+  } = await execa__WEBPACK_IMPORTED_MODULE_3___default()('git', ['ls-files', '-dmto', '--exclude-standard', '--', ...Array.from(projects.values()).filter(p => osd.isPartOfRepo(p)).map(p => p.path)], {
+    cwd: osd.getAbsolute()
   });
   const output = stdout.trim();
   const unassignedChanges = new Map();
@@ -27396,13 +27396,13 @@ async function getChangesForProjects(projects, kbn, log) {
   const changesByProject = new Map();
 
   for (const project of sortedRelevantProjects) {
-    if (kbn.isOutsideRepo(project)) {
+    if (osd.isOutsideRepo(project)) {
       changesByProject.set(project, undefined);
       continue;
     }
 
     const ownChanges = new Map();
-    const prefix = kbn.getRelative(project.path);
+    const prefix = osd.getRelative(project.path);
 
     for (const [path, type] of unassignedChanges) {
       if (path.startsWith(prefix)) {
@@ -27424,15 +27424,15 @@ async function getChangesForProjects(projects, kbn, log) {
 /** Get the latest commit sha for a project */
 
 
-async function getLatestSha(project, kbn) {
-  if (kbn.isOutsideRepo(project)) {
+async function getLatestSha(project, osd) {
+  if (osd.isOutsideRepo(project)) {
     return;
   }
 
   const {
     stdout
   } = await execa__WEBPACK_IMPORTED_MODULE_3___default()('git', ['log', '-n', '1', '--pretty=format:%H', '--', project.path], {
-    cwd: kbn.getAbsolute()
+    cwd: osd.getAbsolute()
   });
   return stdout.trim() || undefined;
 }
@@ -27441,8 +27441,8 @@ async function getLatestSha(project, kbn) {
  */
 
 
-async function getChecksum(project, changes, yarnLock, kbn, log) {
-  const sha = await getLatestSha(project, kbn);
+async function getChecksum(project, changes, yarnLock, osd, log) {
+  const sha = await getLatestSha(project, osd);
 
   if (sha) {
     log.verbose(`[${project.name}] local sha:`, sha);
@@ -27458,14 +27458,14 @@ async function getChecksum(project, changes, yarnLock, kbn, log) {
       return `${path}:deleted`;
     }
 
-    const stats = await statAsync(kbn.getAbsolute(path));
+    const stats = await statAsync(osd.getAbsolute(path));
     log.verbose(`[${project.name}] modified time ${stats.mtimeMs} for ${path}`);
     return `${path}:${stats.mtimeMs}`;
   }));
   const depMap = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_4__["resolveDepsForProject"])({
     project,
     yarnLock,
-    kbn,
+    osd,
     log,
     includeDependentProject: false,
     productionDepsOnly: false
@@ -27502,14 +27502,14 @@ async function getChecksum(project, changes, yarnLock, kbn, log) {
  */
 
 
-async function getAllChecksums(kbn, log, yarnLock) {
-  const projects = kbn.getAllProjects();
-  const changesByProject = await getChangesForProjects(projects, kbn, log);
+async function getAllChecksums(osd, log, yarnLock) {
+  const projects = osd.getAllProjects();
+  const changesByProject = await getChangesForProjects(projects, osd, log);
   /** map of [project.name, cacheKey] */
 
   const cacheKeys = new Map();
   await Promise.all(Array.from(projects.values()).map(async project => {
-    cacheKeys.set(project.name, await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log));
+    cacheKeys.set(project.name, await getChecksum(project, changesByProject.get(project), yarnLock, osd, log));
   }));
   return cacheKeys;
 }
@@ -27552,16 +27552,16 @@ __webpack_require__.r(__webpack_exports__);
 // @ts-expect-error published types are worthless
 
 
-async function readYarnLock(kbn) {
+async function readYarnLock(osd) {
   try {
-    const contents = await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_1__["readFile"])(kbn.getAbsolute('yarn.lock'), 'utf8');
+    const contents = await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_1__["readFile"])(osd.getAbsolute('yarn.lock'), 'utf8');
     const yarnLock = Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["parse"])(contents);
 
     if (yarnLock.type === 'success') {
       return yarnLock.object;
     }
 
-    throw new Error('unable to read yarn.lock file, please run `yarn kbn bootstrap`');
+    throw new Error('unable to read yarn.lock file, please run `yarn osd bootstrap`');
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -27579,7 +27579,7 @@ async function readYarnLock(kbn) {
 function resolveDepsForProject({
   project: rootProject,
   yarnLock,
-  kbn,
+  osd,
   log,
   productionDepsOnly,
   includeDependentProject
@@ -27612,15 +27612,15 @@ function resolveDepsForProject({
         continue;
       }
 
-      if (includeDependentProject && kbn.hasProject(name)) {
-        projectQueue.push(kbn.getProject(name));
+      if (includeDependentProject && osd.hasProject(name)) {
+        projectQueue.push(osd.getProject(name));
       }
 
-      if (!kbn.hasProject(name)) {
+      if (!osd.hasProject(name)) {
         const pkg = yarnLock[req];
 
         if (!pkg) {
-          log.warning('yarn.lock file is out of date, please run `yarn kbn bootstrap` to re-enable caching');
+          log.warning('yarn.lock file is out of date, please run `yarn osd bootstrap` to re-enable caching');
           return;
         }
 
@@ -37958,7 +37958,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 class BootstrapCacheFile {
-  constructor(kbn, project, checksums) {
+  constructor(osd, project, checksums) {
     _defineProperty(this, "path", void 0);
 
     _defineProperty(this, "expectedValue", void 0);
@@ -37969,7 +37969,7 @@ class BootstrapCacheFile {
       return;
     }
 
-    const projectAndDepCacheKeys = Array.from(kbn.getProjectAndDeps(project.name).values()) // sort deps by name so that the key is stable
+    const projectAndDepCacheKeys = Array.from(osd.getProjectAndDeps(project.name).values()) // sort deps by name so that the key is stable
     .sort((a, b) => a.name.localeCompare(b.name)) // get the cacheKey for each project, return undefined if the cache key couldn't be determined
     .map(p => {
       const cacheKey = checksums.get(p.name);
@@ -38062,7 +38062,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function validateDependencies(kbn, yarnLock) {
+async function validateDependencies(osd, yarnLock) {
   // look through all of the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set();
@@ -38083,11 +38083,11 @@ async function validateDependencies(kbn, yarnLock) {
       delete yarnLock[req];
     }
 
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["writeFile"])(kbn.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["writeFile"])(osd.getAbsolute('yarn.lock'), Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["stringify"])(yarnLock), 'utf8');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
 
       Multiple version of lodash v4 were detected, so they have been removed
-      from the yarn.lock file. Please rerun yarn kbn bootstrap to coalese the
+      from the yarn.lock file. Please rerun yarn osd bootstrap to coalese the
       lodash versions installed.
 
       If you still see this error when you re-bootstrap then you might need
@@ -38103,7 +38103,7 @@ async function validateDependencies(kbn, yarnLock) {
   // of lodash v3 in the distributable
 
 
-  const prodDependencies = kbn.resolveAllProductionDependencies(yarnLock, _log__WEBPACK_IMPORTED_MODULE_4__["log"]);
+  const prodDependencies = osd.resolveAllProductionDependencies(yarnLock, _log__WEBPACK_IMPORTED_MODULE_4__["log"]);
   const lodash3Versions = new Set();
 
   for (const dep of prodDependencies.values()) {
@@ -38134,7 +38134,7 @@ async function validateDependencies(kbn, yarnLock) {
 
   const depRanges = new Map();
 
-  for (const project of kbn.getAllProjects().values()) {
+  for (const project of osd.getAllProjects().values()) {
     for (const [dep, range] of Object.entries(project.allDependencies)) {
       const existingDep = depRanges.get(dep);
 
@@ -38180,16 +38180,16 @@ async function validateDependencies(kbn, yarnLock) {
         ${duplicateRanges}
     `);
     process.exit(1);
-  } // look for packages that have the the `kibana.devOnly` flag in their package.json
-  // and make sure they aren't included in the production dependencies of Kibana
+  } // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
+  // and make sure they aren't included in the production dependencies of OpenSearch Dashboards 
 
 
-  const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(kbn, 'kibana');
+  const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
 
   if (devOnlyProjectsInProduction) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].error(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
-      Some of the packages in the production dependency chain for Kibana and X-Pack are
-      flagged with "kibana.devOnly" in their package.json. Please check changes made to
+      Some of the packages in the production dependency chain for OpenSearch Dashboards and X-Pack are
+      flagged with "opensearchDashboards.devOnly" in their package.json. Please check changes made to
       packages and their dependencies to ensure they don't end up in production.
 
       The devOnly dependencies that are being dependend on in production are:
@@ -38202,10 +38202,10 @@ async function validateDependencies(kbn, yarnLock) {
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].success('yarn.lock analysis completed without any issues');
 }
 
-function getDevOnlyProductionDepsTree(kbn, projectName) {
-  const project = kbn.getProject(projectName);
-  const childProjectNames = [...Object.keys(project.productionDependencies).filter(name => kbn.hasProject(name))];
-  const children = childProjectNames.map(n => getDevOnlyProductionDepsTree(kbn, n)).filter(t => !!t);
+function getDevOnlyProductionDepsTree(osd, projectName) {
+  const project = osd.getProject(projectName);
+  const childProjectNames = [...Object.keys(project.productionDependencies).filter(name => osd.hasProject(name))];
+  const children = childProjectNames.map(n => getDevOnlyProductionDepsTree(osd, n)).filter(t => !!t);
 
   if (!children.length && !project.isFlaggedAsDevOnly()) {
     return;
@@ -51644,52 +51644,52 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /**
- * Name of the script in the package/project package.json file to run during `kbn watch`.
+ * Name of the script in the package/project package.json file to run during `osd watch`.
  */
-const watchScriptName = 'kbn:watch';
+const watchScriptName = 'osd:watch';
 /**
- * Name of the Kibana project.
+ * Name of the OpenSearch Dashboards project.
  */
 
-const kibanaProjectName = 'kibana';
+const opensearchDashboardsProjectName = 'opensearch-dashboards';
 /**
- * Command that traverses through list of available projects/packages that have `kbn:watch` script in their
+ * Command that traverses through list of available projects/packages that have `osd:watch` script in their
  * package.json files, groups them into topology aware batches and then processes theses batches one by one
- * running `kbn:watch` scripts in parallel within the same batch.
+ * running `osd:watch` scripts in parallel within the same batch.
  *
- * Command internally relies on the fact that most of the build systems that are triggered by `kbn:watch`
+ * Command internally relies on the fact that most of the build systems that are triggered by `osd:watch`
  * will emit special "marker" once build/watch process is ready that we can use as completion condition for
- * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
+ * the `osd:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
 
 const WatchCommand = {
-  description: 'Runs `kbn:watch` script for every project.',
+  description: 'Runs `osd:watch` script for every project.',
   name: 'watch',
 
   async run(projects, projectGraph) {
     const projectsToWatch = new Map();
 
     for (const project of projects.values()) {
-      // We can't watch project that doesn't have `kbn:watch` script.
+      // We can't watch project that doesn't have `osd:watch` script.
       if (project.hasScript(watchScriptName)) {
         projectsToWatch.set(project.name, project);
       }
     }
 
     if (projectsToWatch.size === 0) {
-      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"](`There are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.`);
+      throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"](`There are no projects to watch found. Make sure that projects define 'osd:watch' script in 'package.json'.`);
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`); // Kibana should always be run the last, so we don't rely on automatic
+    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`); // OpenSearch Dashboards should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
 
-    const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
+    const shouldWatchOpenSearchDashboardsProject = projectsToWatch.delete(opensearchDashboardsProjectName);
     const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projectsToWatch, projectGraph);
 
-    if (shouldWatchKibanaProject) {
-      batchedProjects.push([projects.get(kibanaProjectName)]);
+    if (shouldWatchOpenSearchDashboardsProject) {
+      batchedProjects.push([projects.get(opensearchDashboardsProjectName)]);
     }
 
     await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
@@ -57815,7 +57815,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(144);
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(146);
 /* harmony import */ var _utils_projects_tree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(281);
-/* harmony import */ var _utils_kibana__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(503);
+/* harmony import */ var _utils_opensearch_dashboards__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(503);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -57848,9 +57848,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 async function runCommand(command, config) {
   try {
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(`Running [${command.name}] command from [${config.rootPath}]`);
-    const kbn = await _utils_kibana__WEBPACK_IMPORTED_MODULE_4__["Kibana"].loadFrom(config.rootPath);
-    const projects = kbn.getFilteredProjects({
-      skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
+    const osd = await _utils_opensearch_dashboards__WEBPACK_IMPORTED_MODULE_4__["OpenSearchDashboards"].loadFrom(config.rootPath);
+    const projects = osd.getFilteredProjects({
+      skipOpenSearchDashboardsPlugins: Boolean(config.options['skip-opensearch-dashboards-plugins']),
       ossOnly: Boolean(config.options.oss),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include)
@@ -57865,7 +57865,7 @@ async function runCommand(command, config) {
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(`Found ${projects.size.toString()} projects`);
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].debug(Object(_utils_projects_tree__WEBPACK_IMPORTED_MODULE_3__["renderProjectsTree"])(config.rootPath, projects));
     await command.run(projects, projectGraph, _objectSpread(_objectSpread({}, config), {}, {
-      kbn
+      osd
     }));
   } catch (error) {
     _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].error(`[${command.name}] failed:`);
@@ -57902,7 +57902,7 @@ function toArray(value) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Kibana", function() { return Kibana; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OpenSearchDashboards", function() { return OpenSearchDashboards; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var multimatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(504);
@@ -57944,19 +57944,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /**
  * Helper class for dealing with a set of projects as children of
- * the Kibana project. The kbn/pm is currently implemented to be
+ * the OpenSearch Dashboards project. The osd/pm is currently implemented to be
  * more generic, where everything is an operation of generic projects,
- * but that leads to exceptions where we need the kibana project and
- * do things like `project.get('kibana')!`.
+ * but that leads to exceptions where we need the OpenSearch Dashboards project and
+ * do things like `project.get('opensearch-dashboards')!`.
  *
  * Using this helper we can restructre the generic list of projects
- * as a Kibana object which encapulates all the projects in the
- * workspace and knows about the root Kibana project.
+ * as a OpenSearch Dashboards object which encapulates all the projects in the
+ * workspace and knows about the root OpenSearch Dashboards project.
  */
 
-class Kibana {
+class OpenSearchDashboards {
   static async loadFrom(rootPath) {
-    return new Kibana(await Object(_projects__WEBPACK_IMPORTED_MODULE_4__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"])({
+    return new OpenSearchDashboards(await Object(_projects__WEBPACK_IMPORTED_MODULE_4__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"])({
       rootPath
     })));
   }
@@ -57964,29 +57964,29 @@ class Kibana {
   constructor(allWorkspaceProjects) {
     this.allWorkspaceProjects = allWorkspaceProjects;
 
-    _defineProperty(this, "kibanaProject", void 0);
+    _defineProperty(this, "opensearchDashboardsProject", void 0);
 
-    const kibanaProject = allWorkspaceProjects.get('kibana');
+    const opensearchDashboardsProject = allWorkspaceProjects.get('opensearch-dashboards');
 
-    if (!kibanaProject) {
-      throw new TypeError('Unable to create Kibana object without all projects, including the Kibana project.');
+    if (!opensearchDashboardsProject) {
+      throw new TypeError('Unable to create OpenSearch Dashboards object without all projects, including the OpenSearch Dashboards project.');
     }
 
-    this.kibanaProject = kibanaProject;
+    this.opensearchDashboardsProject = opensearchDashboardsProject;
   }
-  /** make an absolute path by resolving subPath relative to the kibana repo */
+  /** make an absolute path by resolving subPath relative to the opensearch-dashboards repo */
 
 
   getAbsolute(...subPath) {
-    return path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.kibanaProject.path, ...subPath);
+    return path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.opensearchDashboardsProject.path, ...subPath);
   }
-  /** convert an absolute path to a relative path, relative to the kibana repo */
+  /** convert an absolute path to a relative path, relative to the opensearch-dashboards repo */
 
 
   getRelative(absolute) {
-    return path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.kibanaProject.path, absolute);
+    return path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.opensearchDashboardsProject.path, absolute);
   }
-  /** get a copy of the map of all projects in the kibana workspace */
+  /** get a copy of the map of all projects in the opensearch-dashboards workspace */
 
 
   getAllProjects() {
@@ -58025,7 +58025,7 @@ class Kibana {
     const filteredProjects = new Map();
     const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
     const filteredPkgJsonGlobs = Object(_config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"])(_objectSpread(_objectSpread({}, options), {}, {
-      rootPath: this.kibanaProject.path
+      rootPath: this.opensearchDashboardsProject.path
     })).map(g => path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = multimatch__WEBPACK_IMPORTED_MODULE_1___default()(pkgJsonPaths, filteredPkgJsonGlobs);
 
@@ -58043,7 +58043,7 @@ class Kibana {
   }
 
   isPartOfRepo(project) {
-    return project.path === this.kibanaProject.path || is_path_inside__WEBPACK_IMPORTED_MODULE_2___default()(project.path, this.kibanaProject.path);
+    return project.path === this.opensearchDashboardsProject.path || is_path_inside__WEBPACK_IMPORTED_MODULE_2___default()(project.path, this.opensearchDashboardsProject.path);
   }
 
   isOutsideRepo(project) {
@@ -58051,15 +58051,15 @@ class Kibana {
   }
 
   resolveAllProductionDependencies(yarnLock, log) {
-    const kibanaDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_3__["resolveDepsForProject"])({
-      project: this.kibanaProject,
+    const opensearchDashboardsDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_3__["resolveDepsForProject"])({
+      project: this.opensearchDashboardsProject,
       yarnLock,
-      kbn: this,
+      osd: this,
       includeDependentProject: true,
       productionDepsOnly: true,
       log
     });
-    return new Map([...kibanaDeps.entries()]);
+    return new Map([...opensearchDashboardsDeps.entries()]);
   }
 
 }
@@ -58227,11 +58227,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 async function buildProductionProjects({
-  kibanaRoot,
+  opensearchDashboardsRoot,
   buildRoot,
   onlyOSS
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
+  const projects = await getProductionProjects(opensearchDashboardsRoot, onlyOSS);
   const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
   const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
@@ -58241,15 +58241,15 @@ async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
+      await copyToBuild(project, opensearchDashboardsRoot, buildRoot);
     }
   }
 }
 /**
  * Returns the subset of projects that should be built into the production
- * bundle. As we copy these into Kibana's `node_modules` during the build step,
- * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies. If onlyOSS
+ * bundle. As we copy these into OpenSearch Dashboards 's `node_modules` during the build step,
+ * and let OpenSearch Dashboards 's build process be responsible for installing dependencies,
+ * we only include OpenSearch Dashboards 's transitive _production_ dependencies. If onlyOSS
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
 
@@ -58258,7 +58258,7 @@ async function getProductionProjects(rootPath, onlyOSS) {
     rootPath
   });
   const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
-  const projectsSubset = [projects.get('kibana')];
+  const projectsSubset = [projects.get('opensearch-dashboards')];
 
   if (projects.has('x-pack')) {
     projectsSubset.push(projects.get('x-pack'));
@@ -58266,9 +58266,9 @@ async function getProductionProjects(rootPath, onlyOSS) {
 
   const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
     onlyProductionDependencies: true
-  }); // We remove Kibana, as we're already building Kibana
+  }); // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards 
 
-  productionProjects.delete('kibana');
+  productionProjects.delete('opensearch-dashboards');
 
   if (onlyOSS) {
     productionProjects.forEach(project => {
@@ -58302,16 +58302,16 @@ async function buildProject(project) {
  * project or some other location defined in the project's `package.json`.
  *
  * When copying all the files into the build, we exclude `node_modules` because
- * we want the Kibana build to be responsible for actually installing all
- * dependencies. The primary reason for allowing the Kibana build process to
+ * we want the OpenSearch Dashboards build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the OpenSearch Dashboards build process to
  * manage dependencies is that it will "dedupe" them, so we don't include
  * unnecessary copies of dependencies.
  */
 
 
-async function copyToBuild(project, kibanaRoot, buildRoot) {
+async function copyToBuild(project, opensearchDashboardsRoot, buildRoot) {
   // We want the package to have the same relative location within the build
-  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(opensearchDashboardsRoot, project.path);
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),

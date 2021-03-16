@@ -99,7 +99,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-    "KBN_NP_PLUGINS_BUILT=true",
+    "OSD_NP_PLUGINS_BUILT=true",
     "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}"
   ] + additionalEnvs) {
@@ -274,7 +274,7 @@ def doSetup() {
 
 def buildOss(maxWorkers = '') {
   notifyOnError {
-    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+    withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
     }
   }
@@ -282,7 +282,7 @@ def buildOss(maxWorkers = '') {
 
 def buildXpack(maxWorkers = '') {
   notifyOnError {
-    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+    withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
   }

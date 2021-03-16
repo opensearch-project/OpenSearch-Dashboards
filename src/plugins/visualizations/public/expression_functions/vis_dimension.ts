@@ -21,8 +21,8 @@ import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
-  OpensearchDashboardsDatatable,
-  OpensearchDashboardsDatatableColumn,
+  OpenSearchDashboardsDatatable,
+  OpenSearchDashboardsDatatableColumn,
 } from '../../../expressions/public';
 
 interface Arguments {
@@ -34,7 +34,7 @@ interface Arguments {
 type ExpressionValueVisDimension = ExpressionValueBoxed<
   'vis_dimension',
   {
-    accessor: number | OpensearchDashboardsDatatableColumn;
+    accessor: number | OpenSearchDashboardsDatatableColumn;
     format: {
       id?: string;
       params: unknown;
@@ -44,7 +44,7 @@ type ExpressionValueVisDimension = ExpressionValueBoxed<
 
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
-  OpensearchDashboardsDatatable,
+  OpenSearchDashboardsDatatable,
   Arguments,
   ExpressionValueVisDimension
 > => ({

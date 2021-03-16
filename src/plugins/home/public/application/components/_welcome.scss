@@ -1,5 +1,5 @@
 .homWelcome {
-  @include kibanaFullScreenGraphics($euiZLevel6);
+  @include opensearchDashboardsFullScreenGraphics($euiZLevel6);
 }
 
 .homWelcome__header {
@@ -10,7 +10,7 @@
 
 .homWelcome__logo {
   margin-bottom: $euiSizeXL;
-  @include kibanaCircleLogo;
+  @include opensearchDashboardsCircleLogo;
   @include euiBottomShadowMedium;
 }
 

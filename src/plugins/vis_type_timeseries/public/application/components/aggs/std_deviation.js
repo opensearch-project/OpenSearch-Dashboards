@@ -36,9 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
-const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
+const RESTRICT_FIELDS = [OSD_FIELD_TYPES.NUMBER];
 
 const StandardDeviationAggUi = (props) => {
   const { series, panel, fields, intl } = props;

@@ -60,7 +60,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
     },
     async (context, request, res) => {
       const callMsearch = getCallMsearch({
-        opensearchClient: context.core.elasticsearch.client,
+        opensearchClient: context.core.opensearch.client,
         globalConfig$: deps.globalConfig$,
         uiSettings: context.core.uiSettings.client,
       });

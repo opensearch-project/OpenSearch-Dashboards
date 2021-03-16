@@ -65,6 +65,6 @@ export const externals: {
 };
 
 /**
- * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
+ * Webpack loader for configuring the public path lookup from `window.__osdPublicPath__`.
  */
 export const publicPathLoader: string;

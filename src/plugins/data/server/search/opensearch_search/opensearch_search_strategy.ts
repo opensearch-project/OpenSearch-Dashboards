@@ -59,7 +59,7 @@ export const opensearchSearchStrategyProvider = (
 
       try {
         const promise = shimAbortSignal(
-          context.core.elasticsearch.client.asCurrentUser.search(params),
+          context.core.opensearch.client.asCurrentUser.search(params),
           options?.abortSignal
         );
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;

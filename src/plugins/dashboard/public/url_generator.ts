@@ -21,7 +21,7 @@ import {
   TimeRange,
   Filter,
   Query,
-  esFilters,
+  opensearchFilters,
   QueryState,
   RefreshInterval,
 } from '../../data/public';
@@ -128,7 +128,7 @@ export const createDashboardUrlGenerator = (
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
-        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => !opensearchFilters.isFilterPinned(f)),
         viewMode: state.viewMode,
       }),
       { useHash },
@@ -139,7 +139,7 @@ export const createDashboardUrlGenerator = (
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
-        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => opensearchFilters.isFilterPinned(f)),
         refreshInterval: state.refreshInterval,
       }),
       { useHash },

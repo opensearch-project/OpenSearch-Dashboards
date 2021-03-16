@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 import { PullRequest } from './pr_api';
 import { Version } from './version';

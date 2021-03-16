@@ -1109,7 +1109,7 @@
       },
       {
         packagePatterns: [
-          '^@kbn/.*',
+          '^@osd/.*',
         ],
         enabled: false,
       },
