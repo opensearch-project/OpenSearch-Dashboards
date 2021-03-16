@@ -48,7 +48,7 @@ const successfulSearchResponse = {
   rawResponse: {
     aggregations: {
       indices: {
-        buckets: [{ key: 'opensearch_dashboards_sample_data_ecommerce' }, { key: '.kibana_1' }],
+        buckets: [{ key: 'kibana_sample_data_ecommerce' }, { key: '.kibana_1' }],
       },
     },
   },
@@ -88,7 +88,7 @@ describe('getIndices', () => {
     expect(result.length).toBe(4);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
-    expect(result[2].name).toBe('opensearch_dashboards_sample_data_ecommerce');
+    expect(result[2].name).toBe('kibana_sample_data_ecommerce');
     expect(result[3].name).toBe('remoteCluster1:bar-01');
   });
 

@@ -37,7 +37,7 @@ describe('preview_scripted_field route', () => {
       },
     };
     const mockBody = {
-      index: 'opensearch_dashboards_sample_data_logs',
+      index: 'kibana_sample_data_logs',
       name: 'my_scripted_field',
       script: `doc['foo'].value`,
     };
@@ -70,7 +70,7 @@ describe('preview_scripted_field route', () => {
             },
           },
         },
-        "index": "opensearch_dashboards_sample_data_logs",
+        "index": "kibana_sample_data_logs",
         "size": 10,
         "timeout": "30s",
       }
@@ -89,7 +89,7 @@ describe('preview_scripted_field route', () => {
       },
     };
     const mockBody = {
-      index: 'opensearch_dashboards_sample_data_logs',
+      index: 'kibana_sample_data_logs',
       name: 'my_scripted_field',
       script: `doc['foo'].value`,
       query: {
@@ -132,7 +132,7 @@ describe('preview_scripted_field route', () => {
             },
           },
         },
-        "index": "opensearch_dashboards_sample_data_logs",
+        "index": "kibana_sample_data_logs",
         "size": 10,
         "timeout": "30s",
       }

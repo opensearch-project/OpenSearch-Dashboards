@@ -90,7 +90,7 @@ describe('esdsl', () => {
           ],
         },
         {
-          index: 'opensearch_dashboards_sample_data_logs',
+          index: 'kibana_sample_data_logs',
           size: 4,
           dsl: '{"_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
         },
@@ -120,7 +120,7 @@ describe('esdsl', () => {
           query: { language: 'lucene', query: '*' },
         },
         {
-          index: 'opensearch_dashboards_sample_data_logs',
+          index: 'kibana_sample_data_logs',
           size: 4,
           dsl: '{ "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
         },
@@ -158,7 +158,7 @@ describe('esdsl', () => {
         ],
       },
       {
-        index: 'opensearch_dashboards_sample_data_logs',
+        index: 'kibana_sample_data_logs',
         size: 4,
         dsl: '{ "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
       },

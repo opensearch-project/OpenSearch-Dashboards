@@ -47,9 +47,9 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
         id123: 123,
       },
       onChange: jest.fn(),
-      indexPattern: 'opensearch_dashboards_sample_data_flights',
+      indexPattern: 'kibana_sample_data_flights',
       fields: {
-        opensearch_dashboards_sample_data_flights: [
+        kibana_sample_data_flights: [
           {
             aggregatable: true,
             name: 'OriginCityName',

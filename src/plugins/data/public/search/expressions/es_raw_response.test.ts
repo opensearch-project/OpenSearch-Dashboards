@@ -87,7 +87,7 @@ describe('esRawResponse', () => {
             max_score: 0,
             hits: [
               {
-                _index: 'opensearch_dashboards_sample_data_ecommerce',
+                _index: 'kibana_sample_data_ecommerce',
                 _id: 'AncqUnMBMY_orZma2mZy',
                 _type: 'document',
                 _score: 0,
@@ -173,7 +173,7 @@ describe('esRawResponse', () => {
                 },
               },
               {
-                _index: 'opensearch_dashboards_sample_data_ecommerce',
+                _index: 'kibana_sample_data_ecommerce',
                 _id: 'I3cqUnMBMY_orZma2mZy',
                 _type: 'document',
                 _score: 0,
@@ -259,7 +259,7 @@ describe('esRawResponse', () => {
                 },
               },
               {
-                _index: 'opensearch_dashboards_sample_data_ecommerce',
+                _index: 'kibana_sample_data_ecommerce',
                 _id: 'JHcqUnMBMY_orZma2mZy',
                 _score: 0,
                 _type: 'document',
@@ -345,7 +345,7 @@ describe('esRawResponse', () => {
                 },
               },
               {
-                _index: 'opensearch_dashboards_sample_data_ecommerce',
+                _index: 'kibana_sample_data_ecommerce',
                 _id: 'LHcqUnMBMY_orZma2mZy',
                 _score: 0,
                 _type: 'document',
@@ -457,7 +457,7 @@ describe('esRawResponse', () => {
           max_score: 0,
           hits: [
             {
-              _index: 'opensearch_dashboards_sample_data_ecommerce',
+              _index: 'kibana_sample_data_ecommerce',
               _id: 'AncqUnMBMY_orZma2mZy',
               _type: 'document',
               _score: 0,
@@ -543,7 +543,7 @@ describe('esRawResponse', () => {
               },
             },
             {
-              _index: 'opensearch_dashboards_sample_data_ecommerce',
+              _index: 'kibana_sample_data_ecommerce',
               _id: 'I3cqUnMBMY_orZma2mZy',
               _type: 'document',
               _score: 0,
@@ -629,7 +629,7 @@ describe('esRawResponse', () => {
               },
             },
             {
-              _index: 'opensearch_dashboards_sample_data_ecommerce',
+              _index: 'kibana_sample_data_ecommerce',
               _id: 'JHcqUnMBMY_orZma2mZy',
               _score: 0,
               _type: 'document',
@@ -715,7 +715,7 @@ describe('esRawResponse', () => {
               },
             },
             {
-              _index: 'opensearch_dashboards_sample_data_ecommerce',
+              _index: 'kibana_sample_data_ecommerce',
               _id: 'LHcqUnMBMY_orZma2mZy',
               _score: 0,
               _type: 'document',
