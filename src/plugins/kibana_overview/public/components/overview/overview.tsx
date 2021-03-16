@@ -129,7 +129,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       <OverviewPageHeader
         addBasePath={addBasePath}
         hideToolbar={isNewKibanaInstance}
-        iconType="logoAWS"
+        iconType="inputOutput"
         title={<FormattedMessage defaultMessage="OpenSearch Dashboards" id="kibanaOverview.header.title" />}
       />
 

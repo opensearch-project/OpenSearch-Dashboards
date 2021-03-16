@@ -75,34 +75,34 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic</title>
+        <title>OpenSearch</title>
         <Fonts url={uiPublicUrl} />
         {/* Favicons (generated from http://realfavicongenerator.net/) */}
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
+          href={`${uiPublicUrl}/favicons/apple-touch-icon-heatmap.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
+          href={`${uiPublicUrl}/favicons/favicon-heatmap-32x32.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
+          href={`${uiPublicUrl}/favicons/favicon-heatmap-16x16.png`}
         />
         <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
         <link
           rel="mask-icon"
           color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
+          href={`${uiPublicUrl}/favicons/safari-pinned-tab-heatmap.svg`}
         />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon-heatmap.ico`} />
+        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig-heatmap.xml`} />
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
 
