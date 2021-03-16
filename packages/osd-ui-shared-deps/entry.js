@@ -25,14 +25,14 @@ window.$ = window.jQuery = Jquery;
 require('./flot_charts');
 
 // stateful deps
-export const KbnI18n = require('@kbn/i18n');
-export const KbnI18nAngular = require('@kbn/i18n/angular');
-export const KbnI18nReact = require('@kbn/i18n/react');
+export const OsdI18n = require('@osd/i18n');
+export const OsdI18nAngular = require('@osd/i18n/angular');
+export const OsdI18nReact = require('@osd/i18n/react');
 export const Angular = require('angular');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
-export const KbnMonaco = require('@kbn/monaco');
-export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
+export const OsdMonaco = require('@osd/monaco');
+export const MonacoBarePluginApi = require('@osd/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');

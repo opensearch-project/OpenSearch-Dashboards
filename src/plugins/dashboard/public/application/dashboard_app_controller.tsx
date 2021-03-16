@@ -44,7 +44,7 @@ import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_emp
 
 import {
   connectToQueryState,
-  esFilters,
+  opensearchFilters,
   IndexPattern,
   IndexPatternsContract,
   QueryState,
@@ -216,7 +216,7 @@ export class DashboardAppController {
         ),
       },
       {
-        filters: esFilters.FilterStateStore.APP_STATE,
+        filters: opensearchFilters.FilterStateStore.APP_STATE,
         query: true,
       }
     );
@@ -467,10 +467,10 @@ export class DashboardAppController {
               // appState.save which will cause refreshDashboardContainer to be called.
 
               if (
-                !esFilters.compareFilters(
+                !opensearchFilters.compareFilters(
                   container.getInput().filters,
                   filterManager.getFilters(),
-                  esFilters.COMPARE_ALL_OPTIONS
+                  opensearchFilters.COMPARE_ALL_OPTIONS
                 )
               ) {
                 // Add filters modifies the object passed to it, hence the clone deep.
@@ -571,10 +571,10 @@ export class DashboardAppController {
 
       // Filters shouldn't  be compared using regular isEqual
       if (
-        !esFilters.compareFilters(
+        !opensearchFilters.compareFilters(
           containerInput.filters,
           appStateDashboardInput.filters,
-          esFilters.COMPARE_ALL_OPTIONS
+          opensearchFilters.COMPARE_ALL_OPTIONS
         )
       ) {
         differences.filters = appStateDashboardInput.filters;

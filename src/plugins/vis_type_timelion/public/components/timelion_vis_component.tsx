@@ -24,7 +24,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { useOpensearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import {
@@ -85,7 +85,7 @@ function TimelionVisComponent({
   renderComplete,
   fireEvent,
 }: TimelionVisComponentProps) {
-  const opensearchDashboards = useOpensearchDashboards<TimelionVisDependencies>();
+  const opensearchDashboards = useOpenSearchDashboards<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
   const [chartElem, setChartElem] = useState<HTMLDivElement | null>(null);

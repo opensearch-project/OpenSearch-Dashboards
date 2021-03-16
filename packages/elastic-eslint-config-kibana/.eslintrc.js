@@ -7,7 +7,7 @@ module.exports = {
   ],
 
   plugins: [
-    '@kbn/eslint-plugin-eslint',
+    '@osd/eslint-plugin-eslint',
     'prettier',
   ],
 
@@ -27,12 +27,12 @@ module.exports = {
       },
     ],
 
-    '@kbn/eslint/module_migration': [
+    '@osd/eslint/module_migration': [
       'error',
       [
         {
           from: 'expect.js',
-          to: '@kbn/expect',
+          to: '@osd/expect',
         },
         {
           from: 'mkdirp',
@@ -44,7 +44,7 @@ module.exports = {
           to: '@elastic/numeral',
         },
         {
-          from: '@kbn/elastic-idx',
+          from: '@osd/elastic-idx',
           to: false,
           disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
         },
@@ -57,13 +57,13 @@ module.exports = {
           to: 'react-router-dom',
         },
         {
-          from: '@kbn/ui-shared-deps/monaco',
-          to: '@kbn/monaco',
+          from: '@osd/ui-shared-deps/monaco',
+          to: '@osd/monaco',
         },
         {
           from: 'monaco-editor',
           to: false,
-          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`
+          disallowedMessage: `Don't import monaco directly, use or add exports to @osd/monaco`
         },
       ],
     ],

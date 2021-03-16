@@ -365,10 +365,10 @@ export const buildVislibDimensions = async (vis: any, params: BuildPipelineParam
     const xAgg = vis.data.aggs.getResponseAggs()[dimensions.x.accessor];
     if (xAgg.type.name === 'date_histogram') {
       dimensions.x.params.date = true;
-      const { esUnit, esValue } = xAgg.buckets.getInterval();
-      dimensions.x.params.interval = moment.duration(esValue, esUnit);
-      dimensions.x.params.intervalESValue = esValue;
-      dimensions.x.params.intervalESUnit = esUnit;
+      const { opensearchUnit, opensearchValue } = xAgg.buckets.getInterval();
+      dimensions.x.params.interval = moment.duration(opensearchValue, opensearchUnit);
+      dimensions.x.params.intervalESValue = opensearchValue;
+      dimensions.x.params.intervalESUnit = opensearchUnit;
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
@@ -411,7 +411,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   } else {
     // request handler
     if (vis.type.requestHandler === 'courier') {
-      pipeline += `esaggs
+      pipeline += `opensearchaggs
     ${prepareString('index', indexPattern!.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false}
@@ -429,7 +429,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     } else if (vislibCharts.includes(vis.type.name)) {
       const visConfig = { ...vis.params };
       visConfig.dimensions = await buildVislibDimensions(vis, params);
-
       pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visConfig)}`;
     } else {
       const visConfig = { ...vis.params };
@@ -446,6 +445,5 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       }
     }
   }
-
   return pipeline;
 };

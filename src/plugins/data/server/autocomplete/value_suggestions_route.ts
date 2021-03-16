@@ -55,7 +55,7 @@ export function registerValueSuggestionsRoute(
       const config = await config$.pipe(first()).toPromise();
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
-      const { client } = context.core.elasticsearch.legacy;
+      const { client } = context.core.opensearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {

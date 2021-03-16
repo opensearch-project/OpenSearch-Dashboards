@@ -240,7 +240,7 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const osdServer = osdTestServer.getKbnServer(root);
+        const osdServer = osdTestServer.getOsdServer(root);
         osdServer.server.route({
           method: 'GET',
           path: legacyUrl,
@@ -278,7 +278,7 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const osdServer = osdTestServer.getKbnServer(root);
+        const osdServer = osdTestServer.getOsdServer(root);
         osdServer.server.route({
           method: 'GET',
           path: legacyUrl,
@@ -307,7 +307,7 @@ describe('http service', () => {
 
         await root.start();
 
-        const osdServer = osdTestServer.getKbnServer(root);
+        const osdServer = osdTestServer.getOsdServer(root);
         osdServer.server.route({
           method: 'GET',
           path: '/legacy',
@@ -331,7 +331,7 @@ describe('http service', () => {
 
         await root.start();
 
-        const osdServer = osdTestServer.getKbnServer(root);
+        const osdServer = osdTestServer.getOsdServer(root);
         osdServer.server.route({
           method: 'GET',
           path: '/legacy',
@@ -363,7 +363,7 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const osdServer = osdTestServer.getKbnServer(root);
+        const osdServer = osdTestServer.getOsdServer(root);
         osdServer.server.route({
           method: 'GET',
           path: legacyUrl,

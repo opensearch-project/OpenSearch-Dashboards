@@ -33,7 +33,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -43,7 +43,7 @@ const isFieldHistogram = (fields, indexPattern, field) => {
   if (!indexFields) return false;
   const fieldObject = indexFields.find((f) => f.name === field);
   if (!fieldObject) return false;
-  return fieldObject.type === KBN_FIELD_TYPES.HISTOGRAM;
+  return fieldObject.type === OSD_FIELD_TYPES.HISTOGRAM;
 };
 
 export const FilterRatioAgg = (props) => {

@@ -21,7 +21,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 
 import {
   createTestServers,
-  TestOpensearchUtils,
+  TestOpenSearchUtils,
   TestOpenSearchDashboardsUtils,
   TestUtils,
 } from '../../../../test_helpers/osd_server';
@@ -33,7 +33,7 @@ const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let servers: TestUtils;
-  let opensearchServer: TestOpensearchUtils;
+  let opensearchServer: TestOpenSearchUtils;
   let osd: TestOpenSearchDashboardsUtils;
 
   beforeAll(async function () {
@@ -42,7 +42,7 @@ describe('createOrUpgradeSavedConfig()', () => {
         jest.setTimeout(t);
       },
     });
-    opensearchServer = await servers.startES();
+    opensearchServer = await servers.startOpenSearch();
     osd = await servers.startOpenSearchDashboards();
 
     savedObjectsClient = osd.coreStart.savedObjects.getScopedClient(

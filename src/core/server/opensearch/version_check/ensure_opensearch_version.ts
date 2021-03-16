@@ -89,7 +89,7 @@ export function mapNodesVersionCompatibility(
   // Aggregate incompatible OpenSearch nodes.
   const incompatibleNodes = nodes.filter(
     (node) => !opensearchVersionCompatibleWithOpenSearchDashboards(node.version, opensearchDashboardsVersion)
-  opensearch
+  )
 
   // Aggregate OpenSearch nodes which should prompt a OpenSearch Dashboards upgrade. It's acceptable
   // if OpenSearch and OpenSearch Dashboards versions are not the same as long as they are not

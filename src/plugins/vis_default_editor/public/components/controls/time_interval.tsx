@@ -25,7 +25,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 import { search, AggParamOption } from '../../../../data/public';
 import { AggParamEditorProps } from '../agg_param_props';
-const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
+const { parseOpenSearchInterval, InvalidOpenSearchCalendarIntervalError } = search.aggs;
 
 // we check if OpenSearch interval is valid to show a user appropriate error message
 // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
@@ -36,10 +36,10 @@ function isValidCalendarInterval(interval: string) {
   }
 
   try {
-    parseEsInterval(interval);
+    parseOpenSearchInterval(interval);
     return { isValidCalendarValue: true };
   } catch (e) {
-    if (e instanceof InvalidEsCalendarIntervalError) {
+    if (e instanceof InvalidOpenSearchCalendarIntervalError) {
       return { isValidCalendarValue: false, error: e.message };
     }
 
