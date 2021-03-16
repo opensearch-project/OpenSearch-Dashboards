@@ -128,7 +128,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: DEFAULT_QUERY_LANGUAGE,
       description: i18n.translate('data.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
+          'Query language used by the query bar. KQL is a new language built specifically for OpenSearch Dashboards.',
       }),
       type: 'select',
       options: ['lucene', 'kuery'],
@@ -146,7 +146,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: '{ "unmapped_type": "boolean" }',
       description: i18n.translate('data.advancedSettings.sortOptionsText', {
-        defaultMessage: '{optionsLink} for the Elasticsearch sort parameter',
+        defaultMessage: '{optionsLink} for the OpenSearch sort parameter',
         description:
           'Part of composite text: data.advancedSettings.sortOptions.optionsLinkText + ' +
           'data.advancedSettings.sortOptionsText',
@@ -255,8 +255,8 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       type: 'number',
       description: i18n.translate('data.advancedSettings.courier.maxRequestsText', {
         defaultMessage:
-          'Controls the {maxRequestsLink} setting used for _msearch requests sent by Kibana. ' +
-          'Set to 0 to disable this config and use the Elasticsearch default.',
+          'Controls the {maxRequestsLink} setting used for _msearch requests sent by OpenSearch Dashboards. ' +
+          'Set to 0 to disable this config and use the OpenSearch default.',
         values: {
           maxRequestsLink: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`,
@@ -536,7 +536,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+        defaultMessage: 'The timefilter selection to use when OpenSearch Dashboards is started without one',
       }),
       requiresPageReload: true,
       schema: schema.object({

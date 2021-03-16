@@ -220,7 +220,7 @@ export class VisualizePlugin
         title: 'Visualize',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
-            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+            'Create visualizations and aggregate data stores in your OpenSearch indices.',
         }),
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
