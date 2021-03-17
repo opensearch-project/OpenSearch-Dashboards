@@ -44,7 +44,7 @@ describe('Saved Object', () => {
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
-   * that can be used to stub es calls.
+   * that can be used to stub opensearch calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
    * @returns {{attributes: {}, type: string, id: *, _version: string}}
@@ -60,7 +60,7 @@ describe('Saved Object', () => {
   }
 
   /**
-   * Stubs some of the es retrieval calls so it returns the given response.
+   * Stubs some of the opensearch retrieval calls so it returns the given response.
    * @param {Object} mockDocResponse
    */
   function stubOpenSearchResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {

@@ -62,7 +62,7 @@ export function getUniqKeys(obj) {
   // Populate `uniqueXValues` with the preserved x key order from the
   // original tabified data. `flattenedData` only contains the first
   // non-zero values in each series, and therefore is not guaranteed
-  // to match the order that came back from ES.
+  // to match the order that came back from OpenSearch.
   if (obj.xAxisOrderedValues) {
     obj.xAxisOrderedValues.forEach(initXValue);
   }

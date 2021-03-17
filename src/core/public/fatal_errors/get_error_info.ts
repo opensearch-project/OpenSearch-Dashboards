@@ -32,7 +32,7 @@ function formatErrorMessage(error: any): string {
     return inspect(error);
   }
 
-  // handle es error response with `root_cause`s
+  // handle opensearch error response with `root_cause`s
   if (error.resp && error.resp.error && error.resp.error.root_cause) {
     return error.resp.error.root_cause.map((cause: { reason: string }) => cause.reason).join('\n');
   }

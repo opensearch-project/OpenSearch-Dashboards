@@ -60,9 +60,9 @@ interface FieldSubType {
 export interface Field {
   name: string;
   type: string;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
+  // opensearchTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
+  opensearchTypes?: string[];
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;
@@ -109,15 +109,15 @@ export interface DashboardAppStateTransitions {
   set: (
     state: DashboardAppState
   ) => <T extends keyof DashboardAppState>(
-    prop: T,
-    value: DashboardAppState[T]
-  ) => DashboardAppState;
+      prop: T,
+      value: DashboardAppState[T]
+    ) => DashboardAppState;
   setOption: (
     state: DashboardAppState
   ) => <T extends keyof DashboardAppState['options']>(
-    prop: T,
-    value: DashboardAppState['options'][T]
-  ) => DashboardAppState;
+      prop: T,
+      value: DashboardAppState['options'][T]
+    ) => DashboardAppState;
 }
 
 export interface SavedDashboardPanelMap {

@@ -20,7 +20,7 @@
 /* eslint-disable-next-line @osd/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import * as xJson from './xjson';
-import * as esql from './esql';
+import * as opensearchql from './opensearchql';
 import * as painless from './painless';
 
 export const registerLexerRules = (m: typeof monaco) => {
@@ -28,6 +28,6 @@ export const registerLexerRules = (m: typeof monaco) => {
   m.languages.setMonarchTokensProvider(xJson.ID, xJson.lexerRules);
   m.languages.register({ id: painless.ID });
   m.languages.setMonarchTokensProvider(painless.ID, painless.lexerRules);
-  m.languages.register({ id: esql.ID });
-  m.languages.setMonarchTokensProvider(esql.ID, esql.lexerRules);
+  m.languages.register({ id: opensearchql.ID });
+  m.languages.setMonarchTokensProvider(opensearchql.ID, opensearchql.lexerRules);
 };
