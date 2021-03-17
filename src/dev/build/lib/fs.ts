@@ -30,7 +30,7 @@ import File from 'vinyl';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 const pipelineAsync = promisify(pipeline);
 const mkdirAsync = promisify(fs.mkdir);

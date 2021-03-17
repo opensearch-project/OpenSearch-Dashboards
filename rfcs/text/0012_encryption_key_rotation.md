@@ -22,7 +22,7 @@ Before old decryption-only key is disposed administrators may want to call a ded
 ```http request
 POST https://localhost:5601/api/encrypted_saved_objects/rotate_key?conflicts=abort
 Content-Type: application/json
-Kbn-Xsrf: true
+Osd-Xsrf: true
 ```
 
 # Motivation
@@ -82,7 +82,7 @@ We think that the best option we have right now is a dedicated API endpoint that
 ```http request
 POST https://localhost:5601/api/encrypted_saved_objects/rotate_key?conflicts=abort
 Content-Type: application/json
-Kbn-Xsrf: true
+Osd-Xsrf: true
 ```
 
 This will be a protected endpoint and only user with enough privileges will be able to use it.

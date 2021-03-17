@@ -20,13 +20,13 @@
 import { readFileSync } from 'fs';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAbsolutePathSerializer,
   createRecursiveSerializer,
-} from '@kbn/dev-utils';
+} from '@osd/dev-utils';
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { copyWorkspacePackages } from '@kbn/pm';
+import { copyWorkspacePackages } from '@osd/pm';
 
 import { read, write, Task } from '../lib';
 

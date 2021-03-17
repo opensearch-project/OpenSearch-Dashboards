@@ -10,4 +10,4 @@ nice=""
 # The default behavior is to simply log a message "program stop failed; still running"
 KILL_ON_STOP_TIMEOUT=0
 
-KBN_PATH_CONF="/etc/kibana"
+OSD_PATH_CONF="/etc/kibana"

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Project } from '@kbn/pm';
+import { Project } from '@osd/pm';
 
 import { Task } from '../lib';
 
