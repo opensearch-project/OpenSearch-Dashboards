@@ -1,6 +1,6 @@
 # OpenSearch Dashboards
 
-OpenSearch Dashboards is your window into the [OpenSearch Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for OpenSearch.
+OpenSearch Dashboards is your front end into the OpenSearch. Specifically, it's a browser-based analytics and search dashboard for OpenSearch.
 
 - [Getting Started](#getting-started)
   - [Using a OpenSearch Dashboards Release](#using-a-opensearch-dashboards-release)
