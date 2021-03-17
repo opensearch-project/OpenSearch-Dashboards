@@ -199,37 +199,37 @@ describe('#installArchive(path)', () => {
 
 describe('#start(installPath)', () => {
   it('rejects when bin/OpenSearch exists with 0 before starting', async () => {
-    mockEsBin({ exitCode: 0, start: false });
+    mockOpenSearchBin({ exitCode: 0, start: false });
 
     await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
   });
 
   it('rejects when bin/opensearch exists with 143 before starting', async () => {
-    mockEsBin({ exitCode: 143, start: false });
+    mockOpenSearchBin({ exitCode: 143, start: false });
 
     await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
   });
 
   it('rejects when bin/opensearch exists with 130 before starting', async () => {
-    mockEsBin({ exitCode: 130, start: false });
+    mockOpenSearchBin({ exitCode: 130, start: false });
 
     await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
   });
 
   it('rejects when bin/opensearch exists with 1 before starting', async () => {
-    mockEsBin({ exitCode: 1, start: false });
+    mockOpenSearchBin({ exitCode: 1, start: false });
 
     await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited with code 1');
   });
 
   it('resolves when bin/opensearch logs "started"', async () => {
-    mockEsBin({ start: true });
+    mockOpenSearchBin({ start: true });
 
     await new Cluster({ log }).start();
   });
 
   it('rejects if #start() was called previously', async () => {
-    mockEsBin({ start: true });
+    mockOpenSearchBin({ start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start();
@@ -237,7 +237,7 @@ describe('#start(installPath)', () => {
   });
 
   it('rejects if #run() was called previously', async () => {
-    mockEsBin({ start: true });
+    mockOpenSearchBin({ start: true });
 
     const cluster = new Cluster({ log });
     await cluster.run();
@@ -245,7 +245,7 @@ describe('#start(installPath)', () => {
   });
 
   it('sets up SSL when enabled', async () => {
-    mockEsBin({ start: true, ssl: true });
+    mockOpenSearchBin({ start: true, ssl: true });
 
     const cluster = new Cluster({ log, ssl: true });
     await cluster.start();
@@ -258,7 +258,7 @@ describe('#start(installPath)', () => {
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
-    mockEsBin({ start: true });
+    mockOpenSearchBin({ start: true });
 
     extractConfigFiles.mockReturnValueOnce([]);
 
@@ -272,31 +272,31 @@ describe('#start(installPath)', () => {
 
 describe('#run()', () => {
   it('resolves when bin/opensearch exists with 0', async () => {
-    mockEsBin({ exitCode: 0 });
+    mockOpenSearchBin({ exitCode: 0 });
 
     await new Cluster({ log }).run();
   });
 
   it('resolves when bin/opensearch exists with 143', async () => {
-    mockEsBin({ exitCode: 143 });
+    mockOpenSearchBin({ exitCode: 143 });
 
     await new Cluster({ log }).run();
   });
 
   it('resolves when bin/opensearch exists with 130', async () => {
-    mockEsBin({ exitCode: 130 });
+    mockOpenSearchBin({ exitCode: 130 });
 
     await new Cluster({ log }).run();
   });
 
   it('rejects when bin/opensearch exists with 1', async () => {
-    mockEsBin({ exitCode: 1 });
+    mockOpenSearchBin({ exitCode: 1 });
 
     await expect(new Cluster({ log }).run()).rejects.toThrowError('OpenSearch exited with code 1');
   });
 
   it('rejects if #start() was called previously', async () => {
-    mockEsBin({ exitCode: 0, start: true });
+    mockOpenSearchBin({ exitCode: 0, start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start();
@@ -304,7 +304,7 @@ describe('#run()', () => {
   });
 
   it('rejects if #run() was called previously', async () => {
-    mockEsBin({ exitCode: 0 });
+    mockOpenSearchBin({ exitCode: 0 });
 
     const cluster = new Cluster({ log });
     await cluster.run();
@@ -312,7 +312,7 @@ describe('#run()', () => {
   });
 
   it('sets up SSL when enabled', async () => {
-    mockEsBin({ start: true, ssl: true });
+    mockOpenSearchBin({ start: true, ssl: true });
 
     const cluster = new Cluster({ log, ssl: true });
     await cluster.run();
@@ -325,7 +325,7 @@ describe('#run()', () => {
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
-    mockEsBin({ start: true });
+    mockOpenSearchBin({ start: true });
 
     extractConfigFiles.mockReturnValueOnce([]);
 
@@ -344,7 +344,7 @@ describe('#stop()', () => {
   });
 
   it('resolves when OpenSearch exits with 0', async () => {
-    mockEsBin({ exitCode: 0, start: true });
+    mockOpenSearchBin({ exitCode: 0, start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start();
@@ -352,7 +352,7 @@ describe('#stop()', () => {
   });
 
   it('resolves when OpenSearch exits with 143', async () => {
-    mockEsBin({ exitCode: 143, start: true });
+    mockOpenSearchBin({ exitCode: 143, start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start();
@@ -360,7 +360,7 @@ describe('#stop()', () => {
   });
 
   it('resolves when OpenSearch exits with 130', async () => {
-    mockEsBin({ exitCode: 130, start: true });
+    mockOpenSearchBin({ exitCode: 130, start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start();
@@ -368,7 +368,7 @@ describe('#stop()', () => {
   });
 
   it('rejects when OpenSearch exits with 1', async () => {
-    mockEsBin({ exitCode: 1, start: true });
+    mockOpenSearchBin({ exitCode: 1, start: true });
 
     const cluster = new Cluster({ log });
     await expect(cluster.run()).rejects.toThrowError('OpenSearch exited with code 1');

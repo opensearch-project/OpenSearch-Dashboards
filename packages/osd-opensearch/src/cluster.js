@@ -26,7 +26,7 @@ const { downloadSnapshot, installSnapshot, installSource, installArchive } = req
 const { OPENSEARCH_BIN } = require('./paths');
 const {
   log: defaultLog,
-  parseEsLog,
+  parseOpenSearchLog,
   extractConfigFiles,
   decompress,
   NativeRealm,
@@ -319,7 +319,7 @@ exports.Cluster = class Cluster {
 
     // parse and forward opensearch stdout to the log
     this._process.stdout.on('data', (data) => {
-      const lines = parseEsLog(data.toString());
+      const lines = parseOpenSearchLog(data.toString());
       lines.forEach((line) => {
         this._log.info(line.formattedMessage);
       });

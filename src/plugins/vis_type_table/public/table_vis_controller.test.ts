@@ -39,7 +39,7 @@ const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 const { tabifyAggResponse } = search;
 
 jest.mock('../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
-  configureAppAngularModule: () => {},
+  configureAppAngularModule: () => { },
 }));
 
 interface TableVisScope extends IScope {
@@ -167,7 +167,7 @@ describe('Table Vis - Controller', () => {
       get: jest.fn(),
       set: jest.fn(),
     };
-    $rootScope.renderComplete = () => {};
+    $rootScope.renderComplete = () => { };
     $rootScope.newScope = (scope: TableVisScope) => {
       $scope = scope;
     };
@@ -180,15 +180,15 @@ describe('Table Vis - Controller', () => {
   }
 
   // put a response into the controller
-  function attachEsResponseToScope(resp: object) {
+  function attachOpenSearchResponseToScope(resp: object) {
     $rootScope.opensearchResponse = resp;
     $rootScope.$apply();
   }
 
   // remove the response from the controller
-  function removeEsResponseFromScope() {
+  function removeOpenSearchResponseFromScope() {
     delete $rootScope.opensearchResponse;
-    $rootScope.renderComplete = () => {};
+    $rootScope.renderComplete = () => { };
     $rootScope.$apply();
   }
 
@@ -199,7 +199,7 @@ describe('Table Vis - Controller', () => {
     expect(!$scope.tableGroups).toBeTruthy();
     expect(!$scope.hasSomeRows).toBeTruthy();
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
+    attachOpenSearchResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.hasSomeRows).toBeTruthy();
     expect($scope.tableGroups.tables).toBeDefined();
@@ -212,8 +212,8 @@ describe('Table Vis - Controller', () => {
     const vis = getRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
-    removeEsResponseFromScope();
+    attachOpenSearchResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
+    removeOpenSearchResponseFromScope();
 
     expect(!$scope.hasSomeRows).toBeTruthy();
     expect(!$scope.tableGroups).toBeTruthy();
@@ -227,7 +227,7 @@ describe('Table Vis - Controller', () => {
     const vis = getRangeVis({ sort: sortObj });
     initController(vis);
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
+    attachOpenSearchResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.sort.columnIndex).toEqual(sortObj.columnIndex);
     expect($scope.sort.direction).toEqual(sortObj.direction);
@@ -239,7 +239,7 @@ describe('Table Vis - Controller', () => {
 
     tabifiedResponse.rows = [];
 
-    attachEsResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
+    attachOpenSearchResponseToScope(await tableAggResponse(tabifiedResponse, dimensions));
 
     expect($scope.hasSomeRows).toBeFalsy();
     expect(!$scope.tableGroups).toBeTruthy();
