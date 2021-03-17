@@ -184,7 +184,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
         const northWestLat = northWest.lat;
 
         //Bounds cannot be created unless they form a box with larger than 0 dimensions
-        //Invalid areas are rejected by ES.
+        //Invalid areas are rejected by OpenSearch.
         if (southEastLat === northWestLat || southEastLng === northWestLng) {
           return;
         }
@@ -650,7 +650,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
 
     return typeof options.url === 'string' && options.url.length
       ? // eslint-disable-next-line no-undef
-        L.tileLayer.wms(options.url, wmsOptions)
+      L.tileLayer.wms(options.url, wmsOptions)
       : null;
   }
 

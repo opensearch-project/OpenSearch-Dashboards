@@ -172,7 +172,7 @@ def parallelProcesses(Map params) {
 
       return {
         if (config.delayBetweenProcesses && config.delayBetweenProcesses > 0) {
-          // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+          // This delay helps smooth out CPU load caused by OpenSearch/Kibana instances starting up at the same time
           def delay = (processNumber-1)*config.delayBetweenProcesses
           sleep(delay)
         }

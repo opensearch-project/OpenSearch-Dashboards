@@ -85,8 +85,8 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
 
   def kibanaPort = "61${parallelId}1"
-  def esPort = "61${parallelId}2"
-  def esTransportPort = "61${parallelId}3"
+  def opensearchPort = "61${parallelId}2"
+  def opensearchTransportPort = "61${parallelId}3"
   def ingestManagementPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
 
@@ -97,9 +97,9 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_KIBANA_HOST=localhost",
     "TEST_KIBANA_PORT=${kibanaPort}",
     "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
-    "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
-    "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-    "KBN_NP_PLUGINS_BUILT=true",
+    "TEST_ES_URL=http://elastic:changeme@localhost:${opensearchPort}",
+    "TEST_ES_TRANSPORT_PORT=${opensearchTransportPort}",
+    "OSD_NP_PLUGINS_BUILT=true",
     "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}"
   ] + additionalEnvs) {

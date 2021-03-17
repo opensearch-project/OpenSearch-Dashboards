@@ -130,7 +130,7 @@ describe('savedObjectsClient/decorateOpenSearchError', () => {
   });
 
   describe('when opensearch.BadRequest has a reason', () => {
-    it('makes a SavedObjectsClient/esCannotExecuteScriptError error when script context is disabled', () => {
+    it('makes a SavedObjectsClient/opensearchCannotExecuteScriptError error when script context is disabled', () => {
       const error = new opensearchErrors.ResponseError(
         opensearchClientMock.createApiResponse({
           statusCode: 400,
@@ -147,7 +147,7 @@ describe('savedObjectsClient/decorateOpenSearchError', () => {
       expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
     });
 
-    it('makes a SavedObjectsClient/esCannotExecuteScriptError error when inline scripts are disabled', () => {
+    it('makes a SavedObjectsClient/opensearchCannotExecuteScriptError error when inline scripts are disabled', () => {
       const error = new opensearchErrors.ResponseError(
         opensearchClientMock.createApiResponse({
           statusCode: 400,

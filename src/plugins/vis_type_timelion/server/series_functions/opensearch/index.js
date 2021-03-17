@@ -138,7 +138,7 @@ export default new Datasource('opensearch', {
 
     if (!resp.rawResponse._shards.total) {
       throw new Error(
-        i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {
+        i18n.translate('timelion.serverSideErrors.opensearchFunction.indexNotFoundErrorMessage', {
           defaultMessage: 'OpenSearch index not found: {index}',
           values: {
             index: config.index,

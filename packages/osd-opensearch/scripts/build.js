@@ -59,7 +59,7 @@ run(
     });
   },
   {
-    description: 'Simple build tool for @kbn/es package',
+    description: 'Simple build tool for @osd/opensearch package',
     flags: {
       boolean: ['watch', 'source-maps'],
       help: `

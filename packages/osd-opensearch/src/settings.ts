@@ -37,7 +37,7 @@ export enum SettingsFilter {
 }
 
 /**
- * Accepts an array of `esSettingName=opensearchSettingValue` strings and parses them into an array of
+ * Accepts an array of `opensearchSettingName=opensearchSettingValue` strings and parses them into an array of
  * [opensearchSettingName, opensearchSettingValue] tuples optionally filter out secure or non-secure settings.
  * @param rawSettingNameValuePairs Array of strings to parse
  * @param [filter] Optional settings filter.

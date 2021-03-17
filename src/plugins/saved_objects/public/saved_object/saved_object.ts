@@ -20,11 +20,11 @@
 /**
  * @name SavedObject
  *
- * NOTE: SavedObject seems to track a reference to an object in ES,
+ * NOTE: SavedObject seems to track a reference to an object in OpenSearch,
  * and surface methods for CRUD functionality (save and delete). This seems
  * similar to how Backbone Models work.
  *
- * This class seems to interface with ES primarily through the es Angular
+ * This class seems to interface with OpenSearch primarily through the opensearch Angular
  * service and the saved object api.
  */
 import { SavedObject, SavedObjectConfig, SavedObjectOpenSearchDashboardsServices } from '../types';

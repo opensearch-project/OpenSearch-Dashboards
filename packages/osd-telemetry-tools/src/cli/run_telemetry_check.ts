@@ -96,7 +96,7 @@ export function runTelemetryCheck() {
         {
           enabled: (_) => fix,
           skip: ({ roots }: TaskContext) => {
-            return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+            return roots.every(({ opensearchMappingDiffs }) => !opensearchMappingDiffs || !opensearchMappingDiffs.length);
           },
           title: 'Generating new telemetry mappings',
           task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
@@ -104,7 +104,7 @@ export function runTelemetryCheck() {
         {
           enabled: (_) => fix,
           skip: ({ roots }: TaskContext) => {
-            return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+            return roots.every(({ opensearchMappingDiffs }) => !opensearchMappingDiffs || !opensearchMappingDiffs.length);
           },
           title: 'Updating telemetry mapping files',
           task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),

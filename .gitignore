@@ -1,7 +1,7 @@
 .aws-config.json
 .signing-config.json
 .ackrc
-/.es
+/.opensearch
 /.chromium
 .DS_Store
 .node_binaries

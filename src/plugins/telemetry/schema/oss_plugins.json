@@ -1387,7 +1387,7 @@
         "timelion:max_buckets": {
           "type": "long"
         },
-        "timelion:es.timefield": {
+        "timelion:opensearch.timefield": {
           "type": "keyword"
         },
         "timelion:min_interval": {
@@ -1402,7 +1402,7 @@
         "timelion:quandl.key": {
           "type": "keyword"
         },
-        "timelion:es.default_index": {
+        "timelion:opensearch.default_index": {
           "type": "keyword"
         },
         "timelion:showTutorial": {

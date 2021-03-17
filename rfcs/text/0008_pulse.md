@@ -138,7 +138,7 @@ This is the service that will receive and store the telemetry from all the _opte
 - Most likely maintained by the Infra team.
 - GCP is contemplated at this moment, but we need to confirm how would it affect us regarding the FedRamp approvals (and similar).
 - Exposes an API (check [Endpoints](#endpoints) to know more) to inject the data and retrieve the _instructions_.
-- The data will be stored in an ES cluster.
+- The data will be stored in an OpenSearch cluster.
 
 #### Endpoints
 
@@ -150,7 +150,7 @@ This Endpoint will be used to retrieve a randomised `deploymentID` and a `token`
 
 I'd appreciate some insights here to come up with a strong handshake mechanism to avoid stealing identities.
 
-In order to _dereference_ the data, we can store these mappings in a Vault or Secrets provider instead of an index in our ES.
+In order to _dereference_ the data, we can store these mappings in a Vault or Secrets provider instead of an index in our OpenSearch.
 
 _NB: Not for phase 1_
 
@@ -162,7 +162,7 @@ Similar to the current telemetry, we want to keep track of when the user opts in
 
 In order to minimise the amount of requests, this `POST` should accept bulks of data in the payload (mind the payload size limits if any). It will require authentication based on the `deploymentID` and `token` explained in the [previous endpoint](#authenticate) (_NB: Not for phase 1_).
 
-The received payload will be pushed to a streaming technology (AWS Firehose, Google Pub/Sub, ...). This way we can maintain a buffer in cases the ingestion of data spikes or we need to stop our ES cluster for any maintenance purposes.
+The received payload will be pushed to a streaming technology (AWS Firehose, Google Pub/Sub, ...). This way we can maintain a buffer in cases the ingestion of data spikes or we need to stop our OpenSearch cluster for any maintenance purposes.
 
 A subscriber to that stream will receive that info a split the payload into smaller documents per channel and index them into their separate indices.
 

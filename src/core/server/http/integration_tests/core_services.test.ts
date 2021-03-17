@@ -516,7 +516,7 @@ describe('http service', () => {
       expect(header['www-authenticate']).toEqual('content');
     });
 
-    it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
+    it('uses a default value for `www-authenticate` header when OpenSearch 401 does not specify it', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
       // eslint-disable-next-line prefer-const

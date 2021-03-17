@@ -19,7 +19,7 @@
 
 /** ***********************************************************
  *
- *  Run `node scripts/es_archiver --help` for usage information
+ *  Run `node scripts/opensearch_archiver --help` for usage information
  *
  *************************************************************/
 
