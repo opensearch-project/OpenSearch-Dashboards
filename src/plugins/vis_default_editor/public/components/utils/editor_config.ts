@@ -94,17 +94,17 @@ export function getEditorConfig(
     const interval = fieldAgg.interval;
     return interval
       ? {
-          intervalBase: {
-            fixedValue: interval,
-          },
-          interval: {
-            base: interval,
-            help: i18n.translate('visDefaultEditor.editorConfig.histogram.interval.helpText', {
-              defaultMessage: 'Must be a multiple of configuration interval: {interval}',
-              values: { interval },
-            }),
-          },
-        }
+        intervalBase: {
+          fixedValue: interval,
+        },
+        interval: {
+          base: interval,
+          help: i18n.translate('visDefaultEditor.editorConfig.histogram.interval.helpText', {
+            defaultMessage: 'Must be a multiple of configuration interval: {interval}',
+            values: { interval },
+          }),
+        },
+      }
       : {};
   }
 
@@ -114,7 +114,7 @@ export function getEditorConfig(
     // See https://github.com/elastic/kibana/pull/36310
     const interval = fieldAgg.calendar_interval || fieldAgg.fixed_interval;
     return {
-      useNormalizedEsInterval: {
+      useNormalizedOpenSearchInterval: {
         fixedValue: false,
       },
       interval: {
