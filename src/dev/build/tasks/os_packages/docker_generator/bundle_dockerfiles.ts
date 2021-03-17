@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
 import { dockerfileTemplate } from './templates';

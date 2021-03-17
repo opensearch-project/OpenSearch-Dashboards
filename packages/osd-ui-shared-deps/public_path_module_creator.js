@@ -19,6 +19,6 @@
 
 module.exports = function ({ key }) {
   return {
-    code: `__webpack_public_path__ = window.__kbnPublicPath__['${key}']`,
+    code: `__webpack_public_path__ = window.__osdPublicPath__['${key}']`,
   };
 };

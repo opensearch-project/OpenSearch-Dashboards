@@ -115,7 +115,7 @@ function getProxyHeaders(req: OpenSearchDashboardsRequest) {
 
 export const createHandler = ({
   log,
-  proxy: { readLegacyopensearchConfig, pathFilters, proxyConfigCollection },
+  proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
   const { path, method } = query;
@@ -129,7 +129,7 @@ export const createHandler = ({
     });
   }
 
-  const legacyConfig = await readLegacyopensearchConfig();
+  const legacyConfig = await readLegacyOpenSearchConfig();
   const { hosts } = legacyConfig;
   let opensearchIncomingMessage: IncomingMessage;
 

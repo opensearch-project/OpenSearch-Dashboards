@@ -27,7 +27,7 @@ if (isUsingNpm) {
 //
 // - `npm install`: '{"remain":[],"cooked":["install"],"original":[]}'
 // - `yarn`: '{"remain":[],"cooked":["install"],"original":[]}'
-// - `yarn kbn bootstrap`: '{"remain":[],"cooked":["run","kbn"],"original":["kbn","bootstrap"]}'
+// - `yarn osd bootstrap`: '{"remain":[],"cooked":["run","osd"],"original":["osd","bootstrap"]}'
 const rawArgv = process.env.npm_config_argv;
 
 if (rawArgv === undefined) {
@@ -37,13 +37,13 @@ if (rawArgv === undefined) {
 try {
   const argv = JSON.parse(rawArgv);
 
-  if (argv.cooked.includes('kbn')) {
-    // all good, trying to install deps using `kbn`
+  if (argv.cooked.includes('osd')) {
+    // all good, trying to install deps using `osd`
     return;
   }
 
   if (argv.cooked.includes('install')) {
-    console.log('\nWARNING: When installing dependencies, prefer `yarn kbn bootstrap`\n');
+    console.log('\nWARNING: When installing dependencies, prefer `yarn osd bootstrap`\n');
   }
 } catch (e) {
   // if it fails we do nothing, as this is just intended to be a helpful message

@@ -18,7 +18,7 @@
  */
 
 import { getSupportedFieldsByMetricType } from './get_supported_fields_by_metric_type';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
 describe('getSupportedFieldsByMetricType', () => {
   const shouldHaveHistogramAndNumbers = (type) =>
@@ -27,7 +27,7 @@ describe('getSupportedFieldsByMetricType', () => {
     });
   const shouldSupportAllFieldTypes = (type) =>
     it(`should return all field types for ${type}`, () => {
-      expect(getSupportedFieldsByMetricType(type)).toEqual(Object.values(KBN_FIELD_TYPES));
+      expect(getSupportedFieldsByMetricType(type)).toEqual(Object.values(OSD_FIELD_TYPES));
     });
   const shouldHaveOnlyNumbers = (type) =>
     it(`should return only numbers for ${type}`, () => {

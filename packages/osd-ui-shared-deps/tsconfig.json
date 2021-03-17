@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-ui-shared-deps"
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-ui-shared-deps"
   },
   "include": [
     "index.d.ts",

@@ -18,12 +18,12 @@
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@osd/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {
     log(
-      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`
+      `Environment variable CONFIG_PATH is deprecated. It has been replaced with OSD_PATH_CONF pointing to a config folder`
     );
   }
   return settings;
@@ -42,7 +42,7 @@ const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
     log(
       'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
-        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
+      'It will be removed in 8.0 release. Instead, supply the "osd-xsrf" header.'
     );
   }
   return settings;
@@ -52,9 +52,9 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) 
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
       'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, OpenSearch Dashboards ' +
-        'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
-        'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
-        'current behavior and silence this warning.'
+      'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
+      'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
+      'current behavior and silence this warning.'
     );
   }
   return settings;
@@ -105,9 +105,9 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   if (has(settings, 'map.manifestServiceUrl')) {
     log(
       'You should no longer use the map.manifestServiceUrl setting in opensearch_dashboards.yml to configure the location ' +
-        'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
-        '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
-        'modified for use in production environments.'
+      'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
+      '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
+      'modified for use in production environments.'
     );
   }
   return settings;
@@ -117,43 +117,43 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
 }) => [
-  unusedFromRoot('savedObjects.indexCheckTimeout'),
-  unusedFromRoot('server.xsrf.token'),
-  unusedFromRoot('maps.manifestServiceUrl'),
-  unusedFromRoot('optimize.lazy'),
-  unusedFromRoot('optimize.lazyPort'),
-  unusedFromRoot('optimize.lazyHost'),
-  unusedFromRoot('optimize.lazyPrebuild'),
-  unusedFromRoot('optimize.lazyProxyTimeout'),
-  unusedFromRoot('optimize.enabled'),
-  unusedFromRoot('optimize.bundleFilter'),
-  unusedFromRoot('optimize.bundleDir'),
-  unusedFromRoot('optimize.viewCaching'),
-  unusedFromRoot('optimize.watch'),
-  unusedFromRoot('optimize.watchPort'),
-  unusedFromRoot('optimize.watchHost'),
-  unusedFromRoot('optimize.watchPrebuild'),
-  unusedFromRoot('optimize.watchProxyTimeout'),
-  unusedFromRoot('optimize.useBundleCache'),
-  unusedFromRoot('optimize.sourceMaps'),
-  unusedFromRoot('optimize.workers'),
-  unusedFromRoot('optimize.profile'),
-  unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
-  renameFromRoot('xpack.xpack_main.telemetry.config', 'telemetry.config'),
-  renameFromRoot('xpack.xpack_main.telemetry.url', 'telemetry.url'),
-  renameFromRoot('xpack.xpack_main.telemetry.enabled', 'telemetry.enabled'),
-  renameFromRoot('xpack.telemetry.enabled', 'telemetry.enabled'),
-  renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
-  renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
-  renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
-  renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
-  renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
-  unusedFromRoot('opensearch.preserveHost'),
-  unusedFromRoot('opensearch.startupTimeout'),
-  configPathDeprecation,
-  dataPathDeprecation,
-  rewriteBasePathDeprecation,
-  cspRulesDeprecation,
-  mapManifestServiceUrlDeprecation,
-  xsrfDeprecation,
-];
+    unusedFromRoot('savedObjects.indexCheckTimeout'),
+    unusedFromRoot('server.xsrf.token'),
+    unusedFromRoot('maps.manifestServiceUrl'),
+    unusedFromRoot('optimize.lazy'),
+    unusedFromRoot('optimize.lazyPort'),
+    unusedFromRoot('optimize.lazyHost'),
+    unusedFromRoot('optimize.lazyPrebuild'),
+    unusedFromRoot('optimize.lazyProxyTimeout'),
+    unusedFromRoot('optimize.enabled'),
+    unusedFromRoot('optimize.bundleFilter'),
+    unusedFromRoot('optimize.bundleDir'),
+    unusedFromRoot('optimize.viewCaching'),
+    unusedFromRoot('optimize.watch'),
+    unusedFromRoot('optimize.watchPort'),
+    unusedFromRoot('optimize.watchHost'),
+    unusedFromRoot('optimize.watchPrebuild'),
+    unusedFromRoot('optimize.watchProxyTimeout'),
+    unusedFromRoot('optimize.useBundleCache'),
+    unusedFromRoot('optimize.sourceMaps'),
+    unusedFromRoot('optimize.workers'),
+    unusedFromRoot('optimize.profile'),
+    unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+    renameFromRoot('xpack.xpack_main.telemetry.config', 'telemetry.config'),
+    renameFromRoot('xpack.xpack_main.telemetry.url', 'telemetry.url'),
+    renameFromRoot('xpack.xpack_main.telemetry.enabled', 'telemetry.enabled'),
+    renameFromRoot('xpack.telemetry.enabled', 'telemetry.enabled'),
+    renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
+    renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
+    renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
+    renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
+    renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+    unusedFromRoot('opensearch.preserveHost'),
+    unusedFromRoot('opensearch.startupTimeout'),
+    configPathDeprecation,
+    dataPathDeprecation,
+    rewriteBasePathDeprecation,
+    cspRulesDeprecation,
+    mapManifestServiceUrlDeprecation,
+    xsrfDeprecation,
+  ];

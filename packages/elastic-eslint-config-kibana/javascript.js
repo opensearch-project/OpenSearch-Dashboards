@@ -20,7 +20,7 @@ module.exports = {
 
       settings: {
         'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
+          '@osd/eslint-import-resolver-opensearch-dashboards': {
             forceNode: true,
           },
         },

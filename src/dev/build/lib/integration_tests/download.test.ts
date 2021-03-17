@@ -23,8 +23,8 @@ import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
 import del from 'del';
-import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
-import { ToolingLog } from '@kbn/dev-utils';
+import { CI_PARALLEL_PROCESS_PREFIX } from '@osd/test';
+import { ToolingLog } from '@osd/dev-utils';
 
 import { mkdirp } from '../fs';
 import { download } from '../download';

@@ -25,7 +25,7 @@ import { LiteralTypeBuildNode } from '../../node_types/types';
 export function getFields(node: KueryNode, indexPattern?: IIndexPattern) {
   if (!indexPattern) return [];
   if (node.type === 'literal') {
-    const fieldName = literal.toElasticsearchQuery(node as LiteralTypeBuildNode);
+    const fieldName = literal.toOpenSearchQuery(node as LiteralTypeBuildNode);
     const field = indexPattern.fields.find((fld) => fld.name === fieldName);
     if (!field) {
       return [];

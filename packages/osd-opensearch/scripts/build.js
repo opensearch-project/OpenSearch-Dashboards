@@ -20,7 +20,7 @@
 const { resolve } = require('path');
 
 const del = require('del');
-const { run, withProcRunner } = require('@kbn/dev-utils');
+const { run, withProcRunner } = require('@osd/dev-utils');
 
 const ROOT_DIR = resolve(__dirname, '..');
 const BUILD_DIR = resolve(ROOT_DIR, 'target');
@@ -40,7 +40,7 @@ run(
           'src',
           '--no-babelrc',
           '--presets',
-          require.resolve('@kbn/babel-preset/node_preset'),
+          require.resolve('@osd/babel-preset/node_preset'),
           '--extensions',
           '.ts,.js',
           '--copy-files',

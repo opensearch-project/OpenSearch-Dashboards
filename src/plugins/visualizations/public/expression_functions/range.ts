@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ExpressionFunctionDefinition, OpensearchDashboardsDatatable, Range } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Range } from '../../../expressions/public';
 
 interface Arguments {
   from: number;
@@ -27,7 +27,7 @@ interface Arguments {
 
 export const range = (): ExpressionFunctionDefinition<
   'range',
-  OpensearchDashboardsDatatable | null,
+  OpenSearchDashboardsDatatable | null,
   Arguments,
   Range
 > => ({

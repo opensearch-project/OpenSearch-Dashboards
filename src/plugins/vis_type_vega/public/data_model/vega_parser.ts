@@ -58,7 +58,7 @@ const locToDirMap: Record<string, ControlsLocation> = {
 };
 
 // If there is no "%type%" parameter, use this parser
-const DEFAULT_PARSER: string = 'elasticsearch';
+const DEFAULT_PARSER: string = 'opensearch';
 
 export class VegaParser {
   spec: VegaSpec;

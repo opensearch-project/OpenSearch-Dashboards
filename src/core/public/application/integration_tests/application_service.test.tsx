@@ -29,7 +29,7 @@ import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from 'opensearch-dashboards/public';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

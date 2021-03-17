@@ -274,7 +274,7 @@ def doSetup() {
 
 def buildOss(maxWorkers = '') {
   notifyOnError {
-    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+    withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
     }
   }
@@ -282,7 +282,7 @@ def buildOss(maxWorkers = '') {
 
 def buildXpack(maxWorkers = '') {
   notifyOnError {
-    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+    withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
   }

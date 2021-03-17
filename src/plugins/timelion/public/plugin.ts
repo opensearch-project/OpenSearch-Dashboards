@@ -33,7 +33,7 @@ import {
 import { Panel } from './panels/panel';
 import { initAngularBootstrap, OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
+import { DataPublicPluginStart, opensearchFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import {
@@ -83,7 +83,7 @@ export class TimelionPlugin implements Plugin<void, void> {
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
             }))
           ),
         },

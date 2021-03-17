@@ -145,7 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
   public start(
-    { elasticsearch, savedObjects, uiSettings }: CoreStart,
+    { opensearch, savedObjects, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     return {
@@ -160,7 +160,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       searchSource: {
         asScoped: async (request: OpenSearchDashboardsRequest) => {
-          const opensearchClient = elasticsearch.client.asScoped(request);
+          const opensearchClient = opensearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(request);
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
@@ -185,7 +185,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                */
               const fakeRequestHandlerContext = {
                 core: {
-                  elasticsearch: {
+                  opensearch: {
                     client: opensearchClient,
                   },
                   uiSettings: {

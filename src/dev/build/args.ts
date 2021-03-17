@@ -18,7 +18,7 @@
  */
 
 import getopts from 'getopts';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@osd/dev-utils';
 
 import { BuildOptions } from './build_distributables';
 

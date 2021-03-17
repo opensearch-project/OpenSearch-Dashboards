@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment';
+// import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { TelemetryPluginConfig } from '../plugin';

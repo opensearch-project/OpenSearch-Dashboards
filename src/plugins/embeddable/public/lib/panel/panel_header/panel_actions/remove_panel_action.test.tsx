@@ -29,7 +29,7 @@ import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/f
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
 import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { esFilters, Filter } from '../../../../../../../plugins/data/public';
+import { opensearchFilters, Filter } from '../../../../../../../plugins/data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -40,7 +40,7 @@ let embeddable: FilterableEmbeddable;
 
 beforeEach(async () => {
   const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+    $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

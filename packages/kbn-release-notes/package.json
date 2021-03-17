@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/release-notes",
+  "name": "@osd/release-notes",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "main": "target/index.js",
@@ -7,12 +7,12 @@
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch"
+    "osd:bootstrap": "tsc",
+    "osd:watch": "tsc --watch"
   },
   "dependencies": {
-    "@kbn/utils": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
+    "@osd/utils": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
     "axios": "^0.19.2",
     "cheerio": "0.22.0",
     "dedent": "^0.7.0",

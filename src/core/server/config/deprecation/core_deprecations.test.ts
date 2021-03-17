@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { configDeprecationFactory, applyDeprecations } from '@osd/config';
 import { coreDeprecationProvider } from './core_deprecations';
 
 const initialEnv = { ...process.env };
@@ -50,7 +50,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
+          "Environment variable CONFIG_PATH is deprecated. It has been replaced with OSD_PATH_CONF pointing to a config folder",
         ]
       `);
     });
@@ -87,7 +87,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"osd-xsrf\\" header.",
         ]
       `);
     });

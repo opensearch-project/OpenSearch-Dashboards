@@ -83,7 +83,7 @@ export default new Datasource('opensearch', {
       types: ['boolean', 'null'],
       help: i18n.translate('timelion.help.functions.opensearch.args.opensearchDashboardsHelpText', {
         defaultMessage:
-          'Respect filters on Opensearch Dashboards dashboards. Only has an effect when using on Opensearch Dashboards dashboards',
+          'Respect filters on OpenSearch Dashboards dashboards. Only has an effect when using on OpenSearch Dashboards dashboards',
       }),
     },
     {

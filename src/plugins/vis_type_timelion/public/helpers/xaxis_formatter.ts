@@ -36,7 +36,7 @@ export function xaxisFormatterProvider(config: IUiSettingsClient) {
 
     const interval = moment.duration(Number(parts[1]), parts[2]);
 
-    // Cribbed from Opensearch Dashboards's TimeBuckets class
+    // Cribbed from OpenSearch Dashboards's TimeBuckets class
     const rules = config.get('dateFormat:scaled');
 
     for (let i = rules.length - 1; i >= 0; i--) {
