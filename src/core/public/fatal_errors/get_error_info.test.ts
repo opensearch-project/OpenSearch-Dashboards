@@ -19,10 +19,10 @@
 
 import { getErrorInfo } from './get_error_info';
 
-class StubEsError<T> extends Error {
+class StubOpenSearchError<T> extends Error {
   constructor(public resp: T) {
     super('This is an elasticsearch error');
-    Error.captureStackTrace(this, StubEsError);
+    Error.captureStackTrace(this, StubOpenSearchError);
   }
 }
 
@@ -47,7 +47,7 @@ it('reads the message and stack from an Error object', () => {
 });
 
 it('reads the root cause reason from elasticsearch errors', () => {
-  const err = new StubEsError({
+  const err = new StubOpenSearchError({
     error: {
       root_cause: [
         {
@@ -64,7 +64,7 @@ it('reads the root cause reason from elasticsearch errors', () => {
 });
 
 it('should combine the root cause reasons if elasticsearch error has more than one', () => {
-  const err = new StubEsError({
+  const err = new StubOpenSearchError({
     error: {
       root_cause: [
         {

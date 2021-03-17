@@ -179,8 +179,7 @@ function validOptions(
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {
     throw new Error(
-      `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${
-        routeConfig.path
+      `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${routeConfig.path
       } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
     );
   }
@@ -188,14 +187,14 @@ function validOptions(
   const body = shouldNotHavePayload
     ? undefined
     : {
-        // If it's not a GET (requires payload) but no body validation is required (or no body options are specified),
-        // We assume the route does not care about the body => use the memory-cheapest approach (stream and no parsing)
-        output: !shouldValidateBody ? ('stream' as const) : undefined,
-        parse: !shouldValidateBody ? false : undefined,
+      // If it's not a GET (requires payload) but no body validation is required (or no body options are specified),
+      // We assume the route does not care about the body => use the memory-cheapest approach (stream and no parsing)
+      output: !shouldValidateBody ? ('stream' as const) : undefined,
+      parse: !shouldValidateBody ? false : undefined,
 
-        // User's settings should overwrite any of the "desired" values
-        ...options.body,
-      };
+      // User's settings should overwrite any of the "desired" values
+      ...options.body,
+    };
 
   return { ...options, body };
 }
@@ -276,7 +275,7 @@ export class Router implements IRouter {
       // forward 401 errors from OpenSearch client
       if (isOpenSearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
-          opensearchDashboardsResponseFactory.unauthorized(convertEsUnauthorized(e))
+          opensearchDashboardsResponseFactory.unauthorized(convertOpenSearchUnauthorized(e))
         );
       }
       // forward 401 (boom) errors from legacy OpenSearch client
@@ -288,7 +287,7 @@ export class Router implements IRouter {
   }
 }
 
-const convertEsUnauthorized = (e: OpenSearchNotAuthorizedError): ErrorHttpResponseOptions => {
+const convertOpenSearchUnauthorized = (e: OpenSearchNotAuthorizedError): ErrorHttpResponseOptions => {
   const getAuthenticateHeaderValue = () => {
     const header = Object.entries(e.headers).find(
       ([key]) => key.toLowerCase() === 'www-authenticate'
@@ -351,11 +350,11 @@ export type RequestHandler<
   B = unknown,
   Method extends RouteMethod = any,
   ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
-> = (
-  context: RequestHandlerContext,
-  request: OpenSearchDashboardsRequest<P, Q, B, Method>,
-  response: ResponseFactory
-) => IOpenSearchDashboardsResponse<any> | Promise<IOpenSearchDashboardsResponse<any>>;
+  > = (
+    context: RequestHandlerContext,
+    request: OpenSearchDashboardsRequest<P, Q, B, Method>,
+    response: ResponseFactory
+  ) => IOpenSearchDashboardsResponse<any> | Promise<IOpenSearchDashboardsResponse<any>>;
 
 /**
  * Type-safe wrapper for {@link RequestHandler} function.
@@ -376,6 +375,6 @@ export type RequestHandlerWrapper = <
   B,
   Method extends RouteMethod = any,
   ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
->(
+  >(
   handler: RequestHandler<P, Q, B, Method, ResponseFactory>
 ) => RequestHandler<P, Q, B, Method, ResponseFactory>;
