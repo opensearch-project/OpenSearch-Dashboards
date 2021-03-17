@@ -75,10 +75,10 @@ describe('telemetry_application_usage', () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     savedObjectClient.find.mockImplementation(
       async () =>
-        ({
-          saved_objects: [],
-          total: 0,
-        } as any)
+      ({
+        saved_objects: [],
+        total: 0,
+      } as any)
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
@@ -89,7 +89,7 @@ describe('telemetry_application_usage', () => {
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  test('it only gets 10k even when there are more documents (ES limitation)', async () => {
+  test('it only gets 10k even when there are more documents (OpenSearch limitation)', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     const total = 10000;
     savedObjectClient.find.mockImplementation(async (opts) => {

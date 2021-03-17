@@ -54,7 +54,7 @@ export function isObjectMapping(entity: any) {
       return true;
     }
 
-    // 'type' is not set; ES defaults to object mapping for when type is unspecified.
+    // 'type' is not set; OpenSearch defaults to object mapping for when type is unspecified.
     if (typeof entity.type === 'undefined') {
       return true;
     }
@@ -73,10 +73,10 @@ function isArrayMapping(entity: any): entity is { type: 'array'; items: object }
 }
 
 function getValueMapping(value: any) {
-  return isObjectMapping(value) ? transformToEsMapping(value) : value;
+  return isObjectMapping(value) ? transformToOpenSearchMapping(value) : value;
 }
 
-function transformToEsMapping(usageMappingValue: any) {
+function transformToOpenSearchMapping(usageMappingValue: any) {
   const fieldMapping: any = { properties: {} };
   for (const [key, value] of Object.entries(usageMappingValue)) {
     if (isArrayMapping(value)) {
@@ -89,12 +89,12 @@ function transformToEsMapping(usageMappingValue: any) {
 }
 
 export function generateMapping(usageCollections: ParsedUsageCollection[]) {
-  const esMapping: any = { properties: {} };
+  const opensearchMapping: any = { properties: {} };
   for (const [, collecionDetails] of usageCollections) {
-    esMapping.properties[collecionDetails.collectorName] = transformToEsMapping(
+    opensearchMapping.properties[collecionDetails.collectorName] = transformToOpenSearchMapping(
       collecionDetails.schema.value
     );
   }
 
-  return esMapping;
+  return opensearchMapping;
 }

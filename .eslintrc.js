@@ -420,7 +420,7 @@ module.exports = {
         'packages/osd-ui-framework/doc_site/**/*.js',
         'packages/osd-ui-framework/generator-kui/**/*.js',
         'packages/osd-ui-framework/Gruntfile.js',
-        'packages/osd-es/src/**/*.js',
+        'packages/osd-opensearch/src/**/*.js',
         'packages/osd-interpreter/tasks/**/*.js',
         'packages/osd-interpreter/src/plugin/**/*.js',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',

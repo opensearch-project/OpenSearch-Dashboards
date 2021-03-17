@@ -122,11 +122,11 @@ export type ClusterDetailsGetter<CustomContext extends Record<string, any> = {}>
 export type StatsGetter<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload
-> = (
-  clustersDetails: ClusterDetails[],
-  config: StatsCollectionConfig,
-  context: StatsCollectionContext & CustomContext
-) => Promise<T[]>;
+  > = (
+    clustersDetails: ClusterDetails[],
+    config: StatsCollectionConfig,
+    context: StatsCollectionContext & CustomContext
+  ) => Promise<T[]>;
 export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig,
@@ -136,7 +136,7 @@ export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
 export interface CollectionConfig<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload
-> {
+  > {
   title: string;
   priority: number;
   opensearchCluster: ILegacyClusterClient;
@@ -150,12 +150,12 @@ export interface CollectionConfig<
 export interface Collection<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload
-> {
+  > {
   customContext?: CustomContext;
   statsGetter: StatsGetter<CustomContext, T>;
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   opensearchCluster: ILegacyClusterClient;
-  opensearchClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
+  opensearchClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the opensearch client getter.
   title: string;
 }

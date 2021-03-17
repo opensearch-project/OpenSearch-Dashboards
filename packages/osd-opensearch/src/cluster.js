@@ -277,7 +277,7 @@ exports.Cluster = class Cluster {
 
     options.opensearchEnvVars = options.opensearchEnvVars || {};
 
-    // ES now automatically sets heap size to 50% of the machine's available memory
+    // OpenSearch now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of OpenSearch on the same machine during CI
     options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS =
