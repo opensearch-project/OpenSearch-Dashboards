@@ -108,9 +108,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           <EuiCard
             description={app?.subtitle || ''}
             href={addBasePath(app.path)}
-            image={addBasePath(
-              `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
-            )}
+            //image={addBasePath(
+            //  `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
+            //)}
             title={app.title}
             titleElement="h3"
             titleSize="s"
