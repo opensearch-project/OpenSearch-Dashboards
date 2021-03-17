@@ -21,7 +21,7 @@ import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAnyInstanceSerializer,
-} from '@kbn/dev-utils';
+} from '@osd/dev-utils';
 
 import { Config, Platform } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';

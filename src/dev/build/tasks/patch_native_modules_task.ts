@@ -19,7 +19,7 @@
 
 import path from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 import { deleteAll, download, gunzip, untar, Task, Config, Build, Platform, read } from '../lib';
 

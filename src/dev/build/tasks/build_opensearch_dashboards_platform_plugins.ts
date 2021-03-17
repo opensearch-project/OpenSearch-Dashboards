@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { CiStatsReporter } from '@osd/dev-utils';
 import {
   runOptimizer,
   OptimizerConfig,
   logOptimizerState,
   reportOptimizerStats,
-} from '@kbn/optimizer';
+} from '@osd/optimizer';
 
 import { Task } from '../lib';
 

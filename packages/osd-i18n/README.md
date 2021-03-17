@@ -151,7 +151,7 @@ for all 200+ languages is loaded along with the library) and pass the translatio
 messages into `init` method:
 
 ```js
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 i18n.init(messages);
 ```
@@ -160,7 +160,7 @@ One common use-case is that of internationalizing a string constant. Here's an
 example of how we'd do that:
 
 ```js
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
   defaultMessage: 'Greetings, planet Earth!',
@@ -170,7 +170,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 One more example with a parameter:
 
 ```js
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export function getGreetingMessage(userName) {
   return i18n.translate('hello.wonderful.world', {
@@ -201,7 +201,7 @@ uses I18n engine under the hood:
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 ReactDOM.render(
   <I18nProvider>
@@ -216,7 +216,7 @@ ReactDOM.render(
 After that we can use `FormattedMessage` components inside `RootComponent`:
 ```jsx
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 class RootComponent extends Component {
   constructor(props) {
@@ -284,7 +284,7 @@ Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
-The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@osd/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
 
 React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
 
@@ -292,7 +292,7 @@ React component as a pure function:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n/react';
+import { injectI18n, intlShape } from '@osd/i18n/react';
 
 export const MyComponent = injectI18n({ intl }) => (
   <input
@@ -318,7 +318,7 @@ React component as a class:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n/react';
+import { injectI18n, intlShape } from '@osd/i18n/react';
 
 export const MyComponent = injectI18n(
   class MyComponent extends React.Component {
@@ -333,7 +333,7 @@ export const MyComponent = injectI18n(
         <input
           type="text"
           placeholder={intl.formatMessage({
-            id: 'kbn.management.objects.searchPlaceholder',
+            id: 'osd.management.objects.searchPlaceholder',
             defaultMessage: 'Search',
           })}
         />
@@ -345,7 +345,7 @@ export const MyComponent = injectI18n(
 
 ## AngularJS
 
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@osd/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
 AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive`
 and `filter`. Both the directive and the filter use the translation `service`
@@ -428,7 +428,7 @@ In order to translate attributes in AngularJS we should use `i18nFilter`:
 ```html
 <input
   type="text"
-  placeholder="{{ ::'kbn.management.objects.searchAriaLabel' | i18n: {
+  placeholder="{{ ::'osd.management.objects.searchAriaLabel' | i18n: {
     defaultMessage: 'Search { title } Object',
     values: { title }
   } }}"

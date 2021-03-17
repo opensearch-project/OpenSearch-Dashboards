@@ -200,13 +200,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocTableIndex(index: number) {
-      const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+      const row = await find.byCssSelector(`tr.osdDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
     }
 
     public async getDocTableField(index: number) {
       const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+        `tr.osdDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
     }

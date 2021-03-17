@@ -28,7 +28,7 @@ def label(size) {
   Parameters:
     size - size of worker label to use, e.g. 's' or 'xl'
     ramDisk - Should the workspace be mounted in memory? Default: true
-    bootstrapped - If true, download kibana dependencies, run kbn bootstrap, etc. Default: true
+    bootstrapped - If true, download kibana dependencies, run osd bootstrap, etc. Default: true
     name - Name of the worker for display purposes, filenames, etc.
     scm - Jenkins scm configuration for checking out code. Use `null` to disable checkout. Default: inherited from job
 */
