@@ -30,7 +30,7 @@ import { dataPluginMock } from '../../../data/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {
-  useNormalizedEsInterval: { hidden: false, fixedValue: false },
+  useNormalizedOpenSearchInterval: { hidden: false, fixedValue: false },
   interval: {
     hidden: false,
     help: 'Must be a multiple of rollup configuration interval: 1m',
@@ -133,7 +133,7 @@ describe('DefaultEditorAggParams component', () => {
     expect(setAggParamValue).toHaveBeenNthCalledWith(
       1,
       defaultProps.agg.id,
-      'useNormalizedEsInterval',
+      'useNormalizedOpenSearchInterval',
       false
     );
     expect(intervalDeserialize).toHaveBeenCalledWith('1m');
