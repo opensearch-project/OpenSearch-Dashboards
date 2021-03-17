@@ -29,7 +29,7 @@ const { Artifact } = require('../artifact');
 const { parseSettings, SettingsFilter } = require('../settings');
 
 /**
- * Extracts an ES archive and optionally installs plugins
+ * Extracts an OpenSearch archive and optionally installs plugins
  *
  * @param {String} archive - path to tar
  * @param {Object} options
@@ -46,7 +46,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     bundledJDK = false,
-    esArgs = [],
+    opensearchArgs = [],
   } = options;
 
   let dest = archive;

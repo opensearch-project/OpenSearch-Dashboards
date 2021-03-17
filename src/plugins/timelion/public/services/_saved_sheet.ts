@@ -30,7 +30,7 @@ export function createSavedSheetClass(
   class SavedSheet extends SavedObjectClass {
     static type = 'timelion-sheet';
 
-    // if type:sheet has no mapping, we push this mapping into ES
+    // if type:sheet has no mapping, we push this mapping into OpenSearch
     static mapping = {
       title: 'text',
       hits: 'integer',
@@ -61,7 +61,7 @@ export function createSavedSheetClass(
           title: 'New TimeLion Sheet',
           hits: 0,
           description: '',
-          timelion_sheet: ['.es(*)'],
+          timelion_sheet: ['.opensearch(*)'],
           timelion_interval: 'auto',
           timelion_chart_height: 275,
           timelion_columns: config.get('timelion:default_columns') || 2,

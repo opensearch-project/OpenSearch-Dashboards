@@ -36,9 +36,9 @@ const CODE_CONFLICT = 'SavedObjectsClient/conflict';
 // 429 - Too Many Requests
 const CODE_TOO_MANY_REQUESTS = 'SavedObjectsClient/tooManyRequests';
 // 400 - OpenSearch Cannot Execute Script
-const CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
+const CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/opensearchCannotExecuteScript';
 // 503 - OpenSearch Unavailable
-const CODE_OPENSEARCH_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
+const CODE_OPENSEARCH_UNAVAILABLE = 'SavedObjectsClient/opensearchUnavailable';
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 

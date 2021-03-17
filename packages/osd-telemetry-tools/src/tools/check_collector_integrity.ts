@@ -25,10 +25,10 @@ import { kindToDescriptorName } from './serializer';
 
 export function checkMatchingMapping(
   UsageCollections: ParsedUsageCollection[],
-  esMapping: any
+  opensearchMapping: any
 ): any {
   const generatedMapping = generateMapping(UsageCollections);
-  return difference(generatedMapping, esMapping);
+  return difference(generatedMapping, opensearchMapping);
 }
 
 interface IncompatibleDescriptor {
@@ -100,6 +100,6 @@ export function checkCompatibleTypeDescriptor(
   return results.filter((entry): entry is IncompatibleDescriptor => entry !== false);
 }
 
-export function checkCollectorIntegrity(UsageCollections: ParsedUsageCollection[], esMapping: any) {
+export function checkCollectorIntegrity(UsageCollections: ParsedUsageCollection[], opensearchMapping: any) {
   return UsageCollections;
 }

@@ -34,7 +34,7 @@ const recordsToBulkBody = (records: any[]) => {
   }, [] as any[]);
 };
 
-describe('esArchiver: createIndexDocRecordsStream()', () => {
+describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
   it('consumes doc records and sends to `_bulk` api', async () => {
     const records = createPersonDocRecords(1);
     const client = createStubClient([

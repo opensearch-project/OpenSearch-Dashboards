@@ -33,7 +33,7 @@ This command has no additional flags or arguments. The `.telemetryrc.json` files
 ### Output
 
 
-The generated JSON files contain an ES mapping for each schema. This mapping is used to verify changes in the collectors and as the basis to map those fields into the external telemetry cluster.
+The generated JSON files contain an OpenSearch mapping for each schema. This mapping is used to verify changes in the collectors and as the basis to map those fields into the external telemetry cluster.
 
 **Example**:
 
@@ -67,9 +67,9 @@ We don't catch every possible misuse of the collectors, but only the most common
 
 What will not be caught by the validator:
 
-* Mistyped SavedObject/CallCluster return value. Since the hits returned from ES can be typed to anything without any checks. It is advised to add functional tests that grabs the schema json file and checks that the returned usage matches the types exactly. 
+* Mistyped SavedObject/CallCluster return value. Since the hits returned from OpenSearch can be typed to anything without any checks. It is advised to add functional tests that grabs the schema json file and checks that the returned usage matches the types exactly. 
 
-* Fields in the schema that are never collected. If you are trying to report a field from ES but that value is never stored in ES, the check will not be able to detect if that field is ever collected in the first palce. It is advised to add unit/functional tests to check that all the fields are being reported as expected.
+* Fields in the schema that are never collected. If you are trying to report a field from OpenSearch but that value is never stored in OpenSearch, the check will not be able to detect if that field is ever collected in the first palce. It is advised to add unit/functional tests to check that all the fields are being reported as expected.
 
 The tool looks for `.telemetryrc.json` files in the root of the project and in the `x-pack` dir for its runtime configurations.
 

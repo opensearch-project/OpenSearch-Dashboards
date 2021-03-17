@@ -66,7 +66,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
       this.container.appendChild(this.legendEl);
     }
 
-    render(esResponse: any, visParams: VisParams): Promise<void> {
+    render(opensearchResponse: any, visParams: VisParams): Promise<void> {
       if (this.vislibVis) {
         this.destroy();
       }
@@ -86,7 +86,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
         this.vislibVis.on('click', this.vis.API.events.filter);
         this.vislibVis.on('renderComplete', resolve);
 
-        this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+        this.vislibVis.initVisConfig(opensearchResponse, this.vis.getUiState());
 
         if (visParams.addLegend) {
           $(this.container)
@@ -95,10 +95,10 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
             })
             .addClass((legendClassName as any)[visParams.legendPosition]);
 
-          this.mountLegend(esResponse, visParams.legendPosition);
+          this.mountLegend(opensearchResponse, visParams.legendPosition);
         }
 
-        this.vislibVis.render(esResponse, this.vis.getUiState());
+        this.vislibVis.render(opensearchResponse, this.vis.getUiState());
 
         // refreshing the legend after the chart is rendered.
         // this is necessary because some visualizations
@@ -108,8 +108,8 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
           CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
         ) {
           this.unmountLegend();
-          this.mountLegend(esResponse, visParams.legendPosition);
-          this.vislibVis.render(esResponse, this.vis.getUiState());
+          this.mountLegend(opensearchResponse, visParams.legendPosition);
+          this.vislibVis.render(opensearchResponse, this.vis.getUiState());
         }
       });
     }

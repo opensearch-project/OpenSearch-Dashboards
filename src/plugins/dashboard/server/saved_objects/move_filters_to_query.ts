@@ -28,7 +28,7 @@ export interface Pre600FilterQuery {
 
 export interface SearchSourcePre600 {
   // I encountered at least one export from 7.0.0-alpha that was missing the filter property in here.
-  // The maps data in esarchives actually has it, but I don't know how/when they created it.
+  // The maps data in opensearcharchives actually has it, but I don't know how/when they created it.
   filter?: Array<Filter | Pre600FilterQuery>;
 }
 
@@ -56,7 +56,7 @@ export function moveFiltersToQuery(
   };
 
   // I encountered at least one export from 7.0.0-alpha that was missing the filter property in here.
-  // The maps data in esarchives actually has it, but I don't know how/when they created it.
+  // The maps data in opensearcharchives actually has it, but I don't know how/when they created it.
   if (!searchSource.filter) {
     searchSource.filter = [];
   }

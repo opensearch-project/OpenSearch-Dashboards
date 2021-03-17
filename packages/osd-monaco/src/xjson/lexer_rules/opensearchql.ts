@@ -19,7 +19,7 @@
 
 import { monaco } from '../../monaco';
 
-export const ID = 'esql';
+export const ID = 'opensearchql';
 
 const brackets = [
   { open: '[', close: ']', token: 'delimiter.square' },

@@ -20,7 +20,7 @@
 import { monaco } from '../../monaco';
 import { ID } from '../constants';
 import './painless';
-import './esql';
+import './opensearchql';
 
 import { globals } from './shared';
 
@@ -56,7 +56,7 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
           'punctuation.start_triple_quote',
           {
             token: 'punctuation.start_triple_quote.lang_marker',
-            nextEmbedded: 'esql',
+            nextEmbedded: 'opensearchql',
             next: 'my_sql',
           },
         ],
