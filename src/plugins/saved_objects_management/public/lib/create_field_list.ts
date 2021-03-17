@@ -100,7 +100,7 @@ const addFieldsFromClass = function (
       return;
     }
 
-    const getFieldTypeFromEsType = () => {
+    const getFieldTypeFromOpenSearchType = () => {
       switch (castOpenSearchToOsdFieldTypeName(opensearchType)) {
         case 'string':
           return 'text';
@@ -115,7 +115,7 @@ const addFieldsFromClass = function (
 
     fields.push({
       name,
-      type: getFieldTypeFromEsType(),
+      type: getFieldTypeFromOpenSearchType(),
       value: undefined,
     });
   });
