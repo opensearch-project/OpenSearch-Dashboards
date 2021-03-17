@@ -77,7 +77,7 @@ export function createStats(name: string, log: ToolingLog) {
     }
 
     /**
-     * Record that the esArchiver waited for an index that was in the middle of being snapshotted
+     * Record that the opensearchArchiver waited for an index that was in the middle of being snapshotted
      * @param index
      */
     public waitingForInProgressSnapshot(index: string) {

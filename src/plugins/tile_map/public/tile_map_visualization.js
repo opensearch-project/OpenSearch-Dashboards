@@ -90,9 +90,9 @@ export const createTileMapVisualization = (dependencies) => {
       this.vis.eventsSubject.next(updateVarsObject);
     };
 
-    async render(esResponse, visParams) {
+    async render(opensearchResponse, visParams) {
       getOpenSearchDashboardsLegacy().loadFontAwesome();
-      await super.render(esResponse, visParams);
+      await super.render(opensearchResponse, visParams);
     }
 
     async _makeOpenSearchDasbhoardsMap() {

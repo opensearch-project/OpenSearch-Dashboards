@@ -39,7 +39,7 @@ export function initTimelionHelpDirective(app) {
         };
 
         function init() {
-          $scope.es = {
+          $scope.opensearch = {
             invalidCount: 0,
           };
 
@@ -74,14 +74,14 @@ export function initTimelionHelpDirective(app) {
                 defaultMessage: 'Management/OpenSearch Dashboards/Advanced Settings',
               }
             ),
-            esAsteriskQueryDescription: i18n.translate(
-              'timelion.help.querying.esAsteriskQueryDescriptionText',
+            opensearchAsteriskQueryDescription: i18n.translate(
+              'timelion.help.querying.opensearchAsteriskQueryDescriptionText',
               {
                 defaultMessage: 'hey OpenSearch, find everything in my default index',
               }
             ),
-            esIndexQueryDescription: i18n.translate(
-              'timelion.help.querying.esIndexQueryDescriptionText',
+            opensearchIndexQueryDescription: i18n.translate(
+              'timelion.help.querying.opensearchIndexQueryDescriptionText',
               {
                 defaultMessage: 'use * as the q (query) for the logstash-* index',
               }
@@ -125,27 +125,27 @@ export function initTimelionHelpDirective(app) {
           });
         }
         $scope.recheckOpenSearch = function () {
-          $scope.es.valid = null;
+          $scope.opensearch.valid = null;
           checkOpenSearch().then(function (valid) {
-            if (!valid) $scope.es.invalidCount++;
+            if (!valid) $scope.opensearch.invalidCount++;
           });
         };
 
         function checkOpenSearch() {
-          return $http.get('../api/timelion/validate/es').then(function (resp) {
+          return $http.get('../api/timelion/validate/opensearch').then(function (resp) {
             if (resp.data.ok) {
-              $scope.es.valid = true;
-              $scope.es.stats = {
+              $scope.opensearch.valid = true;
+              $scope.opensearch.stats = {
                 min: moment(resp.data.min).format('LLL'),
                 max: moment(resp.data.max).format('LLL'),
                 field: resp.data.field,
               };
             } else {
-              $scope.es.valid = false;
-              $scope.es.invalidReason = (function () {
+              $scope.opensearch.valid = false;
+              $scope.opensearch.invalidReason = (function () {
                 try {
-                  const esResp = JSON.parse(resp.data.resp.response);
-                  return _.get(esResp, 'error.root_cause[0].reason');
+                  const opensearchResp = JSON.parse(resp.data.resp.response);
+                  return _.get(opensearchResp, 'error.root_cause[0].reason');
                 } catch (e) {
                   if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');
                   if (_.get(resp, 'data.resp.output.payload.message'))
@@ -156,7 +156,7 @@ export function initTimelionHelpDirective(app) {
                 }
               })();
             }
-            return $scope.es.valid;
+            return $scope.opensearch.valid;
           });
         }
         init();

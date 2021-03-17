@@ -26,13 +26,13 @@ export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: bo
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      const esMappingString = await readFileAsync(fullPath, 'utf-8');
-      const esMapping = JSON.parse(esMappingString);
+      const opensearchMappingString = await readFileAsync(fullPath, 'utf-8');
+      const opensearchMapping = JSON.parse(opensearchMappingString);
 
       if (root.parsedCollections) {
-        const differences = checkMatchingMapping(root.parsedCollections, esMapping);
-        root.esMappingDiffs = Object.keys(differences);
-        if (root.esMappingDiffs.length && throwOnDiff) {
+        const differences = checkMatchingMapping(root.parsedCollections, opensearchMapping);
+        root.opensearchMappingDiffs = Object.keys(differences);
+        if (root.opensearchMappingDiffs.length && throwOnDiff) {
           throw Error(
             `The following changes must be persisted in ${fullPath} file. Use '--fix' to update.\n${JSON.stringify(
               differences,

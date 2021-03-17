@@ -22,7 +22,7 @@ import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**
- * check for an existing SavedObject with the same title in ES
+ * check for an existing SavedObject with the same title in OpenSearch
  * returns Promise<true> when it's no duplicate, or the modal displaying the warning
  * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
  * @param savedObject
