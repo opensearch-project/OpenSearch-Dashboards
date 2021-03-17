@@ -22,9 +22,9 @@ import { AppCategory } from '../types';
 
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
-  openSearchDashboards: {
-    id: 'openSearchDashboards',
-    label: i18n.translate('core.ui.openSearchDashboardsNavList.label', {
+  opensearchDashboards: {
+    id: 'opensearchDashboards',
+    label: i18n.translate('core.ui.opensearchDashboardsNavList.label', {
       defaultMessage: 'OpenSearch Dashboards',
     }),
     euiIconType: 'logoKibana',
