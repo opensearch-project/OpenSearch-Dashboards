@@ -1,17 +1,17 @@
 #!/bin/sh
 set -e
 
-export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
+export OSD_PATH_CONF=${OSD_PATH_CONF:-<%= configDir %>}
 
 set_chmod() {
-  chmod -f 660 ${KBN_PATH_CONF}/kibana.yml || true
+  chmod -f 660 ${OSD_PATH_CONF}/kibana.yml || true
   chmod -f 2750 <%= dataDir %> || true
-  chmod -f 2750 ${KBN_PATH_CONF} || true
+  chmod -f 2750 ${OSD_PATH_CONF} || true
 }
 
 set_chown() {
   chown -R <%= user %>:<%= group %> <%= dataDir %>
-  chown -R root:<%= group %> ${KBN_PATH_CONF}
+  chown -R root:<%= group %> ${OSD_PATH_CONF}
 }
 
 set_access() {

@@ -18,7 +18,7 @@
  */
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 import { isErrorLogged, markErrorLogged } from './errors';
 import { Build } from './build';

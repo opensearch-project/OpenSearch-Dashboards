@@ -70,7 +70,7 @@ jest.mock('axios', () => ({
   },
 }));
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import { getNodeShasums } from './node_shasums';
 
 describe('src/dev/build/tasks/nodejs/node_shasums', () => {

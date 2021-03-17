@@ -21,7 +21,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsReporter, CiStatsMetrics } from '@kbn/dev-utils';
+import { CiStatsReporter, CiStatsMetrics } from '@osd/dev-utils';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
 

@@ -20,13 +20,13 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAnyInstanceSerializer,
   createRecursiveSerializer,
-} from '@kbn/dev-utils';
+} from '@osd/dev-utils';
 
 import { Config, Platform } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
