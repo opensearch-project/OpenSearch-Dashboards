@@ -24,7 +24,7 @@ import {
   ToolingLogCollectingWriter,
   createStripAnsiSerializer,
   createRecursiveSerializer,
-} from '@kbn/dev-utils';
+} from '@osd/dev-utils';
 
 import { exec } from './exec';
 

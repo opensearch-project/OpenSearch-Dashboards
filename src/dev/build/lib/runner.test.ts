@@ -22,7 +22,7 @@ import {
   ToolingLogCollectingWriter,
   createStripAnsiSerializer,
   createRecursiveSerializer,
-} from '@kbn/dev-utils';
+} from '@osd/dev-utils';
 import { Config } from './config';
 import { createRunner } from './runner';
 import { Build } from './build';

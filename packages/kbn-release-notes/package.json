@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch"
+    "osd:bootstrap": "tsc",
+    "osd:watch": "tsc --watch"
   },
   "dependencies": {
     "@osd/utils": "1.0.0",

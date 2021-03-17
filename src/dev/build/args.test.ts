@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { ToolingLog, createAnyInstanceSerializer } from '@osd/dev-utils';
 
 import { readCliArgs } from './args';
 
