@@ -262,7 +262,7 @@ export function createTestServers({
             ...usersToBeAdded,
             // user elastic
             opensearchTestConfig.getUrlParts(),
-            // user openSearchDashboards
+            // user opensearchDashboards
             osdTestConfig.getUrlParts(),
           ],
         });
