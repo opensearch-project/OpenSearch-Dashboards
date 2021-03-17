@@ -19,7 +19,7 @@ To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
 
 Drag and drop your data onto the visualization builder pane.
 
-. Select the *opensearch_dashboards_sample_data_ecommerce* index pattern.
+. Select the *kibana_sample_data_ecommerce* index pattern.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
 +
@@ -124,7 +124,7 @@ index: _all
 to:
 
 ```yaml
-index: opensearch_dashboards_sample_data_ecommerce
+index: kibana_sample_data_ecommerce
 ```
 
 Click "Update". The result is probably not what you expect. You should see a flat
@@ -135,7 +135,7 @@ no results. You can try the <<vega-browser-debugging-console, Vega debugging pro
 but intuition may be faster for this particular problem.
 
 In this case, the problem is that you are querying the field `@timestamp`,
-which does not exist in the `opensearch_dashboards_sample_data_ecommerce` data. Find and replace
+which does not exist in the `kibana_sample_data_ecommerce` data. Find and replace
 `@timestamp` with `order_date`. This fixes the problem, leaving you with this spec:
 
 .Expand Vega-Lite spec
@@ -150,7 +150,7 @@ which does not exist in the `opensearch_dashboards_sample_data_ecommerce` data. 
     url: {
       %context%: true
       %timefield%: order_date
-      index: opensearch_dashboards_sample_data_ecommerce
+      index: kibana_sample_data_ecommerce
       body: {
         aggs: {
           time_buckets: {
@@ -199,7 +199,7 @@ This query is roughly equivalent to the one that is used in the default
 Vega-Lite spec. Copy it into the Dev Tools:
 
 ```js
-POST opensearch_dashboards_sample_data_ecommerce/_search
+POST kibana_sample_data_ecommerce/_search
 {
   "query": {
     "range": {
@@ -229,7 +229,7 @@ will add a new
 {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]:
 
 ```js
-POST opensearch_dashboards_sample_data_ecommerce/_search
+POST kibana_sample_data_ecommerce/_search
 {
   "query": {
     "range": {
@@ -300,7 +300,7 @@ your spec:
     url: {
       %context%: true
       %timefield%: order_date
-      index: opensearch_dashboards_sample_data_ecommerce
+      index: kibana_sample_data_ecommerce
       body: {
         aggs: {
           categories: {
@@ -577,7 +577,7 @@ The final result of this tutorial is this spec:
     url: {
       %context%: true
       %timefield%: order_date
-      index: opensearch_dashboards_sample_data_ecommerce
+      index: kibana_sample_data_ecommerce
       body: {
         aggs: {
           categories: {
@@ -745,7 +745,7 @@ Next, add a valid {es} search query in the `data` block:
       url: {
         %context%: true
         %timefield%: order_date
-        index: opensearch_dashboards_sample_data_ecommerce
+        index: kibana_sample_data_ecommerce
         body: {
           aggs: {
             time_buckets: {
@@ -1055,7 +1055,7 @@ The final Vega spec for this tutorial is here:
       url: {
         %context%: true
         %timefield%: order_date
-        index: opensearch_dashboards_sample_data_ecommerce
+        index: kibana_sample_data_ecommerce
         body: {
           aggs: {
             time_buckets: {
