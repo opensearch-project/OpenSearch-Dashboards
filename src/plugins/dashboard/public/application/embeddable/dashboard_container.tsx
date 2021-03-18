@@ -91,7 +91,9 @@ export interface DashboardContainerOptions {
   uiActions: UiActionsStart;
 }
 
-export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<DashboardContainerOptions>;
+export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
+  DashboardContainerOptions
+>;
 export type DashboardReactContext = OpenSearchDashboardsReactContext<DashboardContainerOptions>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {

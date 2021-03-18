@@ -24,7 +24,10 @@ import semver, { coerce } from 'semver';
  * 1. Major version differences will never work together.
  * 2. Older versions of OpenSearch won't work with newer versions of OpenSearch Dashboards.
  */
-export function opensearchVersionCompatibleWithOpenSearchDashboards(opensearchVersion: string, opensearchDashboardsVersion: string) {
+export function opensearchVersionCompatibleWithOpenSearchDashboards(
+  opensearchVersion: string,
+  opensearchDashboardsVersion: string
+) {
   const opensearchVersionNumbers = {
     major: semver.major(opensearchVersion),
     minor: semver.minor(opensearchVersion),
@@ -50,8 +53,15 @@ export function opensearchVersionCompatibleWithOpenSearchDashboards(opensearchVe
   return true;
 }
 
-export function opensearchVersionEqualsOpenSearchDashboards(nodeVersion: string, opensearchDashboardsVersion: string) {
+export function opensearchVersionEqualsOpenSearchDashboards(
+  nodeVersion: string,
+  opensearchDashboardsVersion: string
+) {
   const nodeSemVer = coerce(nodeVersion);
   const opensearchDashboardsSemver = coerce(opensearchDashboardsVersion);
-  return nodeSemVer && opensearchDashboardsSemver && nodeSemVer.version === opensearchDashboardsSemver.version;
+  return (
+    nodeSemVer &&
+    opensearchDashboardsSemver &&
+    nodeSemVer.version === opensearchDashboardsSemver.version
+  );
 }

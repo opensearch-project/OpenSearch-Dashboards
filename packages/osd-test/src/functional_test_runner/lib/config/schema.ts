@@ -220,7 +220,9 @@ export const schema = Joi.object()
     // settings for the opensearchArchiver module
     opensearchArchiver: Joi.object()
       .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/opensearch_archiver')),
+        directory: Joi.string().default(
+          defaultRelativeToConfigPath('fixtures/opensearch_archiver')
+        ),
       })
       .default(),
 

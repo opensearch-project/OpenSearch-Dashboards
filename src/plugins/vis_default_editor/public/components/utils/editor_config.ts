@@ -94,17 +94,17 @@ export function getEditorConfig(
     const interval = fieldAgg.interval;
     return interval
       ? {
-        intervalBase: {
-          fixedValue: interval,
-        },
-        interval: {
-          base: interval,
-          help: i18n.translate('visDefaultEditor.editorConfig.histogram.interval.helpText', {
-            defaultMessage: 'Must be a multiple of configuration interval: {interval}',
-            values: { interval },
-          }),
-        },
-      }
+          intervalBase: {
+            fixedValue: interval,
+          },
+          interval: {
+            base: interval,
+            help: i18n.translate('visDefaultEditor.editorConfig.histogram.interval.helpText', {
+              defaultMessage: 'Must be a multiple of configuration interval: {interval}',
+              values: { interval },
+            }),
+          },
+        }
       : {};
   }
 

@@ -93,7 +93,11 @@ export default class OsdServer {
   public server: Server;
   public inject: Server['inject'];
 
-  constructor(settings: Record<string, any>, config: OpenSearchDashboardsConfig, core: OpenSearchDashboardsCore);
+  constructor(
+    settings: Record<string, any>,
+    config: OpenSearchDashboardsConfig,
+    core: OpenSearchDashboardsCore
+  );
 
   public ready(): Promise<void>;
   public mixin(...fns: OsdMixinFunc[]): Promise<void>;

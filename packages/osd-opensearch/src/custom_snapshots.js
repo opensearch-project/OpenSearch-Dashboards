@@ -33,7 +33,10 @@ function getCustomSnapshotUrl() {
     return undefined;
   }
 
-  if (process.env.OSD_OPENSEARCH_SNAPSHOT_URL && process.env.OSD_OPENSEARCH_SNAPSHOT_URL !== 'false') {
+  if (
+    process.env.OSD_OPENSEARCH_SNAPSHOT_URL &&
+    process.env.OSD_OPENSEARCH_SNAPSHOT_URL !== 'false'
+  ) {
     return process.env.OSD_OPENSEARCH_SNAPSHOT_URL;
   }
 }

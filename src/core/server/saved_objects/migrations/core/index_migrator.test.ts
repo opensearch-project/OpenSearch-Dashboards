@@ -288,7 +288,9 @@ describe('IndexMigrator', () => {
 
     expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
-      body: { actions: [{ add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } }] },
+      body: {
+        actions: [{ add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } }],
+      },
     });
   });
 

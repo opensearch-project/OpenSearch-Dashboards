@@ -140,11 +140,15 @@ export class Env {
       prod: !isDevMode,
     });
 
-    const isOpenSearchDashboardsDistributable = Boolean(pkg.build && pkg.build.distributable === true);
+    const isOpenSearchDashboardsDistributable = Boolean(
+      pkg.build && pkg.build.distributable === true
+    );
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
       buildNum: isOpenSearchDashboardsDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: isOpenSearchDashboardsDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      buildSha: isOpenSearchDashboardsDistributable
+        ? pkg.build.sha
+        : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
       dist: isOpenSearchDashboardsDistributable,
     });

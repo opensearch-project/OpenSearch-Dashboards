@@ -128,24 +128,24 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const hasErrors = errors.length > 0;
     const statusMsg = hasErrors
       ? this.props.intl.formatMessage(
-        {
-          id: 'home.tutorial.savedObject.unableToAddErrorMessage',
-          defaultMessage:
-            'Unable to add {errorsLength} of {savedObjectsLength} OpenSearch Dashboards objects, Error: {errorMessage}',
-        },
-        {
-          errorsLength: errors.length,
-          savedObjectsLength: this.props.savedObjects.length,
-          errorMessage: errors[0].error.message,
-        }
-      )
+          {
+            id: 'home.tutorial.savedObject.unableToAddErrorMessage',
+            defaultMessage:
+              'Unable to add {errorsLength} of {savedObjectsLength} OpenSearch Dashboards objects, Error: {errorMessage}',
+          },
+          {
+            errorsLength: errors.length,
+            savedObjectsLength: this.props.savedObjects.length,
+            errorMessage: errors[0].error.message,
+          }
+        )
       : this.props.intl.formatMessage(
-        {
-          id: 'home.tutorial.savedObject.addedLabel',
-          defaultMessage: '{savedObjectsLength} saved objects successfully added',
-        },
-        { savedObjectsLength: this.props.savedObjects.length }
-      );
+          {
+            id: 'home.tutorial.savedObject.addedLabel',
+            defaultMessage: '{savedObjectsLength} saved objects successfully added',
+          },
+          { savedObjectsLength: this.props.savedObjects.length }
+        );
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
@@ -175,9 +175,9 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const installMsg = this.props.installMsg
       ? this.props.installMsg
       : this.props.intl.formatMessage({
-        id: 'home.tutorial.savedObject.installLabel',
-        defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
-      });
+          id: 'home.tutorial.savedObject.installLabel',
+          defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
+        });
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

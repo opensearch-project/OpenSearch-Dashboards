@@ -390,11 +390,13 @@ export class SavedObjectsService
       );
 
       // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.opensearch.opensearchNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-        if (!isCompatible && message) {
-          this.logger.error(message);
+      this.setupDeps!.opensearch.opensearchNodesCompatibility$.subscribe(
+        ({ isCompatible, message }) => {
+          if (!isCompatible && message) {
+            this.logger.error(message);
+          }
         }
-      });
+      );
 
       await this.setupDeps!.opensearch.opensearchNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
@@ -465,7 +467,11 @@ export class SavedObjectsService
       opensearchDashboardsVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
       opensearchDashboardsConfig,
-      client: createMigrationOpenSearchClient(client.asInternalUser, this.logger, migrationsRetryDelay),
+      client: createMigrationOpenSearchClient(
+        client.asInternalUser,
+        this.logger,
+        migrationsRetryDelay
+      ),
     });
   }
 }

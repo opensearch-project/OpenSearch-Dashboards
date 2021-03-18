@@ -82,7 +82,8 @@ export function buildSavedObject(
    */
   savedObject.init = once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyOpenSearchResp = (resp: OpenSearchResponse) => applyOpenSearchResp(resp, savedObject, config, services);
+  savedObject.applyOpenSearchResp = (resp: OpenSearchResponse) =>
+    applyOpenSearchResp(resp, savedObject, config, services);
 
   /**
    * Serialize this object

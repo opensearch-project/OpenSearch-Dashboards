@@ -50,7 +50,10 @@ export default function ({ getService }) {
         .send({ report })
         .expect(200);
 
-      const response = await opensearch.search({ index: '.opensearch-dashboards', q: 'type:ui-metric' });
+      const response = await opensearch.search({
+        index: '.opensearch-dashboards',
+        q: 'type:ui-metric',
+      });
       const ids = response.hits.hits.map(({ _id }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
@@ -75,11 +78,16 @@ export default function ({ getService }) {
         .send({ report })
         .expect(200);
 
-      const response = await opensearch.search({ index: '.opensearch-dashboards', q: 'type:ui-metric' });
+      const response = await opensearch.search({
+        index: '.opensearch-dashboards',
+        q: 'type:ui-metric',
+      });
       const ids = response.hits.hits.map(({ _id }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
-      expect(ids.includes(`ui-metric:opensearch-dashboards-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
+      expect(
+        ids.includes(`ui-metric:opensearch-dashboards-user_agent:${userAgentMetric.userAgent}`)
+      ).to.eql(true);
     });
   });
 }

@@ -28,9 +28,7 @@ import EventEmitter from 'events';
 import type { OpenSearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 
-const createFakeConfig = (
-  parts: Partial<OpenSearchClientConfig> = {}
-): OpenSearchClientConfig => {
+const createFakeConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchClientConfig => {
   return ({
     type: 'fake-config',
     ...parts,

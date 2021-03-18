@@ -26,7 +26,8 @@ const isString = (v: any): v is string => typeof v === 'string';
 
 const CONFIG_PATHS = [
   process.env.OSD_PATH_CONF && join(process.env.OSD_PATH_CONF, 'opensearch_dashboards.yml'),
-  process.env.OPENSEARCH_DASHBOARDS_PATH_CONF && join(process.env.OPENSEARCH_DASHBOARDS_PATH_CONF, 'opensearch_dashboards.yml'),
+  process.env.OPENSEARCH_DASHBOARDS_PATH_CONF &&
+    join(process.env.OPENSEARCH_DASHBOARDS_PATH_CONF, 'opensearch_dashboards.yml'),
   process.env.CONFIG_PATH, // deprecated
   join(REPO_ROOT, 'config/opensearch_dashboards.yml'),
 ].filter(isString);

@@ -49,7 +49,11 @@ export function handleOpenSearchDashboardsStats(
     logger.warn('No OpenSearchDashboards stats returned from usage collectors');
     return;
   }
-  const { opensearch_dashboards, opensearch_dashboards_stats: opensearchDashboardsStats, ...plugins } = response;
+  const {
+    opensearch_dashboards,
+    opensearch_dashboards_stats: opensearchDashboardsStats,
+    ...plugins
+  } = response;
 
   const os = {
     platform: 'unknown',

@@ -38,7 +38,9 @@ type MethodName = typeof methods[number];
 
 export type RepositoryOpenSearchClient = Pick<OpenSearchClient, MethodName>;
 
-export function createRepositoryOpenSearchClient(client: OpenSearchClient): RepositoryOpenSearchClient {
+export function createRepositoryOpenSearchClient(
+  client: OpenSearchClient
+): RepositoryOpenSearchClient {
   return methods.reduce((acc: RepositoryOpenSearchClient, key: MethodName) => {
     Object.defineProperty(acc, key, {
       value: async (params?: unknown, options?: TransportRequestOptions) => {

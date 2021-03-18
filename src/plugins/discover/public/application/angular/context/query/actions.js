@@ -38,21 +38,21 @@ export function QueryActionsProvider(Promise) {
   );
 
   const setFailedStatus = (state) => (subject, details = {}) =>
-  (state.loadingStatus[subject] = {
-    status: LOADING_STATUS.FAILED,
-    reason: FAILURE_REASONS.UNKNOWN,
-    ...details,
-  });
+    (state.loadingStatus[subject] = {
+      status: LOADING_STATUS.FAILED,
+      reason: FAILURE_REASONS.UNKNOWN,
+      ...details,
+    });
 
   const setLoadedStatus = (state) => (subject) =>
-  (state.loadingStatus[subject] = {
-    status: LOADING_STATUS.LOADED,
-  });
+    (state.loadingStatus[subject] = {
+      status: LOADING_STATUS.LOADED,
+    });
 
   const setLoadingStatus = (state) => (subject) =>
-  (state.loadingStatus[subject] = {
-    status: LOADING_STATUS.LOADING,
-  });
+    (state.loadingStatus[subject] = {
+      status: LOADING_STATUS.LOADING,
+    });
 
   const fetchAnchorRow = (state) => () => {
     const {
@@ -173,11 +173,11 @@ export function QueryActionsProvider(Promise) {
   };
 
   const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) =>
-  (state.rows.all = [
-    ...(predecessorRows || []),
-    ...(anchorRow ? [anchorRow] : []),
-    ...(successorRows || []),
-  ]);
+    (state.rows.all = [
+      ...(predecessorRows || []),
+      ...(anchorRow ? [anchorRow] : []),
+      ...(successorRows || []),
+    ]);
 
   return {
     fetchAllRows,

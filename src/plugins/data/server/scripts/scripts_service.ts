@@ -25,5 +25,5 @@ export class ScriptsService implements Plugin<void> {
     registerScriptsRoute(http.createRouter());
   }
 
-  public start() { }
+  public start() {}
 }

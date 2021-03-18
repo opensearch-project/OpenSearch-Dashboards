@@ -72,7 +72,9 @@ describe('ApmConfiguration', () => {
   it('reads the opensearchDashboards uuid from the uuid file', () => {
     readUuidFileMock.mockReturnValue('instance-uuid');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe('instance-uuid');
+    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe(
+      'instance-uuid'
+    );
   });
 
   it('uses the uuid from the opensearchDashboards config if present', () => {
@@ -83,7 +85,9 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, opensearchDashboardsConfig, false);
-    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe('uuid-from-config');
+    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe(
+      'uuid-from-config'
+    );
   });
 
   it('uses the correct default config depending on the `isDistributable` parameter', () => {

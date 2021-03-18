@@ -32,7 +32,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { RedirectAppLinks, useOpenSearchDashboards } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  RedirectAppLinks,
+  useOpenSearchDashboards,
+} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
 import { PLUGIN_ID } from '../../../common';
 

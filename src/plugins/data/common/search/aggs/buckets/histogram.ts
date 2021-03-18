@@ -101,7 +101,7 @@ export const getHistogramBucketAgg = ({
          */
         name: 'intervalBase',
         default: null,
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'interval',
@@ -167,7 +167,7 @@ export const getHistogramBucketAgg = ({
         shouldShow(agg) {
           return isAutoInterval(get(agg, 'params.interval'));
         },
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'min_doc_count',
@@ -183,7 +183,7 @@ export const getHistogramBucketAgg = ({
       {
         name: 'has_extended_bounds',
         default: false,
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'extended_bounds',

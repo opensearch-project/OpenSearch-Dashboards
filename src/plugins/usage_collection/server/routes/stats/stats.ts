@@ -108,7 +108,9 @@ export function registerStatsRoute({
           }
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster, opensearchClient) : Promise.resolve({});
+        const usagePromise = shouldGetUsage
+          ? getUsage(callCluster, opensearchClient)
+          : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
 
         let modifiedUsage = usage;

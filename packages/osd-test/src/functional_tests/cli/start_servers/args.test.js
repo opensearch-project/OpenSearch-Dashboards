@@ -68,7 +68,9 @@ describe('process options for start servers CLI', () => {
   it('rejects boolean value for opensearch-dashboards-install-dir', () => {
     expect(() => {
       processOptions({ 'opensearch-dashboards-install-dir': true }, 'foo');
-    }).toThrow('functional_tests_server: invalid argument [true] to option [opensearch-dashboards-install-dir]');
+    }).toThrow(
+      'functional_tests_server: invalid argument [true] to option [opensearch-dashboards-install-dir]'
+    );
   });
 
   it('accepts source value for opensearchFrom', () => {

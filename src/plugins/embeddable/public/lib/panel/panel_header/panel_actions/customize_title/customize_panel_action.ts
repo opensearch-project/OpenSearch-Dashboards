@@ -37,7 +37,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
 
-  constructor(private readonly getDataFromUser: GetUserData) { }
+  constructor(private readonly getDataFromUser: GetUserData) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {

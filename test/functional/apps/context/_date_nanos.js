@@ -32,7 +32,10 @@ export default function ({ getService, getPageObjects }) {
 
   describe('context view for date_nanos', () => {
     before(async function () {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_date_nanos']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'opensearch_dashboards_date_nanos',
+      ]);
       await opensearchArchiver.loadIfNeeded('date_nanos');
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await opensearchDashboardsServer.uiSettings.update({

@@ -26,7 +26,7 @@ jest.mock('../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: jest.fn(() => 'path'),
     chrome: {
-      setBreadcrumbs: () => { },
+      setBreadcrumbs: () => {},
     },
     tutorialService: {
       getModuleNotices: () => [],
@@ -86,7 +86,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => { }}
+        bulkCreate={() => {}}
       />
     );
     await loadTutorialPromise;
@@ -112,7 +112,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getBasicTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => { }}
+        bulkCreate={() => {}}
       />
     );
     await loadBasicTutorialPromise;
@@ -128,7 +128,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => { }}
+        bulkCreate={() => {}}
       />
     );
     await loadTutorialPromise;
@@ -147,7 +147,7 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
-      bulkCreate={() => { }}
+      bulkCreate={() => {}}
     />
   );
   await loadTutorialPromise;

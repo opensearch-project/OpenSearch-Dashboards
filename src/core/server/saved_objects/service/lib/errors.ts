@@ -181,7 +181,9 @@ export class SavedObjectsErrorHelpers {
   }
 
   public static isOpenSearchCannotExecuteScriptError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT;
+    return (
+      isSavedObjectsClientError(error) && error[code] === CODE_OPENSEARCH_CANNOT_EXECUTE_SCRIPT
+    );
   }
 
   public static decorateOpenSearchUnavailableError(error: Error, reason?: string) {

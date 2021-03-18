@@ -95,7 +95,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Timepicker respects dateFormat from UI settings', async () => {
-      await opensearchDashboardsServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
+      });
       await browser.refresh();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

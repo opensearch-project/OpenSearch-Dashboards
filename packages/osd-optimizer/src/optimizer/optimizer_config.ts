@@ -29,7 +29,10 @@ import {
   parseThemeTags,
 } from '../common';
 
-import { findOpenSearchDashboardsPlatformPlugins, OpenSearchDashboardsPlatformPlugin } from './opensearch_dashboards_platform_plugins';
+import {
+  findOpenSearchDashboardsPlatformPlugins,
+  OpenSearchDashboardsPlatformPlugin,
+} from './opensearch_dashboards_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { readLimits } from '../limits';
@@ -219,19 +222,22 @@ export class OptimizerConfig {
 
   static create(inputOptions: Options) {
     const options = OptimizerConfig.parseOptions(inputOptions);
-    const plugins = findOpenSearchDashboardsPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
+    const plugins = findOpenSearchDashboardsPlatformPlugins(
+      options.pluginScanDirs,
+      options.pluginPaths
+    );
     const bundles = [
       ...(options.includeCoreBundle
         ? [
-          new Bundle({
-            type: 'entry',
-            id: 'core',
-            publicDirNames: ['public', 'public/utils'],
-            sourceRoot: options.repoRoot,
-            contextDir: Path.resolve(options.repoRoot, 'src/core'),
-            outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
-          }),
-        ]
+            new Bundle({
+              type: 'entry',
+              id: 'core',
+              publicDirNames: ['public', 'public/utils'],
+              sourceRoot: options.repoRoot,
+              contextDir: Path.resolve(options.repoRoot, 'src/core'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+            }),
+          ]
         : []),
       ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
@@ -263,7 +269,7 @@ export class OptimizerConfig {
     public readonly profileWebpack: boolean,
     public readonly themeTags: ThemeTags,
     public readonly limits: Limits
-  ) { }
+  ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
     return {

@@ -134,7 +134,10 @@ describe('CollapsibleNav', () => {
   });
 
   it('remembers collapsible section state', () => {
-    const navLinks = [mockLink({ category: opensearchDashboards }), mockLink({ category: observability })];
+    const navLinks = [
+      mockLink({ category: opensearchDashboards }),
+      mockLink({ category: observability }),
+    ];
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
@@ -156,7 +159,10 @@ describe('CollapsibleNav', () => {
 
   it('closes the nav after clicking a link', () => {
     const onClose = sinon.spy();
-    const navLinks = [mockLink({ category: opensearchDashboards }), mockLink({ title: 'categoryless' })];
+    const navLinks = [
+      mockLink({ category: opensearchDashboards }),
+      mockLink({ title: 'categoryless' }),
+    ];
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
@@ -177,7 +183,9 @@ describe('CollapsibleNav', () => {
     expect(onClose.callCount).toEqual(1);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });
-    component.find('[data-test-subj="collapsibleNavGroup-opensearchDashboards"] a').simulate('click');
+    component
+      .find('[data-test-subj="collapsibleNavGroup-opensearchDashboards"] a')
+      .simulate('click');
     expect(onClose.callCount).toEqual(2);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });

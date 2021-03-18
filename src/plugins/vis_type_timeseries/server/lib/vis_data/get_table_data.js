@@ -39,7 +39,13 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const body = buildRequestBody(req, panel, opensearchQueryConfig, indexPatternObject, capabilities);
+    const body = buildRequestBody(
+      req,
+      panel,
+      opensearchQueryConfig,
+      indexPatternObject,
+      capabilities
+    );
     const [resp] = await searchStrategy.search(req, [
       {
         body,

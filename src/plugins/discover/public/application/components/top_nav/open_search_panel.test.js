@@ -32,6 +32,6 @@ jest.mock('../../../opensearch_dashboards_services', () => {
 import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => { }} makeUrl={() => { }} />);
+  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
   expect(component).toMatchSnapshot();
 });

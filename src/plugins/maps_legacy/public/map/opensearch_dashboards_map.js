@@ -248,14 +248,22 @@ export class OpenSearchDashboardsMap extends EventEmitter {
     };
 
     opensearchDashboardsLayer.on('showTooltip', onshowTooltip);
-    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: opensearchDashboardsLayer });
+    this._listeners.push({
+      name: 'showTooltip',
+      handle: onshowTooltip,
+      layer: opensearchDashboardsLayer,
+    });
 
     const onHideTooltip = () => {
       this._leafletMap.closePopup();
       this._popup = null;
     };
     opensearchDashboardsLayer.on('hideTooltip', onHideTooltip);
-    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: opensearchDashboardsLayer });
+    this._listeners.push({
+      name: 'hideTooltip',
+      handle: onHideTooltip,
+      layer: opensearchDashboardsLayer,
+    });
 
     const onStyleChanged = () => {
       if (this._leafletLegendControl) {
@@ -263,7 +271,11 @@ export class OpenSearchDashboardsMap extends EventEmitter {
       }
     };
     opensearchDashboardsLayer.on('styleChanged', onStyleChanged);
-    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: opensearchDashboardsLayer });
+    this._listeners.push({
+      name: 'styleChanged',
+      handle: onStyleChanged,
+      layer: opensearchDashboardsLayer,
+    });
 
     this._layers.push(opensearchDashboardsLayer);
     opensearchDashboardsLayer.addToLeafletMap(this._leafletMap);
@@ -650,7 +662,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
 
     return typeof options.url === 'string' && options.url.length
       ? // eslint-disable-next-line no-undef
-      L.tileLayer.wms(options.url, wmsOptions)
+        L.tileLayer.wms(options.url, wmsOptions)
       : null;
   }
 

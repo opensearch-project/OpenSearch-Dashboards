@@ -21,11 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
-import {
-  opensearchClientMock,
-  ClusterClientMock,
-  CustomClusterClientMock,
-} from './client/mocks';
+import { opensearchClientMock, ClusterClientMock, CustomClusterClientMock } from './client/mocks';
 import { OpenSearchClientConfig } from './client';
 import { legacyClientMock } from './legacy/mocks';
 import { OpenSearchConfig } from './opensearch_config';

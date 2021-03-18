@@ -41,8 +41,8 @@ export const defaultEmbeddableFactoryProvider = <
     createFromSavedObject: def.createFromSavedObject
       ? def.createFromSavedObject.bind(def)
       : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
-        throw new Error(`Creation from saved object not supported by type ${def.type}`);
-      },
+          throw new Error(`Creation from saved object not supported by type ${def.type}`);
+        },
     create: def.create.bind(def),
     type: def.type,
     isEditable: def.isEditable.bind(def),

@@ -36,7 +36,10 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { OpenSearchDashboardsLegacySetup, OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
+import {
+  OpenSearchDashboardsLegacySetup,
+  OpenSearchDashboardsLegacyStart,
+} from 'src/plugins/opensearch_dashboards_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -153,7 +156,7 @@ const embeddableAngularName = 'app/discoverEmbeddable';
  */
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
-  constructor(private readonly initializerContext: PluginInitializerContext) { }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;

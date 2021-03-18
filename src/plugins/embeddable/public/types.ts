@@ -49,6 +49,6 @@ export type EmbeddableFactoryProvider = <
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   T extends SavedObjectAttributes = SavedObjectAttributes
-  >(
+>(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

@@ -41,7 +41,7 @@ export interface ISearchSetup {
   registerSearchStrategy: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
     SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
-    >(
+  >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => void;
@@ -60,7 +60,7 @@ export interface ISearchSetup {
 export interface ISearchStart<
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
   SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
-  > {
+> {
   aggs: AggsStart;
   /**
    * Get other registered search strategies. For example, if a new strategy needs to use the
@@ -86,7 +86,7 @@ export interface ISearchStart<
 export interface ISearchStrategy<
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
   SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
-  > {
+> {
   search: (
     context: RequestHandlerContext,
     request: SearchStrategyRequest,

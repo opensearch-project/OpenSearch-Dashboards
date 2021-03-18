@@ -27,7 +27,10 @@ import { getSearchService, getUiSettings } from '../../services';
 import { OpenSearchRawResponse } from './opensearch_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { IOpenSearchSearchResponse } from '../../../common/search/opensearch_search';
-import { buildOpenSearchQuery, getOpenSearchQueryConfig } from '../../../common/opensearch_query/opensearch_query';
+import {
+  buildOpenSearchQuery,
+  getOpenSearchQueryConfig,
+} from '../../../common/opensearch_query/opensearch_query';
 import { DataPublicPluginStart } from '../../types';
 
 const name = 'opensearchdsl';

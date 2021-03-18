@@ -31,7 +31,10 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await opensearchArchiver.loadIfNeeded('date_nanos_mixed');
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_date_nanos_mixed']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'opensearch_dashboards_date_nanos_mixed',
+      ]);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });

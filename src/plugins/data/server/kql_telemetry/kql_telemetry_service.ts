@@ -25,7 +25,7 @@ import { makeKQLUsageCollector } from './usage_collector';
 import { kqlTelemetry } from '../saved_objects';
 
 export class KqlTelemetryService implements Plugin<void> {
-  constructor(private initializerContext: PluginInitializerContext) { }
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
     { http, getStartServices, savedObjects }: CoreSetup,
@@ -51,5 +51,5 @@ export class KqlTelemetryService implements Plugin<void> {
     }
   }
 
-  public start() { }
+  public start() {}
 }

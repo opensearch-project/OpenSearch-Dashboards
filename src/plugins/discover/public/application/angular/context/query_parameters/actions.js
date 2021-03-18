@@ -25,18 +25,18 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './cons
 
 export function getQueryParameterActions(filterManager, indexPatterns) {
   const setPredecessorCount = (state) => (predecessorCount) =>
-  (state.queryParameters.predecessorCount = clamp(
-    MIN_CONTEXT_SIZE,
-    MAX_CONTEXT_SIZE,
-    predecessorCount
-  ));
+    (state.queryParameters.predecessorCount = clamp(
+      MIN_CONTEXT_SIZE,
+      MAX_CONTEXT_SIZE,
+      predecessorCount
+    ));
 
   const setSuccessorCount = (state) => (successorCount) =>
-  (state.queryParameters.successorCount = clamp(
-    MIN_CONTEXT_SIZE,
-    MAX_CONTEXT_SIZE,
-    successorCount
-  ));
+    (state.queryParameters.successorCount = clamp(
+      MIN_CONTEXT_SIZE,
+      MAX_CONTEXT_SIZE,
+      successorCount
+    ));
 
   const setQueryParameters = (state) => (queryParameters) =>
     Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));

@@ -22,7 +22,9 @@ import { savedObjectsClientProviderMock } from './service/lib/scoped_client_prov
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 export const migratorInstanceMock = mockOpenSearchDashboardsMigrator.create();
-export const OpenSearchDashboardsMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
+export const OpenSearchDashboardsMigratorMock = jest
+  .fn()
+  .mockImplementation(() => migratorInstanceMock);
 jest.doMock('./migrations/opensearch-dashboards/opensearch_dashboards_migrator', () => ({
   OpenSearchDashboardsMigrator: OpenSearchDashboardsMigratorMock,
 }));

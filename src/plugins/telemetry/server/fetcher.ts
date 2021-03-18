@@ -75,12 +75,12 @@ export class FetcherTask {
   }
 
   public start(
-    { savedObjects, opensearch  }: CoreStart,
+    { savedObjects, opensearch }: CoreStart,
     { telemetryCollectionManager }: FetcherTaskDepsStart
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.opensearchClient = opensearch .legacy.createClient('telemetry-fetcher');
+    this.opensearchClient = opensearch.legacy.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()

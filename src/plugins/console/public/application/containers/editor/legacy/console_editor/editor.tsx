@@ -234,7 +234,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(opensearchHostService.getHost());
+                return editorInstanceRef.current!.getRequestsAsCURL(
+                  opensearchHostService.getHost()
+                );
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

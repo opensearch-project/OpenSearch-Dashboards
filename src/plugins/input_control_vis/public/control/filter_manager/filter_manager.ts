@@ -27,7 +27,7 @@ export abstract class FilterManager {
     public fieldName: string,
     public indexPattern: IndexPattern,
     public queryFilter: QueryFilterManager
-  ) { }
+  ) {}
 
   /**
    * Convert phrases into filter

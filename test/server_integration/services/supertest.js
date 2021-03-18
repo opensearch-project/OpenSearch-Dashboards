@@ -21,10 +21,14 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function createOpenSearchDashboardsSupertestProvider({ certificateAuthorities, opensearchDashboardsUrl } = {}) {
+export function createOpenSearchDashboardsSupertestProvider({
+  certificateAuthorities,
+  opensearchDashboardsUrl,
+} = {}) {
   return function ({ getService }) {
     const config = getService('config');
-    opensearchDashboardsUrl = opensearchDashboardsUrl ?? formatUrl(config.get('servers.opensearchDashboards'));
+    opensearchDashboardsUrl =
+      opensearchDashboardsUrl ?? formatUrl(config.get('servers.opensearchDashboards'));
 
     return certificateAuthorities
       ? supertestAsPromised.agent(opensearchDashboardsUrl, { ca: certificateAuthorities })

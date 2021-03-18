@@ -82,7 +82,9 @@ describe('src/dev/npm/installed_packages', () => {
 
     it('does not include root package in the list', () => {
       if (opensearchDashboardsPackages.find((pkg) => pkg.name === 'opensearch-dashboards')) {
-        throw new Error('Expected getInstalledPackages(opensearch-dashboards) to not include opensearch-dashboards pkg');
+        throw new Error(
+          'Expected getInstalledPackages(opensearch-dashboards) to not include opensearch-dashboards pkg'
+        );
       }
 
       if (fixture1Packages.find((pkg) => pkg.name === 'fixture1')) {

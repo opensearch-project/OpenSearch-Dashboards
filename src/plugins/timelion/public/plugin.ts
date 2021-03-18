@@ -31,7 +31,10 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
-import { initAngularBootstrap, OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import {
+  initAngularBootstrap,
+  OpenSearchDashboardsLegacyStart,
+} from '../../opensearch_dashboards_legacy/public';
 import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart, opensearchFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
@@ -133,7 +136,10 @@ export class TimelionPlugin implements Plugin<void, void> {
     });
   }
 
-  public start(core: CoreStart, { opensearchDashboardsLegacy }: { opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart }) {
+  public start(
+    core: CoreStart,
+    { opensearchDashboardsLegacy }: { opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart }
+  ) {
     opensearchDashboardsLegacy.loadFontAwesome();
   }
 

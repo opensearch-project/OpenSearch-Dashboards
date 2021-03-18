@@ -34,7 +34,11 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('opensearchDashboards.defaultAppId', 'opensearch_dashboards_legacy.defaultAppId', true),
+    renameFromRoot(
+      'opensearchDashboards.defaultAppId',
+      'opensearch_dashboards_legacy.defaultAppId',
+      true
+    ),
     (completeConfig: Record<string, any>, rootPath: string, log: ConfigDeprecationLogger) => {
       if (
         get(completeConfig, 'opensearchDashboards.defaultAppId') === undefined &&
@@ -51,9 +55,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 class Plugin {
-  public setup(core: CoreSetup) { }
+  public setup(core: CoreSetup) {}
 
-  public start(core: CoreStart) { }
+  public start(core: CoreStart) {}
 }
 
 export const plugin = () => new Plugin();

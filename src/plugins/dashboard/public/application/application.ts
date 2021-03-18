@@ -41,7 +41,10 @@ import { EmbeddableStart } from '../../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
-import { OpenSearchDashboardsLegacyStart, configureAppAngularModule } from '../../../opensearch_dashboards_legacy/public';
+import {
+  OpenSearchDashboardsLegacyStart,
+  configureAppAngularModule,
+} from '../../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 

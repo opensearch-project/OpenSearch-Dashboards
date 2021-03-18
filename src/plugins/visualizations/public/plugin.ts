@@ -67,7 +67,10 @@ import {
   Start as InspectorStart,
 } from '../../../plugins/inspector/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { createStartServicesGetter, StartServicesGetter } from '../../opensearch_dashboards_utils/public';
+import {
+  createStartServicesGetter,
+  StartServicesGetter,
+} from '../../opensearch_dashboards_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';

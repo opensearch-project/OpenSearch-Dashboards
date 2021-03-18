@@ -19,7 +19,10 @@
 import { take } from 'rxjs/operators';
 
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
-import { OpenSearchDashboardsMigratorOptions, OpenSearchDashboardsMigrator } from './opensearch_dashboards_migrator';
+import {
+  OpenSearchDashboardsMigratorOptions,
+  OpenSearchDashboardsMigrator,
+} from './opensearch_dashboards_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';

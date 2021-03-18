@@ -18,4 +18,8 @@
  */
 
 export { osdTestConfig } from './osd_test_config';
-export { opensearchDashboardsTestUser, opensearchDashboardsServerTestUser, adminTestUser } from './users';
+export {
+  opensearchDashboardsTestUser,
+  opensearchDashboardsServerTestUser,
+  adminTestUser,
+} from './users';

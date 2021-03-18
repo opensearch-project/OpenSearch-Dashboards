@@ -97,7 +97,9 @@ export class ClusterClient implements ICustomClusterClient {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers;
-      const requestIdHeaders = isOpenSearchDashboardsRequest(request) ? { 'x-opaque-id': request.id } : {};
+      const requestIdHeaders = isOpenSearchDashboardsRequest(request)
+        ? { 'x-opaque-id': request.id }
+        : {};
       const authHeaders = this.getAuthHeaders(request);
 
       scopedHeaders = filterHeaders({ ...requestHeaders, ...requestIdHeaders, ...authHeaders }, [

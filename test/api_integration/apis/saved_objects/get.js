@@ -47,7 +47,8 @@ export default function ({ getService }) {
                 // cheat for some of the more complex attributes
                 visState: resp.body.attributes.visState,
                 uiStateJSON: resp.body.attributes.uiStateJSON,
-                opensearchDashboardsSavedObjectMeta: resp.body.attributes.opensearchDashboardsSavedObjectMeta,
+                opensearchDashboardsSavedObjectMeta:
+                  resp.body.attributes.opensearchDashboardsSavedObjectMeta,
               },
               references: [
                 {

@@ -101,7 +101,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { opensearch , http, savedObjects }: CoreSetup,
+    { opensearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
     const currentOpenSearchDashboardsVersion = this.currentOpenSearchDashboardsVersion;
@@ -109,7 +109,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const isDev = this.isDev;
     registerCollection(
       telemetryCollectionManager,
-      opensearch .legacy.client,
+      opensearch.legacy.client,
       () => this.opensearchClient
     );
     const router = http.createRouter();
@@ -135,10 +135,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings, opensearch  } = core;
+    const { savedObjects, uiSettings, opensearch } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
-    this.opensearchClient = opensearch .client;
+    this.opensearchClient = opensearch.client;
 
     // Not catching nor awaiting these promises because they should never reject
     this.handleOldUiSettings(uiSettings);

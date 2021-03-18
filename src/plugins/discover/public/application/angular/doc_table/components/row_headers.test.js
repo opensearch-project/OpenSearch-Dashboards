@@ -26,7 +26,11 @@ import sinon from 'sinon';
 import { getFakeRow } from 'fixtures/fake_row';
 import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../opensearch_dashboards_services';
+import {
+  setScopedHistory,
+  setServices,
+  setDocViewsRegistry,
+} from '../../../../opensearch_dashboards_services';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
@@ -180,11 +184,11 @@ describe('Doc Table', () => {
   describe('osdTableRow', () => {
     const $elem = $(
       '<tr osd-table-row="row" ' +
-      'columns="columns" ' +
-      'sorting="sorting"' +
-      'filter="filter"' +
-      'index-pattern="indexPattern"' +
-      '></tr>'
+        'columns="columns" ' +
+        'sorting="sorting"' +
+        'filter="filter"' +
+        'index-pattern="indexPattern"' +
+        '></tr>'
     );
     let row;
 
@@ -242,11 +246,11 @@ describe('Doc Table', () => {
   describe('osdTableRow meta', () => {
     const $elem = angular.element(
       '<tr osd-table-row="row" ' +
-      'columns="columns" ' +
-      'sorting="sorting"' +
-      'filtering="filtering"' +
-      'index-pattern="indexPattern"' +
-      '></tr>'
+        'columns="columns" ' +
+        'sorting="sorting"' +
+        'filtering="filtering"' +
+        'index-pattern="indexPattern"' +
+        '></tr>'
     );
     let row;
 

@@ -25,7 +25,14 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, series, opensearchQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(
+  req,
+  panel,
+  series,
+  opensearchQueryConfig,
+  indexPatternObject,
+  capabilities
+) {
   return (next) => (doc) => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);

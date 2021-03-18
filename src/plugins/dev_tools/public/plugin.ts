@@ -98,5 +98,5 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     }
   }
 
-  public stop() { }
+  public stop() {}
 }

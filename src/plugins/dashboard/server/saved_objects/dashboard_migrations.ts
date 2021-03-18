@@ -25,7 +25,10 @@ import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720 } from '../../common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
-  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(
+    doc,
+    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
+  );
   if (typeof searchSourceJSON !== 'string') {
     return;
   }
@@ -59,7 +62,9 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       delete filterRow.meta.index;
     });
   }
-  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
+    searchSource
+  );
 }
 
 const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To720 => {

@@ -88,7 +88,9 @@ export function OpenSearchPanel(props) {
               fill
               onClick={props.onClose}
               href={addBasePath(
-                `/app/management/opensearch-dashboards/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
+                `/app/management/opensearch-dashboards/objects?_a=${rison.encode({
+                  tab: SEARCH_OBJECT_TYPE,
+                })}`
               )}
             >
               <FormattedMessage

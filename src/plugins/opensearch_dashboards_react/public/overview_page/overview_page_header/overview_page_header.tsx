@@ -96,9 +96,12 @@ export const OverviewPageHeader: FC<Props> = ({
                       href={addBasePath('/app/home#/tutorial_directory')}
                       iconType="indexOpen"
                     >
-                      {i18n.translate('opensearch-dashboards-react.osdOverviewPageHeader.addDataButtonLabel', {
-                        defaultMessage: 'Add data',
-                      })}
+                      {i18n.translate(
+                        'opensearch-dashboards-react.osdOverviewPageHeader.addDataButtonLabel',
+                        {
+                          defaultMessage: 'Add data',
+                        }
+                      )}
                     </EuiButtonEmpty>
                   </RedirectAppLinks>
                 </EuiFlexItem>
@@ -132,9 +135,12 @@ export const OverviewPageHeader: FC<Props> = ({
                         iconType="wrench"
                         href={addBasePath('/app/dev_tools#/console')}
                       >
-                        {i18n.translate('opensearch-dashboards-react.osdOverviewPageHeader.devToolsButtonLabel', {
-                          defaultMessage: 'Dev tools',
-                        })}
+                        {i18n.translate(
+                          'opensearch-dashboards-react.osdOverviewPageHeader.devToolsButtonLabel',
+                          {
+                            defaultMessage: 'Dev tools',
+                          }
+                        )}
                       </EuiButtonEmpty>
                     </RedirectAppLinks>
                   </EuiFlexItem>

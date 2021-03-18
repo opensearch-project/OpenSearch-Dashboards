@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
+import {
+  LegacyAPICaller,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+} from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 

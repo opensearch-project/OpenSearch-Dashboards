@@ -101,7 +101,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'animals', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'animals',
+        'test_logstash_reader',
+      ]);
       await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',

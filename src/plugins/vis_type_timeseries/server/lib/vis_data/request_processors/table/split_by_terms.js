@@ -32,7 +32,12 @@ export function splitByTerms(req, panel, opensearchQueryConfig, indexPattern) {
           overwrite(
             doc,
             `aggs.pivot.aggs.${column.id}.column_filter.filter`,
-            opensearchQuery.buildOpenSearchQuery(indexPattern, [column.filter], [], opensearchQueryConfig)
+            opensearchQuery.buildOpenSearchQuery(
+              indexPattern,
+              [column.filter],
+              [],
+              opensearchQueryConfig
+            )
           );
         }
       });

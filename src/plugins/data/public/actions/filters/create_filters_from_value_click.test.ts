@@ -78,7 +78,7 @@ describe('createFiltersFromValueClick', () => {
           filter: () => [mockField],
         },
         getFormatterForField: () =>
-          new fieldFormats.BytesFormat({}, (() => { }) as FieldFormatsGetConfigFn),
+          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
     } as unknown) as IndexPatternsContract);
   });

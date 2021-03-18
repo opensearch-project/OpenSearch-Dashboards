@@ -31,7 +31,9 @@ export interface OpenSearchDashboardsPlatformPlugin {
   };
 }
 
-export function parseOpenSearchDashboardsPlatformPlugin(manifestPath: string): OpenSearchDashboardsPlatformPlugin {
+export function parseOpenSearchDashboardsPlatformPlugin(
+  manifestPath: string
+): OpenSearchDashboardsPlatformPlugin {
   if (!Path.isAbsolute(manifestPath)) {
     throw new TypeError('expected new platform manifest path to be absolute');
   }

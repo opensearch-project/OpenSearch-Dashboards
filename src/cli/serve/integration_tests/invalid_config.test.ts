@@ -37,7 +37,12 @@ describe('cli invalid config support', function () {
       // will finish the start lifecycle without a running OpenSearch instance.
       const { error, status, stdout, stderr } = spawnSync(
         process.execPath,
-        ['scripts/opensearch_dashboards', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        [
+          'scripts/opensearch_dashboards',
+          '--config',
+          INVALID_CONFIG_PATH,
+          '--migrations.skip=true',
+        ],
         {
           cwd: REPO_ROOT,
         }

@@ -99,9 +99,12 @@ export function redirectWhenMissing({
     }
 
     toastNotifications.addWarning({
-      title: i18n.translate('opensearch_dashboards_utils.history.savedObjectIsMissingNotificationMessage', {
-        defaultMessage: 'Saved object is missing',
-      }),
+      title: i18n.translate(
+        'opensearch_dashboards_utils.history.savedObjectIsMissingNotificationMessage',
+        {
+          defaultMessage: 'Saved object is missing',
+        }
+      ),
       text: (element: HTMLElement) => {
         ReactDOM.render(<ErrorRenderer>{error.message}</ErrorRenderer>, element);
         return () => ReactDOM.unmountComponentAtNode(element);

@@ -63,7 +63,10 @@ export class OpenSearchDashboardsUsageCollectionPlugin implements Plugin {
     this.metric$ = new Subject<OpsMetrics>();
   }
 
-  public setup(coreSetup: CoreSetup, { usageCollection }: OpenSearchDashboardsUsageCollectionPluginsDepsSetup) {
+  public setup(
+    coreSetup: CoreSetup,
+    { usageCollection }: OpenSearchDashboardsUsageCollectionPluginsDepsSetup
+  ) {
     this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
       coreSetup.savedObjects.registerType(opts)
     );

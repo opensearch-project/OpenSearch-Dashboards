@@ -35,7 +35,9 @@ describe('format', () => {
           ...query,
           test1: 'test1',
         }))
-      ).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/opensearch-dashboards#?test=test&test1=test1"`);
+      ).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/opensearch-dashboards#?test=test&test1=test1"`
+      );
     });
   });
 });

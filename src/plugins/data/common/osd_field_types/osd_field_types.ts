@@ -47,8 +47,12 @@ export const getOsdTypeNames = (): string[] =>
  *  @param {string} opensearchType
  *  @return {string}
  */
-export const castOpenSearchToOsdFieldTypeName = (opensearchType: OPENSEARCH_FIELD_TYPES | string): OSD_FIELD_TYPES => {
-  const type = registeredOsdTypes.find((t) => t.opensearchTypes.includes(opensearchType as OPENSEARCH_FIELD_TYPES));
+export const castOpenSearchToOsdFieldTypeName = (
+  opensearchType: OPENSEARCH_FIELD_TYPES | string
+): OSD_FIELD_TYPES => {
+  const type = registeredOsdTypes.find((t) =>
+    t.opensearchTypes.includes(opensearchType as OPENSEARCH_FIELD_TYPES)
+  );
 
   return type && type.name ? (type.name as OSD_FIELD_TYPES) : OSD_FIELD_TYPES.UNKNOWN;
 };

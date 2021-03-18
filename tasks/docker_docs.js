@@ -37,9 +37,13 @@ export default function (grunt) {
     exec('docker-compose', ['-f', composePath, 'up'], execOptions);
 
     const containerId = String(
-      exec('docker-compose', ['-f', composePath, 'ps', '-q', env.OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME], {
-        env,
-      })
+      exec(
+        'docker-compose',
+        ['-f', composePath, 'ps', '-q', env.OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME],
+        {
+          env,
+        }
+      )
     ).trim();
 
     grunt.log.write('Clearing old docs ... ');

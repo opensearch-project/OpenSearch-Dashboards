@@ -39,28 +39,36 @@ export function opensearchDashboardsMetricsSpecProvider(context: TutorialContext
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('home.tutorials.opensearchDashboardsMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from OpenSearch Dashboards.',
-    }),
+    shortDescription: i18n.translate(
+      'home.tutorials.opensearchDashboardsMetrics.shortDescription',
+      {
+        defaultMessage: 'Fetch internal metrics from OpenSearch Dashboards.',
+      }
+    ),
     longDescription: i18n.translate('home.tutorials.opensearchDashboardsMetrics.longDescription', {
       defaultMessage:
         'The `OpenSearch Dashboards` Metricbeat module fetches internal metrics from OpenSearch Dashboards. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-opensearch-dashboards.html',
+        learnMoreLink:
+          '{config.docs.beats.metricbeat}/metricbeat-module-opensearch-dashboards.html',
       },
     }),
     euiIconType: 'logoKibana',
     artifacts: {
       application: {
-        label: i18n.translate('home.tutorials.opensearchDashboardsMetrics.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
+        label: i18n.translate(
+          'home.tutorials.opensearchDashboardsMetrics.artifacts.application.label',
+          {
+            defaultMessage: 'Discover',
+          }
+        ),
         path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-opensearch-dashboards.html',
+        documentationUrl:
+          '{config.docs.beats.metricbeat}/exported-fields-opensearch-dashboards.html',
       },
     },
     completionTimeMinutes: 10,

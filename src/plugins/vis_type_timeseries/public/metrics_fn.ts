@@ -19,7 +19,11 @@
 
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { ExpressionFunctionDefinition, OpenSearchDashboardsContext, Render } from '../../expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  OpenSearchDashboardsContext,
+  Render,
+} from '../../expressions/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';

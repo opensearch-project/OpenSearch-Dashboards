@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'opensearch-dashboards/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsCreateOptions,
+  OverlayStart,
+} from 'opensearch-dashboards/public';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import * as deps from './confirm_modal_promise';
@@ -72,10 +76,14 @@ describe('saveWithConfirmation', () => {
       );
 
     await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
-    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getOpenSearchType(), source, {
-      overwrite: true,
-      ...options,
-    });
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
+      savedObject.getOpenSearchType(),
+      source,
+      {
+        overwrite: true,
+        ...options,
+      }
+    );
   });
 
   test('should reject when overwriting denied', async () => {

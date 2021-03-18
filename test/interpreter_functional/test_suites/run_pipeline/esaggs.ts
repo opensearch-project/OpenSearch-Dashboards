@@ -50,7 +50,10 @@ export default function ({
           opensearch_dashboards_context timeRange='${JSON.stringify(timeRange)}'
           | opensearchaggs index='logstash-*' aggConfigs='${JSON.stringify(aggConfigs)}'
         `;
-        const result = await expectExpression('opensearchaggs_primary_timefield', expression).getResponse();
+        const result = await expectExpression(
+          'opensearchaggs_primary_timefield',
+          expression
+        ).getResponse();
         expect(getCell(result, 0, 0)).to.be(9375);
       });
 
@@ -66,7 +69,10 @@ export default function ({
             aggConfigs
           )}'
         `;
-        const result = await expectExpression('opensearchaggs_other_timefield', expression).getResponse();
+        const result = await expectExpression(
+          'opensearchaggs_other_timefield',
+          expression
+        ).getResponse();
         expect(getCell(result, 0, 0)).to.be(11134);
       });
 

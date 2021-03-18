@@ -111,7 +111,10 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
     );
   }
 
-  public start(core: CoreStart, { data, opensearchDashboardsLegacy }: VisTypeVislibPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, opensearchDashboardsLegacy }: VisTypeVislibPluginStartDependencies
+  ) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
     setOpenSearchDashboardsLegacy(opensearchDashboardsLegacy);

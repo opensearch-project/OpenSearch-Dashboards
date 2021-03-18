@@ -65,15 +65,21 @@ export function isRangeValid(
     errorMessage = bothMustBeSetErrorMessage;
   } else if ((isLowerValueValid && lowerValue < min) || (isUpperValueValid && upperValue > max)) {
     isValid = false;
-    errorMessage = i18n.translate('opensearch-dashboards-react.dualRangeControl.outsideOfRangeErrorMessage', {
-      defaultMessage: 'Values must be on or between {min} and {max}',
-      values: { min, max },
-    });
+    errorMessage = i18n.translate(
+      'opensearch-dashboards-react.dualRangeControl.outsideOfRangeErrorMessage',
+      {
+        defaultMessage: 'Values must be on or between {min} and {max}',
+        values: { min, max },
+      }
+    );
   } else if (isLowerValueValid && isUpperValueValid && upperValue < lowerValue) {
     isValid = false;
-    errorMessage = i18n.translate('opensearch-dashboards-react.dualRangeControl.upperValidErrorMessage', {
-      defaultMessage: 'Upper value must be greater or equal to lower value',
-    });
+    errorMessage = i18n.translate(
+      'opensearch-dashboards-react.dualRangeControl.upperValidErrorMessage',
+      {
+        defaultMessage: 'Upper value must be greater or equal to lower value',
+      }
+    );
   }
 
   return {

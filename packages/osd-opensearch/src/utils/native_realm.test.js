@@ -206,7 +206,10 @@ describe('getReservedUsers', () => {
       },
     }));
 
-    expect(await nativeRealm.getReservedUsers()).toEqual(['opensearch_dashboards_system', 'logstash_system']);
+    expect(await nativeRealm.getReservedUsers()).toEqual([
+      'opensearch_dashboards_system',
+      'logstash_system',
+    ]);
   });
 });
 

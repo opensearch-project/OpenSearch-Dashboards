@@ -19,7 +19,10 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { OpenSearchDashboardsDatatable, OpenSearchDashboardsDatatableColumn } from 'src/plugins/expressions/public';
+import {
+  OpenSearchDashboardsDatatable,
+  OpenSearchDashboardsDatatableColumn,
+} from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
@@ -140,10 +143,13 @@ const handleCourierRequest = async ({
       defaultMessage: 'Data',
     }),
     {
-      description: i18n.translate('data.functions.opensearchaggs.inspector.dataRequest.description', {
-        defaultMessage:
-          'This request queries OpenSearch to fetch the data for the visualization.',
-      }),
+      description: i18n.translate(
+        'data.functions.opensearchaggs.inspector.dataRequest.description',
+        {
+          defaultMessage:
+            'This request queries OpenSearch to fetch the data for the visualization.',
+        }
+      ),
     }
   );
   request.stats(getRequestInspectorStats(requestSearchSource));

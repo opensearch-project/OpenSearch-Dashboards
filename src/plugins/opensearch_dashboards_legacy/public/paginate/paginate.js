@@ -61,9 +61,12 @@ export function PaginateDirectiveProvider($parse, $compile) {
     controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
-      const allSizeTitle = i18n.translate('opensearch_dashboards_legacy.paginate.size.allDropDownOptionLabel', {
-        defaultMessage: 'All',
-      });
+      const allSizeTitle = i18n.translate(
+        'opensearch_dashboards_legacy.paginate.size.allDropDownOptionLabel',
+        {
+          defaultMessage: 'All',
+        }
+      );
 
       self.sizeOptions = [
         { title: '10', value: 10 },
