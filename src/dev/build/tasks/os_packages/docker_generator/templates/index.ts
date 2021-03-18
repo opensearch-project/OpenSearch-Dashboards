@@ -19,4 +19,4 @@
 
 export { buildDockerSHTemplate } from './build_docker_sh.template';
 export { dockerfileTemplate } from './dockerfile.template';
-export { kibanaYMLTemplate } from './kibana_yml.template';
+export { opensearchDashboardsYMLTemplate } from './opensearch_dashboards_yml.template';
