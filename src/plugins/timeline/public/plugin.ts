@@ -104,7 +104,7 @@ export class TimelinePlugin implements Plugin<void, void> {
       title: 'Timeline',
       order: 8000,
       defaultPath: '#/',
-      euiIconType: 'logoKibana',
+      euiIconType: 'inputOutput',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       navLinkStatus:
         visTypeTimeline.isUiEnabled === false ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,

@@ -12,6 +12,6 @@
     "patterns": [
       "_search/scroll"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-body.html#request-body-search-scroll"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/search-request-body.html#request-body-search-scroll"
   }
 }

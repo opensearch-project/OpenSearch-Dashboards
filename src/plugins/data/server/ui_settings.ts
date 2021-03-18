@@ -93,7 +93,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.query.queryStringOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
+            '<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.query.queryStringOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -152,7 +152,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
+            '<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -234,7 +234,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           setRequestReferenceSetting: `<strong>${UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE}</strong>`,
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
+            '<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
             i18n.translate(
               'data.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText',
               {
@@ -258,7 +258,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Controls the {maxRequestsLink} setting used for _msearch requests sent by OpenSearch Dashboards. ' +
           'Set to 0 to disable this config and use the Elasticsearch default.',
         values: {
-          maxRequestsLink: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+          maxRequestsLink: `<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`,
         },
       }),
@@ -288,7 +288,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
-      description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
+      description: `Will include <a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
@@ -637,7 +637,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
         values: {
           acceptedFormatsLink:
-            `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
+            `<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
             target="_blank" rel="noopener">` +
             i18n.translate('data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',

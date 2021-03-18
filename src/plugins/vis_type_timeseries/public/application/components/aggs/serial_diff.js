@@ -98,7 +98,7 @@ export const SerialDiffAgg = (props) => {
                 id="visTypeTimeseries.serialDiff.lagLabel"
                 defaultMessage="Lag"
                 description="'Lag' refers to the parameter name of the serial diff translation
-                https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
+                https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
                 This should only be translated if there is a reasaonable word explaining what that parameter does."
               />
             }

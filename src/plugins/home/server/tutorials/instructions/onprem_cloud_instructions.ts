@@ -35,7 +35,7 @@ To create a cluster, in Elastic Cloud console:\n\
  4. Wait until deployment creation completes\n\
  5. Go to the new Cloud OpenSearch Dashboards instance and follow the OpenSearch Dashboards Home instructions',
     values: {
-      link: 'https://www.elastic.co/cloud/as-a-service/signup?blade=kib',
+      link: 'https://www.opensearch.co/cloud/as-a-service/signup?blade=kib',
     },
   }),
 });

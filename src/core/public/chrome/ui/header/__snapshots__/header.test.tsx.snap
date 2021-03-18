@@ -2920,7 +2920,7 @@ exports[`Header renders 1`] = `
                       aria-label="Go to home page"
                       data-test-subj="logo"
                       href="/"
-                      iconType="logoElastic"
+                      iconType="heatmap"
                       onClick={[Function]}
                     >
                       <a
@@ -2935,12 +2935,12 @@ exports[`Header renders 1`] = `
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
                           size="l"
-                          type="logoElastic"
+                          type="heatmap"
                         >
                           <div
                             aria-label="Elastic"
                             className="euiHeaderLogo__icon"
-                            data-euiicon-type="logoElastic"
+                            data-euiicon-type="heatmap"
                             size="l"
                           />
                         </EuiIcon>

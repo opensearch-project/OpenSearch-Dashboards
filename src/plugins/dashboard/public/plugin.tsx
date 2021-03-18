@@ -301,7 +301,7 @@ export class DashboardPlugin
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
       order: 2500,
-      euiIconType: 'logoKibana',
+      euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,

@@ -38,6 +38,6 @@
       "_cat/shards",
       "_cat/shards/{indices}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-shards.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/cat-shards.html"
   }
 }
