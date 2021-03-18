@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Region Map',
         'TSVB',
         'Tag Cloud',
-        'Timelion',
+        'Timeline',
         'Vega',
         'Vertical Bar',
       ];

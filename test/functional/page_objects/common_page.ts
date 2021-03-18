@@ -423,7 +423,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       if (msgElements.length > 0) {
         return await msgElements[0].getVisibleText();
       } else {
-        // Sometimes Firefox renders Timelion page without tabs and with div#json
+        // Sometimes Firefox renders Timeline page without tabs and with div#json
         const jsonElement = await find.byCssSelector('body div#json');
         return await jsonElement.getVisibleText();
       }

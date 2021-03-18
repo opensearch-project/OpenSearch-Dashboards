@@ -120,8 +120,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
+      // it('timeline is filtered', async () => {
+      //   await dashboardExpect.timelineLegendCount(0);
       // });
 
       it('vega is filtered', async () => {
@@ -177,8 +177,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
+      // it('timeline is filtered', async () => {
+      //   await dashboardExpect.timelineLegendCount(0);
       // });
 
       it('vega is filtered', async () => {
