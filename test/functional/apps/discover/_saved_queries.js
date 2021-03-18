@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
         await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await queryBar.expectQueryLanguageOrFail('kql');
+        await queryBar.expectQueryLanguageOrFail('dql');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await queryBar.expectQueryLanguageOrFail('lucene');
       });

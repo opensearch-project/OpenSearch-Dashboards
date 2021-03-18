@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { KqlTelemetryService } from './kql_telemetry_service';
+export { makeDQLUsageCollector } from './make_dql_usage_collector';

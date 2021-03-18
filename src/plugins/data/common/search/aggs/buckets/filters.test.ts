@@ -113,8 +113,8 @@ describe('Filters Agg', () => {
       });
     });
 
-    describe('using KQL', () => {
-      test('works with KQL filters', () => {
+    describe('using DQL', () => {
+      test('works with DQL filters', () => {
         const aggConfigs = getAggConfigs({
           filters: [
             generateFilter('a', 'kuery', 'status:200'),
@@ -177,7 +177,7 @@ describe('Filters Agg', () => {
         `);
       });
 
-      test('works with KQL wildcards', () => {
+      test('works with DQL wildcards', () => {
         const aggConfigs = getAggConfigs({
           filters: [generateFilter('a', 'kuery', '*'), generateFilter('b', 'kuery', 'foo*')],
         });

@@ -30,9 +30,9 @@ export default function ({ getService }) {
     before(() => opensearchArchiver.load('saved_objects/basic'));
     after(() => opensearchArchiver.unload('saved_objects/basic'));
 
-    it('should increment the opt *in* counter in the .opensearch-dashboards/kql-telemetry document', async () => {
+    it('should increment the opt *in* counter in the .opensearch-dashboards/dql-telemetry document', async () => {
       await supertest
-        .post('/api/opensearch-dashboards/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect(200);
@@ -40,17 +40,17 @@ export default function ({ getService }) {
       return opensearch
         .search({
           index: '.opensearch-dashboards',
-          q: 'type:kql-telemetry',
+          q: 'type:dql-telemetry',
         })
         .then((response) => {
-          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optInCount).to.be(1);
+          const dqlTelemetryDoc = get(response, 'hits.hits[0]._source.dql-telemetry');
+          expect(dqlTelemetryDoc.optInCount).to.be(1);
         });
     });
 
-    it('should increment the opt *out* counter in the .opensearch-dashboards/kql-telemetry document', async () => {
+    it('should increment the opt *out* counter in the .opensearch-dashboards/dql-telemetry document', async () => {
       await supertest
-        .post('/api/opensearch-dashboards/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect(200);
@@ -58,17 +58,17 @@ export default function ({ getService }) {
       return opensearch
         .search({
           index: '.opensearch-dashboards',
-          q: 'type:kql-telemetry',
+          q: 'type:dql-telemetry',
         })
         .then((response) => {
-          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optOutCount).to.be(1);
+          const dqlTelemetryDoc = get(response, 'hits.hits[0]._source.dql-telemetry');
+          expect(dqlTelemetryDoc.optOutCount).to.be(1);
         });
     });
 
     it('should report success when opt *in* is incremented successfully', () => {
       return supertest
-        .post('/api/opensearch-dashboards/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect('Content-Type', /json/)
@@ -80,7 +80,7 @@ export default function ({ getService }) {
 
     it('should report success when opt *out* is incremented successfully', () => {
       return supertest
-        .post('/api/opensearch-dashboards/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect('Content-Type', /json/)
@@ -93,27 +93,27 @@ export default function ({ getService }) {
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Bluebird.all([
         supertest
-          .post('/api/opensearch-dashboards/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 'notabool' })
           .expect(400),
         supertest
-          .post('/api/opensearch-dashboards/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 0 })
           .expect(400),
         supertest
-          .post('/api/opensearch-dashboards/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: null })
           .expect(400),
         supertest
-          .post('/api/opensearch-dashboards/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: undefined })
           .expect(400),
         supertest
-          .post('/api/opensearch-dashboards/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({})
           .expect(400),

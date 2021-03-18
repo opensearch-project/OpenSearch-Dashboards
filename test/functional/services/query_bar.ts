@@ -70,20 +70,20 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('querySubmitButton');
     }
 
-    public async switchQueryLanguage(lang: 'kql' | 'lucene'): Promise<void> {
+    public async switchQueryLanguage(lang: 'dql' | 'lucene'): Promise<void> {
       await testSubjects.click('switchQueryLanguageButton');
-      const kqlToggle = await testSubjects.find('languageToggle');
+      const dqlToggle = await testSubjects.find('languageToggle');
       const currentLang =
-        (await kqlToggle.getAttribute('aria-checked')) === 'true' ? 'kql' : 'lucene';
+        (await dqlToggle.getAttribute('aria-checked')) === 'true' ? 'dql' : 'lucene';
       if (lang !== currentLang) {
-        await kqlToggle.click();
+        await dqlToggle.click();
       }
 
       await browser.pressKeys(browser.keys.ESCAPE); // close popover
       await this.expectQueryLanguageOrFail(lang); // make sure lang is switched
     }
 
-    public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
+    public async expectQueryLanguageOrFail(lang: 'dql' | 'lucene'): Promise<void> {
       const queryLanguageButton = await testSubjects.find('switchQueryLanguageButton');
       expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
     }

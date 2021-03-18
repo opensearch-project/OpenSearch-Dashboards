@@ -59,7 +59,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return 'kqlOperand';
+    return 'dqlOperand';
   }
 
   public async isCompatible({ embeddable }: ReplacePanelActionContext) {

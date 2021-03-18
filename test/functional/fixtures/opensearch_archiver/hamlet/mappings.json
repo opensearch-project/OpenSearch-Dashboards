@@ -12,7 +12,7 @@
           "config": "87aca8fdb053154f11383fce3dbf3edf",
           "dashboard": "eb3789e1af878e73f85304333240f65f",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
-          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
+          "dql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "references": "7997cf5a56cc02bdc9c93361bde732b0",
@@ -143,7 +143,7 @@
             }
           }
         },
-        "kql-telemetry": {
+        "dql-telemetry": {
           "properties": {
             "optInCount": {
               "type": "long"
