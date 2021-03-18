@@ -1,0 +1,9 @@
+{
+  "id": "visTypeTimeline",
+  "version": "8.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["visualizations", "data", "expressions"],
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "visDefaultEditor"]
+}

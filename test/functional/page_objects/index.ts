@@ -30,7 +30,7 @@ import { SettingsPageProvider } from './settings_page';
 import { SharePageProvider } from './share_page';
 import { LoginPageProvider } from './login_page';
 import { TimePickerProvider } from './time_picker';
-import { TimelionPageProvider } from './timelion_page';
+import { TimelinePageProvider } from './timeline_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
 import { VisualizePageProvider } from './visualize_page';
 import { VisualizeEditorPageProvider } from './visualize_editor_page';
@@ -53,7 +53,7 @@ export const pageObjects = {
   settings: SettingsPageProvider,
   share: SharePageProvider,
   login: LoginPageProvider,
-  timelion: TimelionPageProvider,
+  timeline: TimelinePageProvider,
   timePicker: TimePickerProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,

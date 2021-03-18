@@ -143,8 +143,8 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       );
     }
 
-    async timelionLegendCount(expectedCount: number) {
-      log.debug(`DashboardExpect.timelionLegendCount(${expectedCount})`);
+    async timelineLegendCount(expectedCount: number) {
+      log.debug(`DashboardExpect.timelineLegendCount(${expectedCount})`);
       await retry.try(async () => {
         const flotLegendLabels = await testSubjects.findAll('flotLegendLabel', findTimeout);
         expect(flotLegendLabels.length).to.be(expectedCount);

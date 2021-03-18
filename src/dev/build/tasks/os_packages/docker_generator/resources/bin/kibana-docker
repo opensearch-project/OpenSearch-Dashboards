@@ -132,7 +132,7 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timelion.enabled
+    timeline.enabled
     vega.enableExternalUrls
     xpack.actions.proxyUrl
     xpack.apm.enabled

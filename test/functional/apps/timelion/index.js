@@ -23,11 +23,11 @@ export default function ({ getService, loadTestFile }) {
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
-  describe('timelion app', function () {
+  describe('timeline app', function () {
     this.tags('ciGroup1');
 
     before(async function () {
-      log.debug('Starting timelion before method');
+      log.debug('Starting timeline before method');
       await browser.setWindowSize(1280, 800);
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
