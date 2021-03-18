@@ -19,6 +19,6 @@
       "_shard_stores",
       "{indices}/_shard_stores"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-shards-stores.html"
   }
 }

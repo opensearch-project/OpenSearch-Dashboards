@@ -37,7 +37,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'tar xzvf metricbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'cd metricbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
@@ -53,12 +53,12 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-amd64.deb',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-amd64.deb',
         'sudo dpkg -i metricbeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
+        values: { link: 'https://www.opensearch.co/downloads/beats/metricbeat' },
       }),
     },
     RPM: {
@@ -72,12 +72,12 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/metricbeat/metricbeat-{config.opensearchDashboards.version}-x86_64.rpm',
         'sudo rpm -vi metricbeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
+        values: { link: 'https://www.opensearch.co/downloads/beats/metricbeat' },
       }),
     },
     WINDOWS: {
@@ -100,7 +100,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             metricbeatLink:
               '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
+            elasticLink: 'https://www.opensearch.co/downloads/beats/metricbeat',
           },
         }
       ),

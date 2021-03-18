@@ -78,7 +78,8 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[eCommerce] Markdown',
       }),
       visState:
-        '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"### Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
+        //'{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"### Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://www.opensearch.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
+        '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"### Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://github.com/opensearch-project)."},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,

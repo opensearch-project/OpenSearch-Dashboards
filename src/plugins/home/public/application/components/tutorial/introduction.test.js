@@ -44,7 +44,7 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
-        iconType="logoElastic"
+        iconType="heatmap"
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line

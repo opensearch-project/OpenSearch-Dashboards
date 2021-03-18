@@ -17,7 +17,7 @@ RUN {{packageManager}} install -y findutils tar gzip
 
 {{#usePublicArtifact}}
 RUN cd /opt && \
-  curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/{{artifactTarball}} && \
+  curl --retry 8 -s -L -O https://artifacts.opensearch.co/downloads/kibana/{{artifactTarball}} && \
   cd -
 {{/usePublicArtifact}}
 
@@ -100,25 +100,25 @@ LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.label-schema.license="{{license}}" \
   org.label-schema.name="Kibana" \
   org.label-schema.schema-version="1.0" \
-  org.label-schema.url="https://www.elastic.co/products/kibana" \
-  org.label-schema.usage="https://www.elastic.co/guide/en/kibana/reference/index.html" \
+  org.label-schema.url="https://www.opensearch.co/products/kibana" \
+  org.label-schema.usage="https://www.opensearch.co/guide/en/kibana/reference/index.html" \
   org.label-schema.vcs-ref="{{revision}}" \
   org.label-schema.vcs-url="https://github.com/elastic/kibana" \
   org.label-schema.vendor="Elastic" \
   org.label-schema.version="{{version}}" \
   org.opencontainers.image.created="{{dockerBuildDate}}" \
-  org.opencontainers.image.documentation="https://www.elastic.co/guide/en/kibana/reference/index.html" \
+  org.opencontainers.image.documentation="https://www.opensearch.co/guide/en/kibana/reference/index.html" \
   org.opencontainers.image.licenses="{{license}}" \
   org.opencontainers.image.revision="{{revision}}" \
   org.opencontainers.image.source="https://github.com/elastic/kibana" \
   org.opencontainers.image.title="Kibana" \
-  org.opencontainers.image.url="https://www.elastic.co/products/kibana" \
+  org.opencontainers.image.url="https://www.opensearch.co/products/kibana" \
   org.opencontainers.image.vendor="Elastic" \
   org.opencontainers.image.version="{{version}}"
 
 {{#ubi}}
 LABEL name="Kibana" \
-  maintainer="infra@elastic.co" \
+  maintainer="infra@opensearch.co" \
   vendor="Elastic" \
   version="{{version}}" \
   release="1" \

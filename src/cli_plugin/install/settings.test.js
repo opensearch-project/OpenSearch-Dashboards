@@ -61,7 +61,7 @@ describe('parse function', function () {
         "timeout": 0,
         "urls": Array [
           "plugin name",
-          "https://artifacts.elastic.co/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
+          "https://artifacts.opensearch.co/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
         ],
         "version": 1234,
         "workingPath": <absolute path>/plugins/.plugin.installing,
@@ -88,7 +88,7 @@ describe('parse function', function () {
         "timeout": 0,
         "urls": Array [
           "plugin name",
-          "https://artifacts.elastic.co/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
+          "https://artifacts.opensearch.co/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
         ],
         "version": 1234,
         "workingPath": <absolute path>/plugins/.plugin.installing,

@@ -78,7 +78,7 @@ export class SearchTimeoutError extends OsdError {
   private onClick(application: ApplicationStart) {
     switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
-        application.navigateToUrl('https://www.elastic.co/subscriptions');
+        application.navigateToUrl('https://www.opensearch.co/subscriptions');
         break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {

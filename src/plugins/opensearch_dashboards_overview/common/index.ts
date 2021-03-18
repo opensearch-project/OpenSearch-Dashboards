@@ -20,4 +20,4 @@
 export const PLUGIN_ID = 'opensearchDashboardsOverview';
 export const PLUGIN_NAME = 'Overview';
 export const PLUGIN_PATH = `/app/opensearch_dashboards_overview`;
-export const PLUGIN_ICON = 'logoKibana';
+export const PLUGIN_ICON = 'inputOutput';

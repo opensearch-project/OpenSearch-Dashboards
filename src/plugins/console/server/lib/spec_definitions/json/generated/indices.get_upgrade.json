@@ -18,6 +18,6 @@
       "_upgrade",
       "{indices}/_upgrade"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
   }
 }

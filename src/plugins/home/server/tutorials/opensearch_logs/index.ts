@@ -51,7 +51,7 @@ export function opensearchLogsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-opensearch.html',
       },
     }),
-    euiIconType: 'logoElasticsearch',
+    euiIconType: 'heatmap',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.opensearchLogs.artifacts.application.label', {

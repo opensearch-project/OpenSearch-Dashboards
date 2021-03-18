@@ -17,8 +17,15 @@
  * under the License.
  */
 
+//export const OPENSEARCH_DASHBOARDS_FEEDBACK_LINK =
+//  'https://www.opensearch.co/products/kibana/feedback?blade=kibanafeedback';
+//export const OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK =
+// 'https://www.opensearch.co/products/kibana/ask-elastic?blade=kibanaaskelastic';
+//export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';
+
+
 export const OPENSEARCH_DASHBOARDS_FEEDBACK_LINK =
-  'https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback';
+  'https://github.com/opensearch-project';
 export const OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK =
-  'https://www.elastic.co/products/kibana/ask-elastic?blade=kibanaaskelastic';
-export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';
+  'https://github.com/opensearch-project';
+export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/opensearch-project';

@@ -61,7 +61,7 @@ describe('OsdLoggerJsonFormat', () => {
         source: {
           remoteAddress: '127.0.0.1',
           userAgent: 'Test Thing',
-          referer: 'elastic.co',
+          referer: 'opensearch.co',
         },
       };
       const result = await createPromiseFromStreams([createListStream([event]), format]);
