@@ -64,5 +64,5 @@ You can save existing data into an archive by using the `save` command:
 node scripts/opensearch_archiver.js save <archive name for opensearch-dashboards data> [space separated list of index patterns to include]
 ```
 
-You may want to store the .opensearch-dashboards index separate from data. Since adding a lot of data will bloat our repo size, we have many tests that reuse the same
-data indices but use their own `.opensearch-dashboards` index. 
+You may want to store the .opensearch_dashboards index separate from data. Since adding a lot of data will bloat our repo size, we have many tests that reuse the same
+data indices but use their own `.opensearch_dashboards` index. 

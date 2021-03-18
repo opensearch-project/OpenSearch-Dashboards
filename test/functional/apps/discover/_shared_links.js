@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
-      // delete .opensearch-dashboards index and update configDoc
+      // delete .opensearch_dashboards index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });

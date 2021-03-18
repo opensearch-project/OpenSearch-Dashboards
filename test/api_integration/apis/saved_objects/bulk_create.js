@@ -100,7 +100,7 @@ export default function ({ getService }) {
         async () =>
           // just in case the opensearch-dashboards server has recreated it
           await opensearch.indices.delete({
-            index: '.opensearch-dashboards',
+            index: '.opensearch_dashboards',
             ignore: [404],
           })
       );

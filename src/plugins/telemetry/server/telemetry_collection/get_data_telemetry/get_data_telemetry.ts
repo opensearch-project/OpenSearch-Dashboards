@@ -101,7 +101,7 @@ function findMatchingDescriptors({
   // Otherwise, try with the list of known index patterns
   return DATA_DATASETS_INDEX_PATTERNS_UNIQUE.filter(({ pattern }) => {
     if (!pattern.startsWith('.') && name.startsWith('.')) {
-      // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.opensearch-dashboards-log-...`)
+      // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.opensearch_dashboards-log-...`)
       return false;
     }
     return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(name);
