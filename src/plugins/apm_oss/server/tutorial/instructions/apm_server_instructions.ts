@@ -74,7 +74,7 @@ const createDownloadServerTitle = () =>
 export const createDownloadServerOsx = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+    'curl -L -O https://artifacts.opensearch.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
     'tar xzvf apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
     'cd apm-server-{config.opensearchDashboards.version}-darwin-x86_64/',
   ],
@@ -83,7 +83,7 @@ export const createDownloadServerOsx = () => ({
 export const createDownloadServerDeb = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-amd64.deb',
+    'curl -L -O https://artifacts.opensearch.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-amd64.deb',
     'sudo dpkg -i apm-server-{config.opensearchDashboards.version}-amd64.deb',
   ],
   textPost: i18n.translate('apmOss.tutorial.downloadServerTitle', {
@@ -97,7 +97,7 @@ export const createDownloadServerDeb = () => ({
 export const createDownloadServerRpm = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
+    'curl -L -O https://artifacts.opensearch.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
     'sudo rpm -vi apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
   ],
   textPost: i18n.translate('apmOss.tutorial.downloadServerRpm', {
@@ -124,7 +124,7 @@ directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install \
 PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
         values: {
-          downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
+          downloadPageLink: 'https://www.opensearch.co/downloads/apm/apm-server',
           zipFileExtractFolder: '`C:\\Program Files`',
           apmServerDirectory: '`apm-server-{config.opensearchDashboards.version}-windows`',
         },

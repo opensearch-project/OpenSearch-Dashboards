@@ -70,7 +70,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="logoElastic" size="l" />
+                <EuiIcon type="heatmap" size="l" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
                 <div>

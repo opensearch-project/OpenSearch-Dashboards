@@ -21,6 +21,6 @@
       "{indices}/_alias/{name}",
       "{indices}/_alias"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
   }
 }

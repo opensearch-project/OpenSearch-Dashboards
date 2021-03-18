@@ -32,7 +32,7 @@ import { ControlParams } from '../editor_utils';
 import { InputControlSettings, InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+  // https://www.opensearch.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 

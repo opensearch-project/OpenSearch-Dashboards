@@ -56,7 +56,7 @@ exports[`props iconType 1`] = `
         <EuiIcon
           size="xl"
           title=""
-          type="logoElastic"
+          type="heatmap"
         />
       </EuiFlexItem>
       <EuiFlexItem

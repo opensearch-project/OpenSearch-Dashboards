@@ -11,7 +11,7 @@ exports[`SolutionTitle renders the title section of the solution panel 1`] = `
     <EuiToken
       className="homSolutionPanel__icon"
       fill="light"
-      iconType="logoKibana"
+      iconType="inputOutput"
       shape="circle"
       size="l"
     />

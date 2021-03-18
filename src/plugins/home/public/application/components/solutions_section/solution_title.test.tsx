@@ -26,7 +26,7 @@ const solutionEntry = {
   title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   descriptions: ['Analyze data in dashboards'],
-  icon: 'logoKibana',
+  icon: 'inputOutput',
   path: 'opensearch_dashboards_landing_page',
   order: 1,
 };

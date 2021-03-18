@@ -71,11 +71,11 @@ export async function runFpm(
     '--version',
     version,
     '--url',
-    'https://www.elastic.co',
+    'https://www.opensearch.co',
     '--vendor',
     'Elasticsearch, Inc.',
     '--maintainer',
-    'OpenSearch Dashboards Team <info@elastic.co>',
+    'OpenSearch Dashboards Team <info@opensearch.co>',
     '--license',
     pickLicense(),
 

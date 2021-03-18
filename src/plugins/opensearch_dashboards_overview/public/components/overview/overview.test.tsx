@@ -49,7 +49,7 @@ const mockNewsFetchResult = {
       hash: '8e18fcedbc',
       linkText: 'Read more on the blog',
       linkUrl:
-        'https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=opensearchDashboardsfeed',
+        'https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=opensearchDashboardsfeed',
       publishOn: moment('2020-08-31T10:23:47Z'),
       title: 'The Go client for OpenSearch: Introduction',
     },
@@ -61,7 +61,7 @@ const mockNewsFetchResult = {
       hash: 'fb3e3d42ef',
       linkText: 'Read more on the blog',
       linkUrl:
-        'https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=opensearchDashboardsfeed',
+        'https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=opensearchDashboardsfeed',
       publishOn: moment('2020-08-14T10:23:47Z'),
       title: 'Alerting and anomaly detection for uptime and reliability',
     },
@@ -73,7 +73,7 @@ const mockNewsFetchResult = {
       hash: 'b2fc7d47d5',
       linkText: 'Learn more on the blog',
       linkUrl:
-        'https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=opensearchDashboardsfeed',
+        'https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=opensearchDashboardsfeed',
       publishOn: moment('2020-08-01T10:23:47Z'),
       title: 'Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management',
     },
@@ -88,7 +88,7 @@ const mockSolutions = [
     title: 'OpenSearch Dashboards',
     subtitle: 'Visualize & analyze',
     appDescriptions: ['Analyze data in dashboards'],
-    icon: 'logoKibana',
+    icon: 'inputOutput',
     path: 'opensearch_dashboards_landing_page',
     order: 1,
   },

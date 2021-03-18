@@ -40,14 +40,14 @@ export async function runDockerGenerator(
   ubi: boolean = false
 ) {
   // UBI var config
-  const baseOSImage = ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  const baseOSImage = ubi ? 'docker.opensearch.co/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
   const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
 
   // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
-  const imageTag = 'docker.elastic.co/kibana/kibana';
+  const imageTag = 'docker.opensearch.co/kibana/kibana';
   const version = config.getBuildVersion();
   const artifactTarball = `kibana${imageFlavor}-${version}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');

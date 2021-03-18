@@ -37,7 +37,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'tar xzvf auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'cd auditbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
@@ -53,13 +53,13 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-amd64.deb',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-amd64.deb',
         'sudo dpkg -i auditbeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
+          linkUrl: 'https://www.opensearch.co/downloads/beats/auditbeat',
         },
       }),
     },
@@ -74,13 +74,13 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
         'sudo rpm -vi auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
+          linkUrl: 'https://www.opensearch.co/downloads/beats/auditbeat',
         },
       }),
     },
@@ -102,7 +102,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
           values: {
             folderPath: '`C:\\Program Files`',
             guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
-            auditbeatLinkUrl: 'https://www.elastic.co/downloads/beats/auditbeat',
+            auditbeatLinkUrl: 'https://www.opensearch.co/downloads/beats/auditbeat',
             directoryName: 'auditbeat-{config.opensearchDashboards.version}-windows',
           },
         }
