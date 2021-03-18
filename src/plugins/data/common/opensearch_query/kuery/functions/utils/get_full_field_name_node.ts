@@ -45,14 +45,14 @@ export function getFullFieldNameNode(
     if (nestedPath && !nestedPathFromField) {
       return [
         ...acc,
-        `${field.name} is not a nested field but is in nested group "${nestedPath}" in the KQL expression.`,
+        `${field.name} is not a nested field but is in nested group "${nestedPath}" in the DQL expression.`,
       ];
     }
 
     if (nestedPathFromField && !nestedPath) {
       return [
         ...acc,
-        `${field.name} is a nested field, but is not in a nested group in the KQL expression.`,
+        `${field.name} is a nested field, but is not in a nested group in the DQL expression.`,
       ];
     }
 

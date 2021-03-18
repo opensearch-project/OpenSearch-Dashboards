@@ -377,7 +377,7 @@ describe('kuery AST API', () => {
       expect(result).toEqual(true);
     });
 
-    test('should return false for KQL ranges', () => {
+    test('should return false for DQL ranges', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar < 1');
       expect(result).toEqual(false);
     });
@@ -387,7 +387,7 @@ describe('kuery AST API', () => {
       expect(result).toEqual(true);
     });
 
-    test('should return false for KQL exists', () => {
+    test('should return false for DQL exists', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar:*');
       expect(result).toEqual(false);
     });
@@ -397,7 +397,7 @@ describe('kuery AST API', () => {
       expect(result).toEqual(true);
     });
 
-    test('should return false for KQL wildcards', () => {
+    test('should return false for DQL wildcards', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba*');
       expect(result).toEqual(false);
     });
@@ -442,7 +442,7 @@ describe('kuery AST API', () => {
       expect(result).toEqual(true);
     });
 
-    test('should return true for mixed KQL/Lucene queries', () => {
+    test('should return true for mixed DQL/Lucene queries', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar and (baz: qux || bag)');
       expect(result).toEqual(true);
     });

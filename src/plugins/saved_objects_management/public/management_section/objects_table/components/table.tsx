@@ -281,7 +281,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             ),
             type: 'icon',
-            icon: 'kqlSelector',
+            icon: 'dqlSelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },

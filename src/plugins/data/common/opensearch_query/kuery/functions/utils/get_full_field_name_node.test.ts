@@ -50,7 +50,7 @@ describe('getFullFieldNameNode', function () {
   test('should throw an error if a path is provided for a non-nested field', () => {
     const nameNode = nodeTypes.literal.buildNode('os');
     expect(() => getFullFieldNameNode(nameNode, indexPattern, 'machine')).toThrowError(
-      /machine.os is not a nested field but is in nested group "machine" in the KQL expression/
+      /machine.os is not a nested field but is in nested group "machine" in the DQL expression/
     );
   });
 
@@ -58,7 +58,7 @@ describe('getFullFieldNameNode', function () {
     const nameNode = nodeTypes.literal.buildNode('nestedField.child');
 
     expect(() => getFullFieldNameNode(nameNode, indexPattern)).toThrowError(
-      /nestedField.child is a nested field, but is not in a nested group in the KQL expression./
+      /nestedField.child is a nested field, but is not in a nested group in the DQL expression./
     );
   });
 

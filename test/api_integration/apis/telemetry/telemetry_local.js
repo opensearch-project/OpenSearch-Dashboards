@@ -84,7 +84,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.opensearchDashboards.plugins.stack_management).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.ui_metric).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.kql.defaultQueryLanguage).to.be.a(
+      expect(stats.stack_stats.opensearchDashboards.plugins.dql.defaultQueryLanguage).to.be.a(
         'string'
       );
       expect(stats.stack_stats.opensearchDashboards.plugins['tsvb-validation']).to.be.an('object');

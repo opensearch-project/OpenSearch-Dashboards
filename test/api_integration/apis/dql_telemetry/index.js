@@ -18,7 +18,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('KQL', () => {
-    loadTestFile(require.resolve('./kql_telemetry'));
+  describe('DQL', () => {
+    loadTestFile(require.resolve('./dql_telemetry'));
   });
 }
