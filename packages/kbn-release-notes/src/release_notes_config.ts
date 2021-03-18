@@ -173,7 +173,7 @@ export const AREAS: Area[] = [
   {
     title: 'Visualizations',
     labels: [
-      'Feature:Timelion',
+      'Feature:Timeline',
       'Feature:TSVB',
       'Feature:Coordinate Map',
       'Feature:Region Map',

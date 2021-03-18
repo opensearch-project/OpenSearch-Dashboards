@@ -134,7 +134,7 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
+          timelineDeprecation: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timeline-deprecation`,
         },
       },
     });
