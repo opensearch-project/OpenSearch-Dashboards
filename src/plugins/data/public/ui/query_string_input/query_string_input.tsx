@@ -371,34 +371,34 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('opensearchDashboards.KQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
-      const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
+      const onDQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('opensearchDashboards.KQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: i18n.translate('data.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
-            defaultMessage: 'KQL nested query syntax',
+          title: i18n.translate('data.query.queryBar.DQLNestedQuerySyntaxInfoTitle', {
+            defaultMessage: 'DQL nested query syntax',
           }),
           text: toMountPoint(
             <div>
               <p>
                 <FormattedMessage
-                  id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
                   defaultMessage="It looks like you're querying on a nested field.
-                  You can construct KQL syntax for nested queries in different ways, depending on the results you want.
+                  You can construct DQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
                   values={{
                     link: (
                       <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
                         <FormattedMessage
-                          id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"
                         />
                       </EuiLink>
@@ -408,9 +408,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
               </p>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
+                  <EuiButton size="s" onClick={() => onDQLNestedQuerySyntaxInfoOptOut(toast)}>
                     <FormattedMessage
-                      id="data.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      id="data.query.queryBar.DQLNestedQuerySyntaxInfoOptOutText"
                       defaultMessage="Don't show again"
                     />
                   </EuiButton>
@@ -450,7 +450,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.services.http.post('/api/opensearch-dashboards/kql_opt_in_stats', {
+    this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 

@@ -2673,7 +2673,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
-      it(`throws when KQL filter syntax is invalid`, async () => {
+      it(`throws when DQL filter syntax is invalid`, async () => {
         const findOpts = {
           namespaces: [namespace],
           search: 'foo*',
@@ -2691,7 +2691,7 @@ describe('SavedObjectsRepository', () => {
         };
 
         await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-                          [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
+                          [Error: DQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
                           dashboard.attributes.otherField:<
                           --------------------------------^: Bad Request]
                       `);
@@ -2820,7 +2820,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
+      it(`accepts DQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespaces: [namespace],
           search: 'foo*',
@@ -2861,7 +2861,7 @@ describe('SavedObjectsRepository', () => {
         `);
       });
 
-      it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
+      it(`accepts DQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespaces: [namespace],
           search: 'foo*',

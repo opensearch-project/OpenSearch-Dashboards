@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { makeKQLUsageCollector } from './make_kql_usage_collector';
+import { makeDQLUsageCollector } from './make_dql_usage_collector';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
-describe('makeKQLUsageCollector', () => {
+describe('makeDQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
@@ -31,13 +31,13 @@ describe('makeKQLUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
+    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
-  it('should call makeUsageCollector with type = kql', () => {
-    makeKQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
+  it('should call makeUsageCollector with type = dql', () => {
+    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
-    expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('kql');
+    expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('dql');
   });
 });

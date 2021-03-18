@@ -1,6 +1,6 @@
 {
   "properties": {
-    "kql": {
+    "dql": {
       "properties": {
         "optInCount": {
           "type": "long"

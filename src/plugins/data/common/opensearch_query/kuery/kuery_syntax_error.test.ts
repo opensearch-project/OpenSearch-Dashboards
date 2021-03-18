@@ -19,7 +19,7 @@
 
 import { fromKueryExpression } from './ast';
 
-describe('kql syntax errors', () => {
+describe('dql syntax errors', () => {
   it('should throw an error for a field query missing a value', () => {
     expect(() => {
       fromKueryExpression('response:');

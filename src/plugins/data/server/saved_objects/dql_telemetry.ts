@@ -16,24 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 
-import { fetchProvider, Usage } from './fetch';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
-
-export async function makeKQLUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  opensearchDashboardsIndex: string
-) {
-  const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
-    type: 'kql',
-    fetch: fetchProvider(opensearchDashboardsIndex),
-    isReady: () => true,
-    schema: {
-      optInCount: { type: 'long' },
-      optOutCount: { type: 'long' },
-      defaultQueryLanguage: { type: 'keyword' },
+export const dqlTelemetry: SavedObjectsType = {
+  name: 'dql-telemetry',
+  namespaceType: 'agnostic',
+  hidden: false,
+  mappings: {
+    properties: {
+      optInCount: {
+        type: 'long',
+      },
+      optOutCount: {
+        type: 'long',
+      },
     },
-  });
-
-  usageCollection.registerCollector(kqlUsageCollector);
-}
+  },
+};

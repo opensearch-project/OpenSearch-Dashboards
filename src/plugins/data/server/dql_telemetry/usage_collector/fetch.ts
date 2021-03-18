@@ -34,7 +34,7 @@ export function fetchProvider(index: string) {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
-        id: 'kql-telemetry:kql-telemetry',
+        id: 'dql-telemetry:dql-telemetry',
         ignore: [404],
       }),
       callCluster('search', {
@@ -66,14 +66,14 @@ export function fetchProvider(index: string) {
       defaultLanguage = queryLanguageConfigValue;
     }
 
-    const kqlTelemetryDoc = {
+    const dqlTelemetryDoc = {
       optInCount: 0,
       optOutCount: 0,
-      ...get(response, '_source.kql-telemetry', {}),
+      ...get(response, '_source.dql-telemetry', {}),
     };
 
     return {
-      ...kqlTelemetryDoc,
+      ...dqlTelemetryDoc,
       defaultQueryLanguage: defaultLanguage,
     };
   };

@@ -46,12 +46,12 @@ export function QueryLanguageSwitcher(props: Props) {
   const luceneLabel = (
     <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />
   );
-  const kqlLabel = (
-    <FormattedMessage id="data.query.queryBar.kqlLanguageName" defaultMessage="KQL" />
+  const dqlLabel = (
+    <FormattedMessage id="data.query.queryBar.dqlLanguageName" defaultMessage="DQL" />
   );
-  const kqlFullName = (
+  const dqlFullName = (
     <FormattedMessage
-      id="data.query.queryBar.kqlFullLanguageName"
+      id="data.query.queryBar.dqlFullLanguageName"
       defaultMessage="OpenSearch Dashboards Query Language"
     />
   );
@@ -60,10 +60,10 @@ export function QueryLanguageSwitcher(props: Props) {
     <EuiButtonEmpty
       size="xs"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
+      className="euiFormControlLayout__append dqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
     >
-      {props.language === 'lucene' ? luceneLabel : kqlLabel}
+      {props.language === 'lucene' ? luceneLabel : dqlLabel}
     </EuiButtonEmpty>
   );
 
@@ -90,13 +90,13 @@ export function QueryLanguageSwitcher(props: Props) {
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
-              defaultMessage="The {docsLink} (KQL) offers a simplified query
-              syntax and support for scripted fields. KQL also provides autocomplete if you have
-              a Basic license or above. If you turn off KQL, OpenSearch Dashboards uses Lucene."
+              defaultMessage="The {docsLink} (DQL) offers a simplified query
+              syntax and support for scripted fields. DQL also provides autocomplete if you have
+              a Basic license or above. If you turn off DQL, OpenSearch Dashboards uses Lucene."
               values={{
                 docsLink: (
                   <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                    {kqlFullName}
+                    {dqlFullName}
                   </EuiLink>
                 ),
               }}
@@ -107,15 +107,15 @@ export function QueryLanguageSwitcher(props: Props) {
         <EuiSpacer size="m" />
 
         <EuiForm>
-          <EuiFormRow label={kqlFullName}>
+          <EuiFormRow label={dqlFullName}>
             <EuiSwitch
               id="queryEnhancementOptIn"
               name="popswitch"
               label={
                 props.language === 'kuery' ? (
-                  <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
+                  <FormattedMessage id="data.query.queryBar.dqlOnLabel" defaultMessage="On" />
                 ) : (
-                  <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
+                  <FormattedMessage id="data.query.queryBar.dqlOffLabel" defaultMessage="Off" />
                 )
               }
               checked={props.language === 'kuery'}

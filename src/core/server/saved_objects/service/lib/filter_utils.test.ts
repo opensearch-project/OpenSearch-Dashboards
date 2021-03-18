@@ -86,7 +86,7 @@ describe('Filter Utils', () => {
     test('Empty string filters are ignored', () => {
       expect(validateConvertFilterToKueryNode(['foo'], '', mockMappings)).toBeUndefined();
     });
-    test('Validate a simple KQL KueryNode filter', () => {
+    test('Validate a simple DQL KueryNode filter', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
@@ -95,7 +95,7 @@ describe('Filter Utils', () => {
         )
       ).toEqual(opensearchKuery.fromKueryExpression('foo.title: "best"'));
     });
-    test('Validate a simple KQL expression filter', () => {
+    test('Validate a simple DQL expression filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
       ).toEqual(opensearchKuery.fromKueryExpression('foo.title: "best"'));

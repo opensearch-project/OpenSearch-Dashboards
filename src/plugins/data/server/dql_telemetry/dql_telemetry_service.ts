@@ -19,34 +19,34 @@
 
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
-import { registerKqlTelemetryRoute } from './route';
+import { registerDqlTelemetryRoute } from './route';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
-import { makeKQLUsageCollector } from './usage_collector';
-import { kqlTelemetry } from '../saved_objects';
+import { makeDQLUsageCollector } from './usage_collector';
+import { dqlTelemetry } from '../saved_objects';
 
-export class KqlTelemetryService implements Plugin<void> {
+export class DqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
     { http, getStartServices, savedObjects }: CoreSetup,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
-    savedObjects.registerType(kqlTelemetry);
-    registerKqlTelemetryRoute(
+    savedObjects.registerType(dqlTelemetry);
+    registerDqlTelemetryRoute(
       http.createRouter(),
       getStartServices,
-      this.initializerContext.logger.get('data', 'kql-telemetry')
+      this.initializerContext.logger.get('data', 'dql-telemetry')
     );
 
     if (usageCollection) {
       this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise()
-        .then((config) => makeKQLUsageCollector(usageCollection, config.opensearchDashboards.index))
+        .then((config) => makeDQLUsageCollector(usageCollection, config.opensearchDashboards.index))
         .catch((e) => {
           this.initializerContext.logger
-            .get('kql-telemetry')
-            .warn(`Registering KQL telemetry collector failed: ${e}`);
+            .get('dql-telemetry')
+            .warn(`Registering DQL telemetry collector failed: ${e}`);
         });
     }
   }

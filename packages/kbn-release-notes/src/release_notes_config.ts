@@ -158,7 +158,7 @@ export const AREAS: Area[] = [
       'Feature:Filters',
       'Feature:Timepicker',
       'Feature:Highlight',
-      'Feature:KQL',
+      'Feature:DQL',
       'Feature:Rollups',
     ],
   },
