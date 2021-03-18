@@ -18,7 +18,7 @@
  */
 
 import { nodeTypes } from '../node_types/index';
-import { KQLSyntaxError } from '../kuery_syntax_error';
+import { DQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
 import { IIndexPattern } from '../../../index_patterns/types';
 
@@ -60,7 +60,7 @@ export const fromKueryExpression = (
     return fromExpression(expression, parseOptions, parseKuery);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      throw new KQLSyntaxError(error, expression);
+      throw new DQLSyntaxError(error, expression);
     } else {
       throw error;
     }

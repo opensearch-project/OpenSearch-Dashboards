@@ -328,7 +328,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
               <FormattedMessage
                 id="data.query.queryBar.luceneSyntaxWarningMessage"
                 defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
-               have opensearchDashboards Query Language (KQL) selected. Please review the KQL docs {link}."
+               have opensearchDashboards Query Language (DQL) selected. Please review the DQL docs {link}."
                 values={{
                   link: (
                     <EuiLink href={kueryQuerySyntaxLink} target="_blank">

@@ -128,14 +128,14 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: DEFAULT_QUERY_LANGUAGE,
       description: i18n.translate('data.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. KQL is a new language built specifically for OpenSearch Dashboards.',
+          'Query language used by the query bar. DQL is a new language built specifically for OpenSearch Dashboards.',
       }),
       type: 'select',
       options: ['lucene', 'kuery'],
       optionLabels: {
         lucene: luceneQueryLanguageLabel,
-        kuery: i18n.translate('data.advancedSettings.searchQueryLanguageKql', {
-          defaultMessage: 'KQL',
+        kuery: i18n.translate('data.advancedSettings.searchQueryLanguageDql', {
+          defaultMessage: 'DQL',
         }),
       },
       schema: schema.string(),

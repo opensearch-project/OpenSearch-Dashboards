@@ -68,7 +68,7 @@ const noop = () => {
   return;
 };
 
-const kqlQuery = {
+const dqlQuery = {
   query: 'response:200',
   language: 'kuery',
 };
@@ -126,7 +126,7 @@ describe('QueryBarTopRowTopRow', () => {
   it('Should render query and time picker', async () => {
     const { getByText, getByTestId } = render(
       wrapQueryBarTopRowInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         screenTitle: 'Another Screen',
         isDirty: false,
         indexPatterns: [stubIndexPatternWithFields],
@@ -134,14 +134,14 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
+    await waitFor(() => getByText(dqlQuery.query));
     await waitFor(() => getByTestId('superDatePickerShowDatesButton'));
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     mount(
       wrapQueryBarTopRowInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         screenTitle: 'Another Screen',
         indexPatterns: [stubIndexPatternWithFields],
         timeHistory: mockTimeHistory,
@@ -215,7 +215,7 @@ describe('QueryBarTopRowTopRow', () => {
   it('Should render only query input bar', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         indexPatterns: [stubIndexPatternWithFields],
         isDirty: false,
         screenTitle: 'Another Screen',
@@ -233,7 +233,7 @@ describe('QueryBarTopRowTopRow', () => {
   it('Should NOT render query input bar if disabled', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         isDirty: false,
         screenTitle: 'Another Screen',
         indexPatterns: [stubIndexPatternWithFields],

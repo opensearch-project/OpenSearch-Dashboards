@@ -20,39 +20,39 @@
 import { repeat } from 'lodash';
 import { i18n } from '@osd/i18n';
 
-const endOfInputText = i18n.translate('data.common.kql.errors.endOfInputText', {
+const endOfInputText = i18n.translate('data.common.dql.errors.endOfInputText', {
   defaultMessage: 'end of input',
 });
 
 const grammarRuleTranslations: Record<string, string> = {
-  fieldName: i18n.translate('data.common.kql.errors.fieldNameText', {
+  fieldName: i18n.translate('data.common.dql.errors.fieldNameText', {
     defaultMessage: 'field name',
   }),
-  value: i18n.translate('data.common.kql.errors.valueText', {
+  value: i18n.translate('data.common.dql.errors.valueText', {
     defaultMessage: 'value',
   }),
-  literal: i18n.translate('data.common.kql.errors.literalText', {
+  literal: i18n.translate('data.common.dql.errors.literalText', {
     defaultMessage: 'literal',
   }),
-  whitespace: i18n.translate('data.common.kql.errors.whitespaceText', {
+  whitespace: i18n.translate('data.common.dql.errors.whitespaceText', {
     defaultMessage: 'whitespace',
   }),
 };
 
-interface KQLSyntaxErrorData extends Error {
+interface DQLSyntaxErrorData extends Error {
   found: string;
-  expected: KQLSyntaxErrorExpected[] | null;
+  expected: DQLSyntaxErrorExpected[] | null;
   location: any;
 }
 
-interface KQLSyntaxErrorExpected {
+interface DQLSyntaxErrorExpected {
   description: string;
 }
 
-export class KQLSyntaxError extends Error {
+export class DQLSyntaxError extends Error {
   shortMessage: string;
 
-  constructor(error: KQLSyntaxErrorData, expression: any) {
+  constructor(error: DQLSyntaxErrorData, expression: any) {
     let message = error.message;
     if (error.expected) {
       const translatedExpectations = error.expected.map((expected) => {
@@ -61,7 +61,7 @@ export class KQLSyntaxError extends Error {
 
       const translatedExpectationText = translatedExpectations.join(', ');
 
-      message = i18n.translate('data.common.kql.errors.syntaxError', {
+      message = i18n.translate('data.common.dql.errors.syntaxError', {
         defaultMessage: 'Expected {expectedList} but {foundInput} found.',
         values: {
           expectedList: translatedExpectationText,
@@ -75,7 +75,7 @@ export class KQLSyntaxError extends Error {
     );
 
     super(fullMessage);
-    this.name = 'KQLSyntaxError';
+    this.name = 'DQLSyntaxError';
     this.shortMessage = message;
   }
 }

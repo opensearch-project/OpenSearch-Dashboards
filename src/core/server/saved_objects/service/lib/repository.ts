@@ -768,8 +768,8 @@ export class SavedObjectsRepository {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
       }
     } catch (e) {
-      if (e.name === 'KQLSyntaxError') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+      if (e.name === 'DQLSyntaxError') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('DQLSyntaxError: ' + e.message);
       } else {
         throw e;
       }

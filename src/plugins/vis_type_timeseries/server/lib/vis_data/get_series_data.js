@@ -73,7 +73,7 @@ export async function getSeriesData(req, panel) {
       },
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body || err.name === 'DQLSyntaxError') {
       err.response = err.body;
 
       return {

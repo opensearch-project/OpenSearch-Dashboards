@@ -48,7 +48,7 @@ export interface AppState {
    */
   interval?: string;
   /**
-   * Lucence or KQL query
+   * Lucence or DQL query
    */
   query?: Query;
   /**

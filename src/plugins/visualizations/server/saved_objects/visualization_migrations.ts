@@ -322,7 +322,7 @@ const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn<any, any> = (
 };
 // Migrate filters (string -> { query: string, language: lucene })
 /*
-  Enabling KQL in TSVB causes problems with savedObject visualizations when these are saved with filters.
+  Enabling DQL in TSVB causes problems with savedObject visualizations when these are saved with filters.
   In a visualisation type of saved object, if the visState param is of type metric, the filter is saved as a string that is not interpretted correctly as a lucene query in the visualization itself.
   We need to transform the filter string into an object containing the original string as a query and specify the query language as lucene.
   For Metrics visualizations (param.type === "metric"), filters can be applied to each series object in the series array within the SavedObject.visState.params object.
