@@ -44,7 +44,7 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
     },
 
     /**
-     * Helper to detect an OSS licensed OpenSearch Dashboards 
+     * Helper to detect an OSS licensed OpenSearch Dashboards
      * Useful for functional testing in cloud environment
      */
     async isOss() {

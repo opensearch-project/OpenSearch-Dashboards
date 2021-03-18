@@ -39,12 +39,12 @@ import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
 
 export class OpenSearchDashboardsOverviewPlugin
   implements
-  Plugin<
-  OpenSearchDashboardsOverviewPluginSetup,
-  OpenSearchDashboardsOverviewPluginStart,
-  AppPluginSetupDependencies,
-  AppPluginStartDependencies
-  > {
+    Plugin<
+      OpenSearchDashboardsOverviewPluginSetup,
+      OpenSearchDashboardsOverviewPluginStart,
+      AppPluginSetupDependencies,
+      AppPluginStartDependencies
+    > {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { home }: AppPluginSetupDependencies
@@ -54,7 +54,8 @@ export class OpenSearchDashboardsOverviewPlugin
       map((navLinks) => {
         const hasOpenSearchDashboardsApp = Boolean(
           navLinks.find(
-            ({ id, category, hidden }) => !hidden && category?.id === 'opensearchDashboards' && id !== PLUGIN_ID
+            ({ id, category, hidden }) =>
+              !hidden && category?.id === 'opensearchDashboards' && id !== PLUGIN_ID
           )
         );
 
@@ -98,9 +99,12 @@ export class OpenSearchDashboardsOverviewPlugin
         title: i18n.translate('opensearchDashboardsOverview.opensearchDashboards.solution.title', {
           defaultMessage: 'OpenSearch Dashboards',
         }),
-        subtitle: i18n.translate('opensearchDashboardsOverview.opensearchDashboards.solution.subtitle', {
-          defaultMessage: 'Visualize & analyze',
-        }),
+        subtitle: i18n.translate(
+          'opensearchDashboardsOverview.opensearchDashboards.solution.subtitle',
+          {
+            defaultMessage: 'Visualize & analyze',
+          }
+        ),
         appDescriptions: [
           i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription1', {
             defaultMessage: 'Analyze data in dashboards.',
@@ -135,5 +139,5 @@ export class OpenSearchDashboardsOverviewPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

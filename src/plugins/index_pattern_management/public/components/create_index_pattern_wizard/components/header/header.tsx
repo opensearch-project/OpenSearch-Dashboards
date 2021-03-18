@@ -38,7 +38,8 @@ export const Header = ({
   isBeta?: boolean;
   docLinks: DocLinksStart;
 }) => {
-  const changeTitle = useOpenSearchDashboards<IndexPatternManagmentContext>().services.chrome.docTitle.change;
+  const changeTitle = useOpenSearchDashboards<IndexPatternManagmentContext>().services.chrome
+    .docTitle.change;
   const createIndexPatternHeader = i18n.translate(
     'indexPatternManagement.createIndexPatternHeader',
     {

@@ -36,5 +36,5 @@ export class AutocompleteService implements Plugin<void> {
       registerRoutes(core, this.initializerContext.config.legacy.globalConfig$);
   }
 
-  public start() { }
+  public start() {}
 }

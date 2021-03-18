@@ -18,7 +18,10 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { createSavedObjectClass, SavedObjectOpenSearchDashboardsServices } from '../../../saved_objects/public';
+import {
+  createSavedObjectClass,
+  SavedObjectOpenSearchDashboardsServices,
+} from '../../../saved_objects/public';
 
 // Used only by the savedSheets service, usually no reason to change this
 export function createSavedSheetClass(

@@ -53,9 +53,12 @@ export function opensearchDashboardsLogsSpecProvider(context: TutorialContext): 
     artifacts: {
       dashboards: [],
       application: {
-        label: i18n.translate('home.tutorials.opensearchDashboardsLogs.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
+        label: i18n.translate(
+          'home.tutorials.opensearchDashboardsLogs.artifacts.application.label',
+          {
+            defaultMessage: 'Discover',
+          }
+        ),
         path: '/app/discover#/',
       },
       exportedFields: {

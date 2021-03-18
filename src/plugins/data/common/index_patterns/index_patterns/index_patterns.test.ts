@@ -75,15 +75,15 @@ describe('IndexPatterns', () => {
     indexPatterns = new IndexPatternsService({
       uiSettings: ({
         get: () => Promise.resolve(false),
-        getAll: () => { },
+        getAll: () => {},
       } as any) as UiSettingsCommon,
       savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
-      onNotification: () => { },
-      onError: () => { },
-      onRedirectNoIndexPattern: () => { },
-      onUnsupportedTimePattern: () => { },
+      onNotification: () => {},
+      onError: () => {},
+      onRedirectNoIndexPattern: () => {},
+      onUnsupportedTimePattern: () => {},
     });
   });
 

@@ -88,14 +88,21 @@ export function mapNodesVersionCompatibility(
 
   // Aggregate incompatible OpenSearch nodes.
   const incompatibleNodes = nodes.filter(
-    (node) => !opensearchVersionCompatibleWithOpenSearchDashboards(node.version, opensearchDashboardsVersion)
-  )
+    (node) =>
+      !opensearchVersionCompatibleWithOpenSearchDashboards(
+        node.version,
+        opensearchDashboardsVersion
+      )
+  );
 
   // Aggregate OpenSearch nodes which should prompt a OpenSearch Dashboards upgrade. It's acceptable
   // if OpenSearch and OpenSearch Dashboards versions are not the same as long as they are not
   // incompatible, but we should warn about it.
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
-  const warningNodes = nodes.filter((node) => !opensearchVersionEqualsOpenSearchDashboards(node.version, opensearchDashboardsVersion));
+  const warningNodes = nodes.filter(
+    (node) =>
+      !opensearchVersionEqualsOpenSearchDashboards(node.version, opensearchDashboardsVersion)
+  );
 
   // Note: If incompatible and warning nodes are present `message` only contains
   // an incompatibility notice.

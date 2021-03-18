@@ -31,7 +31,9 @@ export const QueryBarTopRow = (props: QueryBarTopRowProps) => (
   </React.Suspense>
 );
 
-const LazyQueryStringInputUI = withOpenSearchDashboards(React.lazy(() => import('./query_string_input')));
+const LazyQueryStringInputUI = withOpenSearchDashboards(
+  React.lazy(() => import('./query_string_input'))
+);
 export const QueryStringInput = (props: QueryStringInputProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyQueryStringInputUI {...props} />

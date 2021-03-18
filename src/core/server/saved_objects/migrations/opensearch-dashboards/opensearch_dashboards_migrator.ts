@@ -45,7 +45,10 @@ export interface OpenSearchDashboardsMigratorOptions {
   logger: Logger;
 }
 
-export type IOpenSearchDashboardsMigrator = Pick<OpenSearchDashboardsMigrator, keyof OpenSearchDashboardsMigrator>;
+export type IOpenSearchDashboardsMigrator = Pick<
+  OpenSearchDashboardsMigrator,
+  keyof OpenSearchDashboardsMigrator
+>;
 
 export interface OpenSearchDashboardsMigratorStatus {
   status: MigrationStatus;
@@ -163,7 +166,9 @@ export class OpenSearchDashboardsMigrator {
         serializer: this.serializer,
         // Only necessary for the migrator of the opensearch-dashboards index.
         obsoleteIndexTemplatePattern:
-          index === opensearchDashboardsIndexName ? 'opensearch_dashboards_index_template*' : undefined,
+          index === opensearchDashboardsIndexName
+            ? 'opensearch_dashboards_index_template*'
+            : undefined,
         convertToAliasScript: indexMap[index].script,
       });
     });

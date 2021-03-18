@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }) {
 
   describe('test large strings', function () {
     before(async function () {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_large_strings']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'opensearch_dashboards_large_strings',
+      ]);
       await opensearchArchiver.load('empty_opensearch_dashboards');
       await opensearchArchiver.loadIfNeeded('hamlet');
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'testlargestring' });

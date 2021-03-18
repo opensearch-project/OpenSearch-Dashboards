@@ -18,9 +18,19 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'opensearch-dashboards/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'opensearch-dashboards/public';
 // @ts-ignore
-import { setToasts, setUiSettings, setOpenSearchDashboardsVersion, setMapsLegacyConfig } from './opensearch_dashboards_services';
+import {
+  setToasts,
+  setUiSettings,
+  setOpenSearchDashboardsVersion,
+  setMapsLegacyConfig,
+} from './opensearch_dashboards_services';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';

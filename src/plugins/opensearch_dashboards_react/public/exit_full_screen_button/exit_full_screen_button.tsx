@@ -48,9 +48,12 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
       <div>
         <EuiScreenReaderOnly>
           <p aria-live="polite">
-            {i18n.translate('opensearch-dashboards-react.exitFullScreenButton.fullScreenModeDescription', {
-              defaultMessage: 'In full screen mode, press ESC to exit.',
-            })}
+            {i18n.translate(
+              'opensearch-dashboards-react.exitFullScreenButton.fullScreenModeDescription',
+              {
+                defaultMessage: 'In full screen mode, press ESC to exit.',
+              }
+            )}
           </p>
         </EuiScreenReaderOnly>
         <div>

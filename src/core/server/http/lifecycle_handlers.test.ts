@@ -24,7 +24,11 @@ import {
 } from './lifecycle_handlers';
 import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
-import { OpenSearchDashboardsRequest, RouteMethod, OpenSearchDashboardsRouteOptions } from './router';
+import {
+  OpenSearchDashboardsRequest,
+  RouteMethod,
+  OpenSearchDashboardsRouteOptions,
+} from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 

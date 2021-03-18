@@ -201,25 +201,33 @@ describe('#start(installPath)', () => {
   it('rejects when bin/OpenSearch exists with 0 before starting', async () => {
     mockOpenSearchBin({ exitCode: 0, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
+    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+      'OpenSearch exited without starting'
+    );
   });
 
   it('rejects when bin/opensearch exists with 143 before starting', async () => {
     mockOpenSearchBin({ exitCode: 143, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
+    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+      'OpenSearch exited without starting'
+    );
   });
 
   it('rejects when bin/opensearch exists with 130 before starting', async () => {
     mockOpenSearchBin({ exitCode: 130, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited without starting');
+    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+      'OpenSearch exited without starting'
+    );
   });
 
   it('rejects when bin/opensearch exists with 1 before starting', async () => {
     mockOpenSearchBin({ exitCode: 1, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('OpenSearch exited with code 1');
+    await expect(new Cluster({ log }).start()).rejects.toThrowError(
+      'OpenSearch exited with code 1'
+    );
   });
 
   it('resolves when bin/opensearch logs "started"', async () => {

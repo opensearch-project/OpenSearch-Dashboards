@@ -41,9 +41,9 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
     return response.hits.hits.length
       ? response.hits.hits[0]._source['search-telemetry']
       : {
-        successCount: 0,
-        errorCount: 0,
-        averageDuration: null,
-      };
+          successCount: 0,
+          errorCount: 0,
+          averageDuration: null,
+        };
   };
 }

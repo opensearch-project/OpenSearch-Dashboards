@@ -121,7 +121,9 @@ exports.NativeRealm = class NativeRealm {
       }
 
       const sec = 1.5 * attempt;
-      this._log.warning(`assuming OpenSearch isn't initialized completely, trying again in ${sec} seconds`);
+      this._log.warning(
+        `assuming OpenSearch isn't initialized completely, trying again in ${sec} seconds`
+      );
       await new Promise((resolve) => setTimeout(resolve, sec * 1000));
 
       const nextOpts = {

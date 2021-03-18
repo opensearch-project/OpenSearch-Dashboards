@@ -57,9 +57,9 @@ export const getProxyRouteHandlerDeps = ({
     router,
     proxy: proxy
       ? {
-        ...defaultProxyValue,
-        ...proxy,
-      }
+          ...defaultProxyValue,
+          ...proxy,
+        }
       : defaultProxyValue,
     log,
   };

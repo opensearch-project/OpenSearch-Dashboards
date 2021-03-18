@@ -301,7 +301,11 @@ export class IndexPattern implements IIndexPattern {
 
   isTimeNanosBased(): boolean {
     const timeField: any = this.getTimeField();
-    return timeField && timeField.opensearchTypes && timeField.opensearchTypes.indexOf('date_nanos') !== -1;
+    return (
+      timeField &&
+      timeField.opensearchTypes &&
+      timeField.opensearchTypes.indexOf('date_nanos') !== -1
+    );
   }
 
   getTimeField() {

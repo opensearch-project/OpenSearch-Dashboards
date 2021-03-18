@@ -347,7 +347,10 @@ export class CronEditor extends Component {
       <Fragment>
         <EuiFormRow
           label={
-            <FormattedMessage id="opensearchUi.cronEditor.fieldFrequencyLabel" defaultMessage="Frequency" />
+            <FormattedMessage
+              id="opensearchUi.cronEditor.fieldFrequencyLabel"
+              defaultMessage="Frequency"
+            />
           }
           fullWidth
         >

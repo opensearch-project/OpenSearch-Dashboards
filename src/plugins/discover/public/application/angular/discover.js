@@ -394,7 +394,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         const saveModal = (
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => { }}
+            onClose={() => {}}
             title={savedSearch.title}
             showCopyOnSave={!!savedSearch.id}
             objectType="search"

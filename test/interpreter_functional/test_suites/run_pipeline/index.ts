@@ -31,8 +31,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/logstash_functional');
-      await opensearchArchiver.load('../functional/fixtures/opensearch_archiver/visualize_embedding');
+      await opensearchArchiver.loadIfNeeded(
+        '../functional/fixtures/opensearch_archiver/logstash_functional'
+      );
+      await opensearchArchiver.load(
+        '../functional/fixtures/opensearch_archiver/visualize_embedding'
+      );
       await opensearchDashboardsServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',

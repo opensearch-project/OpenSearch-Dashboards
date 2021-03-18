@@ -112,8 +112,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   describe('dashboard container', () => {
     before(async () => {
-      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/dashboard/current/data');
-      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/dashboard/current/opensearch_dashboards');
+      await opensearchArchiver.loadIfNeeded(
+        '../functional/fixtures/opensearch_archiver/dashboard/current/data'
+      );
+      await opensearchArchiver.loadIfNeeded(
+        '../functional/fixtures/opensearch_archiver/dashboard/current/opensearch_dashboards'
+      );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
       await updateInput(JSON.stringify(testDashboardInput, null, 4));

@@ -89,7 +89,9 @@ export class HapiResponseAdapter {
     );
   }
 
-  private toSuccess(opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
+  private toSuccess(
+    opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>
+  ) {
     const response = this.responseToolkit
       .response(opensearchDashboardsResponse.payload)
       .code(opensearchDashboardsResponse.status);
@@ -97,7 +99,9 @@ export class HapiResponseAdapter {
     return response;
   }
 
-  private toRedirect(opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
+  private toRedirect(
+    opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>
+  ) {
     const { headers } = opensearchDashboardsResponse.options;
     if (!headers || typeof headers.location !== 'string') {
       throw new Error("expected 'location' header to be set");
@@ -113,7 +117,11 @@ export class HapiResponseAdapter {
     return response;
   }
 
-  private toError(opensearchDashboardsResponse: OpenSearchDashboardsResponse<ResponseError | Buffer | stream.Readable>) {
+  private toError(
+    opensearchDashboardsResponse: OpenSearchDashboardsResponse<
+      ResponseError | Buffer | stream.Readable
+    >
+  ) {
     const { payload } = opensearchDashboardsResponse;
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.

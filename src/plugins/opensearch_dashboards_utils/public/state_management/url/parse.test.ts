@@ -25,7 +25,9 @@ describe('parseUrlHash', () => {
   });
 
   it('should return parsed hash', () => {
-    expect(parseUrlHash('http://localhost:5601/oxf/app/opensearch-dashboards/#/path?test=test')).toMatchObject({
+    expect(
+      parseUrlHash('http://localhost:5601/oxf/app/opensearch-dashboards/#/path?test=test')
+    ).toMatchObject({
       pathname: '/path',
       query: {
         test: 'test',

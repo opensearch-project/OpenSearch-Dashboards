@@ -33,7 +33,11 @@ export class TimeHistory {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
       },
     };
-    this.history = new PersistedLog('opensearchDashboards.timepicker.timeHistory', historyOptions, storage);
+    this.history = new PersistedLog(
+      'opensearchDashboards.timepicker.timeHistory',
+      historyOptions,
+      storage
+    );
   }
 
   add(time: TimeRange) {

@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ISearchSource, OpenSearchQuerySortValue, SortDirection } from '../../../../../../../data/public';
+import {
+  ISearchSource,
+  OpenSearchQuerySortValue,
+  SortDirection,
+} from '../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
 import { OpenSearchHitRecordList, OpenSearchHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';

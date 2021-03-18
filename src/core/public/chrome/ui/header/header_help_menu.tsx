@@ -182,7 +182,12 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   };
 
   public render() {
-    const { intl, opensearchDashboardsVersion, useDefaultContent, opensearchDashboardsDocLink } = this.props;
+    const {
+      intl,
+      opensearchDashboardsVersion,
+      useDefaultContent,
+      opensearchDashboardsDocLink,
+    } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
 
     const defaultContent = useDefaultContent ? (
@@ -205,7 +210,12 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={OPENSEARCH_DASHBOARDS_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty
+          href={OPENSEARCH_DASHBOARDS_FEEDBACK_LINK}
+          target="_blank"
+          size="xs"
+          flush="left"
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"

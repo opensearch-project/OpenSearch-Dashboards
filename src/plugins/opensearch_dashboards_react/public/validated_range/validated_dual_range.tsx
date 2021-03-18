@@ -121,14 +121,20 @@ export class ValidatedDualRange extends Component<Props> {
           value={this.state.value}
           onChange={this._onChange}
           minInputProps={{
-            'aria-label': i18n.translate('opensearch-dashboards-react.dualRangeControl.minInputAriaLabel', {
-              defaultMessage: 'Range minimum',
-            }),
+            'aria-label': i18n.translate(
+              'opensearch-dashboards-react.dualRangeControl.minInputAriaLabel',
+              {
+                defaultMessage: 'Range minimum',
+              }
+            ),
           }}
           maxInputProps={{
-            'aria-label': i18n.translate('opensearch-dashboards-react.dualRangeControl.maxInputAriaLabel', {
-              defaultMessage: 'Range maximum',
-            }),
+            'aria-label': i18n.translate(
+              'opensearch-dashboards-react.dualRangeControl.maxInputAriaLabel',
+              {
+                defaultMessage: 'Range maximum',
+              }
+            ),
           }}
           {...rest}
         />

@@ -54,7 +54,9 @@ export interface HttpResourcesServiceToolkit {
   /** To respond with HTML page bootstrapping OpenSearch Dashboards application. */
   renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IOpenSearchDashboardsResponse>;
   /** To respond with HTML page bootstrapping OpenSearch Dashboards application without retrieving user-specific information. */
-  renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IOpenSearchDashboardsResponse>;
+  renderAnonymousCoreApp: (
+    options?: HttpResourcesRenderOptions
+  ) => Promise<IOpenSearchDashboardsResponse>;
   /** To respond with a custom HTML page. */
   renderHtml: (options: HttpResourcesResponseOptions) => IOpenSearchDashboardsResponse;
   /** To respond with a custom JS script file. */

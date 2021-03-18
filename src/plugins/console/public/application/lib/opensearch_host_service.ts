@@ -27,7 +27,7 @@ import { Api } from './api';
 export class OpenSearchHostService {
   private host = 'http://localhost:9200';
 
-  constructor(private readonly api: Api) { }
+  constructor(private readonly api: Api) {}
 
   private setHost(host: string): void {
     this.host = host;
@@ -51,4 +51,5 @@ export class OpenSearchHostService {
   }
 }
 
-export const createOpenSearchHostService = ({ api }: { api: Api }) => new OpenSearchHostService(api);
+export const createOpenSearchHostService = ({ api }: { api: Api }) =>
+  new OpenSearchHostService(api);

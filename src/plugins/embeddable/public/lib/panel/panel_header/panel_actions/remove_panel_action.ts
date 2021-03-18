@@ -43,7 +43,7 @@ export class RemovePanelAction implements Action<ActionContext> {
   public readonly id = REMOVE_PANEL_ACTION;
   public order = 1;
 
-  constructor() { }
+  constructor() {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.removePanel.displayName', {

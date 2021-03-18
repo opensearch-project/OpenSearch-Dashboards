@@ -68,7 +68,10 @@ function findIntervalFromDuration(
 ) {
   const date = moment.tz(dateValue, timeZone);
   const startOfDate = moment.tz(date, timeZone).startOf(opensearchUnit);
-  const endOfDate = moment.tz(date, timeZone).startOf(opensearchUnit).add(opensearchValue, opensearchUnit);
+  const endOfDate = moment
+    .tz(date, timeZone)
+    .startOf(opensearchUnit)
+    .add(opensearchValue, opensearchUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
@@ -238,7 +241,12 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: findMinInterval(xValues, intervalOpenSearchValue, intervalOpenSearchUnit, timeZone),
+      minInterval: findMinInterval(
+        xValues,
+        intervalOpenSearchValue,
+        intervalOpenSearchUnit,
+        timeZone
+      ),
     };
 
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if

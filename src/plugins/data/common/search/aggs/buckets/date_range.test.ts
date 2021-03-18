@@ -47,14 +47,14 @@ describe('date_range params', () => {
       },
       typeMeta: hasIncludeTypeMeta
         ? {
-          aggs: {
-            date_range: {
-              bytes: {
-                time_zone: 'defaultTimeZone',
+            aggs: {
+              date_range: {
+                bytes: {
+                  time_zone: 'defaultTimeZone',
+                },
               },
             },
-          },
-        }
+          }
         : undefined,
     } as any;
 

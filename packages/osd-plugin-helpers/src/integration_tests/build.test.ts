@@ -31,7 +31,10 @@ import loadJsonFile from 'load-json-file';
 const OPENSEARCH_DASHBOARDS_VERSION = '7.9.0';
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
-const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-${OPENSEARCH_DASHBOARDS_VERSION}.zip`);
+const PLUGIN_ARCHIVE = Path.resolve(
+  PLUGIN_BUILD_DIR,
+  `fooTestPlugin-${OPENSEARCH_DASHBOARDS_VERSION}.zip`
+);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
@@ -65,7 +68,12 @@ it('builds a generated plugin into a viable archive', async () => {
 
   const buildProc = await execa(
     process.execPath,
-    ['../../scripts/plugin_helpers', 'build', '--opensearch-dashboards-version', OPENSEARCH_DASHBOARDS_VERSION],
+    [
+      '../../scripts/plugin_helpers',
+      'build',
+      '--opensearch-dashboards-version',
+      OPENSEARCH_DASHBOARDS_VERSION,
+    ],
     {
       cwd: PLUGIN_DIR,
       all: true,
@@ -87,7 +95,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info compressing plugin into [fooTestPlugin-7.9.0.zip]"
   `);
 
-  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => { });
+  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
@@ -112,8 +120,11 @@ it('builds a generated plugin into a viable archive', async () => {
     ]
   `);
 
-  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'opensearch-dashboards', 'fooTestPlugin', 'opensearch_dashboards.json')))
-    .toMatchInlineSnapshot(`
+  expect(
+    loadJsonFile.sync(
+      Path.resolve(TMP_DIR, 'opensearch-dashboards', 'fooTestPlugin', 'opensearch_dashboards.json')
+    )
+  ).toMatchInlineSnapshot(`
     Object {
       "id": "fooTestPlugin",
       "opensearchDashboardsVersion": "7.9.0",

@@ -272,5 +272,5 @@ export class ExpressionsService {
     return this;
   }
 
-  public stop() { }
+  public stop() {}
 }

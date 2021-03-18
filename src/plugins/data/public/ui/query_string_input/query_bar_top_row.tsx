@@ -36,7 +36,11 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useOpenSearchDashboards, toMountPoint, withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import {
+  useOpenSearchDashboards,
+  toMountPoint,
+  withOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';

@@ -158,7 +158,10 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller, opensearchClient: OpenSearchClient) => {
+  public bulkFetchUsage = async (
+    callCluster: LegacyAPICaller,
+    opensearchClient: OpenSearchClient
+  ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, opensearchClient, usageCollectors.collectors);
   };

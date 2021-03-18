@@ -29,6 +29,6 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
-  'vislib opensearchDashboardsLegacy'
-);
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
+  OpenSearchDashboardsLegacyStart
+>('vislib opensearchDashboardsLegacy');

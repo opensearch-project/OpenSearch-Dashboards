@@ -63,7 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('should return 404 for object that no longer exists', async () =>
-        await supertest.get(`/api/opensearch-dashboards/management/saved_objects/${existingObject}`).expect(404));
+        await supertest
+          .get(`/api/opensearch-dashboards/management/saved_objects/${existingObject}`)
+          .expect(404));
     });
   });
 }

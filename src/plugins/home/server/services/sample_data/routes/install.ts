@@ -41,15 +41,15 @@ const insertDataIntoIndex = (
       .forEach((timeFieldName: string) => {
         doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
           ? translateTimeRelativeToWeek(
-            doc[timeFieldName],
-            dataIndexConfig.currentTimeMarker,
-            nowReference
-          )
+              doc[timeFieldName],
+              dataIndexConfig.currentTimeMarker,
+              nowReference
+            )
           : translateTimeRelativeToDifference(
-            doc[timeFieldName],
-            dataIndexConfig.currentTimeMarker,
-            nowReference
-          );
+              doc[timeFieldName],
+              dataIndexConfig.currentTimeMarker,
+              nowReference
+            );
       });
     return doc;
   }
@@ -72,7 +72,9 @@ const insertDataIntoIndex = (
       )}`;
       logger.warn(errMsg);
       return Promise.reject(
-        new Error(`Unable to load sample data into index "${index}", see OpenSearch Dashboards logs for details`)
+        new Error(
+          `Unable to load sample data into index "${index}", see OpenSearch Dashboards logs for details`
+        )
       );
     }
   };

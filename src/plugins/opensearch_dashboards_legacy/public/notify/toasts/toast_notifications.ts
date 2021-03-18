@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { NotificationsSetup, Toast, ToastInput, ErrorToastOptions } from 'opensearch-dashboards/public';
+import {
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ErrorToastOptions,
+} from 'opensearch-dashboards/public';
 
 export class ToastNotifications {
   public list: Toast[] = [];

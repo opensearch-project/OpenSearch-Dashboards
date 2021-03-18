@@ -78,14 +78,14 @@ export const opensearchRawResponse: OpenSearchRawResponseExpressionTypeDefinitio
       const rows = convertResult(context.body);
       const columns = rows.length
         ? Object.keys(rows[0]).map((key) => ({
-          id: key,
-          name: key,
-          meta: {
-            type: typeof rows[0][key],
-            field: key,
-            params: {},
-          },
-        }))
+            id: key,
+            name: key,
+            meta: {
+              type: typeof rows[0][key],
+              field: key,
+              params: {},
+            },
+          }))
         : [];
 
       return {

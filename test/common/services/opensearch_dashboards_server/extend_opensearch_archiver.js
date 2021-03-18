@@ -20,7 +20,12 @@
 const OPENSEARCH_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
 const OPENSEARCH_DASHBOARDS_INDEX = '.opensearch-dashboards';
 
-export function extendOpenSearchArchiver({ opensearchArchiver, opensearchDashboardsServer, retry, defaults }) {
+export function extendOpenSearchArchiver({
+  opensearchArchiver,
+  opensearchDashboardsServer,
+  retry,
+  defaults,
+}) {
   // only extend the opensearchArchiver if there are default uiSettings to restore
   if (!defaults) {
     return;
@@ -36,7 +41,8 @@ export function extendOpenSearchArchiver({ opensearchArchiver, opensearchDashboa
       const statsKeys = Object.keys(stats);
       const opensearchDashboardsKeys = statsKeys.filter(
         // this also matches stats keys like '.opensearch-dashboards_1' and '.opensearch-dashboards_2,.opensearch-dashboards_1'
-        (key) => key.includes(OPENSEARCH_DASHBOARDS_INDEX) && (stats[key].created || stats[key].deleted)
+        (key) =>
+          key.includes(OPENSEARCH_DASHBOARDS_INDEX) && (stats[key].created || stats[key].deleted)
       );
 
       // if the opensearch-dashboards index was created by the opensearchArchiver then update the uiSettings

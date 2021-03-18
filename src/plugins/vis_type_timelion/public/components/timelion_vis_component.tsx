@@ -225,7 +225,14 @@ function TimelionVisComponent({
         updateCaption(newPlot.getData());
       }
     },
-    [canvasElem, chartElem?.clientWidth, renderComplete, opensearchDashboards.services, interval, updateCaption]
+    [
+      canvasElem,
+      chartElem?.clientWidth,
+      renderComplete,
+      opensearchDashboards.services,
+      interval,
+      updateCaption,
+    ]
   );
 
   const dimensions = useResizeObserver(chartElem);

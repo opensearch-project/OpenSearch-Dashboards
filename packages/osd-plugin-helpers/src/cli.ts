@@ -76,7 +76,10 @@ export function runCli() {
 
         const plugin = loadOpenSearchDashboardsPlatformPlugin(pluginDir);
         const config = await loadConfig(log, plugin);
-        const opensearchDashboardsVersion = await resolveOpenSearchDashboardsVersion(versionFlag, plugin);
+        const opensearchDashboardsVersion = await resolveOpenSearchDashboardsVersion(
+          versionFlag,
+          plugin
+        );
 
         if (semver.satisfies(opensearchDashboardsVersion, '<7.9')) {
           log.error(
@@ -91,7 +94,11 @@ export function runCli() {
         }
 
         const sourceDir = plugin.directory;
-        const buildDir = Path.resolve(plugin.directory, 'build/opensearch-dashboards', plugin.manifest.id);
+        const buildDir = Path.resolve(
+          plugin.directory,
+          'build/opensearch-dashboards',
+          plugin.manifest.id
+        );
 
         const context: BuildContext = {
           log,

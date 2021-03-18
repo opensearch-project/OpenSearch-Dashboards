@@ -318,7 +318,10 @@ export default ({ getService }: FtrProviderContext) => {
         { status: 'skipped', destIndex: undefined },
       ]);
 
-      const { body } = await opensearchClient.cat.indices({ index: '.migration-c*', format: 'json' });
+      const { body } = await opensearchClient.cat.indices({
+        index: '.migration-c*',
+        format: 'json',
+      });
       // It only created the original and the dest
       expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
 
@@ -341,7 +344,13 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-async function createIndex({ opensearchClient, index }: { opensearchClient: OpenSearchClient; index: string }) {
+async function createIndex({
+  opensearchClient,
+  index,
+}: {
+  opensearchClient: OpenSearchClient;
+  index: string;
+}) {
   await opensearchClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
   const properties = {
     type: { type: 'keyword' },

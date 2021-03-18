@@ -36,7 +36,11 @@ export interface IndexMap {
 /*
  * This file contains logic to convert savedObjectSchemas into a dictionary of indexes and documents
  */
-export function createIndexMap({ opensearchDashboardsIndexName, registry, indexMap }: CreateIndexMapOptions) {
+export function createIndexMap({
+  opensearchDashboardsIndexName,
+  registry,
+  indexMap,
+}: CreateIndexMapOptions) {
   const map: IndexMap = {};
   Object.keys(indexMap).forEach((type) => {
     const typeDef = registry.getType(type);

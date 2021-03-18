@@ -48,7 +48,7 @@ class ControlMock extends Control<BaseFilterManager> {
     return Promise.resolve();
   }
 
-  destroy() { }
+  destroy() {}
 }
 
 describe('hasChanged', () => {

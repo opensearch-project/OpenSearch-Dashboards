@@ -416,9 +416,12 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
     const actions = [
       {
-        name: i18n.translate('opensearch-dashboards-react.tableListView.listing.table.editActionName', {
-          defaultMessage: 'Edit',
-        }),
+        name: i18n.translate(
+          'opensearch-dashboards-react.tableListView.listing.table.editActionName',
+          {
+            defaultMessage: 'Edit',
+          }
+        ),
         description: i18n.translate(
           'opensearch-dashboards-react.tableListView.listing.table.editActionDescription',
           {
@@ -444,9 +447,12 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     const columns = this.props.tableColumns.slice();
     if (this.props.editItem) {
       columns.push({
-        name: i18n.translate('opensearch-dashboards-react.tableListView.listing.table.actionTitle', {
-          defaultMessage: 'Actions',
-        }),
+        name: i18n.translate(
+          'opensearch-dashboards-react.tableListView.listing.table.actionTitle',
+          {
+            defaultMessage: 'Actions',
+          }
+        ),
         width: '100px',
         actions,
       });

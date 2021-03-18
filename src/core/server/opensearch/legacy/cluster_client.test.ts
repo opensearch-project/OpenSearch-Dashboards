@@ -51,7 +51,10 @@ test('#constructor creates client with parsed config', () => {
   expect(clusterClient).toBeDefined();
 
   expect(mockParseOpenSearchClientConfig).toHaveBeenCalledTimes(1);
-  expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(mockOpenSearchConfig, mockLogger);
+  expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(
+    mockOpenSearchConfig,
+    mockLogger
+  );
 
   expect(MockClient).toHaveBeenCalledTimes(1);
   expect(MockClient).toHaveBeenCalledWith(mockOpenSearchClientConfig);
@@ -116,7 +119,9 @@ describe('#callAsInternalUser', () => {
   test('correctly deals with nested endpoint', async () => {
     const mockResponse = { data: 'authenticate' };
     const mockParams = { param: 'authenticate' };
-    mockOpenSearchClientInstance.security.authenticate.mockImplementation(function mockCall(this: any) {
+    mockOpenSearchClientInstance.security.authenticate.mockImplementation(function mockCall(
+      this: any
+    ) {
       return Promise.resolve({
         context: this,
         response: mockResponse,
@@ -261,15 +266,17 @@ describe('#asScoped', () => {
 
     expect(firstScopedClusterClient).toBeDefined();
     expect(mockParseOpenSearchClientConfig).toHaveBeenCalledTimes(1);
-    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(mockOpenSearchConfig, mockLogger, {
-      auth: false,
-      ignoreCertAndKey: true,
-    });
+    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(
+      mockOpenSearchConfig,
+      mockLogger,
+      {
+        auth: false,
+        ignoreCertAndKey: true,
+      }
+    );
 
     expect(MockClient).toHaveBeenCalledTimes(1);
-    expect(MockClient).toHaveBeenCalledWith(
-      mockParseOpenSearchClientConfig.mock.results[0].value
-    );
+    expect(MockClient).toHaveBeenCalledWith(mockParseOpenSearchClientConfig.mock.results[0].value);
 
     jest.clearAllMocks();
 
@@ -295,13 +302,20 @@ describe('#asScoped', () => {
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseOpenSearchClientConfig).toHaveBeenCalledTimes(1);
-    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(mockOpenSearchConfig, mockLogger, {
-      auth: false,
-      ignoreCertAndKey: true,
-    });
+    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(
+      mockOpenSearchConfig,
+      mockLogger,
+      {
+        auth: false,
+        ignoreCertAndKey: true,
+      }
+    );
 
     // Config ssl.alwaysPresentCertificate === false
-    mockOpenSearchConfig = { ...mockOpenSearchConfig, ssl: { alwaysPresentCertificate: false } } as any;
+    mockOpenSearchConfig = {
+      ...mockOpenSearchConfig,
+      ssl: { alwaysPresentCertificate: false },
+    } as any;
     clusterClient = new LegacyClusterClient(
       mockOpenSearchConfig,
       mockLogger,
@@ -312,13 +326,20 @@ describe('#asScoped', () => {
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseOpenSearchClientConfig).toHaveBeenCalledTimes(1);
-    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(mockOpenSearchConfig, mockLogger, {
-      auth: false,
-      ignoreCertAndKey: true,
-    });
+    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(
+      mockOpenSearchConfig,
+      mockLogger,
+      {
+        auth: false,
+        ignoreCertAndKey: true,
+      }
+    );
 
     // Config ssl.alwaysPresentCertificate === true
-    mockOpenSearchConfig = { ...mockOpenSearchConfig, ssl: { alwaysPresentCertificate: true } } as any;
+    mockOpenSearchConfig = {
+      ...mockOpenSearchConfig,
+      ssl: { alwaysPresentCertificate: true },
+    } as any;
     clusterClient = new LegacyClusterClient(
       mockOpenSearchConfig,
       mockLogger,
@@ -329,10 +350,14 @@ describe('#asScoped', () => {
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseOpenSearchClientConfig).toHaveBeenCalledTimes(1);
-    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(mockOpenSearchConfig, mockLogger, {
-      auth: false,
-      ignoreCertAndKey: false,
-    });
+    expect(mockParseOpenSearchClientConfig).toHaveBeenLastCalledWith(
+      mockOpenSearchConfig,
+      mockLogger,
+      {
+        auth: false,
+        ignoreCertAndKey: false,
+      }
+    );
   });
 
   test('passes only filtered headers to the scoped cluster client', () => {
@@ -491,7 +516,11 @@ describe('#asScoped', () => {
       const auditor = auditTrailServiceMock.createAuditor();
       const auditorFactory = auditTrailServiceMock.createAuditorFactory();
       auditorFactory.asScoped.mockReturnValue(auditor);
-      clusterClient = new LegacyClusterClient(mockOpenSearchConfig, mockLogger, () => auditorFactory);
+      clusterClient = new LegacyClusterClient(
+        mockOpenSearchConfig,
+        mockLogger,
+        () => auditorFactory
+      );
       clusterClient.asScoped(httpServerMock.createOpenSearchDashboardsRequest());
 
       expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);

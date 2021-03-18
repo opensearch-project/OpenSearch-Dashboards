@@ -50,12 +50,12 @@ export async function writeServerFiles({
         // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in opensearch_dashboards.json manifest
         ...(OPENSEARCH_DASHBOARDS_VERSION_79 || plugin.manifest.server
           ? config.serverSourcePatterns || [
-            'yarn.lock',
-            'tsconfig.json',
-            'package.json',
-            'index.{js,ts}',
-            '{lib,server,common,translations}/**/*',
-          ]
+              'yarn.lock',
+              'tsconfig.json',
+              'package.json',
+              'index.{js,ts}',
+              '{lib,server,common,translations}/**/*',
+            ]
           : []),
       ],
       {
@@ -88,16 +88,16 @@ export async function writeServerFiles({
         JSON.stringify(
           file.relative === 'opensearch_dashboards.json'
             ? {
-              ...parsed,
-              opensearchDashboardsVersion,
-            }
+                ...parsed,
+                opensearchDashboardsVersion,
+              }
             : {
-              ...parsed,
-              opensearchDashboards: {
-                ...parsed.opensearchDashboards,
-                version: opensearchDashboardsVersion,
+                ...parsed,
+                opensearchDashboards: {
+                  ...parsed.opensearchDashboards,
+                  version: opensearchDashboardsVersion,
+                },
               },
-            },
           null,
           2
         )

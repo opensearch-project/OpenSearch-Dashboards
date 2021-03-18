@@ -65,7 +65,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) { }
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,

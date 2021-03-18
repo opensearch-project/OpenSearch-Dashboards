@@ -154,10 +154,11 @@ export class Home extends Component {
           ) : null}
 
           <EuiFlexGroup
-            className={`homData ${addDataFeatures.length === 1 && manageDataFeatures.length === 1
-              ? 'homData--compressed'
-              : 'homData--expanded'
-              }`}
+            className={`homData ${
+              addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                ? 'homData--compressed'
+                : 'homData--expanded'
+            }`}
           >
             <EuiFlexItem>
               <AddData addBasePath={addBasePath} features={addDataFeatures} />

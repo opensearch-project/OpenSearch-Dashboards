@@ -68,7 +68,10 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
   routeAuthRequired,
   validation = {},
   opensearchDashboardsRouteOptions = { xsrfRequired: true },
-  opensearchDashboardsRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+  opensearchDashboardsRequestState = {
+    requestId: '123',
+    requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+  },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
@@ -90,7 +93,11 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
         search: queryString ? `?${queryString}` : queryString,
       },
       route: {
-        settings: { tags: routeTags, auth: routeAuthRequired, app: opensearchDashboardsRouteOptions },
+        settings: {
+          tags: routeTags,
+          auth: routeAuthRequired,
+          app: opensearchDashboardsRouteOptions,
+        },
       },
       raw: {
         req: {

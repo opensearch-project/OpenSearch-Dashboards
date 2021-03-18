@@ -25,7 +25,9 @@ import { AuthHeaders } from './lifecycle/auth';
  * @return authentication headers {@link AuthHeaders} for - an incoming request.
  * @public
  * */
-export type GetAuthHeaders = (request: OpenSearchDashboardsRequest | LegacyRequest) => AuthHeaders | undefined;
+export type GetAuthHeaders = (
+  request: OpenSearchDashboardsRequest | LegacyRequest
+) => AuthHeaders | undefined;
 
 /** @internal */
 export class AuthHeadersStorage {

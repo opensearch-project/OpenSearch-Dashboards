@@ -100,7 +100,9 @@ export function createRootWithSettings(
  * @param path
  */
 export function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = Buffer.from(`${opensearchDashboardsTestUser.username}:${opensearchDashboardsTestUser.password}`);
+  const testUserCredentials = Buffer.from(
+    `${opensearchDashboardsTestUser.username}:${opensearchDashboardsTestUser.password}`
+  );
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);

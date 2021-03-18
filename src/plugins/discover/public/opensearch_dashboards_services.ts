@@ -94,7 +94,11 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';
-export { formatMsg, formatStack, subscribeWithScope } from '../../opensearch_dashboards_legacy/public';
+export {
+  formatMsg,
+  formatStack,
+  subscribeWithScope,
+} from '../../opensearch_dashboards_legacy/public';
 
 // EXPORT types
 export {

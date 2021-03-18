@@ -19,7 +19,12 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { context, createOpenSearchDashboardsReactContext, useOpenSearchDashboards, OpenSearchDashboardsContextProvider } from './context';
+import {
+  context,
+  createOpenSearchDashboardsReactContext,
+  useOpenSearchDashboards,
+  OpenSearchDashboardsContextProvider,
+} from './context';
 import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
 import { CoreStart } from '../../../../core/public';
 

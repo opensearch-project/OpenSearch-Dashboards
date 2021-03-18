@@ -23,7 +23,7 @@ import { opensearchSearchStrategyProvider } from './opensearch_search_strategy';
 
 describe('OpenSearch search strategy', () => {
   const mockLogger: any = {
-    debug: () => { },
+    debug: () => {},
   };
   const mockApiCaller = jest.fn().mockResolvedValue({
     body: {
@@ -39,7 +39,7 @@ describe('OpenSearch search strategy', () => {
     core: {
       uiSettings: {
         client: {
-          get: () => { },
+          get: () => {},
         },
       },
       elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } },
@@ -88,9 +88,12 @@ describe('OpenSearch search strategy', () => {
     const params = { index: 'logstash-*' };
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
-    const response = await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
-      params,
-    });
+    const response = await opensearchSearch.search(
+      (mockContext as unknown) as RequestHandlerContext,
+      {
+        params,
+      }
+    );
 
     expect(response.isRunning).toBe(false);
     expect(response.isPartial).toBe(false);

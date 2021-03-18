@@ -58,7 +58,9 @@ export default function ({ getService }) {
   const opensearchArchiver = getService('opensearchArchiver');
 
   describe('opensearch-dashboards stats api', () => {
-    before('make sure there are some saved objects', () => opensearchArchiver.load('saved_objects/basic'));
+    before('make sure there are some saved objects', () =>
+      opensearchArchiver.load('saved_objects/basic')
+    );
     after('cleanup saved objects changes', () => opensearchArchiver.unload('saved_objects/basic'));
 
     describe('basic', () => {

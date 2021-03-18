@@ -361,15 +361,21 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           })
         );
       }
-      if (_.isPlainObject(this.spec.config) && this.spec.config.opensearchDashboards !== undefined) {
+      if (
+        _.isPlainObject(this.spec.config) &&
+        this.spec.config.opensearchDashboards !== undefined
+      ) {
         result = this.spec.config.opensearchDashboards;
         delete this.spec.config.opensearchDashboards;
         if (!_.isPlainObject(result)) {
           throw new Error(
-            i18n.translate('visTypeVega.vegaParser.opensearchDashboardsConfigValueTypeErrorMessage', {
-              defaultMessage: 'If present, {configName} must be an object',
-              values: { configName: 'config.opensearchDashboards' },
-            })
+            i18n.translate(
+              'visTypeVega.vegaParser.opensearchDashboardsConfigValueTypeErrorMessage',
+              {
+                defaultMessage: 'If present, {configName} must be an object',
+                values: { configName: 'config.opensearchDashboards' },
+              }
+            )
           );
         }
       }
@@ -449,10 +455,13 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           return;
         }
         this._onWarning(
-          i18n.translate('visTypeVega.vegaParser.someOpenSearchDashboardsurationIsNoValidWarningMessage', {
-            defaultMessage: '{configName} is not valid',
-            values: { configName: `config.opensearchDashboards.${name}` },
-          })
+          i18n.translate(
+            'visTypeVega.vegaParser.someOpenSearchDashboardsurationIsNoValidWarningMessage',
+            {
+              defaultMessage: '{configName} is not valid',
+              values: { configName: `config.opensearchDashboards.${name}` },
+            }
+          )
         );
       }
       if (!isZoom) res[name] = 0;
@@ -513,12 +522,15 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
       this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.someOpenSearchDashboardsParamValueTypeWarningMessage', {
-          defaultMessage: '{configName} must be a boolean value',
-          values: {
-            configName: `config.opensearchDashboards.${paramName}`,
-          },
-        })
+        i18n.translate(
+          'visTypeVega.vegaParser.someOpenSearchDashboardsParamValueTypeWarningMessage',
+          {
+            defaultMessage: '{configName} must be a boolean value',
+            values: {
+              configName: `config.opensearchDashboards.${paramName}`,
+            },
+          }
+        )
       );
       dstObj[paramName] = dflt;
     } else {

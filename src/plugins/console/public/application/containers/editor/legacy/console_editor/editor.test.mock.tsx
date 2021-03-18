@@ -50,9 +50,12 @@ jest.mock('../../../../models/sense_editor', () => {
   };
 });
 
-jest.mock('../../../../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch', () => ({
-  sendRequestToOpenSearch: jest.fn(),
-}));
+jest.mock(
+  '../../../../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch',
+  () => ({
+    sendRequestToOpenSearch: jest.fn(),
+  })
+);
 jest.mock('../../../../../lib/autocomplete/get_endpoint_from_position', () => ({
   getEndpointFromPosition: jest.fn(),
 }));

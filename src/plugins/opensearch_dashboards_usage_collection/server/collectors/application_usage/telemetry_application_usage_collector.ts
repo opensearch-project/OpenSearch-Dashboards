@@ -19,7 +19,11 @@
 
 import moment from 'moment';
 import { timer } from 'rxjs';
-import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'opensearch-dashboards/server';
+import {
+  ISavedObjectsRepository,
+  Logger,
+  SavedObjectsServiceSetup,
+} from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   ApplicationUsageDaily,

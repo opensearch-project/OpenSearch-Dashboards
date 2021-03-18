@@ -62,7 +62,8 @@ describe('OpenSearch Dashboards keystore', () => {
 
     it('returns an error for a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      const message = "ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one.";
+      const message =
+        "ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one.";
 
       await add(keystore, 'foo');
 

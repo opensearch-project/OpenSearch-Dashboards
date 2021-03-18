@@ -58,17 +58,17 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-  Plugin<
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-  HomePluginSetupDependencies,
-  HomePluginStartDependencies
-  > {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) { }
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
@@ -81,7 +81,7 @@ export class HomePublicPlugin
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiStats.bind(usageCollection, 'OpenSearch_Dashboards_home')
-          : () => { };
+          : () => {};
         const [
           coreStart,
           { telemetry, data, urlForwarding: urlForwardingStart },

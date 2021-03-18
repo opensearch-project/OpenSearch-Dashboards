@@ -23,7 +23,11 @@ import {
 } from 'src/plugins/telemetry_collection_manager/server';
 import { getClusterInfo, OpenSearchClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getOpenSearchDashboards, handleOpenSearchDashboardsStats, OpenSearchDashboardsUsageStats } from './get_opensearch_dashboards';
+import {
+  getOpenSearchDashboards,
+  handleOpenSearchDashboardsStats,
+  OpenSearchDashboardsUsageStats,
+} from './get_opensearch_dashboards';
 import { getNodesUsage } from './get_nodes_usage';
 import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
 
@@ -75,7 +79,13 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
-      const [clusterInfo, clusterStats, nodesUsage, opensearchDashboards, dataTelemetry] = await Promise.all([
+      const [
+        clusterInfo,
+        clusterStats,
+        nodesUsage,
+        opensearchDashboards,
+        dataTelemetry,
+      ] = await Promise.all([
         getClusterInfo(opensearchClient), // cluster info
         getClusterStats(opensearchClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(opensearchClient), // nodes_usage info

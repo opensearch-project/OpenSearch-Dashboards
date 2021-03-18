@@ -32,7 +32,9 @@ test('returns value for valid URI as per RFC3986', () => {
     'http://tools.ietf.org/html/rfc3986'
   );
   expect(uriSchema.validate('udp://3domain.local')).toBe('udp://3domain.local');
-  expect(uriSchema.validate('urn:opensearch:opensearchDashboards')).toBe('urn:opensearch:opensearchDashboards');
+  expect(uriSchema.validate('urn:opensearch:opensearchDashboards')).toBe(
+    'urn:opensearch:opensearchDashboards'
+  );
   expect(uriSchema.validate('ftp://ftp.ietf.org/rfc/rfc3986.txt')).toBe(
     'ftp://ftp.ietf.org/rfc/rfc3986.txt'
   );
@@ -40,8 +42,12 @@ test('returns value for valid URI as per RFC3986', () => {
     'mailto:Platform.OpenSearchDashboards@opensearch.co'
   );
   expect(uriSchema.validate('tel:+500-111-222-333')).toBe('tel:+500-111-222-333');
-  expect(uriSchema.validate('file:///opensearch_dashboards.log')).toBe('file:///opensearch_dashboards.log');
-  expect(uriSchema.validate('http://opensearch@localhost:9200')).toBe('http://opensearch@localhost:9200');
+  expect(uriSchema.validate('file:///opensearch_dashboards.log')).toBe(
+    'file:///opensearch_dashboards.log'
+  );
+  expect(uriSchema.validate('http://opensearch@localhost:9200')).toBe(
+    'http://opensearch@localhost:9200'
+  );
   expect(uriSchema.validate('http://opensearch:changeme@localhost:9200')).toBe(
     'http://opensearch:changeme@localhost:9200'
   );
@@ -89,9 +95,9 @@ describe('#scheme', () => {
     expect(() => uriSchema.validate('ftp://opensearch.co')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
-    expect(() => uriSchema.validate('file:///opensearch_dashboards.log')).toThrowErrorMatchingInlineSnapshot(
-      `"expected URI with scheme [http|https]."`
-    );
+    expect(() =>
+      uriSchema.validate('file:///opensearch_dashboards.log')
+    ).toThrowErrorMatchingInlineSnapshot(`"expected URI with scheme [http|https]."`);
   });
 });
 
@@ -104,7 +110,9 @@ describe('#defaultValue', () => {
 
   test('returns value when specified', () => {
     expect(
-      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://opensearch-dashboards.local')
+      schema
+        .uri({ defaultValue: 'http://localhost:9200' })
+        .validate('http://opensearch-dashboards.local')
     ).toBe('http://opensearch-dashboards.local');
   });
 
@@ -133,7 +141,9 @@ describe('#validate', () => {
   test('is not called with default value in no input', () => {
     const validate = jest.fn();
 
-    schema.uri({ validate, defaultValue: 'http://opensearch-dashboards.local' }).validate(undefined);
+    schema
+      .uri({ validate, defaultValue: 'http://opensearch-dashboards.local' })
+      .validate(undefined);
 
     expect(validate).not.toHaveBeenCalled();
   });

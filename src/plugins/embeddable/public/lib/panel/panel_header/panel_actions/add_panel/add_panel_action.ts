@@ -40,7 +40,7 @@ export class AddPanelAction implements Action<ActionContext> {
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
-  ) { }
+  ) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.addPanel.displayName', {

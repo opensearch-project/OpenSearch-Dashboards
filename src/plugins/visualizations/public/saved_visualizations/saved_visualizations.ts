@@ -24,11 +24,14 @@ import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../vis_types';
 
-export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations extends SavedObjectOpenSearchDashboardsServices {
+export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations
+  extends SavedObjectOpenSearchDashboardsServices {
   visualizationTypes: TypesStart;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
-export function createSavedVisLoader(services: SavedObjectOpenSearchDashboardsServicesWithVisualizations) {
+export function createSavedVisLoader(
+  services: SavedObjectOpenSearchDashboardsServicesWithVisualizations
+) {
   const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {

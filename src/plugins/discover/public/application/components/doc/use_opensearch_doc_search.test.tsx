@@ -17,7 +17,11 @@
  * under the License.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { buildSearchBody, useOpenSearchDocSearch, OpenSearchRequestState } from './use_opensearch_doc_search';
+import {
+  buildSearchBody,
+  useOpenSearchDocSearch,
+  OpenSearchRequestState,
+} from './use_opensearch_doc_search';
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 

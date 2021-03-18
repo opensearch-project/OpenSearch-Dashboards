@@ -26,7 +26,10 @@ import {
   SearchResponse,
 } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
-import { createRepositoryOpenSearchClient, RepositoryOpenSearchClient } from './repository_opensearch_client';
+import {
+  createRepositoryOpenSearchClient,
+  RepositoryOpenSearchClient,
+} from './repository_opensearch_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
@@ -393,7 +396,9 @@ export class SavedObjectsRepository {
       } = expectedBulkGetResult.value;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
+        const actualResult = indexFound
+          ? bulkGetResponse?.body.docs[opensearchRequestIndex]
+          : undefined;
         const docFound = indexFound && actualResult.found === true;
         if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
           const { id, type } = object;
@@ -1347,7 +1352,9 @@ export class SavedObjectsRepository {
         let versionProperties;
         if (opensearchRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
-          const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
+          const actualResult = indexFound
+            ? bulkGetResponse?.body.docs[opensearchRequestIndex]
+            : undefined;
           const docFound = indexFound && actualResult.found === true;
           if (
             !docFound ||
@@ -1412,7 +1419,13 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { type, id, namespaces, documentToSave, opensearchRequestIndex } = expectedResult.value;
+        const {
+          type,
+          id,
+          namespaces,
+          documentToSave,
+          opensearchRequestIndex,
+        } = expectedResult.value;
         const response = bulkUpdateResponse?.body.items[opensearchRequestIndex];
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.

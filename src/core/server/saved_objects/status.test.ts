@@ -112,7 +112,10 @@ describe('calculateStatus$', () => {
   });
 
   describe('when opensearch is degraded', () => {
-    const openSearchStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
+    const openSearchStatus$ = of<ServiceStatus>({
+      level: ServiceStatusLevels.degraded,
+      summary: 'xxx',
+    });
 
     it('is unavailable before migrations have ran', async () => {
       await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), openSearchStatus$));

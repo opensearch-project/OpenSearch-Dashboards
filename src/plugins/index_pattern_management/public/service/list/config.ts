@@ -42,11 +42,11 @@ export class IndexPatternListConfig {
   ): IndexPatternTag[] {
     return isDefault
       ? [
-        {
-          key: 'default',
-          name: defaultIndexPatternListName,
-        },
-      ]
+          {
+            key: 'default',
+            name: defaultIndexPatternListName,
+          },
+        ]
       : [];
   }
 

@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from 'opensearch-dashboards/server';
+import {
+  CoreSetup,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from 'opensearch-dashboards/server';
 import { schema } from '@osd/config-schema';
 import { first } from 'rxjs/operators';
 
@@ -49,5 +53,5 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
       }
     );
   },
-  start() { },
+  start() {},
 });

@@ -29,7 +29,12 @@ export function query(req, panel, opensearchQueryConfig, indexPatternObject) {
 
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = opensearchQuery.buildOpenSearchQuery(indexPatternObject, queries, filters, opensearchQueryConfig);
+    doc.query = opensearchQuery.buildOpenSearchQuery(
+      indexPatternObject,
+      queries,
+      filters,
+      opensearchQueryConfig
+    );
 
     const timerange = {
       range: {
@@ -43,7 +48,12 @@ export function query(req, panel, opensearchQueryConfig, indexPatternObject) {
     doc.query.bool.must.push(timerange);
     if (panel.filter) {
       doc.query.bool.must.push(
-        opensearchQuery.buildOpenSearchQuery(indexPatternObject, [panel.filter], [], opensearchQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(
+          indexPatternObject,
+          [panel.filter],
+          [],
+          opensearchQueryConfig
+        )
       );
     }
 

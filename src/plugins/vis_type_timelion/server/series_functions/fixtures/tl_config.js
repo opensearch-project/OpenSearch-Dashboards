@@ -30,16 +30,18 @@ export default function () {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
-    getStartServices: sinon
-      .stub()
-      .returns(
-        Promise.resolve([
-          {},
-          { data: { search: { search: () => Promise.resolve({ rawResponse: opensearchResponse }) } } },
-        ])
-      ),
+    getStartServices: sinon.stub().returns(
+      Promise.resolve([
+        {},
+        {
+          data: {
+            search: { search: () => Promise.resolve({ rawResponse: opensearchResponse }) },
+          },
+        },
+      ])
+    ),
 
-      opensearchShardTimeout: moment.duration(30000),
+    opensearchShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
   });
 

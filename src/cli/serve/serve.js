@@ -101,9 +101,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('opensearch.ssl.certificateAuthorities');
 
       const opensearchHosts = (
-        (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || [
-          'https://localhost:9200',
-        ]
+        (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
       ).map((hostUrl) => {
         const parsedUrl = url.parse(hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
@@ -201,7 +199,10 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the osd/optimizer completely')
       .option('--no-cache', 'Disable the osd/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the opensearch_dashboards.dev.yml file in --dev mode');
+      .option(
+        '--no-dev-config',
+        'Prevents loading the opensearch_dashboards.dev.yml file in --dev mode'
+      );
   }
 
   command.action(async function (opts) {

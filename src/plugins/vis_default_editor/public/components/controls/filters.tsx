@@ -65,7 +65,10 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
     setFilters(updatedFilters);
   };
 
-  const { services } = useOpenSearchDashboards<{ uiSettings: IUiSettingsClient; data: DataPublicPluginStart }>();
+  const { services } = useOpenSearchDashboards<{
+    uiSettings: IUiSettingsClient;
+    data: DataPublicPluginStart;
+  }>();
 
   const onAddFilter = () =>
     updateFilters([

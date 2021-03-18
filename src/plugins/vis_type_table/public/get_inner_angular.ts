@@ -25,7 +25,11 @@ import angular from 'angular';
 import 'angular-sanitize';
 import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
-import { CoreStart, IUiSettingsClient, PluginInitializerContext } from 'opensearch-dashboards/public';
+import {
+  CoreStart,
+  IUiSettingsClient,
+  PluginInitializerContext,
+} from 'opensearch-dashboards/public';
 import {
   initAngularBootstrap,
   PaginateDirectiveProvider,

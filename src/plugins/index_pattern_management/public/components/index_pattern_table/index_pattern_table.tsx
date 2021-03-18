@@ -33,7 +33,10 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { reactRouterNavigate, useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
+import {
+  reactRouterNavigate,
+  useOpenSearchDashboards,
+} from '../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';

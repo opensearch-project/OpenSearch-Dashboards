@@ -25,6 +25,6 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('table data.fieldFormats');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
-  'table opensearchDashboardsLegacy'
-);
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
+  OpenSearchDashboardsLegacyStart
+>('table opensearchDashboardsLegacy');

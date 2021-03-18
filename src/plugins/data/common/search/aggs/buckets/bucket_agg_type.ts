@@ -42,7 +42,7 @@ interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
 export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfig> extends AggType<
   TBucketAggConfig,
   BucketAggParam<TBucketAggConfig>
-  > {
+> {
   getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
   type = bucketType;
 
