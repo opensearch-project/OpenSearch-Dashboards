@@ -1,6 +1,6 @@
 - Start Date: 2019-03-22
 - RFC PR: [#33740](https://github.com/elastic/kibana/pull/33740)
-- Kibana Issue: (leave this empty)
+- OpenSearch Dashboards Issue: (leave this empty)
 
 # Summary
 
@@ -41,7 +41,7 @@ const savedObject = await server.savedObjects
 
 ```
 
-Use dedicated method to retrieve saved object with decrypted attributes on behalf of Kibana internal user:
+Use dedicated method to retrieve saved object with decrypted attributes on behalf of OpenSearch Dashboards internal user:
 
 ```typescript
 const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsInternalUser(
@@ -151,7 +151,7 @@ const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsI
 ```
 
 As can be seen from the method name, the request to retrieve saved object and decrypt its attributes is performed on
-behalf of the internal Kibana user and hence isn't supposed to be called within user request context.
+behalf of the internal OpenSearch Dashboards user and hence isn't supposed to be called within user request context.
 
 **Note:** the fact that saved object with encrypted attributes is created using standard Saved Objects API within a 
 particular user and space context, but retrieved out of any context makes it unclear how consumers are supposed to 
@@ -165,9 +165,9 @@ Saved object attributes are encrypted using [@elastic/node-crypto](https://githu
 take a look at the source code of this library to know how encryption is performed exactly, what algorithm and encryption 
 parameters are used, but in short it's AES Encryption with AES-256-GCM that uses random initialization vector and salt.
 
-As with encryption key for Kibana's session cookie, master encryption key used by `encrypted_saved_objects` plugin can be
-defined as a configuration value (`xpack.encryptedSavedObjects.encryptionKey`) via `kibana.yml`, but it's **highly 
-recommended** to define this key in the [Kibana Keystore](https://www.elastic.co/guide/en/kibana/current/secure-settings.html)
+As with encryption key for OpenSearch Dashboards's session cookie, master encryption key used by `encrypted_saved_objects` plugin can be
+defined as a configuration value (`xpack.encryptedSavedObjects.encryptionKey`) via `opensearch_dashboards.yml`, but it's **highly 
+recommended** to define this key in the [OpenSearch Dashboards Keystore](https://www.elastic.co/guide/en/kibana/current/secure-settings.html)
 instead. The master key should be cryptographically safe and be equal or greater than 32 bytes.
 
 To prevent certain vectors of attacks where raw content of encrypted attributes of one saved object is copied to another
@@ -190,7 +190,7 @@ into AAD (e.g some user defined content associated with the email action or aler
 ## Audit
 
 Encrypted attributes will most likely contain sensitive information and any attempt to access these should be properly
-logged to allow any further audit procedures. The following events will be logged with Kibana audit log functionality:
+logged to allow any further audit procedures. The following events will be logged with OpenSearch Dashboards audit log functionality:
 
 * Successful attempt to encrypt attributes (incl. saved object ID, type and attributes names)
 * Failed attempt to encrypt attribute (incl. saved object ID, type and attribute name)
@@ -223,7 +223,7 @@ handler.
 # Out of scope
 
 * Encryption key rotation mechanism, either regular or emergency
-* Mechanism that would detect and warn when Kibana does not use keystore to store encryption key
+* Mechanism that would detect and warn when OpenSearch Dashboards does not use keystore to store encryption key
 
 # Alternatives
 

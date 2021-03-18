@@ -23,10 +23,10 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
-  private name = this.oss ? 'kibana-oss' : 'kibana';
-  private logTag = this.oss ? chalk`{magenta [kibana-oss]}` : chalk`{cyan [  kibana  ]}`;
+  private name = this.oss ? 'opensearch-dashboards-oss' : 'opensearch-dashboards';
+  private logTag = this.oss ? chalk`{magenta [opensearch-dashboards-oss]}` : chalk`{cyan [  opensearch-dashboards  ]}`;
 
-  constructor(private config: Config, private oss: boolean) {}
+  constructor(private config: Config, private oss: boolean) { }
 
   isOss() {
     return !!this.oss;
@@ -40,7 +40,7 @@ export class Build {
     return this.config.resolveFromRepo(
       'build',
       this.oss ? 'oss' : 'default',
-      `kibana-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `opensearch-dashboards-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }

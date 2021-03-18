@@ -106,7 +106,7 @@ export async function runDockerGenerator(
 
   // Copy all the needed resources into kibana-docker folder
   // in order to build the docker image accordingly the dockerfile defined
-  // under templates/kibana_yml.template/js
+  // under templates/opensearch_dashboards_yml.template/js
   await copyAll(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
     dockerBuildDir

@@ -8,7 +8,7 @@ This RFC proposes a way of the encryption key (`xpack.encryptedSavedObjects.encr
 
 # Basic example
 
-When administrators decide to rotate encryption key they will have to generate a new one and move the old key(s) to the `keyRotation` section in the `kibana.yml`:
+When administrators decide to rotate encryption key they will have to generate a new one and move the old key(s) to the `keyRotation` section in the `opensearch_dashboards.yml`:
 
 ```yaml
 xpack.encryptedSavedObjects:
@@ -31,7 +31,7 @@ Today when encryption key changes we can no longer decrypt Saved Objects attribu
 
 * If consumers explicitly request decryption via  `getDecryptedAsInternalUser()` we abort operation and throw exception.
 * If consumers fetch Saved Objects with encrypted attributes that should be automatically decrypted (the ones with `dangerouslyExposeValue: true` marker) via standard Saved Objects APIs we don't abort operation, but rather strip all encrypted attributes from the response and record decryption error in the `error` Saved Object field.
-* If Kibana tries to migrate encrypted Saved Objects at the start up time we abort operation and throw exception. 
+* If OpenSearch Dashboards tries to migrate encrypted Saved Objects at the start up time we abort operation and throw exception. 
 
 In both of these cases we throw or record error with the specific type to allow consumers to gracefully handle this scenario and either drop Saved Objects with unrecoverable encrypted attributes or facilitate the process of re-entering and re-encryption of the new values.
 
@@ -49,7 +49,7 @@ In this scenario a new encryption key (primary encryption key) will be generated
 
 The old old decryption-only keys should be eventually disposed and users should have a way to make sure all existing Saved Objects are re-encrypted with the new primary encryption key.
 
-__NOTE:__ users can get into a state when different Saved Objects are encrypted with different encryption keys even if they didn't intend to rotate the encryption key. We anticipate that it can happen during initial Elastic Stack HA setup, when by mistake or intentionally different Kibana instances were using different encryption keys. Key rotation mechanism can help to fix this issue without a data loss.
+__NOTE:__ users can get into a state when different Saved Objects are encrypted with different encryption keys even if they didn't intend to rotate the encryption key. We anticipate that it can happen during initial Elastic Stack HA setup, when by mistake or intentionally different OpenSearch Dashboards instances were using different encryption keys. Key rotation mechanism can help to fix this issue without a data loss.
 
 # Detailed design
 
@@ -72,9 +72,9 @@ Technically just having `decryptionOnlyKeys` would be enough to cover the majori
 
 We'd like to make this process as simple as possible while meeting the following requirements:
 
-* It should not be required to restart Kibana to perform this type of migration since Saved Objects encrypted with the another encryption key can theoretically appear at any point in time.
+* It should not be required to restart OpenSearch Dashboards to perform this type of migration since Saved Objects encrypted with the another encryption key can theoretically appear at any point in time.
 * It should be possible to integrate this operation into other operational flows our users may have and any user-friendly key management UIs we may introduce in this future.
-* Any possible failures that may happen during this operation shouldn't make Kibana nonfunctional.
+* Any possible failures that may happen during this operation shouldn't make OpenSearch Dashboards nonfunctional.
 * Ordinary users should not be able to trigger this migration since it may consume a considerable amount of computing resources.
 
 We think that the best option we have right now is a dedicated API endpoint that would trigger this migration:
@@ -93,7 +93,7 @@ As for any other encryption or decryption operation we'll record relevant bits i
 
 # Benefits
 
-* The concept of decryption-only keys is easy to grasp and allows Kibana to function even if it has a mix of Saved Objects encrypted with different encryption keys.
+* The concept of decryption-only keys is easy to grasp and allows OpenSearch Dashboards to function even if it has a mix of Saved Objects encrypted with different encryption keys.
 * Support of the key rotation out of the box decreases the chances of the data loss and makes `EncryptedSavedObjects` story more secure and approachable overall.
 
 # Drawbacks
@@ -103,7 +103,7 @@ As for any other encryption or decryption operation we'll record relevant bits i
 
 # Alternatives
 
-We cannot think of any better alternative for `decryptionOnlyKeys` at the moment, but instead of API endpoint for the batch re-encryption we could potentially use another `kibana.yml` config option. For example `keyRotation.mode: onWrite | onStart | both`, but it feels a bit hacky and cannot be really integrated with anything else.
+We cannot think of any better alternative for `decryptionOnlyKeys` at the moment, but instead of API endpoint for the batch re-encryption we could potentially use another `opensearch_dashboards.yml` config option. For example `keyRotation.mode: onWrite | onStart | both`, but it feels a bit hacky and cannot be really integrated with anything else.
 
 # Adoption strategy
 
