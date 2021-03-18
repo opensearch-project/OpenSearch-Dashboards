@@ -11,7 +11,7 @@
       "max_score": 1,
       "hits": [
          {
-            "_index": ".opensearch-dashboards",
+            "_index": ".opensearch_dashboards",
             "_type": "config",
             "_id": "4.0.0",
             "_score": 1,

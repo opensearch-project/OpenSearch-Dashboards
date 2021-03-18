@@ -237,7 +237,7 @@ describe('SavedObjectsRepository', () => {
     const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
-      index: '.opensearch-dashboards-test',
+      index: '.opensearch_dashboards-test',
       mappings,
       client,
       migrator,
@@ -689,7 +689,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], {
           method: 'create',
-          _index: '.opensearch-dashboards-test',
+          _index: '.opensearch_dashboards-test',
         });
       });
 
@@ -1937,7 +1937,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.opensearch-dashboards-test' }),
+          expect.objectContaining({ index: '.opensearch_dashboards-test' }),
           expect.anything()
         );
       });
@@ -2416,7 +2416,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.opensearch-dashboards-test', 'custom'] }),
+          expect.objectContaining({ index: ['.opensearch_dashboards-test', 'custom'] }),
           expect.anything()
         );
       });
@@ -2464,7 +2464,7 @@ describe('SavedObjectsRepository', () => {
           total: 4,
           hits: [
             {
-              _index: '.opensearch-dashboards',
+              _index: '.opensearch_dashboards',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
               _score: 1,
               ...mockVersionProps,
@@ -2481,7 +2481,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch-dashboards',
+              _index: '.opensearch_dashboards',
               _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
               _score: 2,
               ...mockVersionProps,
@@ -2496,7 +2496,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch-dashboards',
+              _index: '.opensearch_dashboards',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
               _score: 3,
               ...mockVersionProps,
@@ -2512,7 +2512,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch-dashboards',
+              _index: '.opensearch_dashboards',
               _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
               _score: 4,
               ...mockVersionProps,
@@ -3129,7 +3129,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({
           _id: params.id,
           ...mockVersionProps,
-          _index: '.opensearch-dashboards',
+          _index: '.opensearch_dashboards',
           get: {
             found: true,
             _source: {
@@ -3309,7 +3309,7 @@ describe('SavedObjectsRepository', () => {
           opensearchClientMock.createSuccessTransportRequestPromise({
             _id: params.id,
             ...mockVersionProps,
-            _index: '.opensearch-dashboards',
+            _index: '.opensearch_dashboards',
             get: {
               found: true,
               _source: {
@@ -3450,7 +3450,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.delete).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.opensearch-dashboards-test' }),
+              expect.objectContaining({ index: '.opensearch_dashboards-test' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessDelete(expectFn);
@@ -3527,7 +3527,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.update).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.opensearch-dashboards-test' }),
+              expect.objectContaining({ index: '.opensearch_dashboards-test' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessUpdate(expectFn);

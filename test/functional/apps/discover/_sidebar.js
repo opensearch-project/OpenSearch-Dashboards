@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch-dashboards index and update configDoc
+      // delete .opensearch_dashboards index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });

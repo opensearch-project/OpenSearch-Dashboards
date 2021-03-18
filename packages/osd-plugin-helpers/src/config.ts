@@ -34,7 +34,7 @@ const isArrayOfStrings = (v: any): v is string[] =>
 
 export async function loadConfig(log: ToolingLog, plugin: Plugin): Promise<Config> {
   try {
-    const path = Path.resolve(plugin.directory, '.opensearch-dashboards-plugin-helpers.json');
+    const path = Path.resolve(plugin.directory, '.opensearch_dashboards-plugin-helpers.json');
     const file = await loadJsonFile(path);
 
     if (!(typeof file === 'object' && file && !Array.isArray(file))) {

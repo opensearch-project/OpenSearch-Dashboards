@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   describe('index result popularity', function describeIndexTests() {
     const fieldName = 'geo.coordinates';
     before(async function () {
-      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
+      // delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });

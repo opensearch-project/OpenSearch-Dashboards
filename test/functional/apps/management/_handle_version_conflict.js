@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await opensearch.update({
-        index: '.opensearch-dashboards',
+        index: '.opensearch_dashboards',
         type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('controls are open');
       await PageObjects.settings.setFieldFormat('url');
       const response = await opensearch.update({
-        index: '.opensearch-dashboards',
+        index: '.opensearch_dashboards',
         type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {

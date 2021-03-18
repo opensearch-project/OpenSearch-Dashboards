@@ -34,7 +34,7 @@ describe('IndexMigrator', () => {
     testOpts = {
       batchSize: 10,
       client: opensearchClientMock.createOpenSearchClient(),
-      index: '.opensearch-dashboards',
+      index: '.opensearch_dashboards',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
@@ -92,7 +92,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.opensearch-dashboards_1',
+      index: '.opensearch_dashboards_1',
     });
   });
 
@@ -104,8 +104,8 @@ describe('IndexMigrator', () => {
     const result = await new IndexMigrator(testOpts).migrate();
 
     expect(result).toMatchObject({
-      destIndex: '.opensearch-dashboards_1',
-      sourceIndex: '.opensearch-dashboards',
+      destIndex: '.opensearch_dashboards_1',
+      sourceIndex: '.opensearch_dashboards',
       status: 'migrated',
     });
   });
@@ -115,7 +115,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.opensearch-dashboards_1': {
+        '.opensearch_dashboards_1': {
           aliases: {},
           mappings: {
             foo: { properties: {} },
@@ -139,7 +139,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.opensearch-dashboards_1': {
+        '.opensearch_dashboards_1': {
           aliases: {},
           mappings: {
             poc: {
@@ -164,7 +164,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.opensearch-dashboards_1': {
+        '.opensearch_dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -214,7 +214,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.opensearch-dashboards_2',
+      index: '.opensearch_dashboards_2',
     });
   });
 
@@ -225,7 +225,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.opensearch-dashboards_1': {
+        '.opensearch_dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -275,7 +275,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.opensearch-dashboards_2',
+      index: '.opensearch_dashboards_2',
     });
   });
 
@@ -289,7 +289,7 @@ describe('IndexMigrator', () => {
     expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
-        actions: [{ add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } }],
+        actions: [{ add: { alias: '.opensearch_dashboards', index: '.opensearch_dashboards_1' } }],
       },
     });
   });
@@ -309,8 +309,8 @@ describe('IndexMigrator', () => {
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
-          { remove: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } },
-          { add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_2' } },
+          { remove: { alias: '.opensearch_dashboards', index: '.opensearch_dashboards_1' } },
+          { add: { alias: '.opensearch_dashboards', index: '.opensearch_dashboards_2' } },
         ],
       },
     });
@@ -360,13 +360,13 @@ describe('IndexMigrator', () => {
     expect(client.bulk).toHaveBeenCalledTimes(2);
     expect(client.bulk).toHaveBeenNthCalledWith(1, {
       body: [
-        { index: { _id: 'foo:1', _index: '.opensearch-dashboards_2' } },
+        { index: { _id: 'foo:1', _index: '.opensearch_dashboards_2' } },
         { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
     expect(client.bulk).toHaveBeenNthCalledWith(2, {
       body: [
-        { index: { _id: 'foo:2', _index: '.opensearch-dashboards_2' } },
+        { index: { _id: 'foo:2', _index: '.opensearch_dashboards_2' } },
         { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
@@ -402,8 +402,8 @@ function withIndex(
   opts: any = {}
 ) {
   const defaultIndex = {
-    '.opensearch-dashboards_1': {
-      aliases: { '.opensearch-dashboards': {} },
+    '.opensearch_dashboards_1': {
+      aliases: { '.opensearch_dashboards': {} },
       mappings: {
         dynamic: 'strict',
         properties: {
@@ -413,7 +413,7 @@ function withIndex(
     },
   };
   const defaultAlias = {
-    '.opensearch-dashboards_1': {},
+    '.opensearch_dashboards_1': {},
   };
   const { numOutOfDate = 0 } = opts;
   const { alias = defaultAlias } = opts;

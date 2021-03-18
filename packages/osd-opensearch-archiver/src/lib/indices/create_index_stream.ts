@@ -68,7 +68,7 @@ export function createCreateIndexStream({
 
     // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
     const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
-    const isOpenSearchDashboards = index.startsWith('.opensearch-dashboards');
+    const isOpenSearchDashboards = index.startsWith('.opensearch_dashboards');
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
