@@ -86,7 +86,7 @@ Some background:
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
 - The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a OpenSearch Dashboards Metricbeat module, the Beat calls OpenSearch Dashboards's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `opensearchClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.opensearch-dashboards' index. 
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `opensearchClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.opensearch_dashboards' index. 
 
 Note: there will be many cases where you won't need to use the `callCluster` (or `opensearchClient`) function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 

@@ -38,7 +38,7 @@ function setupMockCallCluster(
     if (params && 'id' in params && params.id === 'dql-telemetry:dql-telemetry') {
       if (optCount === null) {
         return Promise.resolve({
-          _index: '.opensearch-dashboards_1',
+          _index: '.opensearch_dashboards_1',
           _type: 'doc',
           _id: 'dql-telemetry:dql-telemetry',
           found: false,
@@ -85,10 +85,10 @@ function setupMockCallCluster(
 describe('makeDQLUsageCollector', () => {
   describe('fetch method', () => {
     beforeEach(() => {
-      fetch = fetchProvider('.opensearch-dashboards');
+      fetch = fetchProvider('.opensearch_dashboards');
     });
 
-    it('should return opt in data from the .opensearch-dashboards/dql-telemetry doc', async () => {
+    it('should return opt in data from the .opensearch_dashboards/dql-telemetry doc', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(1);
@@ -114,7 +114,7 @@ describe('makeDQLUsageCollector', () => {
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
     });
 
-    it('should default to 0 opt in counts if the .opensearch-dashboards/dql-telemetry doc does not exist', async () => {
+    it('should default to 0 opt in counts if the .opensearch_dashboards/dql-telemetry doc does not exist', async () => {
       setupMockCallCluster(null, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(0);

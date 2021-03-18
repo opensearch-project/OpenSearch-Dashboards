@@ -18,7 +18,7 @@
  */
 
 const OPENSEARCH_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
-const OPENSEARCH_DASHBOARDS_INDEX = '.opensearch-dashboards';
+const OPENSEARCH_DASHBOARDS_INDEX = '.opensearch_dashboards';
 
 export function extendOpenSearchArchiver({
   opensearchArchiver,
@@ -40,7 +40,7 @@ export function extendOpenSearchArchiver({
 
       const statsKeys = Object.keys(stats);
       const opensearchDashboardsKeys = statsKeys.filter(
-        // this also matches stats keys like '.opensearch-dashboards_1' and '.opensearch-dashboards_2,.opensearch-dashboards_1'
+        // this also matches stats keys like '.opensearch_dashboards_1' and '.opensearch_dashboards_2,.opensearch_dashboards_1'
         (key) =>
           key.includes(OPENSEARCH_DASHBOARDS_INDEX) && (stats[key].created || stats[key].deleted)
       );

@@ -23,7 +23,7 @@ import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 
 /**
- * Deletes all indices that start with `.opensearch-dashboards`
+ * Deletes all indices that start with `.opensearch_dashboards`
  */
 export async function deleteOpenSearchDashboardsIndices({
   client,
@@ -55,7 +55,7 @@ export async function deleteOpenSearchDashboardsIndices({
 }
 
 /**
- * Given an opensearch client, and a logger, migrates the `.opensearch-dashboards` index. This
+ * Given an opensearch client, and a logger, migrates the `.opensearch_dashboards` index. This
  * builds up an object that implements just enough of the osdMigrations interface
  * as is required by migrations.
  */
@@ -69,7 +69,7 @@ export async function migrateOpenSearchDashboardsIndex({
   // we allow dynamic mappings on the index, as some interceptors are accessing documents before
   // the migration is actually performed. The migrator will put the value back to `strict` after migration.
   await client.indices.putMapping({
-    index: '.opensearch-dashboards',
+    index: '.opensearch_dashboards',
     body: {
       dynamic: true,
     },
@@ -80,17 +80,17 @@ export async function migrateOpenSearchDashboardsIndex({
 
 /**
  * Migrations mean that the OpenSearch Dashboards index will look something like:
- * .opensearch-dashboards, .opensearch-dashboards_1, .opensearch-dashboards_323, etc. This finds all indices starting
- * with .opensearch-dashboards, then filters out any that aren't actually OpenSearch Dashboards's core
- * index (e.g. we don't want to remove .opensearch-dashboards_task_manager or the like).
+ * .opensearch_dashboards, .opensearch_dashboards_1, .opensearch_dashboards_323, etc. This finds all indices starting
+ * with .opensearch_dashboards, then filters out any that aren't actually OpenSearch Dashboards's core
+ * index (e.g. we don't want to remove .opensearch_dashboards_task_manager or the like).
  */
 async function fetchOpenSearchDashboardsIndices(client: Client) {
   const opensearchDashboardsIndices = await client.cat.indices({
-    index: '.opensearch-dashboards*',
+    index: '.opensearch_dashboards*',
     format: 'json',
   });
   const isOpenSearchDashboardsIndex = (index: string) =>
-    /^\.opensearch-dashboards(:?_\d*)?$/.test(index);
+    /^\.opensearch_dashboards(:?_\d*)?$/.test(index);
   return opensearchDashboardsIndices
     .map((x: { index: string }) => x.index)
     .filter(isOpenSearchDashboardsIndex);
@@ -117,7 +117,7 @@ export async function cleanOpenSearchDashboardsIndices({
 
   while (true) {
     const resp = await client.deleteByQuery({
-      index: `.opensearch-dashboards`,
+      index: `.opensearch_dashboards`,
       body: {
         query: {
           bool: {
@@ -147,10 +147,10 @@ export async function cleanOpenSearchDashboardsIndices({
 
   log.warning(
     `since spaces are enabled, all objects other than the default space were deleted from ` +
-      `.opensearch-dashboards rather than deleting the whole index`
+      `.opensearch_dashboards rather than deleting the whole index`
   );
 
-  stats.deletedIndex('.opensearch-dashboards');
+  stats.deletedIndex('.opensearch_dashboards');
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {

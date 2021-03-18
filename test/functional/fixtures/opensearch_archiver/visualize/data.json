@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:logstash-*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -19,7 +19,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:logstash*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -35,7 +35,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:long-window-logstash-*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -52,7 +52,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:Shared-Item-Visualization-AreaChart",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -73,7 +73,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:Visualization-AreaChart",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -94,7 +94,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:68305470-87bc-11e9-a991-3b492a7c3e09",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "visualization" : {
         "title" : "chained input control",
@@ -131,7 +131,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:64983230-87bf-11e9-a991-3b492a7c3e09",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "visualization" : {
         "title" : "dynamic options input control",
@@ -163,7 +163,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:5d2de430-87c0-11e9-a991-3b492a7c3e09",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "visualization" : {
         "title" : "chained input control with dynamic options",
@@ -200,7 +200,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:test_index*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"opensearchTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"opensearchTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"opensearchTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"opensearchTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"message\",\"type\":\"string\",\"opensearchTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"message.keyword\",\"type\":\"string\",\"opensearchTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"message\"}}},{\"name\":\"user\",\"type\":\"string\",\"opensearchTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"user.keyword\",\"type\":\"string\",\"opensearchTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"user\"}}}]",
@@ -215,7 +215,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:AreaChart-no-date-field",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "type": "visualization",
       "visualization": {
@@ -236,7 +236,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:log*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
@@ -252,7 +252,7 @@
   "type": "doc",
   "value": {
     "id": "visualization:AreaChart-no-time-filter",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "type": "visualization",
       "visualization": {

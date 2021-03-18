@@ -2,10 +2,10 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".opensearch-dashboards": {
+      ".opensearch_dashboards": {
       }
     },
-    "index": ".opensearch-dashboards_1",
+    "index": ".opensearch_dashboards_1",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {

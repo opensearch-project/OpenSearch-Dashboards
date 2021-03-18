@@ -39,7 +39,7 @@ export function createDeleteIndexStream(
         if (!record || record.type === 'index') {
           const { index } = record.value;
 
-          if (index.startsWith('.opensearch-dashboards')) {
+          if (index.startsWith('.opensearch_dashboards')) {
             await cleanOpenSearchDashboardsIndices({
               client,
               stats,

@@ -53,10 +53,10 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
           this.push({
             type: 'index',
             value: {
-              // always rewrite the .opensearch-dashboards_* index to .opensearch-dashboards_1 so that
+              // always rewrite the .opensearch_dashboards_* index to .opensearch_dashboards_1 so that
               // when it is loaded it can skip migration, if possible
-              index: index.startsWith('.opensearch-dashboards')
-                ? '.opensearch-dashboards_1'
+              index: index.startsWith('.opensearch_dashboards')
+                ? '.opensearch_dashboards_1'
                 : index,
               settings,
               mappings,

@@ -71,10 +71,10 @@ export function createGenerateDocRecordsStream({
             this.push({
               type: 'doc',
               value: {
-                // always rewrite the .opensearch-dashboards_* index to .opensearch-dashboards_1 so that
+                // always rewrite the .opensearch_dashboards_* index to .opensearch_dashboards_1 so that
                 // when it is loaded it can skip migration, if possible
-                index: hit._index.startsWith('.opensearch-dashboards')
-                  ? '.opensearch-dashboards_1'
+                index: hit._index.startsWith('.opensearch_dashboards')
+                  ? '.opensearch_dashboards_1'
                   : hit._index,
                 type: hit._type,
                 id: hit._id,

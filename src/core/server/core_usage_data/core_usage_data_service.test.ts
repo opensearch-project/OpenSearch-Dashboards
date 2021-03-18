@@ -83,7 +83,7 @@ describe('CoreUsageDataService', () => {
         opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.opensearch-dashboards_1',
+              name: '.opensearch_dashboards_1',
               'docs.count': 20,
               'docs.deleted': 20,
               'store.size': 2000,
@@ -93,7 +93,7 @@ describe('CoreUsageDataService', () => {
         } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
-          { name: 'type 1', indexPattern: '.opensearch-dashboards' },
+          { name: 'type 1', indexPattern: '.opensearch_dashboards' },
           { name: 'type 2', indexPattern: '.opensearch_dashboards_task_manager' },
         ] as any);
 
@@ -202,7 +202,7 @@ describe('CoreUsageDataService', () => {
               "savedObjects": Object {
                 "indices": Array [
                   Object {
-                    "alias": ".opensearch-dashboards",
+                    "alias": ".opensearch_dashboards",
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,

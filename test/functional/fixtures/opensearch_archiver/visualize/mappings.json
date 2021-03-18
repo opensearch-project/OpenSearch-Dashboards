@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "mappings": {
       "properties": {
         "config": {
