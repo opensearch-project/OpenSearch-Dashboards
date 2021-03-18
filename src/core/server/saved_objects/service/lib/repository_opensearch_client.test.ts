@@ -18,7 +18,10 @@
  */
 import { retryCallClusterMock } from './repository_opensearch_client.test.mock';
 
-import { createRepositoryOpenSearchClient, RepositoryOpenSearchClient } from './repository_opensearch_client';
+import {
+  createRepositoryOpenSearchClient,
+  RepositoryOpenSearchClient,
+} from './repository_opensearch_client';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectsErrorHelpers } from './errors';
 

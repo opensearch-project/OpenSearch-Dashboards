@@ -33,7 +33,7 @@ export class InspectPanelAction implements Action<ActionContext> {
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 20;
 
-  constructor(private readonly inspector: InspectorStartContract) { }
+  constructor(private readonly inspector: InspectorStartContract) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.inspectPanel.displayName', {

@@ -21,7 +21,9 @@ import { createShortUrlRedirectApp } from './short_url_redirect_app';
 import { coreMock } from '../../../../core/public/mocks';
 import { hashUrl } from '../../../opensearch_dashboards_utils/public';
 
-jest.mock('../../../opensearch_dashboards_utils/public', () => ({ hashUrl: jest.fn((x) => `${x}/hashed`) }));
+jest.mock('../../../opensearch_dashboards_utils/public', () => ({
+  hashUrl: jest.fn((x) => `${x}/hashed`),
+}));
 
 describe('short_url_redirect_app', () => {
   beforeEach(() => {

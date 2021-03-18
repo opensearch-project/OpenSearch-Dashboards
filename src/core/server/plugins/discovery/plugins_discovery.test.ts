@@ -75,7 +75,13 @@ const packageMock = {
 };
 
 const manifestPath = (...pluginPath: string[]) =>
-  resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins', ...pluginPath, 'opensearch_dashboards.json');
+  resolve(
+    OPENSEARCH_DASHBOARDS_ROOT,
+    'src',
+    'plugins',
+    ...pluginPath,
+    'opensearch_dashboards.json'
+  );
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -336,9 +342,15 @@ describe('plugins discovery system', () => {
       {
         [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
         [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid(
+          'plugin3'
+        ),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid(
+          'plugin4'
+        ),
+        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid(
+          'plugin5'
+        ),
         [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
           'plugin6'
         ),

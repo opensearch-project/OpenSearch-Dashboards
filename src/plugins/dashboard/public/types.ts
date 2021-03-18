@@ -109,15 +109,15 @@ export interface DashboardAppStateTransitions {
   set: (
     state: DashboardAppState
   ) => <T extends keyof DashboardAppState>(
-      prop: T,
-      value: DashboardAppState[T]
-    ) => DashboardAppState;
+    prop: T,
+    value: DashboardAppState[T]
+  ) => DashboardAppState;
   setOption: (
     state: DashboardAppState
   ) => <T extends keyof DashboardAppState['options']>(
-      prop: T,
-      value: DashboardAppState['options'][T]
-    ) => DashboardAppState;
+    prop: T,
+    value: DashboardAppState['options'][T]
+  ) => DashboardAppState;
 }
 
 export interface SavedDashboardPanelMap {

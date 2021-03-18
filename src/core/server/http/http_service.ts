@@ -187,7 +187,9 @@ export class HttpService
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`OpenSearch Dashboards server is not ready yet ${req.method}:${req.url.href}.`);
+        this.log.debug(
+          `OpenSearch Dashboards server is not ready yet ${req.method}:${req.url.href}.`
+        );
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)

@@ -143,7 +143,12 @@ describe('parseAppUrl', () => {
   describe('with relative paths', () => {
     it('works with sibling relative urls', () => {
       expect(
-        parseAppUrl('./foo', basePath, apps, 'https://opensearch-dashboards.local:8080/base-path/app/current')
+        parseAppUrl(
+          './foo',
+          basePath,
+          apps,
+          'https://opensearch-dashboards.local:8080/base-path/app/current'
+        )
       ).toEqual({
         app: 'foo',
         path: undefined,
@@ -217,13 +222,23 @@ describe('parseAppUrl', () => {
   describe('with absolute urls', () => {
     it('parses the app id', () => {
       expect(
-        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/app/foo', basePath, apps, currentUrl)
+        parseAppUrl(
+          'https://opensearch-dashboards.local:8080/base-path/app/foo',
+          basePath,
+          apps,
+          currentUrl
+        )
       ).toEqual({
         app: 'foo',
         path: undefined,
       });
       expect(
-        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/custom-bar', basePath, apps, currentUrl)
+        parseAppUrl(
+          'https://opensearch-dashboards.local:8080/base-path/custom-bar',
+          basePath,
+          apps,
+          currentUrl
+        )
       ).toEqual({
         app: 'bar',
         path: undefined,
@@ -377,7 +392,12 @@ describe('parseAppUrl', () => {
         )
       ).toEqual(undefined);
       expect(
-        parseAppUrl('https://opensearch-dashboards.local:8080/base-path/unknown-path', basePath, apps, currentUrl)
+        parseAppUrl(
+          'https://opensearch-dashboards.local:8080/base-path/unknown-path',
+          basePath,
+          apps,
+          currentUrl
+        )
       ).toEqual(undefined);
     });
     it('returns undefined when origin does not match', () => {
@@ -399,9 +419,9 @@ describe('parseAppUrl', () => {
       ).toEqual(undefined);
     });
     it('returns undefined when the path does not contain the base path', () => {
-      expect(parseAppUrl('https://opensearch-dashboards.local:8080/app/foo', basePath, apps, currentUrl)).toEqual(
-        undefined
-      );
+      expect(
+        parseAppUrl('https://opensearch-dashboards.local:8080/app/foo', basePath, apps, currentUrl)
+      ).toEqual(undefined);
     });
   });
 });

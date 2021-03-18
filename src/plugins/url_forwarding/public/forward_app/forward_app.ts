@@ -46,7 +46,12 @@ export const createLegacyUrlForwardApp = (
       },
     ] = await core.getStartServices();
 
-    const result = await navigateToLegacyOpenSearchDashboardsUrl(hash, forwards, basePath, application);
+    const result = await navigateToLegacyOpenSearchDashboardsUrl(
+      hash,
+      forwards,
+      basePath,
+      application
+    );
 
     if (!result.navigated) {
       const [, , opensearchDashboardsLegacyStart] = await core.getStartServices();

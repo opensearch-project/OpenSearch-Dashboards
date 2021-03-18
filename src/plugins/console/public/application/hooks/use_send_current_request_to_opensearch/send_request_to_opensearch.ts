@@ -48,7 +48,9 @@ export interface OpenSearchRequestResult<V = unknown> {
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToOpenSearch(args: OpenSearchRequestArgs): Promise<OpenSearchRequestResult[]> {
+export function sendRequestToOpenSearch(
+  args: OpenSearchRequestArgs
+): Promise<OpenSearchRequestResult[]> {
   const requests = args.requests.slice();
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
@@ -81,8 +83,9 @@ export function sendRequestToOpenSearch(args: OpenSearchRequestArgs): Promise<Op
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
-      opensearch.send(opensearchMethod, opensearchPath, opensearchData).always(
-        (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
+      opensearch
+        .send(opensearchMethod, opensearchPath, opensearchData)
+        .always((dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
           if (reqId !== CURRENT_REQ_ID) {
             return;
           }
@@ -152,8 +155,7 @@ export function sendRequestToOpenSearch(args: OpenSearchRequestArgs): Promise<Op
               },
             });
           }
-        }
-      );
+        });
     };
 
     sendNextRequest();

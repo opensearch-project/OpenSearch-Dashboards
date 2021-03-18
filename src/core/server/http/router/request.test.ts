@@ -89,7 +89,10 @@ describe('OpenSearchDashboardsRequest', () => {
         headers: { custom: 'one', authorization: 'token' },
       });
       const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
-      expect(opensearchDashboardsRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
+      expect(opensearchDashboardsRequest.headers).toEqual({
+        custom: 'one',
+        authorization: 'token',
+      });
     });
   });
 
@@ -120,7 +123,11 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(
+        request,
+        undefined,
+        false
+      );
       expect(opensearchDashboardsRequest.headers).toEqual({
         custom: 'one',
         authorization: 'token',

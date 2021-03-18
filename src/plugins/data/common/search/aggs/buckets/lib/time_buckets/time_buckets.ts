@@ -292,7 +292,9 @@ export class TimeBuckets {
 
       return Object.assign(interval, {
         description:
-          opensearchInterval.value === 1 ? prettyUnits : opensearchInterval.value + ' ' + prettyUnits + 's',
+          opensearchInterval.value === 1
+            ? prettyUnits
+            : opensearchInterval.value + ' ' + prettyUnits + 's',
         opensearchValue: opensearchInterval.value,
         opensearchUnit: opensearchInterval.unit,
         expression: opensearchInterval.expression,

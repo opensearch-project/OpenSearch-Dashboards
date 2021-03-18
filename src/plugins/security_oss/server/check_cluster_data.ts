@@ -33,7 +33,8 @@ export const createClusterDataCheck = () => {
         });
         clusterHasUserData = indices.body.some((indexCount) => {
           const isInternalIndex =
-            indexCount.index.startsWith('.') || indexCount.index.startsWith('opensearch_dashboards_sample_');
+            indexCount.index.startsWith('.') ||
+            indexCount.index.startsWith('opensearch_dashboards_sample_');
 
           return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
         });

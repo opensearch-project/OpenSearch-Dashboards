@@ -58,7 +58,7 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     };
   }
 
-  public stop() { }
+  public stop() {}
 
   private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
     const enhancements: Record<string, any> = state.enhancements || {};

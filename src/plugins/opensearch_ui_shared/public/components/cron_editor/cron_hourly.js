@@ -28,7 +28,10 @@ export const CronHourly = ({ minute, minuteOptions, onChange }) => (
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronHourly.fieldTimeLabel" defaultMessage="Minute" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronHourly.fieldTimeLabel"
+          defaultMessage="Minute"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"

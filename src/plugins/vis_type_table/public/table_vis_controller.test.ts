@@ -39,7 +39,7 @@ const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 const { tabifyAggResponse } = search;
 
 jest.mock('../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
-  configureAppAngularModule: () => { },
+  configureAppAngularModule: () => {},
 }));
 
 interface TableVisScope extends IScope {
@@ -167,7 +167,7 @@ describe('Table Vis - Controller', () => {
       get: jest.fn(),
       set: jest.fn(),
     };
-    $rootScope.renderComplete = () => { };
+    $rootScope.renderComplete = () => {};
     $rootScope.newScope = (scope: TableVisScope) => {
       $scope = scope;
     };
@@ -188,7 +188,7 @@ describe('Table Vis - Controller', () => {
   // remove the response from the controller
   function removeOpenSearchResponseFromScope() {
     delete $rootScope.opensearchResponse;
-    $rootScope.renderComplete = () => { };
+    $rootScope.renderComplete = () => {};
     $rootScope.$apply();
   }
 

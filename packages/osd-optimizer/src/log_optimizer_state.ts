@@ -42,7 +42,8 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (event?.type === 'bundle not cached') {
           log.debug(
-            `[${event.bundle.id}] bundle not cached because [${event.reason}]${event.diff ? `, diff:\n${event.diff}` : ''
+            `[${event.bundle.id}] bundle not cached because [${event.reason}]${
+              event.diff ? `, diff:\n${event.diff}` : ''
             }`
           );
         }
@@ -60,7 +61,8 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           }
 
           log.info(
-            `starting worker [${event.bundles.length} ${event.bundles.length === 1 ? 'bundle' : 'bundles'
+            `starting worker [${event.bundles.length} ${
+              event.bundles.length === 1 ? 'bundle' : 'bundles'
             }]`
           );
           log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
@@ -129,7 +131,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           } else {
             log.success(
               `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
-              (config.watch ? ', watching for changes' : '')
+                (config.watch ? ', watching for changes' : '')
             );
           }
 

@@ -20,7 +20,9 @@
 import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch-dashboards/opensearch_dashboards_migrator.mock';
 
 export const migratorInstanceMock = mockOpenSearchDashboardsMigrator.create();
-export const OpenSearchDashboardsMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
+export const OpenSearchDashboardsMigratorMock = jest
+  .fn()
+  .mockImplementation(() => migratorInstanceMock);
 jest.doMock('../../migrations/opensearch-dashboards/opensearch_dashboards_migrator', () => ({
   OpenSearchDashboardsMigrator: OpenSearchDashboardsMigratorMock,
 }));

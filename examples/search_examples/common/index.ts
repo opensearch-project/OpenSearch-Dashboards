@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { IOpenSearchSearchResponse, IOpenSearchSearchRequest } from '../../../src/plugins/data/common';
+import {
+  IOpenSearchSearchResponse,
+  IOpenSearchSearchRequest,
+} from '../../../src/plugins/data/common';
 
 export const PLUGIN_ID = 'searchExamples';
 export const PLUGIN_NAME = 'Search Examples';

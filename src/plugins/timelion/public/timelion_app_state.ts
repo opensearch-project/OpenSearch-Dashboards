@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { createStateContainer, syncState, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
+import {
+  createStateContainer,
+  syncState,
+  IOsdUrlStateStorage,
+} from '../../opensearch_dashboards_utils/public';
 
 import { TimelionAppState, TimelionAppStateTransitions } from './types';
 

@@ -37,7 +37,10 @@ export default function ({
     // - tests against a single function could easily be written as unit tests (and should be)
     describe('opensearchDashboards function', () => {
       it('returns opensearch_dashboards_context', async () => {
-        const result = await expectExpression('returns_opensearch_dashboards_context', 'opensearchDashboards').getResponse();
+        const result = await expectExpression(
+          'returns_opensearch_dashboards_context',
+          'opensearchDashboards'
+        ).getResponse();
         expect(result).to.have.property('type', 'opensearch_dashboards_context');
       });
 

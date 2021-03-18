@@ -25,7 +25,9 @@ export function normalizeSortRequest(
   indexPattern: IIndexPattern | string | undefined,
   defaultSortOptions: SortOptions = {}
 ) {
-  const sortArray: OpenSearchQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
+  const sortArray: OpenSearchQuerySortValue[] = Array.isArray(sortObject)
+    ? sortObject
+    : [sortObject];
   return sortArray.map(function (sortable) {
     return normalize(sortable, indexPattern, defaultSortOptions);
   });

@@ -134,9 +134,9 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
               <p>
                 Existing links retrieved from storage. The links that were generated from legacy
                 generators are in red. This can be useful for developers to know they will have to
-                migrate persisted state or in a future version of OpenSearch Dashboards, these links may no longer
-                work. They still work now because legacy url generators must provide a state
-                migration function.
+                migrate persisted state or in a future version of OpenSearch Dashboards, these links
+                may no longer work. They still work now because legacy url generators must provide a
+                state migration function.
               </p>
             </EuiText>
             {buildingLinks ? (

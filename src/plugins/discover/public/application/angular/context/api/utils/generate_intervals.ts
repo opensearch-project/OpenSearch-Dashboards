@@ -46,7 +46,7 @@ export function generateIntervals(
 ): IterableIterator<IntervalValue[]> {
   const offsetSign =
     (sort === SortDirection.asc && type === 'successors') ||
-      (sort === SortDirection.desc && type === 'predecessors')
+    (sort === SortDirection.desc && type === 'predecessors')
       ? 1
       : -1;
   // ending with `null` opens the last interval

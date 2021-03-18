@@ -25,20 +25,20 @@ export const getSearchSourceMock = (opensearchSearchResponse?: any) =>
       opensearchSearchResponse
         ? opensearchSearchResponse
         : {
-          aggregations: {
-            termsAgg: {
-              buckets: [
-                {
-                  key: 'Zurich Airport',
-                  doc_count: 691,
-                },
-                {
-                  key: 'Xi an Xianyang International Airport',
-                  doc_count: 526,
-                },
-              ],
+            aggregations: {
+              termsAgg: {
+                buckets: [
+                  {
+                    key: 'Zurich Airport',
+                    doc_count: 691,
+                  },
+                  {
+                    key: 'Xi an Xianyang International Airport',
+                    doc_count: 526,
+                  },
+                ],
+              },
             },
-          },
-        }
+          }
     ),
   }));

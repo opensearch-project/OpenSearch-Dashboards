@@ -32,7 +32,9 @@ const legacyConfig = follow('__fixtures__/reload_logging_config/opensearch_dashb
 const configFileLogConsole = follow(
   '__fixtures__/reload_logging_config/opensearch_dashboards_log_console.test.yml'
 );
-const configFileLogFile = follow('__fixtures__/reload_logging_config/opensearch_dashboards_log_file.test.yml');
+const configFileLogFile = follow(
+  '__fixtures__/reload_logging_config/opensearch_dashboards_log_file.test.yml'
+);
 
 const opensearchDashboardsPath = follow('../../../../scripts/opensearch_dashboards.js');
 
@@ -187,7 +189,12 @@ describe('Server logging configuration', function () {
         const configFilePath = Path.resolve(tempDir, 'opensearch_dashboards.yml');
         Fs.copyFileSync(configFileLogConsole, configFilePath);
 
-        child = Child.spawn(process.execPath, [opensearchDashboardsPath, '--oss', '--config', configFilePath]);
+        child = Child.spawn(process.execPath, [
+          opensearchDashboardsPath,
+          '--oss',
+          '--config',
+          configFilePath,
+        ]);
 
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
@@ -233,7 +240,12 @@ describe('Server logging configuration', function () {
           return oldConfig;
         });
 
-        child = Child.spawn(process.execPath, [opensearchDashboardsPath, '--oss', '--config', configFilePath]);
+        child = Child.spawn(process.execPath, [
+          opensearchDashboardsPath,
+          '--oss',
+          '--config',
+          configFilePath,
+        ]);
 
         await watchFileUntil(logPath, /setting up root/, 30 * second);
         // once the server is running, archive the log file and issue SIGHUP

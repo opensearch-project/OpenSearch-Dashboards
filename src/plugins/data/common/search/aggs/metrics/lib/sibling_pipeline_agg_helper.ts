@@ -65,7 +65,7 @@ export const siblingPipelineAggHelper = {
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customBucket'
         ),
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'customMetric',

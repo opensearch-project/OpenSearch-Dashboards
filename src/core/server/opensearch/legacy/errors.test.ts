@@ -63,9 +63,7 @@ describe('OpenSearchErrorHelpers', () => {
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 401', () => {
-          const error = LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(
-            new Error('foo')
-          );
+          const error = LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 401);
         });
       });

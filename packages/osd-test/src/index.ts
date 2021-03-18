@@ -37,7 +37,12 @@ export { OPENSEARCH_DASHBOARDS_ROOT } from './functional_tests/lib/paths';
 export { opensearchTestConfig, createLegacyOpenSearchTestCluster } from './legacy_opensearch';
 
 // @ts-ignore not typed yet
-export { osdTestConfig, opensearchDashboardsServerTestUser, opensearchDashboardsTestUser, adminTestUser } from './osd';
+export {
+  osdTestConfig,
+  opensearchDashboardsServerTestUser,
+  opensearchDashboardsTestUser,
+  adminTestUser,
+} from './osd';
 
 // @ts-ignore not typed yet
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';

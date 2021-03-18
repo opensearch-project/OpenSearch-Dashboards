@@ -20,7 +20,10 @@
 import { functionWrapper } from './utils';
 import { opensearchDashboards } from '../opensearch_dashboards';
 import { ExecutionContext } from '../../../execution/types';
-import { OpenSearchDashboardsContext, ExpressionValueSearchContext } from '../../../expression_types';
+import {
+  OpenSearchDashboardsContext,
+  ExpressionValueSearchContext,
+} from '../../../expression_types';
 
 describe('interpreter/functions#opensearch-dashboards', () => {
   const fn = functionWrapper(opensearchDashboards);

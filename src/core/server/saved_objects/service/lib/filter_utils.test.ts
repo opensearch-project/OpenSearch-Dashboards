@@ -149,7 +149,9 @@ describe('Filter Utils', () => {
           'alert.attributes.actions:{ actionTypeId: ".server-log" }',
           mockMappings
         )
-      ).toEqual(opensearchKuery.fromKueryExpression('alert.actions:{ actionTypeId: ".server-log" }'));
+      ).toEqual(
+        opensearchKuery.fromKueryExpression('alert.actions:{ actionTypeId: ".server-log" }')
+      );
     });
 
     test('Lets make sure that we are throwing an exception if we get an error', () => {

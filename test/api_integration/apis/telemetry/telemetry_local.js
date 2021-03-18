@@ -41,7 +41,9 @@ export default function ({ getService }) {
   const opensearchArchiver = getService('opensearchArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
-    before('make sure there are some saved objects', () => opensearchArchiver.load('saved_objects/basic'));
+    before('make sure there are some saved objects', () =>
+      opensearchArchiver.load('saved_objects/basic')
+    );
     after('cleanup saved objects changes', () => opensearchArchiver.unload('saved_objects/basic'));
 
     before('create some telemetry-data tracked indices', async () => {
@@ -71,19 +73,27 @@ export default function ({ getService }) {
       expect(stats.stack_stats.opensearchDashboards.indices).to.be.a('number');
       expect(stats.stack_stats.opensearchDashboards.os.platforms[0].platform).to.be.a('string');
       expect(stats.stack_stats.opensearchDashboards.os.platforms[0].count).to.be(1);
-      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].platformRelease).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].platformRelease).to.be.a(
+        'string'
+      );
       expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].count).to.be(1);
       expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.opt_in_status).to.be(false);
-      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.usage_fetcher).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.usage_fetcher).to.be.a(
+        'string'
+      );
       expect(stats.stack_stats.opensearchDashboards.plugins.stack_management).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.ui_metric).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.kql.defaultQueryLanguage).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.plugins.kql.defaultQueryLanguage).to.be.a(
+        'string'
+      );
       expect(stats.stack_stats.opensearchDashboards.plugins['tsvb-validation']).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.localization).to.be.an('object');
       expect(stats.stack_stats.opensearchDashboards.plugins.csp.strict).to.be(false);
       expect(stats.stack_stats.opensearchDashboards.plugins.csp.warnLegacyBrowsers).to.be(true);
-      expect(stats.stack_stats.opensearchDashboards.plugins.csp.rulesChangedFromDefault).to.be(false);
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.rulesChangedFromDefault).to.be(
+        false
+      );
 
       // Testing stack_stats.data
       expect(stats.stack_stats.data).to.be.an('object');

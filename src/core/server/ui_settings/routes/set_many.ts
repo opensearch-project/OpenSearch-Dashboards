@@ -29,32 +29,35 @@ const validate = {
 };
 
 export function registerSetManyRoute(router: IRouter) {
-  router.post({ path: '/api/opensearch-dashboards/settings', validate }, async (context, request, response) => {
-    try {
-      const uiSettingsClient = context.core.uiSettings.client;
+  router.post(
+    { path: '/api/opensearch-dashboards/settings', validate },
+    async (context, request, response) => {
+      try {
+        const uiSettingsClient = context.core.uiSettings.client;
 
-      const { changes } = request.body;
+        const { changes } = request.body;
 
-      await uiSettingsClient.setMany(changes);
+        await uiSettingsClient.setMany(changes);
 
-      return response.ok({
-        body: {
-          settings: await uiSettingsClient.getUserProvided(),
-        },
-      });
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        return response.customError({
-          body: error,
-          statusCode: error.output.statusCode,
+        return response.ok({
+          body: {
+            settings: await uiSettingsClient.getUserProvided(),
+          },
         });
-      }
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+          return response.customError({
+            body: error,
+            statusCode: error.output.statusCode,
+          });
+        }
 
-      if (error instanceof CannotOverrideError || error instanceof ValidationError) {
-        return response.badRequest({ body: error });
-      }
+        if (error instanceof CannotOverrideError || error instanceof ValidationError) {
+          return response.badRequest({ body: error });
+        }
 
-      throw error;
+        throw error;
+      }
     }
-  });
+  );
 }

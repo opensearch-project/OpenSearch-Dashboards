@@ -22,7 +22,10 @@ import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { OPENSEARCH_DASHBOARDS_STATS_TYPE } from '../../../common/constants';
-import { getSavedObjectsCounts, OpenSearchDashboardsSavedObjectCounts } from './get_saved_object_counts';
+import {
+  getSavedObjectsCounts,
+  OpenSearchDashboardsSavedObjectCounts,
+} from './get_saved_object_counts';
 
 interface OpenSearchDashboardsUsage extends OpenSearchDashboardsSavedObjectCounts {
   index: string;
@@ -32,7 +35,10 @@ export function getOpenSearchDashboardsUsageCollector(
   usageCollection: UsageCollectionSetup,
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
-  return usageCollection.makeUsageCollector<OpenSearchDashboardsUsage, { usage: OpenSearchDashboardsUsage }>({
+  return usageCollection.makeUsageCollector<
+    OpenSearchDashboardsUsage,
+    { usage: OpenSearchDashboardsUsage }
+  >({
     type: 'opensearchDashboards',
     isReady: () => true,
     schema: {
@@ -74,5 +80,7 @@ export function registerOpenSearchDashboardsUsageCollector(
   usageCollection: UsageCollectionSetup,
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
-  usageCollection.registerCollector(getOpenSearchDashboardsUsageCollector(usageCollection, legacyConfig$));
+  usageCollection.registerCollector(
+    getOpenSearchDashboardsUsageCollector(usageCollection, legacyConfig$)
+  );
 }

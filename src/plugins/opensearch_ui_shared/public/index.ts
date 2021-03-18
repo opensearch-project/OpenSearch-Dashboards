@@ -62,7 +62,7 @@ export { extractQueryParams } from './url';
 /** dummy plugin, we just want opensearchUiShared to have its own bundle */
 export function plugin() {
   return new (class OpenSearchUiSharedPlugin {
-    setup() { }
-    start() { }
+    setup() {}
+    start() {}
   })();
 }

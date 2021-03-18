@@ -44,7 +44,11 @@ function checkModuleNameNode(context, mappings, node) {
   if (mapping.toRelative) {
     const sourceDirectory = path.dirname(context.getFilename());
     const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
-    const modulePath = path.resolve(OPENSEARCH_DASHBOARDS_ROOT, mapping.toRelative, localModulePath);
+    const modulePath = path.resolve(
+      OPENSEARCH_DASHBOARDS_ROOT,
+      mapping.toRelative,
+      localModulePath
+    );
     const relativePath = path.relative(sourceDirectory, modulePath);
 
     newSource = relativePath.startsWith('.') ? relativePath : `./${relativePath}`;

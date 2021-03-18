@@ -23,7 +23,7 @@ import { pick, trimStart, trimEnd } from 'lodash';
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 
-import { OpenSearchConfigForProxy as OpenSearchConfigForProxy } from '../../../../types';
+import { OpenSearchConfigForProxy } from '../../../../types';
 import {
   getOpenSearchProxyConfig,
   ProxyConfigCollection,

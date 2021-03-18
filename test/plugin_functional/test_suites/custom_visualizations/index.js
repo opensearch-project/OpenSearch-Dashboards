@@ -24,7 +24,9 @@ export default function ({ getService, loadTestFile }) {
 
   describe('custom visualizations', function () {
     before(async () => {
-      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/logstash_functional');
+      await opensearchArchiver.loadIfNeeded(
+        '../functional/fixtures/opensearch_archiver/logstash_functional'
+      );
       await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/visualize');
       await opensearchDashboardsServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',

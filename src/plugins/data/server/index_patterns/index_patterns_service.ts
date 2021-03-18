@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, OpenSearchDashboardsRequest, Logger } from 'opensearch-dashboards/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  OpenSearchDashboardsRequest,
+  Logger,
+} from 'opensearch-dashboards/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -50,7 +56,9 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     const { uiSettings, savedObjects } = core;
 
     return {
-      indexPatternsServiceFactory: async (opensearchDashboardsRequest: OpenSearchDashboardsRequest) => {
+      indexPatternsServiceFactory: async (
+        opensearchDashboardsRequest: OpenSearchDashboardsRequest
+      ) => {
         const savedObjectsClient = savedObjects.getScopedClient(opensearchDashboardsRequest);
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);

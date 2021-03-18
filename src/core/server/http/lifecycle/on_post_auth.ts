@@ -63,7 +63,10 @@ export type OnPostAuthHandler = (
   request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | OpenSearchDashboardsResponse | Promise<OnPostAuthResult | OpenSearchDashboardsResponse>;
+) =>
+  | OnPostAuthResult
+  | OpenSearchDashboardsResponse
+  | Promise<OnPostAuthResult | OpenSearchDashboardsResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
@@ -82,7 +85,11 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        OpenSearchDashboardsRequest.from(request),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }

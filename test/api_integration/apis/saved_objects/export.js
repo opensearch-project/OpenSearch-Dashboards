@@ -288,7 +288,9 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
+                JSON.parse(
+                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+                )
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -347,7 +349,9 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
+                JSON.parse(
+                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+                )
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -411,7 +415,9 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
+                JSON.parse(
+                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+                )
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();

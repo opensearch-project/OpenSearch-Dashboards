@@ -18,7 +18,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../../common/search';
+import {
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  ISearchOptions,
+} from '../../common/search';
 
 export type ISearch = (
   request: IOpenSearchDashboardsSearchRequest,
@@ -28,7 +32,7 @@ export type ISearch = (
 export type ISearchGeneric = <
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
   SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
-  >(
+>(
   request: SearchStrategyRequest,
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;

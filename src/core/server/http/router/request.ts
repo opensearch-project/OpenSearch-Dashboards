@@ -51,7 +51,9 @@ export interface OpenSearchDashboardsRequestState extends ApplicationState {
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
  */
-export type OpenSearchDashboardsRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+export type OpenSearchDashboardsRequestRouteOptions<Method extends RouteMethod> = Method extends
+  | 'get'
+  | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
   : Required<RouteConfigOptions<Method>>;
 
@@ -202,7 +204,8 @@ export class OpenSearchDashboardsRequest<
     // OpenSearchDashboardsRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     this.id = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestId ?? uuid.v4();
-    this.uuid = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
+    this.uuid =
+      (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
@@ -253,7 +256,8 @@ export class OpenSearchDashboardsRequest<
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call OpenSearchDashboardsRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as OpenSearchDashboardsRouteOptions)?.xsrfRequired ?? true,
+      xsrfRequired:
+        (request.route.settings.app as OpenSearchDashboardsRouteOptions)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
       timeout: {
         payload: payloadTimeout,
@@ -313,7 +317,9 @@ export const ensureRawRequest = (request: OpenSearchDashboardsRequest | LegacyRe
  * Checks if an incoming request is a {@link OpenSearchDashboardsRequest}
  * @internal
  */
-export function isOpenSearchDashboardsRequest(request: unknown): request is OpenSearchDashboardsRequest {
+export function isOpenSearchDashboardsRequest(
+  request: unknown
+): request is OpenSearchDashboardsRequest {
   return request instanceof OpenSearchDashboardsRequest;
 }
 
@@ -329,6 +335,8 @@ function isRequest(request: any): request is LegacyRequest {
  * Checks if an incoming request either OpenSearchDashboardsRequest or Legacy.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is OpenSearchDashboardsRequest | LegacyRequest {
+export function isRealRequest(
+  request: unknown
+): request is OpenSearchDashboardsRequest | LegacyRequest {
   return isOpenSearchDashboardsRequest(request) || isRequest(request);
 }

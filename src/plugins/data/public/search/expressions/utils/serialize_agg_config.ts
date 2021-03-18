@@ -23,7 +23,9 @@ import { IndexPattern } from '../../../index_patterns';
 import { getSearchService } from '../../../../public/services';
 
 /** @internal */
-export const serializeAggConfig = (aggConfig: IAggConfig): OpenSearchDashboardsDatatableColumnMeta => {
+export const serializeAggConfig = (
+  aggConfig: IAggConfig
+): OpenSearchDashboardsDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
     indexPatternId: aggConfig.getIndexPattern().id,

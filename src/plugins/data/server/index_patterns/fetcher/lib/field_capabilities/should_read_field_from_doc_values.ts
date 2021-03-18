@@ -18,5 +18,9 @@
  */
 
 export function shouldReadFieldFromDocValues(aggregatable: boolean, opensearchType: string) {
-  return aggregatable && !['text', 'geo_shape'].includes(opensearchType) && !opensearchType.startsWith('_');
+  return (
+    aggregatable &&
+    !['text', 'geo_shape'].includes(opensearchType) &&
+    !opensearchType.startsWith('_')
+  );
 }

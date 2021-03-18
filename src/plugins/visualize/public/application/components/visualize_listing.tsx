@@ -24,7 +24,10 @@ import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
 
-import { useOpenSearchDashboards, TableListView } from '../../../../opensearch_dashboards_react/public';
+import {
+  useOpenSearchDashboards,
+  TableListView,
+} from '../../../../opensearch_dashboards_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';

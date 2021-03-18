@@ -114,7 +114,10 @@ export class SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || OPENSEARCH_SEARCH_STRATEGY}/${id || ''}`, '/');
+    const path = trimEnd(
+      `/internal/search/${strategy || OPENSEARCH_SEARCH_STRATEGY}/${id || ''}`,
+      '/'
+    );
     const body = JSON.stringify(searchRequest);
     return from(
       this.deps.http.fetch({

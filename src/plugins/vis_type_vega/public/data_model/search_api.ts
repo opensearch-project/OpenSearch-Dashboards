@@ -76,7 +76,10 @@ export class SearchAPI {
     }
   }
 
-  private inspectSearchResult(response: IOpenSearchSearchResponse, requestResponder: RequestResponder) {
+  private inspectSearchResult(
+    response: IOpenSearchSearchResponse,
+    requestResponder: RequestResponder
+  ) {
     if (requestResponder) {
       requestResponder
         .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))

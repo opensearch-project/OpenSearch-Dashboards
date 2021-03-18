@@ -27,7 +27,8 @@ const { createHash } = require('crypto');
 const path = require('path');
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-daily';
+const DAILY_SNAPSHOTS_BASE_URL =
+  'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-permanent';
 

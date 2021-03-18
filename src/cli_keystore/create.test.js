@@ -72,7 +72,10 @@ describe('OpenSearch Dashboards keystore', () => {
       await create(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.log);
-      sinon.assert.calledWith(Logger.prototype.log, `Created OpenSearch Dashboards keystore in ${path}`);
+      sinon.assert.calledWith(
+        Logger.prototype.log,
+        `Created OpenSearch Dashboards keystore in ${path}`
+      );
     });
 
     it('prompts for overwrite', async () => {

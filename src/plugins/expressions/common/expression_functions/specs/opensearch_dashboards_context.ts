@@ -78,9 +78,12 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
     savedSearchId: {
       types: ['string', 'null'],
       default: null,
-      help: i18n.translate('expressions.functions.opensearch_dashboards_context.savedSearchId.help', {
-        defaultMessage: 'Specify saved search ID to be used for queries and filters',
-      }),
+      help: i18n.translate(
+        'expressions.functions.opensearch_dashboards_context.savedSearchId.help',
+        {
+          defaultMessage: 'Specify saved search ID to be used for queries and filters',
+        }
+      ),
     },
   },
 
@@ -93,12 +96,14 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
       if (typeof getSavedObject !== 'function') {
         throw new Error(
           '"getSavedObject" function not available in execution context. ' +
-          'When you execute expression you need to add extra execution context ' +
-          'as the third argument and provide "getSavedObject" implementation.'
+            'When you execute expression you need to add extra execution context ' +
+            'as the third argument and provide "getSavedObject" implementation.'
         );
       }
       const obj = await getSavedObject('search', args.savedSearchId);
-      const search = obj.attributes.opensearchDashboardsSavedObjectMeta as { searchSourceJSON: string };
+      const search = obj.attributes.opensearchDashboardsSavedObjectMeta as {
+        searchSourceJSON: string;
+      };
       const { query, filter } = getParsedValue(search.searchSourceJSON, {});
 
       if (query) {

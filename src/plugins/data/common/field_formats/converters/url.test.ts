@@ -43,7 +43,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
 
@@ -52,7 +52,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>'
+          'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>'
       );
     });
 
@@ -61,7 +61,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>'
+          'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>'
       );
     });
 
@@ -70,7 +70,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>'
+          'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>'
       );
     });
 
@@ -79,7 +79,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
 
@@ -88,7 +88,7 @@ describe('UrlFormat', () => {
 
       expect(url.convert('http://opensearch.co', HTML_CONTEXT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://opensearch.co" alt="A dynamically-specified image located at http://opensearch.co" ' +
-        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
   });

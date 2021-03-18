@@ -266,9 +266,12 @@ exports.Cluster = class Cluster {
       opensearchArgs.push(`xpack.security.http.ssl.keystore.password=${OPENSEARCH_P12_PASSWORD}`);
     }
 
-    const args = parseSettings(extractConfigFiles(opensearchArgs, installPath, { log: this._log }), {
-      filter: SettingsFilter.NonSecureOnly,
-    }).reduce(
+    const args = parseSettings(
+      extractConfigFiles(opensearchArgs, installPath, { log: this._log }),
+      {
+        filter: SettingsFilter.NonSecureOnly,
+      }
+    ).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
@@ -281,13 +284,16 @@ exports.Cluster = class Cluster {
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of OpenSearch on the same machine during CI
     options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS =
-      (options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS ? `${options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS} ` : '') +
-      '-Xms1g -Xmx1g';
+      (options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS
+        ? `${options.opensearchEnvVars.OPENSEARCH_JAVA_OPTS} `
+        : '') + '-Xms1g -Xmx1g';
 
     this._process = execa(OPENSEARCH_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { OPENSEARCH_TMPDIR: path.resolve(installPath, 'OPENSEARCH_TMPDIR') } : {}),
+        ...(installPath
+          ? { OPENSEARCH_TMPDIR: path.resolve(installPath, 'OPENSEARCH_TMPDIR') }
+          : {}),
         ...process.env,
         ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
         ...(options.opensearchEnvVars || {}),

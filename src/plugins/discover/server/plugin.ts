@@ -35,5 +35,5 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

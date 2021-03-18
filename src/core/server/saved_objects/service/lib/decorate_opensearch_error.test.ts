@@ -58,7 +58,10 @@ describe('savedObjectsClient/decorateOpenSearchError', () => {
   });
 
   it('makes TimeoutError a SavedObjectsClient/OpenSearchUnavailable error', () => {
-    const error = new opensearchErrors.TimeoutError('reason', opensearchClientMock.createApiResponse());
+    const error = new opensearchErrors.TimeoutError(
+      'reason',
+      opensearchClientMock.createApiResponse()
+    );
     expect(SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error)).toBe(false);
     expect(decorateOpenSearchError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error)).toBe(true);

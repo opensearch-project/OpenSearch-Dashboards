@@ -212,7 +212,11 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return opensearchFilters.compareFilters(filtersA, filtersB, opensearchFilters.COMPARE_ALL_OPTIONS);
+  return opensearchFilters.compareFilters(
+    filtersA,
+    filtersB,
+    opensearchFilters.COMPARE_ALL_OPTIONS
+  );
 }
 
 /**

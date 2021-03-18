@@ -264,7 +264,9 @@ describe.skip('get_data_telemetry', () => {
 
     test('return empty array when there is an error', async () => {
       const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
-      opensearchClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
+      opensearchClient.indices.getMapping.mockRejectedValue(
+        new Error('Something went terribly wrong')
+      );
       opensearchClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
       await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([]);
     });

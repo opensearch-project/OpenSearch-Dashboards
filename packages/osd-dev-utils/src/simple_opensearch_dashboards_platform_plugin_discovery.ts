@@ -26,7 +26,10 @@ import { parseOpenSearchDashboardsPlatformPlugin } from './parse_opensearch_dash
 /**
  * Helper to find the new platform plugins.
  */
-export function simpleOpenSearchDashboardsPlatformPluginDiscovery(scanDirs: string[], pluginPaths: string[]) {
+export function simpleOpenSearchDashboardsPlatformPluginDiscovery(
+  scanDirs: string[],
+  pluginPaths: string[]
+) {
   const patterns = Array.from(
     new Set([
       // find opensearch_dashboards.json files up to 5 levels within the scan dir

@@ -23,7 +23,10 @@ import { i18n } from '@osd/i18n';
 
 import { createHashHistory } from 'history';
 
-import { createOsdUrlStateStorage, withNotifyOnErrors } from '../../opensearch_dashboards_utils/public';
+import {
+  createOsdUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
 import { syncQueryStateWithUrl } from '../../data/public';
 
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';

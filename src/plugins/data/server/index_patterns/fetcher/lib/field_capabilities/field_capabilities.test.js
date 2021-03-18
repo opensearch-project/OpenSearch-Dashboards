@@ -48,7 +48,11 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   };
 
   const stubDeps = (options = {}) => {
-    const { opensearchResponse = {}, fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
+    const {
+      opensearchResponse = {},
+      fieldsFromFieldCaps = [],
+      mergeOverrides = identity,
+    } = options;
 
     sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => opensearchResponse);
     sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);

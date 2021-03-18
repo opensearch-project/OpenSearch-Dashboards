@@ -73,5 +73,5 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     });
   }
 
-  public start() { }
+  public start() {}
 }

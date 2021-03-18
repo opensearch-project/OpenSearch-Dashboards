@@ -28,7 +28,10 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronDaily.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronDaily.fieldTimeLabel"
+          defaultMessage="Time"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"

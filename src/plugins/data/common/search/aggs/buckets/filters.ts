@@ -24,7 +24,12 @@ import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { getOpenSearchQueryConfig, buildOpenSearchQuery, Query, UI_SETTINGS } from '../../../../common';
+import {
+  getOpenSearchQueryConfig,
+  buildOpenSearchQuery,
+  Query,
+  UI_SETTINGS,
+} from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
@@ -80,7 +85,12 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
               }
 
               const opensearchQueryConfigs = getOpenSearchQueryConfig({ get: getConfig });
-              const query = buildOpenSearchQuery(aggConfig.getIndexPattern(), [input], [], opensearchQueryConfigs);
+              const query = buildOpenSearchQuery(
+                aggConfig.getIndexPattern(),
+                [input],
+                [],
+                opensearchQueryConfigs
+              );
 
               if (!query) {
                 console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console

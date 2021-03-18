@@ -26,7 +26,9 @@ describe('createLogKey', () => {
 
   it('should include a hashed suffix of the identifier when present', async () => {
     const expectedSuffix = `/N4rLtula/QIYB+3If6bXDONEO5CnqBPrlURto+/j7k=`;
-    expect(await createLogKey('foo', 'bar')).toMatch(`opensearchDashboards.history.foo-${expectedSuffix}`);
+    expect(await createLogKey('foo', 'bar')).toMatch(
+      `opensearchDashboards.history.foo-${expectedSuffix}`
+    );
   });
 
   it('should not include a hashed suffix if the identifier is not present', async () => {

@@ -23,4 +23,8 @@ export { getTotalLoaded } from './get_total_loaded';
 export * from './to_snake_case';
 export { shimAbortSignal } from './shim_abort_signal';
 
-export { OPENSEARCH_SEARCH_STRATEGY, IOpenSearchSearchRequest, IOpenSearchSearchResponse } from '../../../common';
+export {
+  OPENSEARCH_SEARCH_STRATEGY,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+} from '../../../common';

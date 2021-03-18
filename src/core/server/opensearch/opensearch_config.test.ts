@@ -88,9 +88,7 @@ test('#hosts accepts both string and array of strings', () => {
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  configValue = new OpenSearchConfig(
-    config.schema.validate({ hosts: ['http://some.host:1234'] })
-  );
+  configValue = new OpenSearchConfig(config.schema.validate({ hosts: ['http://some.host:1234'] }));
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
   configValue = new OpenSearchConfig(
@@ -207,9 +205,7 @@ describe('reads files', () => {
   });
 
   it('reads a private key when ssl.key is specified', () => {
-    const configValue = new OpenSearchConfig(
-      config.schema.validate({ ssl: { key: 'some-path' } })
-    );
+    const configValue = new OpenSearchConfig(config.schema.validate({ ssl: { key: 'some-path' } }));
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
     expect(configValue.ssl.key).toEqual('content-of-some-path');
   });

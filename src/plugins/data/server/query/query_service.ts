@@ -25,5 +25,5 @@ export class QueryService implements Plugin<void> {
     core.savedObjects.registerType(querySavedObjectType);
   }
 
-  public start() { }
+  public start() {}
 }

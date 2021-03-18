@@ -93,7 +93,9 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     let query;
     if (searchContext) {
-      const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(this.context.services.uiSettings);
+      const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(
+        this.context.services.uiSettings
+      );
       query = opensearchQuery.buildOpenSearchQuery(
         this.props.indexPattern,
         searchContext.query || [],

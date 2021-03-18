@@ -21,9 +21,7 @@ import { duration } from 'moment';
 import { OpenSearchClientConfig, parseClientOptions } from './client_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
-const createConfig = (
-  parts: Partial<OpenSearchClientConfig> = {}
-): OpenSearchClientConfig => {
+const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchClientConfig => {
   return {
     customHeaders: {},
     logQueries: false,

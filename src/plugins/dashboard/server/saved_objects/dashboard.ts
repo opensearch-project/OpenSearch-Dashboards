@@ -32,7 +32,9 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/opensearch-dashboards/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/objects/savedDashboards/${encodeURIComponent(
+        obj.id
+      )}`;
     },
     getInAppUrl(obj) {
       return {

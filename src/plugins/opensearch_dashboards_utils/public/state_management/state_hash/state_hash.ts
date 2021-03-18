@@ -58,10 +58,13 @@ export function retrieveState<State>(stateHash: string): State {
   const json = hashedItemStore.getItem(stateHash);
   const throwUnableToRestoreUrlError = () => {
     throw new Error(
-      i18n.translate('opensearch_dashboards_utils.stateManagement.stateHash.unableToRestoreUrlErrorMessage', {
-        defaultMessage:
-          'Unable to completely restore the URL, be sure to use the share functionality.',
-      })
+      i18n.translate(
+        'opensearch_dashboards_utils.stateManagement.stateHash.unableToRestoreUrlErrorMessage',
+        {
+          defaultMessage:
+            'Unable to completely restore the URL, be sure to use the share functionality.',
+        }
+      )
     );
   };
   if (json === null) {

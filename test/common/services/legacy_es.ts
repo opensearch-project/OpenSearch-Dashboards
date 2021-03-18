@@ -24,7 +24,9 @@ import * as legacyOpenSearch from 'elasticsearch';
 import { DEFAULT_API_VERSION } from '../../../src/core/server/opensearch/opensearch_config';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function LegacyOpenSearchProvider({ getService }: FtrProviderContext): legacyOpenSearch.Client {
+export function LegacyOpenSearchProvider({
+  getService,
+}: FtrProviderContext): legacyOpenSearch.Client {
   const config = getService('config');
 
   return new legacyOpenSearch.Client({

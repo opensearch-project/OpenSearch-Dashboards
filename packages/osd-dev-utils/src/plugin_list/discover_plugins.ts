@@ -44,7 +44,7 @@ const getReadmeAsciidocName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
 
 export const discoverPlugins = (pluginsRootDir: string): Plugins =>
-simpleOpenSearchDashboardsPlatformPluginDiscovery([pluginsRootDir], []).map(
+  simpleOpenSearchDashboardsPlatformPluginDiscovery([pluginsRootDir], []).map(
     ({ directory, manifest: { id } }): Plugin => {
       const readmeName = getReadmeName(directory);
       const readmeAsciidocName = getReadmeAsciidocName(directory);

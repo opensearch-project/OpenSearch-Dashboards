@@ -113,7 +113,12 @@ export class UrlForwardingPlugin {
        * @param hash
        */
       navigateToLegacyOpenSearchDashboardsUrl: (hash: string) => {
-        return navigateToLegacyOpenSearchDashboardsUrl(hash, this.forwardDefinitions, basePath, application);
+        return navigateToLegacyOpenSearchDashboardsUrl(
+          hash,
+          this.forwardDefinitions,
+          basePath,
+          application
+        );
       },
       /**
        * @deprecated

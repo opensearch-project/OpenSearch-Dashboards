@@ -40,13 +40,17 @@ export type ResponseError =
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @public
  */
-export interface IOpenSearchDashboardsResponse<T extends HttpResponsePayload | ResponseError = any> {
+export interface IOpenSearchDashboardsResponse<
+  T extends HttpResponsePayload | ResponseError = any
+> {
   readonly status: number;
   readonly payload?: T;
   readonly options: HttpResponseOptions;
 }
 
-export function isOpenSearchDashboardsResponse(response: Record<string, any>): response is IOpenSearchDashboardsResponse {
+export function isOpenSearchDashboardsResponse(
+  response: Record<string, any>
+): response is IOpenSearchDashboardsResponse {
   return typeof response.status === 'number' && typeof response.options === 'object';
 }
 
@@ -119,21 +123,24 @@ const successResponseFactory = {
    * Status code: `200`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  ok: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(200, options.body, options),
+  ok: (options: HttpResponseOptions = {}) =>
+    new OpenSearchDashboardsResponse(200, options.body, options),
 
   /**
    * The request has been accepted for processing.
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  accepted: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(202, options.body, options),
+  accepted: (options: HttpResponseOptions = {}) =>
+    new OpenSearchDashboardsResponse(202, options.body, options),
 
   /**
    * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
    * Status code: `204`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  noContent: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(204, undefined, options),
+  noContent: (options: HttpResponseOptions = {}) =>
+    new OpenSearchDashboardsResponse(204, undefined, options),
 };
 
 const redirectionResponseFactory = {
@@ -143,7 +150,8 @@ const redirectionResponseFactory = {
    * @param options - {@link RedirectResponseOptions} configures HTTP response body & headers.
    * Expects `location` header to be set.
    */
-  redirected: (options: RedirectResponseOptions) => new OpenSearchDashboardsResponse(302, options.body, options),
+  redirected: (options: RedirectResponseOptions) =>
+    new OpenSearchDashboardsResponse(302, options.body, options),
 };
 
 const errorResponseFactory = {

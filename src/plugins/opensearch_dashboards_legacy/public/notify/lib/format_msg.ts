@@ -47,12 +47,15 @@ export function formatMsg(err: Record<string, any> | string, source: string = ''
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += i18n.translate('opensearch_dashboards_legacy.notify.toaster.unavailableServerErrorMessage', {
-        defaultMessage:
-          'An HTTP request has failed to connect. ' +
-          'Please check if the OpenSearch Dashboards server is running and that your browser has a working connection, ' +
-          'or contact your system administrator.',
-      });
+      message += i18n.translate(
+        'opensearch_dashboards_legacy.notify.toaster.unavailableServerErrorMessage',
+        {
+          defaultMessage:
+            'An HTTP request has failed to connect. ' +
+            'Please check if the OpenSearch Dashboards server is running and that your browser has a working connection, ' +
+            'or contact your system administrator.',
+        }
+      );
     } else {
       message += i18n.translate('opensearch_dashboards_legacy.notify.toaster.errorStatusMessage', {
         defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',

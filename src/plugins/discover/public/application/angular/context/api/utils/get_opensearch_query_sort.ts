@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { OpenSearchQuerySortValue, SortDirection } from '../../../../../opensearch_dashboards_services';
+import {
+  OpenSearchQuerySortValue,
+  SortDirection,
+} from '../../../../../opensearch_dashboards_services';
 
 /**
  * Returns `OpenSearchQuerySort` which is used to sort records in the OpenSearch query

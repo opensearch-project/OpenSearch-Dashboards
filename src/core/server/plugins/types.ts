@@ -271,7 +271,10 @@ export const SharedGlobalConfigKeys = {
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  opensearchDashboards: Pick<OpenSearchDashboardsConfigType, typeof SharedGlobalConfigKeys.opensearchDashboards[number]>;
+  opensearchDashboards: Pick<
+    OpenSearchDashboardsConfigType,
+    typeof SharedGlobalConfigKeys.opensearchDashboards[number]
+  >;
   opensearch: Pick<OpenSearchConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;

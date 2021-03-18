@@ -219,7 +219,10 @@ export async function isNewPlatformPlugin(pluginPath: string) {
  * @param expectedOpenSearchDashboardsVersion OpenSearch Dashboards version expected by the plugin.
  * @param actualOpenSearchDashboardsVersion Used OpenSearch Dashboards version.
  */
-function isVersionCompatible(expectedOpenSearchDashboardsVersion: string, actualOpenSearchDashboardsVersion: string) {
+function isVersionCompatible(
+  expectedOpenSearchDashboardsVersion: string,
+  actualOpenSearchDashboardsVersion: string
+) {
   if (expectedOpenSearchDashboardsVersion === ALWAYS_COMPATIBLE_VERSION) {
     return true;
   }
@@ -235,5 +238,8 @@ function isVersionCompatible(expectedOpenSearchDashboardsVersion: string, actual
   }
 
   // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
-  return coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) === 0;
+  return (
+    coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) ===
+    0
+  );
 }

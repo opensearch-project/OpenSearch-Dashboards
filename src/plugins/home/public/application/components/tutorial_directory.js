@@ -157,7 +157,8 @@ class TutorialDirectoryUi extends React.Component {
       }),
       description: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataDescription',
-        defaultMessage: 'Get started exploring OpenSearch Dashboards with these "one click" data sets.',
+        defaultMessage:
+          'Get started exploring OpenSearch Dashboards with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/tutorial_directory/sampleData'),
       elasticCloud: true,

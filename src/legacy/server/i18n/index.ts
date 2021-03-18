@@ -27,7 +27,11 @@ import { I18N_RC } from './constants';
 import OsdServer, { OpenSearchDashboardsConfig } from '../osd_server';
 import { registerLocalizationUsageCollector } from './localization';
 
-export async function i18nMixin(osdServer: OsdServer, server: Server, config: OpenSearchDashboardsConfig) {
+export async function i18nMixin(
+  osdServer: OsdServer,
+  server: Server,
+  config: OpenSearchDashboardsConfig
+) {
   const locale = config.get('i18n.locale') as string;
 
   const translationPaths = await Promise.all([

@@ -18,7 +18,11 @@
  */
 
 import { resolve, relative } from 'path';
-import { OPENSEARCH_DASHBOARDS_ROOT, OPENSEARCH_DASHBOARDS_EXEC, OPENSEARCH_DASHBOARDS_EXEC_PATH } from './paths';
+import {
+  OPENSEARCH_DASHBOARDS_ROOT,
+  OPENSEARCH_DASHBOARDS_EXEC,
+  OPENSEARCH_DASHBOARDS_EXEC_PATH,
+} from './paths';
 
 function extendNodeOptions(installDir) {
   if (!installDir) {
@@ -77,7 +81,10 @@ function collectCliArgs(config, { installDir, extraOsdOpts }) {
   return pipe(
     serverArgs,
     (args) => (installDir ? args.filter((a) => a !== '--oss') : args),
-    (args) => (installDir ? [...buildArgs, ...args] : [OPENSEARCH_DASHBOARDS_EXEC_PATH, ...sourceArgs, ...args]),
+    (args) =>
+      installDir
+        ? [...buildArgs, ...args]
+        : [OPENSEARCH_DASHBOARDS_EXEC_PATH, ...sourceArgs, ...args],
     (args) => args.concat(extraOsdOpts || [])
   );
 }

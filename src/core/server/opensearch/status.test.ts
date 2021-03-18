@@ -51,7 +51,12 @@ describe('calculateStatus', () => {
   it('changes to available when isCompatible and no warningNodes', async () => {
     expect(
       await calculateStatus$(
-        of({ isCompatible: true, opensearchDashboardsVersion: '1.1.1', warningNodes: [], incompatibleNodes: [] })
+        of({
+          isCompatible: true,
+          opensearchDashboardsVersion: '1.1.1',
+          warningNodes: [],
+          incompatibleNodes: [],
+        })
       )
         .pipe(take(2))
         .toPromise()

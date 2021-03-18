@@ -18,7 +18,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Range } from '../../../expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  OpenSearchDashboardsDatatable,
+  Range,
+} from '../../../expressions/public';
 
 interface Arguments {
   from: number;

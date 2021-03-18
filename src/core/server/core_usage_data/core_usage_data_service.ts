@@ -56,8 +56,13 @@ export interface StartDeps {
  * @param opensearchDashboardsConfigIndex The default opensearch-dashboards index as configured by the user
  * with `opensearchDashboards.index`
  */
-const opensearchDashboardsOrTaskManagerIndex = (index: string, opensearchDashboardsConfigIndex: string) => {
-  return index === opensearchDashboardsConfigIndex ? '.opensearch-dashboards' : '.opensearch_dashboards_task_manager';
+const opensearchDashboardsOrTaskManagerIndex = (
+  index: string,
+  opensearchDashboardsConfigIndex: string
+) => {
+  return index === opensearchDashboardsConfigIndex
+    ? '.opensearch-dashboards'
+    : '.opensearch_dashboards_task_manager';
 };
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
@@ -102,7 +107,10 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           .then(({ body }) => {
             const stats = body[0];
             return {
-              alias: opensearchDashboardsOrTaskManagerIndex(index, this.opensearchDashboardsConfig!.index),
+              alias: opensearchDashboardsOrTaskManagerIndex(
+                index,
+                this.opensearchDashboardsConfig!.index
+              ),
               docsCount: stats['docs.count'],
               docsDeleted: stats['docs.deleted'],
               storeSizeBytes: stats['store.size'],
@@ -139,7 +147,10 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
         opensearch: {
           apiVersion: opensearchConfig.apiVersion,
           sniffOnStart: opensearchConfig.sniffOnStart,
-          sniffIntervalMs: opensearchConfig.sniffInterval !== false ? opensearchConfig.sniffInterval.asMilliseconds() : -1,
+          sniffIntervalMs:
+            opensearchConfig.sniffInterval !== false
+              ? opensearchConfig.sniffInterval.asMilliseconds()
+              : -1,
           sniffOnConnectionFault: opensearchConfig.sniffOnConnectionFault,
           numberOfHostsConfigured: Array.isArray(opensearchConfig.hosts)
             ? opensearchConfig.hosts.length

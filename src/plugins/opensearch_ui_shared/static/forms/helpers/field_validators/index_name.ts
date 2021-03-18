@@ -53,14 +53,17 @@ export const indexNameField = (i18n: any) => (
   );
   if (doesContain) {
     return {
-      message: i18n.translate('opensearchUi.forms.fieldValidation.indexNameInvalidCharactersError', {
-        defaultMessage:
-          'The index name contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
-        values: {
-          characterList: charsFound.join(' '),
-          characterListLength: charsFound.length,
-        },
-      }),
+      message: i18n.translate(
+        'opensearchUi.forms.fieldValidation.indexNameInvalidCharactersError',
+        {
+          defaultMessage:
+            'The index name contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
+          values: {
+            characterList: charsFound.join(' '),
+            characterListLength: charsFound.length,
+          },
+        }
+      ),
     };
   }
 };

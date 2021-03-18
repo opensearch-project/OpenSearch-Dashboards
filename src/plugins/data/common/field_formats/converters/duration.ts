@@ -195,8 +195,8 @@ export class DurationFormat extends FieldFormat {
     const prefix =
       val < 0 && human
         ? i18n.translate('data.fieldFormats.duration.negativeLabel', {
-          defaultMessage: 'minus',
-        }) + ' '
+            defaultMessage: 'minus',
+          }) + ' '
         : '';
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = duration[outputFormat]();

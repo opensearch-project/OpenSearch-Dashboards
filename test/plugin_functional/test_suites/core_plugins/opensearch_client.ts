@@ -29,9 +29,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await supertest.get('/api/opensearch_client_plugin/contract/ping').expect(200, 'true');
     });
     it('server plugins can create a custom opensearch client', async () => {
-      await supertest
-        .get('/api/opensearch_client_plugin/custom_client/ping')
-        .expect(200, 'true');
+      await supertest.get('/api/opensearch_client_plugin/custom_client/ping').expect(200, 'true');
     });
   });
 }

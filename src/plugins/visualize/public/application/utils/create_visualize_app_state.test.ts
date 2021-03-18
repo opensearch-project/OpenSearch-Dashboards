@@ -36,7 +36,9 @@ jest.mock('./migrate_app_state', () => ({
   migrateAppState: jest.fn(() => 'migratedAppState'),
 }));
 
-const { createStateContainer, syncState } = jest.requireMock('../../../../opensearch_dashboards_utils/public');
+const { createStateContainer, syncState } = jest.requireMock(
+  '../../../../opensearch_dashboards_utils/public'
+);
 
 describe('createVisualizeAppState', () => {
   const osdUrlStateStorage = ({
