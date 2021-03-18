@@ -71,7 +71,7 @@ exports[`Overview render 1`] = `
       }
     }
     hideToolbar={false}
-    iconType="logoKibana"
+    iconType="inputOutput"
     title={
       <FormattedMessage
         defaultMessage="Kibana"
@@ -128,7 +128,7 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
                   "title": "The Go client for Elasticsearch: Introduction",
                 },
@@ -138,7 +138,7 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -148,7 +148,7 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },
@@ -198,7 +198,7 @@ exports[`Overview render 1`] = `
                     <EuiToken
                       className="kbnOverviewSolution__icon"
                       fill="light"
-                      iconType="logoKibana"
+                      iconType="inputOutput"
                       shape="circle"
                       size="l"
                     />
@@ -491,7 +491,7 @@ exports[`Overview without features 1`] = `
       }
     }
     hideToolbar={false}
-    iconType="logoKibana"
+    iconType="inputOutput"
     title={
       <FormattedMessage
         defaultMessage="Kibana"
@@ -548,7 +548,7 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
                   "title": "The Go client for Elasticsearch: Introduction",
                 },
@@ -558,7 +558,7 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -568,7 +568,7 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },
@@ -618,7 +618,7 @@ exports[`Overview without features 1`] = `
                     <EuiToken
                       className="kbnOverviewSolution__icon"
                       fill="light"
-                      iconType="logoKibana"
+                      iconType="inputOutput"
                       shape="circle"
                       size="l"
                     />
@@ -911,7 +911,7 @@ exports[`Overview without solutions 1`] = `
       }
     }
     hideToolbar={false}
-    iconType="logoKibana"
+    iconType="inputOutput"
     title={
       <FormattedMessage
         defaultMessage="Kibana"
@@ -968,7 +968,7 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
                   "title": "The Go client for Elasticsearch: Introduction",
                 },
@@ -978,7 +978,7 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -988,7 +988,7 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },

@@ -14,6 +14,6 @@
       "_cat/count",
       "_cat/count/{indices}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-count.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/cat-count.html"
   }
 }

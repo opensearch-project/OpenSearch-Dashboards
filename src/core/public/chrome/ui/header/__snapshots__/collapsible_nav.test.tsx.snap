@@ -129,7 +129,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         Object {
           "baseUrl": "/",
           "category": Object {
-            "euiIconType": "logoKibana",
+            "euiIconType": "inputOutput",
             "id": "kibana",
             "label": "Kibana",
             "order": 1000,
@@ -185,7 +185,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         Object {
           "baseUrl": "/",
           "category": Object {
-            "euiIconType": "logoKibana",
+            "euiIconType": "inputOutput",
             "id": "kibana",
             "label": "Kibana",
             "order": 1000,
@@ -199,7 +199,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         Object {
           "baseUrl": "/",
           "category": Object {
-            "euiIconType": "logoKibana",
+            "euiIconType": "inputOutput",
             "id": "kibana",
             "label": "Kibana",
             "order": 1000,
@@ -854,7 +854,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiCollapsibleNavGroup
                 data-test-subj="collapsibleNavGroup-kibana"
-                iconType="logoKibana"
+                iconType="inputOutput"
                 initialIsOpen={true}
                 isCollapsible={true}
                 key="kibana"
@@ -875,7 +875,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       >
                         <EuiIcon
                           size="l"
-                          type="logoKibana"
+                          type="inputOutput"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -951,10 +951,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 >
                                   <EuiIcon
                                     size="l"
-                                    type="logoKibana"
+                                    type="inputOutput"
                                   >
                                     <div
-                                      data-euiicon-type="logoKibana"
+                                      data-euiicon-type="inputOutput"
                                       size="l"
                                     />
                                   </EuiIcon>

@@ -125,7 +125,7 @@ export class OpenSearchDashboardsOverviewPlugin
             defaultMessage: 'Reveal patterns and relationships.',
           }),
         ],
-        icon: 'logoKibana',
+        icon: 'inputOutput',
         path: PLUGIN_PATH,
         order: 400,
       });

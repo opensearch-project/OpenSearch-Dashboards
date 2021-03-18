@@ -38,7 +38,7 @@ describe('SearchTimeoutError', () => {
     expect(component.find('EuiButton').length).toBe(1);
     component.find('EuiButton').simulate('click');
     expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
-      'https://www.elastic.co/subscriptions'
+      'https://www.opensearch.co/subscriptions'
     );
   });
 

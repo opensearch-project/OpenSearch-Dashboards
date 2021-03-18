@@ -218,7 +218,7 @@ export const EditIndexPattern = withRouter(
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
               <EuiLink
-                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
+                href="http://www.opensearch.co/guide/en/elasticsearch/reference/current/mapping.html"
                 target="_blank"
                 external
               >

@@ -37,6 +37,6 @@
       ],
       "indices": null
     },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
 }

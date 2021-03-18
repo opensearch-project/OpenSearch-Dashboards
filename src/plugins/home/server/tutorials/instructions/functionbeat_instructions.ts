@@ -37,7 +37,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'tar xzvf functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'cd functionbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
@@ -56,7 +56,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         }
       ),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
         'tar xzvf functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
         'cd functionbeat-{config.opensearchDashboards.version}-linux-x86_64/',
       ],
@@ -81,7 +81,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             functionbeatLink:
               '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/functionbeat',
+            elasticLink: 'https://www.opensearch.co/downloads/beats/functionbeat',
           },
         }
       ),

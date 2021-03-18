@@ -38,20 +38,20 @@ export const configSchema = schema.object({
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
+      defaultValue: `https://telemetry-staging.opensearch.co/xpack/${ENDPOINT_VERSION}/send`,
     }),
     schema.string({
-      defaultValue: `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
+      defaultValue: `https://telemetry.opensearch.co/xpack/${ENDPOINT_VERSION}/send`,
     })
   ),
   optInStatusUrl: schema.conditional(
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
+      defaultValue: `https://telemetry-staging.opensearch.co/opt_in_status/${ENDPOINT_VERSION}/send`,
     }),
     schema.string({
-      defaultValue: `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
+      defaultValue: `https://telemetry.opensearch.co/opt_in_status/${ENDPOINT_VERSION}/send`,
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {

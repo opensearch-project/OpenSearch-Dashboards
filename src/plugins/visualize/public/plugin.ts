@@ -141,7 +141,7 @@ export class VisualizePlugin
       id: 'visualize',
       title: 'Visualize',
       order: 8000,
-      euiIconType: 'logoKibana',
+      euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       updater$: this.appStateUpdater.asObservable(),

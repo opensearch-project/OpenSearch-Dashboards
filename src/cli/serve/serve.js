@@ -232,7 +232,7 @@ export default function (program) {
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
         // We can tell users they only have to run with `yarn start --run-examples` to get those
         // local links to work.  Similar to what we do for "View in Console" links in our
-        // elastic.co links.
+        // opensearch.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         disableOptimizer: !opts.optimizer,
