@@ -24,9 +24,11 @@ import { Platform } from './platform';
 
 export class Build {
   private name = this.oss ? 'opensearch-dashboards-oss' : 'opensearch-dashboards';
-  private logTag = this.oss ? chalk`{magenta [opensearch-dashboards-oss]}` : chalk`{cyan [  opensearch-dashboards  ]}`;
+  private logTag = this.oss
+    ? chalk`{magenta [opensearch-dashboards-oss]}`
+    : chalk`{cyan [  opensearch-dashboards  ]}`;
 
-  constructor(private config: Config, private oss: boolean) { }
+  constructor(private config: Config, private oss: boolean) {}
 
   isOss() {
     return !!this.oss;

@@ -24,7 +24,7 @@ import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager
 import { OpenSearchClient } from 'src/core/server';
 
 export interface OpenSearchDashboardsUsageStats {
-  opensearch_dashboards: {
+  opensearchDashboards: {
     index: string;
   };
   opensearch_dashboards_stats: {
@@ -50,7 +50,7 @@ export function handleOpenSearchDashboardsStats(
     return;
   }
   const {
-    opensearch_dashboards,
+    opensearchDashboards,
     opensearch_dashboards_stats: opensearchDashboardsStats,
     ...plugins
   } = response;
@@ -76,7 +76,7 @@ export function handleOpenSearchDashboardsStats(
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry
   return {
-    ...omit(opensearch_dashboards, 'index'), // discard index
+    ...omit(opensearchDashboards, 'index'), // discard index
     count: 1,
     indices: 1,
     os: formattedOsStats,
