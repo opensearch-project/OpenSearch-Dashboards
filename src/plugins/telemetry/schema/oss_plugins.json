@@ -252,7 +252,7 @@
             }
           }
         },
-        "timelion": {
+        "timeline": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1343,7 +1343,7 @@
             }
           }
         },
-        "timelion_sheet": {
+        "timeline_sheet": {
           "properties": {
             "total": {
               "type": "long"
@@ -1381,31 +1381,31 @@
         "visualization:tileMap:WMSdefaults": {
           "type": "text"
         },
-        "timelion:target_buckets": {
+        "timeline:target_buckets": {
           "type": "long"
         },
-        "timelion:max_buckets": {
+        "timeline:max_buckets": {
           "type": "long"
         },
-        "timelion:opensearch.timefield": {
+        "timeline:opensearch.timefield": {
           "type": "keyword"
         },
-        "timelion:min_interval": {
+        "timeline:min_interval": {
           "type": "keyword"
         },
-        "timelion:default_rows": {
+        "timeline:default_rows": {
           "type": "long"
         },
-        "timelion:default_columns": {
+        "timeline:default_columns": {
           "type": "long"
         },
-        "timelion:quandl.key": {
+        "timeline:quandl.key": {
           "type": "keyword"
         },
-        "timelion:opensearch.default_index": {
+        "timeline:opensearch.default_index": {
           "type": "keyword"
         },
-        "timelion:showTutorial": {
+        "timeline:showTutorial": {
           "type": "boolean"
         },
         "securitySolution:timeDefaults": {
@@ -1937,7 +1937,7 @@
             }
           }
         },
-        "timelion": {
+        "timeline": {
           "type": "array",
           "items": {
             "properties": {

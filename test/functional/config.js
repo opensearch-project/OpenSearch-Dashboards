@@ -35,7 +35,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/status_page'),
-      require.resolve('./apps/timelion'),
+      require.resolve('./apps/timeline'),
       require.resolve('./apps/visualize'),
     ],
     pageObjects,
@@ -92,8 +92,8 @@ export default async function ({ readConfigFile }) {
       settings: {
         pathname: '/app/management',
       },
-      timelion: {
-        pathname: '/app/timelion',
+      timeline: {
+        pathname: '/app/timeline',
       },
       console: {
         pathname: '/app/dev_tools',
