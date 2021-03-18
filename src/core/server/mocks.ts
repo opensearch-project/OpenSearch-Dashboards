@@ -61,7 +61,7 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
     opensearchDashboards: {
-      index: '.kibana-tests',
+      index: '.opensearch_dashboards_tests',
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
     },

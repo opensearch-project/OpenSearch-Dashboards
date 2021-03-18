@@ -65,12 +65,12 @@ export class Config {
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
     public readonly isRelease: boolean
-  ) {}
+  ) { }
 
   /**
    * Get Kibana's parsed package.json file
    */
-  getKibanaPkg() {
+  getOpenSearchDashboardsPkg() {
     return this.pkg;
   }
 

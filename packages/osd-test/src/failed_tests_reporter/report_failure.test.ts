@@ -53,7 +53,7 @@ describe('createFailureIssue()', () => {
 
       First failure: [Jenkins Build](https://build-url)
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
             Array [
               "failed-test",
             ],
@@ -82,7 +82,7 @@ describe('updateFailureIssue()', () => {
         body: dedent`
           # existing issue body
 
-          <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
+          <!-- opensearchDashboardsCiData = {"failed-test":{"test.failCount":10}} -->"
         `,
       },
       api
@@ -95,7 +95,7 @@ describe('updateFailureIssue()', () => {
             1234,
             "# existing issue body
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.failCount\\":11}} -->\\"",
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"test.failCount\\":11}} -->\\"",
           ],
         ],
         "results": Array [
