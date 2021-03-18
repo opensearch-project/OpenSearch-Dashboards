@@ -25,8 +25,8 @@ const names: Record<string, string> = {
   general: i18n.translate('advancedSettings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),
-  timelion: i18n.translate('advancedSettings.categoryNames.timelionLabel', {
-    defaultMessage: 'Timelion',
+  timeline: i18n.translate('advancedSettings.categoryNames.timelineLabel', {
+    defaultMessage: 'Timeline',
   }),
   notifications: i18n.translate('advancedSettings.categoryNames.notificationsLabel', {
     defaultMessage: 'Notifications',

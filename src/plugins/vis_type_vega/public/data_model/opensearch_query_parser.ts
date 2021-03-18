@@ -420,7 +420,7 @@ export class OpenSearchQueryParser {
   }
 
   /**
-   * Adapted from src/legacy/core_plugins/timelion/common/lib/calculate_interval.js
+   * Adapted from src/legacy/core_plugins/timeline/common/lib/calculate_interval.js
    * @param interval (ms)
    * @returns {string}
    */
