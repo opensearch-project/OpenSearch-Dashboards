@@ -18,7 +18,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { getFormatService, getNotifications, getOpenSearchDashboardsLegacy } from './opensearch_dashboards_services';
+import {
+  getFormatService,
+  getNotifications,
+  getOpenSearchDashboardsLegacy,
+} from './opensearch_dashboards_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';

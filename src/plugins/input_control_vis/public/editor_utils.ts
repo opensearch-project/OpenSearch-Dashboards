@@ -49,10 +49,10 @@ export const setControl = (
   controlIndex: number,
   control: ControlParams
 ): ControlParams[] => [
-    ...controls.slice(0, controlIndex),
-    control,
-    ...controls.slice(controlIndex + 1),
-  ];
+  ...controls.slice(0, controlIndex),
+  control,
+  ...controls.slice(controlIndex + 1),
+];
 
 export const addControl = (controls: ControlParams[], control: ControlParams): ControlParams[] => [
   ...controls,

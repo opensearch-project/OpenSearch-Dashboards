@@ -216,7 +216,9 @@ describe('OsdUrlStateStorage', () => {
       const state = { test: 'test', ok: 1 };
       const key = '_s';
       await urlStateStorage.set(key, state);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/opensearch-dashboards/app/#?_s=(ok:1,test:test)"`);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/opensearch-dashboards/app/#?_s=(ok:1,test:test)"`
+      );
       expect(urlStateStorage.get(key)).toEqual(state);
     });
 
@@ -226,7 +228,9 @@ describe('OsdUrlStateStorage', () => {
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/opensearch-dashboards/app/"`);
       expect(urlStateStorage.flush()).toBe(true);
-      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/opensearch-dashboards/app/#?_s=(ok:1,test:test)"`);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/opensearch-dashboards/app/#?_s=(ok:1,test:test)"`
+      );
       expect(urlStateStorage.get(key)).toEqual(state);
 
       expect(urlStateStorage.flush()).toBe(false); // nothing to flush, not update

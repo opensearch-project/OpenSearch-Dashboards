@@ -92,7 +92,9 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
   const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
-  const parsedSearchSource = JSON.parse(newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON);
+  const parsedSearchSource = JSON.parse(
+    newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+  );
   expect(parsedSearchSource.filter.length).toBe(0);
   expect(parsedSearchSource.query.query).toBe('');
 
@@ -124,7 +126,9 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
   const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
-  const parsedSearchSource = JSON.parse(newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON);
+  const parsedSearchSource = JSON.parse(
+    newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+  );
   expect(parsedSearchSource.filter.length).toBe(0);
   expect(parsedSearchSource.query.query).toBe('user:spiderman');
 

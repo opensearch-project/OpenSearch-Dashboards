@@ -32,7 +32,7 @@ export class FilterableContainerFactory
 
   constructor(
     private readonly getFactory: () => Promise<EmbeddableStart['getEmbeddableFactory']>
-  ) { }
+  ) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {

@@ -31,7 +31,7 @@ getAngularModule().config(($routeProvider: any) => {
         }
       });
       // prevent angular from completing the navigation
-      return new Promise(() => { });
+      return new Promise(() => {});
     },
   });
 });

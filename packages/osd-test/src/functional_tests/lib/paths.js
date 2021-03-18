@@ -28,7 +28,10 @@ function resolveRelative(path) {
 export const OPENSEARCH_DASHBOARDS_EXEC = 'node';
 export const OPENSEARCH_DASHBOARDS_EXEC_PATH = resolveRelative('scripts/opensearch_dashboards');
 export const OPENSEARCH_DASHBOARDS_ROOT = resolve(__dirname, '../../../../../');
-export const OPENSEARCH_DASHBOARDS_FTR_SCRIPT = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'scripts/functional_test_runner');
+export const OPENSEARCH_DASHBOARDS_FTR_SCRIPT = resolve(
+  OPENSEARCH_DASHBOARDS_ROOT,
+  'scripts/functional_test_runner'
+);
 export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
 export const FUNCTIONAL_CONFIG_PATH = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'test/functional/config');
 export const API_CONFIG_PATH = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'test/api_integration/config');

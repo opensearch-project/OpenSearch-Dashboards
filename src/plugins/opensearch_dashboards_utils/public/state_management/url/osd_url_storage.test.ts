@@ -288,9 +288,12 @@ describe('osd_url_storage', () => {
 
     it('should extract path relative to browser history with basename from relative url', () => {
       const history = createBrowserHistory({ basename: '/oxf/app/' });
-      const url = "/oxf/app/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const url =
+        "/oxf/app/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
-      expect(relativePath).toEqual("/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+      expect(relativePath).toEqual(
+        "/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+      );
     });
 
     it('should extract path relative to hash history without basename', () => {
@@ -311,7 +314,8 @@ describe('osd_url_storage', () => {
 
     it('should extract path relative to hash history with basename from relative url', () => {
       const history = createHashHistory({ basename: 'management' });
-      const url = "/oxf/app/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const url =
+        "/oxf/app/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
       expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });

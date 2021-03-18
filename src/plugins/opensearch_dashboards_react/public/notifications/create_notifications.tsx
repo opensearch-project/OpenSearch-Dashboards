@@ -22,7 +22,9 @@ import { OpenSearchDashboardsServices } from '../context/types';
 import { OpenSearchDashboardsReactNotifications } from './types';
 import { toMountPoint } from '../util';
 
-export const createNotifications = (services: OpenSearchDashboardsServices): OpenSearchDashboardsReactNotifications => {
+export const createNotifications = (
+  services: OpenSearchDashboardsServices
+): OpenSearchDashboardsReactNotifications => {
   const show: OpenSearchDashboardsReactNotifications['toasts']['show'] = ({
     title,
     body,

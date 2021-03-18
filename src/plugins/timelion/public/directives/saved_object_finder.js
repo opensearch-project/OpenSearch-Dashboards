@@ -263,7 +263,9 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
           };
 
           self.manageObjects = function (type) {
-            $location.url('/management/opensearch-dashboards/objects?_a=' + rison.encode({ tab: type }));
+            $location.url(
+              '/management/opensearch-dashboards/objects?_a=' + rison.encode({ tab: type })
+            );
           };
 
           self.hitCountNoun = function () {

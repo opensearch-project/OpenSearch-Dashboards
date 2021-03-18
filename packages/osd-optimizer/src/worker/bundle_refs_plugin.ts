@@ -46,7 +46,7 @@ export class BundleRefsPlugin {
   private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) { }
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
 
   /**
    * Called by webpack when the plugin is passed in the webpack config

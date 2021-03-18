@@ -32,12 +32,22 @@ export function ratios(req, panel, opensearchQueryConfig, indexPatternObject) {
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
-            opensearchQuery.buildOpenSearchQuery(indexPatternObject, metric.numerator, [], opensearchQueryConfig)
+            opensearchQuery.buildOpenSearchQuery(
+              indexPatternObject,
+              metric.numerator,
+              [],
+              opensearchQueryConfig
+            )
           );
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
-            opensearchQuery.buildOpenSearchQuery(indexPatternObject, metric.denominator, [], opensearchQueryConfig)
+            opensearchQuery.buildOpenSearchQuery(
+              indexPatternObject,
+              metric.denominator,
+              [],
+              opensearchQueryConfig
+            )
           );
 
           let numeratorPath = `${metric.id}-numerator>_count`;

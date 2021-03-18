@@ -28,7 +28,10 @@ export default function ({ getService }) {
   describe('sample data apis', () => {
     describe('list', () => {
       it('should return list of sample data sets with installed status', async () => {
-        const resp = await supertest.get(`/api/sample_data`).set('osd-xsrf', 'opensearch-dashboards').expect(200);
+        const resp = await supertest
+          .get(`/api/sample_data`)
+          .set('osd-xsrf', 'opensearch-dashboards')
+          .expect(200);
 
         expect(resp.body).to.be.an('array');
         expect(resp.body.length).to.be.above(0);
@@ -38,7 +41,10 @@ export default function ({ getService }) {
 
     describe('install', () => {
       it('should return 404 if id does not match any sample data sets', async () => {
-        await supertest.post(`/api/sample_data/xxxx`).set('osd-xsrf', 'opensearch-dashboards').expect(404);
+        await supertest
+          .post(`/api/sample_data/xxxx`)
+          .set('osd-xsrf', 'opensearch-dashboards')
+          .expect(404);
       });
 
       it('should return 200 if success', async () => {
@@ -87,7 +93,10 @@ export default function ({ getService }) {
 
     describe('uninstall', () => {
       it('should uninstall sample data', async () => {
-        await supertest.delete(`/api/sample_data/flights`).set('osd-xsrf', 'opensearch-dashboards').expect(204);
+        await supertest
+          .delete(`/api/sample_data/flights`)
+          .set('osd-xsrf', 'opensearch-dashboards')
+          .expect(204);
       });
 
       it('should remove opensearch index containing sample data', async () => {

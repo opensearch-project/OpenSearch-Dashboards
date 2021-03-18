@@ -32,7 +32,9 @@ const matchedIndices = {
     { name: 'opensearch', ...tagsPartial },
   ] as unknown) as MatchedItem[],
   exactMatchedIndices: [] as MatchedItem[],
-  partialMatchedIndices: ([{ name: 'opensearch-dashboards', ...tagsPartial }] as unknown) as MatchedItem[],
+  partialMatchedIndices: ([
+    { name: 'opensearch-dashboards', ...tagsPartial },
+  ] as unknown) as MatchedItem[],
 };
 
 describe('StatusMessage', () => {
@@ -52,7 +54,9 @@ describe('StatusMessage', () => {
   it('should render with exact matches', () => {
     const localMatchedIndices = {
       ...matchedIndices,
-      exactMatchedIndices: ([{ name: 'opensearch-dashboards', ...tagsPartial }] as unknown) as MatchedItem[],
+      exactMatchedIndices: ([
+        { name: 'opensearch-dashboards', ...tagsPartial },
+      ] as unknown) as MatchedItem[],
     };
 
     const component = shallow(

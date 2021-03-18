@@ -93,10 +93,7 @@ test('parses fully specified config', () => {
     },
   };
 
-  const opensearchClientConfig = parseOpenSearchClientConfig(
-    opensearchConfig,
-    logger.get()
-  );
+  const opensearchClientConfig = parseOpenSearchClientConfig(opensearchConfig, logger.get());
 
   // Check that original references aren't used.
   for (const host of opensearchClientConfig.hosts) {

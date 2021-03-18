@@ -325,7 +325,9 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateOpenSearchCannotExecuteScriptError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(error)).toBe(
+          error
+        );
       });
 
       it('makes the error identifiable as a OpenSearchCannotExecuteScript error', () => {
@@ -336,7 +338,9 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       it('adds boom properties', () => {
-        const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateOpenSearchCannotExecuteScriptError(
+          new Error()
+        );
         expect(error).toHaveProperty('isBoom', true);
       });
 
@@ -393,7 +397,9 @@ describe('savedObjectsClient/errorTypes', () => {
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(
+            new Error('foobar')
+          );
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
 
@@ -406,7 +412,9 @@ describe('savedObjectsClient/errorTypes', () => {
         });
 
         it('sets statusCode to 503', () => {
-          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateOpenSearchUnavailableError(
+            new Error('foo')
+          );
           expect(error.output).toHaveProperty('statusCode', 503);
         });
 

@@ -42,7 +42,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
 
       it(
         'includes only name, type, opensearchTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
-        'and subType of each field',
+          'and subType of each field',
         () => {
           const responseClone = cloneDeep(opensearchResponse);
           // try to trick it into including an extra field

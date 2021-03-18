@@ -30,7 +30,10 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
   <section aria-labelledby="osdOverviewNews__title" className="osdOverviewNews">
     <EuiTitle size="s">
       <h2 id="osdOverviewNews__title">
-        <FormattedMessage id="opensearchDashboardsOverview.news.title" defaultMessage="What's new" />
+        <FormattedMessage
+          id="opensearchDashboardsOverview.news.title"
+          defaultMessage="What's new"
+        />
       </h2>
     </EuiTitle>
 

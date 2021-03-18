@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { shouldReadFieldFromDocValues, castOpenSearchToOsdFieldTypeName } from '../plugins/data/server';
+import {
+  shouldReadFieldFromDocValues,
+  castOpenSearchToOsdFieldTypeName,
+} from '../plugins/data/server';
 
 function stubbedLogstashFields() {
   return [
@@ -53,7 +56,14 @@ function stubbedLogstashFields() {
     ['script date', 'date', true, false, { script: '1234', lang: 'painless' }],
     ['script murmur3', 'murmur3', true, false, { script: '1234' }],
   ].map(function (row) {
-    const [name, opensearchType, aggregatable, searchable, metadata = {}, subType = undefined] = row;
+    const [
+      name,
+      opensearchType,
+      aggregatable,
+      searchable,
+      metadata = {},
+      subType = undefined,
+    ] = row;
 
     const {
       count = 0,
@@ -64,7 +74,10 @@ function stubbedLogstashFields() {
 
     // the conflict type is actually a osdFieldType, we
     // don't have any other way to represent it here
-    const type = opensearchType === 'conflict' ? opensearchType : castOpenSearchToOsdFieldTypeName(opensearchType);
+    const type =
+      opensearchType === 'conflict'
+        ? opensearchType
+        : castOpenSearchToOsdFieldTypeName(opensearchType);
 
     return {
       name,

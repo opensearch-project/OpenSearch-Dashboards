@@ -41,7 +41,10 @@ describe('ElasticIndex', () => {
         mappings: { dynamic: 'strict', properties: {} },
       });
 
-      expect(client.indices.get).toHaveBeenCalledWith({ index: '.opensearch-dashboards-test' }, { ignore: [404] });
+      expect(client.indices.get).toHaveBeenCalledWith(
+        { index: '.opensearch-dashboards-test' },
+        { ignore: [404] }
+      );
     });
 
     test('fails if the index doc type is unsupported', async () => {

@@ -22,6 +22,8 @@ import { services as opensearchDashboardsCommonServices } from '../../common/ser
 import { services as opensearchDashboardsApiIntegrationServices } from '../../api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<
-  typeof opensearchDashboardsCommonServices & { supertest: typeof opensearchDashboardsApiIntegrationServices.supertest },
+  typeof opensearchDashboardsCommonServices & {
+    supertest: typeof opensearchDashboardsApiIntegrationServices.supertest;
+  },
   {}
 >;

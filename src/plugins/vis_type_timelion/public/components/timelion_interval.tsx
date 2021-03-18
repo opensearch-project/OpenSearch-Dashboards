@@ -102,7 +102,8 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
     [value]
   );
 
-  const isValid = intervalOptions.some((int) => int.value === value) || isValidOpenSearchInterval(value);
+  const isValid =
+    intervalOptions.some((int) => int.value === value) || isValidOpenSearchInterval(value);
 
   useValidation(setValidity, isValid);
 

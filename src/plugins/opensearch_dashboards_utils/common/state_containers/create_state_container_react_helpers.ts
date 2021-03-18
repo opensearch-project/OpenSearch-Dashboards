@@ -74,7 +74,7 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
 
 /**
  * Creates helpers for using {@link StateContainer | State Containers} with react
- * 
+ *
  * TODO Update link
  * Refer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details
  * @public

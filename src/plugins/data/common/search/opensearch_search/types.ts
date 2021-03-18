@@ -37,8 +37,11 @@ export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
 
-export interface IOpenSearchSearchRequest extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
+export interface IOpenSearchSearchRequest
+  extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
   indexType?: string;
 }
 
-export type IOpenSearchSearchResponse<Source = any> = IOpenSearchDashboardsSearchResponse<SearchResponse<Source>>;
+export type IOpenSearchSearchResponse<Source = any> = IOpenSearchDashboardsSearchResponse<
+  SearchResponse<Source>
+>;

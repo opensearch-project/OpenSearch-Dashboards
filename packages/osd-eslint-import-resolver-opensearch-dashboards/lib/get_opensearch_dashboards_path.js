@@ -33,9 +33,9 @@ exports.getOpenSearchDashboardsPath = function (config, projectRoot) {
   if (inConfig && config.opensearchDashboardsPath !== '.') {
     throw new Error(
       'The `opensearchDashboardsPath` option has been removed from `eslint-import-resolver-opensearch-dashboards`. ' +
-      'During development your plugin must live in `./plugins/{pluginName}` ' +
-      'inside the OpenSearch Dashboards folder or `../opensearch-dashboards-extra/{pluginName}` ' +
-      'relative to the OpenSearch Dashboards folder to work with this package.'
+        'During development your plugin must live in `./plugins/{pluginName}` ' +
+        'inside the OpenSearch Dashboards folder or `../opensearch-dashboards-extra/{pluginName}` ' +
+        'relative to the OpenSearch Dashboards folder to work with this package.'
     );
   }
 

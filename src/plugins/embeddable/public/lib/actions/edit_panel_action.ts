@@ -83,9 +83,9 @@ export class EditPanelAction implements Action<ActionContext> {
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
-      embeddable.getOutput().editable &&
-      (embeddable.getOutput().editUrl ||
-        (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
+        embeddable.getOutput().editable &&
+        (embeddable.getOutput().editUrl ||
+          (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);

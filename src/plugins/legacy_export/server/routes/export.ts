@@ -40,7 +40,9 @@ export const registerExportRoute = (router: IRouter, opensearchDashboardsVersion
       const { client } = ctx.core.savedObjects;
 
       const exported = await exportDashboards(ids, client, opensearchDashboardsVersion);
-      const filename = `opensearch-dashboards-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;
+      const filename = `opensearch-dashboards-dashboards.${moment
+        .utc()
+        .format('YYYY-MM-DD-HH-mm-ss')}.json`;
       const body = JSON.stringify(exported, null, '  ');
 
       return res.ok({

@@ -82,7 +82,10 @@ export type OnPreRoutingHandler = (
   request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreRoutingToolkit
-) => OnPreRoutingResult | OpenSearchDashboardsResponse | Promise<OnPreRoutingResult | OpenSearchDashboardsResponse>;
+) =>
+  | OnPreRoutingResult
+  | OpenSearchDashboardsResponse
+  | Promise<OnPreRoutingResult | OpenSearchDashboardsResponse>;
 
 /**
  * @public
@@ -98,7 +101,11 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        OpenSearchDashboardsRequest.from(request),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }

@@ -104,7 +104,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('does not allow file tree traversing', async function () {
-        await supertest.get('/plugins/corePluginStaticAssets/assets/../../opensearch_dashboards.json').expect(404);
+        await supertest
+          .get('/plugins/corePluginStaticAssets/assets/../../opensearch_dashboards.json')
+          .expect(404);
       });
 
       it('generates "etag" & "last-modified" headers', async () => {

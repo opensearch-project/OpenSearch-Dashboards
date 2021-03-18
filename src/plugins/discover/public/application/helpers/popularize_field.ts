@@ -35,7 +35,7 @@ async function popularizeField(
   try {
     await indexPatternsService.updateSavedObject(indexPattern, 0, true);
     // eslint-disable-next-line no-empty
-  } catch { }
+  } catch {}
 }
 
 export { popularizeField };

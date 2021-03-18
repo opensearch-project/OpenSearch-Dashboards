@@ -22,7 +22,10 @@ import { UI_SETTINGS } from '../../../common';
 
 const defaultSessionId = `${Date.now()}`;
 
-export function getOpenSearchPreference(uiSettings: IUiSettingsClient, sessionId = defaultSessionId) {
+export function getOpenSearchPreference(
+  uiSettings: IUiSettingsClient,
+  sessionId = defaultSessionId
+) {
   const setPreference = uiSettings.get(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
   if (setPreference === 'sessionId') return `${sessionId}`;
   const customPreference = uiSettings.get(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE);

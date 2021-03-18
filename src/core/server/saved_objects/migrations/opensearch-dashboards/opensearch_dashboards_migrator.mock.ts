@@ -18,7 +18,10 @@
  */
 import type { PublicMethodsOf } from '@osd/utility-types';
 
-import { OpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './opensearch_dashboards_migrator';
+import {
+  OpenSearchDashboardsMigrator,
+  OpenSearchDashboardsMigratorStatus,
+} from './opensearch_dashboards_migrator';
 import { buildActiveMappings } from '../core';
 const { mergeTypes } = jest.requireActual('./opensearch_dashboards_migrator');
 import { SavedObjectsType } from '../../types';

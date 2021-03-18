@@ -35,7 +35,9 @@ import {
 import { readConfigFile } from '../functional_test_runner/lib';
 
 const makeSuccessMessage = (options) => {
-  const installDirFlag = options.installDir ? ` --opensearch-dashboards-install-dir=${options.installDir}` : '';
+  const installDirFlag = options.installDir
+    ? ` --opensearch-dashboards-install-dir=${options.installDir}`
+    : '';
 
   return (
     '\n\n' +

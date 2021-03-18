@@ -55,12 +55,9 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
 
-          const { count } = await context.core.opensearch.legacy.client.callAsCurrentUser(
-            'count',
-            {
-              index,
-            }
-          );
+          const { count } = await context.core.opensearch.legacy.client.callAsCurrentUser('count', {
+            index,
+          });
           if (count === 0) {
             sampleDataset.status = NOT_INSTALLED;
             return;

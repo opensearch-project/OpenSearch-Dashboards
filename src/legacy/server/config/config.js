@@ -22,7 +22,11 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { override } from './override';
 import createDefaultSchema from './schema';
-import { unset, deepCloneWithBuffers as clone, IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../utils';
+import {
+  unset,
+  deepCloneWithBuffers as clone,
+  IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE,
+} from '../../utils';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');

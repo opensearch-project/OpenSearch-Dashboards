@@ -22,7 +22,10 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useOpenSearchDashboards, toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import {
+  useOpenSearchDashboards,
+  toMountPoint,
+} from '../../../../opensearch_dashboards_react/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 

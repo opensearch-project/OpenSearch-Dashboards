@@ -35,13 +35,16 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipelineParams) => {
-  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('opensearchaggs', {
-    index: vis.data.indexPattern!.id!,
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
-  });
+  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
+    'opensearchaggs',
+    {
+      index: vis.data.indexPattern!.id!,
+      metricsAtAllLevels: vis.isHierarchical(),
+      partialRows: false,
+      aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+      includeFormatHints: false,
+    }
+  );
 
   const schemas = getVisSchemas(vis, params);
   const { scale, orientation, minFontSize, maxFontSize, showLabel } = vis.params;

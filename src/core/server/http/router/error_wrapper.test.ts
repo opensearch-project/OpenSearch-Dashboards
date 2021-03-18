@@ -18,9 +18,17 @@
  */
 
 import Boom from 'boom';
-import { OpenSearchDashboardsResponse, OpenSearchDashboardsResponseFactory, opensearchDashboardsResponseFactory } from './response';
+import {
+  OpenSearchDashboardsResponse,
+  OpenSearchDashboardsResponseFactory,
+  opensearchDashboardsResponseFactory,
+} from './response';
 import { wrapErrors } from './error_wrapper';
-import { OpenSearchDashboardsRequest, RequestHandler, RequestHandlerContext } from 'opensearch-dashboards/server';
+import {
+  OpenSearchDashboardsRequest,
+  RequestHandler,
+  RequestHandlerContext,
+} from 'opensearch-dashboards/server';
 
 const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
   return handler();

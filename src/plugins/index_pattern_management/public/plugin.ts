@@ -50,15 +50,15 @@ const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
   implements
-  Plugin<
-  IndexPatternManagementSetup,
-  IndexPatternManagementStart,
-  IndexPatternManagementSetupDependencies,
-  IndexPatternManagementStartDependencies
-  > {
+    Plugin<
+      IndexPatternManagementSetup,
+      IndexPatternManagementStart,
+      IndexPatternManagementSetupDependencies,
+      IndexPatternManagementStartDependencies
+    > {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
 
-  constructor(initializerContext: PluginInitializerContext) { }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
@@ -73,7 +73,11 @@ export class IndexPatternManagementPlugin
     const newAppPath = `management/opensearch-dashboards/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
-    urlForwarding.forwardApp('management/opensearch-dashboards/index_pattern', newAppPath, (path) => '/create');
+    urlForwarding.forwardApp(
+      'management/opensearch-dashboards/index_pattern',
+      newAppPath,
+      (path) => '/create'
+    );
     urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;

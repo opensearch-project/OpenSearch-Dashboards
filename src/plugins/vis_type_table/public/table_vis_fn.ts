@@ -19,7 +19,11 @@
 
 import { i18n } from '@osd/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  OpenSearchDashboardsDatatable,
+  Render,
+} from '../../expressions/public';
 
 export type Input = OpenSearchDashboardsDatatable;
 

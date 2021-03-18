@@ -55,10 +55,13 @@ describe('Url shortener', () => {
     const basePath = '/foo';
 
     it('should shorten urls with a port', async () => {
-      const shortUrl = await shortenUrl(`http://localhost:5601${basePath}/app/opensearch-dashboards#123`, {
-        basePath,
-        post: postStub,
-      });
+      const shortUrl = await shortenUrl(
+        `http://localhost:5601${basePath}/app/opensearch-dashboards#123`,
+        {
+          basePath,
+          post: postStub,
+        }
+      );
       expect(shortUrl).toBe(`http://localhost:5601${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
         body: '{"url":"/app/opensearch-dashboards#123"}',
@@ -66,10 +69,13 @@ describe('Url shortener', () => {
     });
 
     it('should shorten urls without a port', async () => {
-      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/opensearch-dashboards#123`, {
-        basePath,
-        post: postStub,
-      });
+      const shortUrl = await shortenUrl(
+        `http://localhost${basePath}/app/opensearch-dashboards#123`,
+        {
+          basePath,
+          post: postStub,
+        }
+      );
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
         body: '{"url":"/app/opensearch-dashboards#123"}',
@@ -77,10 +83,13 @@ describe('Url shortener', () => {
     });
 
     it('should shorten urls with a query string', async () => {
-      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/opensearch-dashboards?foo#123`, {
-        basePath,
-        post: postStub,
-      });
+      const shortUrl = await shortenUrl(
+        `http://localhost${basePath}/app/opensearch-dashboards?foo#123`,
+        {
+          basePath,
+          post: postStub,
+        }
+      );
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
         body: '{"url":"/app/opensearch-dashboards?foo#123"}',

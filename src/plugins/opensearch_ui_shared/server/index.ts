@@ -22,7 +22,7 @@ export { isOpenSearchError } from './errors';
 /** dummy plugin*/
 export function plugin() {
   return new (class OpenSearchUiSharedPlugin {
-    setup() { }
-    start() { }
+    setup() {}
+    start() {}
   })();
 }

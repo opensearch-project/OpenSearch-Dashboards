@@ -34,7 +34,10 @@ function isDirectory(filename) {
 
 export function analyzeArchive(archive) {
   const plugins = [];
-  const regExp = new RegExp('(opensearch-dashboards[\\\\/][^\\\\/]+)[\\\\/]opensearch_dashboards.json', 'i');
+  const regExp = new RegExp(
+    '(opensearch-dashboards[\\\\/][^\\\\/]+)[\\\\/]opensearch_dashboards.json',
+    'i'
+  );
 
   return new Promise((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
@@ -72,7 +75,8 @@ export function analyzeArchive(archive) {
               // two versions need plugins can specify a opensearchDashboardsVersion to indicate the version
               // of opensearch-dashboards the plugin is intended to work with.
               opensearchDashboardsVersion:
-                typeof manifest.opensearchDashboardsVersion === 'string' && manifest.opensearchDashboardsVersion
+                typeof manifest.opensearchDashboardsVersion === 'string' &&
+                manifest.opensearchDashboardsVersion
                   ? manifest.opensearchDashboardsVersion
                   : manifest.version,
             });

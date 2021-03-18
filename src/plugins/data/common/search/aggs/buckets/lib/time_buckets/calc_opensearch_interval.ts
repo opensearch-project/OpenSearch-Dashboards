@@ -39,7 +39,9 @@ export interface OpenSearchInterval {
  * @param  {moment.duration} duration
  * @return {object}
  */
-export function convertDurationToNormalizedOpenSearchInterval(duration: moment.Duration): OpenSearchInterval {
+export function convertDurationToNormalizedOpenSearchInterval(
+  duration: moment.Duration
+): OpenSearchInterval {
   for (let i = 0; i < unitsDesc.length; i++) {
     const unit = unitsDesc[i];
     const val = duration.as(unit);

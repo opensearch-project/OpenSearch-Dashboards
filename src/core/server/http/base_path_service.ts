@@ -53,7 +53,10 @@ export class BasePath {
    *
    * @privateRemarks should work only for OpenSearchDashboardsRequest as soon as spaces migrate to NP
    */
-  public set = (request: OpenSearchDashboardsRequest | LegacyRequest, requestSpecificBasePath: string) => {
+  public set = (
+    request: OpenSearchDashboardsRequest | LegacyRequest,
+    requestSpecificBasePath: string
+  ) => {
     const rawRequest = ensureRawRequest(request);
 
     if (this.basePathCache.has(rawRequest)) {

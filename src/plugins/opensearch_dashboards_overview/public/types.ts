@@ -23,10 +23,10 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OpenSearchDashboardsOverviewPluginSetup { }
+export interface OpenSearchDashboardsOverviewPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OpenSearchDashboardsOverviewPluginStart { }
+export interface OpenSearchDashboardsOverviewPluginStart {}
 
 export interface AppPluginSetupDependencies {
   home: HomePublicPluginSetup;

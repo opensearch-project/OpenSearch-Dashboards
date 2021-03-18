@@ -47,31 +47,31 @@ This agent supports a variety of frameworks but can also be used with your custo
     )}
 var apm = require('elastic-apm-node').start({curlyOpen}
   // ${i18n.translate(
-      'apmOss.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
-      {
-        defaultMessage: 'Override service name from package.json',
-      }
-    )}
+    'apmOss.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Override service name from package.json',
+    }
+  )}
   // ${i18n.translate('apmOss.tutorial.nodeClient.configure.commands.allowedCharactersComment', {
-      defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
-    })}
+    defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
+  })}
   serviceName: '',
 
   // ${i18n.translate(
-      'apmOss.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
-      {
-        defaultMessage: 'Use if APM Server requires a token',
-      }
-    )}
+    'apmOss.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   secretToken: '${secretToken}',
 
   // ${i18n.translate(
-      'apmOss.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
-      {
-        defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-        values: { defaultApmServerUrl: 'http://localhost:8200' },
-      }
-    )}
+    'apmOss.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   serverUrl: '${apmServerUrl}'
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.nodeClient.configure.textPost', {
@@ -119,31 +119,31 @@ INSTALLED_APPS = (
 
 ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
-      {
-        defaultMessage: 'Set required service name. Allowed characters:',
-      }
-    )}
+    'apmOss.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Set required service name. Allowed characters:',
+    }
+  )}
   # ${i18n.translate('apmOss.tutorial.djangoClient.configure.commands.allowedCharactersComment', {
-      defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-    })}
+    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+  })}
   'SERVICE_NAME': '',
 
   # ${i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
-      {
-        defaultMessage: 'Use if APM Server requires a token',
-      }
-    )}
+    'apmOss.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   'SECRET_TOKEN': '${secretToken}',
 
   # ${i18n.translate(
-      'apmOss.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
-      {
-        defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-        values: { defaultApmServerUrl: 'http://localhost:8200' },
-      }
-    )}
+    'apmOss.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   'SERVER_URL': '${apmServerUrl}',
 {curlyClose}
 
@@ -199,31 +199,31 @@ apm = ElasticAPM(app)
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
-      'apmOss.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
-      {
-        defaultMessage: 'Set required service name. Allowed characters:',
-      }
-    )}
+    'apmOss.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Set required service name. Allowed characters:',
+    }
+  )}
   # ${i18n.translate('apmOss.tutorial.flaskClient.configure.commands.allowedCharactersComment', {
-      defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-    })}
+    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+  })}
   'SERVICE_NAME': '',
 
   # ${i18n.translate(
-      'apmOss.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
-      {
-        defaultMessage: 'Use if APM Server requires a token',
-      }
-    )}
+    'apmOss.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   'SECRET_TOKEN': '${secretToken}',
 
   # ${i18n.translate(
-      'apmOss.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
-      {
-        defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-        values: { defaultApmServerUrl: 'http://localhost:8200' },
-      }
-    )}
+    'apmOss.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   'SERVER_URL': '${apmServerUrl}',
 {curlyClose}
 
@@ -397,29 +397,29 @@ The Agent can then be initialized and configured in your application like this:'
 var apm = initApm({curlyOpen}
 
   // ${i18n.translate(
-      'apmOss.tutorial.jsClient.installDependency.commands.setRequiredServiceNameComment',
-      {
-        defaultMessage:
-          'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
-      }
-    )}
+    'apmOss.tutorial.jsClient.installDependency.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage:
+        'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
+    }
+  )}
   serviceName: '',
 
   // ${i18n.translate(
-      'apmOss.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
-      {
-        defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-        values: { defaultApmServerUrl: 'http://localhost:8200' },
-      }
-    )}
+    'apmOss.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   serverUrl: '${apmServerUrl}',
 
   // ${i18n.translate(
-      'apmOss.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
-      {
-        defaultMessage: 'Set service version (required for source map feature)',
-      }
-    )}
+    'apmOss.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
+    {
+      defaultMessage: 'Set service version (required for source map feature)',
+    }
+  )}
   serviceVersion: ''
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.jsClient.installDependency.textPost', {
@@ -644,8 +644,9 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     commands: `{curlyOpen}
     "ElasticApm": {curlyOpen}
     "SecretToken": "${secretToken}",
-    "ServerUrls": "${apmServerUrl || 'http://localhost:8200'
-      }", //Set custom APM Server URL (default: http://localhost:8200)
+    "ServerUrls": "${
+      apmServerUrl || 'http://localhost:8200'
+    }", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
   {curlyClose}
 {curlyClose}`.split('\n'),

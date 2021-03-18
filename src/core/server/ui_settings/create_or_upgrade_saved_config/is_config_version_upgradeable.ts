@@ -25,7 +25,10 @@ function extractRcNumber(version: string): [string, number] {
   return match ? [match[1], parseInt(match[2], 10)] : [version, Infinity];
 }
 
-export function isConfigVersionUpgradeable(savedVersion: string, opensearchDashboardsVersion: string): boolean {
+export function isConfigVersionUpgradeable(
+  savedVersion: string,
+  opensearchDashboardsVersion: string
+): boolean {
   if (
     typeof savedVersion !== 'string' ||
     typeof opensearchDashboardsVersion !== 'string' ||
@@ -36,7 +39,9 @@ export function isConfigVersionUpgradeable(savedVersion: string, opensearchDashb
   }
 
   const [savedReleaseVersion, savedRcNumber] = extractRcNumber(savedVersion);
-  const [opensearchDashboardsReleaseVersion, opensearchDashboardsRcNumber] = extractRcNumber(opensearchDashboardsVersion);
+  const [opensearchDashboardsReleaseVersion, opensearchDashboardsRcNumber] = extractRcNumber(
+    opensearchDashboardsVersion
+  );
 
   // ensure that both release versions are valid, if not then abort
   if (!semver.valid(savedReleaseVersion) || !semver.valid(opensearchDashboardsReleaseVersion)) {
@@ -45,8 +50,17 @@ export function isConfigVersionUpgradeable(savedVersion: string, opensearchDashb
 
   // ultimately if the saved config is from a previous OpenSearch Dashboards version
   // or from an earlier rc of the same version, then we can upgrade
-  const savedIsLessThanOpenSearchDashboards = semver.lt(savedReleaseVersion, opensearchDashboardsReleaseVersion);
-  const savedIsSameAsOpenSearchDashboards = semver.eq(savedReleaseVersion, opensearchDashboardsReleaseVersion);
+  const savedIsLessThanOpenSearchDashboards = semver.lt(
+    savedReleaseVersion,
+    opensearchDashboardsReleaseVersion
+  );
+  const savedIsSameAsOpenSearchDashboards = semver.eq(
+    savedReleaseVersion,
+    opensearchDashboardsReleaseVersion
+  );
   const savedRcIsLessThanOpenSearchDashboards = savedRcNumber < opensearchDashboardsRcNumber;
-  return savedIsLessThanOpenSearchDashboards || (savedIsSameAsOpenSearchDashboards && savedRcIsLessThanOpenSearchDashboards);
+  return (
+    savedIsLessThanOpenSearchDashboards ||
+    (savedIsSameAsOpenSearchDashboards && savedRcIsLessThanOpenSearchDashboards)
+  );
 }

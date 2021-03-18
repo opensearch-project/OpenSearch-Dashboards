@@ -18,7 +18,11 @@
  */
 
 import * as React from 'react';
-import { OpenSearchDashboardsReactContext, OpenSearchDashboardsReactContextValue, OpenSearchDashboardsServices } from './types';
+import {
+  OpenSearchDashboardsReactContext,
+  OpenSearchDashboardsReactContextValue,
+  OpenSearchDashboardsServices,
+} from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
 
@@ -30,19 +34,27 @@ const defaultContextValue = {
   notifications: createNotifications({}),
 };
 
-export const context = createContext<OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices>>(defaultContextValue);
+export const context = createContext<
+  OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices>
+>(defaultContextValue);
 
-export const useOpenSearchDashboards = <Extra extends object = {}>(): OpenSearchDashboardsReactContextValue<
-  OpenSearchDashboardsServices & Extra
-> =>
+export const useOpenSearchDashboards = <
+  Extra extends object = {}
+>(): OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices & Extra> =>
   useContext(
-    (context as unknown) as React.Context<OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices & Extra>>
+    (context as unknown) as React.Context<
+      OpenSearchDashboardsReactContextValue<OpenSearchDashboardsServices & Extra>
+    >
   );
 
-export const withOpenSearchDashboards = <Props extends { opensearchDashboards: OpenSearchDashboardsReactContextValue<any> }>(
+export const withOpenSearchDashboards = <
+  Props extends { opensearchDashboards: OpenSearchDashboardsReactContextValue<any> }
+>(
   type: React.ComponentType<Props>
 ): React.FC<Omit<Props, 'opensearchDashboards'>> => {
-  const EnhancedType: React.FC<Omit<Props, 'opensearchDashboards'>> = (props: Omit<Props, 'opensearchDashboards'>) => {
+  const EnhancedType: React.FC<Omit<Props, 'opensearchDashboards'>> = (
+    props: Omit<Props, 'opensearchDashboards'>
+  ) => {
     const opensearchDashboards = useOpenSearchDashboards();
     return React.createElement(type, { ...props, opensearchDashboards } as Props);
   };
@@ -53,7 +65,9 @@ export const UseOpenSearchDashboards: React.FC<{
   children: (opensearchDashboards: OpenSearchDashboardsReactContextValue<any>) => React.ReactNode;
 }> = ({ children }) => <>{children(useOpenSearchDashboards())}</>;
 
-export const createOpenSearchDashboardsReactContext = <Services extends OpenSearchDashboardsServices>(
+export const createOpenSearchDashboardsReactContext = <
+  Services extends OpenSearchDashboardsServices
+>(
   services: Services
 ): OpenSearchDashboardsReactContext<Services> => {
   const value: OpenSearchDashboardsReactContextValue<Services> = {
@@ -68,7 +82,12 @@ export const createOpenSearchDashboardsReactContext = <Services extends OpenSear
   }) => {
     const oldValue = useOpenSearchDashboards();
     const { value: newValue } = useMemo(
-      () => createOpenSearchDashboardsReactContext({ ...services, ...oldValue.services, ...newServices }),
+      () =>
+        createOpenSearchDashboardsReactContext({
+          ...services,
+          ...oldValue.services,
+          ...newServices,
+        }),
       [services, oldValue, newServices]
     );
     return createElement(context.Provider as React.ComponentType<any>, {
@@ -80,8 +99,12 @@ export const createOpenSearchDashboardsReactContext = <Services extends OpenSear
   return {
     value,
     Provider,
-    Consumer: (context.Consumer as unknown) as React.Consumer<OpenSearchDashboardsReactContextValue<Services>>,
+    Consumer: (context.Consumer as unknown) as React.Consumer<
+      OpenSearchDashboardsReactContextValue<Services>
+    >,
   };
 };
 
-export const { Provider: OpenSearchDashboardsContextProvider } = createOpenSearchDashboardsReactContext({});
+export const {
+  Provider: OpenSearchDashboardsContextProvider,
+} = createOpenSearchDashboardsReactContext({});

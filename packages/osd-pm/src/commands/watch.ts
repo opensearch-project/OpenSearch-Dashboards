@@ -68,7 +68,9 @@ export const WatchCommand: ICommand = {
 
     // OpenSearch Dashboards should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
-    const shouldWatchOpenSearchDashboardsProject = projectsToWatch.delete(opensearchDashboardsProjectName);
+    const shouldWatchOpenSearchDashboardsProject = projectsToWatch.delete(
+      opensearchDashboardsProjectName
+    );
 
     const batchedProjects = topologicallyBatchProjects(projectsToWatch, projectGraph);
 

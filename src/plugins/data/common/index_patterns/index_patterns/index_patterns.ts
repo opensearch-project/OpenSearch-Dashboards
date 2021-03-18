@@ -84,7 +84,7 @@ export class IndexPatternsService {
     onNotification,
     onError,
     onUnsupportedTimePattern,
-    onRedirectNoIndexPattern = () => { },
+    onRedirectNoIndexPattern = () => {},
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -382,7 +382,11 @@ export class IndexPatternsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(savedObjectType, id, 'management/opensearch-dashboards/indexPatterns');
+      throw new SavedObjectNotFound(
+        savedObjectType,
+        id,
+        'management/opensearch-dashboards/indexPatterns'
+      );
     }
 
     const spec = this.savedObjectToSpec(savedObject);
@@ -396,11 +400,11 @@ export class IndexPatternsService {
     try {
       spec.fields = isFieldRefreshRequired
         ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-          pattern: title,
-          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-          type,
-          params: typeMeta && typeMeta.params,
-        })
+            pattern: title,
+            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+            type,
+            params: typeMeta && typeMeta.params,
+          })
         : spec.fields;
     } catch (err) {
       isSaveRequired = false;

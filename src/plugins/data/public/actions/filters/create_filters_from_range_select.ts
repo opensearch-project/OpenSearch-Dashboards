@@ -60,5 +60,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectConte
     range.format = 'strict_date_optional_time';
   }
 
-  return opensearchFilters.mapAndFlattenFilters([opensearchFilters.buildRangeFilter(field, range, indexPattern)]);
+  return opensearchFilters.mapAndFlattenFilters([
+    opensearchFilters.buildRangeFilter(field, range, indexPattern),
+  ]);
 }

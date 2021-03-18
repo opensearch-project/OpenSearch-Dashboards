@@ -63,7 +63,10 @@ test('ignores non-paths', () => {
 
 test('keeps regular expressions intact', () => {
   fs.existsSync = () => false;
-  const config = extractConfigFiles(['foo=bar', 'foo.bar=/https?://127.0.0.1(:[0-9]+)?/'], '/opensearch');
+  const config = extractConfigFiles(
+    ['foo=bar', 'foo.bar=/https?://127.0.0.1(:[0-9]+)?/'],
+    '/opensearch'
+  );
 
   expect(config).toEqual(['foo=bar', 'foo.bar=/https?://127.0.0.1(:[0-9]+)?/']);
 });

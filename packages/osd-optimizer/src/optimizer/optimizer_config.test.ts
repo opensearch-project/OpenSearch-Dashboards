@@ -382,8 +382,9 @@ describe('OptimizerConfig::parseOptions()', () => {
 describe('OptimizerConfig::create()', () => {
   const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
     .assignBundlesToWorkers;
-  const findOpenSearchDashboardsPlatformPlugins: jest.Mock = jest.requireMock('./opensearch_dashboards_platform_plugins.ts')
-    .findOpenSearchDashboardsPlatformPlugins;
+  const findOpenSearchDashboardsPlatformPlugins: jest.Mock = jest.requireMock(
+    './opensearch_dashboards_platform_plugins.ts'
+  ).findOpenSearchDashboardsPlatformPlugins;
   const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
   const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
   const readLimits: jest.Mock = jest.requireMock('../limits.ts').readLimits;

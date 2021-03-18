@@ -43,7 +43,10 @@ export interface FullIndexInfo {
  * A slight enhancement to indices.get, that adds indexName, and validates that the
  * index mappings are somewhat what we expect.
  */
-export async function fetchInfo(client: MigrationOpenSearchClient, index: string): Promise<FullIndexInfo> {
+export async function fetchInfo(
+  client: MigrationOpenSearchClient,
+  index: string
+): Promise<FullIndexInfo> {
   const { body, statusCode } = await client.indices.get({ index }, { ignore: [404] });
 
   if (statusCode === 404) {

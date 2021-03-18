@@ -160,7 +160,7 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
   }
 
   // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
-  // and make sure they aren't included in the production dependencies of OpenSearch Dashboards 
+  // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
   if (devOnlyProjectsInProduction) {
     log.error(dedent`

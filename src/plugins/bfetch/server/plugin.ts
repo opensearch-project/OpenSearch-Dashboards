@@ -54,7 +54,9 @@ export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
 export interface BfetchServerSetup {
   addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
-    handler: (request: OpenSearchDashboardsRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (
+      request: OpenSearchDashboardsRequest
+    ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => void;
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
@@ -104,13 +106,13 @@ const streamingHeaders = {
 
 export class BfetchServerPlugin
   implements
-  Plugin<
-  BfetchServerSetup,
-  BfetchServerStart,
-  BfetchServerSetupDependencies,
-  BfetchServerStartDependencies
-  > {
-  constructor(private readonly initializerContext: PluginInitializerContext) { }
+    Plugin<
+      BfetchServerSetup,
+      BfetchServerStart,
+      BfetchServerSetupDependencies,
+      BfetchServerStartDependencies
+    > {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
     const logger = this.initializerContext.logger.get();
@@ -130,7 +132,7 @@ export class BfetchServerPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 
   private addStreamingResponseRoute = ({
     router,
@@ -181,32 +183,34 @@ export class BfetchServerPlugin
     E extends ErrorLike = ErrorLike
   >(
     path: string,
-    handler: (request: OpenSearchDashboardsRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (
+      request: OpenSearchDashboardsRequest
+    ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => {
-      addStreamingResponseRoute<
-        BatchRequestData<BatchItemData>,
-        BatchResponseItem<BatchItemResult, E>
-      >(path, (request) => {
-        const handlerInstance = handler(request);
-        return {
-          getResponseStream: ({ batch }) => {
-            const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
-            let cnt = batch.length;
-            batch.forEach(async (batchItem, id) => {
-              try {
-                const result = await handlerInstance.onBatchItem(batchItem);
-                subject.next({ id, result });
-              } catch (err) {
-                const error = normalizeError<E>(err);
-                subject.next({ id, error });
-              } finally {
-                cnt--;
-                if (!cnt) subject.complete();
-              }
-            });
-            return subject;
-          },
-        };
-      });
-    };
+    addStreamingResponseRoute<
+      BatchRequestData<BatchItemData>,
+      BatchResponseItem<BatchItemResult, E>
+    >(path, (request) => {
+      const handlerInstance = handler(request);
+      return {
+        getResponseStream: ({ batch }) => {
+          const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
+          let cnt = batch.length;
+          batch.forEach(async (batchItem, id) => {
+            try {
+              const result = await handlerInstance.onBatchItem(batchItem);
+              subject.next({ id, result });
+            } catch (err) {
+              const error = normalizeError<E>(err);
+              subject.next({ id, error });
+            } finally {
+              cnt--;
+              if (!cnt) subject.complete();
+            }
+          });
+          return subject;
+        },
+      };
+    });
+  };
 }

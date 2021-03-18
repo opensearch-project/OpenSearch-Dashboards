@@ -36,7 +36,10 @@ export const CronWeekly = ({
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronWeekly.fieldDateLabel" defaultMessage="Day" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronWeekly.fieldDateLabel"
+          defaultMessage="Day"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -55,7 +58,10 @@ export const CronWeekly = ({
 
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronWeekly.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronWeekly.fieldTimeLabel"
+          defaultMessage="Time"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"

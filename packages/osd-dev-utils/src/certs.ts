@@ -28,7 +28,10 @@ export const OPENSEARCH_EMPTYPASSWORD_P12_PATH = resolve(
   __dirname,
   '../certs/opensearch_emptypassword.p12'
 );
-export const OPENSEARCH_NOPASSWORD_P12_PATH = resolve(__dirname, '../certs/opensearch_nopassword.p12');
+export const OPENSEARCH_NOPASSWORD_P12_PATH = resolve(
+  __dirname,
+  '../certs/opensearch_nopassword.p12'
+);
 export const OSD_KEY_PATH = resolve(__dirname, '../certs/opensearch_dashboards.key');
 export const OSD_CERT_PATH = resolve(__dirname, '../certs/opensearch_dashboards.crt');
 export const OSD_P12_PATH = resolve(__dirname, '../certs/opensearch_dashboards.p12');

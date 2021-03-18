@@ -93,7 +93,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await PageObjects.vegaChart.typeInSpec('"config": { "opensearchDashboards": {"renderer": "svg"} },');
+          await PageObjects.vegaChart.typeInSpec(
+            '"config": { "opensearchDashboards": {"renderer": "svg"} },'
+          );
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();

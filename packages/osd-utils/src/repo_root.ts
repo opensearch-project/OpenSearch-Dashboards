@@ -26,7 +26,12 @@ const readOpenSearchDashboardsPkgJson = (dir: string) => {
   try {
     const path = Path.resolve(dir, 'package.json');
     const json = loadJsonFile.sync(path);
-    if (json && typeof json === 'object' && 'name' in json && json.name === 'opensearch-dashboards') {
+    if (
+      json &&
+      typeof json === 'object' &&
+      'name' in json &&
+      json.name === 'opensearch-dashboards'
+    ) {
       return json;
     }
   } catch (error) {
@@ -65,7 +70,10 @@ const findOpenSearchDashboardsPackageJson = () => {
   }
 };
 
-const { opensearchDashboardsDir, opensearchDashboardsPkgJson } = findOpenSearchDashboardsPackageJson();
+const {
+  opensearchDashboardsDir,
+  opensearchDashboardsPkgJson,
+} = findOpenSearchDashboardsPackageJson();
 
 export const REPO_ROOT = opensearchDashboardsDir;
 export const UPSTREAM_BRANCH = opensearchDashboardsPkgJson.branch;

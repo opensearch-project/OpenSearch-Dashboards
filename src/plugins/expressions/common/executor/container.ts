@@ -65,7 +65,7 @@ export const pureSelectors: ExecutorPureSelectors = {
 
 export type ExecutorContainer<
   Context extends Record<string, unknown> = Record<string, unknown>
-  > = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
+> = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
 export const createExecutorContainer = <
   Context extends Record<string, unknown> = Record<string, unknown>

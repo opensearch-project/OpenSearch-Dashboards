@@ -20,5 +20,10 @@
 export { runOpenSearchDashboardsServer } from './run_opensearch_dashboards_server';
 export { runOpenSearch } from './run_opensearch';
 export { runFtr, hasTests, assertNoneExcluded } from './run_ftr';
-export { OPENSEARCH_DASHBOARDS_ROOT, OPENSEARCH_DASHBOARDS_FTR_SCRIPT, FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH } from './paths';
+export {
+  OPENSEARCH_DASHBOARDS_ROOT,
+  OPENSEARCH_DASHBOARDS_FTR_SCRIPT,
+  FUNCTIONAL_CONFIG_PATH,
+  API_CONFIG_PATH,
+} from './paths';
 export { runCli } from './run_cli';

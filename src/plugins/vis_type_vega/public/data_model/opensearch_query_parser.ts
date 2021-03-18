@@ -289,13 +289,16 @@ export class OpenSearchQueryParser {
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
               throw new Error(
-                i18n.translate('visTypeVega.opensearchQueryParser.autointervalValueTypeErrorMessage', {
-                  defaultMessage: '{autointerval} must be either {trueValue} or a number',
-                  values: {
-                    autointerval: `"${AUTOINTERVAL}"`,
-                    trueValue: 'true',
-                  },
-                })
+                i18n.translate(
+                  'visTypeVega.opensearchQueryParser.autointervalValueTypeErrorMessage',
+                  {
+                    defaultMessage: '{autointerval} must be either {trueValue} or a number',
+                    values: {
+                      autointerval: `"${AUTOINTERVAL}"`,
+                      trueValue: 'true',
+                    },
+                  }
+                )
               );
             }
             const bounds = this._timeCache.getTimeBounds();

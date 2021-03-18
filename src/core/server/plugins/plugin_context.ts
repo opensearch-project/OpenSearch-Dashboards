@@ -30,11 +30,11 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { OpenSearchDashboardsConfigType, config as opensearchDashboardsConfig } from '../opensearch_dashboards_config';
 import {
-  OpenSearchConfigType,
-  config as opensearchConfig,
-} from '../opensearch/opensearch_config';
+  OpenSearchDashboardsConfigType,
+  config as opensearchDashboardsConfig,
+} from '../opensearch_dashboards_config';
+import { OpenSearchConfigType, config as opensearchConfig } from '../opensearch/opensearch_config';
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
@@ -85,7 +85,7 @@ export function createPluginInitializerContext(
     /**
      * Core configuration functionality, enables fetching a subset of the config.
      */
-     config: {
+    config: {
       legacy: {
         /**
          * Global configuration
@@ -93,14 +93,19 @@ export function createPluginInitializerContext(
          * @deprecated
          */
         globalConfig$: combineLatest([
-          coreContext.configService.atPath<OpenSearchDashboardsConfigType>(opensearchDashboardsConfig.path),
+          coreContext.configService.atPath<OpenSearchDashboardsConfigType>(
+            opensearchDashboardsConfig.path
+          ),
           coreContext.configService.atPath<OpenSearchConfigType>(opensearchConfig.path),
           coreContext.configService.atPath<PathConfigType>(pathConfig.path),
           coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
         ]).pipe(
           map(([opensearchDashboards, opensearch, path, savedObjects]) =>
             deepFreeze({
-              opensearchDashboards: pick(opensearchDashboards, SharedGlobalConfigKeys.opensearchDashboards),
+              opensearchDashboards: pick(
+                opensearchDashboards,
+                SharedGlobalConfigKeys.opensearchDashboards
+              ),
               opensearch: pick(opensearch, SharedGlobalConfigKeys.opensearch),
               path: pick(path, SharedGlobalConfigKeys.path),
               savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),

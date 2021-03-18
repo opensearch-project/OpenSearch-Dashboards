@@ -22,7 +22,9 @@ import { OpenSearchDashboardsServices } from '../context/types';
 import { OpenSearchDashboardsReactOverlays } from './types';
 import { toMountPoint } from '../util';
 
-export const createReactOverlays = (services: OpenSearchDashboardsServices): OpenSearchDashboardsReactOverlays => {
+export const createReactOverlays = (
+  services: OpenSearchDashboardsServices
+): OpenSearchDashboardsReactOverlays => {
   const checkCoreService = () => {
     if (!services.overlays) {
       throw new TypeError('Could not show overlay as overlays service is not available.');

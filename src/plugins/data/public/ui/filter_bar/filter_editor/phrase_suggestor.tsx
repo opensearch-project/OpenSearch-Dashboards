@@ -20,7 +20,10 @@
 import React from 'react';
 import { debounce } from 'lodash';
 
-import { withOpenSearchDashboards, OpenSearchDashboardsReactContextValue } from '../../../../../opensearch_dashboards_react/public';
+import {
+  withOpenSearchDashboards,
+  OpenSearchDashboardsReactContextValue,
+} from '../../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
 import { UI_SETTINGS } from '../../../../common';
 

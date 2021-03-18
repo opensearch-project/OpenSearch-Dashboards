@@ -29,7 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('input control range', () => {
     before(async () => {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_sample_admin']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'opensearch_dashboards_sample_admin',
+      ]);
       await opensearchArchiver.load('opensearch_dashboards_sample_data_flights_index_pattern');
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
@@ -37,7 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add filter with scripted field', async () => {
       await visEditor.addInputControl('range');
-      await visEditor.setFilterParams(0, 'opensearch_dashboards_sample_data_flights', 'hour_of_day');
+      await visEditor.setFilterParams(
+        0,
+        'opensearch_dashboards_sample_data_flights',
+        'hour_of_day'
+      );
       await visEditor.clickGo();
       await visEditor.setFilterRange(0, '7', '10');
       await visEditor.inputControlSubmit();
@@ -48,7 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add filter with price field', async () => {
       await visEditor.addInputControl('range');
-      await visEditor.setFilterParams(1, 'opensearch_dashboards_sample_data_flights', 'AvgTicketPrice');
+      await visEditor.setFilterParams(
+        1,
+        'opensearch_dashboards_sample_data_flights',
+        'AvgTicketPrice'
+      );
       await visEditor.clickGo();
       await visEditor.setFilterRange(1, '400', '999');
       await visEditor.inputControlSubmit();

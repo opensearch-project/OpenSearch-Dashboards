@@ -67,7 +67,8 @@ export function subscribeWithScope<T>(
             observer.error(error);
           } else {
             throw new Error(
-              `Uncaught error in subscribeWithScope(): ${error ? error.stack || error.message : error
+              `Uncaught error in subscribeWithScope(): ${
+                error ? error.stack || error.message : error
               }`
             );
           }

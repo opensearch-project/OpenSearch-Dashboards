@@ -19,7 +19,11 @@
 
 import { i18n } from '@osd/i18n';
 
-import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  OpenSearchDashboardsDatatable,
+  Render,
+} from '../../expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';

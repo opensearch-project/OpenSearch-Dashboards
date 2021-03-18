@@ -56,7 +56,9 @@ describe('FeatureCatalogueRegistry', () => {
     test('throws when registering a solution with a duplicate id', () => {
       const setup = new FeatureCatalogueRegistry().setup();
       setup.registerSolution(OPENSEARCH_DASHBOARDS_SOLUTION);
-      expect(() => setup.registerSolution(OPENSEARCH_DASHBOARDS_SOLUTION)).toThrowErrorMatchingInlineSnapshot(
+      expect(() =>
+        setup.registerSolution(OPENSEARCH_DASHBOARDS_SOLUTION)
+      ).toThrowErrorMatchingInlineSnapshot(
         `"Solution with id [opensearchDashboards] has already been registered. Use a unique id."`
       );
     });

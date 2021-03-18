@@ -17,7 +17,12 @@
  * under the License.
  */
 import _ from 'lodash';
-import { OpenSearchResponse, SavedObject, SavedObjectConfig, SavedObjectOpenSearchDashboardsServices } from '../../types';
+import {
+  OpenSearchResponse,
+  SavedObject,
+  SavedObjectConfig,
+  SavedObjectOpenSearchDashboardsServices,
+} from '../../types';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/public';
 import {
   IndexPattern,

@@ -158,7 +158,10 @@ export type AuthenticationHandler = (
   request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: AuthToolkit
-) => AuthResult | IOpenSearchDashboardsResponse | Promise<AuthResult | IOpenSearchDashboardsResponse>;
+) =>
+  | AuthResult
+  | IOpenSearchDashboardsResponse
+  | Promise<AuthResult | IOpenSearchDashboardsResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(

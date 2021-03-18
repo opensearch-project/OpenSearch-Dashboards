@@ -78,7 +78,7 @@ async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
     onlyProductionDependencies: true,
   });
 
-  // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards 
+  // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards
   productionProjects.delete('opensearch-dashboards');
 
   if (onlyOSS) {
