@@ -68,12 +68,12 @@ describe('#isOss()', () => {
 });
 
 describe('#getName()', () => {
-  it('returns kibana for default build', () => {
-    expect(defaultBuild.getName()).toBe('kibana');
+  it('returns opensearch-dashboards for default build', () => {
+    expect(defaultBuild.getName()).toBe('opensearch-dashboards');
   });
 
-  it('returns kibana-oss for oss', () => {
-    expect(ossBuild.getName()).toBe('kibana-oss');
+  it('returns opensearch-dashboards-oss for oss', () => {
+    expect(ossBuild.getName()).toBe('opensearch-dashboards-oss');
   });
 });
 
@@ -87,13 +87,13 @@ describe('#getLogTag()', () => {
 describe('#resolvePath()', () => {
   it('uses passed config to resolve a path relative to the repo', () => {
     expect(ossBuild.resolvePath('bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/kibana-oss/bar`
+      `<absolute path>/build/opensearch-dashboards-oss/bar`
     );
   });
 
   it('passes all arguments to config.resolveFromRepo()', () => {
     expect(defaultBuild.resolvePath('bar', 'baz', 'box')).toMatchInlineSnapshot(
-      `<absolute path>/build/kibana/bar/baz/box`
+      `<absolute path>/build/opensearch-dashboards/bar/baz/box`
     );
   });
 });
@@ -101,7 +101,7 @@ describe('#resolvePath()', () => {
 describe('#resolvePathForPlatform()', () => {
   it('uses config.resolveFromRepo(), config.getBuildVersion(), and platform.getBuildName() to create path', () => {
     expect(ossBuild.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/oss/kibana-8.0.0-linux-x86_64/foo/bar`
+      `<absolute path>/build/oss/opensearch-dashboards-8.0.0-linux-x86_64/foo/bar`
     );
   });
 });
@@ -109,13 +109,13 @@ describe('#resolvePathForPlatform()', () => {
 describe('#getPlatformArchivePath()', () => {
   it('creates correct path for different platforms', () => {
     expect(ossBuild.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-linux-x86_64.tar.gz`
+      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-linux-x86_64.tar.gz`
     );
     expect(ossBuild.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-linux-aarch64.tar.gz`
+      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-linux-aarch64.tar.gz`
     );
     expect(ossBuild.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/kibana-oss-8.0.0-windows-x86_64.zip`
+      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-windows-x86_64.zip`
     );
   });
 });
