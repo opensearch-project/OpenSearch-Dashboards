@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover app', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch-dashboards index and update configDoc
+      // delete .opensearch_dashboards index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
 
       log.debug('load opensearch-dashboards index with default index pattern');

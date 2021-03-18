@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('opensearch-dashboards settings', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
+      // delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();

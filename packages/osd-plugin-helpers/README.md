@@ -68,9 +68,9 @@ When you're targeting versions before OpenSearch Dashboards 6.3, use the `@elast
 
 ## Configuration
 
-`plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.opensearch-dashboards-plugin-helpers.json` file if you'd like to bundle those settings with your project.
+`plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.opensearch_dashboards-plugin-helpers.json` file if you'd like to bundle those settings with your project.
 
-It will also observe a `.opensearch-dashboards-plugin-helpers.dev.json`, much like OpenSearch Dashboards does, which we encourage you to add to your `.gitignore` file and use for local settings that you don't intend to share. These "dev" settings will override any settings in the normal json config.
+It will also observe a `.opensearch_dashboards-plugin-helpers.dev.json`, much like OpenSearch Dashboards does, which we encourage you to add to your `.gitignore` file and use for local settings that you don't intend to share. These "dev" settings will override any settings in the normal json config.
 
 All configuration setting listed below can simply can be included in the json config files. If you intend to inline the command, you will need to convert the setting to snake case (ie. `skipArchive` becomes `--skip-archive`).
 

@@ -83,7 +83,7 @@ describe('createPluginInitializerContext', () => {
       .toPromise();
     expect(configObject).toStrictEqual({
       opensearchDashboards: {
-        index: '.opensearch-dashboards',
+        index: '.opensearch_dashboards',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
       },

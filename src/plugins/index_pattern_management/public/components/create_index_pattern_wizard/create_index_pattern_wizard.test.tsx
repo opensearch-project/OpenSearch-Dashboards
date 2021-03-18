@@ -102,7 +102,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       isIncludingSystemIndices: true,
-      allIndices: [{ name: '.opensearch-dashboards ' }],
+      allIndices: [{ name: '.opensearch_dashboards ' }],
     });
 
     await component.update();

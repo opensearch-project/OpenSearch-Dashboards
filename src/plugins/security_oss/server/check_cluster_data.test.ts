@@ -40,7 +40,7 @@ describe('checkClusterForUserData', () => {
       opensearchServiceMock.createApiResponse({
         body: [
           {
-            index: '.opensearch-dashboards',
+            index: '.opensearch_dashboards',
             'docs.count': 500,
           },
           {
@@ -68,7 +68,7 @@ describe('checkClusterForUserData', () => {
       opensearchServiceMock.createApiResponse({
         body: [
           {
-            index: '.opensearch-dashboards',
+            index: '.opensearch_dashboards',
             'docs.count': 500,
           },
           {
@@ -98,7 +98,7 @@ describe('checkClusterForUserData', () => {
         opensearchServiceMock.createApiResponse({
           body: [
             {
-              index: '.opensearch-dashboards',
+              index: '.opensearch_dashboards',
               'docs.count': 500,
             },
           ],

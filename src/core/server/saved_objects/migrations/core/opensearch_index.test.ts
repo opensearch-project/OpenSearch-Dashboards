@@ -33,16 +33,16 @@ describe('ElasticIndex', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      const info = await Index.fetchInfo(client, '.opensearch-dashboards-test');
+      const info = await Index.fetchInfo(client, '.opensearch_dashboards_test');
       expect(info).toEqual({
         aliases: {},
         exists: false,
-        indexName: '.opensearch-dashboards-test',
+        indexName: '.opensearch_dashboards_test',
         mappings: { dynamic: 'strict', properties: {} },
       });
 
       expect(client.indices.get).toHaveBeenCalledWith(
-        { index: '.opensearch-dashboards-test' },
+        { index: '.opensearch_dashboards_test' },
         { ignore: [404] }
       );
     });

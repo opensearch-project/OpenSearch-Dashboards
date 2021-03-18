@@ -31,12 +31,12 @@ describe('makeDQLUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
+    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch_dashboards');
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = dql', () => {
-    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch-dashboards');
+    makeDQLUsageCollector(usageCollectionMock as UsageCollectionSetup, '.opensearch_dashboards');
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('dql');
   });

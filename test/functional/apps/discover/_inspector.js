@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchArchiver.load('discover');
-      // delete .opensearch-dashboards index and update configDoc
+      // delete .opensearch_dashboards index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });

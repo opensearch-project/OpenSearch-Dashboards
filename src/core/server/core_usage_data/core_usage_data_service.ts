@@ -47,7 +47,7 @@ export interface StartDeps {
  * we need to map customized index names back to a "standard" index name.
  *
  * e.g. If a user configures `opensearchDashboards.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.opensearch-dashboards` not ".my_saved_objects".
+ * collected data to be grouped under `.opensearch_dashboards` not ".my_saved_objects".
  *
  * This is rather brittle, but the option to configure index names might go
  * away completely anyway (see #60053).
@@ -61,7 +61,7 @@ const opensearchDashboardsOrTaskManagerIndex = (
   opensearchDashboardsConfigIndex: string
 ) => {
   return index === opensearchDashboardsConfigIndex
-    ? '.opensearch-dashboards'
+    ? '.opensearch_dashboards'
     : '.opensearch_dashboards_task_manager';
 };
 

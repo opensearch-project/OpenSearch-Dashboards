@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "id": "visualization:title-with-dash",
     "source": {
       "type": "visualization",
@@ -24,7 +24,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "id": "visualization:title-with-asterisk",
     "source": {
       "type": "visualization",
@@ -48,7 +48,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "id": "visualization:noise-1",
     "source": {
       "type": "visualization",
@@ -71,7 +71,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "id": "visualization:noise-2",
     "source": {
       "type": "visualization",

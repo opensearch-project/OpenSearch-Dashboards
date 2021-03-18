@@ -648,7 +648,7 @@ export class IndexPatternsService {
   }
 
   /**
-   * Deletes an index pattern from .opensearch-dashboards index
+   * Deletes an index pattern from .opensearch_dashboards index
    * @param indexPatternId: Id of OpenSearch Dashboards Index Pattern to delete
    */
   async delete(indexPatternId: string) {

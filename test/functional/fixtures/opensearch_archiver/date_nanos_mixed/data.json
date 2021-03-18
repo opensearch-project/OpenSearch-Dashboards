@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:timestamp-*",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "index-pattern": {
         "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"opensearchTypes\":[\"_id\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"opensearchTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"opensearchTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"opensearchTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"timestamp\",\"type\":\"date\",\"opensearchTypes\":[\"date\",\"date_nanos\"],\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
@@ -20,7 +20,7 @@
   "type": "doc",
   "value": {
     "id": "search:82116b30-d407-11e9-8004-932185690e7b",
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "source": {
       "search": {
         "columns": [
