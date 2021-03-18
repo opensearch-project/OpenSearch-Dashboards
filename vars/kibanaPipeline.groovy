@@ -50,9 +50,9 @@ def getParallelWorkspaces() {
   if (fileExists(parallelWorkspace)) {
     dir(parallelWorkspace) {
       // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
-      workspaces = findFiles(glob: '*/kibana/package.json')
+      workspaces = findFiles(glob: '*/opensearch-dashboards/package.json')
         .collect {
-          // get the paths to the kibana directories for the parallel workspaces
+          // get the paths to the OpenSearch Dashboards directories for the parallel workspaces
           return parallelWorkspace + '/' + it.path.tokenize('/').dropRight(1).join('/')
         }
     }
@@ -84,7 +84,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   // This can go away once everything that uses the deprecated workers.parallelProcesses() is moved to task queue
   def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
 
-  def kibanaPort = "61${parallelId}1"
+  def opensearchDashboardsPort = "61${parallelId}1"
   def opensearchPort = "61${parallelId}2"
   def opensearchTransportPort = "61${parallelId}3"
   def ingestManagementPackageRegistryPort = "61${parallelId}4"
@@ -92,11 +92,11 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
   withEnv([
     "CI_GROUP=${parallelId}",
-    "REMOVE_KIBANA_INSTALL_DIR=1",
+    "REMOVE_OPENSEARCH_DASHBOARDS_INSTALL_DIR=1",
     "CI_PARALLEL_PROCESS_NUMBER=${parallelId}",
-    "TEST_KIBANA_HOST=localhost",
-    "TEST_KIBANA_PORT=${kibanaPort}",
-    "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
+    "TEST_OPENSEARCH_DASHBOARDS_HOST=localhost",
+    "TEST_OPENSEARCH_DASHBOARDS_PORT=${opensearchDashboardsPort}",
+    "TEST_OPENSEARCH_DASHBOARDS_URL=http://elastic:changeme@localhost:${opensearchDashboardsPort}",
     "TEST_ES_URL=http://elastic:changeme@localhost:${opensearchPort}",
     "TEST_ES_TRANSPORT_PORT=${opensearchTransportPort}",
     "OSD_NP_PLUGINS_BUILT=true",
@@ -127,10 +127,10 @@ def ossCiGroupProcess(ciGroup) {
   return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
-      "JOB=kibana-ciGroup${ciGroup}",
+      "JOB=opensearch-dashboards-ciGroup${ciGroup}",
     ]) {
-      retryable("kibana-ciGroup${ciGroup}") {
-        runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+      retryable("opensearch-dashboards-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_ci_group.sh", "Execute opensearch-dashboards-ciGroup${ciGroup}")
       }
     }
   }
@@ -140,10 +140,10 @@ def xpackCiGroupProcess(ciGroup) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
-      "JOB=xpack-kibana-ciGroup${ciGroup}",
+      "JOB=xpack-opensearch-dashboards-ciGroup${ciGroup}",
     ]) {
-      retryable("xpack-kibana-ciGroup${ciGroup}") {
-        runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
+      retryable("xpack-opensearch-dashboards-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-opensearch-dashboards-ciGroup${ciGroup}")
       }
     }
   }
@@ -151,7 +151,7 @@ def xpackCiGroupProcess(ciGroup) {
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
   googleStorageUpload(
-    credentialsId: 'kibana-ci-gcs-plugin',
+    credentialsId: 'opensearch-dashboards-ci-gcs-plugin',
     bucket: "gs://${uploadPrefix}",
     pattern: pattern,
     sharedPublicly: true,
@@ -160,11 +160,11 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 }
 
 def withGcsArtifactUpload(workerName, closure) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
+  def uploadPrefix = "opensearch-dashboards-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
-    'target/kibana-*',
+    'target/opensearch-dashboards-*',
     'target/test-metrics/*',
-    'target/kibana-security-solution/**/*.png',
+    'target/opensearch-dashboards-security-solution/**/*.png',
     'target/junit/**/*',
     'target/test-suites-ci-plan.json',
     'test/**/screenshots/session/*.png',
@@ -191,7 +191,7 @@ def withGcsArtifactUpload(workerName, closure) {
 
         dir(env.WORKSPACE) {
           ARTIFACT_PATTERNS.each { pattern ->
-            uploadGcsArtifact(uploadPrefix, "parallel/*/kibana/${pattern}")
+            uploadGcsArtifact(uploadPrefix, "parallel/*/opensearch-dashboards/${pattern}")
           }
         }
       }
@@ -203,7 +203,7 @@ def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
 
   dir(env.WORKSPACE) {
-    junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+    junit(testResults: 'parallel/*/opensearch-dashboards/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
   }
 }
 
@@ -216,7 +216,7 @@ def sendMail(Map params = [:]) {
   if (buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
     node('flyweight') {
       sendInfraMail()
-      sendKibanaMail(params)
+      sendOpenSearchDashboardsMail(params)
     }
   }
 }
@@ -232,8 +232,8 @@ def sendInfraMail() {
   }
 }
 
-def sendKibanaMail(Map params = [:]) {
-  def config = [to: 'build-kibana@elastic.co'] + params
+def sendOpenSearchDashboardsMail(Map params = [:]) {
+  def config = [to: 'build-opensearch-dashboards@elastic.co'] + params
 
   catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
@@ -275,7 +275,7 @@ def doSetup() {
 def buildOss(maxWorkers = '') {
   notifyOnError {
     withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-      runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+      runbld("./test/scripts/jenkins_build_opensearch_dashboards.sh", "Build OSS/Default OpenSearch Dashboards")
     }
   }
 }
@@ -283,7 +283,7 @@ def buildOss(maxWorkers = '') {
 def buildXpack(maxWorkers = '') {
   notifyOnError {
     withEnv(["OSD_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+      runbld("./test/scripts/jenkins_xpack_build_opensearch_dashboards.sh", "Build X-Pack OpenSearch Dashboards")
     }
   }
 }
@@ -310,7 +310,7 @@ def runErrorReporter(workspaces) {
 def call(Map params = [:], Closure closure) {
   def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
 
-  stage("Kibana Pipeline") {
+  stage("OpenSearch Dashboards Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
@@ -340,12 +340,12 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
-// Creates a task queue using withTaskQueue, and copies the bootstrapped kibana repo into each process's workspace
+// Creates a task queue using withTaskQueue, and copies the bootstrapped OpenSearch Dashboards repo into each process's workspace
 // Note that node_modules are mostly symlinked to save time/space. See test/scripts/jenkins_setup_parallel_workspace.sh
 def withCiTaskQueue(Map options = [:], Closure closure) {
   def setupClosure = {
     // This can't use runbld, because it expects the source to be there, which isn't yet
-    bash("${env.WORKSPACE}/kibana/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
+    bash("${env.WORKSPACE}/opensearch-dashboards/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
   }
 
   def config = [parallel: 24, setup: setupClosure] + options
@@ -380,7 +380,7 @@ def buildDocker() {
 
 def withDocker(Closure closure) {
   docker
-    .image('kibana-ci')
+    .image('opensearch-dashboards-ci')
     .inside(
       "-v /etc/runbld:/etc/runbld:ro -v '${env.JENKINS_HOME}:${env.JENKINS_HOME}' -v '/dev/shm/workspace:/dev/shm/workspace' --shm-size 2GB --cpus 4",
       closure

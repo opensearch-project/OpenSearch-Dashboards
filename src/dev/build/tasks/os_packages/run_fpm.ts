@@ -65,7 +65,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'kibana-oss' : 'kibana',
+    build.isOss() ? 'opensearch-dashboards-oss' : 'opensearch-dashboards',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -75,13 +75,13 @@ export async function runFpm(
     '--vendor',
     'Elasticsearch, Inc.',
     '--maintainer',
-    'Kibana Team <info@elastic.co>',
+    'OpenSearch Dashboards Team <info@elastic.co>',
     '--license',
     pickLicense(),
 
-    // prevent installing kibana if installing kibana-oss and vice versa
+    // prevent installing opensearch-dashboards if installing opensearch-dashboards-oss and vice versa
     '--conflicts',
-    build.isOss() ? 'kibana' : 'kibana-oss',
+    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards-oss',
 
     // define install/uninstall scripts
     '--after-install',
@@ -95,43 +95,43 @@ export async function runFpm(
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
-    `/etc/kibana/kibana.yml`,
+    `/etc/opensearch-dashboards/opensearch_dashboards.yml`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
     '--template-value',
-    `user=kibana`,
+    `user=opensearchDashboards`,
     '--template-value',
-    `group=kibana`,
+    `group=opensearchDashboards`,
     '--template-value',
-    `optimizeDir=/usr/share/kibana/optimize`,
+    `optimizeDir=/usr/share/opensearch-dashboards/optimize`,
     '--template-value',
-    `configDir=/etc/kibana`,
+    `configDir=/etc/opensearch-dashboards`,
     '--template-value',
-    `pluginsDir=/usr/share/kibana/plugins`,
+    `pluginsDir=/usr/share/opensearch-dashboards/plugins`,
     '--template-value',
-    `dataDir=/var/lib/kibana`,
+    `dataDir=/var/lib/opensearch-dashboards`,
 
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
-    // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
+    // /usr/share/opensearch-dashboards/config. PATHS MUST BE RELATIVE, so drop the leading slash
     '--exclude',
-    `usr/share/kibana/config`,
+    `usr/share/opensearch-dashboards/config`,
     '--exclude',
-    `usr/share/kibana/data`,
+    `usr/share/opensearch-dashboards/data`,
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
 
-    // copy the build output to /usr/share/kibana/, config and data dirs
+    // copy the build output to /usr/share/opensearch-dashboards/, config and data dirs
     // are excluded with `--exclude` flag above
-    `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
+    `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/opensearch-dashboards/`,
 
-    // copy the config directory to /etc/kibana
-    `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
+    // copy the config directory to /etc/opensearch-dashboards
+    `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/opensearch-dashboards/`,
 
-    // copy the data directory at /var/lib/kibana
-    `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
+    // copy the data directory at /var/lib/opensearch-dashboards
+    `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/opensearch-dashboards/`,
 
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,

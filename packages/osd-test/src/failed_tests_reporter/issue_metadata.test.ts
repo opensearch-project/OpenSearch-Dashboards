@@ -26,7 +26,7 @@ const HAS_METADATA = dedent`
 
   some text
 
-  <!-- kibanaCiData = {"failed-test": {"foo": "bar"}} -->
+  <!-- opensearchDashboardsCiData = {"failed-test": {"foo": "bar"}} -->
 `;
 
 const HAS_SOME_OTHER_METADATA = dedent`
@@ -34,7 +34,7 @@ const HAS_SOME_OTHER_METADATA = dedent`
 
   some text
 
-  <!-- kibanaCiData = {"some-other": {"foo": "bar"}} -->
+  <!-- opensearchDashboardsCiData = {"some-other": {"foo": "bar"}} -->
 `;
 
 const INVALID_METADATA = dedent`
@@ -42,7 +42,7 @@ const INVALID_METADATA = dedent`
 
   some text
 
-  <!-- kibanaCiData = {"failed-test" -->
+  <!-- opensearchDashboardsCiData = {"failed-test" -->
 `;
 
 const MISSING_METADATA = dedent`
@@ -88,7 +88,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"foo\\":\\"bar\\",\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"foo\\":\\"bar\\",\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -102,7 +102,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
 
     expect(
@@ -114,7 +114,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- kibanaCiData = {\\"some-other\\":{\\"foo\\":\\"bar\\"},\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"some-other\\":{\\"foo\\":\\"bar\\"},\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -128,7 +128,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- kibanaCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 });

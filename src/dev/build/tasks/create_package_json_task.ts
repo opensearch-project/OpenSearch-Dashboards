@@ -25,7 +25,7 @@ export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
   async run(config, log, build) {
-    const pkg = config.getKibanaPkg();
+    const pkg = config.getOpenSearchDashboardsPkg();
 
     const newPkg = {
       name: pkg.name,

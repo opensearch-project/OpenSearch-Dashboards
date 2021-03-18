@@ -44,10 +44,10 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
   });
 };
 
-describe('#getKibanaPkg()', () => {
+describe('#getOpenSearchDashboardsPkg()', () => {
   it('returns the parsed package.json from the Kibana repo', async () => {
     const config = await setup();
-    expect(config.getKibanaPkg()).toEqual(pkg);
+    expect(config.getOpenSearchDashboardsPkg()).toEqual(pkg);
   });
 });
 
