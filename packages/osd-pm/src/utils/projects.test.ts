@@ -166,7 +166,15 @@ describe('#getProjects', () => {
 
     test('does not return any project if `exclude` filter is specified for all projects', async () => {
       const projects = await getProjects(rootPath, projectPaths, {
-        exclude: ['opensearch-dashboards', 'bar', 'corge', 'foo', 'with-additional-projects', 'quux', 'baz'],
+        exclude: [
+          'opensearch-dashboards',
+          'bar',
+          'corge',
+          'foo',
+          'with-additional-projects',
+          'quux',
+          'baz',
+        ],
       });
 
       expect(projects.size).toBe(0);
@@ -230,7 +238,12 @@ describe('#topologicallyBatchProjects', () => {
 
       const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
-      expect(expectedBatches).toEqual([['opensearch-dashboards'], ['bar', 'foo'], ['baz', 'zorge'], ['quux']]);
+      expect(expectedBatches).toEqual([
+        ['opensearch-dashboards'],
+        ['bar', 'foo'],
+        ['baz', 'zorge'],
+        ['quux'],
+      ]);
     });
   });
 });
@@ -239,8 +252,8 @@ describe('#includeTransitiveProjects', () => {
   test('includes transitive dependencies for OpenSearch Dashboards package', async () => {
     const projects = await getProjects(rootPath, ['.', 'packages/*']);
 
-    const opensearch-dashboards = projects.get('opensearch-dashboards')!;
-    const withTransitive = includeTransitiveProjects([opensearch-dashboards], projects);
+    const opensearchDashboards = projects.get('opensearch-dashboards')!;
+    const withTransitive = includeTransitiveProjects([opensearchDashboards], projects);
 
     expect([...withTransitive.keys()]).toEqual(['opensearch-dashboards', 'foo']);
   });
@@ -248,9 +261,9 @@ describe('#includeTransitiveProjects', () => {
   test('handles multiple projects with same transitive dep', async () => {
     const projects = await getProjects(rootPath, ['.', 'packages/*']);
 
-    const opensearch-dashboards = projects.get('opensearch-dashboards')!;
+    const opensearchDashboards = projects.get('opensearch-dashboards')!;
     const bar = projects.get('bar')!;
-    const withTransitive = includeTransitiveProjects([opensearch-dashboards, bar], projects);
+    const withTransitive = includeTransitiveProjects([opensearchDashboards, bar], projects);
 
     expect([...withTransitive.keys()]).toEqual(['opensearch-dashboards', 'bar', 'foo']);
   });
