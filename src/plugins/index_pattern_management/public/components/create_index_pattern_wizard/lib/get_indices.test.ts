@@ -50,7 +50,7 @@ const successfulSearchResponse = {
       indices: {
         buckets: [
           { key: 'opensearch_dashboards_sample_data_ecommerce' },
-          { key: '.opensearch-dashboards_1' },
+          { key: '.opensearch_dashboards_1' },
         ],
       },
     },

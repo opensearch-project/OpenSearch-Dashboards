@@ -52,7 +52,7 @@ describe.skip('get_data_telemetry', () => {
       expect(
         buildDataTelemetryPayload([
           { name: 'no__way__this__can_match_anything', sizeInBytes: 10 },
-          { name: '.opensearch-dashboards-event-log-8.0.0' },
+          { name: '.opensearch_dashboards-event-log-8.0.0' },
         ])
       ).toStrictEqual([]);
     });

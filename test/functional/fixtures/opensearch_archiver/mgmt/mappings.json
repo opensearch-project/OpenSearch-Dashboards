@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": ".opensearch-dashboards",
+    "index": ".opensearch_dashboards",
     "mappings": {
       "dynamic": "strict",
       "properties": {

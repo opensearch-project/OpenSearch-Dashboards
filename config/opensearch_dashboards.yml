@@ -29,7 +29,7 @@
 
 # OpenSearch Dashboards uses an index in OpenSearch to store saved searches, visualizations and
 # dashboards. OpenSearch Dashboards creates a new index if the index doesn't already exist.
-#opensearchDashboards.index: ".opensearch-dashboards"
+#opensearchDashboards.index: ".opensearch_dashboards"
 
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"

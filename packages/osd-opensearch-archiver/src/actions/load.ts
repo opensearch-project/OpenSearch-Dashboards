@@ -107,11 +107,11 @@ export async function loadAction({
   });
 
   // If we affected the OpenSearch Dashboards index, we need to ensure it's migrated...
-  if (Object.keys(result).some((k) => k.startsWith('.opensearch-dashboards'))) {
+  if (Object.keys(result).some((k) => k.startsWith('.opensearch_dashboards'))) {
     await migrateOpenSearchDashboardsIndex({ client, osdClient });
 
     if (opensearchDashboardsPluginIds.includes('spaces')) {
-      await createDefaultSpace({ client, index: '.opensearch-dashboards' });
+      await createDefaultSpace({ client, index: '.opensearch_dashboards' });
     }
   }
 

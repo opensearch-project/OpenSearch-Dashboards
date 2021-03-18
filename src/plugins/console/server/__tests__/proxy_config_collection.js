@@ -41,7 +41,7 @@ describe('ProxyConfigCollection', function () {
         protocol: 'https',
         host: 'localhost',
         port: 5601,
-        path: '/.opensearch-dashboards',
+        path: '/.opensearch_dashboards',
       },
 
       timeout: 1,
@@ -92,9 +92,9 @@ describe('ProxyConfigCollection', function () {
     });
   });
 
-  describe('https://localhost:5601/.opensearch-dashboards', function () {
+  describe('https://localhost:5601/.opensearch_dashboards', function () {
     it('defaults to the first matching timeout', function () {
-      expect(getTimeout('https://localhost:5601/.opensearch-dashboards')).to.be(1);
+      expect(getTimeout('https://localhost:5601/.opensearch_dashboards')).to.be(1);
     });
   });
 
