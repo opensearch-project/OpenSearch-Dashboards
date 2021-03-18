@@ -48,6 +48,8 @@ export async function findObject(
   id: string
 ): Promise<SavedObjectWithMetadata> {
   return await http.get<SavedObjectWithMetadata>(
-    `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
+    `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
+      type
+    )}/${encodeURIComponent(id)}`
   );
 }

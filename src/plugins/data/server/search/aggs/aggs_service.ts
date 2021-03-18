@@ -118,5 +118,5 @@ export class AggsService {
     };
   }
 
-  public stop() { }
+  public stop() {}
 }

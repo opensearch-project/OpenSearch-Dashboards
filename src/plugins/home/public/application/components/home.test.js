@@ -30,7 +30,7 @@ jest.mock('../opensearch_dashboards_services', () => ({
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
-      setBreadcrumbs: () => { },
+      setBreadcrumbs: () => {},
     },
   }),
 }));

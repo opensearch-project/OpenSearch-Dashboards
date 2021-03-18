@@ -40,19 +40,25 @@ export const osdTestConfig = new (class OsdTestConfig {
       return {
         protocol: testOpenSearchDashboardsUrl.protocol?.slice(0, -1),
         hostname: testOpenSearchDashboardsUrl.hostname,
-        port: testOpenSearchDashboardsUrl.port ? parseInt(testOpenSearchDashboardsUrl.port, 10) : undefined,
+        port: testOpenSearchDashboardsUrl.port
+          ? parseInt(testOpenSearchDashboardsUrl.port, 10)
+          : undefined,
         auth: testOpenSearchDashboardsUrl.auth,
         username: testOpenSearchDashboardsUrl.auth?.split(':')[0],
         password: testOpenSearchDashboardsUrl.auth?.split(':')[1],
       };
     }
 
-    const username = process.env.TEST_OPENSEARCH_DASHBOARDS_USERNAME || opensearchDashboardsTestUser.username;
-    const password = process.env.TEST_OPENSEARCH_DASHBOARDS_PASSWORD || opensearchDashboardsTestUser.password;
+    const username =
+      process.env.TEST_OPENSEARCH_DASHBOARDS_USERNAME || opensearchDashboardsTestUser.username;
+    const password =
+      process.env.TEST_OPENSEARCH_DASHBOARDS_PASSWORD || opensearchDashboardsTestUser.password;
     return {
       protocol: process.env.TEST_OPENSEARCH_DASHBOARDS_PROTOCOL || 'http',
       hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOSTNAME || 'localhost',
-      port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT ? parseInt(process.env.TEST_OPENSEARCH_DASHBOARDS_PORT, 10) : 5620,
+      port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT
+        ? parseInt(process.env.TEST_OPENSEARCH_DASHBOARDS_PORT, 10)
+        : 5620,
       auth: `${username}:${password}`,
       username,
       password,

@@ -126,12 +126,16 @@ export class FieldFormatsRegistry {
    * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes - Array of OpenSearch data types
    * @return {OPENSEARCH_FIELD_TYPES | undefined}
    */
-  getTypeNameByOpenSearchTypes = (opensearchTypes: OPENSEARCH_FIELD_TYPES[] | undefined): OPENSEARCH_FIELD_TYPES | undefined => {
+  getTypeNameByOpenSearchTypes = (
+    opensearchTypes: OPENSEARCH_FIELD_TYPES[] | undefined
+  ): OPENSEARCH_FIELD_TYPES | undefined => {
     if (!Array.isArray(opensearchTypes)) {
       return undefined;
     }
 
-    return opensearchTypes.find((type) => this.defaultMap[type] && this.defaultMap[type].opensearch);
+    return opensearchTypes.find(
+      (type) => this.defaultMap[type] && this.defaultMap[type].opensearch
+    );
   };
 
   /**
@@ -205,7 +209,10 @@ export class FieldFormatsRegistry {
    * @param  {OPENSEARCH_FIELD_TYPES[]} opensearchTypes
    * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: OSD_FIELD_TYPES, opensearchTypes: OPENSEARCH_FIELD_TYPES[]): string {
+  getDefaultInstanceCacheResolver(
+    fieldType: OSD_FIELD_TYPES,
+    opensearchTypes: OPENSEARCH_FIELD_TYPES[]
+  ): string {
     // @ts-ignore
     return Array.isArray(opensearchTypes) && opensearchTypes.indexOf(fieldType) === -1
       ? [fieldType, ...opensearchTypes].join('-')

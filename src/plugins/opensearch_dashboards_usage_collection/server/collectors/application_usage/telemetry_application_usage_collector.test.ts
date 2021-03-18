@@ -75,10 +75,10 @@ describe('telemetry_application_usage', () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     savedObjectClient.find.mockImplementation(
       async () =>
-      ({
-        saved_objects: [],
-        total: 0,
-      } as any)
+        ({
+          saved_objects: [],
+          total: 0,
+        } as any)
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 

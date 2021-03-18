@@ -55,10 +55,7 @@ export type OpenSearchClientConfig = Pick<
  * @param scoped if true, will adapt the configuration to be used by a scoped client
  *        (will remove basic auth and ssl certificates)
  */
-export function parseClientOptions(
-  config: OpenSearchClientConfig,
-  scoped: boolean
-): ClientOptions {
+export function parseClientOptions(config: OpenSearchClientConfig, scoped: boolean): ClientOptions {
   const clientOptions: ClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,

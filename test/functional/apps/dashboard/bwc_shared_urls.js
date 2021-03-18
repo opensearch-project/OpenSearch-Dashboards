@@ -57,7 +57,8 @@ export default function ({ getService, getPageObjects }) {
 
       const currentUrl = await browser.getCurrentUrl();
       opensearchDashboardsLegacyBaseUrl =
-        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/opensearch-dashboards';
+        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) +
+        '/app/opensearch-dashboards';
     });
 
     describe('5.6 urls', () => {

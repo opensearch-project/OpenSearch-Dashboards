@@ -81,7 +81,7 @@ describe('Integration', () => {
       //setTimeout(function () {
       senseEditor.completer = {
         base: {},
-        changeListener: function () { },
+        changeListener: function () {},
       }; // mimic auto complete
 
       senseEditor.autocomplete._test.getCompletions(senseEditor, null, cursor, '', function (
@@ -327,12 +327,12 @@ describe('Integration', () => {
 
   contextTests(
     '{\n' +
-    '   "query": {\n' +
-    '    "field": "something"\n' +
-    '   },\n' +
-    '   "facets": {},\n' +
-    '   "size": 20 \n' +
-    '}',
+      '   "query": {\n' +
+      '    "field": "something"\n' +
+      '   },\n' +
+      '   "facets": {},\n' +
+      '   "size": 20 \n' +
+      '}',
     MAPPING,
     SEARCH_OSD,
     'POST _search',

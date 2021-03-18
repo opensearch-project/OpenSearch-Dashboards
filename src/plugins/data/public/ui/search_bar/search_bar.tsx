@@ -24,7 +24,10 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { withOpenSearchDashboards, OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
+import {
+  withOpenSearchDashboards,
+  OpenSearchDashboardsReactContextValue,
+} from '../../../../opensearch_dashboards_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';

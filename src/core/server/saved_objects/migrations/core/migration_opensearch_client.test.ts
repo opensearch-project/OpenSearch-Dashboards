@@ -18,7 +18,10 @@
  */
 import { migrationRetryCallClusterMock } from './migration_opensearch_client.test.mock';
 
-import { createMigrationOpenSearchClient, MigrationOpenSearchClient } from './migration_opensearch_client';
+import {
+  createMigrationOpenSearchClient,
+  MigrationOpenSearchClient,
+} from './migration_opensearch_client';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsErrorHelpers } from '../../service/lib/errors';

@@ -33,7 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 200 with individual responses', async () =>
         await supertest
-          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization&fields=title')
+          .get(
+            '/api/opensearch-dashboards/management/saved_objects/_find?type=visualization&fields=title'
+          )
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body).to.eql({
@@ -110,7 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () =>
           await supertest
-            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a')
+            .get(
+              '/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a'
+            )
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -195,7 +199,9 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () =>
           await supertest
-            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a')
+            .get(
+              '/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a'
+            )
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({

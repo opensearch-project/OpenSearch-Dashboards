@@ -687,7 +687,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use default index`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: '.opensearch-dashboards-test' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: '.opensearch-dashboards-test',
+        });
       });
 
       it(`should use custom index`, async () => {
@@ -851,7 +854,11 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error reason for other errors`, async () => {
         const opensearchError = { reason: 'some_other_error' };
-        await bulkCreateError(obj3, opensearchError, expectErrorResult(obj3, { message: opensearchError.reason }));
+        await bulkCreateError(
+          obj3,
+          opensearchError,
+          expectErrorResult(obj3, { message: opensearchError.reason })
+        );
       });
 
       it(`returns error string for other errors if no reason is defined`, async () => {
@@ -1590,7 +1597,11 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error reason for other errors (bulk)`, async () => {
         const opensearchError = { reason: 'some_other_error' };
-        await bulkUpdateError(obj, opensearchError, expectErrorResult(obj, { message: opensearchError.reason }));
+        await bulkUpdateError(
+          obj,
+          opensearchError,
+          expectErrorResult(obj, { message: opensearchError.reason })
+        );
       });
 
       it(`returns error string for other errors if no reason is defined (bulk)`, async () => {
@@ -2523,9 +2534,7 @@ describe('SavedObjectsRepository', () => {
 
     const findSuccess = async (options, namespace) => {
       client.search.mockResolvedValueOnce(
-        opensearchClientMock.createSuccessTransportRequestPromise(
-          generateSearchResults(namespace)
-        )
+        opensearchClientMock.createSuccessTransportRequestPromise(generateSearchResults(namespace))
       );
       const result = await savedObjectsRepository.find(options);
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);

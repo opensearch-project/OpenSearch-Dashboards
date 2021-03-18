@@ -51,7 +51,9 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   };
 };
 
-export const createVersionCheckPostAuthHandler = (opensearchDashboardsVersion: string): OnPostAuthHandler => {
+export const createVersionCheckPostAuthHandler = (
+  opensearchDashboardsVersion: string
+): OnPostAuthHandler => {
   return (request, response, toolkit) => {
     const requestVersion = request.headers[VERSION_HEADER];
     if (requestVersion && requestVersion !== opensearchDashboardsVersion) {

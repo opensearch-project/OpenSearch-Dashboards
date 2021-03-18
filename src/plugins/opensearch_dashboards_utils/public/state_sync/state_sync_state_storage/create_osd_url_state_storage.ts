@@ -33,7 +33,7 @@ import {
  * 1. Keeps state in sync with the URL.
  * 2. Serializes data and stores it in the URL in one of the supported formats:
  *   * Rison encoded.
- *   * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See OpenSearch Dashboards's `state:storeInSessionStorage` 
+ *   * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See OpenSearch Dashboards's `state:storeInSessionStorage`
  *     advanced option for more context.
  * 3. Takes care of listening to the URL updates and notifies state about the updates.
  * 4. Takes care of batching URL updates to prevent redundant browser history records.

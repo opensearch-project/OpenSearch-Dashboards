@@ -138,7 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('opensearch_dashboards_sample_data_flights');
+          await PageObjects.visualBuilder.setIndexPatternValue(
+            'opensearch_dashboards_sample_data_flights'
+          );
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });

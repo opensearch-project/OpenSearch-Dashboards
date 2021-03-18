@@ -68,9 +68,12 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
         onClick={() => {
           setDefaultRoute(path);
           toasts.addSuccess({
-            title: i18n.translate('opensearch-dashboards-react.pageFooter.changeDefaultRouteSuccessToast', {
-              defaultMessage: 'Landing page updated',
-            }),
+            title: i18n.translate(
+              'opensearch-dashboards-react.pageFooter.changeDefaultRouteSuccessToast',
+              {
+                defaultMessage: 'Landing page updated',
+              }
+            ),
           });
         }}
         size="xs"

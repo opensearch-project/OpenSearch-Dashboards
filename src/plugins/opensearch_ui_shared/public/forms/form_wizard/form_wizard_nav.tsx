@@ -43,7 +43,9 @@ const DEFAULT_TEXTS = {
   back: i18n.translate('opensearchUi.formWizard.backButtonLabel', { defaultMessage: 'Back' }),
   next: i18n.translate('opensearchUi.formWizard.nextButtonLabel', { defaultMessage: 'Next' }),
   save: i18n.translate('opensearchUi.formWizard.saveButtonLabel', { defaultMessage: 'Save' }),
-  saving: i18n.translate('opensearchUi.formWizard.savingButtonLabel', { defaultMessage: 'Saving...' }),
+  saving: i18n.translate('opensearchUi.formWizard.savingButtonLabel', {
+    defaultMessage: 'Saving...',
+  }),
 };
 
 export const FormWizardNav = ({

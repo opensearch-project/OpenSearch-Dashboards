@@ -56,10 +56,10 @@ test('render', () => {
     <InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
-      onStatusCheck={() => { }}
+      onStatusCheck={() => {}}
       offset={1}
       paramValues={{}}
-      replaceTemplateStrings={() => { }}
+      replaceTemplateStrings={() => {}}
     />
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -79,11 +79,11 @@ describe('statusCheckState', () => {
       <InstructionSet.WrappedComponent
         title="title1"
         instructionVariants={instructionVariants}
-        onStatusCheck={() => { }}
+        onStatusCheck={() => {}}
         offset={1}
         paramValues={{}}
         statusCheckConfig={statusCheckConfig}
-        replaceTemplateStrings={() => { }}
+        replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
       />
     );
@@ -95,11 +95,11 @@ describe('statusCheckState', () => {
       <InstructionSet.WrappedComponent
         title="title1"
         instructionVariants={instructionVariants}
-        onStatusCheck={() => { }}
+        onStatusCheck={() => {}}
         offset={1}
         paramValues={{}}
         statusCheckConfig={statusCheckConfig}
-        replaceTemplateStrings={() => { }}
+        replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
       />
     );
@@ -111,11 +111,11 @@ describe('statusCheckState', () => {
       <InstructionSet.WrappedComponent
         title="title1"
         instructionVariants={instructionVariants}
-        onStatusCheck={() => { }}
+        onStatusCheck={() => {}}
         offset={1}
         paramValues={{}}
         statusCheckConfig={statusCheckConfig}
-        replaceTemplateStrings={() => { }}
+        replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.ERROR}
       />
     );
@@ -127,11 +127,11 @@ describe('statusCheckState', () => {
       <InstructionSet.WrappedComponent
         title="title1"
         instructionVariants={instructionVariants}
-        onStatusCheck={() => { }}
+        onStatusCheck={() => {}}
         offset={1}
         paramValues={{}}
         statusCheckConfig={statusCheckConfig}
-        replaceTemplateStrings={() => { }}
+        replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.NO_DATA}
       />
     );
@@ -143,11 +143,11 @@ describe('statusCheckState', () => {
       <InstructionSet.WrappedComponent
         title="title1"
         instructionVariants={instructionVariants}
-        onStatusCheck={() => { }}
+        onStatusCheck={() => {}}
         offset={1}
         paramValues={{}}
         statusCheckConfig={statusCheckConfig}
-        replaceTemplateStrings={() => { }}
+        replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.HAS_DATA}
       />
     );

@@ -68,7 +68,9 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing originating app state in append mode', async () => {
-    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
+    const historyMock = mockHistoryState({
+      opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
+    });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     await stateTransfer.navigateToEditor(destinationApp, {
       state: { originatingApp },
@@ -93,7 +95,9 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing embeddable package state in append mode', async () => {
-    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
+    const historyMock = mockHistoryState({
+      opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
+    });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
       state: { type: 'coolestType', input: { savedObjectId: '150' } },
@@ -117,7 +121,9 @@ describe('embeddable state transfer', () => {
   });
 
   it('returns undefined with originating app state is not in the right shape', async () => {
-    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
+    const historyMock = mockHistoryState({
+      opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
+    });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEditorState();
     expect(fetchedState).toBeUndefined();
@@ -134,7 +140,9 @@ describe('embeddable state transfer', () => {
   });
 
   it('returns undefined when embeddable package is not in the right shape', async () => {
-    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
+    const historyMock = mockHistoryState({
+      opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
+    });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage();
     expect(fetchedState).toBeUndefined();

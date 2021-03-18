@@ -67,7 +67,10 @@ export type OnPreAuthHandler = (
   request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | OpenSearchDashboardsResponse | Promise<OnPreAuthResult | OpenSearchDashboardsResponse>;
+) =>
+  | OnPreAuthResult
+  | OpenSearchDashboardsResponse
+  | Promise<OnPreAuthResult | OpenSearchDashboardsResponse>;
 
 /**
  * @public
@@ -83,7 +86,11 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        OpenSearchDashboardsRequest.from(request),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }

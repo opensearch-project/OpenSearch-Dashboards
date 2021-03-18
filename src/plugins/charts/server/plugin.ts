@@ -48,5 +48,5 @@ export class ChartsServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

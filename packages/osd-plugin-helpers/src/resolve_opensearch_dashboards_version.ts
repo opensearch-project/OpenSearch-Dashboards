@@ -21,8 +21,12 @@ import inquirer from 'inquirer';
 
 import { Plugin } from './load_opensearch_dashboards_platform_plugin';
 
-export async function resolveOpenSearchDashboardsVersion(option: string | undefined, plugin: Plugin) {
-  const preselectedVersion = option || plugin.manifest.opensearchDashboardsVersion || plugin.manifest.version;
+export async function resolveOpenSearchDashboardsVersion(
+  option: string | undefined,
+  plugin: Plugin
+) {
+  const preselectedVersion =
+    option || plugin.manifest.opensearchDashboardsVersion || plugin.manifest.version;
 
   if (preselectedVersion && preselectedVersion !== 'opensearchDashboards') {
     return preselectedVersion;

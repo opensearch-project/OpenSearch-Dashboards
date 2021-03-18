@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
@@ -57,7 +62,10 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, { data, opensearchDashboardsLegacy }: TablePluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, opensearchDashboardsLegacy }: TablePluginStartDependencies
+  ) {
     setFormatService(data.fieldFormats);
     setOpenSearchDashboardsLegacy(opensearchDashboardsLegacy);
   }

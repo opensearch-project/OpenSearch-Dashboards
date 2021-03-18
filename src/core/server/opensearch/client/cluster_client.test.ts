@@ -26,9 +26,7 @@ import { ClusterClient } from './cluster_client';
 import { OpenSearchClientConfig } from './client_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 
-const createConfig = (
-  parts: Partial<OpenSearchClientConfig> = {}
-): OpenSearchClientConfig => {
+const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchClientConfig => {
   return {
     logQueries: false,
     sniffOnStart: false,
@@ -208,7 +206,10 @@ describe('ClusterClient', () => {
 
       const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
       const request = httpServerMock.createOpenSearchDashboardsRequest({
-        opensearchDashboardsRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
+        opensearchDashboardsRequestState: {
+          requestId: 'my-fake-id',
+          requestUuid: 'ignore-this-id',
+        },
       });
 
       clusterClient.asScoped(request);
@@ -335,7 +336,10 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         headers: { foo: 'request' },
-        opensearchDashboardsRequestState: { requestId: 'from request', requestUuid: 'ignore-this-id' },
+        opensearchDashboardsRequestState: {
+          requestId: 'from request',
+          requestUuid: 'ignore-this-id',
+        },
       });
 
       clusterClient.asScoped(request);

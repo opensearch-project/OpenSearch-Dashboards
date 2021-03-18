@@ -29,10 +29,10 @@ import { setFieldFormats } from '../services';
 
 setFieldFormats(({
   getDefaultInstance: () =>
-  ({
-    getConverterFor: () => (value: any) => value,
-    convert: (value: any) => JSON.stringify(value),
-  } as FieldFormatImpl),
+    ({
+      getConverterFor: () => (value: any) => value,
+      convert: (value: any) => JSON.stringify(value),
+    } as FieldFormatImpl),
 } as unknown) as FieldFormatsStart);
 
 export function getStubIndexPattern(

@@ -68,17 +68,17 @@ export class SampleDataSetCard extends React.Component {
                 aria-label={
                   this.props.isProcessing
                     ? i18n.translate('home.sampleDataSetCard.removingButtonAriaLabel', {
-                      defaultMessage: 'Removing {datasetName}',
-                      values: {
-                        datasetName: this.props.name,
-                      },
-                    })
+                        defaultMessage: 'Removing {datasetName}',
+                        values: {
+                          datasetName: this.props.name,
+                        },
+                      })
                     : i18n.translate('home.sampleDataSetCard.removeButtonAriaLabel', {
-                      defaultMessage: 'Remove {datasetName}',
-                      values: {
-                        datasetName: this.props.name,
-                      },
-                    })
+                        defaultMessage: 'Remove {datasetName}',
+                        values: {
+                          datasetName: this.props.name,
+                        },
+                      })
                 }
               >
                 {this.props.isProcessing ? (
@@ -87,11 +87,11 @@ export class SampleDataSetCard extends React.Component {
                     defaultMessage="Removing"
                   />
                 ) : (
-                    <FormattedMessage
-                      id="home.sampleDataSetCard.removeButtonLabel"
-                      defaultMessage="Remove"
-                    />
-                  )}
+                  <FormattedMessage
+                    id="home.sampleDataSetCard.removeButtonLabel"
+                    defaultMessage="Remove"
+                  />
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -116,17 +116,17 @@ export class SampleDataSetCard extends React.Component {
                 aria-label={
                   this.props.isProcessing
                     ? i18n.translate('home.sampleDataSetCard.addingButtonAriaLabel', {
-                      defaultMessage: 'Adding {datasetName}',
-                      values: {
-                        datasetName: this.props.name,
-                      },
-                    })
+                        defaultMessage: 'Adding {datasetName}',
+                        values: {
+                          datasetName: this.props.name,
+                        },
+                      })
                     : i18n.translate('home.sampleDataSetCard.addButtonAriaLabel', {
-                      defaultMessage: 'Add {datasetName}',
-                      values: {
-                        datasetName: this.props.name,
-                      },
-                    })
+                        defaultMessage: 'Add {datasetName}',
+                        values: {
+                          datasetName: this.props.name,
+                        },
+                      })
                 }
               >
                 {this.props.isProcessing ? (
@@ -135,11 +135,11 @@ export class SampleDataSetCard extends React.Component {
                     defaultMessage="Adding"
                   />
                 ) : (
-                    <FormattedMessage
-                      id="home.sampleDataSetCard.addButtonLabel"
-                      defaultMessage="Add data"
-                    />
-                  )}
+                  <FormattedMessage
+                    id="home.sampleDataSetCard.addButtonLabel"
+                    defaultMessage="Add data"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

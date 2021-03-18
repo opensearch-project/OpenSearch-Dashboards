@@ -55,7 +55,8 @@ describe.skip('NewsfeedApiDriver', () => {
   const opensearchDashboardsVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
   const fetchInterval = 2000;
-  const getDriver = () => new NewsfeedApiDriver(opensearchDashboardsVersion, userLanguage, fetchInterval);
+  const getDriver = () =>
+    new NewsfeedApiDriver(opensearchDashboardsVersion, userLanguage, fetchInterval);
 
   afterEach(() => {
     sinon.reset();

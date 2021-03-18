@@ -38,7 +38,10 @@ export const CronYearly = ({
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronYearly.fieldMonthLabel" defaultMessage="Month" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronYearly.fieldMonthLabel"
+          defaultMessage="Month"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -57,7 +60,10 @@ export const CronYearly = ({
 
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronYearly.fieldDateLabel" defaultMessage="Date" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronYearly.fieldDateLabel"
+          defaultMessage="Date"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -76,7 +82,10 @@ export const CronYearly = ({
 
     <EuiFormRow
       label={
-        <FormattedMessage id="opensearchUi.cronEditor.cronYearly.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage
+          id="opensearchUi.cronEditor.cronYearly.fieldTimeLabel"
+          defaultMessage="Time"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"

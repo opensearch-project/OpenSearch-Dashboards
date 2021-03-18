@@ -58,7 +58,7 @@ describe('debounce service', function () {
   });
 
   it('should have a cancel method', function () {
-    const bouncer = debounce(() => { }, 100);
+    const bouncer = debounce(() => {}, 100);
 
     expect(bouncer).toHaveProperty('cancel');
   });

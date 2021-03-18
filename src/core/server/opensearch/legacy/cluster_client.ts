@@ -20,7 +20,12 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { LegacyOpenSearchErrorHelpers } from './errors';
-import { GetAuthHeaders, OpenSearchDashboardsRequest, isOpenSearchDashboardsRequest, isRealRequest } from '../../http';
+import {
+  GetAuthHeaders,
+  OpenSearchDashboardsRequest,
+  isOpenSearchDashboardsRequest,
+  isRealRequest,
+} from '../../http';
 import { AuditorFactory } from '../../audit_trail';
 import { filterHeaders, ensureRawRequest } from '../../http/router';
 import { Logger } from '../../logging';
@@ -218,7 +223,9 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   private getScopedAuditor(request?: ScopeableRequest) {
     // TODO: support alternative credential owners from outside of Request context in #39430
     if (request && isRealRequest(request)) {
-      const opensearchDashboardsRequest = isOpenSearchDashboardsRequest(request) ? request : OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = isOpenSearchDashboardsRequest(request)
+        ? request
+        : OpenSearchDashboardsRequest.from(request);
       const auditorFactory = this.getAuditorFactory();
       return auditorFactory.asScoped(opensearchDashboardsRequest);
     }
@@ -259,7 +266,9 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     }
     const authHeaders = this.getAuthHeaders(request);
     const requestHeaders = ensureRawRequest(request).headers;
-    const requestIdHeaders = isOpenSearchDashboardsRequest(request) ? { 'x-opaque-id': request.id } : {};
+    const requestIdHeaders = isOpenSearchDashboardsRequest(request)
+      ? { 'x-opaque-id': request.id }
+      : {};
 
     return { ...requestHeaders, ...requestIdHeaders, ...authHeaders };
   }

@@ -35,9 +35,12 @@ export function Resizer(props: Props) {
     <button
       {...props}
       data-test-subj="splitPanelResizer"
-      aria-label={i18n.translate('opensearch-dashboards-react.splitPanel.adjustPanelSizeAriaLabel', {
-        defaultMessage: 'Press left/right to adjust panels size',
-      })}
+      aria-label={i18n.translate(
+        'opensearch-dashboards-react.splitPanel.adjustPanelSizeAriaLabel',
+        {
+          defaultMessage: 'Press left/right to adjust panels size',
+        }
+      )}
     >
       <EuiIcon type="grabHorizontal" />
     </button>

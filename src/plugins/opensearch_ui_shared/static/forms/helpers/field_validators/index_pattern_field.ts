@@ -52,14 +52,17 @@ export const indexPatternField = (i18n: any) => (
     return {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_PATTERN',
-      message: i18n.translate('opensearchUi.forms.fieldValidation.indexPatternInvalidCharactersError', {
-        defaultMessage:
-          'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
-        values: {
-          characterList: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' '),
-          characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
-        },
-      }),
+      message: i18n.translate(
+        'opensearchUi.forms.fieldValidation.indexPatternInvalidCharactersError',
+        {
+          defaultMessage:
+            'The index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.',
+          values: {
+            characterList: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' '),
+            characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
+          },
+        }
+      ),
     };
   }
 };

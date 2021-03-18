@@ -20,7 +20,11 @@
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
-  function isUpgradeableTest(savedVersion: string, opensearchDashboardsVersion: string, expected: boolean) {
+  function isUpgradeableTest(
+    savedVersion: string,
+    opensearchDashboardsVersion: string,
+    expected: boolean
+  ) {
     it(`should return ${expected} for config version ${savedVersion} and OpenSearch Dashboards version ${opensearchDashboardsVersion}`, () => {
       expect(isConfigVersionUpgradeable(savedVersion, opensearchDashboardsVersion)).toBe(expected);
     });

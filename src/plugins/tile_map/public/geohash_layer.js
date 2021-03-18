@@ -26,7 +26,14 @@ import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
 
 export class GeohashLayer extends OpenSearchDashboardsMapLayer {
-  constructor(featureCollection, featureCollectionMetaData, options, zoom, opensearchDashboardsMap, leaflet) {
+  constructor(
+    featureCollection,
+    featureCollectionMetaData,
+    options,
+    zoom,
+    opensearchDashboardsMap,
+    leaflet
+  ) {
     super();
 
     this._featureCollection = featureCollection;

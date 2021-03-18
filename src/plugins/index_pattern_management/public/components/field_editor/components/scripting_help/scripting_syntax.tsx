@@ -25,8 +25,8 @@ import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services.docLinks?.links
-    .scriptedFields;
+  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services
+    .docLinks?.links.scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

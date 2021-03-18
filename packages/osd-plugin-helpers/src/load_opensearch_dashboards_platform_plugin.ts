@@ -20,7 +20,11 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@osd/utils';
-import { parseOpenSearchDashboardsPlatformPlugin, OpenSearchDashboardsPlatformPlugin, createFailError } from '@osd/dev-utils';
+import {
+  parseOpenSearchDashboardsPlatformPlugin,
+  OpenSearchDashboardsPlatformPlugin,
+  createFailError,
+} from '@osd/dev-utils';
 
 export type Plugin = OpenSearchDashboardsPlatformPlugin;
 
@@ -32,7 +36,9 @@ export function loadOpenSearchDashboardsPlatformPlugin(pluginDir: string) {
   const isRootPlugin = parentDir === Path.resolve(REPO_ROOT, 'plugins');
 
   if (isFixture || isExample || isRootPlugin) {
-    return parseOpenSearchDashboardsPlatformPlugin(Path.resolve(pluginDir, 'opensearch_dashboards.json'));
+    return parseOpenSearchDashboardsPlatformPlugin(
+      Path.resolve(pluginDir, 'opensearch_dashboards.json')
+    );
   }
 
   throw createFailError(

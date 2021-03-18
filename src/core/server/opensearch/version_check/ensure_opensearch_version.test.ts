@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mapNodesVersionCompatibility, pollOpenSearchNodesVersion, NodesInfo } from './ensure_opensearch_version';
+import {
+  mapNodesVersionCompatibility,
+  pollOpenSearchNodesVersion,
+  NodesInfo,
+} from './ensure_opensearch_version';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { opensearchClientMock } from '../client/mocks';
 import { take, delay } from 'rxjs/operators';
@@ -57,13 +61,21 @@ describe('mapNodesVersionCompatibility', () => {
 
   it('returns isCompatible=true with a single node that matches', async () => {
     const nodesInfo = createNodes('5.1.0');
-    const result = await mapNodesVersionCompatibility(nodesInfo, OPENSEARCH_DASHBOARDS_VERSION, false);
+    const result = await mapNodesVersionCompatibility(
+      nodesInfo,
+      OPENSEARCH_DASHBOARDS_VERSION,
+      false
+    );
     expect(result.isCompatible).toBe(true);
   });
 
   it('returns isCompatible=true with multiple nodes that satisfy', async () => {
     const nodesInfo = createNodes('5.1.0', '5.2.0', '5.1.1-Beta1');
-    const result = await mapNodesVersionCompatibility(nodesInfo, OPENSEARCH_DASHBOARDS_VERSION, false);
+    const result = await mapNodesVersionCompatibility(
+      nodesInfo,
+      OPENSEARCH_DASHBOARDS_VERSION,
+      false
+    );
     expect(result.isCompatible).toBe(true);
   });
 
@@ -90,7 +102,11 @@ describe('mapNodesVersionCompatibility', () => {
     // 5.0.0 OpenSearch is too old to work with a 5.1.0 version of OpenSearch Dashboards.
     const nodesInfo = createNodes('5.1.0', '5.2.0', '5.0.0');
     const ignoreVersionMismatch = true;
-    const result = mapNodesVersionCompatibility(nodesInfo, OPENSEARCH_DASHBOARDS_VERSION, ignoreVersionMismatch);
+    const result = mapNodesVersionCompatibility(
+      nodesInfo,
+      OPENSEARCH_DASHBOARDS_VERSION,
+      ignoreVersionMismatch
+    );
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
       `"Ignoring version incompatibility between OpenSearch Dashboards v5.1.0 and the following OpenSearch nodes: v5.0.0 @ http_address (ip)"`
@@ -98,7 +114,11 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('returns isCompatible=true with a message if a node is only off by a patch version', () => {
-    const result = mapNodesVersionCompatibility(createNodes('5.1.1'), OPENSEARCH_DASHBOARDS_VERSION, false);
+    const result = mapNodesVersionCompatibility(
+      createNodes('5.1.1'),
+      OPENSEARCH_DASHBOARDS_VERSION,
+      false
+    );
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
       `"You're running OpenSearch Dashboards 5.1.0 with some different versions of OpenSearch. Update OpenSearch Dashboards or OpenSearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
@@ -106,7 +126,11 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('returns isCompatible=true with a message if a node is only off by a patch version and without http publish address', async () => {
-    const result = mapNodesVersionCompatibility(createNodes('5.1.1'), OPENSEARCH_DASHBOARDS_VERSION, false);
+    const result = mapNodesVersionCompatibility(
+      createNodes('5.1.1'),
+      OPENSEARCH_DASHBOARDS_VERSION,
+      false
+    );
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
       `"You're running OpenSearch Dashboards 5.1.0 with some different versions of OpenSearch. Update OpenSearch Dashboards or OpenSearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
@@ -174,7 +198,9 @@ describe('pollOpenSearchNodesVersion', () => {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
-          expect(result).toEqual(mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false));
+          expect(result).toEqual(
+            mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+          );
         },
         complete: done,
         error: done,

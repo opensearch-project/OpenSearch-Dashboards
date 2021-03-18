@@ -592,7 +592,8 @@ describe('Saved Object', () => {
           filter: [
             {
               meta: {
-                indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                indexRefName:
+                  'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
               },
             },
           ],

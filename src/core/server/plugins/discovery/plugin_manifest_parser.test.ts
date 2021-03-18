@@ -102,7 +102,12 @@ test('return error when plugin id includes `.` characters', async () => {
 
 test('logs warning if pluginId is not in camelCase format', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })
+      )
+    );
   });
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
@@ -118,7 +123,12 @@ test('logs warning if pluginId is not in camelCase format', async () => {
 
 test('does not log pluginId format warning in dist mode', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })
+      )
+    );
   });
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
@@ -154,7 +164,13 @@ test('return error when plugin expected OpenSearch Dashboards version cannot be 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', opensearchDashboardsVersion: 'non-sem-ver' }))
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '1.0.0',
+          opensearchDashboardsVersion: 'non-sem-ver',
+        })
+      )
     );
   });
 

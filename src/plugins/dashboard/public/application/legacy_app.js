@@ -168,7 +168,7 @@ export function initDashboardApp(app, deps) {
                       history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
                       $route.reload();
                     }
-                    return new Promise(() => { });
+                    return new Promise(() => {});
                   });
               }
             });
@@ -232,12 +232,12 @@ export function initDashboardApp(app, deps) {
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
                     })
                   );
-                  return new Promise(() => { });
+                  return new Promise(() => {});
                 } else {
                   // E.g. a corrupt or deleted dashboard
                   deps.core.notifications.toasts.addDanger(error.message);
                   history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return new Promise(() => { });
+                  return new Promise(() => {});
                 }
               });
           },
@@ -254,7 +254,7 @@ export function initDashboardApp(app, deps) {
             }
           });
           // prevent angular from completing the navigation
-          return new Promise(() => { });
+          return new Promise(() => {});
         },
       });
   });

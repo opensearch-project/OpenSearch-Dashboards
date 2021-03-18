@@ -25,4 +25,8 @@ export {
   withOpenSearchDashboards,
   UseOpenSearchDashboards,
 } from './context';
-export { OpenSearchDashboardsReactContext, OpenSearchDashboardsReactContextValue, OpenSearchDashboardsServices } from './types';
+export {
+  OpenSearchDashboardsReactContext,
+  OpenSearchDashboardsReactContextValue,
+  OpenSearchDashboardsServices,
+} from './types';

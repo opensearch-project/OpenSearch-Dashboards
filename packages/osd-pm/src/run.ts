@@ -30,7 +30,9 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
 
     const osd = await OpenSearchDashboards.loadFrom(config.rootPath);
     const projects = osd.getFilteredProjects({
-      skipOpenSearchDashboardsPlugins: Boolean(config.options['skip-opensearch-dashboards-plugins']),
+      skipOpenSearchDashboardsPlugins: Boolean(
+        config.options['skip-opensearch-dashboards-plugins']
+      ),
       ossOnly: Boolean(config.options.oss),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include),

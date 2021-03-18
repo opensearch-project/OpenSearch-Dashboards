@@ -278,7 +278,8 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       deprecation: {
         message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
-          defaultMessage: 'This setting is deprecated and will be removed in OpenSearch Dashboards 8.0.',
+          defaultMessage:
+            'This setting is deprecated and will be removed in OpenSearch Dashboards 8.0.',
         }),
         docLinksKey: 'opensearchDashboardsSearchSettings',
       },
@@ -536,7 +537,8 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when OpenSearch Dashboards is started without one',
+        defaultMessage:
+          'The timefilter selection to use when OpenSearch Dashboards is started without one',
       }),
       requiresPageReload: true,
       schema: schema.object({

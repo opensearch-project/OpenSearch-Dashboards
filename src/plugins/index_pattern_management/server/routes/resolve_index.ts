@@ -49,8 +49,9 @@ export function registerResolveIndexRoute(router: IRouter): void {
         'transport.request',
         {
           method: 'GET',
-          path: `/_resolve/index/${encodeURIComponent(req.params.query)}${queryString ? '?' + new URLSearchParams(queryString).toString() : ''
-            }`,
+          path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
+            queryString ? '?' + new URLSearchParams(queryString).toString() : ''
+          }`,
         }
       );
       return res.ok({ body: result });

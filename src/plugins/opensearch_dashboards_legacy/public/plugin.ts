@@ -23,7 +23,7 @@ import { getDashboardConfig } from './dashboard_config';
 import { injectHeaderStyle } from './utils/inject_header_style';
 
 export class OpenSearchDashboardsLegacyPlugin {
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) { }
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(core: CoreSetup<{}, OpenSearchDashboardsLegacyStart>) {
     return {};

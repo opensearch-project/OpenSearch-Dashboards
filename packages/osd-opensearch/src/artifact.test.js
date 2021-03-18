@@ -33,7 +33,8 @@ const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
 
-const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-daily';
+const DAILY_SNAPSHOT_BASE_URL =
+  'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-daily';
 const PERMANENT_SNAPSHOT_BASE_URL =
   'https://storage.googleapis.com/opensearch-dashboards-ci-opensearch-snapshots-permanent';
 
@@ -56,7 +57,10 @@ const mockFetch = (mock) =>
   fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
 const previousEnvVars = {};
-const ENV_VARS_TO_RESET = ['OPENSEARCH_SNAPSHOT_MANIFEST', 'OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED'];
+const ENV_VARS_TO_RESET = [
+  'OPENSEARCH_SNAPSHOT_MANIFEST',
+  'OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED',
+];
 
 beforeAll(() => {
   ENV_VARS_TO_RESET.forEach((key) => {

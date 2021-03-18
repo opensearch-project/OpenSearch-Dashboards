@@ -20,7 +20,12 @@
 import _ from 'lodash';
 
 import { FilterManager } from './filter_manager';
-import { opensearchFilters, RangeFilter, RangeFilterParams, IFieldType } from '../../../../data/public';
+import {
+  opensearchFilters,
+  RangeFilter,
+  RangeFilterParams,
+  IFieldType,
+} from '../../../../data/public';
 
 interface SliderValue {
   min?: string | number;

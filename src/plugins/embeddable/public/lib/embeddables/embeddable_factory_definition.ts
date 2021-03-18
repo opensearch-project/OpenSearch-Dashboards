@@ -27,21 +27,21 @@ export type EmbeddableFactoryDefinition<
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   T extends SavedObjectAttributes = SavedObjectAttributes
-  > =
+> =
   // Required parameters
   Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> &
-  // Optional parameters
-  Partial<
-    Pick<
-      EmbeddableFactory<I, O, E, T>,
-      | 'createFromSavedObject'
-      | 'isContainerType'
-      | 'getExplicitInput'
-      | 'savedObjectMetaData'
-      | 'canCreateNew'
-      | 'getDefaultInput'
-      | 'telemetry'
-      | 'extract'
-      | 'inject'
-    >
-  >;
+    // Optional parameters
+    Partial<
+      Pick<
+        EmbeddableFactory<I, O, E, T>,
+        | 'createFromSavedObject'
+        | 'isContainerType'
+        | 'getExplicitInput'
+        | 'savedObjectMetaData'
+        | 'canCreateNew'
+        | 'getDefaultInput'
+        | 'telemetry'
+        | 'extract'
+        | 'inject'
+      >
+    >;

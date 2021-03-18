@@ -79,7 +79,11 @@ const calculateForGivenInterval = (
      - The lower power of 10, times 2
      - The lower power of 10, times 5
  **/
-const calculateAutoInterval = (diff: number, maxBars: number, opensearchTypes: OPENSEARCH_FIELD_TYPES[]) => {
+const calculateAutoInterval = (
+  diff: number,
+  maxBars: number,
+  opensearchTypes: OPENSEARCH_FIELD_TYPES[]
+) => {
   const exactInterval = diff / maxBars;
 
   // For integer fields that are less than maxBars, we should use 1 as the value of interval
@@ -137,12 +141,12 @@ export const calculateHistogramInterval = ({
     if (diff) {
       calculatedInterval = isAuto
         ? calculateAutoInterval(
-          diff,
+            diff,
 
-          // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
-          Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
-          opensearchTypes
-        )
+            // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
+            Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
+            opensearchTypes
+          )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }
   }

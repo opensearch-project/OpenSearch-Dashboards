@@ -42,7 +42,11 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_logstash_reader', 'animals']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'test_logstash_reader',
+        'animals',
+      ]);
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

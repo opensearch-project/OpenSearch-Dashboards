@@ -40,7 +40,9 @@ export type CiStatsMetrics = Array<{
 function parseConfig(log: ToolingLog) {
   const configJson = process.env.OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG;
   if (!configJson) {
-    log.debug('OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter');
+    log.debug(
+      'OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter'
+    );
     return;
   }
 
@@ -62,19 +64,25 @@ function parseConfig(log: ToolingLog) {
 function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown }) {
   const validApiUrl = typeof config.apiUrl === 'string' && config.apiUrl.length !== 0;
   if (!validApiUrl) {
-    log.warning('OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid api url, stats will not be reported');
+    log.warning(
+      'OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid api url, stats will not be reported'
+    );
     return;
   }
 
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
   if (!validApiToken) {
-    log.warning('OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');
+    log.warning(
+      'OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid api token, stats will not be reported'
+    );
     return;
   }
 
   const validId = typeof config.buildId === 'string' && config.buildId.length !== 0;
   if (!validId) {
-    log.warning('OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid build id, stats will not be reported');
+    log.warning(
+      'OPENSEARCH_DASHBOARDS_CI_STATS_CONFIG is missing a valid build id, stats will not be reported'
+    );
     return;
   }
 

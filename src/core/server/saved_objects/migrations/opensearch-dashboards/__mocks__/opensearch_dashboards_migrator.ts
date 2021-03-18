@@ -21,6 +21,8 @@ import { mockOpenSearchDashboardsMigrator } from '../opensearch_dashboards_migra
 
 export const mockOpenSearchDashboardsMigratorInstance = mockOpenSearchDashboardsMigrator.create();
 
-const mockConstructor = jest.fn().mockImplementation(() => mockOpenSearchDashboardsMigratorInstance);
+const mockConstructor = jest
+  .fn()
+  .mockImplementation(() => mockOpenSearchDashboardsMigratorInstance);
 
 export const OpenSearchDashboardsMigrator = mockConstructor;

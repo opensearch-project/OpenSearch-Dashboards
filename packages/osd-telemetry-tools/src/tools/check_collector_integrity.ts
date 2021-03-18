@@ -100,6 +100,9 @@ export function checkCompatibleTypeDescriptor(
   return results.filter((entry): entry is IncompatibleDescriptor => entry !== false);
 }
 
-export function checkCollectorIntegrity(UsageCollections: ParsedUsageCollection[], opensearchMapping: any) {
+export function checkCollectorIntegrity(
+  UsageCollections: ParsedUsageCollection[],
+  opensearchMapping: any
+) {
   return UsageCollections;
 }

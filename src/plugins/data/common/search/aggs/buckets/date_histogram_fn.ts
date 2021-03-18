@@ -67,9 +67,13 @@ export const aggDateHistogram = (): FunctionDefinition => ({
     },
     useNormalizedOpenSearchInterval: {
       types: ['boolean'],
-      help: i18n.translate('data.search.aggs.buckets.dateHistogram.useNormalizedOpenSearchInterval.help', {
-        defaultMessage: 'Specifies whether to use useNormalizedOpenSearchInterval for this aggregation',
-      }),
+      help: i18n.translate(
+        'data.search.aggs.buckets.dateHistogram.useNormalizedOpenSearchInterval.help',
+        {
+          defaultMessage:
+            'Specifies whether to use useNormalizedOpenSearchInterval for this aggregation',
+        }
+      ),
     },
     time_zone: {
       types: ['string'],

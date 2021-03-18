@@ -90,7 +90,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,

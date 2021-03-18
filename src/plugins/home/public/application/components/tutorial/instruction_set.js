@@ -92,9 +92,9 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.success
           ? this.props.statusCheckConfig.success
           : this.props.intl.formatMessage({
-            id: 'home.tutorial.instructionSet.successLabel',
-            defaultMessage: 'Success',
-          });
+              id: 'home.tutorial.instructionSet.successLabel',
+              defaultMessage: 'Success',
+            });
         color = 'success';
         break;
       case StatusCheckStates.ERROR:
@@ -102,9 +102,9 @@ class InstructionSetUi extends React.Component {
         message = this.props.statusCheckConfig.error
           ? this.props.statusCheckConfig.error
           : this.props.intl.formatMessage({
-            id: 'home.tutorial.instructionSet.noDataLabel',
-            defaultMessage: 'No data found',
-          });
+              id: 'home.tutorial.instructionSet.noDataLabel',
+              defaultMessage: 'No data found',
+            });
         color = 'warning';
         break;
     }

@@ -48,12 +48,12 @@ export type IMetricAggType = MetricAggType;
 export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig> extends AggType<
   TMetricAggConfig,
   MetricAggParam<TMetricAggConfig>
-  > {
+> {
   subtype: string;
   isScalable: () => boolean;
   type = metricType;
 
-  getKey = () => { };
+  getKey = () => {};
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);

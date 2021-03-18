@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { castOpenSearchToOsdFieldTypeName, getOsdFieldType, getOsdTypeNames, OsdFieldType } from '.';
+import {
+  castOpenSearchToOsdFieldTypeName,
+  getOsdFieldType,
+  getOsdTypeNames,
+  OsdFieldType,
+} from '.';
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 
@@ -36,7 +41,11 @@ describe('utils/osd_field_types', () => {
       const name = 'name';
       const sortable = true;
       const filterable = true;
-      const opensearchTypes = [OPENSEARCH_FIELD_TYPES.LONG, OPENSEARCH_FIELD_TYPES.BYTE, OPENSEARCH_FIELD_TYPES.DATE];
+      const opensearchTypes = [
+        OPENSEARCH_FIELD_TYPES.LONG,
+        OPENSEARCH_FIELD_TYPES.BYTE,
+        OPENSEARCH_FIELD_TYPES.DATE,
+      ];
 
       const osdFieldType = new OsdFieldType({ name, sortable, filterable, opensearchTypes });
 

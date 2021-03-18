@@ -36,13 +36,16 @@ const prepareDimension = (params: SchemaConfig) => {
 
 export const toExpressionAst = (vis: Vis, params: any) => {
   // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
-  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('opensearchaggs', {
-    index: vis.data.indexPattern!.id!,
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows || false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
-  });
+  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
+    'opensearchaggs',
+    {
+      index: vis.data.indexPattern!.id!,
+      metricsAtAllLevels: vis.isHierarchical(),
+      partialRows: vis.params.showPartialRows || false,
+      aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+      includeFormatHints: false,
+    }
+  );
 
   const schemas = getVisSchemas(vis, params);
 

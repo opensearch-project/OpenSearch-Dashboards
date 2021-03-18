@@ -35,10 +35,10 @@ export const isQueryStringFilter = (filter: any): filter is QueryStringFilter =>
 
 // Creates a filter corresponding to a raw OpenSearch query DSL object
 export const buildQueryFilter = (query: QueryStringFilter['query'], index: string, alias: string) =>
-({
-  query,
-  meta: {
-    index,
-    alias,
-  },
-} as QueryStringFilter);
+  ({
+    query,
+    meta: {
+      index,
+      alias,
+    },
+  } as QueryStringFilter);

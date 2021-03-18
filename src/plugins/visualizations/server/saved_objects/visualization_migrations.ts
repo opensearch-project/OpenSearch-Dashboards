@@ -22,7 +22,10 @@ import { cloneDeep, get, omit, has, flow } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(
+    doc,
+    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
+  );
   if (typeof searchSourceJSON !== 'string') {
     return doc;
   }
@@ -58,7 +61,9 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     });
   }
 
-  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
+    searchSource
+  );
 
   return doc;
 };
@@ -662,7 +667,10 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
  * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(
+    doc,
+    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
+  );
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -733,7 +741,10 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
-  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(
+    doc,
+    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
+  );
 
   if (visStateJSON) {
     try {

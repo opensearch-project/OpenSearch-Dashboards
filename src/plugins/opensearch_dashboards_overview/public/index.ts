@@ -26,4 +26,7 @@ import { OpenSearchDashboardsOverviewPlugin } from './plugin';
 export function plugin() {
   return new OpenSearchDashboardsOverviewPlugin();
 }
-export { OpenSearchDashboardsOverviewPluginSetup, OpenSearchDashboardsOverviewPluginStart } from './types';
+export {
+  OpenSearchDashboardsOverviewPluginSetup,
+  OpenSearchDashboardsOverviewPluginStart,
+} from './types';

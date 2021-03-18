@@ -27,7 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('indexpattern without timefield', () => {
     before(async () => {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_timefield']);
+      await security.testUser.setRoles([
+        'opensearch_dashboards_admin',
+        'opensearch_dashboards_timefield',
+      ]);
       await opensearchArchiver.loadIfNeeded('index_pattern_without_timefield');
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
       await PageObjects.common.navigateToApp('discover');

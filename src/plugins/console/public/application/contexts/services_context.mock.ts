@@ -35,7 +35,7 @@ export const serviceContextMock = {
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
       services: {
-        trackUiMetric: { count: () => { }, load: () => { } },
+        trackUiMetric: { count: () => {}, load: () => {} },
         storage,
         opensearchHostService,
         settings: new SettingsMock(storage),

@@ -24,13 +24,18 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // @ts-ignore not TS yet
 import * as OpenSearchDashboardsServer from './opensearch_dasboards_server';
 
-export function OpenSearchArchiverProvider({ getService, hasService }: FtrProviderContext): OpenSearchArchiver {
+export function OpenSearchArchiverProvider({
+  getService,
+  hasService,
+}: FtrProviderContext): OpenSearchArchiver {
   const config = getService('config');
   const client = getService('legacyOpenSearch');
   const log = getService('log');
 
   if (!config.get('opensearchArchiver')) {
-    throw new Error(`opensearchArchiver can't be used unless you specify it's config in your config file`);
+    throw new Error(
+      `opensearchArchiver can't be used unless you specify it's config in your config file`
+    );
   }
 
   const dataDir = config.get('opensearchArchiver.directory');

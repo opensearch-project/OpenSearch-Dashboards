@@ -53,7 +53,10 @@ export class NewsfeedApiDriver {
     private readonly fetchInterval: number
   ) {
     // The API only accepts versions in the format `X.Y.Z`, so we need to drop the `-SNAPSHOT` or any other label after it
-    this.opensearchDashboardsVersion = opensearchDashboardsVersion.replace(/^(\d+\.\d+\.\d+).*/, '$1');
+    this.opensearchDashboardsVersion = opensearchDashboardsVersion.replace(
+      /^(\d+\.\d+\.\d+).*/,
+      '$1'
+    );
     this.lastFetchStorageKey = `${NEWSFEED_LAST_FETCH_STORAGE_KEY}.${this.id}`;
     this.hashSetStorageKey = `${NEWSFEED_HASH_SET_STORAGE_KEY}.${this.id}`;
   }

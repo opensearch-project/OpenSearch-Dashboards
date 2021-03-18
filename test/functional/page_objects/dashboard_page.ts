@@ -45,7 +45,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   }
 
   class DashboardPage {
-    async initTests({ opensearchDashboardsIndex = 'dashboard/legacy', defaultIndex = 'logstash-*' } = {}) {
+    async initTests({
+      opensearchDashboardsIndex = 'dashboard/legacy',
+      defaultIndex = 'logstash-*',
+    } = {}) {
       log.debug('load opensearch-dashboards index with visualizations and log data');
       await opensearchArchiver.load(opensearchDashboardsIndex);
       await opensearchDashboardsServer.uiSettings.replace({ defaultIndex });

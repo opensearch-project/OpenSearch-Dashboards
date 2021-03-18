@@ -35,6 +35,6 @@ export const [getQueryService, setQueryService] = createGetterSetter<
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
-  'OpenSearchDashboardsLegacy'
-);
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
+  OpenSearchDashboardsLegacyStart
+>('OpenSearchDashboardsLegacy');

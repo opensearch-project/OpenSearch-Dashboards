@@ -100,7 +100,12 @@ export function getTimelionRequestHandler({
           sheet: [expression],
           extended: {
             opensearch: {
-              filter: opensearchQuery.buildOpenSearchQuery(undefined, query, filters, opensearchQueryConfigs),
+              filter: opensearchQuery.buildOpenSearchQuery(
+                undefined,
+                query,
+                filters,
+                opensearchQueryConfigs
+              ),
             },
           },
           time: {

@@ -79,7 +79,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     }_2x.png`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
-  const opensearchDashboardsApps = features.filter(({ solutionId }) => solutionId === 'opensearchDashboards').sort(sortByOrder);
+  const opensearchDashboardsApps = features
+    .filter(({ solutionId }) => solutionId === 'opensearchDashboards')
+    .sort(sortByOrder);
   const addDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.DATA);
   const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
   const devTools = findFeatureById('console');
@@ -109,7 +111,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             description={app?.subtitle || ''}
             href={addBasePath(app.path)}
             image={addBasePath(
-              `/plugins/${PLUGIN_ID}/assets/opensearch_dashboards_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}.svg`
+              `/plugins/${PLUGIN_ID}/assets/opensearch_dashboards_${appId}_${
+                IS_DARK_THEME ? 'dark' : 'light'
+              }.svg`
             )}
             title={app.title}
             titleElement="h3"
@@ -122,7 +126,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboard', 'discover'];
-  const remainingApps = opensearchDashboardsApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+  const remainingApps = opensearchDashboardsApps
+    .map(({ id }) => id)
+    .filter((id) => !mainApps.includes(id));
 
   return (
     <main aria-labelledby="osdOverviewPageHeader__title" className="osdOverviewWrapper">
@@ -130,12 +136,21 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         addBasePath={addBasePath}
         hideToolbar={isNewOpenSearchDashboardsInstance}
         iconType="logoKibana"
-        title={<FormattedMessage defaultMessage="OpenSearch Dashboards" id="opensearchDashboardsOverview.header.title" />}
+        title={
+          <FormattedMessage
+            defaultMessage="OpenSearch Dashboards"
+            id="opensearchDashboardsOverview.header.title"
+          />
+        }
       />
 
       <div className="osdOverviewContent">
         {isNewOpenSearchDashboardsInstance ? (
-          <GettingStarted addBasePath={addBasePath} isDarkTheme={IS_DARK_THEME} apps={opensearchDashboardsApps} />
+          <GettingStarted
+            addBasePath={addBasePath}
+            isDarkTheme={IS_DARK_THEME}
+            apps={opensearchDashboardsApps}
+          />
         ) : (
           <>
             <section aria-labelledby="osdOverviewApps__title" className="osdOverviewApps">

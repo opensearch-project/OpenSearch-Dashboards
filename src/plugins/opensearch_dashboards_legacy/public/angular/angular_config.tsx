@@ -198,7 +198,9 @@ const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
-  const isOpenSearchDashboardsAppRoute = window.location.pathname.endsWith('/app/opensearch-dashboards');
+  const isOpenSearchDashboardsAppRoute = window.location.pathname.endsWith(
+    '/app/opensearch-dashboards'
+  );
   // this feature only works within opensearch dashboards app for now after everything is
   // switched to the application service, this can be changed to handle all
   // apps.

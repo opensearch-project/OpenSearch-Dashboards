@@ -112,7 +112,7 @@ export interface AggExpressionType {
 /** @internal */
 export type AggExpressionFunctionArgs<
   Name extends keyof AggParamsMapping
-  > = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.

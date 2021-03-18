@@ -69,7 +69,15 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['osd', 'run', 'test', '--exclude', 'opensearch-dashboards', '--oss', '--skip-opensearch-dashboards-plugins'],
+      args: [
+        'osd',
+        'run',
+        'test',
+        '--exclude',
+        'opensearch-dashboards',
+        '--oss',
+        '--skip-opensearch-dashboards-plugins',
+      ],
       opts: { stdio: 'inherit' },
     };
 

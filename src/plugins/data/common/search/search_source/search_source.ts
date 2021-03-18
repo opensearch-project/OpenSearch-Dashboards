@@ -80,7 +80,12 @@ import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
-import { getOpenSearchQueryConfig, buildOpenSearchQuery, Filter, UI_SETTINGS } from '../../../common';
+import {
+  getOpenSearchQueryConfig,
+  buildOpenSearchQuery,
+  Filter,
+  UI_SETTINGS,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
@@ -107,7 +112,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   search: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
     SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
-    >(
+  >(
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;

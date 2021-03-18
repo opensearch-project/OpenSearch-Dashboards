@@ -1645,8 +1645,13 @@ describe('migration visualization', () => {
     it('should remove the search source JSON', () => {
       const timeSeriesDoc = generateDoc({ type: 'metrics' });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
-      expect(migratedtimeSeriesDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON).toEqual('{}');
-      const { opensearchDashboardsSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+      expect(
+        migratedtimeSeriesDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+      ).toEqual('{}');
+      const {
+        opensearchDashboardsSavedObjectMeta,
+        ...attributes
+      } = migratedtimeSeriesDoc.attributes;
       const {
         opensearchDashboardsSavedObjectMeta: oldOpenSearchDashboardsSavedObjectMeta,
         ...oldAttributes

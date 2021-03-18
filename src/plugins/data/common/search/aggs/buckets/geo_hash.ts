@@ -58,7 +58,7 @@ export const getGeoHashBucketAgg = () =>
       {
         name: 'autoPrecision',
         default: true,
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'precision',
@@ -70,17 +70,17 @@ export const getGeoHashBucketAgg = () =>
       {
         name: 'useGeocentroid',
         default: true,
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'isFilteredByCollar',
         default: true,
-        write: () => { },
+        write: () => {},
       },
       {
         name: 'boundingBox',
         default: null,
-        write: () => { },
+        write: () => {},
       },
     ],
     getRequestAggs(agg) {

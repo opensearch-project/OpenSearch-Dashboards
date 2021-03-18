@@ -29,5 +29,5 @@ export class ApmOssPlugin implements Plugin<ApmOssPluginSetup, ApmOssPluginStart
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }
