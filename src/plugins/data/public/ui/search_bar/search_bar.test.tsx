@@ -79,7 +79,7 @@ const mockIndexPattern = {
   ],
 } as IIndexPattern;
 
-const kqlQuery = {
+const dqlQuery = {
   query: 'response:200',
   language: 'kuery',
 };
@@ -184,7 +184,7 @@ describe('SearchBar', () => {
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
-        query: kqlQuery,
+        query: dqlQuery,
       })
     );
 
@@ -199,7 +199,7 @@ describe('SearchBar', () => {
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
-        query: kqlQuery,
+        query: dqlQuery,
         showQueryBar: false,
       })
     );
@@ -215,7 +215,7 @@ describe('SearchBar', () => {
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
-        query: kqlQuery,
+        query: dqlQuery,
         filters: [],
         onFiltersUpdated: noop,
       })

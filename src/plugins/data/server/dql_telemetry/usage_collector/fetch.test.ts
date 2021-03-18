@@ -35,21 +35,21 @@ function setupMockCallCluster(
   language: string | undefined | null
 ) {
   callCluster = (jest.fn((method, params) => {
-    if (params && 'id' in params && params.id === 'kql-telemetry:kql-telemetry') {
+    if (params && 'id' in params && params.id === 'dql-telemetry:dql-telemetry') {
       if (optCount === null) {
         return Promise.resolve({
           _index: '.opensearch-dashboards_1',
           _type: 'doc',
-          _id: 'kql-telemetry:kql-telemetry',
+          _id: 'dql-telemetry:dql-telemetry',
           found: false,
         });
       } else {
         return Promise.resolve({
           _source: {
-            'kql-telemetry': {
+            'dql-telemetry': {
               ...optCount,
             },
-            type: 'kql-telemetry',
+            type: 'dql-telemetry',
             updated_at: '2018-10-05T20:20:56.258Z',
           },
         });
@@ -82,13 +82,13 @@ function setupMockCallCluster(
   }) as unknown) as LegacyAPICaller;
 }
 
-describe('makeKQLUsageCollector', () => {
+describe('makeDQLUsageCollector', () => {
   describe('fetch method', () => {
     beforeEach(() => {
       fetch = fetchProvider('.opensearch-dashboards');
     });
 
-    it('should return opt in data from the .opensearch-dashboards/kql-telemetry doc', async () => {
+    it('should return opt in data from the .opensearch-dashboards/dql-telemetry doc', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(1);
@@ -114,7 +114,7 @@ describe('makeKQLUsageCollector', () => {
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
     });
 
-    it('should default to 0 opt in counts if the .opensearch-dashboards/kql-telemetry doc does not exist', async () => {
+    it('should default to 0 opt in counts if the .opensearch-dashboards/dql-telemetry doc does not exist', async () => {
       setupMockCallCluster(null, 'kuery');
       const fetchResponse = await fetch(callCluster);
       expect(fetchResponse.optInCount).toBe(0);

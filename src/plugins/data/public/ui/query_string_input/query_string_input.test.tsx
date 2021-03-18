@@ -46,7 +46,7 @@ const noop = () => {
   return;
 };
 
-const kqlQuery = {
+const dqlQuery = {
   query: 'response:200',
   language: 'kuery',
 };
@@ -103,14 +103,14 @@ describe('QueryStringInput', () => {
   it('Should render the given query', async () => {
     const { getByText } = render(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPatternWithFields],
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByText('KQL'));
+    await waitFor(() => getByText(dqlQuery.query));
+    await waitFor(() => getByText('DQL'));
   });
 
   it('Should pass the query language to the language switcher', () => {
@@ -127,7 +127,7 @@ describe('QueryStringInput', () => {
   it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
     const component = mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -141,7 +141,7 @@ describe('QueryStringInput', () => {
 
     mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -157,7 +157,7 @@ describe('QueryStringInput', () => {
     const component = mount(
       wrapQueryStringInputInContext(
         {
-          query: kqlQuery,
+          query: dqlQuery,
           onSubmit: mockCallback,
           indexPatterns: [stubIndexPatternWithFields],
           disableAutoFocus: true,
@@ -180,7 +180,7 @@ describe('QueryStringInput', () => {
 
     const component = mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: mockCallback,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -201,7 +201,7 @@ describe('QueryStringInput', () => {
 
     const component = mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onBlur: mockCallback,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -220,7 +220,7 @@ describe('QueryStringInput', () => {
 
     const component = mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onChangeQueryInputFocus: mockCallback,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -237,7 +237,7 @@ describe('QueryStringInput', () => {
   it('Should use PersistedLog for recent search suggestions', async () => {
     const component = mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
@@ -261,7 +261,7 @@ describe('QueryStringInput', () => {
     mockFetchIndexPatterns.mockClear();
     mount(
       wrapQueryStringInputInContext({
-        query: kqlQuery,
+        query: dqlQuery,
         onSubmit: noop,
         indexPatterns: ['logstash-*'],
         disableAutoFocus: true,

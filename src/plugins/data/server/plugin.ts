@@ -25,7 +25,7 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
-import { KqlTelemetryService } from './kql_telemetry';
+import { DqlTelemetryService } from './dql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
@@ -68,7 +68,7 @@ export class DataServerPlugin
     > {
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
-  private readonly kqlTelemetryService: KqlTelemetryService;
+  private readonly dqlTelemetryService: DqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
@@ -79,7 +79,7 @@ export class DataServerPlugin
     this.logger = initializerContext.logger.get('data');
     this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
-    this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
+    this.dqlTelemetryService = new DqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
@@ -91,7 +91,7 @@ export class DataServerPlugin
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
-    this.kqlTelemetryService.setup(core, { usageCollection });
+    this.dqlTelemetryService.setup(core, { usageCollection });
 
     core.uiSettings.register(getUiSettings());
 

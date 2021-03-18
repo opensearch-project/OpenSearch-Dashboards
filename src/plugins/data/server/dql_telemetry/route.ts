@@ -20,14 +20,14 @@
 import { StartServicesAccessor, IRouter, Logger } from 'opensearch-dashboards/server';
 import { schema } from '@osd/config-schema';
 
-export function registerKqlTelemetryRoute(
+export function registerDqlTelemetryRoute(
   router: IRouter,
   getStartServices: StartServicesAccessor,
   logger: Logger
 ) {
   router.post(
     {
-      path: '/api/opensearch-dashboards/kql_opt_in_stats',
+      path: '/api/opensearch-dashboards/dql_opt_in_stats',
       validate: {
         body: schema.object({
           opt_in: schema.boolean(),
@@ -45,7 +45,7 @@ export function registerKqlTelemetryRoute(
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
+        await internalRepository.incrementCounter('dql-telemetry', 'dql-telemetry', counterName);
       } catch (error) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({

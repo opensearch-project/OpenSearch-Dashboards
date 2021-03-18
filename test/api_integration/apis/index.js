@@ -23,7 +23,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./kql_telemetry'));
+    loadTestFile(require.resolve('./dql_telemetry'));
     loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./scripts'));

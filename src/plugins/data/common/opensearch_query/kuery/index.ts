@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { KQLSyntaxError } from './kuery_syntax_error';
+export { DQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes } from './node_types';
 export * from './ast';
 
