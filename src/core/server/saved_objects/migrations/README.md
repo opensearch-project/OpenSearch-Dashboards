@@ -13,8 +13,6 @@ All of this happens prior to OpenSearch Dashboards serving any http requests.
 
 Here is the gist of what happens if an index migration is necessary:
 
-<<<<<<< HEAD
-
 - If `.opensearch_dashboards` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
   - Reindex `.opensearch_dashboards` into `.opensearch_dashboards_1`
   - Delete `.opensearch_dashboards`
@@ -23,20 +21,9 @@ Here is the gist of what happens if an index migration is necessary:
 - Copy all documents from `.opensearch_dashboards_1` into `.opensearch_dashboards_2`, running them through any applicable migrations
 - # Point the `.opensearch_dashboards` alias to `.opensearch_dashboards_2`
 
-* If `.opensearch-dashboards` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
-  - Reindex `.opensearch-dashboards` into `.opensearch-dashboards_1`
-  - Delete `.opensearch-dashboards`
-  - Create an alias `.opensearch-dashboards` that points to `.opensearch-dashboards_1`
-* Create a `.opensearch-dashboards_2` index
-* Copy all documents from `.opensearch-dashboards_1` into `.opensearch-dashboards_2`, running them through any applicable migrations
-* Point the `.opensearch-dashboards` alias to `.opensearch-dashboards_2`
-  > > > > > > > 81dc805cef (Replace logos, clean images and some reference links)
-
 ## Migrating OpenSearch Dashboards clusters
 
 If OpenSearch Dashboards is being run in a cluster, migrations will be coordinated so that they only run on one OpenSearch Dashboards instance at a time. This is done in a fairly rudimentary way. Let's say we have two OpenSearch Dashboards instances, opensearch-dashboards-1 and opensearch-dashboards-2.
-
-<<<<<<< HEAD
 
 - opensearch-dashboards-1 and opensearch-dashboards-2 both start simultaneously and detect that the index requires migration
 - opensearch-dashboards-1 begins the migration and creates index `.opensearch_dashboards_4`
@@ -44,14 +31,6 @@ If OpenSearch Dashboards is being run in a cluster, migrations will be coordinat
 - opensearch-dashboards-2 logs that it failed to create the migration index, and instead begins polling
   - Every few seconds, opensearch-dashboards-2 instance checks the `.opensearch_dashboards` index to see if it is done migrating
   - # Once `.opensearch_dashboards` is determined to be up to date, the opensearch-dashboards-2 instance continues booting
-
-* opensearch-dashboards-1 and opensearch-dashboards-2 both start simultaneously and detect that the index requires migration
-* opensearch-dashboards-1 begins the migration and creates index `.opensearch-dashboards_4`
-* opensearch-dashboards-2 tries to begin the migration, but fails with the error `.opensearch-dashboards_4 already exists`
-* opensearch-dashboards-2 logs that it failed to create the migration index, and instead begins polling
-  - Every few seconds, opensearch-dashboards-2 instance checks the `.opensearch-dashboards` index to see if it is done migrating
-  - Once `.opensearch-dashboards` is determined to be up to date, the opensearch-dashboards-2 instance continues booting
-    > > > > > > > 81dc805cef (Replace logos, clean images and some reference links)
 
 In this example, if the `.opensearch_dashboards_4` index existed prior to OpenSearch Dashboards booting, the entire migration process will fail, as all OpenSearch Dashboards instances will assume another instance is migrating to the `.opensearch_dashboards_4` index. This problem is only fixable by deleting the `.opensearch_dashboards_4` index.
 
