@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/functionbeat_instructions';
 import {
   TutorialContext,
@@ -62,7 +60,5 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions([], context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

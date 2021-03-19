@@ -90,13 +90,18 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage:
               'First time using Logstash?  See the [Getting Started Guide]({logstashLink}).\n\
- 1. [Download]({elasticLink}) the Logstash Windows zip file.\n\
+ 1. [Download]({opensearchLink}) the Logstash Windows zip file.\n\
  2. Extract the contents of the zip file.',
             values: {
               logstashLink:
                 '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
+<<<<<<< HEAD
               elasticLink:
                 'https://artifacts.opensearch.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
+=======
+              opensearchLink:
+                'https://artifacts.elastic.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
+>>>>>>> 6b9f77d6fa (clean escloud -1)
             },
           }
         ),

@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createAuditbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -177,7 +175,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -185,7 +183,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -207,7 +205,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -215,7 +213,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -237,7 +235,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -245,7 +243,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -267,7 +265,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -277,7 +275,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         'home.tutorials.common.auditbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of OpenSearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -286,78 +284,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createAuditbeatCloudInstructions = () => ({
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.osxTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`auditbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.debTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/auditbeat/auditbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.rpmTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/auditbeat/auditbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    WINDOWS: {
-      title: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.windowsTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: i18n.translate(
-        'home.tutorials.common.auditbeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -425,71 +351,3 @@ export function onPremInstructions(platforms: readonly Platform[], context?: Tut
   };
 }
 
-export function onPremCloudInstructions(platforms: readonly Platform[]) {
-  const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions();
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-
-  const variants = [];
-  for (let i = 0; i < platforms.length; i++) {
-    const platform = platforms[i];
-    variants.push({
-      id: INSTRUCTION_VARIANT[platform],
-      instructions: [
-        TRYCLOUD_OPTION1,
-        TRYCLOUD_OPTION2,
-        AUDITBEAT_INSTRUCTIONS.INSTALL[platform],
-        AUDITBEAT_INSTRUCTIONS.CONFIG[platform],
-        AUDITBEAT_INSTRUCTIONS.START[platform],
-      ],
-    });
-  }
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.auditbeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: variants,
-        statusCheck: auditbeatStatusCheck(),
-      },
-    ],
-  };
-}
-
-export function cloudInstructions(platforms: readonly Platform[]) {
-  const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions();
-  const AUDITBEAT_CLOUD_INSTRUCTIONS = createAuditbeatCloudInstructions();
-
-  const variants = [];
-  for (let i = 0; i < platforms.length; i++) {
-    const platform = platforms[i];
-    variants.push({
-      id: INSTRUCTION_VARIANT[platform],
-      instructions: [
-        AUDITBEAT_INSTRUCTIONS.INSTALL[platform],
-        AUDITBEAT_CLOUD_INSTRUCTIONS.CONFIG[platform],
-        AUDITBEAT_INSTRUCTIONS.START[platform],
-      ],
-    });
-  }
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.auditbeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: variants,
-        statusCheck: auditbeatStatusCheck(),
-      },
-    ],
-  };
-}

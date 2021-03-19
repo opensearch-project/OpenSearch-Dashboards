@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
@@ -55,7 +53,5 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }
