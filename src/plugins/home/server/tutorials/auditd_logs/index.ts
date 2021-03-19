@@ -64,7 +64,6 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/auditd_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

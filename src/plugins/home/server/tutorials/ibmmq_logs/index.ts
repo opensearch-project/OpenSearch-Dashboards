@@ -63,7 +63,6 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/ibmmq_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

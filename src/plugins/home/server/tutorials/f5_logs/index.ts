@@ -62,7 +62,6 @@ export function f5LogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/f5_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

@@ -68,7 +68,6 @@ export function googlecloudMetricsSpecProvider(context: TutorialContext): Tutori
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/googlecloud_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

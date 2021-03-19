@@ -65,7 +65,6 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/okta_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

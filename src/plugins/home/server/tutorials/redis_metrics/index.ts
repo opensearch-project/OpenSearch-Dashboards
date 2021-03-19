@@ -63,7 +63,6 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/redis_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

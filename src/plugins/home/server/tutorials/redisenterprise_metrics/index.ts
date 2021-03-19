@@ -62,7 +62,6 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/redisenterprise_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

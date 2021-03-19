@@ -64,7 +64,6 @@ It collects system wide statistics and statistics per process and filesystem. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

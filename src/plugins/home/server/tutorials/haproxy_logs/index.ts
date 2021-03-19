@@ -64,7 +64,6 @@ export function haproxyLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/haproxy_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

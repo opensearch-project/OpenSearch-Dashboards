@@ -64,7 +64,6 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

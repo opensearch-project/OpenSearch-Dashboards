@@ -62,7 +62,6 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions([], context),
   };
 }

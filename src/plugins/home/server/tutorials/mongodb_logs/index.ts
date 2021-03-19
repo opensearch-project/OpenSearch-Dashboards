@@ -64,7 +64,6 @@ export function mongodbLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/mongodb_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }
