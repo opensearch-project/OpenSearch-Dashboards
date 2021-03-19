@@ -98,11 +98,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             metricbeatLink:
               '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-<<<<<<< HEAD
             elasticLink: 'https://www.opensearch.co/downloads/beats/metricbeat',
-=======
-            opensearchLink: 'https://www.elastic.co/downloads/beats/metricbeat',
->>>>>>> 6b9f77d6fa (clean escloud -1)
           },
         }
       ),
