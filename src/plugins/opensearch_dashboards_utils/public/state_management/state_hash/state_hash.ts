@@ -95,7 +95,9 @@ export function persistState<State>(state: State): string {
         'This can usually be fixed by moving to a fresh tab, but could ' +
         'be caused by a larger issue. If you are seeing this message regularly, ' +
         'please file an issue at {gitHubIssuesUrl}.',
-      values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' },
+      values: {
+        gitHubIssuesUrl: 'https://github.com/opensearch-project/OpenSearch-Dashboards/issues',
+      },
     }
   );
   throw new Error(message);

@@ -152,7 +152,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   }
 
   createGithubUrl = (labels: string[], title?: string) => {
-    const url = new URL('https://github.com/elastic/kibana/issues/new?');
+    const url = new URL('https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new?');
 
     if (labels.length) {
       url.searchParams.set('labels', labels.join(','));
