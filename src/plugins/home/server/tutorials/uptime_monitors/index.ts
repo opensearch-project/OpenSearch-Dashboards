@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/heartbeat_instructions';
 import {
   TutorialContext,
@@ -66,7 +64,5 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions([], context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

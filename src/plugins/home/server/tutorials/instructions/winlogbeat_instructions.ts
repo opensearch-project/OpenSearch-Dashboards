@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -35,7 +33,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Winlogbeat? See the [Quick Start]({winlogbeatLink}).\n\
- 1. Download the Winlogbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 1. Download the Winlogbeat Windows zip file from the [Download]({opensearchLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Winlogbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -46,7 +44,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             winlogbeatLink:
               '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
-            elasticLink: 'https://www.opensearch.co/downloads/beats/winlogbeat',
+            opensearchLink: 'https://www.opensearch.co/downloads/beats/winlogbeat',
           },
         }
       ),
@@ -90,7 +88,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -100,7 +98,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.winlogbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -109,30 +107,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createWinlogbeatCloudInstructions = () => ({
-  CONFIG: {
-    WINDOWS: {
-      title: i18n.translate(
-        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: i18n.translate(
-        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -197,63 +171,5 @@ export function onPremInstructions(context?: TutorialContext) {
   };
 }
 
-export function onPremCloudInstructions() {
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
 
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.winlogbeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              WINLOGBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              WINLOGBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              WINLOGBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: winlogbeatStatusCheck(),
-      },
-    ],
-  };
-}
 
-export function cloudInstructions() {
-  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
-  const WINLOGBEAT_CLOUD_INSTRUCTIONS = createWinlogbeatCloudInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.winlogbeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              WINLOGBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              WINLOGBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-              WINLOGBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: winlogbeatStatusCheck(),
-      },
-    ],
-  };
-}
