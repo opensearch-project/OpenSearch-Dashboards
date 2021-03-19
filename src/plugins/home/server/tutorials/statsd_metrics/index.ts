@@ -19,9 +19,7 @@
 
 import { i18n } from '@osd/i18n';
 import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
-import {
-  onPremInstructions,
-} from '../instructions/metricbeat_instructions';
+import { onPremInstructions } from '../instructions/metricbeat_instructions';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSchema {

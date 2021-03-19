@@ -18,9 +18,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  onPremInstructions,
-} from '../instructions/metricbeat_instructions';
+import { onPremInstructions } from '../instructions/metricbeat_instructions';
 import {
   TutorialContext,
   TutorialsCategory,
