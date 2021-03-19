@@ -47,7 +47,7 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
         input will parse the header and set the timestamp value. Then the \
         processor is applied to parse the CEF encoded data. The decoded data \
         is written into a `cef` object field. Lastly any OpenSearch Common Schema \
-        (ECS) fields that can be populated with the CEF data are populated. \
+        (OCS) fields that can be populated with the CEF data are populated. \
         [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cef.html',

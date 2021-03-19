@@ -44,7 +44,7 @@ export function crowdstrikeLogsSpecProvider(context: TutorialContext): TutorialS
       defaultMessage:
         'This is the Filebeat module for CrowdStrike Falcon using the Falcon \
         [SIEM Connector](https://www.crowdstrike.com/blog/tech-center/integrate-with-your-siem). \
-        This module collects this data, converts it to ECS, and ingests it to view in the SIEM. \
+        This module collects this data, converts it to OCS, and ingests it to view in the SIEM. \
         By default, the Falcon SIEM connector outputs JSON formatted Falcon Streaming API event data. \
 [Learn more]({learnMoreLink}).',
       values: {
