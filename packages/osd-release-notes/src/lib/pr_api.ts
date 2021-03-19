@@ -79,7 +79,7 @@ export class PrApi {
     const resp = await this.gqlRequest(
       gql`
         query($number: Int!) {
-          repository(owner: "elastic", name: "kibana") {
+          repository(owner: "opensearch-project", name: "OpenSearch-Dashboards") {
             pullRequest(number: $number) {
               ...PrNode
             }
@@ -111,7 +111,7 @@ export class PrApi {
       const resp = await this.gqlRequest(
         gql`
           query($cursor: String, $labels: [String!]) {
-            repository(owner: "elastic", name: "kibana") {
+            repository(owner: "opensearch-project", name: "OpenSearch-Dashboards") {
               pullRequests(first: 100, after: $cursor, labels: $labels, states: MERGED) {
                 pageInfo {
                   hasNextPage

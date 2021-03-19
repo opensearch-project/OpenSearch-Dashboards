@@ -23,7 +23,7 @@
  */
 export const IGNORE_LABELS: Array<RegExp | string> = [
   'Team:Docs',
-  ':KibanaApp/fix-it-week',
+  ':OpenSearchDashboardsApp/fix-it-week',
   'reverted',
   /^test/,
   'non-issue',
@@ -65,12 +65,12 @@ export const AREAS: Area[] = [
       'Feature:Search Profiler',
       'Feature:watcher',
       'Feature:Index Patterns',
-      'Feature:Kibana Management',
+      'Feature:OpenSearch Dashboards Management',
       'Feature:Dev Tools',
       'Feature:Inspector',
       'Feature:Index Management',
       'Feature:Snapshot and Restore',
-      'Team:Elasticsearch UI',
+      'Team:OpenSearch UI',
       'Feature:FieldFormatters',
       'Feature:CCR',
       'Feature:ILM',
@@ -86,8 +86,8 @@ export const AREAS: Area[] = [
     labels: ['Team:Operations', 'Feature:License'],
   },
   {
-    title: 'Kibana UI',
-    labels: ['Kibana UI', 'Team:Core UI', 'Feature:Header'],
+    title: 'OpenSearch Dashboards UI',
+    labels: ['OpenSearch Dashboards UI', 'Team:Core UI', 'Feature:Header'],
   },
   {
     title: 'Platform',
@@ -147,7 +147,7 @@ export const AREAS: Area[] = [
     labels: ['Feature:Discover'],
   },
   {
-    title: 'Kibana Home & Add Data',
+    title: 'OpenSearch Dashboards Home & Add Data',
     labels: ['Feature:Add Data', 'Feature:Home'],
   },
   {
