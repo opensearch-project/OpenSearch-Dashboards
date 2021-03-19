@@ -92,7 +92,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             heartbeatLink:
               '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
-            elasticLink: 'https://www.opensearch.co/downloads/beats/heartbeat',
+            opensearchLink: 'https://www.opensearch.co/downloads/beats/heartbeat',
           },
         }
       ),
