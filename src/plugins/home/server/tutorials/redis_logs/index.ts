@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
 import {
   TutorialContext,
@@ -74,7 +72,5 @@ Note that the `slowlog` fileset is experimental. \
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/redis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

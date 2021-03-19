@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
 import {
   TutorialContext,
@@ -68,7 +66,5 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/auditd_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

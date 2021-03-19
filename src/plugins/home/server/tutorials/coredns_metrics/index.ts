@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
   TutorialContext,
@@ -65,7 +63,5 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/coredns_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

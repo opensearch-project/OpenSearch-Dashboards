@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createFilebeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -174,7 +172,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -182,7 +180,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -204,7 +202,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -212,7 +210,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -234,7 +232,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -242,7 +240,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -264,7 +262,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -274,7 +272,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         'home.tutorials.common.filebeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -283,66 +281,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createFilebeatCloudInstructions = () => ({
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.osxTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`filebeat.yml`',
-        },
-      }),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.debTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`/etc/filebeat/filebeat.yml`',
-        },
-      }),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.rpmTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`/etc/filebeat/filebeat.yml`',
-        },
-      }),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -474,73 +412,3 @@ export function onPremInstructions(
   };
 }
 
-export function onPremCloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
-  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-
-  const variants = [];
-  for (let i = 0; i < platforms.length; i++) {
-    const platform = platforms[i];
-    variants.push({
-      id: INSTRUCTION_VARIANT[platform],
-      instructions: [
-        TRYCLOUD_OPTION1,
-        TRYCLOUD_OPTION2,
-        FILEBEAT_INSTRUCTIONS.INSTALL[platform],
-        FILEBEAT_INSTRUCTIONS.CONFIG[platform],
-        filebeatEnableInstructions(moduleName)[platform],
-        FILEBEAT_INSTRUCTIONS.START[platform],
-      ],
-    });
-  }
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.filebeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: variants,
-        statusCheck: filebeatStatusCheck(moduleName),
-      },
-    ],
-  };
-}
-
-export function cloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
-  const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
-  const FILEBEAT_CLOUD_INSTRUCTIONS = createFilebeatCloudInstructions();
-
-  const variants = [];
-  for (let i = 0; i < platforms.length; i++) {
-    const platform = platforms[i];
-    variants.push({
-      id: INSTRUCTION_VARIANT[platform],
-      instructions: [
-        FILEBEAT_INSTRUCTIONS.INSTALL[platform],
-        FILEBEAT_CLOUD_INSTRUCTIONS.CONFIG[platform],
-        filebeatEnableInstructions(moduleName)[platform],
-        FILEBEAT_INSTRUCTIONS.START[platform],
-      ],
-    });
-  }
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.filebeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: variants,
-        statusCheck: filebeatStatusCheck(moduleName),
-      },
-    ],
-  };
-}
