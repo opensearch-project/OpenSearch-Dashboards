@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
 import {
   TutorialContext,
@@ -48,8 +46,8 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
         Syslog. When messages are received over the syslog protocol the syslog \
         input will parse the header and set the timestamp value. Then the \
         processor is applied to parse the CEF encoded data. The decoded data \
-        is written into a `cef` object field. Lastly any Elastic Common Schema \
-        (ECS) fields that can be populated with the CEF data are populated. \
+        is written into a `cef` object field. Lastly any OpenSearch Common Schema \
+        (OCS) fields that can be populated with the CEF data are populated. \
         [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cef.html',
@@ -72,7 +70,5 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

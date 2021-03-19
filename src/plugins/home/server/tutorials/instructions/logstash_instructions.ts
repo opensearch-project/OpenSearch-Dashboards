@@ -90,7 +90,7 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage:
               'First time using Logstash?  See the [Getting Started Guide]({logstashLink}).\n\
- 1. [Download]({elasticLink}) the Logstash Windows zip file.\n\
+ 1. [Download]({opensearchLink}) the Logstash Windows zip file.\n\
  2. Extract the contents of the zip file.',
             values: {
               logstashLink:

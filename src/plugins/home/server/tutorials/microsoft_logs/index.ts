@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
 import {
   TutorialContext,
@@ -44,7 +42,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
     }),
     longDescription: i18n.translate('home.tutorials.microsoftLogs.longDescription', {
       defaultMessage:
-        'Collect Microsoft Defender ATP alerts for use with Elastic Security. \
+        'Collect Microsoft Defender ATP alerts for use with OpenSearch Security. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-microsoft.html',
@@ -68,7 +66,5 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

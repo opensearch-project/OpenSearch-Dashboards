@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/winlogbeat_instructions';
 import {
   TutorialContext,
@@ -65,7 +63,5 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createMetricbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -89,7 +87,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Metricbeat? See the [Quick Start]({metricbeatLink}).\n\
- 1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 1. Download the Metricbeat Windows zip file from the [Download]({opensearchLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Metricbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -171,7 +169,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -179,7 +177,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -201,7 +199,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -209,7 +207,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -231,7 +229,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -239,7 +237,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -264,7 +262,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -274,7 +272,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         'home.tutorials.common.metricbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -283,78 +281,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createMetricbeatCloudInstructions = () => ({
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.osxTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`metricbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.debTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/metricbeat/metricbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.metricbeatCloudInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.rpmTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/metricbeat/metricbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    WINDOWS: {
-      title: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.windowsTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -509,125 +435,3 @@ export function onPremInstructions(moduleName: string, context?: TutorialContext
   };
 }
 
-export function onPremCloudInstructions(moduleName: string) {
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.metricbeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
-              METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
-              metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
-              METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
-              metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
-              METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
-              metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: metricbeatStatusCheck(moduleName),
-      },
-    ],
-  };
-}
-
-export function cloudInstructions(moduleName: string) {
-  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
-  const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.metricbeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
-              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX,
-              metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
-              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.DEB,
-              metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
-              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.RPM,
-              metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-              metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: metricbeatStatusCheck(moduleName),
-      },
-    ],
-  };
-}

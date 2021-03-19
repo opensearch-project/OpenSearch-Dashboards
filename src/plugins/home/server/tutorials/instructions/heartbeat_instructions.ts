@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createHeartbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -83,7 +81,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Heartbeat? See the [Quick Start]({heartbeatLink}).\n\
- 1. Download the Heartbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 1. Download the Heartbeat Windows zip file from the [Download]({opensearchLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Heartbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -153,7 +151,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -161,7 +159,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -183,7 +181,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -191,7 +189,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -213,7 +211,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -221,7 +219,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+          'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
@@ -243,7 +241,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -253,7 +251,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         'home.tutorials.common.heartbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -262,78 +260,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createHeartbeatCloudInstructions = () => ({
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.osxTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`heartbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.debTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/heartbeat/heartbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.heartbeatCloudInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.rpmTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`/etc/heartbeat/heartbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    WINDOWS: {
-      title: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.windowsTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: i18n.translate(
-        'home.tutorials.common.heartbeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -553,125 +479,3 @@ export function onPremInstructions(platforms: Platform[], context?: TutorialCont
   };
 }
 
-export function onPremCloudInstructions() {
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.heartbeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              HEARTBEAT_INSTRUCTIONS.INSTALL.OSX,
-              HEARTBEAT_INSTRUCTIONS.CONFIG.OSX,
-              heartbeatEnableInstructionsCloud().OSX,
-              HEARTBEAT_INSTRUCTIONS.START.OSX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              HEARTBEAT_INSTRUCTIONS.INSTALL.DEB,
-              HEARTBEAT_INSTRUCTIONS.CONFIG.DEB,
-              heartbeatEnableInstructionsCloud().DEB,
-              HEARTBEAT_INSTRUCTIONS.START.DEB,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              HEARTBEAT_INSTRUCTIONS.INSTALL.RPM,
-              HEARTBEAT_INSTRUCTIONS.CONFIG.RPM,
-              heartbeatEnableInstructionsCloud().RPM,
-              HEARTBEAT_INSTRUCTIONS.START.RPM,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              HEARTBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              HEARTBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              heartbeatEnableInstructionsCloud().WINDOWS,
-              HEARTBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: heartbeatStatusCheck(),
-      },
-    ],
-  };
-}
-
-export function cloudInstructions() {
-  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions();
-  const HEARTBEAT_CLOUD_INSTRUCTIONS = createHeartbeatCloudInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.heartbeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              HEARTBEAT_INSTRUCTIONS.INSTALL.OSX,
-              HEARTBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX,
-              heartbeatEnableInstructionsCloud().OSX,
-              HEARTBEAT_INSTRUCTIONS.START.OSX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              HEARTBEAT_INSTRUCTIONS.INSTALL.DEB,
-              HEARTBEAT_CLOUD_INSTRUCTIONS.CONFIG.DEB,
-              heartbeatEnableInstructionsCloud().DEB,
-              HEARTBEAT_INSTRUCTIONS.START.DEB,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              HEARTBEAT_INSTRUCTIONS.INSTALL.RPM,
-              HEARTBEAT_CLOUD_INSTRUCTIONS.CONFIG.RPM,
-              heartbeatEnableInstructionsCloud().RPM,
-              HEARTBEAT_INSTRUCTIONS.START.RPM,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              HEARTBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              HEARTBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-              heartbeatEnableInstructionsCloud().WINDOWS,
-              HEARTBEAT_INSTRUCTIONS.START.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: heartbeatStatusCheck(),
-      },
-    ],
-  };
-}
