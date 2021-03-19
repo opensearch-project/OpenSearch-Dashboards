@@ -95,7 +95,7 @@ export const createLogstashInstructions = () => ({
             values: {
               logstashLink:
                 '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
-              elasticLink:
+              opensearchLink:
                 'https://artifacts.opensearch.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
             },
           }
