@@ -145,7 +145,7 @@ API routes must start with the `/api/` path segment, and should be followed by t
 
 ### snake_case
 
-OpenSearch Dashboards uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
+OpenSearch Dashboards uses `snake_case` for the entire API, just like OpenSearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
 
 _Right:_
 
