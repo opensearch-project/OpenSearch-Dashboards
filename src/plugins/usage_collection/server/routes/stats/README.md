@@ -14,7 +14,7 @@ However, the information detailed above can be extended, with the combination of
 
 ## Known use cases
 
-Metricbeat OpenSearch Dashboards's stats metricset ([code](https://github.com/elastic/beats/blob/master/metricbeat/module/opensearch-dashboards/stats/stats.go)) uses this API to collect the metrics (every 10s) and usage (only once every 24h), and then reports them to the Monitoring cluster. They call this API in 2 ways:
+Metricbeat OpenSearch Dashboards's stats metricset ([code](https://github.com/elastic/beats/blob/master/metricbeat/module/kibana/stats/stats.go)) uses this API to collect the metrics (every 10s) and usage (only once every 24h), and then reports them to the Monitoring cluster. They call this API in 2 ways:
 
 1. Metrics-only collection (every 10 seconds): `GET /api/stats?extended=true&legacy=true&exclude_usage=true`
 2. Metrics+usage (every 24 hours): `GET /api/stats?extended=true&legacy=true&exclude_usage=false`

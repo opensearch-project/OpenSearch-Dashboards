@@ -8,7 +8,7 @@ Containers are a special type of embeddable that can contain nested embeddables.
 
 ## Examples
 
-Many example embeddables are implemented and registered [here](https://github.com/elastic/kibana/tree/master/examples/embeddable_examples). They can be played around with and explored [in the Embeddable Explorer example plugin](https://github.com/elastic/kibana/tree/master/examples/embeddable_explorer). Just run kibana with
+Many example embeddables are implemented and registered [here](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/examples/embeddable_examples). They can be played around with and explored [in the Embeddable Explorer example plugin](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/examples/embeddable_explorer). Just run OpenSearch Dashboards with
 
 ```
 yarn start --run-examples
@@ -16,7 +16,7 @@ yarn start --run-examples
 
 and navigate to the Embeddable explorer app.
 
-There is also an example of rendering dashboard container outside of dashboard app [here](https://github.com/elastic/kibana/tree/master/examples/dashboard_embeddable_examples).
+There is also an example of rendering dashboard container outside of dashboard app [here](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/examples/dashboard_embeddable_examples).
 
 ## Docs
 

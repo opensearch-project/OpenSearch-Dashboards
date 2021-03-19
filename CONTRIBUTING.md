@@ -3,6 +3,7 @@
 
 # Contributing to OpenSearch Dashboards
 
+<<<<<<< HEAD
 OpenSearch is a community project that is built and maintained by people just like you. We're glad you're interested in helping out. There are several different ways you can do it, but before we talk about that, let's talk about how to get started.
 
 ## Table of Contents:
@@ -96,5 +97,8 @@ During the PR process, expect that there will be some back-and-forth. Please try
 
 If we accept the PR, we will merge your change and usually take care of backporting it to appropriate branches ourselves.
 If we reject the PR, we will close the pull request with a comment explaining why. This decision isn't always final: if you feel we have misunderstood your intended change or otherwise think that we should reconsider then please continue the conversation with a comment on the PR and we'll do our best to address any further points you raise.
+=======
+We understand that you may not have days at a time to work on OpenSearch Dashboards. We ask that you read our [developer guide](https://www.opensearch.co/guide/en/kibana/master/development.html) carefully so that you spend less time, overall, struggling to push your PR through our code review processes.
+>>>>>>> [Rename] all elastic github references except for issues and PRs (#37)
 
 w00t!!!

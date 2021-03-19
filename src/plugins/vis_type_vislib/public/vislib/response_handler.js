@@ -110,7 +110,7 @@ function handlerFunction(convertTable) {
     });
     if (!converted) {
       // mimic a row of tables that doesn't have any tables
-      // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/opensearch-dashboards/components/vislib/components/zero_injection/inject_zeros.js#L32
       converted = { rows: [] };
     }
 
