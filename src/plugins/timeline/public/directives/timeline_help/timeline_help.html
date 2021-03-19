@@ -242,19 +242,10 @@
             html_srcIp: '<code>src_ip</code>',
             html_opensearchCardinalityQuery: '<code>.opensearch(*, metric=\'cardinality:src_ip\')</code>',
             html_opensearchAvgQuery: '<code>.opensearch(metric=\'avg:bytes\')</code>',
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
           }" i18n-description="Part of composite text
                             timeline.help.querying.countTextPart1 +
                             timeline.help.querying.countMetricAggregationLinkText +
                             timeline.help.querying.countTextPart2"></span>
-=======
-          }"
-          i18n-description="Part of composite text
-                            timelion.help.querying.countTextPart1 +
-                            timelion.help.querying.countMetricAggregationLinkText +
-                            timelion.help.querying.countTextPart2"
-        ></span>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
       </p>
     </div>
     <div class="timHelp__buttons">
@@ -269,8 +260,7 @@
   </div>
 
   <div ng-show="page === 4">
-    <div>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
+    <div>)
       <h2 i18n-id="timeline.help.expressionsTitle" i18n-default-message="Expressing yourself with expressions"></h2>
       <p i18n-id="timeline.help.expressions.paragraph1" i18n-default-message="Every expression starts with a datasource function. From there, you
                               can append new functions to the datasource to transform and augment it."></p>
@@ -278,26 +268,6 @@
                               than we do. Feel free to replace the sample queries with something
                               more meaningful!"></p>
       <p i18n-id="timeline.help.expressions.paragraph3" i18n-default-message="We're going to experiment, so click {strongAdd} in the OpenSearch Dashboards toolbar
-=======
-      <h2
-        i18n-id="timelion.help.expressionsTitle"
-        i18n-default-message="Expressing yourself with expressions"
-      ></h2>
-      <p
-        i18n-id="timelion.help.expressions.paragraph1"
-        i18n-default-message="Every expression starts with a datasource function. From there, you
-                              can append new functions to the datasource to transform and augment it."
-      ></p>
-      <p
-        i18n-id="timelion.help.expressions.paragraph2"
-        i18n-default-message="By the way, from here on out you probably know more about your data
-                              than we do. Feel free to replace the sample queries with something
-                              more meaningful!"
-      ></p>
-      <p
-        i18n-id="timelion.help.expressions.paragraph3"
-        i18n-default-message="We're going to experiment, so click {strongAdd} in the OpenSearch Dashboards toolbar
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
                               to add another chart or three. Then, select a chart,
                               copy one of the following expressions, paste it into the input bar,
                               and hit enter. Rinse, repeat to try out the other expressions."
@@ -306,31 +276,25 @@
       <table class="table table-condensed table-striped">
         <tr>
           <td><code>.opensearch(*), .opensearch(US)</code></td>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
           <td i18n-id="timeline.help.expressions.examples.twoExpressionsDescription"
             i18n-default-message="{descriptionTitle} Two expressions on the same chart." i18n-values="{
-=======
           <td
             i18n-id="timelion.help.expressions.examples.twoExpressionsDescription"
             i18n-default-message="{descriptionTitle} Two expressions on the same chart."
             i18n-values="{
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
               html_descriptionTitle: '<strong>' + translations.twoExpressionsDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
         <tr>
           <td><code>.opensearch(*).color(#f66), .opensearch(US).bars(1)</code></td>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
           <td i18n-id="timeline.help.expressions.examples.customStylingDescription" i18n-default-message="{descriptionTitle} Colorizes the first series red and
                                   uses 1 pixel wide bars for the second series." i18n-values="{
-=======
           <td
             i18n-id="timelion.help.expressions.examples.customStylingDescription"
             i18n-default-message="{descriptionTitle} Colorizes the first series red and
                                   uses 1 pixel wide bars for the second series."
             i18n-values="{
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
               html_descriptionTitle: '<strong>' + translations.customStylingDescriptionTitle + '</strong>',
             }"
           ></td>
@@ -342,13 +306,7 @@
               weight=1)</code
             >
           </td>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
           <td i18n-id="timeline.help.expressions.examples.namedArgumentsDescription" i18n-default-message="{descriptionTitle} Forget trying to remember what order you need
-=======
-          <td
-            i18n-id="timelion.help.expressions.examples.namedArgumentsDescription"
-            i18n-default-message="{descriptionTitle} Forget trying to remember what order you need
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
                                   to specify arguments in, use named arguments to make
                                   the expressions easier to read and write."
             i18n-values="{
@@ -358,23 +316,14 @@
         </tr>
         <tr>
           <td><code>(.opensearch(*), .opensearch(GB)).points()</code></td>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
           <td i18n-id="timeline.help.expressions.examples.groupedExpressionsDescription" i18n-default-message="{descriptionTitle} You can also chain groups of expressions to
                                   functions. Here, both series are shown as points instead of lines." i18n-values="{
-=======
-          <td
-            i18n-id="timelion.help.expressions.examples.groupedExpressionsDescription"
-            i18n-default-message="{descriptionTitle} You can also chain groups of expressions to
-                                  functions. Here, both series are shown as points instead of lines."
-            i18n-values="{
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
               html_descriptionTitle: '<strong>' + translations.groupedExpressionsDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
       </table>
       <p>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
         <span i18n-id="timeline.help.expressions.paragraph4" i18n-default-message="Timeline provides additional view transformation functions you can use
                                 to customize the appearance of your charts. For the complete list, see the"
           i18n-description="Part of composite text
@@ -384,25 +333,6 @@
           i18n-default-message="Function reference" i18n-description="Part of composite text
                             timeline.help.expressions.paragraph4 +
                             timeline.help.expressions.functionReferenceLinkText"></a>.
-=======
-        <span
-          i18n-id="timelion.help.expressions.paragraph4"
-          i18n-default-message="Timelion provides additional view transformation functions you can use
-                                to customize the appearance of your charts. For the complete list, see the"
-          i18n-description="Part of composite text
-                            timelion.help.expressions.paragraph4 +
-                            timelion.help.expressions.functionReferenceLinkText"
-        ></span>
-        <a
-          ng-click="setPage(0)"
-          i18n-id="timelion.help.expressions.functionReferenceLinkText"
-          i18n-default-message="Function reference"
-          i18n-description="Part of composite text
-                            timelion.help.expressions.paragraph4 +
-                            timelion.help.expressions.functionReferenceLinkText"
-        ></a
-        >.
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
       </p>
     </div>
     <div class="timHelp__buttons">
@@ -417,7 +347,6 @@
   </div>
   <div ng-show="page === 5">
     <div>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
       <h2 i18n-id="timeline.help.dataTransformingTitle"
         i18n-default-message="Transforming your data: the real fun begins!"></h2>
       <p i18n-id="timeline.help.dataTransforming.paragraph1" i18n-default-message="Now that you've mastered the basics, it's time to unleash the power of
@@ -428,34 +357,12 @@
         i18n-default-message="First, we need to find all events that contain US: {opensearchUsQuery}."
         i18n-values="{ html_opensearchUsQuery: '<code>.opensearch(\'US\')</code>' }"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph3" i18n-default-message="Next, we want to calculate the ratio of US events to the whole.
-=======
-      <h2
-        i18n-id="timelion.help.dataTransformingTitle"
-        i18n-default-message="Transforming your data: the real fun begins!"
-      ></h2>
-      <p
-        i18n-id="timelion.help.dataTransforming.paragraph1"
-        i18n-default-message="Now that you've mastered the basics, it's time to unleash the power of
-                              Timelion. Let's figure out what percentage some subset of our data
-                              represents of the whole, over time. For example, what percentage of
-                              our web traffic comes from the US?"
-      ></p>
-      <p
-        i18n-id="timelion.help.dataTransforming.paragraph2"
-        i18n-default-message="First, we need to find all events that contain US: {opensearchUsQuery}."
-        i18n-values="{ html_opensearchUsQuery: '<code>.opensearch(\'US\')</code>' }"
-      ></p>
-      <p
-        i18n-id="timelion.help.dataTransforming.paragraph3"
-        i18n-default-message="Next, we want to calculate the ratio of US events to the whole.
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
                               To divide {us} by everything, we can use the {divide} function:
                               {divideDataQuery}."
         i18n-values="{
           html_us: '<code>\'US\'</code>',
           html_divide: '<code>divide</code>',
           html_divideDataQuery: '<code>.opensearch(\'US\').divide(.opensearch())</code>',
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
         }"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph4" i18n-default-message="Not bad, but this gives us a number between 0 and 1. To convert it
                               to a percentage, simply multiply by 100: {multiplyDataQuery}."
@@ -463,20 +370,6 @@
       </p>
       <p i18n-id="timeline.help.dataTransforming.paragraph5" i18n-default-message="Now we know what percentage of our traffic comes from the US, and
                               can see how it has changed over time! Timeline has a number of
-=======
-        }"
-      ></p>
-      <p
-        i18n-id="timelion.help.dataTransforming.paragraph4"
-        i18n-default-message="Not bad, but this gives us a number between 0 and 1. To convert it
-                              to a percentage, simply multiply by 100: {multiplyDataQuery}."
-        i18n-values="{ html_multiplyDataQuery: '<code>.opensearch(\'US\').divide(.opensearch()).multiply(100)</code>' }"
-      ></p>
-      <p
-        i18n-id="timelion.help.dataTransforming.paragraph5"
-        i18n-default-message="Now we know what percentage of our traffic comes from the US, and
-                              can see how it has changed over time! Timelion has a number of
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
                               built-in arithmetic functions, such as {sum}, {subtract}, {multiply},
                               and {divide}. Many of these can take a series or a number. There are
                               also other useful data transformation functions, such as
@@ -492,7 +385,6 @@
         }"
       ></p>
       <p>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
         <span i18n-id="timeline.help.dataTransforming.paragraph6Part1"
           i18n-default-message="Now that you're familiar with the syntax, refer to the" i18n-description="Part of composite text
                             timeline.help.dataTransforming.paragraph6Part1 +
@@ -510,36 +402,6 @@
                             timeline.help.dataTransforming.paragraph6Part1 +
                             timeline.help.dataTransforming.functionReferenceLinkText +
                             timeline.help.dataTransforming.paragraph6Part2"></span>
-=======
-        <span
-          i18n-id="timelion.help.dataTransforming.paragraph6Part1"
-          i18n-default-message="Now that you're familiar with the syntax, refer to the"
-          i18n-description="Part of composite text
-                            timelion.help.dataTransforming.paragraph6Part1 +
-                            timelion.help.dataTransforming.functionReferenceLinkText +
-                            timelion.help.dataTransforming.paragraph6Part2"
-        ></span>
-        <a
-          ng-click="setPage(0)"
-          i18n-id="timelion.help.dataTransforming.functionReferenceLinkText"
-          i18n-default-message="Function reference"
-          i18n-description="Part of composite text
-                            timelion.help.dataTransforming.paragraph6Part1 +
-                            timelion.help.dataTransforming.functionReferenceLinkText +
-                            timelion.help.dataTransforming.paragraph6Part2"
-        ></a>
-        <span
-          i18n-id="timelion.help.dataTransforming.paragraph6Part2"
-          i18n-default-message="to see how to use all of the available Timelion functions.
-                                You can view the reference at any time by clicking \{Docs\}
-                                in the OpenSearch Dashboards toolbar. To get back to this tutorial, click the
-                                \{Tutorial\} link at the top of the reference."
-          i18n-description="Part of composite text
-                            timelion.help.dataTransforming.paragraph6Part1 +
-                            timelion.help.dataTransforming.functionReferenceLinkText +
-                            timelion.help.dataTransforming.paragraph6Part2"
-        ></span>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
       </p>
     </div>
     <div class="timHelp__buttons">
@@ -554,7 +416,6 @@
   </div>
 </div>
 <div ng-show="page === 0">
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
   <h2 class="kuiLocalDropdownTitle" i18n-id="timeline.help.mainPageTitle" i18n-default-message="Help"></h2>
 
   <timeline-help-tabs activate-tab="activateTab" active-tab="activeTab">
@@ -566,30 +427,6 @@
         i18n-default-message="Click any function for more information. Just getting started?"></span>
       <a i18n-id="timeline.help.mainPage.functionReference.welcomePageLinkText"
         i18n-default-message="Check out the tutorial" class="kuiLink" ng-click="setPage(1)" osd-accessible-click></a>.
-=======
-  <h2
-    class="kuiLocalDropdownTitle"
-    i18n-id="timelion.help.mainPageTitle"
-    i18n-default-message="Help"
-  ></h2>
-
-  <timelion-help-tabs activate-tab="activateTab" active-tab="activeTab"> </timelion-help-tabs>
-
-  <div ng-show="activeTab == 'funcref'" class="list-group-item list-group-item--noBorder">
-    <div class="kuiLocalDropdownHelpText">
-      <span
-        i18n-id="timelion.help.mainPage.functionReference.gettingStartedText"
-        i18n-default-message="Click any function for more information. Just getting started?"
-      ></span>
-      <a
-        i18n-id="timelion.help.mainPage.functionReference.welcomePageLinkText"
-        i18n-default-message="Check out the tutorial"
-        class="kuiLink"
-        ng-click="setPage(1)"
-        osd-accessible-click
-      ></a
-      >.
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
     </div>
 
     <div class="timHelp__functions">
@@ -614,7 +451,6 @@
                 ng-show="function.args.length > (function.chainable ? 1: 0)"
               >
                 <thead>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
                   <th scope="col"
                     i18n-id="timeline.help.mainPage.functionReference.detailsTable.argumentNameColumnLabel"
                     i18n-default-message="Argument Name"></th>
@@ -623,23 +459,6 @@
                     i18n-default-message="Accepted Types"></th>
                   <th scope="col" i18n-id="timeline.help.mainPage.functionReference.detailsTable.informationColumnLabel"
                     i18n-default-message="Information"></th>
-=======
-                  <th
-                    scope="col"
-                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.argumentNameColumnLabel"
-                    i18n-default-message="Argument Name"
-                  ></th>
-                  <th
-                    scope="col"
-                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.acceptedTypesColumnLabel"
-                    i18n-default-message="Accepted Types"
-                  ></th>
-                  <th
-                    scope="col"
-                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.informationColumnLabel"
-                    i18n-default-message="Information"
-                  ></th>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
                 </thead>
                 <tr ng-repeat="arg in function.args" ng-hide="$index < 1 && function.chainable">
                   <td>{{arg.name}}</td>
@@ -648,15 +467,8 @@
                 </tr>
               </table>
               <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
                 <em i18n-id="timeline.help.mainPage.functionReference.noArgumentsFunctionErrorMessage"
                   i18n-default-message="This function does not accept any arguments. Well that's simple, isn't it?"></em>
-=======
-                <em
-                  i18n-id="timelion.help.mainPage.functionReference.noArgumentsFunctionErrorMessage"
-                  i18n-default-message="This function does not accept any arguments. Well that's simple, isn't it?"
-                ></em>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
               </div>
             </div>
           </td>
@@ -669,7 +481,6 @@
     <!-- General editing tips -->
     <dl class="dl-horizontal">
       <dd>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
         <strong i18n-id="timeline.help.mainPage.keyboardTips.generalEditingTitle"
           i18n-default-message="General editing"></strong>
       </dd>
@@ -677,26 +488,12 @@
       <dt>Ctrl/Cmd + Enter</dt>
       <dd i18n-id="timeline.help.mainPage.keyboardTips.generalEditing.submitRequestText"
         i18n-default-message="Submit request"></dd>
-=======
-        <strong
-          i18n-id="timelion.help.mainPage.keyboardTips.generalEditingTitle"
-          i18n-default-message="General editing"
-        ></strong>
-      </dd>
-      <dt></dt>
-      <dt>Ctrl/Cmd + Enter</dt>
-      <dd
-        i18n-id="timelion.help.mainPage.keyboardTips.generalEditing.submitRequestText"
-        i18n-default-message="Submit request"
-      ></dd>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
     </dl>
 
     <!-- Auto complete tips -->
     <dl class="dl-horizontal">
       <dt></dt>
       <dd>
-<<<<<<< HEAD:src/plugins/timeline/public/directives/timeline_help/timeline_help.html
         <strong i18n-id="timeline.help.mainPage.keyboardTips.autoCompleteTitle"
           i18n-default-message="When auto-complete is visible"></strong>
       </dd>
@@ -710,31 +507,6 @@
       <dt>Esc</dt>
       <dd i18n-id="timeline.help.mainPage.keyboardTips.autoComplete.escDescription"
         i18n-default-message="Close auto-complete menu"></dd>
-=======
-        <strong
-          i18n-id="timelion.help.mainPage.keyboardTips.autoCompleteTitle"
-          i18n-default-message="When auto-complete is visible"
-        ></strong>
-      </dd>
-      <dt
-        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowLabel"
-        i18n-default-message="Down arrow"
-      ></dt>
-      <dd
-        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowDescription"
-        i18n-default-message="Switch focus to auto-complete menu. Use arrows to further select a term"
-      ></dd>
-      <dt>Enter/Tab</dt>
-      <dd
-        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.enterTabDescription"
-        i18n-default-message="Select the currently selected or the top most term in auto-complete menu"
-      ></dd>
-      <dt>Esc</dt>
-      <dd
-        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.escDescription"
-        i18n-default-message="Close auto-complete menu"
-      ></dd>
->>>>>>> 81dc805cef (Replace logos, clean images and some reference links):src/plugins/timelion/public/directives/timelion_help/timelion_help.html
     </dl>
   </div>
 </div>
