@@ -19,9 +19,7 @@
 
 import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
-import {
-  onPremInstructions,
-} from '../instructions/heartbeat_instructions';
+import { onPremInstructions } from '../instructions/heartbeat_instructions';
 import {
   TutorialContext,
   TutorialSchema,

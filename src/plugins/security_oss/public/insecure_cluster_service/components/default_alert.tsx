@@ -31,67 +31,67 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-//export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
+// export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
 //  defaultMessage: 'Your data is not secure',
-//});
+// });
 
-//export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint = (
+// export const defaultAlertText: (onDismiss: (persist: boolean) => void) => MountPoint = (
 //  onDismiss
-//) => (e) => {
- // const AlertText = () => {
- //   const [persist, setPersist] = useState(false);
+// ) => (e) => {
+// const AlertText = () => {
+//   const [persist, setPersist] = useState(false);
 
- //   return (
- //     <I18nProvider>
- //       <div data-test-subj="insecureClusterDefaultAlertText">
- //         <EuiText size="s">
- //           <FormattedMessage
- //             id="security.checkup.insecureClusterMessage"
- //             defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
- //           />
- //         </EuiText>
- //         <EuiSpacer />
- //         <EuiCheckbox
- //           id="persistDismissedAlertPreference"
- //           checked={persist}
- //           onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
- //           label={i18n.translate('security.checkup.dontShowAgain', {
- //             defaultMessage: `Don't show again`,
- //           })}
- //         />
- //         <EuiSpacer />
- //         <EuiFlexGroup justifyContent="spaceBetween">
- //           <EuiFlexItem grow={false}>
- //             <EuiButton
- //               size="s"
- //               color="primary"
- //               fill
- //               href="https://www.opensearch.co/what-is/elastic-stack-security?blade=kibanasecuritymessage"
- //               target="_blank"
- //             >
- //               {i18n.translate('security.checkup.learnMoreButtonText', {
- //                 defaultMessage: `Learn more`,
+//   return (
+//     <I18nProvider>
+//       <div data-test-subj="insecureClusterDefaultAlertText">
+//         <EuiText size="s">
+//           <FormattedMessage
+//             id="security.checkup.insecureClusterMessage"
+//             defaultMessage="Don't lose one bit. Secure your data for free with Elastic."
+//           />
+//         </EuiText>
+//         <EuiSpacer />
+//         <EuiCheckbox
+//           id="persistDismissedAlertPreference"
+//           checked={persist}
+//           onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
+//           label={i18n.translate('security.checkup.dontShowAgain', {
+//             defaultMessage: `Don't show again`,
+//           })}
+//         />
+//         <EuiSpacer />
+//         <EuiFlexGroup justifyContent="spaceBetween">
+//           <EuiFlexItem grow={false}>
+//             <EuiButton
+//               size="s"
+//               color="primary"
+//               fill
+//               href="https://www.opensearch.co/what-is/elastic-stack-security?blade=kibanasecuritymessage"
+//               target="_blank"
+//             >
+//               {i18n.translate('security.checkup.learnMoreButtonText', {
+//                 defaultMessage: `Learn more`,
 //                })}
- //             </EuiButton>
- //           </EuiFlexItem>
- //           <EuiFlexItem grow={false}>
+//             </EuiButton>
+//           </EuiFlexItem>
+//           <EuiFlexItem grow={false}>
 //              <EuiButton
- //               size="s"
- //               onClick={() => onDismiss(persist)}
- //               data-test-subj="defaultDismissAlertButton"
- //             >
- //               {i18n.translate('security.checkup.dismissButtonText', {
- //                 defaultMessage: `Dismiss`,
- //               })}
- //             </EuiButton>
- //           </EuiFlexItem>
- //         </EuiFlexGroup>
- //       </div>
- //     </I18nProvider>
- //   );
- // };
+//               size="s"
+//               onClick={() => onDismiss(persist)}
+//               data-test-subj="defaultDismissAlertButton"
+//             >
+//               {i18n.translate('security.checkup.dismissButtonText', {
+//                 defaultMessage: `Dismiss`,
+//               })}
+//             </EuiButton>
+//           </EuiFlexItem>
+//         </EuiFlexGroup>
+//       </div>
+//     </I18nProvider>
+//   );
+// };
 
- // render(<AlertText />, e);
+// render(<AlertText />, e);
 
 //  return () => unmountComponentAtNode(e);
-//s};
+// s};
