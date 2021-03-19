@@ -65,7 +65,6 @@ export function santaLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/santa_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

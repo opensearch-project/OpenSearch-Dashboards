@@ -69,7 +69,6 @@ export function googlecloudLogsSpecProvider(context: TutorialContext): TutorialS
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/googlecloud_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

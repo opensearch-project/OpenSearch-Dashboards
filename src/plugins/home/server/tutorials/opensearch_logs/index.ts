@@ -63,7 +63,6 @@ export function opensearchLogsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/opensearch_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

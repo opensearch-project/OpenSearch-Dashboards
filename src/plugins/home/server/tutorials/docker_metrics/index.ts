@@ -63,7 +63,6 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/docker_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

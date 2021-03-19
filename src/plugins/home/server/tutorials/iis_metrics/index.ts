@@ -64,7 +64,6 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iis_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

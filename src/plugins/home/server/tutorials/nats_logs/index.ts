@@ -65,7 +65,6 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nats_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

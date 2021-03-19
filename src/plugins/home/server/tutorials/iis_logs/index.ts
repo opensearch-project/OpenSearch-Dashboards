@@ -64,7 +64,6 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

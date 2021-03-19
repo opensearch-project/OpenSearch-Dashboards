@@ -63,7 +63,6 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/stan_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

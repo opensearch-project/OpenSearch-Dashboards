@@ -65,7 +65,6 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/aws_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

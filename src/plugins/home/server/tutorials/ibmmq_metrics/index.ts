@@ -62,7 +62,6 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/ibmmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

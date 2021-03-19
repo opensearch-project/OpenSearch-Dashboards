@@ -66,7 +66,6 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/kubernetes_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

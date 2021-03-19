@@ -64,7 +64,6 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/kafka_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

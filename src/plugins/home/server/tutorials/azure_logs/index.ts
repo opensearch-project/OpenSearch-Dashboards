@@ -65,7 +65,6 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/azure_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

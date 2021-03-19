@@ -63,7 +63,6 @@ processes, users, logins, sockets information, file accesses, and more. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/auditbeat/screenshot.png',
     onPrem: onPremInstructions(platforms, context),
   };
 }

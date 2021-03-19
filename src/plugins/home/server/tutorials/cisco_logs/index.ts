@@ -64,7 +64,6 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/cisco_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

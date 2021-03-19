@@ -67,7 +67,6 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/envoyproxy_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

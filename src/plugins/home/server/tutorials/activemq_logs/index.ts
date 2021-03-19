@@ -63,7 +63,6 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/activemq_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }
