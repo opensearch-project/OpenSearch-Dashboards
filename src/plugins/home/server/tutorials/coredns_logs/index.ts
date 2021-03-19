@@ -64,7 +64,6 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

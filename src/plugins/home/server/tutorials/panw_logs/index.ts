@@ -67,7 +67,6 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/panw_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

@@ -63,7 +63,6 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/consul_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

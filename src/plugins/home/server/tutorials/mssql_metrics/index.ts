@@ -64,7 +64,6 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/mssql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

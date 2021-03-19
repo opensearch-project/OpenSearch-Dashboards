@@ -64,7 +64,6 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/azure_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

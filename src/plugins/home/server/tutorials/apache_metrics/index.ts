@@ -63,7 +63,6 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/apache_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
   };
 }

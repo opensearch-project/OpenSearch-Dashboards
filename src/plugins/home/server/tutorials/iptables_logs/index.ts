@@ -67,7 +67,6 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iptables_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }

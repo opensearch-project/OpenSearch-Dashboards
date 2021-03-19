@@ -70,7 +70,6 @@ Note that the `slowlog` fileset is experimental. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/redis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
   };
 }
