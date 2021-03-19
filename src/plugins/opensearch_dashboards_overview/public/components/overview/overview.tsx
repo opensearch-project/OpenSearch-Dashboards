@@ -110,11 +110,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           <EuiCard
             description={app?.subtitle || ''}
             href={addBasePath(app.path)}
-            //image={addBasePath(
+            // image={addBasePath(
             //  `/plugins/${PLUGIN_ID}/assets/opensearch_dashboards_${appId}_${
             //    IS_DARK_THEME ? 'dark' : 'light'
             //  }.svg`
-            //)}
+            // )}
             title={app.title}
             titleElement="h3"
             titleSize="s"

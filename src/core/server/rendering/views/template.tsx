@@ -101,7 +101,10 @@ export const Template: FunctionComponent<Props> = ({
           href={`${uiPublicUrl}/favicons/safari-pinned-tab-heatmap.svg`}
         />
         <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon-heatmap.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig-heatmap.xml`} />
+        <meta
+          name="msapplication-config"
+          content={`${uiPublicUrl}/favicons/browserconfig-heatmap.xml`}
+        />
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
 
