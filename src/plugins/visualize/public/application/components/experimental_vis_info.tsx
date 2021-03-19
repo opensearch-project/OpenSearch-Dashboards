@@ -32,7 +32,7 @@ export const InfoComponent = () => {
           githubLink: (
             <EuiLink
               external
-              href="https://github.com/elastic/kibana/issues/new/choose"
+              href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
               target="_blank"
             >
               GitHub

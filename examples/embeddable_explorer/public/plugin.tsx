@@ -73,7 +73,8 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/embeddable/README.md',
+          href:
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/embeddable/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

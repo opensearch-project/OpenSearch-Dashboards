@@ -30,7 +30,7 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
 // before update to make sure it's in sync with validation rules in Legacy
-// https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
+// https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/legacy/server/config/schema.js
 export const config = {
   path: 'server',
   schema: schema.object(

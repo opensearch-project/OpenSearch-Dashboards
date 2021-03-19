@@ -23,7 +23,7 @@ import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@osd/dev-utils';
 
-const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
+const BASE_URL = 'https://api.github.com/repos/opensearch-project/OpenSearch-Dashboards/';
 
 export interface GithubIssue {
   html_url: string;

@@ -40,7 +40,7 @@ node scripts/generate_plugin --help
 
 Since the Plugin Generator is now a part of the OpenSearch Dashboards repo, when you update your local checkout of the OpenSearch Dashboards repository and `bootstrap` everything should be up to date!
 
-> ***NOTE:*** These commands should be run from the OpenSearch Dashboards repo, and `upstream` is our convention for the git remote that references https://github.com/elastic/kibana.git, unless you added this remote you might need to use `origin`.
+> ***NOTE:*** These commands should be run from the OpenSearch Dashboards repo, and `upstream` is our convention for the git remote that references https://github.com/opensearch-project/OpenSearch-Dashboards.git, unless you added this remote you might need to use `origin`.
 
 ```sh
 git pull upstream master

@@ -39,7 +39,7 @@ import {
  * 4. Takes care of batching URL updates to prevent redundant browser history records.
  *
  * TODO: Update link
- * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/osd_url_storage.md | Refer to this guide for more info}
+ * {@link https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/osd_url_storage.md | Refer to this guide for more info}
  * @public
  */
 export interface IOsdUrlStateStorage extends IStateStorage {

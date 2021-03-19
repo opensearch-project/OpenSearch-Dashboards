@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elastic/kibana.git"
+    "url": "git+https://github.com/opensearch-project/OpenSearch-Dashboards.git"
   },
   "keywords": [
     "lodash",
@@ -35,9 +35,9 @@
   "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/issues"
+    "url": "https://github.com/opensearch-project/OpenSearch-Dashboards/issues"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/safer-lodash-set#readme",
+  "homepage": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/packages/safer-lodash-set#readme",
   "standard": {
     "ignore": [
       "/lodash/"
