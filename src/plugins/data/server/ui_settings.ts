@@ -146,7 +146,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: '{ "unmapped_type": "boolean" }',
       description: i18n.translate('data.advancedSettings.sortOptionsText', {
-        defaultMessage: '{optionsLink} for the Elasticsearch sort parameter',
+        defaultMessage: '{optionsLink} for the OpenSearch sort parameter',
         description:
           'Part of composite text: data.advancedSettings.sortOptions.optionsLinkText + ' +
           'data.advancedSettings.sortOptionsText',
@@ -256,7 +256,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       description: i18n.translate('data.advancedSettings.courier.maxRequestsText', {
         defaultMessage:
           'Controls the {maxRequestsLink} setting used for _msearch requests sent by OpenSearch Dashboards. ' +
-          'Set to 0 to disable this config and use the Elasticsearch default.',
+          'Set to 0 to disable this config and use the OpenSearch default.',
         values: {
           maxRequestsLink: `<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`,
