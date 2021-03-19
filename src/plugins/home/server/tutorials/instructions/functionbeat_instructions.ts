@@ -79,11 +79,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             functionbeatLink:
               '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-<<<<<<< HEAD
             elasticLink: 'https://www.opensearch.co/downloads/beats/functionbeat',
-=======
-            opensearchLink: 'https://www.elastic.co/downloads/beats/functionbeat',
->>>>>>> 6b9f77d6fa (clean escloud -1)
           },
         }
       ),

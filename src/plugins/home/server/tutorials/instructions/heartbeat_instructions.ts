@@ -92,11 +92,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             heartbeatLink:
               '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
-<<<<<<< HEAD
             elasticLink: 'https://www.opensearch.co/downloads/beats/heartbeat',
-=======
-            opensearchLink: 'https://www.elastic.co/downloads/beats/heartbeat',
->>>>>>> 6b9f77d6fa (clean escloud -1)
           },
         }
       ),
@@ -341,7 +337,6 @@ export function heartbeatEnableInstructionsOnPrem() {
   };
 }
 
-<<<<<<< HEAD
 export function heartbeatEnableInstructionsCloud() {
   const defaultTitle = i18n.translate(
     'home.tutorials.common.heartbeatEnableCloudInstructions.defaultTitle',
@@ -402,8 +397,6 @@ export function heartbeatEnableInstructionsCloud() {
   };
 }
 
-=======
->>>>>>> 6b9f77d6fa (clean escloud -1)
 export function heartbeatStatusCheck() {
   return {
     title: i18n.translate('home.tutorials.common.heartbeatStatusCheck.title', {
