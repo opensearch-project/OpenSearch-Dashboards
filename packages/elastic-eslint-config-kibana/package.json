@@ -5,7 +5,7 @@
   "main": ".eslintrc.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elastic/kibana.git"
+    "url": "git+https://github.com/opensearch-project/OpenSearch-Dashboards.git"
   },
   "kibana": {
     "devOnly": true
@@ -14,9 +14,9 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
+    "url": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/packages/elastic-eslint-config-kibana"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana",
+  "homepage": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/packages/elastic-eslint-config-kibana",
   "peerDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.10.0",
     "@typescript-eslint/parser": "^3.10.0",

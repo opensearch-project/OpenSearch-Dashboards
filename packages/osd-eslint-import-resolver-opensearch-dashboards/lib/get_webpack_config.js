@@ -27,7 +27,7 @@ exports.getWebpackConfig = function (opensearchDashboardsPath) {
       mainFields: ['browser', 'main'],
       modules: ['node_modules', resolve(opensearchDashboardsPath, 'node_modules')],
       alias: {
-        // Dev defaults for test bundle https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/core_plugins/tests_bundle/index.js#L73-L78
+        // Dev defaults for test bundle https://github.com/opensearch-project/OpenSearch-Dashboards/blob/6998f074542e8c7b32955db159d15661aca253d7/src/core_plugins/tests_bundle/index.js#L73-L78
         fixtures: resolve(opensearchDashboardsPath, 'src/fixtures'),
         test_utils: resolve(opensearchDashboardsPath, 'src/test_utils/public'),
       },

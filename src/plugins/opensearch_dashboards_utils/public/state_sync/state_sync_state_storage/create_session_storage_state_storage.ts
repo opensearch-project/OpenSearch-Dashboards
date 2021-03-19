@@ -22,7 +22,7 @@ import { IStateStorage } from './types';
 /**
  * TODO: Update link
  * {@link IStateStorage} for storing state in browser {@link Storage}
- * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}
+ * {@link https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/session_storage.md | guide}
  * @public
  */
 export interface ISessionStorageStateStorage extends IStateStorage {
@@ -33,7 +33,7 @@ export interface ISessionStorageStateStorage extends IStateStorage {
 /**
  * TODO: Update link
  * Creates {@link ISessionStorageStateStorage}
- * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}
+ * {@link https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/session_storage.md | guide}
  * @param storage - Option {@link Storage} to use for storing state. By default window.sessionStorage.
  * @returns - {@link ISessionStorageStateStorage}
  * @public
