@@ -1,65 +1,49 @@
 # OpenSearch Dashboards
 
-OpenSearch Dashboards is your window into the [OpenSearch Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for OpenSearch.
+Hello!
 
-- [Getting Started](#getting-started)
-  - [Using a OpenSearch Dashboards Release](#using-a-opensearch-dashboards-release)
-  - [Building and Running OpenSearch Dashboards, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
-- [Documentation](#documentation)
-- [Version Compatibility with OpenSearch](#version-compatibility-with-elasticsearch)
-- [Questions? Problems? Suggestions?](#questions-problems-suggestions)
+OpenSearch Dashboards is a visualization tool derived from Kibana 7.10.2.
 
-## Getting Started
+## Current State
 
-If you just want to try OpenSearch Dashboards out, check out the [OpenSearch Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
+We officially began work on the new fork on January 21st, 2021. Since then, we've been removing non-Apache code and doing a full deep rename of the project. As this is an early phase, we don't expect the codebase to be bug free or to work perfectly. If you find an issue, feel free to open an issue [here](https://github.com/opensearch-project/OpenSearch-Dashboards/issues). 
 
-If you're interested in diving a bit deeper and getting a taste of OpenSearch Dashboards's capabilities, head over to the [OpenSearch Dashboards Getting Started Page](https://www.elastic.co/guide/en/kibana/current/getting-started.html).
+## What works
 
-### Using a OpenSearch Dashboards Release
+* All references to non-Apache 2.0 code should be removed.
+* Core plugins (non-3rd party)
+* New project name should be used everywhere.
+* ```yarn osd bootstrap```, ESLint and commit hook should be passing.
+* CI / CD with DCO check
 
-If you want to use a OpenSearch Dashboards release in production, give it a test run, or just play around:
+## What doesn’t works
 
-- Download the latest version on the [OpenSearch Dashboards Download Page](https://www.elastic.co/downloads/kibana).
-- Learn more about OpenSearch Dashboards's features and capabilities on the
-[OpenSearch Dashboards Product Page](https://www.elastic.co/products/kibana).
-- We also offer a hosted version of OpenSearch Dashboards on our
-[Cloud Service](https://www.elastic.co/cloud/as-a-service).
+* Jest Unit test cases
+* Integration test cases
+* Functional test cases
+* 3rd party plugins (including OpenDistro)
 
-### Building and Running OpenSearch Dashboards, and/or Contributing Code
+## Guiding Principles
 
-You might want to build OpenSearch Dashboards locally to contribute some code, test out the latest features, or try
-out an open PR:
+* Great software. If it doesn’t solve a user's problem, everything else is moot. It shall be software you love to use.
+* Open source like we mean it. Contributors shall be invested in this being a successful open source project for the long term. It’s all Apache 2.0. There’s no Contributor License Agreement. Easy.
+* A level playing field. Contributors shall not tweak the software so that it runs better for any vendor at the expense of others. If this happens, call it out and the contributors shall fix it together as a community.
+* Used everywhere. The project goal is for as many people as possible to use it in their business, their software, and their projects. Use it however you want. Surprise the community!
+* Made with community input. Project maintainers shall ask for public input on direction, requirements, and implementation for any feature built.
+* Open to all contributions. Great open source software is built together, with a diverse community of contributors. If you want to get involved at any level - big, small, or huge - the project maintainers shall find a way to make it happen.
+* Respectful, approachable, and friendly. This will be a community where all will be heard, accepted, and valued, whether a new or experienced user or contributor.
+* A place to invent and innovate. You will be able to innovate rapidly. This project shall have a stable and predictable foundation that is modular, making it easy to extend.
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) will help you get OpenSearch Dashboards up and running.
-- If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
-- For all other questions, check out the [FAQ.md](FAQ.md) and
-[wiki](https://github.com/elastic/kibana/wiki).
+## How you can help
 
-## Documentation
+### Look for the label "help wanted"
 
-Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full OpenSearch Dashboards documentation.
+If you're excited to jump in, we've tried to mark a few issues that would be good candidates to get started on. Look for the label "help wanted" to find them. https://github.com/opensearch-project/OpenSearch/labels/help%20wanted
 
-For information about building the documentation, see the README in [elastic/docs](https://github.com/elastic/docs).
+### Watch the forum, there are a bunch of things we want to talk about
 
-## Version Compatibility with OpenSearch
+As we've been working, we've come up with a bunch of questions that we wanted to get community feedback on. Now that we're done with this first pass of renaming, you'll see us posting those questions to the forum. Please let us know your thoughts!
 
-Ideally, you should be running OpenSearch and OpenSearch Dashboards with matching version numbers. If your OpenSearch has an older version number or a newer _major_ number than OpenSearch Dashboards, then OpenSearch Dashboards will fail to run. If OpenSearch has a newer minor or patch number than OpenSearch Dashboards, then the OpenSearch Dashboards Server will log a warning.
+### Questions? Feedback?
 
-_Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
-
-| Situation                 | Example OpenSearch Dashboards version     | Example OpenSearch version | Outcome |
-| ------------------------- | -------------------------- |------------------- | ------- |
-| Versions are the same.    | 5.1.2                      | 5.1.2              | 💚 OK      |
-| OpenSearch patch number is newer. | 5.1.__2__                  | 5.1.__5__          | ⚠️ Logged warning      |
-| OpenSearch minor number is newer. | 5.__1__.2                  | 5.__5__.0          | ⚠️ Logged warning      |
-| OpenSearch major number is newer. | __5__.1.2                  | __6__.0.0          | 🚫 Fatal error      |
-| OpenSearch patch number is older. | 5.1.__2__                  | 5.1.__0__          | ⚠️ Logged warning      |
-| OpenSearch minor number is older. | 5.__1__.2                  | 5.__0__.0          | 🚫 Fatal error      |
-| OpenSearch major number is older. | __5__.1.2                  | __4__.0.0          | 🚫 Fatal error      |
-
-## Questions? Problems? Suggestions?
-
-- If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
-  Please check to make sure someone else hasn't already created an issue for the same topic.
-- Need help using OpenSearch Dashboards? Ask away on our [OpenSearch Dashboards Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
-OpenSearch Dashboards engineer will be glad to help you out.
+Let us know in the [forums](https://discuss.opendistrocommunity.dev/). w00t!!!
