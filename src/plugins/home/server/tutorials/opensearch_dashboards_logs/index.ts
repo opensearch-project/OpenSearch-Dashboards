@@ -49,7 +49,7 @@ export function opensearchDashboardsLogsSpecProvider(context: TutorialContext): 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-opensearch-dashboards.html',
       },
     }),
-    euiIconType: 'logoKibana',
+    euiIconType: 'inputOutput',
     artifacts: {
       dashboards: [],
       application: {

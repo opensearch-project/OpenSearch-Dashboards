@@ -24,7 +24,7 @@ import {
 
 /**
  * Returns `OpenSearchQuerySort` which is used to sort records in the OpenSearch query
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
+ * https://www.opensearch.co/guide/en/elasticsearch/reference/current/search-request-sort.html
  * @param timeField
  * @param tieBreakerField
  * @param sortDir

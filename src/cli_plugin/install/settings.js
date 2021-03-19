@@ -26,7 +26,7 @@ import { fromRoot } from '../../core/server/utils';
 function generateUrls({ version, plugin }) {
   return [
     plugin,
-    `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
+    `https://artifacts.opensearch.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
   ];
 }
 

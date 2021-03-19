@@ -41,7 +41,7 @@ function VegaHelpMenu() {
   const items = [
     <EuiContextMenuItem
       key="vegaHelp"
-      href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
+      href="https://www.opensearch.co/guide/en/kibana/master/vega-graph.html"
       target="_blank"
       onClick={closePopover}
     >

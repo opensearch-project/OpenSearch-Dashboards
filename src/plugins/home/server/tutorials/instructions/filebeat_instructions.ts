@@ -37,7 +37,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'tar xzvf filebeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'cd filebeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
@@ -53,13 +53,13 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-amd64.deb',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-amd64.deb',
         'sudo dpkg -i filebeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+          linkUrl: 'https://www.opensearch.co/downloads/beats/filebeat',
         },
       }),
     },
@@ -74,13 +74,13 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-x86_64.rpm',
         'sudo rpm -vi filebeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+          linkUrl: 'https://www.opensearch.co/downloads/beats/filebeat',
         },
       }),
     },
@@ -100,7 +100,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         values: {
           folderPath: '`C:\\Program Files`',
           guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-          filebeatLinkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
+          filebeatLinkUrl: 'https://www.opensearch.co/downloads/beats/filebeat',
           directoryName: 'filebeat-{config.opensearchDashboards.version}-windows',
         },
       }),

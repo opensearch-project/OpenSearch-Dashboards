@@ -255,7 +255,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "appDescriptions": Array [
               "Analyze data in dashboards",
             ],
-            "icon": "logoKibana",
+            "icon": "inputOutput",
             "id": "kibana",
             "order": 1,
             "path": "kibana_landing_page",

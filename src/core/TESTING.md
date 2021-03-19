@@ -10,9 +10,9 @@ This document outlines best practices and patterns for testing OpenSearch Dashbo
       - [Example](#example)
   - [Strategies for specific Core APIs](#strategies-for-specific-core-apis)
     - [HTTP Routes](#http-routes)
-        - [Preconditions](#preconditions)
+      - [Preconditions](#preconditions)
       - [Unit testing](#unit-testing)
-          - [Example](#example-1)
+        - [Example](#example-1)
       - [Integration tests](#integration-tests)
         - [Functional Test Runner](#functional-test-runner)
           - [Example](#example-2)
@@ -34,15 +34,17 @@ This document outlines best practices and patterns for testing OpenSearch Dashbo
 ## Strategy
 
 In general, we recommend three tiers of tests:
-- Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies 
+
+- Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies
 - Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, OpenSearch API calls, calling other plugin contracts).
 - End-to-end tests (e2e): tests that verify user-facing behavior through the browser
 
-These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level. 
+These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level.
 
 ## New concerns in the OpenSearch Dashboards Platform
 
 The OpenSearch Dashboards Platform introduces new concepts that legacy plugins did not have concern themselves with. Namely:
+
 - **Lifecycles**: plugins now have explicit lifecycle methods that must interop with Core APIs and other plugins.
 - **Shared runtime**: plugins now all run in the same process at the same time. On the frontend, this is different behavior than the legacy plugins. Developers should take care not to break other plugins when interacting with their enviornment (Node.js or Browser).
 - **Single page application**: OpenSearch Dashboards's frontend is now a single-page application where all plugins are running, but only one application is mounted at a time. Plugins need to handle mounting and unmounting, cleanup, and avoid overriding global browser behaviors in this shared space.
@@ -74,31 +76,33 @@ test('my test', async () => {
   // Assert that client was called with expected arguments
   expect(opensearchClient.callAsCurrentUser).toHaveBeenCalledWith(/** expected args */);
   // Expect that unit under test returns expected value based on client's response
-  expect(result).toEqual(/** expected return value */)
+  expect(result).toEqual(/** expected return value */);
 });
 ```
 
 ## Strategies for specific Core APIs
 
 ### HTTP Routes
+
 The HTTP API interface is another public contract of OpenSearch Dashboards, although not every OpenSearch Dashboards endpoint is for external use. When evaluating the required level of test coverage for an HTTP resource, make your judgment based on whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
 Public API tests should cover the **observable behavior** of the system, therefore they should be close to the real user interactions as much as possible, ideally by using HTTP requests to communicate with the OpenSearch Dashboards server as a real user would do.
 
 ##### Preconditions
+
 We are going to add tests for `myPlugin` plugin that allows to format user-provided text, store and retrieve it later.
-The plugin has *thin* route controllers isolating all the network layer dependencies and delegating all the logic to the plugin model.
+The plugin has _thin_ route controllers isolating all the network layer dependencies and delegating all the logic to the plugin model.
 
 ```typescript
 class TextFormatter {
   public static async format(text: string, sanitizer: Deps['sanitizer']) {
     // sanitizer.sanitize throws MisformedTextError when passed text contains HTML markup
-    const sanitizedText = await sanitizer.sanitize(text); 
+    const sanitizedText = await sanitizer.sanitize(text);
     return sanitizedText;
   }
 
   public static async save(text: string, savedObjectsClient: SavedObjectsClient) {
     const { id } = await savedObjectsClient.update('myPlugin-type', 'myPlugin', {
-      userText: text
+      userText: text,
     });
     return { id };
   }
@@ -121,9 +125,9 @@ router.get(
     try {
       const formattedText = await TextFormatter.format(request.query.text, deps.sanitizer);
       return response.ok({ body: formattedText });
-    } catch(error) {
+    } catch (error) {
       if (error instanceof MisformedTextError) {
-        return response.badRequest({ body: error.message })
+        return response.badRequest({ body: error.message });
       }
 
       throw e;
@@ -143,9 +147,9 @@ router.post(
     try {
       const { id } = await TextFormatter.save(request.query.text, context.core.savedObjects.client);
       return response.ok({ body: { id } });
-    } catch(error) {
+    } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
-        return response.conflict({ body: error.message })
+        return response.conflict({ body: error.message });
       }
       throw e;
     }
@@ -163,13 +167,16 @@ router.get(
   },
   async (context, request, response) => {
     try {
-      const { text } = await TextFormatter.getById(request.params.id, context.core.savedObjects.client);
+      const { text } = await TextFormatter.getById(
+        request.params.id,
+        context.core.savedObjects.client
+      );
       return response.ok({
-        body: text
+        body: text,
       });
-    } catch(error) {
+    } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return response.notFound()
+        return response.notFound();
       }
       throw e;
     }
@@ -178,24 +185,30 @@ router.get(
 ```
 
 #### Unit testing
-Unit tests provide the simplest and fastest way to test the logic in your route controllers and plugin models. 
+
+Unit tests provide the simplest and fastest way to test the logic in your route controllers and plugin models.
 Use them whenever adding an integration test is hard and slow due to complex setup or the number of logic permutations.
 Since all external core and plugin dependencies are mocked, you don't have the guarantee that the whole system works as
 expected.
 Pros:
+
 - fast
 - easier to debug
 
 Cons:
+
 - doesn't test against real dependencies
 - doesn't cover integration with other plugins
 
 ###### Example
+
 You can leverage existing unit-test infrastructure for this. You should add `*.test.ts` file and use dependencies mocks to cover the functionality with a broader test suit that covers:
+
 - input permutations
 - input edge cases
 - expected exception
 - interaction with dependencies
+
 ```typescript
 // src/plugins/my_plugin/server/formatter.test.ts
 describe('TextFormatter', () => {
@@ -223,37 +236,47 @@ describe('TextFormatter', () => {
 ```
 
 #### Integration tests
-Depending on the number of external dependencies, you can consider implementing several high-level integration tests. 
-They would work as a set of [smoke tests](https://en.wikipedia.org/wiki/Smoke_testing_(software)) for the most important functionality.
+
+Depending on the number of external dependencies, you can consider implementing several high-level integration tests.
+They would work as a set of [smoke tests](<https://en.wikipedia.org/wiki/Smoke_testing_(software)>) for the most important functionality.
 Main subjects for tests should be:
+
 - authenticated / unauthenticated access to an endpoint.
 - endpoint validation (params, query, body).
 - main business logic.
 - dependencies on other plugins.
 
 ##### Functional Test Runner
-If your plugin relies on the opensearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
+
+If your plugin relies on the opensearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests.
 FTR bootstraps an opensearch and a OpenSearch Dashboards instance and runs the test suite against it.
 Pros:
+
 - runs the whole Elastic stack
 - tests cross-plugin integration
 - emulates a real user interaction with the stack
 - allows adjusting config values
 
 Cons:
+
 - slow start
 - hard to debug
 - brittle tests
 
 ###### Example
+
 You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-opensearch-dashboards-tests)
 
 The tests cover:
+
 - authenticated / non-authenticated user access (when applicable)
+
 ```typescript
 // TODO after https://github.com/elastic/opensearch-dashboards/pull/53208/
 ```
+
 - request validation
+
 ```typescript
 // test/api_integration/apis/my_plugin/something.ts
 export default function({ getService }: FtrProviderContext) {
@@ -271,7 +294,9 @@ export default function({ getService }: FtrProviderContext) {
     });
   });
 ```
+
 - the main logic of the plugin
+
 ```typescript
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -307,20 +332,25 @@ export default function({ getService }: FtrProviderContext) {
 ```
 
 ##### TestUtils
+
 It can be utilized if your plugin doesn't interact with the opensearch server or mocks the own methods doing so.
 Runs tests against real OpenSearch Dashboards server instance.
 Pros:
+
 - runs the real OpenSearch Dashboards instance
 - tests cross-plugin integration
 - emulates a real user interaction with the HTTP resources
 
 Cons:
+
 - faster than FTR because it doesn't run opensearch instance, but still slow
 - hard to debug
 - doesn't cover OpenSearch Dashboards CLI logic
 
 ###### Example
+
 To have access to OpenSearch Dashboards TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
+
 ```typescript
 // src/plugins/my_plugin/server/integration_tests/formatter.test.ts
 import * as osdTestServer from 'src/core/test_helpers/osd_server';
@@ -362,13 +392,15 @@ describe('myPlugin', () => {
   });
 });
 ```
-Sometimes we want to test a route controller logic and don't rely on the internal logic of the platform or a third-party plugin. 
+
+Sometimes we want to test a route controller logic and don't rely on the internal logic of the platform or a third-party plugin.
 Then we can apply a hybrid approach and mock the necessary method of `TextFormatter` model to test how `MisformedTextError`
 handled in the route handler without calling `sanitizer` dependency directly.
+
 ```typescript
 jest.mock('../path/to/model');
 import { TextFormatter } from '../path/to/model';
-import { MisformedTextError } from '../path/to/sanitizer'
+import { MisformedTextError } from '../path/to/sanitizer';
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {
@@ -394,9 +426,10 @@ describe('myPlugin', () => {
 
 ### Applications
 
-OpenSearch Dashboards Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA). 
+OpenSearch Dashboards Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA).
 
 These long-lived sessions make cleanup more important than before. It's entirely possible a user has a single browsing session open for weeks at a time, without ever doing a full-page refresh. Common things that need to be cleaned up (and tested!) when your application is unmounted:
+
 - Subscriptions and polling (eg. `uiSettings.get$()`)
 - Any Core API calls that set state (eg. `core.chrome.setIsVisible`).
 - Open connections (eg. a Websocket)
@@ -416,12 +449,12 @@ class Plugin {
       async mount(params) {
         const [{ renderApp }, [coreStart, startDeps]] = await Promise.all([
           import('./application'),
-          core.getStartServices()
+          core.getStartServices(),
         ]);
 
         return renderApp(params, coreStart, startDeps);
-      }
-    })
+      },
+    });
   }
 }
 ```
@@ -489,16 +522,13 @@ export const renderApp = (
 
   // uiSettings subscription
   const uiSettingsClient = core.uiSettings.client;
-  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe(async mySetting1 => {
+  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe(async (mySetting1) => {
     const value = core.http.fetch(/** use `mySetting1` in request **/);
     // ...
   });
 
   // Render app
-  ReactDOM.render(
-    <AppRoot routerHistory={history} core={core} plugins={plugins} />,
-    element
-  );
+  ReactDOM.render(<AppRoot routerHistory={history} core={core} plugins={plugins} />, element);
 
   return () => {
     // Unmount UI
@@ -512,8 +542,9 @@ export const renderApp = (
 ```
 
 In testing `renderApp` you should be verifying that:
-1) Your application mounts and unmounts correctly
-2) Cleanup logic is completed as expected
+
+1. Your application mounts and unmounts correctly
+2. Cleanup logic is completed as expected
 
 ```typescript
 /** public/application.test.ts */
@@ -561,7 +592,7 @@ describe('renderApp', () => {
     // Verify stateful Core API was called on unmount
     unmount();
     expect(core.chrome.setIsVisible).toHaveBeenCalledWith(true);
-  })
+  });
 });
 ```
 
@@ -590,10 +621,7 @@ import { SavedObjectsClientContract } from 'opensearch-dashboards/server';
 
 export const shortUrlLookup = {
   generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
-    const id = crypto
-      .createHash('md5')
-      .update(url)
-      .digest('hex');
+    const id = crypto.createHash('md5').update(url).digest('hex');
 
     return savedObjectsClient
       .create(
@@ -606,8 +634,8 @@ export const shortUrlLookup = {
         },
         { id }
       )
-      .then(doc => doc.id)
-      .catch(err => {
+      .then((doc) => doc.id)
+      .catch((err) => {
         if (savedObjectsClient.errors.isConflictError(err)) {
           return id;
         } else {
@@ -616,7 +644,6 @@ export const shortUrlLookup = {
       });
   },
 };
-
 ```
 
 ```typescript
@@ -627,7 +654,7 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 describe('shortUrlLookup', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
   const TYPE = 'url';
-  const URL = 'http://elastic.co';
+  const URL = 'http://opensearch.co';
 
   const mockSavedObjectsClient = savedObjectsClientMock.create();
 
@@ -741,7 +768,7 @@ describe('saved query service', () => {
     jest.resetAllMocks();
   });
 
-  describe('saveQuery', function() {
+  describe('saveQuery', function () {
     it('should create a saved object for the given attributes', async () => {
       // The public Saved Objects client returns instances of
       // SimpleSavedObject, so we create an instance to return from our mock.
@@ -760,7 +787,7 @@ describe('saved query service', () => {
       expect(response).toBe(mockReturnValue);
     });
 
-    it('should reject with an error when saved objects client errors', async done => {
+    it('should reject with an error when saved objects client errors', async (done) => {
       mockSavedObjectsClient.create.mockRejectedValue(new Error('timeout'));
 
       try {
@@ -777,6 +804,7 @@ describe('saved query service', () => {
 ```
 
 #### Integration Tests
+
 To get the highest confidence in how your code behaves when using the Saved
 Objects client, you should write at least a few integration tests which loads
 data into and queries a real OpenSearch database.
@@ -797,16 +825,16 @@ _How to test OpenSearch clients_
 ## Plugin integrations
 
 In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `opensearch_dashboards.json`
-manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
+manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective
 `setup` and `start` phases. One of the upsides with testing is that every usage of the dependencies is explicit,
-and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
+and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a
 specific logical component for unit testing is way easier than in legacy.
 
 The approach to test parts of a plugin's code that is relying on other plugins is quite similar to testing
 code using `core` APIs: it's expected to mock the dependency, and make it return the value the test is expecting.
 
-Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file  in 
-`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in 
+Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file in
+`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in
 `src/plugins/data/public/mocks.ts`. When such mocks are present, it's strongly recommended to use them
 when testing against dependencies. Otherwise, one should create it's own mocked implementation of the dependency's
 contract (and should probably ping the plugin's owner to ask them to add proper contract mocks).
@@ -814,8 +842,8 @@ contract (and should probably ping the plugin's owner to ask them to add proper 
 ### Preconditions
 
 For these examples, we are going to see how we should test the `myPlugin` plugin.
- 
-This plugin declares the `data` plugin as  a `required` dependency and the `usageCollection` plugin as an `optional` 
+
+This plugin declares the `data` plugin as a `required` dependency and the `usageCollection` plugin as an `optional`
 one. It also exposes a `getSpecialSuggestions` API in it's start contract, which relies on the `data` plugin to retrieve
 data.
 
@@ -837,7 +865,8 @@ interface MyPluginStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart, MyPluginSetupDeps, MyPluginStartDeps> {
+export class MyPlugin
+  implements Plugin<MyPluginSetup, MyPluginStart, MyPluginSetupDeps, MyPluginStartDeps> {
   private suggestionsService = new SuggestionsService();
 
   public setup(core: CoreSetup, { data, usageCollection }: MyPluginSetupDeps) {
@@ -884,7 +913,7 @@ export const defaultSuggestions = [
 export class SuggestionsService {
   public setup(data: DataPublicPluginSetup) {
     // register a suggestion provider to the `data` dependency plugin
-    data.autocomplete.addQuerySuggestionProvider('fr', async args => {
+    data.autocomplete.addQuerySuggestionProvider('fr', async (args) => {
       return suggestDependingOn(args);
     });
   }
@@ -901,7 +930,7 @@ export class SuggestionsService {
         if (!baseSuggestions || baseSuggestions.length === 0) {
           return defaultSuggestions;
         }
-        return baseSuggestions.filter(suggestion => suggestion.type !== 'conjunction');
+        return baseSuggestions.filter((suggestion) => suggestion.type !== 'conjunction');
       },
     };
   }
@@ -915,8 +944,8 @@ A plugin should test expected usage and calls on it's dependency plugins' API.
 Some calls, such as 'registration' APIs exposed from dependency plugins, should be checked,
 to ensure both that they are actually executed, and performed with the correct parameters.
 
-For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly 
-registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls 
+For our example plugin's `SuggestionsService`, we should assert that the suggestion provider is correctly
+registered to the `data` plugin during the `setup` phase, and that `getSuggestions` calls
 `autocomplete.getQuerySuggestions` with the correct parameters.
 
 ```typescript
@@ -976,7 +1005,7 @@ describe('SuggestionsService', () => {
 When testing parts of your plugin code that depends on the dependency plugin's data, the best approach
 is to mock the dependency to be able to get the behavior expected for the test.
 
-In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test 
+In this example, we are going to mock the results of `autocomplete.getQuerySuggestions` to be able to test
 the service's `getSuggestions` method.
 
 ```typescript
@@ -1043,12 +1072,12 @@ describe('Plugin', () => {
       data: dataPluginMock.createSetupContract(),
       // optional usageCollector dependency is not available
     };
-  
+
     const coreStart = coreMock.createStart();
     const startDeps = {
       data: dataPluginMock.createStartContract(),
     };
-  
+
     expect(() => {
       plugin.setup(coreSetup, setupDeps);
     }).not.toThrow();

@@ -13,6 +13,6 @@
       "_scripts/{id}",
       "_scripts/{id}/{context}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
+    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
   }
 }

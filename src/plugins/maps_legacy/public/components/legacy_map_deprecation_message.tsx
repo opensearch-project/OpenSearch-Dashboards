@@ -39,7 +39,7 @@ export function LegacyMapDeprecationMessage(props: Props) {
             color="accent"
             external
             // TODO: link
-            href="https://www.elastic.co/downloads/kibana"
+            href="https://www.opensearch.co/downloads/kibana"
             target="_blank"
           >
             default distribution

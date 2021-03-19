@@ -54,7 +54,7 @@ export function opensearchDashboardsMetricsSpecProvider(context: TutorialContext
           '{config.docs.beats.metricbeat}/metricbeat-module-opensearch-dashboards.html',
       },
     }),
-    euiIconType: 'logoKibana',
+    euiIconType: 'inputOutput',
     artifacts: {
       application: {
         label: i18n.translate(

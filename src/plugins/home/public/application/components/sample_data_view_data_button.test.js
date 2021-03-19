@@ -45,7 +45,7 @@ test('should render popover when appLinks is not empty', () => {
     {
       path: 'app/myAppPath',
       label: 'myAppLabel',
-      icon: 'logoKibana',
+      icon: 'inputOutput',
     },
   ];
 

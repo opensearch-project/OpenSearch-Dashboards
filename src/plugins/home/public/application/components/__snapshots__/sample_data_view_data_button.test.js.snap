@@ -42,7 +42,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
               "href": "rootapp/myAppPath",
               "icon": <EuiIcon
                 size="m"
-                type="logoKibana"
+                type="inputOutput"
               />,
               "name": "myAppLabel",
               "onClick": [Function],

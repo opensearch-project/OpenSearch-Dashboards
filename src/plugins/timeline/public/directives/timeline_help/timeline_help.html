@@ -23,16 +23,13 @@
       </p>
     </div>
     <div class="timHelp__buttons">
-
       <button ng-click="opts.dontShowHelp()" class="kuiButton kuiButton--hollow">
         {{translations.dontShowHelpButtonLabel}}
       </button>
 
-
       <button ng-click="setPage(page+1)" class="kuiButton kuiButton--primary">
         {{translations.nextButtonLabel}}
       </button>
-
     </div>
   </div>
   <div ng-show="page === 2">
@@ -42,17 +39,18 @@
         <p i18n-id="timeline.help.configuration.notValid.paragraph1" i18n-default-message="If you're using Logstash, you don't need to configure anything to
                                 start exploring your log data with Timeline. To search other
                                 indices, go to {advancedSettingsPath} and configure the {opensearchDefaultIndex}
-                                and {opensearchTimefield} settings to match your indices." i18n-values="{
+                                and {opensearchTimefield} settings to match your indices."
+          i18n-values="{
             html_advancedSettingsPath: '<strong>' + translations.notValidAdvancedSettingsPath + '</strong>',
             html_opensearchDefaultIndex: '<code>timeline:opensearch.default_index</code>',
             html_opensearchTimefield: '<code>timeline:opensearch.timefield</code>',
           }"></p>
         <p i18n-id="timeline.help.configuration.notValid.paragraph2" i18n-default-message="You'll also see some other Timeline settings. For now, you don't need
                                 to worry about them. Later, you'll see that you can set most of
-                                them on the fly if you need to."></p>
+                                them on the fly if you need to."
+        ></p>
       </div>
       <div class="timHelp__buttons">
-
         <button ng-click="setPage(page-1)" class="kuiButton kuiButton--primary">
           {{translations.previousButtonLabel}}
         </button>
@@ -62,7 +60,8 @@
                                 Check your Advanced Settings and try again. ({count})" i18n-values="{
             html_reason: '<strong>' + opensearch.invalidReason + '</strong>',
             count: opensearch.invalidCount,
-          }"></span>
+          }"
+        ></span>
 
         <button ng-click="recheckOpenSearch()" class="kuiButton kuiButton--primary"
           i18n-id="timeline.help.configuration.notValid.validateButtonLabel"
@@ -77,7 +76,8 @@
         <p>
           <span i18n-id="timeline.help.configuration.valid.paragraph1Part1" i18n-default-message="We validated your default index and your timefield and everything
                                   looks ok. We found data from {statsMin} to {statsMax}.
-                                  You're probably all set. If this doesn't look right, see" i18n-values="{
+                                  You're probably all set. If this doesn't look right, see"
+            i18n-values="{
               html_statsMin: '<strong>' + opensearch.stats.min + '</strong>',
               html_statsMax: '<strong>' + opensearch.stats.max + '</strong>',
             }" i18n-description="Part of composite text timeline.help.configuration.valid.paragraph1Part1 +
@@ -129,7 +129,8 @@
                 i18n-values="{
                   html_maxBuckets: '<code>timeline:max_buckets</code>',
                   html_advancedSettingsPath: '<strong>' + translations.validAdvancedSettingsPath + '</strong>',
-                }"></span>
+                }"
+              ></span>
             </p>
           </li>
           <li>
@@ -137,7 +138,8 @@
               i18n-default-message="Time range"></strong>
             <p i18n-id="timeline.help.configuration.valid.timeRangeText" i18n-default-message="Use the timepicker in the OpenSearch Dashboards toolbar to select the time period
                                     that contains the data you want to visualize. Make sure you select
-                                    a time period that includes all or part of the time range shown above."></p>
+                                    a time period that includes all or part of the time range shown above."
+            ></p>
           </li>
         </ul>
         <p i18n-id="timeline.help.configuration.valid.paragraph3"
@@ -145,16 +147,13 @@
         </p>
       </div>
       <div class="timHelp__buttons">
-
         <button ng-click="setPage(page-1)" class="kuiButton kuiButton--primary">
           {{translations.previousButtonLabel}}
         </button>
 
-
         <button ng-click="setPage(page+1)" class="kuiButton kuiButton--primary">
           {{translations.nextButtonLabel}}
         </button>
-
       </div>
     </div>
   </div>
@@ -163,15 +162,18 @@
       <h2 i18n-id="timeline.help.queryingTitle" i18n-default-message="Querying the OpenSearch datasource"></h2>
       <p i18n-id="timeline.help.querying.paragraph1" i18n-default-message="Now that we've validated that you have a working OpenSearch
                               datasource, you can start submitting queries. For starters,
-                              enter {opensearchPattern} in the input bar and hit enter." i18n-values="{
+                              enter {opensearchPattern} in the input bar and hit enter."
+        i18n-values="{
           html_opensearchPattern: '<code>.opensearch(*)</code>',
-        }"></p>
+        }"
+      ></p>
       <p>
         <span i18n-id="timeline.help.querying.paragraph2Part1" i18n-default-message="This says {opensearchAsteriskQueryDescription}. If you want to find a subset, you could enter something
                                 like {htmlQuery} to count events that match {html}, or {bobQuery}
                                 to find events that contain {bob} in the {user} field and have a {bytes}
                                 field that is greater than 100. Note that this query is enclosed in single
-                                quotes&mdash;that's because it contains spaces. You can enter any" i18n-values="{
+                                quotes&mdash;that's because it contains spaces. You can enter any"
+          i18n-values="{
             html_opensearchAsteriskQueryDescription: '<em>' + translations.opensearchAsteriskQueryDescription + '</em>',
             html_html: '<em>html</em>',
             html_htmlQuery: '<code>.opensearch(html)</code>',
@@ -204,7 +206,8 @@
                               For example, {opensearchEmptyQuery} and {opensearchStarQuery} do the same thing.
                               Arguments also have names, so you don't have to specify them in a specific order.
                               For example, you can enter {opensearchLogstashQuery} to tell the OpenSearch datasource
-                              {opensearchIndexQueryDescription}." i18n-values="{
+                              {opensearchIndexQueryDescription}."
+        i18n-values="{
           html_opensearchEmptyQuery: '<code>.opensearch()</code>',
           html_opensearchStarQuery: '<code>.opensearch(*)</code>',
           html_opensearchLogstashQuery: '<code>.opensearch(index=\'logstash-*\', q=\'*\')</code>',
@@ -246,21 +249,18 @@
       </p>
     </div>
     <div class="timHelp__buttons">
-
       <button ng-click="setPage(page-1)" class="kuiButton kuiButton--primary">
         {{translations.previousButtonLabel}}
       </button>
 
-
       <button ng-click="setPage(page+1)" class="kuiButton kuiButton--primary">
         {{translations.nextButtonLabel}}
       </button>
-
     </div>
   </div>
 
   <div ng-show="page === 4">
-    <div>
+    <div>)
       <h2 i18n-id="timeline.help.expressionsTitle" i18n-default-message="Expressing yourself with expressions"></h2>
       <p i18n-id="timeline.help.expressions.paragraph1" i18n-default-message="Every expression starts with a datasource function. From there, you
                               can append new functions to the datasource to transform and augment it."></p>
@@ -271,39 +271,56 @@
                               to add another chart or three. Then, select a chart,
                               copy one of the following expressions, paste it into the input bar,
                               and hit enter. Rinse, repeat to try out the other expressions."
-        i18n-values="{ html_strongAdd: '<strong>' + translations.strongAddText + '</strong>' }"></p>
+        i18n-values="{ html_strongAdd: '<strong>' + translations.strongAddText + '</strong>' }"
+      ></p>
       <table class="table table-condensed table-striped">
         <tr>
           <td><code>.opensearch(*), .opensearch(US)</code></td>
           <td i18n-id="timeline.help.expressions.examples.twoExpressionsDescription"
             i18n-default-message="{descriptionTitle} Two expressions on the same chart." i18n-values="{
+          <td
+            i18n-id="timelion.help.expressions.examples.twoExpressionsDescription"
+            i18n-default-message="{descriptionTitle} Two expressions on the same chart."
+            i18n-values="{
               html_descriptionTitle: '<strong>' + translations.twoExpressionsDescriptionTitle + '</strong>',
-            }"></td>
+            }"
+          ></td>
         </tr>
         <tr>
           <td><code>.opensearch(*).color(#f66), .opensearch(US).bars(1)</code></td>
           <td i18n-id="timeline.help.expressions.examples.customStylingDescription" i18n-default-message="{descriptionTitle} Colorizes the first series red and
                                   uses 1 pixel wide bars for the second series." i18n-values="{
+          <td
+            i18n-id="timelion.help.expressions.examples.customStylingDescription"
+            i18n-default-message="{descriptionTitle} Colorizes the first series red and
+                                  uses 1 pixel wide bars for the second series."
+            i18n-values="{
               html_descriptionTitle: '<strong>' + translations.customStylingDescriptionTitle + '</strong>',
-            }"></td>
+            }"
+          ></td>
         </tr>
         <tr>
           <td>
-            <code>.opensearch(*).color(#f66).lines(fill=3),
-            .opensearch(US).bars(1).points(radius=3, weight=1)</code>
+            <code
+              >.opensearch(*).color(#f66).lines(fill=3), .opensearch(US).bars(1).points(radius=3,
+              weight=1)</code
+            >
           </td>
           <td i18n-id="timeline.help.expressions.examples.namedArgumentsDescription" i18n-default-message="{descriptionTitle} Forget trying to remember what order you need
                                   to specify arguments in, use named arguments to make
-                                  the expressions easier to read and write." i18n-values="{
+                                  the expressions easier to read and write."
+            i18n-values="{
               html_descriptionTitle: '<strong>' + translations.namedArgumentsDescriptionTitle + '</strong>',
-            }"></td>
+            }"
+          ></td>
         </tr>
         <tr>
           <td><code>(.opensearch(*), .opensearch(GB)).points()</code></td>
           <td i18n-id="timeline.help.expressions.examples.groupedExpressionsDescription" i18n-default-message="{descriptionTitle} You can also chain groups of expressions to
                                   functions. Here, both series are shown as points instead of lines." i18n-values="{
               html_descriptionTitle: '<strong>' + translations.groupedExpressionsDescriptionTitle + '</strong>',
-            }"></td>
+            }"
+          ></td>
         </tr>
       </table>
       <p>
@@ -319,16 +336,13 @@
       </p>
     </div>
     <div class="timHelp__buttons">
-
       <button ng-click="setPage(page-1)" class="kuiButton kuiButton--primary">
         {{translations.previousButtonLabel}}
       </button>
 
-
       <button ng-click="setPage(page+1)" class="kuiButton kuiButton--primary">
         {{translations.nextButtonLabel}}
       </button>
-
     </div>
   </div>
   <div ng-show="page === 5">
@@ -344,7 +358,8 @@
         i18n-values="{ html_opensearchUsQuery: '<code>.opensearch(\'US\')</code>' }"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph3" i18n-default-message="Next, we want to calculate the ratio of US events to the whole.
                               To divide {us} by everything, we can use the {divide} function:
-                              {divideDataQuery}." i18n-values="{
+                              {divideDataQuery}."
+        i18n-values="{
           html_us: '<code>\'US\'</code>',
           html_divide: '<code>divide</code>',
           html_divideDataQuery: '<code>.opensearch(\'US\').divide(.opensearch())</code>',
@@ -358,7 +373,8 @@
                               built-in arithmetic functions, such as {sum}, {subtract}, {multiply},
                               and {divide}. Many of these can take a series or a number. There are
                               also other useful data transformation functions, such as
-                              {movingaverage}, {abs}, and {derivative}." i18n-values="{
+                              {movingaverage}, {abs}, and {derivative}."
+        i18n-values="{
           html_sum: '<code>sum</code>',
           html_subtract: '<code>subtract</code>',
           html_multiply: '<code>multiply</code>',
@@ -366,7 +382,8 @@
           html_movingaverage: '<code>movingaverage</code>',
           html_abs: '<code>abs</code>',
           html_derivative: '<code>derivative</code>',
-        }"></p>
+        }"
+      ></p>
       <p>
         <span i18n-id="timeline.help.dataTransforming.paragraph6Part1"
           i18n-default-message="Now that you're familiar with the syntax, refer to the" i18n-description="Part of composite text
@@ -388,17 +405,13 @@
       </p>
     </div>
     <div class="timHelp__buttons">
-
       <button ng-click="setPage(page-1)" class="kuiButton kuiButton--primary">
         {{translations.previousButtonLabel}}
       </button>
 
-
-
       <button ng-click="opts.dontShowHelp()" class="kuiButton kuiButton--hollow">
         {{translations.dontShowHelpButtonLabel}}
       </button>
-
     </div>
   </div>
 </div>
@@ -418,18 +431,25 @@
 
     <div class="timHelp__functions">
       <table class="table table-condensed table-bordered">
-        <tr class="timHelp__functionsTableRow" ng-repeat-start="function in functions.list"
-          ng-class="{active: functions.details === function.name}" ng-click="functions.details =
+        <tr
+          class="timHelp__functionsTableRow"
+          ng-repeat-start="function in functions.list"
+          ng-class="{active: functions.details === function.name}"
+          ng-click="functions.details =
                     (functions.details === function.name ?
-                      null : function.name)" osd-accessible-click>
+                      null : function.name)"
+          osd-accessible-click
+        >
           <td><strong>.{{function.name}}()</strong></td>
           <td>{{function.help}}</td>
         </tr>
         <tr ng-if="functions.details === function.name" ng-repeat-end>
-          <td colspan=2>
+          <td colspan="2">
             <div class="suggestion-details">
-              <table class="table table-condensed table-bordered
-                        timHelp__functionDetailsTable" ng-show="function.args.length > (function.chainable ? 1: 0)">
+              <table
+                class="table table-condensed table-bordered timHelp__functionDetailsTable"
+                ng-show="function.args.length > (function.chainable ? 1: 0)"
+              >
                 <thead>
                   <th scope="col"
                     i18n-id="timeline.help.mainPage.functionReference.detailsTable.argumentNameColumnLabel"

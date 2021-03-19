@@ -27,7 +27,7 @@ const solutionEntry = {
   subtitle: 'Visualize & analyze',
   description: 'Explore and analyze your data',
   appDescriptions: ['Analyze data in dashboards'],
-  icon: 'logoKibana',
+  icon: 'inputOutput',
   path: 'opensearch_dashboards_landing_page',
   order: 1,
 };
