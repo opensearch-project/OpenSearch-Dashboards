@@ -6,14 +6,14 @@ OpenSearch Dashboards is a visualization tool derived from Kibana 7.10.2.
 
 ## Current State
 
-We officially began work on the new fork on January 21st, 2021. Since then, we've been removing non-Apache code and doing a full deep rename of the project. More details...
+We officially began work on the new fork on January 21st, 2021. Since then, we've been removing non-Apache code and doing a full deep rename of the project. As this is an early phase, we don't expect the codebase to be bug free or to work perfectly. If you find an issue, feel free to open an issue [here](https://github.com/opensearch-project/OpenSearch-Dashboards/issues). 
 
 ## What works
 
 * All references to non-Apache 2.0 code should be removed.
 * Core plugins (non-3rd party)
 * New project name should be used everywhere.
-* yarn osd bootstrap, EsLint and commit hook should be passing.
+* ```yarn osd bootstrap```, ESLint and commit hook should be passing.
 * CI / CD with DCO check
 
 ## What doesn’t works
@@ -22,7 +22,6 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 * Integration test cases
 * Functional test cases
 * 3rd party plugins (including OpenDistro)
-* Works with OpenSearch engine
 
 ## Guiding Principles
 
@@ -47,4 +46,4 @@ As we've been working, we've come up with a bunch of questions that we wanted to
 
 ### Questions? Feedback?
 
-Let us know in the forums. w00t!!!
+Let us know in the [forums](https://discuss.opendistrocommunity.dev/). w00t!!!
