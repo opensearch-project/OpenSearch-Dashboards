@@ -19,10 +19,8 @@
 
 import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
-import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -70,7 +68,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Functionbeat? See the [Quick Start]({functionbeatLink}).\n\
- 1. Download the Functionbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 1. Download the Functionbeat Windows zip file from the [Download]({opensearchLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Functionbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -81,7 +79,11 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             functionbeatLink:
               '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+<<<<<<< HEAD
             elasticLink: 'https://www.opensearch.co/downloads/beats/functionbeat',
+=======
+            opensearchLink: 'https://www.elastic.co/downloads/beats/functionbeat',
+>>>>>>> 6b9f77d6fa (clean escloud -1)
           },
         }
       ),
@@ -120,7 +122,7 @@ OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
   CONFIG: {
     OSX_LINUX: {
       title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTitle', {
-        defaultMessage: 'Configure the Elastic cluster',
+        defaultMessage: 'Configure the OpenSearch cluster',
       }),
       textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
@@ -131,7 +133,7 @@ OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -141,7 +143,7 @@ OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
         'home.tutorials.common.functionbeatInstructions.config.osxTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -167,7 +169,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
       commands: [
         'output.opensearch:',
         '  hosts: ["<opensearch_url>"]',
-        '  username: "elastic"',
+        '  username: "opensearch"',
         '  password: "<password>"',
         'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
@@ -177,7 +179,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         'home.tutorials.common.functionbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+            'Where {passwordTemplate} is the password of the `opensearch` user, {opensearchUrlTemplate} is the URL of opensearch, \
 and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
@@ -186,46 +188,6 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           },
         }
       ),
-    },
-  },
-});
-
-export const createFunctionbeatCloudInstructions = () => ({
-  CONFIG: {
-    OSX_LINUX: {
-      title: i18n.translate('home.tutorials.common.functionbeatCloudInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatCloudInstructions.config.osxTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`functionbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
-    },
-    WINDOWS: {
-      title: i18n.translate(
-        'home.tutorials.common.functionbeatCloudInstructions.config.windowsTitle',
-        {
-          defaultMessage: 'Edit the configuration',
-        }
-      ),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatCloudInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-          values: {
-            path: '`C:\\Program Files\\Functionbeat\\functionbeat.yml`',
-          },
-        }
-      ),
-      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
     },
   },
 });
@@ -397,111 +359,3 @@ export function onPremInstructions(platforms: Platform[], context?: TutorialCont
   };
 }
 
-export function onPremCloudInstructions() {
-  const TRYCLOUD_OPTION1 = createTrycloudOption1();
-  const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.functionbeat.premCloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.OSX,
-              functionbeatAWSInstructions().OSX_LINUX,
-              functionbeatEnableInstructions().OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.CONFIG.OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.OSX_LINUX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.LINUX,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.LINUX,
-              functionbeatAWSInstructions().OSX_LINUX,
-              functionbeatEnableInstructions().OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.CONFIG.OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.OSX_LINUX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              TRYCLOUD_OPTION1,
-              TRYCLOUD_OPTION2,
-              functionbeatAWSInstructions().WINDOWS,
-              functionbeatEnableInstructions().WINDOWS,
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              FUNCTIONBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: functionbeatStatusCheck(),
-      },
-    ],
-  };
-}
-
-export function cloudInstructions() {
-  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions();
-  const FUNCTIONBEAT_CLOUD_INSTRUCTIONS = createFunctionbeatCloudInstructions();
-
-  return {
-    instructionSets: [
-      {
-        title: i18n.translate(
-          'home.tutorials.common.functionbeat.cloudInstructions.gettingStarted.title',
-          {
-            defaultMessage: 'Getting Started',
-          }
-        ),
-        instructionVariants: [
-          {
-            id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.OSX,
-              functionbeatAWSInstructions().OSX_LINUX,
-              functionbeatEnableInstructions().OSX_LINUX,
-              FUNCTIONBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.OSX_LINUX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.LINUX,
-            instructions: [
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.LINUX,
-              functionbeatAWSInstructions().OSX_LINUX,
-              functionbeatEnableInstructions().OSX_LINUX,
-              FUNCTIONBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX_LINUX,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.OSX_LINUX,
-            ],
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              FUNCTIONBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              functionbeatAWSInstructions().WINDOWS,
-              functionbeatEnableInstructions().WINDOWS,
-              FUNCTIONBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-              FUNCTIONBEAT_INSTRUCTIONS.DEPLOY.WINDOWS,
-            ],
-          },
-        ],
-        statusCheck: functionbeatStatusCheck(),
-      },
-    ],
-  };
-}

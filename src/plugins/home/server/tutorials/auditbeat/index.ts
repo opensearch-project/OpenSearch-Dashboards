@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/auditbeat_instructions';
 import {
   TutorialContext,
@@ -67,7 +65,5 @@ processes, users, logins, sockets information, file accesses, and more. \
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/auditbeat/screenshot.png',
     onPrem: onPremInstructions(platforms, context),
-    elasticCloud: cloudInstructions(platforms),
-    onPremElasticCloud: onPremCloudInstructions(platforms),
   };
 }

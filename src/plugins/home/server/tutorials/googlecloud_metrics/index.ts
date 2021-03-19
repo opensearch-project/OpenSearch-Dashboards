@@ -21,8 +21,6 @@ import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
-  cloudInstructions,
-  onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
   TutorialContext,
@@ -72,7 +70,5 @@ export function googlecloudMetricsSpecProvider(context: TutorialContext): Tutori
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/googlecloud_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }
