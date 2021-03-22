@@ -45,14 +45,14 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
 };
 
 describe('#getOpenSearchDashboardsPkg()', () => {
-  it('returns the parsed package.json from the Kibana repo', async () => {
+  it('returns the parsed package.json from the OpenSearch Dashboards repo', async () => {
     const config = await setup();
     expect(config.getOpenSearchDashboardsPkg()).toEqual(pkg);
   });
 });
 
 describe('#getNodeVersion()', () => {
-  it('returns the node version from the kibana package.json', async () => {
+  it('returns the node version from the OpenSearch Dashboards package.json', async () => {
     const config = await setup();
     expect(config.getNodeVersion()).toEqual(pkg.engines.node);
   });

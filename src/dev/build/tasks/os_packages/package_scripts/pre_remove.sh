@@ -1,16 +1,16 @@
 #!/bin/sh
 set -e
 
-echo -n "Stopping kibana service..."
-if command -v systemctl >/dev/null && systemctl is-active kibana.service >/dev/null; then
-    systemctl --no-reload stop kibana.service
-elif [ -x /etc/init.d/kibana ]; then
+echo -n "Stopping OpenSearch Dashboards service..."
+if command -v systemctl >/dev/null && systemctl is-active opensearch_dashboards.service >/dev/null; then
+    systemctl --no-reload stop opensearch_dashboards.service
+elif [ -x /etc/init.d/opensearch-dashboards ]; then
     if command -v invoke-rc.d >/dev/null; then
-        invoke-rc.d kibana stop
+        invoke-rc.d opensearch-dashboards stop
     elif command -v service >/dev/null; then
-        service kibana stop
+        service opensearch-dashboards stop
     else
-        /etc/init.d/kibana stop
+        /etc/init.d/opensearch-dashboards stop
     fi
 fi
 echo " OK"

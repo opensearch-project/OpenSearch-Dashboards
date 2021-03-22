@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-  <title>Kibana Visual Regression Gallery</title>
+  <title>OpenSearch Dashboards Visual Regression Gallery</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    body {
+      padding: 40px;
+      background-color: #f6f6f6;
+      font-family: 'Helvetica', Arial, sans-serif;
+      min-width: 2000px;
+    }
 
-  body {
-    padding: 40px;
-    background-color: #f6f6f6;
-    font-family: 'Helvetica', Arial, sans-serif;
-    min-width: 2000px;
-  }
+    .title {
+      margin-bottom: 6px;
+      font-size: 28px;
+    }
 
-  .title {
-    margin-bottom: 6px;
-    font-size: 28px;
-  }
+    .meta {
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
 
-  .meta {
-    font-size: 14px;
-    margin-bottom: 30px;
-  }
-
-  .comparison {
-    padding: 20px;
-    margin-bottom: 40px;
-    background-color: #ffffff;
-  }
+    .comparison {
+      padding: 20px;
+      margin-bottom: 40px;
+      background-color: #ffffff;
+    }
 
     .comparison__title {
       cursor: pointer;
@@ -42,9 +42,9 @@
       background-color: #e9e9e9;
     }
 
-      .comparison__percent {
-        opacity: 0.4;
-      }
+    .comparison__percent {
+      opacity: 0.4;
+    }
 
     .comparison__subTitle {
       display: -webkit-box;
@@ -66,28 +66,26 @@
       overflow: auto;
     }
 
-  .comparison--collapsed .comparison__title {
-    margin-bottom: 0;
-    border-bottom: 0;
-  }
+    .comparison--collapsed .comparison__title {
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
 
-  .comparison--collapsed .comparison__subTitle {
-    display: none;
-  }
+    .comparison--collapsed .comparison__subTitle {
+      display: none;
+    }
 
-  .comparison--collapsed .comparison__body {
-    display: none;
-  }
+    .comparison--collapsed .comparison__body {
+      display: none;
+    }
 
-  .comparison--warning {
-  }
+    .comparison--warning {}
 
-  .comparisonScreenshot {
-  }
+    .comparisonScreenshot {}
 
-  .comparisonScreenshot + .comparisonScreenshot {
-    margin-left: 20px;
-  }
+    .comparisonScreenshot+.comparisonScreenshot {
+      margin-left: 20px;
+    }
 
     .comparisonScreenshot__image {
       cursor: pointer;
@@ -96,25 +94,24 @@
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     }
 
-  .comparisonScreenshotTitle {
-    width: 900px;
-    background-color: white;
-  }
+    .comparisonScreenshotTitle {
+      width: 900px;
+      background-color: white;
+    }
 
-  .comparisonScreenshotTitle + .comparisonScreenshotTitle {
-    margin-left: 20px;
-  }
+    .comparisonScreenshotTitle+.comparisonScreenshotTitle {
+      margin-left: 20px;
+    }
 
-  .comparisonScreenshotTitle--session,
-  .comparisonScreenshotTitle--baseline {
-    cursor: pointer;
-  }
+    .comparisonScreenshotTitle--session,
+    .comparisonScreenshotTitle--baseline {
+      cursor: pointer;
+    }
 
-  .comparisonScreenshotTitle--session:hover,
-  .comparisonScreenshotTitle--baseline:hover {
-    background-color: #e9e9e9;
-  }
-
+    .comparisonScreenshotTitle--session:hover,
+    .comparisonScreenshotTitle--baseline:hover {
+      background-color: #e9e9e9;
+    }
   </style>
 
 </head>
@@ -122,7 +119,7 @@
 <body>
 
   <div class="title">
-    Kibana Visual Regression Gallery
+    OpenSearch Dashboards Visual Regression Gallery
   </div>
 
   <div class="meta">
@@ -130,7 +127,8 @@
   </div>
 
   {{#each comparisons as |comparison|}}
-  <div class="comparison{{#lte comparison.change ../hiddenThreshold}} comparison--collapsed{{/lte}} {{#gte comparison.change ../warningThreshold }} comparison--warning{{/gte}}">
+  <div
+    class="comparison{{#lte comparison.change ../hiddenThreshold}} comparison--collapsed{{/lte}} {{#gte comparison.change ../warningThreshold }} comparison--warning{{/gte}}">
 
     <div class="comparison__title">
       <span class="comparison__percent">({{comparison.percentage}}%)</span> {{comparison.name}}
@@ -138,15 +136,10 @@
 
     <div class="comparison__subTitle">
       <div class="comparisonScreenshotTitle">Diff</div>
-      <div
-        class="comparisonScreenshotTitle comparisonScreenshotTitle--session"
-        style="display: none"
-      >
+      <div class="comparisonScreenshotTitle comparisonScreenshotTitle--session" style="display: none">
         Session
       </div>
-      <div
-        class="comparisonScreenshotTitle comparisonScreenshotTitle--baseline"
-      >
+      <div class="comparisonScreenshotTitle comparisonScreenshotTitle--baseline">
         Baseline
       </div>
     </div>
@@ -154,144 +147,133 @@
     <div class="comparison__body">
       <!-- Diff first, so we can scan for regressions. -->
       <div class="comparisonScreenshot">
-        <img
-          class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{comparison.imageData.diff}}"
-        />
+        <img class="comparisonScreenshot__image" src="data:image/png;base64,{{comparison.imageData.diff}}" />
       </div>
 
       <!-- Session, see what happened during the test. -->
-      <div
-        class="comparisonScreenshot comparisonScreenshot--session"
-        style="display: none"
-      >
-        <img
-          class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{comparison.imageData.session}}"
-        />
+      <div class="comparisonScreenshot comparisonScreenshot--session" style="display: none">
+        <img class="comparisonScreenshot__image" src="data:image/png;base64,{{comparison.imageData.session}}" />
       </div>
 
       <!-- Baseline, see what it's supposed to be. -->
       <div class="comparisonScreenshot comparisonScreenshot--baseline">
-        <img
-          class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{comparison.imageData.baseline}}"
-        />
+        <img class="comparisonScreenshot__image" src="data:image/png;base64,{{comparison.imageData.baseline}}" />
       </div>
     </div>
   </div>
   {{/each}}
 
-<script>
+  <script>
 
-function start() {
+    function start() {
 
-  function addClass(el, className) {
-    el.className += ' ' + className;
-  }
+      function addClass(el, className) {
+        el.className += ' ' + className;
+      }
 
-  function removeClass(el, className) {
-    var classes = el.className.split(' ');
-    var classIndex = classes.indexOf(className);
-    if (classIndex !== -1) {
-      classes.splice(classIndex, 1);
+      function removeClass(el, className) {
+        var classes = el.className.split(' ');
+        var classIndex = classes.indexOf(className);
+        if (classIndex !== -1) {
+          classes.splice(classIndex, 1);
+        }
+        el.className = classes.join(' ');
+      }
+
+      function onClickComparisonTitle(comparison) {
+        return function () {
+          var collapsedClass = 'comparison--collapsed';
+          if (comparison.className.indexOf(collapsedClass) === -1) {
+            addClass(comparison, collapsedClass);
+          } else {
+            removeClass(comparison, collapsedClass);
+          }
+        };
+      }
+
+      function onClickBaselineTitle(
+        baselineImage,
+        baselineTitle,
+        sessionImage,
+        sessionTitle
+      ) {
+        return function () {
+          // Hide the baseline image.
+          baselineImage.setAttribute('style', 'display: none');
+          baselineTitle.setAttribute('style', 'display: none');
+
+          // Show the session image.
+          sessionImage.setAttribute('style', '');
+          sessionTitle.setAttribute('style', '');
+        }
+      }
+
+      function onClickSessionTitle(
+        baselineImage,
+        baselineTitle,
+        sessionImage,
+        sessionTitle
+      ) {
+        return function () {
+          // Show the baseline image.
+          baselineImage.setAttribute('style', '');
+          baselineTitle.setAttribute('style', '');
+
+          // Hide the session image.
+          sessionImage.setAttribute('style', 'display: none');
+          sessionTitle.setAttribute('style', 'display: none');
+        }
+      }
+
+      function onClickImage(image) {
+        return function () {
+          const url = image.getAttribute('src');
+          window.open(url, '_blank');
+        }
+      }
+
+      var comparisons = document.querySelectorAll('.comparison');
+
+      for (var i = 0; i < comparisons.length; i++) {
+        var comparison = comparisons[i];
+        var comparisonTitle = comparison.querySelector('.comparison__title');
+        comparisonTitle.onclick = onClickComparisonTitle(comparison);
+
+        var baselineScreenshot = comparison.querySelector('.comparisonScreenshot--baseline');
+        var baselineTitle = comparison.querySelector('.comparisonScreenshotTitle--baseline');
+        var sessionScreenshot = comparison.querySelector('.comparisonScreenshot--session');
+        var sessionTitle = comparison.querySelector('.comparisonScreenshotTitle--session');
+
+        baselineTitle.onclick = onClickBaselineTitle(
+          baselineScreenshot,
+          baselineTitle,
+          sessionScreenshot,
+          sessionTitle
+        );
+
+        sessionTitle.onclick = onClickSessionTitle(
+          baselineScreenshot,
+          baselineTitle,
+          sessionScreenshot,
+          sessionTitle
+        );
+
+        const baselineImage = baselineScreenshot.querySelector('img');
+        baselineImage.onclick = onClickImage(baselineImage);
+
+        const sessionImage = sessionScreenshot.querySelector('img');
+        sessionImage.onclick = onClickImage(sessionImage);
+      }
     }
-    el.className = classes.join(' ');
-  }
 
-  function onClickComparisonTitle(comparison) {
-    return function() {
-      var collapsedClass = 'comparison--collapsed';
-      if (comparison.className.indexOf(collapsedClass) === -1) {
-        addClass(comparison, collapsedClass);
-      } else {
-        removeClass(comparison, collapsedClass);
+    document.onreadystatechange = function () {
+      if (document.readyState === 'complete') {
+        start();
       }
     };
-  }
 
-  function onClickBaselineTitle(
-    baselineImage,
-    baselineTitle,
-    sessionImage,
-    sessionTitle
-  ) {
-    return function() {
-      // Hide the baseline image.
-      baselineImage.setAttribute('style', 'display: none');
-      baselineTitle.setAttribute('style', 'display: none');
-
-      // Show the session image.
-      sessionImage.setAttribute('style', '');
-      sessionTitle.setAttribute('style', '');
-    }
-  }
-
-  function onClickSessionTitle(
-    baselineImage,
-    baselineTitle,
-    sessionImage,
-    sessionTitle
-  ) {
-    return function() {
-      // Show the baseline image.
-      baselineImage.setAttribute('style', '');
-      baselineTitle.setAttribute('style', '');
-
-      // Hide the session image.
-      sessionImage.setAttribute('style', 'display: none');
-      sessionTitle.setAttribute('style', 'display: none');
-    }
-  }
-
-  function onClickImage(image) {
-    return function() {
-      const url = image.getAttribute('src');
-      window.open(url, '_blank');
-    }
-  }
-
-  var comparisons = document.querySelectorAll('.comparison');
-
-  for (var i = 0; i < comparisons.length; i++) {
-    var comparison = comparisons[i];
-    var comparisonTitle = comparison.querySelector('.comparison__title');
-    comparisonTitle.onclick = onClickComparisonTitle(comparison);
-
-    var baselineScreenshot = comparison.querySelector('.comparisonScreenshot--baseline');
-    var baselineTitle = comparison.querySelector('.comparisonScreenshotTitle--baseline');
-    var sessionScreenshot = comparison.querySelector('.comparisonScreenshot--session');
-    var sessionTitle = comparison.querySelector('.comparisonScreenshotTitle--session');
-
-    baselineTitle.onclick = onClickBaselineTitle(
-      baselineScreenshot,
-      baselineTitle,
-      sessionScreenshot,
-      sessionTitle
-    );
-
-    sessionTitle.onclick = onClickSessionTitle(
-      baselineScreenshot,
-      baselineTitle,
-      sessionScreenshot,
-      sessionTitle
-    );
-
-    const baselineImage = baselineScreenshot.querySelector('img');
-    baselineImage.onclick = onClickImage(baselineImage);
-
-    const sessionImage = sessionScreenshot.querySelector('img');
-    sessionImage.onclick = onClickImage(sessionImage);
-  }
-}
-
-document.onreadystatechange = function () {
-  if (document.readyState === 'complete') {
-    start();
-  }
-};
-
-</script>
+  </script>
 
 </body>
+
 </html>

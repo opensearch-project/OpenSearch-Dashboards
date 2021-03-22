@@ -4,7 +4,7 @@ set -e
 export OSD_PATH_CONF=${OSD_PATH_CONF:-<%= configDir %>}
 
 set_chmod() {
-  chmod -f 660 ${OSD_PATH_CONF}/kibana.yml || true
+  chmod -f 660 ${OSD_PATH_CONF}/opensearch_dashboards.yml || true
   chmod -f 2750 <%= dataDir %> || true
   chmod -f 2750 ${OSD_PATH_CONF} || true
 }
@@ -48,7 +48,7 @@ case $1 in
 
     if ! getent passwd "<%= user %>" >/dev/null; then
       useradd -r -g "<%= group %>" -M -s /sbin/nologin \
-      -c "kibana service user" "<%= user %>"
+      -c "opensearch_dashboards.service user" "<%= user %>"
     fi
 
     if [ "$1" = "2" ]; then

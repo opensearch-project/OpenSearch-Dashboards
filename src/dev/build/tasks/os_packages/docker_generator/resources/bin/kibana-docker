@@ -3,18 +3,18 @@
 # ** THIS IS AN AUTO-GENERATED FILE **
 #
 
-# Run Kibana, using environment variables to set longopts defining Kibana's
+# Run OpenSearch Dashboards, using environment variables to set longopts defining OpenSearch Dashboards's
 # configuration.
 #
 # eg. Setting the environment variable:
 #
 #       ELASTICSEARCH_LOGQUERIES=true
 #
-# will cause Kibana to be invoked with:
+# will cause OpenSearch Dashboards to be invoked with:
 #
 #       --elasticsearch.logQueries=true
 
-kibana_vars=(
+opensearch_dashboards_vars=(
     console.enabled
     console.proxyConfig
     console.proxyFilter
@@ -49,10 +49,10 @@ kibana_vars=(
     elasticsearch.username
     i18n.locale
     interpreter.enableInVisualize
-    kibana.autocompleteTerminateAfter
-    kibana.autocompleteTimeout
-    kibana.defaultAppId
-    kibana.index
+    opensearchDashboards.autocompleteTerminateAfter
+    opensearchDashboards.autocompleteTimeout
+    opensearchDashboards.defaultAppId
+    opensearchDashboards.index
     logging.dest
     logging.json
     logging.quiet
@@ -74,8 +74,8 @@ kibana_vars=(
     map.tilemap.url
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.enabled
-    monitoring.kibana.collection.enabled
-    monitoring.kibana.collection.interval
+    monitoring.opensearchDashboards.collection.enabled
+    monitoring.opensearchDashboards.collection.interval
     monitoring.ui.container.elasticsearch.enabled
     monitoring.ui.container.logstash.enabled
     monitoring.ui.elasticsearch.password
@@ -163,7 +163,7 @@ kibana_vars=(
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.fleet.agents.elasticsearch.host
-    xpack.fleet.agents.kibana.host
+    xpack.fleet.agents.opensearchDashboards.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
@@ -215,10 +215,10 @@ kibana_vars=(
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index
-    xpack.reporting.kibanaApp
-    xpack.reporting.kibanaServer.hostname
-    xpack.reporting.kibanaServer.port
-    xpack.reporting.kibanaServer.protocol
+    xpack.reporting.opensearchDashboardsApp
+    xpack.reporting.opensearchDashboardsServer.hostname
+    xpack.reporting.opensearchDashboardsServer.port
+    xpack.reporting.opensearchDashboardsServer.protocol
     xpack.reporting.poll.jobCompletionNotifier.interval
     xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier
     xpack.reporting.poll.jobsRefresh.interval
@@ -263,15 +263,15 @@ kibana_vars=(
 )
 
 longopts=''
-for kibana_var in ${kibana_vars[*]}; do
+for opensearch_dashboards_var in ${opensearch_dashboards_vars[*]}; do
     # 'elasticsearch.hosts' -> 'ELASTICSEARCH_HOSTS'
-    env_var=$(echo ${kibana_var^^} | tr . _)
+    env_var=$(echo ${opensearch_dashboards_var^^} | tr . _)
 
     # Indirectly lookup env var values via the name of the var.
     # REF: http://tldp.org/LDP/abs/html/bashver2.html#EX78
     value=${!env_var}
     if [[ -n $value ]]; then
-      longopt="--${kibana_var}=${value}"
+      longopt="--${opensearch_dashboards_var}=${value}"
       longopts+=" ${longopt}"
     fi
 done
@@ -285,11 +285,11 @@ umask 0002
 # introspect the statistics for the cgroup for the given
 # hierarchy. Alas, Docker breaks this by mounting the container
 # statistics at the root while leaving the cgroup paths as the actual
-# paths. Therefore, Kibana provides a mechanism to override
+# paths. Therefore, OpenSearch Dashboards provides a mechanism to override
 # reading the cgroup path from /proc/self/cgroup and instead uses the
 # cgroup path defined the configuration properties
 # cpu.cgroup.path.override and cpuacct.cgroup.path.override.
 # Therefore, we set this value here so that cgroup statistics are
 # available for the container this process will run in.
 
-exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"
+exec /usr/share/opensearch-dashboards/bin/opensearch-dashboards --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"

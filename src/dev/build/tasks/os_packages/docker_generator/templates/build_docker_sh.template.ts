@@ -64,7 +64,7 @@ function generator({
 
   retry_docker_pull ${baseOSImage}
 
-  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
+  echo "Building: opensearch-dashboards${imageFlavor}${ubiImageFlavor}-docker"; \\
   docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;
 
   docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} | gzip -c > ${dockerTargetFilename}

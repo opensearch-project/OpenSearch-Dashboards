@@ -39,7 +39,7 @@ export const PathLength: Task = {
           }
 
           throw new Error(
-            'Windows has a path limit of 260 characters so we limit the length of paths in Kibana to 200 characters ' +
+            'Windows has a path limit of 260 characters so we limit the length of paths in OpenSearch Dashboards to 200 characters ' +
               ' and the following files exceed this limit:' +
               '\n - ' +
               tooLongPaths.join('\n - ')

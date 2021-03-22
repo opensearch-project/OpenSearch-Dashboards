@@ -19,14 +19,14 @@
 
 import { resolve } from 'path';
 
-const kibanaDir = resolve(__dirname, '..', '..');
+const opensearchDashboardsDir = resolve(__dirname, '..', '..');
 
 export function buildDocsScript(cmd) {
   return resolve(process.cwd(), cmd.docrepo, 'build_docs');
 }
 
 export function buildDocsArgs(cmd) {
-  const docsIndexFile = resolve(kibanaDir, 'docs', 'index.asciidoc');
+  const docsIndexFile = resolve(opensearchDashboardsDir, 'docs', 'index.asciidoc');
   let args = ['--doc', docsIndexFile, '--chunk=1'];
   if (cmd.open) {
     args = [...args, '--open'];
@@ -35,5 +35,5 @@ export function buildDocsArgs(cmd) {
 }
 
 export function defaultDocsRepoPath() {
-  return resolve(kibanaDir, '..', 'docs');
+  return resolve(opensearchDashboardsDir, '..', 'docs');
 }

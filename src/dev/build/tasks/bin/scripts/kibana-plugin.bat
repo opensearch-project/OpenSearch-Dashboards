@@ -31,7 +31,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%"
 
-TITLE Kibana Server
+TITLE OpenSearch Dashboards Server
 "%NODE%" "%DIR%\src\cli_plugin\dist" %*
 
 :finally

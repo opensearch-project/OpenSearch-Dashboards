@@ -27,15 +27,15 @@ function generator({ imageFlavor }: TemplateContext) {
   # ** THIS IS AN AUTO-GENERATED FILE **
   #
 
-  # Default Kibana configuration for docker target
-  server.name: kibana
+  # Default OpenSearch Dashboards configuration for docker target
+  server.name: opensearch-dashboards
   server.host: "0"
-  elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-  ${!imageFlavor ? 'monitoring.ui.container.elasticsearch.enabled: true' : ''}
+  opensearch.hosts: [ "http://opensearch:9200" ]
+  ${!imageFlavor ? 'monitoring.ui.container.opensearch.enabled: true' : ''}
   `);
 }
 
-export const kibanaYMLTemplate = {
-  name: 'config/kibana.yml',
+export const opensearchDashboardsYMLTemplate = {
+  name: 'config/opensearch_dashboards.yml',
   generator,
 };

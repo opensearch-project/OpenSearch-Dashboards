@@ -68,14 +68,14 @@ export class Config {
   ) {}
 
   /**
-   * Get Kibana's parsed package.json file
+   * Get OpenSearch Dashboards's parsed package.json file
    */
   getOpenSearchDashboardsPkg() {
     return this.pkg;
   }
 
   /**
-   * Get the node version required by Kibana
+   * Get the node version required by OpenSearch Dashboards
    */
   getNodeVersion() {
     return this.nodeVersion;
@@ -89,7 +89,7 @@ export class Config {
   }
 
   /**
-   * Resolve a set of relative paths based from the directory of the Kibana repo
+   * Resolve a set of relative paths based from the directory of the OpenSearch Dashboards repo
    */
   resolveFromRepo(...subPaths: string[]) {
     return resolve(this.repoRoot, ...subPaths);
