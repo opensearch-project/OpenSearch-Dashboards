@@ -21,7 +21,7 @@ export { MigrationResult } from './core';
 export {
   OpenSearchDashboardsMigrator,
   IOpenSearchDashboardsMigrator,
-} from './opensearch-dashboards';
+} from './opensearch_dashboards';
 export {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
