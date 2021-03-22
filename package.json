@@ -1,6 +1,6 @@
 {
   "name": "opensearch-dashboards",
-  "description": "OpenSearch Dashboards is a browser based analytics and search dashboard for OpenSearch. OpeenSearch Dashboards is a snap to setup and start using. OpeenSearch Dashboards strives to be easy to get started with, while also being flexible and powerful, just like OpenSearch.",
+  "description": "OpenSearch Dashboards is a browser based analytics and search dashboard for OpenSearch. OpenSearch Dashboards is a snap to setup and start using. OpenSearch Dashboards strives to be easy to get started with, while also being flexible and powerful, just like OpenSearch.",
   "keywords": [
     "opensearch-dashboards",
     "opensearch",
@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.10.3",
+  "version": "7.10.2",
   "branch": "7.10",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -35,7 +35,7 @@
       ]
     }
   },
-  "author": "Rashid Khan <rashid.khan@elastic.co>",
+  "author": "Rashid Khan <rashid.khan@opensearch.co>",
   "scripts": {
     "preinstall": "node ./preinstall_check",
     "osd": "node scripts/osd",

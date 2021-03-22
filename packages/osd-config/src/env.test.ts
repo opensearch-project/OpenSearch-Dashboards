@@ -150,7 +150,6 @@ test('correctly creates environment with constructor.', () => {
   expect(env).toMatchSnapshot('env properties');
 });
 
-
 test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
     '/some/home/dir',
