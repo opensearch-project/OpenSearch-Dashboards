@@ -10,7 +10,7 @@ To run `@osd/pm`, go to OpenSearch Dashboards root and run `yarn osd`.
 Long-term we want to get rid of Webpack from production (basically, it's causing
 a lot of problems, using a lot of memory and adding a lot of complexity).
 Ideally we want each plugin to build its own separate production bundles for
-both server and UI. To get there all OpenSearch Dashboards plugins (including x-pack) need to
+both server and UI. To get there all OpenSearch Dashboards plugins need to
 be able to build their production bundles separately from OpenSearch Dashboards , which means
 they need to be able to depend on code from OpenSearch Dashboards without `import`-ing random
 files directly from the OpenSearch Dashboards source code.
@@ -96,8 +96,7 @@ that looks like this:
 opensearch
 └── opensearch-dashboards
     └── plugins
-        ├── opensearch-dashboards-canvas
-        └── x-pack-opensearch-dashboards
+        ├── opensearch-dashboards-example
 ```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`

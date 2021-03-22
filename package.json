@@ -104,7 +104,6 @@
       "**/@types/*/**",
       "**/grunt-*",
       "**/grunt-*/**",
-      "x-pack/typescript",
       "@elastic/eui/rehype-react",
       "@elastic/eui/remark-rehype",
       "@elastic/eui/remark-rehype/**"

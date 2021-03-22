@@ -34,8 +34,6 @@ export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
   title?: string;
 };
 
-// TODO: refactor to shared component with ../../../../../../../../x-pack/legacy/plugins/lens/public/indexpattern_plugin/change_indexpattern
-
 export function ChangeIndexPattern({
   indexPatternRefs,
   indexPatternId,

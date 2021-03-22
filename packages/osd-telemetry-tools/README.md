@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract telemetry collectors schema from all `*.{ts}` files in provided plugins directories to JSON files. The tool looks for `.telemetryrc.json` files in the root of the project and in the `x-pack` dir for its runtime configurations.
+The tool is used to extract telemetry collectors schema from all `*.{ts}` files in provided plugins directories to JSON files. The tool looks for `.telemetryrc.json` files in the root of the project.
 
 It uses typescript parser to build an AST for each file. The tool is able to validate, extract and match collector schemas.
 

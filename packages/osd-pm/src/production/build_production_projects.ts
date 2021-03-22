@@ -70,10 +70,6 @@ async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   const projects = await getProjects(rootPath, projectPaths);
   const projectsSubset = [projects.get('opensearch-dashboards')!];
 
-  if (projects.has('x-pack')) {
-    projectsSubset.push(projects.get('x-pack')!);
-  }
-
   const productionProjects = includeTransitiveProjects(projectsSubset, projects, {
     onlyProductionDependencies: true,
   });

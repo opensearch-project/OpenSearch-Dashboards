@@ -24,9 +24,8 @@ import { ErrorReporter, checkConfigNamespacePrefix, arrayify } from '..';
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
   const opensearchDashboardsRC = resolve(root, I18N_RC);
-  const xpackRC = resolve(root, 'x-pack', I18N_RC);
 
-  const configPaths = [opensearchDashboardsRC, xpackRC, ...arrayify(additionalConfigPaths)];
+  const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: { reporter: ErrorReporter }) => {

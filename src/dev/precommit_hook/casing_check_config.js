@@ -36,12 +36,8 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
-  'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
-  'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
   'packages/osd-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
@@ -63,13 +59,8 @@ export const IGNORE_FILE_GLOBS = [
   'packages/elastic-safer-lodash-set/**/*',
 
   // TODO fix file names in APM to remove these
-  'x-pack/plugins/apm/public/**/*',
-  'x-pack/plugins/apm/scripts/**/*',
-  'x-pack/plugins/apm/e2e/**/*',
 
-  'x-pack/plugins/maps/server/fonts/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**
@@ -77,8 +68,10 @@ export const IGNORE_FILE_GLOBS = [
  * folders that must use kebab case.
  *
  * @type {Array}
+ *
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
+
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -102,8 +95,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',
-  'x-pack/dev-tools',
-  'packages/osd-optimizer/src/__fixtures__/mock_repo/x-pack',
 ];
 
 /**
@@ -146,41 +137,4 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'packages/osd-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/osd-ui-framework/doc_site/src/images/hint-arrow.svg',
   'packages/osd-ui-framework/doc_site/src/images/react-logo.svg',
-  'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
-  'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
-  'x-pack/test/functional/opensearch_archives/monitoring/beats-with-restarted-instance/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/beats-with-restarted-instance/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/logstash-pipelines/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/logstash-pipelines/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/multi-basic/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/multi-basic/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-basic-beats/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-basic-beats/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-gold/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-gold/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-platinum/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-platinum/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-trial-two-nodes-one-cgrouped/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-green-trial-two-nodes-one-cgrouped/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-red-platinum/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-red-platinum/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-three-nodes-shard-relocation/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-three-nodes-shard-relocation/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-basic/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-basic/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-platinum--with-10-alerts/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-platinum--with-10-alerts/mappings.json',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-platinum/data.json.gz',
-  'x-pack/test/functional/opensearch_archives/monitoring/singlecluster-yellow-platinum/mappings.json',
 ];

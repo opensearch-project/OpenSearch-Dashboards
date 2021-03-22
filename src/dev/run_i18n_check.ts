@@ -72,7 +72,7 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+    const srcPaths = Array().concat(path || ['./src', './packages']);
 
     const list = new Listr(
       [

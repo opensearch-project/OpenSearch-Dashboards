@@ -46,15 +46,4 @@ export const PLUGIN_TYPE_OPTIONS: Array<{ name: string; value: PluginType }> = [
       installDir: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
     },
   },
-  {
-    name: 'X-Pack',
-    value: { thirdParty: false, installDir: Path.resolve(REPO_ROOT, 'x-pack/plugins') },
-  },
-  {
-    name: 'X-Pack Functional Testing',
-    value: {
-      thirdParty: false,
-      installDir: Path.resolve(REPO_ROOT, 'x-pack/test/plugin_functional/plugins'),
-    },
-  },
 ];

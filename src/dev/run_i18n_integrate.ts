@@ -77,7 +77,7 @@ run(
       );
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+    const srcPaths = Array().concat(path || ['./src', './packages']);
 
     const list = new Listr([
       {

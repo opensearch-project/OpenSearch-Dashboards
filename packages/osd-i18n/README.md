@@ -33,7 +33,7 @@ For example:
 src/legacy/core_plugins/opensearch-dashboards/translations/fr.json
 ```
 
-The engine scans `x-pack/legacy/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
+The engine scans `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
 
 The engine uses a `config/opensearch_dashboards.yml` file for locale resolution process. If locale is
 defined via `i18n.locale` option in `config/opensearch_dashboards.yml` then it will be used as a base

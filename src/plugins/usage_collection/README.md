@@ -200,20 +200,8 @@ New fields added to the telemetry payload currently mean that telemetry cluster 
 There are a few ways you can test that your usage collector is working properly.
 
 1. The `/api/stats?extended=true&legacy=true` HTTP API in OpenSearch Dashboards (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
-2. There is a dev script in x-pack that will give a sample of a payload of data that gets sent up to the telemetry cluster for the sending phase of telemetry. Collected data comes from:
-    - The `.monitoring-*` indices, when Monitoring is enabled. Monitoring enhances the sent payload of telemetry by producing usage data potentially of multiple clusters that exist in the monitoring data. Monitoring data is time-based, and the time frame of collection is the last 15 minutes.
-    - Live-pulled from OpenSearch API endpoints. This will get just real-time stats without context of historical data.
-    - The dev script in x-pack can be run on the command-line with:
-
-      ```shell
-      cd x-pack
-      node scripts/api_debug.js telemetry --host=http://localhost:5601
-      ```
-
-      Where `http://localhost:5601` is a OpenSearch Dashboards server running in dev mode. If needed, authentication and basePath info can be provided in the command as well.
-    - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/kibana/pull/22336) / 6.5.0
-3. In Dev mode, OpenSearch Dashboards will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
-4. If you catch the network traffic coming from your browser when a telemetry payload is sent, you can examine the request payload body to see the data. This can be tricky as telemetry payloads are sent only once per day per browser. Use incognito mode or clear your localStorage data to force a telemetry payload.
+2. In Dev mode, OpenSearch Dashboards will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
+3. If you catch the network traffic coming from your browser when a telemetry payload is sent, you can examine the request payload body to see the data. This can be tricky as telemetry payloads are sent only once per day per browser. Use incognito mode or clear your localStorage data to force a telemetry payload.
 
 ## FAQ
 

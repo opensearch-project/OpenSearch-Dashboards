@@ -43,14 +43,6 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     name: 'OpenSearch Dashboards OSS Functional Testing',
     value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
   },
-  {
-    name: 'X-Pack',
-    value: Path.resolve(REPO_ROOT, 'x-pack/plugins'),
-  },
-  {
-    name: 'X-Pack Functional Testing',
-    value: Path.resolve(REPO_ROOT, 'x-pack/test/plugin_functional/plugins'),
-  },
 ];
 
 export const QUESTIONS = [

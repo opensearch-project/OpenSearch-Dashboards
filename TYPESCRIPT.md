@@ -110,7 +110,7 @@ If that happens, just pick the closest one.
 If yarn doesn't find the module it may not have types.  For example, our `rison_node` package doesn't have types. In this case you have a few options:
 
 1. Contribute types into the DefinitelyTyped repo itself, or
-2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/legacy/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
+2. Create a top level `types` folder and point to that in the tsconfig.
 3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method.
 
 ### TypeScripting react files
