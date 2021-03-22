@@ -94,19 +94,19 @@ export interface LicenseUsage {
 }
 
 export interface StaticTelemetryUsage {
-  ece?: {
+  opensearchce?: {
     osd_uuid: string;
     opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
   };
-  ess?: {
+  opensearchs?: {
     osd_uuid: string;
     opensearch_uuid: string;
     account_id: string;
     license: LicenseUsage;
   };
-  eck?: {
+  opensearchck?: {
     operator_uuid: string;
     operator_roles: string;
     custom_operator_namespace: boolean;

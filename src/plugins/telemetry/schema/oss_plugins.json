@@ -15,7 +15,7 @@
     },
     "search": {
       "properties": {
-        "successCount": {
+        "succopensearchsCount": {
           "type": "number"
         },
         "errorCount": {
@@ -812,7 +812,7 @@
             }
           }
         },
-        "security_access_agreement": {
+        "security_accopensearchs_agreement": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -952,7 +952,7 @@
             }
           }
         },
-        "security_overwritten_session": {
+        "security_overwritten_sopensearchsion": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1495,7 +1495,7 @@
         "context:step": {
           "type": "long"
         },
-        "accessibility:disableAnimations": {
+        "accopensearchsibility:disableAnimations": {
           "type": "boolean"
         },
         "ml:fileDataVisualizerMaxFileSize": {
@@ -1525,7 +1525,7 @@
         "theme:darkMode": {
           "type": "boolean"
         },
-        "state:storeInSessionStorage": {
+        "state:storeInSopensearchsionStorage": {
           "type": "boolean"
         },
         "savedObjects:perPage": {
@@ -2158,7 +2158,7 @@
             }
           }
         },
-        "security_access_agreement": {
+        "security_accopensearchs_agreement": {
           "type": "array",
           "items": {
             "properties": {
@@ -2223,7 +2223,7 @@
             }
           }
         },
-        "security_overwritten_session": {
+        "security_overwritten_sopensearchsion": {
           "type": "array",
           "items": {
             "properties": {
@@ -2383,7 +2383,7 @@
     },
     "static_telemetry": {
       "properties": {
-        "ece": {
+        "opensearchce": {
           "properties": {
             "osd_uuid": {
               "type": "keyword"
@@ -2424,7 +2424,7 @@
             }
           }
         },
-        "ess": {
+        "opensearchs": {
           "properties": {
             "osd_uuid": {
               "type": "keyword"
@@ -2465,7 +2465,7 @@
             }
           }
         },
-        "eck": {
+        "opensearchck": {
           "properties": {
             "operator_uuid": {
               "type": "keyword"
