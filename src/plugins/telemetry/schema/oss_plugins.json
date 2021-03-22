@@ -15,7 +15,7 @@
     },
     "search": {
       "properties": {
-        "succopensearchsCount": {
+        "successCount": {
           "type": "number"
         },
         "errorCount": {
@@ -812,7 +812,7 @@
             }
           }
         },
-        "security_accopensearchs_agreement": {
+        "security_access_agreement": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -952,7 +952,7 @@
             }
           }
         },
-        "security_overwritten_sopensearchsion": {
+        "security_overwritten_session": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1495,7 +1495,7 @@
         "context:step": {
           "type": "long"
         },
-        "accopensearchsibility:disableAnimations": {
+        "accessibility:disableAnimations": {
           "type": "boolean"
         },
         "ml:fileDataVisualizerMaxFileSize": {
@@ -1525,7 +1525,7 @@
         "theme:darkMode": {
           "type": "boolean"
         },
-        "state:storeInSopensearchsionStorage": {
+        "state:storeInSessionStorage": {
           "type": "boolean"
         },
         "savedObjects:perPage": {
@@ -2158,7 +2158,7 @@
             }
           }
         },
-        "security_accopensearchs_agreement": {
+        "security_access_agreement": {
           "type": "array",
           "items": {
             "properties": {
@@ -2223,7 +2223,7 @@
             }
           }
         },
-        "security_overwritten_sopensearchsion": {
+        "security_overwritten_session": {
           "type": "array",
           "items": {
             "properties": {
