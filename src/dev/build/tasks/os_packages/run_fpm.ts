@@ -41,7 +41,7 @@ export async function runFpm(
     if (build.isOss()) {
       return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
     } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
+      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
     }
   };
 
@@ -65,7 +65,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'opensearch-dashboards-oss' : 'opensearch-dashboards',
+    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -81,7 +81,7 @@ export async function runFpm(
 
     // prevent installing opensearch-dashboards if installing opensearch-dashboards-oss and vice versa
     '--conflicts',
-    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards-oss',
+    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards',
 
     // define install/uninstall scripts
     '--after-install',
