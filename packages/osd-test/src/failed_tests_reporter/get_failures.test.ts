@@ -92,7 +92,7 @@ it('discovers failures in mocha report', async () => {
       Object {
         "classname": "X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts",
         "failure": "
-            Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+            Error: Unable to read artifact info from https://artifacts-api.opensearch.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
       <html>
     <head><title>503 Service Temporarily Unavailable</title></head>
     <body bgcolor=\\"white\\">

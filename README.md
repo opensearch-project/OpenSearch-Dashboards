@@ -39,7 +39,7 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 
 ### Look for the label "help wanted"
 
-If you're excited to jump in, we've tried to mark a few issues that would be good candidates to get started on. Look for the label "help wanted" to find them. https://github.com/opensearch-project/OpenSearch/labels/help%20wanted
+If you're excited to jump in, we've tried to mark a few issues that would be good candidates to get started on. Look for the label "help wanted" to find them. https://github.com/opensearch-project/OpenSearch-Dashboards/labels/help%20wanted
 
 ### Watch the forum, there are a bunch of things we want to talk about
 

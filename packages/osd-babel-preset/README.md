@@ -1,6 +1,6 @@
 # @osd/babel-preset
 
-This package contains the shared bits of babel config that we use for transpiling our source code to code compatible with Node.JS and the various [browsers we support](https://www.elastic.co/support/matrix#matrix_browsers).
+This package contains the shared bits of babel config that we use for transpiling our source code to code compatible with Node.JS and the various [browsers we support](https://www.opensearch.co/support/matrix#matrix_browsers).
 
 ## usage
 

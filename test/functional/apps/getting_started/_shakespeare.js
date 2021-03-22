@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
     'visChart',
   ]);
 
-  // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
+  // https://www.opensearch.co/guide/en/kibana/current/tutorial-load-dataset.html
 
   describe('Shakespeare', function describeIndexTests() {
     // index starts on the first "count" metric at 1
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       log.debug(
         'Load empty_opensearch_dashboards and Shakespeare Getting Started data\n' +
-          'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
+          'https://www.opensearch.co/guide/en/kibana/current/tutorial-load-dataset.html'
       );
       await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_shakespeare_reader']);
       await opensearchArchiver.load('empty_opensearch_dashboards', { skipExisting: true });
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
       expect(patternName).to.be('shakespeare');
     });
 
-    // https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html
+    // https://www.opensearch.co/guide/en/kibana/current/tutorial-visualizing.html
     /* 1. Click New and select Vertical bar chart.
     2. Select the shakes* index pattern. Since you haven’t defined any buckets
     yet, you’ll see a single big bar that shows the total count of documents that

@@ -73,7 +73,7 @@ COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
-ENV ELASTIC_CONTAINER true
+ENV OPENSEARCH_CONTAINER true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.

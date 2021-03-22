@@ -81,7 +81,8 @@ export default function licensesCSVReport(grunt) {
           licenses: [
             'Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf',
           ],
-          sourceURL: 'https://oss-dependencies.elastic.co/redhat/ubi/ubi-minimal-8-source.tar.gz',
+          sourceURL:
+            'https://oss-dependencies.opensearch.co/redhat/ubi/ubi-minimal-8-source.tar.gz',
         }
       );
 
