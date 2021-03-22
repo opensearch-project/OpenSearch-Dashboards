@@ -147,7 +147,6 @@ describe('plugins discovery system', () => {
       {
         [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
         [`${OPENSEARCH_DASHBOARDS_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
       },
       { createCwd: false }
     );

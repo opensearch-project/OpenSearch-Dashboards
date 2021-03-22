@@ -44,13 +44,6 @@ export function getProjectPaths({ rootPath, ossOnly, skipOpenSearchDashboardsPlu
   projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'examples/*'));
 
-  if (!ossOnly) {
-    projectPaths.push(resolve(rootPath, 'x-pack'));
-    projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
-    projectPaths.push(resolve(rootPath, 'x-pack/legacy/plugins/*'));
-    projectPaths.push(resolve(rootPath, 'x-pack/test/functional_with_es_ssl/fixtures/plugins/*'));
-  }
-
   if (!skipOpenSearchDashboardsPlugins) {
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*'));
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*/packages/*'));

@@ -46,7 +46,7 @@ run(
         `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
       );
     }
-    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+    const srcPaths = Array().concat(path || ['./src', './packages']);
 
     const list = new Listr([
       {

@@ -150,29 +150,6 @@ test('correctly creates environment with constructor.', () => {
   expect(env).toMatchSnapshot('env properties');
 });
 
-test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { oss: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/plugins');
-});
-
-test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { oss: true },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/plugins');
-});
 
 test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
@@ -186,30 +163,6 @@ test('pluginSearchPaths contains examples plugins path if --run-examples flag is
   expect(env.pluginSearchPaths).toContain('/some/home/dir/examples');
 });
 
-test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true },
-    })
-  );
-
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/examples');
-});
-
-test('pluginSearchPaths does not contain x-pack/examples plugins path if --oss flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true, oss: true },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
-});
-
 test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
   const env = new Env(
     '/some/home/dir',
@@ -220,16 +173,4 @@ test('pluginSearchPaths does not contains examples plugins path if --run-example
   );
 
   expect(env.pluginSearchPaths).not.toContain('/some/home/dir/examples');
-});
-
-test('pluginSearchPaths does not contains x-pack/examples plugins path if --run-examples flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
 });

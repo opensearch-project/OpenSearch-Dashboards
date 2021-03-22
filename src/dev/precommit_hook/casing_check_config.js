@@ -71,7 +71,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  */
 
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*'];
 
 /**
  * These patterns are matched against directories and indicate
