@@ -668,7 +668,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
    * @private
    */
   _setDefaultColors() {
-    // Default category coloring to the opensearch.color scheme
+    // Default category coloring to the OpenSearch color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
     if (this.isVegaLite) {

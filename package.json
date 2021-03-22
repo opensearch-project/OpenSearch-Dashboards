@@ -35,7 +35,7 @@
       ]
     }
   },
-  "author": "Rashid Khan <rashid.khan@opensearch.co>",
+  "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "preinstall": "node ./preinstall_check",
     "osd": "node scripts/osd",
