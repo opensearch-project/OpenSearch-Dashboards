@@ -70,11 +70,6 @@ export function runMochaCli() {
           'src/**/__tests__/**/*.{js,ts,tsx}',
           'packages/**/__tests__/**/*.{js,ts,tsx}',
           'tasks/**/__tests__/**/*.{js,ts,tsx}',
-          'x-pack/common/**/__tests__/**/*.{js,ts,tsx}',
-          'x-pack/server/**/__tests__/**/*.{js,ts,tsx}',
-          `x-pack/legacy/plugins/*/__tests__/**/*.{js,ts,tsx}`,
-          `x-pack/legacy/plugins/*/common/**/__tests__/**/*.{js,ts,tsx}`,
-          `x-pack/legacy/plugins/*/**/server/**/__tests__/**/*.{js,ts,tsx}`,
         ],
         {
           cwd: REPO_ROOT,

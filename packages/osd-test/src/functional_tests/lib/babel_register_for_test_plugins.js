@@ -25,14 +25,7 @@ const { REPO_ROOT } = require('@osd/dev-utils');
 // compile the required source with babel
 require('@babel/register')({
   ignore: [/[\/\\](node_modules|target|dist)[\/\\]/],
-  only: [
-    Path.resolve(REPO_ROOT, 'test'),
-    Path.resolve(REPO_ROOT, 'x-pack/test'),
-    Path.resolve(REPO_ROOT, 'examples'),
-    Path.resolve(REPO_ROOT, 'x-pack/examples'),
-    // TODO: should should probably remove this link back to the source
-    Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
-  ],
+  only: [Path.resolve(REPO_ROOT, 'test'), Path.resolve(REPO_ROOT, 'examples')],
   babelrc: false,
   presets: [require.resolve('@osd/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],

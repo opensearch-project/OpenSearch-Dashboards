@@ -46,7 +46,7 @@ function* printPlugins(plugins: Plugins, includes: string[]) {
   }
 }
 
-export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
+export function generatePluginList(ossPlugins: Plugins) {
   const includes: string[] = [];
 
   return `////
@@ -75,20 +75,6 @@ NOTE:
 |Description
 
 ${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
-
-|===
-
-[discrete]
-=== x-pack/plugins
-
-[%header,cols=2*]
-|===
-|Name
-|Description
-
-${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
-
-|===
 
 ${Array.from(includes).join('\n')}
 `;

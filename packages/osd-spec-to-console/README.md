@@ -25,8 +25,6 @@ At the root of the OpenSearch Dashboards repository, run the following commands:
 # OSS
 yarn spec_to_console -g "<OPENSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" -d "src/plugins/console/server/lib/spec_definitions/json/generated"
 
-# X-pack
-yarn spec_to_console -g "<OPENSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/resources/rest-api-spec/api/*" -d "x-pack/plugins/console_extensions/server/lib/spec_definitions/json/generated"
 ```
 
 ### Information used in Console that is not available in the REST spec
