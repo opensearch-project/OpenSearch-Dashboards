@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 /*
  * Accepts an array of zero-filled y value objects (arr1)
- * and a kibana data.series[i].values array of objects (arr2).
+ * and a OpenSearch Dashboards data.series[i].values array of objects (arr2).
  * Return a zero-filled array of objects (arr1).
  */
 

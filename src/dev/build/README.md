@@ -1,6 +1,6 @@
 # dev/build
 
-Build the default and OSS distributables of Kibana.
+Build the default and OSS distributables of OpenSearch Dashboards.
 
 # Quick Start
 
@@ -18,7 +18,7 @@ node scripts/build --skip-node-download --debug --no-oss
 
 # Fixing out of memory issues
 
-Building Kibana and its distributables can take a lot of memory to finish successfully. Builds do make use of child processes, which means you can increase the amount of memory available by specifying `NODE_OPTIONS="--max-old-space-size=VALUE-IN-MEGABYTES"`.
+Building OpenSearch Dashboards and its distributables can take a lot of memory to finish successfully. Builds do make use of child processes, which means you can increase the amount of memory available by specifying `NODE_OPTIONS="--max-old-space-size=VALUE-IN-MEGABYTES"`.
 
 ```sh
 

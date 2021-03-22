@@ -19,9 +19,9 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
-  "homepage": "https://www.elastic.co/products/kibana",
+  "homepage": "https://www.opensearch.co/products/kibana",
   "bugs": {
-    "url": "http://github.com/elastic/kibana/issues"
+    "url": "http://github.com/opensearch-project/OpenSearch-Dashboards/issues"
   },
   "opensearchDashboards": {
     "clean": {

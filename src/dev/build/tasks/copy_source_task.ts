@@ -42,11 +42,11 @@ export const CopySource: Task = {
         '!src/setup_node_env/babel_register/register.js',
         '!**/public/**/*.{js,ts,tsx,json}',
         'typings/**',
-        'config/kibana.yml',
+        'config/opensearch_dashboards.yml',
         'config/node.options',
         'tsconfig*.json',
         '.i18nrc.json',
-        'kibana.d.ts',
+        'opensearch_dashboards.d.ts',
       ],
     });
   },

@@ -27,7 +27,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
   )
 )
 
-TITLE Kibana Keystore
+TITLE OpenSearch Dashboards Keystore
 "%NODE%" "%DIR%\src\cli_keystore\dist" %*
 
 :finally

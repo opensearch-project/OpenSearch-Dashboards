@@ -47,19 +47,19 @@ export async function runDockerGenerator(
   // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
-  const imageTag = 'docker.opensearch.co/kibana/kibana';
+  const imageTag = 'docker.opensearch.co/opensearch-dashboards/opensearch-dashboards';
   const version = config.getBuildVersion();
-  const artifactTarball = `kibana${imageFlavor}-${version}-linux-x86_64.tar.gz`;
+  const artifactTarball = `opensearch-dashboards${imageFlavor}-${version}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo(
     'build',
-    'kibana-docker',
+    'opensearch-dashboards-docker',
     build.isOss() ? `oss` : `default${ubiImageFlavor}`
   );
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image.tar.gz`
+    `opensearch-dashboards${imageFlavor}${ubiImageFlavor}-${version}-docker-image.tar.gz`
   );
   const scope: TemplateContext = {
     artifactTarball,
@@ -77,11 +77,11 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
   };
 
-  // Verify if we have the needed kibana target in order
-  // to build the kibana docker image.
+  // Verify if we have the needed OpenSearch Dashboards target in order
+  // to build the OpenSearch Dashboards docker image.
   // Also create the docker build target folder
   // and  delete the current linked target into the
-  // kibana docker build folder if we have one.
+  // OpenSearch Dashboards docker build folder if we have one.
   try {
     await accessAsync(resolve(artifactsDir, artifactTarball));
     await mkdirp(dockerBuildDir);
@@ -89,22 +89,22 @@ export async function runDockerGenerator(
   } catch (e) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
       throw new Error(
-        `Kibana linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
+        `OpenSearch Dashboards linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
       );
     }
   }
 
-  // Create the kibana linux target inside the
-  // Kibana docker build
+  // Create the OpenSearch Dashboards linux target inside the
+  // OpenSearch Dashboards docker build
   await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
 
   // Write all the needed docker config files
-  // into kibana-docker folder
+  // into opensearch-dashboards-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
   }
 
-  // Copy all the needed resources into kibana-docker folder
+  // Copy all the needed resources into opensearch-dashboards-docker folder
   // in order to build the docker image accordingly the dockerfile defined
   // under templates/opensearch_dashboards_yml.template/js
   await copyAll(

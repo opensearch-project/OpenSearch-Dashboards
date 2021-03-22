@@ -66,7 +66,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.BuildPackages);
   await run(Tasks.CreatePackageJson);
   await run(Tasks.InstallDependencies);
-  await run(Tasks.BuildKibanaPlatformPlugins);
+  await run(Tasks.BuildOpenSearchDashboardsPlatformPlugins);
   await run(Tasks.TranspileBabel);
   await run(Tasks.RemoveWorkspaces);
   await run(Tasks.CleanPackages);

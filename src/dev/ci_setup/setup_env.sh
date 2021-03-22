@@ -133,8 +133,8 @@ else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
 
-### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
-if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then
+### only run on pr jobs for opensearch-project/OpenSearch-Dashboards, checks-reporter doesn't work for other repos
+if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'opensearch-project/OpenSearch-Dashboards' ]] ; then
   export CHECKS_REPORTER_ACTIVE=true
 fi
 

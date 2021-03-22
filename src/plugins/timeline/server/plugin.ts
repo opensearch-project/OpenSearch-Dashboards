@@ -27,7 +27,7 @@ import { timelineSheetSavedObjectType } from './saved_objects';
  * Deprecated since 7.0, the Timeline app will be removed in 8.0.
  * To continue using your Timeline worksheets, migrate them to a dashboard.
  *
- *  @link https://www.elastic.co/guide/en/kibana/master/timeline.html#timeline-deprecation
+ *  @link https://www.opensearch.co/guide/en/kibana/master/timeline.html#timeline-deprecation
  **/
 const showWarningMessageIfTimelineSheetWasFound = (core: CoreStart, logger: Logger) => {
   const { savedObjects } = core;
@@ -42,7 +42,7 @@ const showWarningMessageIfTimelineSheetWasFound = (core: CoreStart, logger: Logg
       ({ total }) =>
         total &&
         logger.warn(
-          'Deprecated since 7.0, the Timeline app will be removed in 8.0. To continue using your Timeline worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/dashboard.html#timeline-deprecation.'
+          'Deprecated since 7.0, the Timeline app will be removed in 8.0. To continue using your Timeline worksheets, migrate them to a dashboard. See https://www.opensearch.co/guide/en/kibana/master/dashboard.html#timeline-deprecation.'
         )
     );
 };

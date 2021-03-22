@@ -31,7 +31,7 @@ export const CreateNoticeFile: Task = {
     log.info('Generating notice from source');
     log.indent(4);
     const noticeFromSource = await generateNoticeFromSource({
-      productName: build.isOss() ? 'Kibana' : 'Kibana with X-Pack',
+      productName: build.isOss() ? 'OpenSearch Dashboards' : 'OpenSearch Dashboards',
       directory: build.resolvePath(),
       log,
     });

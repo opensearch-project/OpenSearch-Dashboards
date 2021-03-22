@@ -28,8 +28,8 @@ import {
 
 import { Task } from '../lib';
 
-export const BuildKibanaPlatformPlugins: Task = {
-  description: 'Building distributable versions of Kibana platform plugins',
+export const BuildOpenSearchDashboardsPlatformPlugins: Task = {
+  description: 'Building distributable versions of OpenSearch Dashboards platform plugins',
   async run(_, log, build) {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,

@@ -1,8 +1,8 @@
-# Kibana Storybook
+# OpenSearch Dashboards Storybook
 
-This package provides ability to add [Storybook](https://storybook.js.org/) to any Kibana plugin.
+This package provides ability to add [Storybook](https://storybook.js.org/) to any OpenSearch Dashboards plugin.
 
-- [Kibana Storybook](#opensearch-dashboards-storybook)
+- [OpenSearch Dashboards Storybook](#opensearch-dashboards-storybook)
   - [Setup Instructions](#setup-instructions)
   - [Customizing configuration](#customizing-configuration)
 

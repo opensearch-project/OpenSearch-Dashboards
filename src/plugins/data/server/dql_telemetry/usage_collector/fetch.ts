@@ -49,14 +49,14 @@ export function fetchProvider(index: string) {
       `hits.hits[0]._source.config.${UI_SETTINGS.SEARCH_QUERY_LANGUAGE}`
     );
 
-    // search:queryLanguage can potentially be in four states in the .kibana index:
+    // search:queryLanguage can potentially be in four states in the .opensearch_dashboards index:
     // 1. undefined: this means the user has never touched this setting
     // 2. null: this means the user has touched the setting, but the current value matches the default
     // 3. 'kuery' or 'lucene': this means the user has explicitly selected the given non-default language
     //
     // It's nice to know if the user has never touched the setting or if they tried kuery then
     // went back to the default, so I preserve this info by prefixing the language name with
-    // 'default-' when the value in .kibana is undefined (case #1).
+    // 'default-' when the value in .opensearch_dashboards is undefined (case #1).
     let defaultLanguage;
     if (queryLanguageConfigValue === undefined) {
       defaultLanguage = `default-${defaultSearchQueryLanguageSetting}`;
