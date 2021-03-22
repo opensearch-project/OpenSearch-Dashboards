@@ -7,6 +7,7 @@ assignees: ''
 ---
 
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
 **To Reproduce**
@@ -26,9 +27,11 @@ Please list the version of OpenSearch being used.
 Please list the version of OpenSearch Dashboards being used.
 
 **Plugins**
+
 Please list all plugins currently enabled.
 
 **Screenshots**
+
 If applicable, add screenshots to help explain your problem.
 
 **Host/Environment (please complete the following information):**
@@ -36,4 +39,5 @@ If applicable, add screenshots to help explain your problem.
  - Browser and version [e.g. 22]
 
 **Additional context**
+
 Add any other context about the problem here.
