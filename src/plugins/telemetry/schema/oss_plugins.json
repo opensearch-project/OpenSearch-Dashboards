@@ -2383,7 +2383,7 @@
     },
     "static_telemetry": {
       "properties": {
-        "ece": {
+        "opensearchce": {
           "properties": {
             "osd_uuid": {
               "type": "keyword"
@@ -2424,7 +2424,7 @@
             }
           }
         },
-        "ess": {
+        "opensearchs": {
           "properties": {
             "osd_uuid": {
               "type": "keyword"
@@ -2465,7 +2465,7 @@
             }
           }
         },
-        "eck": {
+        "opensearchck": {
           "properties": {
             "operator_uuid": {
               "type": "keyword"

@@ -32,19 +32,19 @@ const licenseSchema: MakeSchemaFrom<LicenseUsage> = {
 };
 
 export const staticTelemetrySchema: MakeSchemaFrom<StaticTelemetryUsage> = {
-  ece: {
+  opensearchce: {
     osd_uuid: { type: 'keyword' },
     opensearch_uuid: { type: 'keyword' },
     account_id: { type: 'keyword' },
     license: licenseSchema,
   },
-  ess: {
+  opensearchs: {
     osd_uuid: { type: 'keyword' },
     opensearch_uuid: { type: 'keyword' },
     account_id: { type: 'keyword' },
     license: licenseSchema,
   },
-  eck: {
+  opensearchck: {
     operator_uuid: { type: 'keyword' },
     operator_roles: { type: 'keyword' },
     custom_operator_namespace: { type: 'boolean' },
