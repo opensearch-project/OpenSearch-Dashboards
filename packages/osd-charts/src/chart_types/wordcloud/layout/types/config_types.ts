@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import { Pixels, SizeRatio } from '../../../../common/geometry';
+import { FontFamily } from '../../../../common/text_utils';
 
-import { Example } from '../stories/wordcloud/1_wordcloud';
+// todo switch to `io-ts` style, generic way of combining static and runtime type info
+/** potential internal */
+export interface Config {
+  // shape geometry
+  width: number;
+  height: number;
+  margin: { left: SizeRatio; right: SizeRatio; top: SizeRatio; bottom: SizeRatio };
 
-export class Playground extends React.Component {
-  render() {
-    return <Example />;
-  }
+  // general text config
+  fontFamily: FontFamily;
+
+  // fill text config
+  minFontSize: Pixels;
+  maxFontSize: Pixels;
 }

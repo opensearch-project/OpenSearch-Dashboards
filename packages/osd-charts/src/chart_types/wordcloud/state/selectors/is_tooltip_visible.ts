@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import createCachedSelector from 're-reselect';
 
-import { Example } from '../stories/wordcloud/1_wordcloud';
+import { getTooltipType } from '../../../../specs';
+import { TooltipType } from '../../../../specs/constants';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { getTooltipInfoSelector } from './tooltip';
 
-export class Playground extends React.Component {
-  render() {
-    return <Example />;
-  }
-}
+/** @internal */
+export const isTooltipVisibleSelector = createCachedSelector(
+  [getSettingsSpecSelector, getTooltipInfoSelector],
+  (settingsSpec, tooltipInfo): boolean => {
+    if (getTooltipType(settingsSpec) === TooltipType.None) {
+      return false;
+    }
+    return tooltipInfo.values.length > 0;
+  },
+)(getChartIdSelector);

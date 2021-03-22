@@ -468,6 +468,7 @@ export const ChartTypes: Readonly<{
     Partition: "partition";
     XYAxis: "xy_axis";
     Heatmap: "heatmap";
+    Wordcloud: "wordcloud";
 }>;
 
 // @public (undocumented)
@@ -2350,6 +2351,56 @@ export type VerticalAlignment = $Values<typeof VerticalAlignment>;
 export interface Visible {
     // (undocumented)
     visible: boolean;
+}
+
+// Warning: (ae-forgotten-export) The symbol "SpecRequiredProps" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
+//
+// @alpha (undocumented)
+export const Wordcloud: React_2.FunctionComponent<SpecRequiredProps_9 & SpecOptionalProps_9>;
+
+// @alpha (undocumented)
+export interface WordcloudSpec extends Spec {
+    // (undocumented)
+    angleCount: number;
+    // (undocumented)
+    chartType: typeof ChartTypes.Wordcloud;
+    // (undocumented)
+    config: RecursivePartial<PartitionConfig>;
+    // Warning: (ae-forgotten-export) The symbol "WordModel" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    data: WordModel[];
+    // (undocumented)
+    endAngle: number;
+    // (undocumented)
+    exponent: number;
+    // (undocumented)
+    fontFamily: string;
+    // (undocumented)
+    fontStyle: string;
+    // (undocumented)
+    fontWeight: number;
+    // (undocumented)
+    maxFontSize: number;
+    // (undocumented)
+    minFontSize: number;
+    // Warning: (ae-forgotten-export) The symbol "OutOfRoomCallback" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    outOfRoomCallback: OutOfRoomCallback;
+    // (undocumented)
+    padding: number;
+    // (undocumented)
+    specType: typeof SpecTypes.Series;
+    // (undocumented)
+    spiral: string;
+    // (undocumented)
+    startAngle: number;
+    // Warning: (ae-forgotten-export) The symbol "WeightFun" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    weightFun: WeightFun;
 }
 
 // Warning: (ae-missing-release-tag) "XScaleType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

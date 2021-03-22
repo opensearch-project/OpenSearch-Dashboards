@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs/constants';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getSpecsFromStore } from '../../../../state/utils';
+import { WordcloudSpec } from '../../specs';
 
-import { Example } from '../stories/wordcloud/1_wordcloud';
-
-export class Playground extends React.Component {
-  render() {
-    return <Example />;
-  }
+/** @internal */
+export function getSpecOrNull(state: GlobalChartState): WordcloudSpec | null {
+  const specs = getSpecsFromStore<WordcloudSpec>(state.specs, ChartTypes.Wordcloud, SpecTypes.Series);
+  return specs.length > 0 ? specs[0] : null;
 }

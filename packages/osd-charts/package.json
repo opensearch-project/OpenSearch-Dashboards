@@ -60,6 +60,7 @@
     "chroma-js": "^2.1.0",
     "classnames": "^2.2.6",
     "d3-array": "^1.2.4",
+    "d3-cloud": "^1.2.5",
     "d3-collection": "^1.0.7",
     "d3-color": "^1.4.0",
     "d3-interpolate": "^1.4.0",

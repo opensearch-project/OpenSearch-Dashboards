@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-import { Example } from '../stories/wordcloud/1_wordcloud';
+export default {
+  title: 'Wordcloud (@alpha)',
+  parameters: {
+    options: { selectedPanel: SB_SOURCE_PANEL },
+  },
+};
 
-export class Playground extends React.Component {
-  render() {
-    return <Example />;
-  }
-}
+export { Example as simpleWordcloud } from './1_wordcloud';
