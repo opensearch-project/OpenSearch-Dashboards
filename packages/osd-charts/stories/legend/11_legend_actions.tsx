@@ -124,7 +124,6 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
       isOpen={popoverOpen}
       closePopover={() => setPopoverOpen(false)}
       panelPaddingSize="none"
-      withTitle
       anchorPosition={anchorPosition}
       ownFocus
     >
