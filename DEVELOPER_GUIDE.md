@@ -1,4 +1,4 @@
-# OpenSearch Dashboards Style Guide
+# OpenSearch Dashboards Developer Guide
 
 This guide applies to all development within the OpenSearch Dashboards project and is
 recommended for the development of all OpenSearch Dashboards plugins.
@@ -10,11 +10,11 @@ recommended for the development of all OpenSearch Dashboards plugins.
 - [SASS files](#sass-files)
 - [React](#react)
 
-Besides the content in this style guide, the following style guides may also apply
+Besides the content in this developer guide, the following developer guides may also apply
 to all development within the OpenSearch Dashboards project. Please make sure to also read them:
 
-- [Accessibility style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/accessibility)
-- [SASS style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/sass)
+- [Accessibility developer guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/accessibility)
+- [SASS developer guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/sass)
 
 ## General
 
@@ -38,14 +38,14 @@ and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code
 can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
-Whenever possible we are trying to use Prettier and linting over written style guide rules.
-Consider every linting rule and every Prettier rule to be also part of our style guide
+Whenever possible we are trying to use Prettier and linting over written developer guide rules.
+Consider every linting rule and every Prettier rule to be also part of our developer guide
 and disable them only in exceptional cases and ideally leave a comment why they are
 disabled at that specific place.
 
 ## HTML
 
-This part contains style guide rules around general (framework agnostic) HTML usage.
+This part contains developer guide rules around general (framework agnostic) HTML usage.
 
 ### Camel case `id` and `data-test-subj`
 
@@ -133,7 +133,7 @@ You can also use this service outside of React.
 
 ## API endpoints
 
-The following style guide rules are targeting development of server side API endpoints.
+The following developer guide rules are targeting development of server side API endpoints.
 
 ### Paths
 
@@ -162,7 +162,7 @@ POST /api/opensearch-dashboards/index_patterns
 
 ## TypeScript/JavaScript
 
-The following style guide rules apply for working with TypeScript/JavaScript files.
+The following developer guide rules apply for working with TypeScript/JavaScript files.
 
 ### TypeScript vs. JavaScript
 
@@ -624,7 +624,7 @@ Do not use the underscore `_` SASS file naming pattern when importing directly i
 
 ## React
 
-The following style guide rules are specific for working with the React framework.
+The following developer guide rules are specific for working with the React framework.
 
 ### Prefer reactDirective over react-component
 
@@ -661,7 +661,7 @@ Name action functions in the form of a strong verb and passed properties in the 
 
 ## Attribution
 
-Parts of the JavaScript style guide were initially forked from the
+Parts of the JavaScript developer guide were initially forked from the
 [node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) which is
 licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
 license.
