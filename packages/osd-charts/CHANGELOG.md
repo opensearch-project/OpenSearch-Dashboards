@@ -1,3 +1,15 @@
+# [26.0.0](https://github.com/elastic/elastic-charts/compare/v25.4.0...v26.0.0) (2021-03-23)
+
+
+### Features
+
+* **partition:** small multiples ([#1076](https://github.com/elastic/elastic-charts/issues/1076)) ([282082b](https://github.com/elastic/elastic-charts/commit/282082b0316d8e2fe5229761112cd209d70802b8))
+
+
+### BREAKING CHANGES
+
+* **partition:** clarifies the inner/outer padding notation `<SmallMultiples style={{horizontalPanelPadding, verticalPanelPadding}}` from `[outer, inner]` to `{outer, inner}`—they still have the same effect
+
 # [25.4.0](https://github.com/elastic/elastic-charts/compare/v25.3.0...v25.4.0) (2021-03-23)
 
 
