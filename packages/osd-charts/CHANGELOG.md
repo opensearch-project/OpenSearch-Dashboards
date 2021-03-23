@@ -1,3 +1,16 @@
+# [25.4.0](https://github.com/elastic/elastic-charts/compare/v25.3.0...v25.4.0) (2021-03-23)
+
+
+### Bug Fixes
+
+* chromium area path render bug ([#1067](https://github.com/elastic/elastic-charts/issues/1067)) ([e16d15d](https://github.com/elastic/elastic-charts/commit/e16d15d92add87f0bfe580a7301975915c10c381))
+
+
+### Features
+
+* **tooltip:** expose datum in the TooltipValue ([#1082](https://github.com/elastic/elastic-charts/issues/1082)) ([0246784](https://github.com/elastic/elastic-charts/commit/0246784bf4f88b374b7a28ffa4a60380f4c162b4)), closes [#1042](https://github.com/elastic/elastic-charts/issues/1042)
+* **wordcloud:** wordcloud ([#1038](https://github.com/elastic/elastic-charts/issues/1038)) ([f08f4c9](https://github.com/elastic/elastic-charts/commit/f08f4c9b7472d8c81a0fa56cd7dc7018eed637ad))
+
 # [25.3.0](https://github.com/elastic/elastic-charts/compare/v25.2.0...v25.3.0) (2021-03-11)
 
 
