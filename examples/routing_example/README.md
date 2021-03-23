@@ -6,4 +6,4 @@ Read more:
 
 - [IRouter API Docs](../../docs/development/core/server/opensearch-dashboards-plugin-core-server.irouter.md)
 - [HttpHandler (core.http.fetch) API Docs](../../docs/development/core/public/opensearch-dashboards-plugin-core-public.httphandler.md)
-- [Routing Conventions](../../STYLEGUIDE.md#api-endpoints)
+- [Routing Conventions](../../DEVELOPER_GUIDE.md#api-endpoints)
