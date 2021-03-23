@@ -199,6 +199,12 @@ export interface TooltipValue {
    * The accessor linked to the current tooltip value
    */
   valueAccessor?: Accessor;
+
+  /**
+   * The datum associated with the current tooltip value
+   * Maybe not available
+   */
+  datum?: unknown;
 }
 
 /**

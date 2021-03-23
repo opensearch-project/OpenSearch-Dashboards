@@ -53,6 +53,7 @@ export const getTooltipInfoSelector = createCachedSelector(
         },
         value: shape.actual,
         formattedValue: `${shape.actual}`,
+        datum: shape.actual,
       });
     });
 

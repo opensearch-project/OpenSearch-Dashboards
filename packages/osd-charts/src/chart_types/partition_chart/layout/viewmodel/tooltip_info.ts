@@ -37,7 +37,7 @@ export function getTooltipInfo(
   valueFormatter: ValueFormatter,
   percentFormatter: ValueFormatter,
   id: string,
-) {
+): TooltipInfo {
   if (!valueFormatter || !labelFormatters) {
     return EMPTY_TOOLTIP;
   }
@@ -65,6 +65,7 @@ export function getTooltipInfo(
       value,
       formattedValue: `${valueFormatter(value)} (${percentFormatter(percentValueGetter(shape))})`,
       valueAccessor: shape.depth,
+      // the datum is omitted ATM due to the aggregated and nested nature of a partition section
     });
   });
 

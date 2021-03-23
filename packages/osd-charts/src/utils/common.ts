@@ -216,16 +216,25 @@ export type RecursivePartial<T> = {
     ? Set<RecursivePartial<V>>
     : T[P] extends Map<infer K, infer V> // checks for Maps
     ? Map<K, RecursivePartial<V>>
-    : T[P] extends NonAny // checks for primative values
+    : T[P] extends NonAny // checks for primitive values
     ? T[P]
-    : RecursivePartial<T[P]>; // recurse for all non-array and non-primative values
+    : IsUnknown<T[P], 1, 0> extends 1
+    ? T[P]
+    : RecursivePartial<T[P]>; // recurse for all non-array and non-primitive values
 };
-type NonAny = number | boolean | string | symbol | null;
+
+// return True if T is `any`, otherwise return False
+export type IsAny<T, True, False = never> = True | False extends (T extends never ? True : False) ? True : False;
+
+// return True if T is `unknown`, otherwise return False
+export type IsUnknown<T, True, False = never> = unknown extends T ? IsAny<T, False, True> : False;
+
+export type NonAny = number | boolean | string | symbol | null;
 
 export interface MergeOptions {
   /**
    * Includes all available keys of every provided partial at a given level.
-   * This is opposite to normal behavoir, which only uses keys from the base
+   * This is opposite to normal behavior, which only uses keys from the base
    * object to merge values.
    *
    * @defaultValue false
@@ -253,7 +262,7 @@ export function getPartialValue<T>(base: T, partial?: RecursivePartial<T>, parti
  * @internal
  */
 export function getAllKeys(object: any, objects: any[] = []): string[] {
-  const initalKeys = object instanceof Map ? [...object.keys()] : Object.keys(object);
+  const initialKeys = object instanceof Map ? [...object.keys()] : Object.keys(object);
 
   return objects.reduce((keys: any[], obj) => {
     if (obj && typeof obj === 'object') {
@@ -262,7 +271,7 @@ export function getAllKeys(object: any, objects: any[] = []): string[] {
     }
 
     return keys;
-  }, initalKeys);
+  }, initialKeys);
 }
 
 /** @internal */
