@@ -24,7 +24,12 @@ import { getSpecsFromStore } from '../../../../state/utils';
 import { PartitionSpec } from '../../specs';
 
 /** @internal */
+export function getPartitionSpecs(state: GlobalChartState): PartitionSpec[] {
+  return getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
+}
+
+/** @internal */
 export function getPartitionSpec(state: GlobalChartState): PartitionSpec | null {
-  const partitionSpecs = getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
+  const partitionSpecs = getPartitionSpecs(state);
   return partitionSpecs.length > 0 ? partitionSpecs[0] : null; // singleton!
 }

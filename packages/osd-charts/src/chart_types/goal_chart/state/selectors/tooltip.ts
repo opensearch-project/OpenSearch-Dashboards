@@ -20,6 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { TooltipInfo } from '../../../../components/tooltip/types';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSpecOrNull } from './goal_spec';
 import { getPickedShapes } from './picked_shapes';
 
@@ -59,4 +60,4 @@ export const getTooltipInfoSelector = createCachedSelector(
 
     return tooltipInfo;
   },
-)((state) => state.chartId);
+)(getChartIdSelector);

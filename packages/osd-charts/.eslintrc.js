@@ -57,6 +57,17 @@ module.exports = {
     'import/namespace': process.env.NODE_ENV === 'production' ? 2 : 0,
 
     /**
+     **************************************************************
+     * Rules that ensure sufficient freedom of expressing intent
+     **************************************************************
+     */
+    'no-else-return': 'off',
+    'no-param-reassign': [1, { props: false }],
+    '@typescript-eslint/comma-spacing': 0,
+    'unicorn/no-nested-ternary': 0,
+    '@typescript-eslint/lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
+
+    /**
      *****************************************
      * Rules to consider adding/fixing later
      *****************************************
@@ -81,8 +92,6 @@ module.exports = {
     'global-require': 1,
     'import/no-dynamic-require': 1,
     'no-shadow': 1,
-    'no-param-reassign': [1, { props: false }],
-    '@typescript-eslint/comma-spacing': 0,
     'react/no-array-index-key': 1,
     'react/prefer-stateless-function': 1,
     'react/require-default-props': 'off',
@@ -92,7 +101,6 @@ module.exports = {
     'jsx-a11y/click-events-have-key-events': 1,
     '@typescript-eslint/member-ordering': 1,
     eqeqeq: 1,
-    'unicorn/no-nested-ternary': 0,
 
     /**
      * Standard rules
@@ -107,7 +115,6 @@ module.exports = {
     'no-bitwise': 0,
     'no-void': 0,
     yoda: 0,
-    '@typescript-eslint/lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
     'no-restricted-globals': 0,
     'no-case-declarations': 0,
     'no-return-await': 0,
@@ -255,6 +262,7 @@ module.exports = {
     'unicorn/no-null': 0,
     'unicorn/no-fn-reference-in-iterator': 0,
     'unicorn/prefer-query-selector': 0,
+    'unicorn/prefer-array-find': 0,
     'unicorn/no-for-loop': 0,
     'unicorn/no-reduce': 0,
     'unicorn/no-useless-undefined': 0,

@@ -29,7 +29,12 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
 import { MODEL_KEY } from '../../layout/config';
-import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
+import {
+  nullShapeViewModel,
+  QuadViewModel,
+  ShapeViewModel,
+  SmallMultiplesIndices,
+} from '../../layout/types/viewmodel_types';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { isSimpleLinear } from '../../layout/viewmodel/viewmodel';
 import { partitionDrilldownFocus, partitionMultiGeometries } from '../../state/selectors/geometries';
@@ -43,6 +48,9 @@ export interface ContinuousDomainFocus {
   prevFocusX0: number;
   prevFocusX1: number;
 }
+
+/** @internal */
+export interface IndexedContinuousDomainFocus extends ContinuousDomainFocus, SmallMultiplesIndices {}
 
 interface ReactiveChartStateProps {
   initialized: boolean;

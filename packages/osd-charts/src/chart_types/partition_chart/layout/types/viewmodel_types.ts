@@ -26,6 +26,7 @@ import {
   PointTuple,
   PointTuples,
   Radian,
+  SizeRatio,
 } from '../../../../common/geometry';
 import { Font, VerticalAlignments } from '../../../../common/text_utils';
 import { LegendPath } from '../../../../state/actions/legend';
@@ -35,7 +36,7 @@ import { Layer } from '../../specs';
 import { config, MODEL_KEY, ValueGetterName } from '../config';
 import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
 import { LinkLabelsViewModelSpec } from '../viewmodel/link_text_layout';
-import { Config } from './config_types';
+import { Config, PartitionLayout } from './config_types';
 
 /** @internal */
 export type LinkLabelVM = {
@@ -88,7 +89,13 @@ export interface RowSet {
 }
 
 /** @internal */
-export interface QuadViewModel extends ShapeTreeNode {
+export interface SmallMultiplesIndices {
+  index: number;
+  innerIndex: number;
+}
+
+/** @internal */
+export interface QuadViewModel extends ShapeTreeNode, SmallMultiplesIndices {
   strokeWidth: number;
   strokeStyle: string;
   fillColor: string;
@@ -104,7 +111,21 @@ export interface OutsideLinksViewModel {
 export type PickFunction = (x: Pixels, y: Pixels, focus: ContinuousDomainFocus) => Array<QuadViewModel>;
 
 /** @internal */
-export type ShapeViewModel = {
+export interface PartitionSmallMultiplesModel extends SmallMultiplesIndices {
+  panelTitle: string;
+  partitionLayout: PartitionLayout;
+  top: SizeRatio;
+  left: SizeRatio;
+  width: SizeRatio;
+  height: SizeRatio;
+  innerRowCount: number;
+  innerColumnCount: number;
+  innerRowIndex: number;
+  innerColumnIndex: number;
+}
+
+/** @internal */
+export interface ShapeViewModel extends PartitionSmallMultiplesModel {
   config: Config;
   layers: Layer[];
   quadViewModel: QuadViewModel[];
@@ -114,7 +135,7 @@ export type ShapeViewModel = {
   diskCenter: PointObject;
   pickQuads: PickFunction;
   outerRadius: number;
-};
+}
 
 const defaultFont: Font = {
   fontStyle: 'normal',
@@ -126,7 +147,24 @@ const defaultFont: Font = {
 };
 
 /** @internal */
+export const nullPartitionSmallMultiplesModel = (partitionLayout: PartitionLayout): PartitionSmallMultiplesModel => ({
+  index: 0,
+  innerIndex: 0,
+  panelTitle: '',
+  top: 0,
+  left: 0,
+  width: 0,
+  height: 0,
+  innerRowCount: 0,
+  innerColumnCount: 0,
+  innerRowIndex: 0,
+  innerColumnIndex: 0,
+  partitionLayout,
+});
+
+/** @internal */
 export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointObject): ShapeViewModel => ({
+  ...nullPartitionSmallMultiplesModel((specifiedConfig || config).partitionLayout),
   config: specifiedConfig || config,
   layers: [],
   quadViewModel: [],

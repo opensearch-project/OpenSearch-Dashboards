@@ -20,6 +20,7 @@
 import React from 'react';
 
 import { ChartTypes } from '../..';
+import { Predicate } from '../../../common/predicate';
 import { ScaleType } from '../../../scales/constants';
 import { SeriesScales, Spec } from '../../../specs';
 import { SpecTypes } from '../../../specs/constants';
@@ -28,7 +29,6 @@ import { Accessor, AccessorFn } from '../../../utils/accessor';
 import { Color, Datum, RecursivePartial } from '../../../utils/common';
 import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
-import { Predicate } from '../utils/common';
 
 const defaultProps = {
   chartType: ChartTypes.Heatmap,

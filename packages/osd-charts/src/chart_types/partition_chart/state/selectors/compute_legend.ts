@@ -23,23 +23,22 @@ import { LegendItem } from '../../../../common/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getLegendItems } from '../../layout/utils/legend';
-import { partitionGeometries } from './geometries';
-import { getPartitionSpec } from './partition_spec';
+import { partitionMultiGeometries } from './geometries';
+import { getPartitionSpecs } from './get_partition_specs';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
-  [getPartitionSpec, getSettingsSpecSelector, partitionGeometries],
-  (partitionSpec, { flatLegend, legendMaxDepth, legendPosition }, geometries): LegendItem[] => {
-    const { quadViewModel } = geometries[0];
-    return partitionSpec
-      ? getLegendItems(
-          partitionSpec.id,
-          partitionSpec.layers,
-          flatLegend,
-          legendMaxDepth,
-          legendPosition,
-          quadViewModel,
-        )
-      : [];
-  },
+  [getPartitionSpecs, getSettingsSpecSelector, partitionMultiGeometries],
+  (specs, { flatLegend, legendMaxDepth, legendPosition }, geometries): LegendItem[] =>
+    specs.flatMap((partitionSpec, i) => {
+      const quadViewModel = geometries.filter((g) => g.index === i).flatMap((g) => g.quadViewModel);
+      return getLegendItems(
+        partitionSpec.id,
+        partitionSpec.layers,
+        flatLegend,
+        legendMaxDepth,
+        legendPosition,
+        quadViewModel,
+      );
+    }),
 )(getChartIdSelector);

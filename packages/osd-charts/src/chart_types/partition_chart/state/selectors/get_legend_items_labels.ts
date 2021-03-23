@@ -23,12 +23,12 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getLegendLabels } from '../../layout/utils/legend_labels';
-import { getPartitionSpec } from './partition_spec';
-import { getTree } from './tree';
+import { getPartitionSpecs } from './get_partition_specs';
+import { getTrees } from './tree';
 
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
-  [getPartitionSpec, getSettingsSpecSelector, getTree],
-  (spec, { legendMaxDepth, showLegend }, tree): LegendItemLabel[] =>
-    spec && showLegend ? getLegendLabels(spec.layers, tree, legendMaxDepth) : [],
+  [getPartitionSpecs, getSettingsSpecSelector, getTrees],
+  (specs, { legendMaxDepth, showLegend }, trees): LegendItemLabel[] =>
+    specs.flatMap((spec) => (showLegend ? getLegendLabels(spec.layers, trees[0].tree, legendMaxDepth) : [])), // singleton! wrt inner small multiples
 )(getChartIdSelector);

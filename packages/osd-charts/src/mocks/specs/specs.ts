@@ -18,7 +18,6 @@
  */
 
 import { ChartTypes } from '../../chart_types';
-import { Predicate } from '../../chart_types/heatmap/utils/common';
 import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config';
 import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
@@ -41,6 +40,7 @@ import {
   AnnotationDomainTypes,
   AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
+import { Predicate } from '../../common/predicate';
 import { ScaleType } from '../../scales/constants';
 import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC, SmallMultiplesSpec, GroupBySpec, Spec } from '../../specs';
 import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/common';
@@ -135,6 +135,7 @@ export class MockSeriesSpec {
     valueFormatter: (d: number): string => String(d),
     percentFormatter,
     topGroove: 0,
+    smallMultiples: null,
     layers: [
       {
         groupByRollup: (d: Datum, i: number) => i,
@@ -159,6 +160,7 @@ export class MockSeriesSpec {
     valueFormatter: (d: number): string => String(d),
     percentFormatter,
     topGroove: 20,
+    smallMultiples: null,
     layers: [
       {
         groupByRollup: (d: Datum, i: number) => i,
@@ -299,8 +301,8 @@ export class MockGlobalSpec {
     chartType: ChartTypes.Global,
     specType: SpecTypes.SmallMultiples,
     style: {
-      verticalPanelPadding: [0, 0],
-      horizontalPanelPadding: [0, 0],
+      verticalPanelPadding: { outer: 0, inner: 0 },
+      horizontalPanelPadding: { outer: 0, inner: 0 },
     },
   };
 

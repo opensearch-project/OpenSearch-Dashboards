@@ -19,10 +19,10 @@
 
 import createCachedSelector from 're-reselect';
 
-import { isLinear, isSimpleLinear } from '../../layout/viewmodel/viewmodel';
-import { getPartitionSpec } from './partition_spec';
+import { isSimpleLinear } from '../../layout/viewmodel/viewmodel';
+import { getPartitionSpecs } from './partition_spec';
 
 /** @internal */
-export const drilldownActive = createCachedSelector([getPartitionSpec], (spec) => {
-  return spec && isLinear(spec.config.partitionLayout) && isSimpleLinear(spec.config, spec.layers);
+export const drilldownActive = createCachedSelector([getPartitionSpecs], (specs) => {
+  return specs.length === 1 && isSimpleLinear(specs[0].config, specs[0].layers); // singleton!
 })((state) => state.chartId);

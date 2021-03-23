@@ -27,17 +27,10 @@ import { AGGREGATE_KEY, DEPTH_KEY, getNodeName, PARENT_KEY, PATH_KEY, SORT_INDEX
 /** @internal */
 export const pickedShapes = (
   models: ShapeViewModel[],
-  pointerPosition: Point,
+  { x, y }: Point,
   foci: ContinuousDomainFocus[],
-): QuadViewModel[] => {
-  const geoms = models[0];
-  const focus = foci[0];
-  const picker = geoms.pickQuads;
-  const { diskCenter } = geoms;
-  const x = pointerPosition.x - diskCenter.x;
-  const y = pointerPosition.y - diskCenter.y;
-  return picker(x, y, focus);
-};
+): QuadViewModel[] =>
+  models.flatMap(({ diskCenter, pickQuads }) => pickQuads(x - diskCenter.x, y - diskCenter.y, foci[0]));
 
 /** @internal */
 export function pickShapesLayerValues(shapes: QuadViewModel[]): LayerValue[][] {

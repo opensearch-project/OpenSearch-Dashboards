@@ -20,12 +20,12 @@
 import createCachedSelector from 're-reselect';
 
 import { ScaleBand } from '../../../../scales';
-import { DEFAULT_SM_PANEL_PADDING } from '../../../../specs/small_multiples';
+import { DEFAULT_SM_PANEL_PADDING, RelativeBandsPadding } from '../../../../specs/small_multiples';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSmallMultiplesSpec } from '../../../../state/selectors/get_small_multiples_spec';
 import { OrdinalDomain } from '../../../../utils/domain';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
-import { getSmallMultipleSpec } from './get_small_multiples_spec';
 
 /** @internal */
 export interface SmallMultipleScales {
@@ -38,11 +38,11 @@ export interface SmallMultipleScales {
  * @internal
  */
 export const computeSmallMultipleScalesSelector = createCachedSelector(
-  [computeSeriesDomainsSelector, computeChartDimensionsSelector, getSmallMultipleSpec],
+  [computeSeriesDomainsSelector, computeChartDimensionsSelector, getSmallMultiplesSpec],
   ({ smHDomain, smVDomain }, { chartDimensions: { width, height } }, smSpec): SmallMultipleScales => {
     return {
-      horizontal: getScale(smHDomain, width, smSpec?.style?.horizontalPanelPadding),
-      vertical: getScale(smVDomain, height, smSpec?.style?.verticalPanelPadding),
+      horizontal: getScale(smHDomain, width, smSpec && smSpec[0].style?.horizontalPanelPadding),
+      vertical: getScale(smVDomain, height, smSpec && smSpec[0].style?.verticalPanelPadding),
     };
   },
 )(getChartIdSelector);
@@ -50,7 +50,11 @@ export const computeSmallMultipleScalesSelector = createCachedSelector(
 /**
  * @internal
  */
-export function getScale(domain: OrdinalDomain, maxRange: number, padding = DEFAULT_SM_PANEL_PADDING) {
+export function getScale(
+  domain: OrdinalDomain,
+  maxRange: number,
+  padding: RelativeBandsPadding = DEFAULT_SM_PANEL_PADDING,
+) {
   const singlePanelSmallMultiple = domain.length <= 1;
   const defaultDomain = domain.length === 0 ? [undefined] : domain;
   return new ScaleBand(defaultDomain, [0, maxRange], undefined, singlePanelSmallMultiple ? 0 : padding);

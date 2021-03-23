@@ -23,11 +23,11 @@ import { getChartContainerDimensionsSelector } from '../../../../state/selectors
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getLegendSizeSelector, LegendSizing } from '../../../../state/selectors/get_legend_size';
+import { getSmallMultiplesSpec } from '../../../../state/selectors/get_small_multiples_spec';
 import { Position } from '../../../../utils/common';
 import { computeChartDimensions, ChartDimensions } from '../../utils/dimensions';
 import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
 import { getAxesStylesSelector } from './get_axis_styles';
-import { getSmallMultipleSpec } from './get_small_multiples_spec';
 import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
@@ -39,7 +39,7 @@ export const computeChartDimensionsSelector = createCachedSelector(
     getAxisSpecsSelector,
     getAxesStylesSelector,
     getLegendSizeSelector,
-    getSmallMultipleSpec,
+    getSmallMultiplesSpec,
   ],
   (
     chartContainerDimensions,
@@ -57,7 +57,7 @@ export const computeChartDimensionsSelector = createCachedSelector(
       axesStyles,
       axesSpecs,
       getLegendDimension(legendSize),
-      smSpec,
+      smSpec && smSpec[0],
     ),
 )(getChartIdSelector);
 

@@ -26,16 +26,19 @@ import {
   Pixels,
   PointTuple,
   Radius,
+  Ratio,
   trueBearingToStandardPositionAngle,
 } from '../../../../common/geometry';
 import { Part, TextMeasure } from '../../../../common/text_utils';
+import { SmallMultiplesStyle, RelativeBandsPadding } from '../../../../specs';
 import { StrokeStyle, ValueFormatter, Color, RecursivePartial } from '../../../../utils/common';
 import { Layer } from '../../specs';
-import { MODEL_KEY, percentValueGetter } from '../config';
+import { config as defaultConfig, MODEL_KEY, percentValueGetter } from '../config';
 import { Config, FillLabelConfig, PartitionLayout } from '../types/config_types';
 import {
   nullShapeViewModel,
   OutsideLinksViewModel,
+  PartitionSmallMultiplesModel,
   PickFunction,
   QuadViewModel,
   RawTextGetter,
@@ -67,6 +70,25 @@ import {
   nodeId,
 } from './fill_text_layout';
 import { linkTextLayout } from './link_text_layout';
+
+/** @internal */
+export const isTreemap = (p: PartitionLayout | undefined) => p === PartitionLayout.treemap;
+
+/** @internal */
+export const isSunburst = (p: PartitionLayout | undefined) => p === PartitionLayout.sunburst;
+
+/** @internal */
+export const isIcicle = (p: PartitionLayout | undefined) => p === PartitionLayout.icicle;
+
+/** @internal */
+export const isFlame = (p: PartitionLayout | undefined) => p === PartitionLayout.flame;
+
+/** @internal */
+export const isLinear = (p: PartitionLayout | undefined) => isFlame(p) || isIcicle(p);
+
+/** @internal */
+export const isSimpleLinear = (config: RecursivePartial<Config>, layers: Layer[]) =>
+  isLinear(config.partitionLayout) && layers.every((l) => l.fillLabel?.clipText ?? config.fillLabel?.clipText);
 
 function grooveAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
@@ -110,6 +132,8 @@ export function makeQuadViewModel(
   layers: Layer[],
   sectorLineWidth: Pixels,
   sectorLineStroke: StrokeStyle,
+  index: number,
+  innerIndex: number,
   fillLabel: FillLabelConfig,
   isSunburstLayout: boolean,
   containerBackgroundColor?: Color,
@@ -130,7 +154,7 @@ export function makeQuadViewModel(
       !isSunburstLayout && textNegligible
         ? 'transparent'
         : fillTextColor(textColor, textInvertible, textContrast, fillColor, containerBackgroundColor);
-    return { strokeWidth, strokeStyle, fillColor, textColor: color, ...node };
+    return { index, innerIndex, strokeWidth, strokeStyle, fillColor, textColor: color, ...node };
   });
 }
 
@@ -236,23 +260,22 @@ const rawChildNodes = (
 };
 
 /** @internal */
-export const isTreemap = (p: PartitionLayout | undefined) => p === PartitionLayout.treemap;
+export type PanelPlacement = PartitionSmallMultiplesModel;
 
-/** @internal */
-export const isSunburst = (p: PartitionLayout | undefined) => p === PartitionLayout.sunburst;
+function getInterMarginSize(size: Pixels, startMargin: Ratio, endMargin: Ratio) {
+  return size * (1 - Math.min(1, startMargin + endMargin));
+}
 
-/** @internal */
-export const isIcicle = (p: PartitionLayout | undefined) => p === PartitionLayout.icicle;
+function bandwidth(range: Pixels, bandCount: number, { outer, inner }: RelativeBandsPadding) {
+  // same convention as d3.scaleBand https://observablehq.com/@d3/d3-scaleband
+  return range / (2 * outer + bandCount + bandCount * inner - inner);
+}
 
-/** @internal */
-export const isFlame = (p: PartitionLayout | undefined) => p === PartitionLayout.flame;
-
-/** @internal */
-export const isLinear = (p: PartitionLayout | undefined) => isFlame(p) || isIcicle(p);
-
-/** @internal */
-export const isSimpleLinear = (config: RecursivePartial<Config>, layers: Layer[]) =>
-  isLinear(config.partitionLayout) && layers.every((l) => l.fillLabel?.clipText ?? config.fillLabel?.clipText);
+/**
+ * Todo move it to config
+ * @internal
+ */
+export const panelTitleFontSize = 16;
 
 /** @internal */
 export function shapeViewModel(
@@ -265,7 +288,9 @@ export function shapeViewModel(
   valueGetter: ValueGetterFunction,
   tree: HierarchyOfArrays,
   topGroove: Pixels,
-  containerBackgroundColor?: Color,
+  containerBackgroundColor: Color,
+  smallMultiplesStyle: SmallMultiplesStyle,
+  panel: PanelPlacement,
 ): ShapeViewModel {
   const {
     width,
@@ -281,8 +306,22 @@ export function shapeViewModel(
     partitionLayout,
     sectorLineWidth,
   } = config;
-  const innerWidth = width * (1 - Math.min(1, margin.left + margin.right));
-  const innerHeight = height * (1 - Math.min(1, margin.top + margin.bottom));
+
+  const innerWidth = getInterMarginSize(width, margin.left, margin.right);
+  const innerHeight = getInterMarginSize(height, margin.top, margin.bottom);
+
+  const panelInnerWidth = bandwidth(innerWidth, panel.innerColumnCount, smallMultiplesStyle.horizontalPanelPadding);
+
+  const panelInnerHeight = bandwidth(innerHeight, panel.innerRowCount, smallMultiplesStyle.verticalPanelPadding);
+
+  const marginLeftPx =
+    width * margin.left +
+    panelInnerWidth * smallMultiplesStyle.horizontalPanelPadding.outer +
+    panel.innerColumnIndex * (panelInnerWidth * (1 + smallMultiplesStyle.horizontalPanelPadding.inner));
+  const marginTopPx =
+    height * margin.top +
+    panelInnerHeight * smallMultiplesStyle.verticalPanelPadding.outer +
+    panel.innerRowIndex * (panelInnerHeight * (1 + smallMultiplesStyle.verticalPanelPadding.inner));
 
   const treemapLayout = isTreemap(partitionLayout);
   const sunburstLayout = isSunburst(partitionLayout);
@@ -292,10 +331,14 @@ export function shapeViewModel(
 
   const diskCenter = isSunburst(partitionLayout)
     ? {
-        x: width * margin.left + innerWidth / 2,
-        y: height * margin.top + innerHeight / 2,
+        x: marginLeftPx + panelInnerWidth / 2,
+        y: marginTopPx + panelInnerHeight / 2,
       }
-    : { x: width * margin.left, y: height * margin.top };
+    : {
+        x: marginLeftPx,
+        y: marginTopPx,
+      };
+
   // don't render anything if the total, the width or height is not positive
   if (!(width > 0) || !(height > 0) || tree.length === 0) {
     return nullShapeViewModel(config, diskCenter);
@@ -308,8 +351,8 @@ export function shapeViewModel(
     partitionLayout,
     tree,
     topGroove,
-    width,
-    height,
+    panelInnerWidth,
+    panelInnerHeight,
     clockwiseSectors,
     specialFirstInnermostSector,
     maxDepth,
@@ -322,7 +365,10 @@ export function shapeViewModel(
   });
 
   // use the smaller of the two sizes, as a circle fits into a square
-  const circleMaximumSize = Math.min(innerWidth, innerHeight);
+  const circleMaximumSize = Math.min(
+    panelInnerWidth,
+    panelInnerHeight - (panel.panelTitle.length > 0 ? panelTitleFontSize * 2 : 0),
+  );
   const outerRadius: Radius = Math.min(outerSizeRatio * circleMaximumSize, circleMaximumSize - sectorLineWidth) / 2;
   const innerRadius: Radius = outerRadius - (1 - emptySizeRatio) * outerRadius;
   const treeHeight = shownChildNodes.reduce((p: number, n: Part) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
@@ -333,6 +379,8 @@ export function shapeViewModel(
     layers,
     config.sectorLineWidth,
     config.sectorLineStroke,
+    panel.index,
+    panel.innerIndex,
     config.fillLabel,
     sunburstLayout,
     containerBackgroundColor,
@@ -396,8 +444,8 @@ export function shapeViewModel(
         });
   const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
   const linkLabelViewModels = linkTextLayout(
-    width,
-    height,
+    panelInnerWidth,
+    panelInnerHeight,
     textMeasure,
     config,
     nodesWithoutRoom,
@@ -407,7 +455,10 @@ export function shapeViewModel(
     valueGetter,
     valueFormatter,
     maxLinkedLabelTextLength,
-    diskCenter,
+    {
+      x: width * panel.left + panelInnerWidth / 2,
+      y: height * panel.top + panelInnerHeight / 2,
+    },
     containerBackgroundColor,
   );
 
@@ -430,6 +481,20 @@ export function shapeViewModel(
 
   // combined viewModel
   return {
+    partitionLayout: config?.partitionLayout ?? defaultConfig.partitionLayout,
+
+    panelTitle: panel.panelTitle,
+    index: panel.index,
+    innerIndex: panel.innerIndex,
+    width: panel.width,
+    height: panel.height,
+    top: panel.top,
+    left: panel.left,
+    innerRowCount: panel.innerRowCount,
+    innerColumnCount: panel.innerColumnCount,
+    innerRowIndex: panel.innerRowIndex,
+    innerColumnIndex: panel.innerColumnIndex,
+
     config,
     layers,
     diskCenter,

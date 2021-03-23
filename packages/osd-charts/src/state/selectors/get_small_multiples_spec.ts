@@ -16,25 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/constants';
-import { SmallMultiplesSpec } from '../../../../specs/small_multiples';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { getSpecsFromStore } from '../../../../state/utils';
+import { ChartTypes } from '../../chart_types';
+import { SpecTypes } from '../../specs/constants';
+import { SmallMultiplesSpec } from '../../specs/small_multiples';
+import { getSpecsFromStore } from '../utils';
+import { getChartIdSelector } from './get_chart_id';
+import { getSpecs } from './get_settings_specs';
+
+/**
+ * Return the small multiple specs
+ * @internal
+ */
+export const getSmallMultiplesSpecs = createCachedSelector([getSpecs], (specs) =>
+  getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples),
+)(getChartIdSelector);
 
 /**
  * Return the small multiple spec
  * @internal
  */
-export const getSmallMultipleSpec = (state: GlobalChartState) => {
-  const smallMultiples = getSpecsFromStore<SmallMultiplesSpec>(
-    state.specs,
-    ChartTypes.Global,
-    SpecTypes.SmallMultiples,
-  );
-  if (smallMultiples.length !== 1) {
-    return undefined;
-  }
-  return smallMultiples[0];
-};
+export const getSmallMultiplesSpec = createCachedSelector([getSmallMultiplesSpecs], (smallMultiples) =>
+  smallMultiples.length === 1 ? smallMultiples : undefined,
+)(getChartIdSelector);

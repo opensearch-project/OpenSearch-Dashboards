@@ -22,35 +22,28 @@ import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
-import { partitionDrilldownFocus, partitionGeometries } from '../../state/selectors/geometries';
+import { partitionDrilldownFocus, partitionMultiGeometries } from '../../state/selectors/geometries';
 import { getPickedShapes } from '../../state/selectors/picked_shapes';
-import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
+import { DEFAULT_PROPS, HighlighterComponent, HighlighterProps, highlightSetMapper } from './highlighter';
 
 const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return DEFAULT_PROPS;
   }
 
-  const { chartId } = state;
-  const {
-    outerRadius,
-    diskCenter,
-    config: { partitionLayout },
-  } = partitionGeometries(state)[0];
-
-  const geometries = getPickedShapes(state);
-  const geometriesFocus = partitionDrilldownFocus(state)[0];
   const canvasDimension = getChartContainerDimensionsSelector(state);
+  const { chartId } = state;
+
+  const allGeometries = partitionMultiGeometries(state); // .filter((g) => g.index === 0 && g.innerIndex === 0);
+  const geometriesFoci = partitionDrilldownFocus(state);
+  const pickedGeometries = getPickedShapes(state);
+
   return {
     chartId,
     initialized: true,
     renderAsOverlay: true,
     canvasDimension,
-    diskCenter,
-    outerRadius,
-    geometries,
-    geometriesFocus,
-    partitionLayout,
+    highlightSets: allGeometries.map(highlightSetMapper(pickedGeometries, geometriesFoci)),
   };
 };
 

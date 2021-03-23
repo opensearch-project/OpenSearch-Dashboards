@@ -18,20 +18,21 @@
  */
 
 import { measureText } from '../../../../common/text_utils';
-import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/common';
+import { SmallMultiplesStyle } from '../../../../specs';
+import { Color, identity, mergePartial, RecursivePartial } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
-import { PartitionSpec, Layer } from '../../specs';
+import { Layer, PartitionSpec } from '../../specs';
 import { config as defaultConfig, VALUE_GETTERS } from '../config';
 import { Config } from '../types/config_types';
 import {
+  nullShapeViewModel,
+  RawTextGetter,
   ShapeTreeNode,
   ShapeViewModel,
-  RawTextGetter,
-  nullShapeViewModel,
   ValueGetter,
 } from '../types/viewmodel_types';
 import { DEPTH_KEY, HierarchyOfArrays } from '../utils/group_by_rollup';
-import { shapeViewModel } from './viewmodel';
+import { PanelPlacement, shapeViewModel } from './viewmodel';
 
 function rawTextGetter(layers: Layer[]): RawTextGetter {
   return (node: ShapeTreeNode) => {
@@ -50,7 +51,9 @@ export function getShapeViewModel(
   partitionSpec: PartitionSpec,
   parentDimensions: Dimensions,
   tree: HierarchyOfArrays,
-  containerBackgroundColor?: Color,
+  containerBackgroundColor: Color,
+  smallMultiplesStyle: SmallMultiplesStyle,
+  panelPlacement: PanelPlacement,
 ): ShapeViewModel {
   const { width, height } = parentDimensions;
   const { layers, topGroove, config: specConfig } = partitionSpec;
@@ -62,6 +65,7 @@ export function getShapeViewModel(
     return nullShapeViewModel(config, { x: width / 2, y: height / 2 });
   }
   const valueGetter = valueGetterFunction(partitionSpec.valueGetter);
+
   return shapeViewModel(
     measureText(textMeasurerCtx),
     config,
@@ -73,5 +77,7 @@ export function getShapeViewModel(
     tree,
     topGroove,
     containerBackgroundColor,
+    smallMultiplesStyle,
+    panelPlacement,
   );
 }

@@ -24,21 +24,30 @@ import { PointObject } from '../../../../common/geometry';
 import { Dimensions } from '../../../../utils/dimensions';
 import { configMetadata } from '../../layout/config';
 import { PartitionLayout } from '../../layout/types/config_types';
-import { QuadViewModel } from '../../layout/types/viewmodel_types';
+import {
+  nullPartitionSmallMultiplesModel,
+  PartitionSmallMultiplesModel,
+  QuadViewModel,
+  ShapeViewModel,
+} from '../../layout/types/viewmodel_types';
 import { isSunburst, isTreemap } from '../../layout/viewmodel/viewmodel';
-import { ContinuousDomainFocus } from '../canvas/partition';
+import { ContinuousDomainFocus, IndexedContinuousDomainFocus } from '../canvas/partition';
+
+interface HighlightSet extends PartitionSmallMultiplesModel {
+  geometries: QuadViewModel[];
+  geometriesFoci: ContinuousDomainFocus[];
+  diskCenter: PointObject;
+  outerRadius: number;
+  partitionLayout: PartitionLayout;
+}
 
 /** @internal */
 export interface HighlighterProps {
   chartId: string;
   initialized: boolean;
   canvasDimension: Dimensions;
-  partitionLayout: PartitionLayout;
-  geometries: QuadViewModel[];
-  geometriesFocus: ContinuousDomainFocus;
-  diskCenter: PointObject;
-  outerRadius: number;
   renderAsOverlay: boolean;
+  highlightSets: HighlightSet[];
 }
 
 const EPSILON = 1e-6;
@@ -56,12 +65,13 @@ interface SVGStyle {
  * @param r The arc's radius. Must be positive
  * @param a0 The angle at which the arc starts in radians, measured from the positive x-axis
  * @param a1 The angle at which the arc ends in radians, measured from the positive x-axis
- * @param ccw If 1, draws the arc counter-clockwise between the start and end angles
+ * @param ccw If true, draws the arc counter-clockwise between the start and end angles
  */
 function getSectorShapeFromCanvasArc(x: number, y: number, r: number, a0: number, a1: number, ccw: boolean): string {
-  const cw = Number(!ccw);
-  const da = ccw ? a0 - a1 : a1 - a0;
-  return `A${r},${r},0,${+(da >= Math.PI)},${cw},${x + r * Math.cos(a1)},${y + r * Math.sin(a1)}`;
+  const cw = ccw ? 0 : 1;
+  const diff = a1 - a0;
+  const direction = ccw ? -1 : 1;
+  return `A${r},${r},0,${+(direction * diff >= Math.PI)},${cw},${x + r * Math.cos(a1)},${y + r * Math.sin(a1)}`;
 }
 
 /**
@@ -108,14 +118,27 @@ function renderGeometries(
   geoms: QuadViewModel[],
   partitionLayout: PartitionLayout,
   style: SVGStyle,
-  focus: ContinuousDomainFocus,
+  foci: ContinuousDomainFocus[],
   width: number,
 ) {
   const maxDepth = geoms.reduce((acc, geom) => Math.max(acc, geom.depth), 0);
   // we should render only the deepest geometries of the tree to avoid overlaying highlighted geometries
   const highlightedGeoms = isTreemap(partitionLayout) ? geoms.filter((g) => g.depth >= maxDepth) : geoms;
   const renderGeom = isSunburst(partitionLayout) ? renderSector : renderRectangles;
-  return highlightedGeoms.map((geometry, index) => renderGeom(geometry, `${index}`, style, focus, width));
+  return highlightedGeoms.map((geometry, index) =>
+    renderGeom(
+      geometry,
+      `${index}`,
+      style,
+      foci[0] ?? {
+        currentFocusX0: NaN,
+        currentFocusX1: NaN,
+        prevFocusX0: NaN,
+        prevFocusX1: NaN,
+      },
+      width,
+    ),
+  );
 }
 
 /** @internal */
@@ -124,72 +147,111 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
 
   renderAsMask() {
     const {
-      geometries,
-      geometriesFocus,
-      diskCenter,
-      outerRadius,
-      partitionLayout,
       chartId,
       canvasDimension: { width, height },
+      highlightSets,
     } = this.props;
-    const maskId = `echHighlighterMask__${chartId}`;
+
+    const maskId = (ind: number, ind2: number) => `echHighlighterMask__${chartId}__${ind}__${ind2}`;
+
     return (
       <>
         <defs>
-          <mask id={maskId}>
-            <rect x={0} y={0} width={width} height={height} fill="white" />
-            <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
-              {renderGeometries(geometries, partitionLayout, { color: 'black' }, geometriesFocus, width)}
-            </g>
-          </mask>
+          {highlightSets
+            .filter(({ geometries }) => geometries.length > 0)
+            .map(
+              ({
+                geometries,
+                geometriesFoci,
+                diskCenter,
+                index,
+                innerIndex,
+                partitionLayout,
+                top: topRatio,
+                left: leftRatio,
+                width: widthRatio,
+                height: heightRatio,
+              }) => (
+                <mask key={`${index}__${innerIndex}`} id={maskId(index, innerIndex)}>
+                  <rect
+                    x={width * leftRatio}
+                    y={height * topRatio}
+                    width={width * widthRatio}
+                    height={height * heightRatio}
+                    fill="white"
+                  />
+                  <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
+                    {renderGeometries(geometries, partitionLayout, { color: 'black' }, geometriesFoci, width)}
+                  </g>
+                </mask>
+              ),
+            )}
         </defs>
-        {isSunburst(partitionLayout) ? (
-          <circle
-            cx={diskCenter.x}
-            cy={diskCenter.y}
-            r={outerRadius}
-            mask={`url(#${maskId})`}
-            className="echHighlighter__mask"
-          />
-        ) : (
-          <rect x={0} y={0} width={width} height={height} mask={`url(#${maskId})`} className="echHighlighter__mask" />
-        )}
+        {highlightSets
+          .filter(({ geometries }) => geometries.length > 0)
+          .map(
+            ({
+              diskCenter,
+              outerRadius,
+              index,
+              innerIndex,
+              partitionLayout,
+              top: topRatio,
+              left: leftRatio,
+              width: widthRatio,
+              height: heightRatio,
+            }) =>
+              isSunburst(partitionLayout) ? (
+                <circle
+                  key={`${index}__${innerIndex}`}
+                  cx={diskCenter.x}
+                  cy={diskCenter.y}
+                  r={outerRadius}
+                  mask={`url(#${maskId(index, innerIndex)})`}
+                  className="echHighlighter__mask"
+                />
+              ) : (
+                <rect
+                  key={`${index}__${innerIndex}`}
+                  x={width * leftRatio}
+                  y={height * topRatio}
+                  width={width * widthRatio}
+                  height={height * heightRatio}
+                  mask={`url(#${maskId(index, innerIndex)})`}
+                  className="echHighlighter__mask"
+                />
+              ),
+          )}
       </>
     );
   }
 
   renderAsOverlay() {
     const {
-      geometries,
-      geometriesFocus,
-      diskCenter,
-      partitionLayout,
       canvasDimension: { width },
     } = this.props;
-    return (
-      <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
-        {renderGeometries(
-          geometries,
-          partitionLayout,
-          {
-            fillClassName: 'echHighlighterOverlay__fill',
-            strokeClassName: 'echHighlighterOverlay__stroke',
-          },
-          geometriesFocus,
-          width,
-        )}
-      </g>
-    );
+    return this.props.highlightSets
+      .filter(({ geometries }) => geometries.length > 0)
+      .map(({ index, innerIndex, partitionLayout, geometries, diskCenter, geometriesFoci }) => (
+        <g key={`${index}|${innerIndex}`} transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
+          {renderGeometries(
+            geometries,
+            partitionLayout,
+            {
+              fillClassName: 'echHighlighterOverlay__fill',
+              strokeClassName: 'echHighlighterOverlay__stroke',
+            },
+            geometriesFoci,
+            width,
+          )}
+        </g>
+      ));
   }
 
   render() {
-    const { geometries, renderAsOverlay } = this.props;
-    if (geometries.length === 0) {
-      return null;
-    }
     return (
       <svg className="echHighlighter" width="100%" height="100%">
-        {renderAsOverlay ? this.renderAsOverlay() : this.renderAsMask()}
+        {this.props.renderAsOverlay ? this.renderAsOverlay() : this.renderAsMask()}
       </svg>
     );
   }
@@ -199,19 +261,47 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
 export const DEFAULT_PROPS: HighlighterProps = {
   chartId: 'empty',
   initialized: false,
+  renderAsOverlay: false,
   canvasDimension: {
     width: 0,
     height: 0,
     left: 0,
     top: 0,
   },
-  geometries: [],
-  geometriesFocus: { currentFocusX0: NaN, currentFocusX1: NaN, prevFocusX0: NaN, prevFocusX1: NaN },
-  diskCenter: {
-    x: 0,
-    y: 0,
-  },
-  outerRadius: 10,
-  renderAsOverlay: false,
-  partitionLayout: configMetadata.partitionLayout.dflt,
+  highlightSets: [
+    {
+      ...nullPartitionSmallMultiplesModel(configMetadata.partitionLayout.dflt),
+      geometries: [],
+      geometriesFoci: [],
+      diskCenter: {
+        x: 0,
+        y: 0,
+      },
+      outerRadius: 10,
+    },
+  ],
 };
+
+/** @internal */
+export function highlightSetMapper(geometries: QuadViewModel[], foci: IndexedContinuousDomainFocus[]) {
+  return (vm: ShapeViewModel): HighlightSet => {
+    return {
+      index: vm.index,
+      innerIndex: vm.innerIndex,
+      panelTitle: vm.panelTitle,
+      partitionLayout: vm.partitionLayout,
+      width: vm.width,
+      height: vm.height,
+      top: vm.top,
+      left: vm.left,
+      diskCenter: vm.diskCenter,
+      outerRadius: vm.outerRadius,
+      geometries: geometries.filter(({ index: i, innerIndex: ii }) => vm.index === i && vm.innerIndex === ii),
+      geometriesFoci: foci.filter(({ index: i, innerIndex: ii }) => vm.index === i && vm.innerIndex === ii),
+      innerRowIndex: vm.innerRowIndex,
+      innerColumnIndex: vm.innerColumnIndex,
+      innerRowCount: vm.innerRowCount,
+      innerColumnCount: vm.innerColumnCount,
+    };
+  };
+}

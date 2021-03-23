@@ -26,7 +26,8 @@ import { GlobalChartState } from '../chart_state';
 import { getSpecsFromStore } from '../utils';
 import { getChartIdSelector } from './get_chart_id';
 
-const getSpecs = (state: GlobalChartState) => state.specs;
+/** @internal */
+export const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
 export const getSettingsSpecSelector = createCachedSelector(

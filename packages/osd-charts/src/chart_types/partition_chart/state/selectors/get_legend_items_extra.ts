@@ -25,14 +25,14 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getExtraValueMap } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { getPartitionSpec } from './partition_spec';
-import { getTree } from './tree';
+import { getTrees } from './tree';
 
 /** @internal */
 export const getLegendItemsExtra = createCachedSelector(
-  [getPartitionSpec, getSettingsSpecSelector, getTree],
-  (spec, { legendMaxDepth }, tree): Map<SeriesKey, LegendItemExtraValues> => {
+  [getPartitionSpec, getSettingsSpecSelector, getTrees],
+  (spec, { legendMaxDepth }, trees): Map<SeriesKey, LegendItemExtraValues> => {
     return spec && !Number.isNaN(legendMaxDepth) && legendMaxDepth > 0
-      ? getExtraValueMap(spec.layers, spec.valueFormatter, tree, legendMaxDepth)
+      ? getExtraValueMap(spec.layers, spec.valueFormatter, trees[0].tree, legendMaxDepth) // singleton! wrt inner small multiples
       : new Map<SeriesKey, LegendItemExtraValues>();
   },
 )(getChartIdSelector);

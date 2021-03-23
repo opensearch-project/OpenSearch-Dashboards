@@ -22,9 +22,9 @@ import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
-import { partitionDrilldownFocus, partitionGeometries } from '../../state/selectors/geometries';
+import { partitionDrilldownFocus, partitionMultiGeometries } from '../../state/selectors/geometries';
 import { legendHoverHighlightNodes } from '../../state/selectors/get_highlighted_shapes';
-import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
+import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS, highlightSetMapper } from './highlighter';
 
 const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
@@ -32,25 +32,16 @@ const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   }
 
   const { chartId } = state;
-  const {
-    outerRadius,
-    diskCenter,
-    config: { partitionLayout },
-  } = partitionGeometries(state)[0];
 
   const geometries = legendHoverHighlightNodes(state);
-  const geometriesFocus = partitionDrilldownFocus(state)[0];
+  const geometriesFoci = partitionDrilldownFocus(state);
   const canvasDimension = getChartContainerDimensionsSelector(state);
   return {
     chartId,
     initialized: true,
     renderAsOverlay: false,
     canvasDimension,
-    geometries,
-    geometriesFocus,
-    diskCenter,
-    outerRadius,
-    partitionLayout,
+    highlightSets: partitionMultiGeometries(state).map(highlightSetMapper(geometries, geometriesFoci)),
   };
 };
 

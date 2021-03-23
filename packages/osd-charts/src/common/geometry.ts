@@ -25,8 +25,13 @@
 
 import { RIGHT_ANGLE, TAU } from './constants';
 
-export type Pixels = number;
+/**
+ * A finite number that expresses a ratio
+ * @public
+ */
 export type Ratio = number;
+
+export type Pixels = number;
 export type SizeRatio = Ratio;
 type Cartesian = number;
 export type Coordinate = Cartesian;

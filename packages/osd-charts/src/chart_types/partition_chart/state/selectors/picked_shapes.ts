@@ -20,8 +20,9 @@
 import createCachedSelector from 're-reselect';
 
 import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { pickedShapes, pickShapesLayerValues } from '../../layout/viewmodel/picked_shapes';
-import { partitionDrilldownFocus, partitionGeometries } from './geometries';
+import { partitionDrilldownFocus, partitionMultiGeometries } from './geometries';
 
 function getCurrentPointerPosition(state: GlobalChartState) {
   return state.interactions.pointer.current.position;
@@ -29,12 +30,12 @@ function getCurrentPointerPosition(state: GlobalChartState) {
 
 /** @internal */
 export const getPickedShapes = createCachedSelector(
-  [partitionGeometries, getCurrentPointerPosition, partitionDrilldownFocus],
+  [partitionMultiGeometries, getCurrentPointerPosition, partitionDrilldownFocus],
   pickedShapes,
-)((state) => state.chartId);
+)(getChartIdSelector);
 
 /** @internal */
 export const getPickedShapesLayerValues = createCachedSelector(
   [getPickedShapes],
   pickShapesLayerValues,
-)((state) => state.chartId);
+)(getChartIdSelector);

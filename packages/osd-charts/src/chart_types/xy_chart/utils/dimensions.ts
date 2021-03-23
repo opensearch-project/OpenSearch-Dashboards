@@ -49,12 +49,6 @@ export interface ChartDimensions {
 /**
  * Compute the chart dimensions. It's computed removing from the parent dimensions
  * the axis spaces, the legend and any other specified style margin and padding.
- * @param parentDimensions the parent dimension
- * @param theme
- * @param axisDimensions the axis dimensions
- * @param axesStyles
- * @param axisSpecs the axis specs
- * @param legendSizing
  * @internal
  */
 export function computeChartDimensions(

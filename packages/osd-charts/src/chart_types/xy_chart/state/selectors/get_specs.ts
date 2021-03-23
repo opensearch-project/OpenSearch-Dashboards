@@ -22,12 +22,10 @@ import createCachedSelector from 're-reselect';
 import { ChartTypes } from '../../..';
 import { GroupBySpec, SmallMultiplesSpec } from '../../../../specs';
 import { SpecTypes } from '../../../../specs/constants';
-import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSpecs } from '../../../../state/selectors/get_settings_specs';
 import { getSpecsFromStore } from '../../../../state/utils';
-import { AxisSpec, BasicSeriesSpec, AnnotationSpec } from '../../utils/specs';
-
-const getSpecs = (state: GlobalChartState) => state.specs;
+import { AnnotationSpec, AxisSpec, BasicSeriesSpec } from '../../utils/specs';
 
 /** @internal */
 export interface SmallMultiplesGroupBy {
@@ -54,25 +52,10 @@ export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (spec
 export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpecs], (specs):
   | SmallMultiplesGroupBy
   | undefined => {
-  const smallMultiples = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples);
-  if (smallMultiples.length !== 1) {
-    return undefined;
-  }
-  const indexOrders = getSpecsFromStore<GroupBySpec>(specs, ChartTypes.Global, SpecTypes.IndexOrder);
-  const [smallMultiplesConfig] = smallMultiples;
-
-  let vertical: GroupBySpec | undefined;
-  let horizontal: GroupBySpec | undefined;
-
-  if (smallMultiplesConfig.splitVertically) {
-    vertical = indexOrders.find((d) => d.id === smallMultiplesConfig.splitVertically);
-  }
-  if (smallMultiplesConfig.splitHorizontally) {
-    horizontal = indexOrders.find((d) => d.id === smallMultiplesConfig.splitHorizontally);
-  }
-
+  const [smallMultiples] = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples);
+  const groupBySpecs = getSpecsFromStore<GroupBySpec>(specs, ChartTypes.Global, SpecTypes.IndexOrder);
   return {
-    vertical,
-    horizontal,
+    horizontal: groupBySpecs.find((s) => s.id === smallMultiples?.splitHorizontally),
+    vertical: groupBySpecs.find((s) => s.id === smallMultiples?.splitVertically),
   };
 })(getChartIdSelector);

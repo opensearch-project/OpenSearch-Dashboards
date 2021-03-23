@@ -19,21 +19,91 @@
 
 import createCachedSelector from 're-reselect';
 
+import { ChartTypes } from '../../..';
+import { getPredicateFn } from '../../../../common/predicate';
+import {
+  DEFAULT_SM_PANEL_PADDING,
+  GroupByAccessor,
+  GroupBySpec,
+  SmallMultiplesSpec,
+  SmallMultiplesStyle,
+  SpecTypes,
+} from '../../../../specs';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSpecs } from '../../../../state/selectors/get_settings_specs';
+import { getSmallMultiplesSpecs } from '../../../../state/selectors/get_small_multiples_spec';
+import { getSpecsFromStore } from '../../../../state/utils';
+import { Datum } from '../../../../utils/common';
 import { configMetadata } from '../../layout/config';
 import { HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
 import { partitionTree } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { PartitionSpec } from '../../specs';
 import { getPartitionSpecs } from './get_partition_specs';
 
-function getTreeForSpec(spec: PartitionSpec) {
-  const { data, valueAccessor, layers, config } = spec;
-  return partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout);
+const getGroupBySpecs = createCachedSelector([getSpecs], (specs) =>
+  getSpecsFromStore<GroupBySpec>(specs, ChartTypes.Global, SpecTypes.IndexOrder),
+)(getChartIdSelector);
+
+/** @internal */
+export type StyledTree = { name: string | number; style: SmallMultiplesStyle; tree: HierarchyOfArrays };
+
+function getTreesForSpec(
+  spec: PartitionSpec,
+  smSpecs: SmallMultiplesSpec[],
+  groupBySpecs: GroupBySpec[],
+): StyledTree[] {
+  const { data, valueAccessor, layers, config, smallMultiples: smId } = spec;
+  const smSpec = smSpecs.find((s) => s.id === smId);
+  const smStyle: SmallMultiplesStyle = {
+    horizontalPanelPadding: smSpec
+      ? smSpec.style?.horizontalPanelPadding ?? DEFAULT_SM_PANEL_PADDING
+      : { outer: 0, inner: 0 },
+    verticalPanelPadding: smSpec
+      ? smSpec.style?.verticalPanelPadding ?? DEFAULT_SM_PANEL_PADDING
+      : { outer: 0, inner: 0 },
+  };
+  const groupBySpec = groupBySpecs.find(
+    (s) => s.id === smSpec?.splitHorizontally || s.id === smSpec?.splitVertically || s.id === smSpec?.splitZigzag,
+  );
+
+  if (groupBySpec) {
+    const { by, sort, format = (name) => String(name) } = groupBySpec;
+    const accessorSpec = { id: spec.id, chartType: spec.chartType, specType: SpecTypes.Series };
+    const groups = data.reduce((map: Map<ReturnType<GroupByAccessor>, Datum[]>, next) => {
+      const groupingValue = by(accessorSpec, next);
+      const preexistingGroup = map.get(groupingValue);
+      const group = preexistingGroup ?? [];
+      if (!preexistingGroup) map.set(groupingValue, group);
+      group.push(next);
+      return map;
+    }, new Map<string, HierarchyOfArrays>());
+    return Array.from(groups)
+      .sort(getPredicateFn(sort))
+      .map(([groupKey, subData]) => ({
+        name: format(groupKey),
+        style: smStyle,
+        tree: partitionTree(
+          subData,
+          valueAccessor,
+          layers,
+          configMetadata.partitionLayout.dflt,
+          config.partitionLayout,
+        ),
+      }));
+  } else {
+    return [
+      {
+        name: '',
+        style: smStyle,
+        tree: partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout),
+      },
+    ];
+  }
 }
 
 /** @internal */
-export const getTree = createCachedSelector(
-  [getPartitionSpecs],
-  (partitionSpecs): HierarchyOfArrays => {
-    return partitionSpecs.length > 0 ? getTreeForSpec(partitionSpecs[0]) : []; // singleton!
-  },
-)((state) => state.chartId);
+export const getTrees = createCachedSelector(
+  [getPartitionSpecs, getSmallMultiplesSpecs, getGroupBySpecs],
+  (partitionSpecs, smallMultiplesSpecs, groupBySpecs): StyledTree[] =>
+    partitionSpecs.length > 0 ? getTreesForSpec(partitionSpecs[0], smallMultiplesSpecs, groupBySpecs) : [], // singleton!
+)(getChartIdSelector);

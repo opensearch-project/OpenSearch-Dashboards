@@ -21,6 +21,8 @@ import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } fro
 
 import { Scale, ScaleBandType } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { Ratio } from '../common/geometry';
+import { RelativeBandsPadding } from '../specs';
 import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/common';
 import { Range } from '../utils/domain';
 import { ScaleType } from './constants';
@@ -67,17 +69,17 @@ export class ScaleBand implements Scale {
      * A number between 0 and 1.
      * @defaultValue 0
      */
-    barsPadding: number | [number, number] = 0,
+    barsPadding: Ratio | RelativeBandsPadding = 0,
   ) {
     this.type = ScaleType.Ordinal;
     this.d3Scale = scaleBand<NonNullable<PrimitiveValue>>();
     this.d3Scale.domain(domain);
     this.d3Scale.range(range);
     let safeBarPadding = 0;
-    if (Array.isArray(barsPadding)) {
-      this.d3Scale.paddingInner(barsPadding[1]);
-      this.d3Scale.paddingOuter(barsPadding[0]);
-      this.barsPadding = barsPadding[1];
+    if (typeof barsPadding === 'object') {
+      this.d3Scale.paddingInner(barsPadding.inner);
+      this.d3Scale.paddingOuter(barsPadding.outer);
+      this.barsPadding = barsPadding.inner;
     } else {
       safeBarPadding = maxValueWithUpperLimit(barsPadding, 0, 1);
       this.d3Scale.paddingInner(safeBarPadding);

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { getPredicateFn, Predicate } from '../../../../common/predicate';
 import { SeriesKey, SeriesIdentifier } from '../../../../common/series_id';
 import { Scale } from '../../../../scales';
 import { CustomXDomain, SortSeriesByConfig } from '../../../../specs';
@@ -35,7 +36,6 @@ import {
 import { GroupId, SpecId } from '../../../../utils/ids';
 import { getRenderingCompareFn, SeriesCompareFn } from '../../../../utils/series_sort';
 import { ColorConfig, Theme } from '../../../../utils/themes/theme';
-import { getPredicateFn, Predicate } from '../../../heatmap/utils/common';
 import { XDomain } from '../../domains/types';
 import { mergeXDomain } from '../../domains/x_domain';
 import { isStackedSpec, mergeYDomain } from '../../domains/y_domain';
