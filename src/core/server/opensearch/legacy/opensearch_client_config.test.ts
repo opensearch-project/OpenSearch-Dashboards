@@ -47,7 +47,7 @@ test('parses minimally specified config', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "x-elastic-product-origin": "opensearch-dashboards",
+            "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -78,7 +78,7 @@ test('parses fully specified config', () => {
       'https://opensearch.local',
     ],
     requestHeadersWhitelist: [],
-    username: 'elastic',
+    username: 'opensearch',
     password: 'changeme',
     pingTimeout: 12345,
     requestTimeout: 54321,
@@ -107,9 +107,9 @@ test('parses fully specified config', () => {
       "apiVersion": "v7.0.0",
       "hosts": Array [
         Object {
-          "auth": "elastic:changeme",
+          "auth": "opensearch:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearch-dashboards",
+            "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -119,9 +119,9 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
+          "auth": "opensearch:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearch-dashboards",
+            "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "domain.com",
@@ -131,9 +131,9 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
+          "auth": "opensearch:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearch-dashboards",
+            "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "opensearch.local",
@@ -188,7 +188,7 @@ test('parses config timeouts of moment.Duration type', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "x-elastic-product-origin": "opensearch-dashboards",
+            "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -220,7 +220,7 @@ describe('#auth', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['http://user:password@localhost/opensearch', 'https://opensearch.local'],
-          username: 'elastic',
+          username: 'opensearch',
           password: 'changeme',
           requestHeadersWhitelist: [],
         },
@@ -233,7 +233,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "localhost",
@@ -244,7 +244,7 @@ describe('#auth', () => {
           },
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -284,7 +284,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -313,7 +313,7 @@ describe('#auth', () => {
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
-          username: 'elastic',
+          username: 'opensearch',
         },
         logger.get(),
         { auth: true }
@@ -324,7 +324,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -509,7 +509,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -556,7 +556,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -599,7 +599,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -667,7 +667,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearch-dashboards",
+              "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
