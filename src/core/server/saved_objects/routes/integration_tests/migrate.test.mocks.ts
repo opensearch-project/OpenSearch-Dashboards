@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch-dashboards/opensearch_dashboards_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch_dashboards/opensearch_dashboards_migrator.mock';
 
 export const migratorInstanceMock = mockOpenSearchDashboardsMigrator.create();
 export const OpenSearchDashboardsMigratorMock = jest

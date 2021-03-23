@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObjectsRepository } from './repository';
-import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch-dashboards/opensearch_dashboards_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch_dashboards/opensearch_dashboards_migrator.mock';
 import { OpenSearchDashboardsMigrator } from '../../migrations';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
