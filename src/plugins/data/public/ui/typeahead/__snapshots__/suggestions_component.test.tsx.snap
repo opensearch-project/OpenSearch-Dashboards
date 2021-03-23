@@ -10,13 +10,13 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
   verticalListPosition="bottom: 768px;"
 >
   <div
-    className="kbnTypeahead"
+    className="osdTypeahead"
   >
     <div
-      className="kbnTypeahead__popover kbnTypeahead__popover--top"
+      className="osdTypeahead__popover osdTypeahead__popover--top"
     >
       <div
-        id="kbnTypeahead__items"
+        id="osdTypeahead__items"
         onScroll={[Function]}
         role="listbox"
       >
@@ -72,13 +72,13 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
   verticalListPosition="bottom: 768px;"
 >
   <div
-    className="kbnTypeahead"
+    className="osdTypeahead"
   >
     <div
-      className="kbnTypeahead__popover kbnTypeahead__popover--top"
+      className="osdTypeahead__popover osdTypeahead__popover--top"
     >
       <div
-        id="kbnTypeahead__items"
+        id="osdTypeahead__items"
         onScroll={[Function]}
         role="listbox"
       >

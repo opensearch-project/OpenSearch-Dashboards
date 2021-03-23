@@ -104,29 +104,6 @@ describe('CoreUsageDataService', () => {
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
-              "opensearch": Object {
-                "apiVersion": "7.x",
-                "customHeadersConfigured": false,
-                "healthCheckDelayMs": 2500,
-                "logQueries": false,
-                "numberOfHostsConfigured": 1,
-                "pingTimeoutMs": 30000,
-                "requestHeadersWhitelistConfigured": false,
-                "requestTimeoutMs": 30000,
-                "shardTimeoutMs": 30000,
-                "sniffIntervalMs": -1,
-                "sniffOnConnectionFault": false,
-                "sniffOnStart": false,
-                "ssl": Object {
-                  "alwaysPresentCertificate": false,
-                  "certificateAuthoritiesConfigured": false,
-                  "certificateConfigured": false,
-                  "keyConfigured": false,
-                  "keystoreConfigured": false,
-                  "truststoreConfigured": false,
-                  "verificationMode": "full",
-                },
-              },
               "http": Object {
                 "basePathConfigured": false,
                 "compression": Object {
@@ -186,6 +163,29 @@ describe('CoreUsageDataService', () => {
                 "appendersTypesUsed": Array [],
                 "loggersConfiguredCount": 0,
               },
+              "opensearch": Object {
+                "apiVersion": "7.x",
+                "customHeadersConfigured": false,
+                "healthCheckDelayMs": 2500,
+                "logQueries": false,
+                "numberOfHostsConfigured": 1,
+                "pingTimeoutMs": 30000,
+                "requestHeadersWhitelistConfigured": false,
+                "requestTimeoutMs": 30000,
+                "shardTimeoutMs": 30000,
+                "sniffIntervalMs": -1,
+                "sniffOnConnectionFault": false,
+                "sniffOnStart": false,
+                "ssl": Object {
+                  "alwaysPresentCertificate": false,
+                  "certificateAuthoritiesConfigured": false,
+                  "certificateConfigured": false,
+                  "keyConfigured": false,
+                  "keystoreConfigured": false,
+                  "truststoreConfigured": false,
+                  "verificationMode": "full",
+                },
+              },
               "savedObjects": Object {
                 "maxImportExportSizeBytes": 10000,
                 "maxImportPayloadBytes": 26214400,
@@ -202,7 +202,7 @@ describe('CoreUsageDataService', () => {
               "savedObjects": Object {
                 "indices": Array [
                   Object {
-                    "alias": ".opensearch_dashboards",
+                    "alias": ".opensearch_dashboards_task_manager",
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,

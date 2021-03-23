@@ -14,7 +14,7 @@ Object {
     },
   ],
   "timeFieldName": "@timestamp",
-  "title": "kibana-*",
+  "title": "opensearch-dashboards-*",
   "type": "",
   "typeMeta": Object {},
   "version": "version",

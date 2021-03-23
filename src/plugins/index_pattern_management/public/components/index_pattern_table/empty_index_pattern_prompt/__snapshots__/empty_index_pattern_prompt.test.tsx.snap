@@ -28,7 +28,7 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
       >
         <h2>
           <FormattedMessage
-            defaultMessage="You have data in Elasticsearch."
+            defaultMessage="You have data in OpenSearch."
             id="indexPatternManagement.emptyIndexPatternPrompt.youHaveData"
             values={Object {}}
           />
@@ -41,7 +41,7 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
         </h2>
         <p>
           <FormattedMessage
-            defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
+            defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
             id="indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation"
             values={Object {}}
           />

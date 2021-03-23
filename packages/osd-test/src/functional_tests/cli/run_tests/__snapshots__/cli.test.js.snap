@@ -11,8 +11,8 @@ Usage:
 Options:
   --help                         Display this menu and exit. 
   --config <file>                Pass in a config. Can pass in multiple configs. 
-  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or snapshot
-  --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --opensearchFrom <snapshot|source> Build OpenSearch from source or run from snapshot. Default: $TEST_OPENSEARCH_FROM or snapshot
+  --opensearch-dashboards-install-dir <dir> Run OpenSearch Dashboards from existing install directory instead of from source. 
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
@@ -35,9 +35,9 @@ exports[`run tests CLI options rejects boolean config value 1`] = `
 "
 `;
 
-exports[`run tests CLI options rejects boolean value for kibana-install-dir 1`] = `
+exports[`run tests CLI options rejects boolean value for opensearch-dashboards-install-dir 1`] = `
 "
-[31mfunctional_tests: invalid argument [true] to option [kibana-install-dir][39m
+[31mfunctional_tests: invalid argument [true] to option [opensearch-dashboards-install-dir][39m
     ...stack trace...
 "
 `;
@@ -63,9 +63,9 @@ exports[`run tests CLI options rejects non-boolean value for bail 1`] = `
 "
 `;
 
-exports[`run tests CLI options rejects non-enum value for esFrom 1`] = `
+exports[`run tests CLI options rejects non-enum value for opensearchFrom 1`] = `
 "
-[31mfunctional_tests: invalid argument [butter] to option [esFrom][39m
+[31mfunctional_tests: invalid argument [butter] to option [opensearchFrom][39m
     ...stack trace...
 "
 `;

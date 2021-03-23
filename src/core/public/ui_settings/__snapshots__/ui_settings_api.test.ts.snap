@@ -3,23 +3,23 @@
 exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
@@ -30,23 +30,23 @@ Array [
 exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
@@ -57,23 +57,23 @@ Array [
 exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },
@@ -107,12 +107,12 @@ exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`
 exports[`#batchSet sends a single change immediately: single change 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/api/opensearch-dashboards/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
-        "kbn-version": "kibanaVersion",
+        "osd-version": "opensearchDashboardsVersion",
       },
       "method": "POST",
     },

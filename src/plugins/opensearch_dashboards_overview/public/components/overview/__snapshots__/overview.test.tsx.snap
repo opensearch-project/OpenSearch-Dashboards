@@ -2,46 +2,46 @@
 
 exports[`Overview render 1`] = `
 <main
-  aria-labelledby="kbnOverviewPageHeader__title"
-  className="kbnOverviewWrapper"
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
 >
   <mockConstructor
     addBasePath={
       [MockFunction] {
         "calls": Array [
           Array [
-            "kibana_landing_page",
+            "opensearch_dashboards_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           ],
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": "kibana_landing_page",
+            "value": "opensearch_dashboards_landing_page",
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           },
           Object {
             "type": "return",
@@ -49,7 +49,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           },
           Object {
             "type": "return",
@@ -57,7 +57,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           },
           Object {
             "type": "return",
@@ -65,7 +65,7 @@ exports[`Overview render 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           },
         ],
       }
@@ -74,32 +74,32 @@ exports[`Overview render 1`] = `
     iconType="inputOutput"
     title={
       <FormattedMessage
-        defaultMessage="Kibana"
-        id="kibanaOverview.header.title"
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
         values={Object {}}
       />
     }
   />
   <div
-    className="kbnOverviewContent"
+    className="osdOverviewContent"
   >
     <section
-      aria-labelledby="kbnOverviewApps__title"
-      className="kbnOverviewApps"
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
     >
       <EuiScreenReaderOnly>
         <h2
-          id="kbnOverviewApps__title"
+          id="osdOverviewApps__title"
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibanaOverview.apps.title"
+            id="opensearchDashboardsOverview.apps.title"
             values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
       <EuiFlexGroup
-        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
         justifyContent="center"
       />
       <EuiSpacer
@@ -112,7 +112,7 @@ exports[`Overview render 1`] = `
     />
     <EuiFlexGroup
       alignItems="flexStart"
-      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+      className="osdOverviewSupplements osdOverviewSupplements--hasNews"
     >
       <EuiFlexItem
         grow={1}
@@ -128,9 +128,9 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
-                  "title": "The Go client for Elasticsearch: Introduction",
+                  "title": "The Go client for OpenSearch: Introduction",
                 },
                 Object {
                   "badge": null,
@@ -138,7 +138,7 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -148,13 +148,13 @@ exports[`Overview render 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },
               ],
               "hasNew": true,
-              "kibanaVersion": "8.0.0",
+              "opensearchDashboardsVersion": "8.0.0",
             }
           }
         />
@@ -163,18 +163,18 @@ exports[`Overview render 1`] = `
         grow={3}
       >
         <section
-          aria-labelledby="kbnOverviewMore__title"
-          className="kbnOverviewMore"
+          aria-labelledby="osdOverviewMore__title"
+          className="osdOverviewMore"
         >
           <EuiTitle
             size="s"
           >
             <h2
-              id="kbnOverviewMore__title"
+              id="osdOverviewMore__title"
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibanaOverview.more.title"
+                id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -183,52 +183,52 @@ exports[`Overview render 1`] = `
             size="m"
           />
           <EuiFlexGroup
-            className="kbnOverviewMore__content"
+            className="osdOverviewMore__content"
           >
             <EuiFlexItem
-              className="kbnOverviewMore__item"
-              key="kibana"
+              className="osdOverviewMore__item"
+              key="opensearchDashboards"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description=""
-                  href="kibana_landing_page"
+                  href="opensearch_dashboards_landing_page"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="inputOutput"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
-                  title="Kibana"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png"
+                  title="OpenSearch Dashboards"
                   titleElement="h3"
                   titleSize="xs"
                 />
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-2"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution two"
                   href="path-to-solution-two"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png"
                   title="Solution two"
                   titleElement="h3"
                   titleSize="xs"
@@ -236,24 +236,24 @@ exports[`Overview render 1`] = `
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-3"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution three"
                   href="path-to-solution-three"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png"
                   title="Solution three"
                   titleElement="h3"
                   titleSize="xs"
@@ -261,24 +261,24 @@ exports[`Overview render 1`] = `
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-4"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution four"
                   href="path-to-solution-four"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png"
                   title="Solution four"
                   titleElement="h3"
                   titleSize="xs"
@@ -298,38 +298,38 @@ exports[`Overview render 1`] = `
         [MockFunction] {
           "calls": Array [
             Array [
-              "kibana_landing_page",
+              "opensearch_dashboards_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             ],
           ],
           "results": Array [
             Object {
               "type": "return",
-              "value": "kibana_landing_page",
+              "value": "opensearch_dashboards_landing_page",
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             },
             Object {
               "type": "return",
@@ -337,7 +337,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             },
             Object {
               "type": "return",
@@ -345,7 +345,7 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             },
             Object {
               "type": "return",
@@ -353,12 +353,12 @@ exports[`Overview render 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             },
           ],
         }
       }
-      path="/app/kibana_overview"
+      path="/app/opensearch_dashboards_overview"
     />
   </div>
 </main>
@@ -366,102 +366,70 @@ exports[`Overview render 1`] = `
 
 exports[`Overview without features 1`] = `
 <main
-  aria-labelledby="kbnOverviewPageHeader__title"
-  className="kbnOverviewWrapper"
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
 >
   <mockConstructor
     addBasePath={
       [MockFunction] {
         "calls": Array [
           Array [
-            "kibana_landing_page",
+            "opensearch_dashboards_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
-          ],
-          Array [
-            "path-to-solution-two",
-          ],
-          Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
-          ],
-          Array [
-            "path-to-solution-three",
-          ],
-          Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
-          ],
-          Array [
-            "path-to-solution-four",
-          ],
-          Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
-          ],
-          Array [
-            "kibana_landing_page",
-          ],
-          Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           ],
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": "kibana_landing_page",
+            "value": "opensearch_dashboards_landing_page",
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-two",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-three",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
-          },
-          Object {
-            "type": "return",
-            "value": "path-to-solution-four",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
-          },
-          Object {
-            "type": "return",
-            "value": "kibana_landing_page",
-          },
-          Object {
-            "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           },
           Object {
             "type": "return",
@@ -469,7 +437,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           },
           Object {
             "type": "return",
@@ -477,7 +445,7 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           },
           Object {
             "type": "return",
@@ -485,7 +453,39 @@ exports[`Overview without features 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           },
         ],
       }
@@ -494,32 +494,32 @@ exports[`Overview without features 1`] = `
     iconType="inputOutput"
     title={
       <FormattedMessage
-        defaultMessage="Kibana"
-        id="kibanaOverview.header.title"
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
         values={Object {}}
       />
     }
   />
   <div
-    className="kbnOverviewContent"
+    className="osdOverviewContent"
   >
     <section
-      aria-labelledby="kbnOverviewApps__title"
-      className="kbnOverviewApps"
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
     >
       <EuiScreenReaderOnly>
         <h2
-          id="kbnOverviewApps__title"
+          id="osdOverviewApps__title"
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibanaOverview.apps.title"
+            id="opensearchDashboardsOverview.apps.title"
             values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
       <EuiFlexGroup
-        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
         justifyContent="center"
       />
       <EuiSpacer
@@ -532,7 +532,7 @@ exports[`Overview without features 1`] = `
     />
     <EuiFlexGroup
       alignItems="flexStart"
-      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+      className="osdOverviewSupplements osdOverviewSupplements--hasNews"
     >
       <EuiFlexItem
         grow={1}
@@ -548,9 +548,9 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
-                  "title": "The Go client for Elasticsearch: Introduction",
+                  "title": "The Go client for OpenSearch: Introduction",
                 },
                 Object {
                   "badge": null,
@@ -558,7 +558,7 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -568,13 +568,13 @@ exports[`Overview without features 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },
               ],
               "hasNew": true,
-              "kibanaVersion": "8.0.0",
+              "opensearchDashboardsVersion": "8.0.0",
             }
           }
         />
@@ -583,18 +583,18 @@ exports[`Overview without features 1`] = `
         grow={3}
       >
         <section
-          aria-labelledby="kbnOverviewMore__title"
-          className="kbnOverviewMore"
+          aria-labelledby="osdOverviewMore__title"
+          className="osdOverviewMore"
         >
           <EuiTitle
             size="s"
           >
             <h2
-              id="kbnOverviewMore__title"
+              id="osdOverviewMore__title"
             >
               <FormattedMessage
                 defaultMessage="Do more with Elastic"
-                id="kibanaOverview.more.title"
+                id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
             </h2>
@@ -603,52 +603,52 @@ exports[`Overview without features 1`] = `
             size="m"
           />
           <EuiFlexGroup
-            className="kbnOverviewMore__content"
+            className="osdOverviewMore__content"
           >
             <EuiFlexItem
-              className="kbnOverviewMore__item"
-              key="kibana"
+              className="osdOverviewMore__item"
+              key="opensearchDashboards"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description=""
-                  href="kibana_landing_page"
+                  href="opensearch_dashboards_landing_page"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="inputOutput"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
-                  title="Kibana"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png"
+                  title="OpenSearch Dashboards"
                   titleElement="h3"
                   titleSize="xs"
                 />
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-2"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution two"
                   href="path-to-solution-two"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png"
                   title="Solution two"
                   titleElement="h3"
                   titleSize="xs"
@@ -656,24 +656,24 @@ exports[`Overview without features 1`] = `
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-3"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution three"
                   href="path-to-solution-three"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png"
                   title="Solution three"
                   titleElement="h3"
                   titleSize="xs"
@@ -681,24 +681,24 @@ exports[`Overview without features 1`] = `
               </mockConstructor>
             </EuiFlexItem>
             <EuiFlexItem
-              className="kbnOverviewMore__item"
+              className="osdOverviewMore__item"
               key="solution-4"
             >
               <mockConstructor>
                 <EuiCard
-                  className="kbnOverviewSolution"
+                  className="osdOverviewSolution"
                   description="Description of solution four"
                   href="path-to-solution-four"
                   icon={
                     <EuiToken
-                      className="kbnOverviewSolution__icon"
+                      className="osdOverviewSolution__icon"
                       fill="light"
                       iconType="empty"
                       shape="circle"
                       size="l"
                     />
                   }
-                  image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png"
                   title="Solution four"
                   titleElement="h3"
                   titleSize="xs"
@@ -718,94 +718,62 @@ exports[`Overview without features 1`] = `
         [MockFunction] {
           "calls": Array [
             Array [
-              "kibana_landing_page",
+              "opensearch_dashboards_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
-            ],
-            Array [
-              "path-to-solution-two",
-            ],
-            Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
-            ],
-            Array [
-              "path-to-solution-three",
-            ],
-            Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
-            ],
-            Array [
-              "path-to-solution-four",
-            ],
-            Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
-            ],
-            Array [
-              "kibana_landing_page",
-            ],
-            Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             ],
           ],
           "results": Array [
             Object {
               "type": "return",
-              "value": "kibana_landing_page",
+              "value": "opensearch_dashboards_landing_page",
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
-            },
-            Object {
-              "type": "return",
-              "value": "path-to-solution-two",
-            },
-            Object {
-              "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
-            },
-            Object {
-              "type": "return",
-              "value": "path-to-solution-three",
-            },
-            Object {
-              "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
-            },
-            Object {
-              "type": "return",
-              "value": "path-to-solution-four",
-            },
-            Object {
-              "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
-            },
-            Object {
-              "type": "return",
-              "value": "kibana_landing_page",
-            },
-            Object {
-              "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             },
             Object {
               "type": "return",
@@ -813,7 +781,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             },
             Object {
               "type": "return",
@@ -821,7 +789,7 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             },
             Object {
               "type": "return",
@@ -829,12 +797,44 @@ exports[`Overview without features 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             },
           ],
         }
       }
-      path="/app/kibana_overview"
+      path="/app/opensearch_dashboards_overview"
     />
   </div>
 </main>
@@ -842,46 +842,46 @@ exports[`Overview without features 1`] = `
 
 exports[`Overview without solutions 1`] = `
 <main
-  aria-labelledby="kbnOverviewPageHeader__title"
-  className="kbnOverviewWrapper"
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
 >
   <mockConstructor
     addBasePath={
       [MockFunction] {
         "calls": Array [
           Array [
-            "kibana_landing_page",
+            "opensearch_dashboards_landing_page",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           ],
           Array [
             "path-to-solution-two",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           ],
           Array [
             "path-to-solution-three",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           ],
           Array [
             "path-to-solution-four",
           ],
           Array [
-            "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           ],
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": "kibana_landing_page",
+            "value": "opensearch_dashboards_landing_page",
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
           },
           Object {
             "type": "return",
@@ -889,7 +889,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
           },
           Object {
             "type": "return",
@@ -897,7 +897,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
           },
           Object {
             "type": "return",
@@ -905,7 +905,7 @@ exports[`Overview without solutions 1`] = `
           },
           Object {
             "type": "return",
-            "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           },
         ],
       }
@@ -914,32 +914,32 @@ exports[`Overview without solutions 1`] = `
     iconType="inputOutput"
     title={
       <FormattedMessage
-        defaultMessage="Kibana"
-        id="kibanaOverview.header.title"
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
         values={Object {}}
       />
     }
   />
   <div
-    className="kbnOverviewContent"
+    className="osdOverviewContent"
   >
     <section
-      aria-labelledby="kbnOverviewApps__title"
-      className="kbnOverviewApps"
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
     >
       <EuiScreenReaderOnly>
         <h2
-          id="kbnOverviewApps__title"
+          id="osdOverviewApps__title"
         >
           <FormattedMessage
             defaultMessage="Explore these apps"
-            id="kibanaOverview.apps.title"
+            id="opensearchDashboardsOverview.apps.title"
             values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
       <EuiFlexGroup
-        className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
         justifyContent="center"
       />
       <EuiSpacer
@@ -952,7 +952,7 @@ exports[`Overview without solutions 1`] = `
     />
     <EuiFlexGroup
       alignItems="flexStart"
-      className="kbnOverviewSupplements kbnOverviewSupplements--hasNews"
+      className="osdOverviewSupplements osdOverviewSupplements--hasNews"
     >
       <EuiFlexItem
         grow={1}
@@ -968,9 +968,9 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "8e18fcedbc",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/the-go-client-for-elasticsearch-introduction?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-31T10:23:47.000Z",
-                  "title": "The Go client for Elasticsearch: Introduction",
+                  "title": "The Go client for OpenSearch: Introduction",
                 },
                 Object {
                   "badge": null,
@@ -978,7 +978,7 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "fb3e3d42ef",
                   "linkText": "Read more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-14T10:23:47.000Z",
                   "title": "Alerting and anomaly detection for uptime and reliability",
                 },
@@ -988,13 +988,13 @@ exports[`Overview without solutions 1`] = `
                   "expireOn": "2050-12-31T11:59:59.000Z",
                   "hash": "b2fc7d47d5",
                   "linkText": "Learn more on the blog",
-                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
+                  "linkUrl": "https://www.opensearch.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=opensearchDashboardsfeed",
                   "publishOn": "2020-08-01T10:23:47.000Z",
                   "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
                 },
               ],
               "hasNew": true,
-              "kibanaVersion": "8.0.0",
+              "opensearchDashboardsVersion": "8.0.0",
             }
           }
         />
@@ -1003,7 +1003,7 @@ exports[`Overview without solutions 1`] = `
         grow={3}
       >
         <EuiFlexGroup
-          className="kbnOverviewData kbnOverviewData--expanded"
+          className="osdOverviewData osdOverviewData--expanded"
         >
           <EuiFlexItem>
             <AddData
@@ -1011,38 +1011,38 @@ exports[`Overview without solutions 1`] = `
                 [MockFunction] {
                   "calls": Array [
                     Array [
-                      "kibana_landing_page",
+                      "opensearch_dashboards_landing_page",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-two",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-three",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-four",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
                     ],
                   ],
                   "results": Array [
                     Object {
                       "type": "return",
-                      "value": "kibana_landing_page",
+                      "value": "opensearch_dashboards_landing_page",
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1050,7 +1050,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1058,7 +1058,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1066,7 +1066,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
                     },
                   ],
                 }
@@ -1080,38 +1080,38 @@ exports[`Overview without solutions 1`] = `
                 [MockFunction] {
                   "calls": Array [
                     Array [
-                      "kibana_landing_page",
+                      "opensearch_dashboards_landing_page",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-two",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-three",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
                     ],
                     Array [
                       "path-to-solution-four",
                     ],
                     Array [
-                      "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
                     ],
                   ],
                   "results": Array [
                     Object {
                       "type": "return",
-                      "value": "kibana_landing_page",
+                      "value": "opensearch_dashboards_landing_page",
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1119,7 +1119,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1127,7 +1127,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
                     },
                     Object {
                       "type": "return",
@@ -1135,7 +1135,7 @@ exports[`Overview without solutions 1`] = `
                     },
                     Object {
                       "type": "return",
-                      "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
                     },
                   ],
                 }
@@ -1155,38 +1155,38 @@ exports[`Overview without solutions 1`] = `
         [MockFunction] {
           "calls": Array [
             Array [
-              "kibana_landing_page",
+              "opensearch_dashboards_landing_page",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             ],
             Array [
               "path-to-solution-two",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             ],
             Array [
               "path-to-solution-three",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             ],
             Array [
               "path-to-solution-four",
             ],
             Array [
-              "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             ],
           ],
           "results": Array [
             Object {
               "type": "return",
-              "value": "kibana_landing_page",
+              "value": "opensearch_dashboards_landing_page",
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
             },
             Object {
               "type": "return",
@@ -1194,7 +1194,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
             },
             Object {
               "type": "return",
@@ -1202,7 +1202,7 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
             },
             Object {
               "type": "return",
@@ -1210,12 +1210,12 @@ exports[`Overview without solutions 1`] = `
             },
             Object {
               "type": "return",
-              "value": "/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
             },
           ],
         }
       }
-      path="/app/kibana_overview"
+      path="/app/opensearch_dashboards_overview"
     />
   </div>
 </main>

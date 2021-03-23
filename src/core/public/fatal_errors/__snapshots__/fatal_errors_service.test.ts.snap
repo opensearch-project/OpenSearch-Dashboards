@@ -6,7 +6,7 @@ Array [
     <I18nContext>
       <FatalErrorsScreen
         errorInfo$={Rx.Observable}
-        kibanaVersion="kibanaVersion"
+        opensearchDashboardsVersion="opensearchDashboardsVersion"
       />
     </I18nContext>,
     <div />,

@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`kbnLoadingIndicator is hidden by default 1`] = `
+exports[`osdLoadingIndicator is hidden by default 1`] = `
 <EuiLoadingSpinner
   aria-hidden={true}
   aria-label="Loading content"
-  className="kbnLoadingIndicator-hidden"
+  className="osdLoadingIndicator-hidden"
   data-test-subj="globalLoadingIndicator-hidden"
 />
 `;
 
-exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
+exports[`osdLoadingIndicator is visible when loadingCount is > 0 1`] = `
 <EuiLoadingSpinner
   aria-hidden={false}
   aria-label="Loading content"

@@ -116,7 +116,7 @@ exports[`StatusMessage should show that no indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No Elasticsearch indices match your pattern."
+        defaultMessage="No OpenSearch indices match your pattern."
         id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
         values={Object {}}
       />
@@ -133,7 +133,7 @@ exports[`StatusMessage should show that system indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No Elasticsearch indices match your pattern."
+        defaultMessage="No OpenSearch indices match your pattern."
         id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
         values={Object {}}
       />

@@ -8,7 +8,7 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Scripting disabled"
-        description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
+        description="Showing the status that scripting is disabled in OpenSearch. Not an update message, that it JUST got disabled."
         id="indexPatternManagement.disabledCallOutHeader"
         values={Object {}}
       />
@@ -16,7 +16,7 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
   >
     <p>
       <FormattedMessage
-        defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
+        defaultMessage="All inline scripting has been disabled in OpenSearch. You must enable inline scripting for at least one language in order to use scripted fields in OpenSearch Dashboards."
         id="indexPatternManagement.disabledCallOutLabel"
         values={Object {}}
       />

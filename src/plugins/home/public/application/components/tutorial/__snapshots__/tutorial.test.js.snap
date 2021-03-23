@@ -147,7 +147,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
                 "id": "platform id",
                 "instructions": Array [
                   Object {
-                    "title": "elasticCloud instructions",
+                    "title": "OpenSearchCloud instructions",
                   },
                 ],
               },

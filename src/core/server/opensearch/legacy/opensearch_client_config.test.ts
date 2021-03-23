@@ -47,7 +47,7 @@ test('parses minimally specified config', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "x-elastic-product-origin": "opensearh-dashboards",
+            "x-elastic-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -109,7 +109,7 @@ test('parses fully specified config', () => {
         Object {
           "auth": "elastic:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearh-dashboards",
+            "x-elastic-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -121,7 +121,7 @@ test('parses fully specified config', () => {
         Object {
           "auth": "elastic:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearh-dashboards",
+            "x-elastic-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "domain.com",
@@ -133,7 +133,7 @@ test('parses fully specified config', () => {
         Object {
           "auth": "elastic:changeme",
           "headers": Object {
-            "x-elastic-product-origin": "opensearh-dashboards",
+            "x-elastic-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "opensearch.local",
@@ -188,7 +188,7 @@ test('parses config timeouts of moment.Duration type', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "x-elastic-product-origin": "opensearh-dashboards",
+            "x-elastic-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
           "host": "localhost",
@@ -233,7 +233,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "localhost",
@@ -244,7 +244,7 @@ describe('#auth', () => {
           },
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -284,7 +284,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -324,7 +324,7 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
             "host": "opensearch.local",
@@ -509,7 +509,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -556,7 +556,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -599,7 +599,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",
@@ -667,7 +667,7 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "x-elastic-product-origin": "opensearh-dashboards",
+              "x-elastic-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
             "path": "/",

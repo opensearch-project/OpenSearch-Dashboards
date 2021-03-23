@@ -21,7 +21,7 @@ Object {
           false,
         ],
       },
-      "function": "esaggs",
+      "function": "opensearchaggs",
       "type": "function",
     },
     Object {
@@ -59,7 +59,7 @@ Object {
           false,
         ],
       },
-      "function": "esaggs",
+      "function": "opensearchaggs",
       "type": "function",
     },
     Object {

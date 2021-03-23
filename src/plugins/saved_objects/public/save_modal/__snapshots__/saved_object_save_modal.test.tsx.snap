@@ -6,7 +6,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
     onSubmit={[Function]}
   >
     <EuiModal
-      className="kbnSavedObjectSaveModal"
+      className="osdSavedObjectSaveModal"
       data-test-subj="savedObjectSaveModal"
       onClose={[Function]}
     >

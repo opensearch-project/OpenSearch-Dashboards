@@ -70,12 +70,12 @@ exports[`AddData render 1`] = `
       key="ingestManager"
     >
       <Synopsis
-        description="Add and manage your fleet of Elastic Agents and integrations."
+        description="Add and manage your fleet of OpenSearch Agents and integrations."
         iconType="indexManagementApp"
         id="ingestManager"
         isBeta={false}
         onClick={[Function]}
-        title="Add Elastic Agent"
+        title="Add OpenSearch Agent"
         url="/app/ingestManager"
         wrapInPanel={true}
       />

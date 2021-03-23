@@ -7,7 +7,7 @@ Object {
   ],
   "baz": Array [],
   "foo": Array [],
-  "kibana": Array [
+  "opensearch-dashboards": Array [
     "foo",
   ],
   "quux": Array [
@@ -27,7 +27,7 @@ Array [
     "baz",
   ],
   Array [
-    "kibana",
+    "opensearch-dashboards",
     "bar",
     "zorge",
   ],
@@ -40,7 +40,7 @@ Array [
 exports[`#topologicallyBatchProjects batches projects topologically even if graph contains projects not presented in the project map 1`] = `
 Array [
   Array [
-    "kibana",
+    "opensearch-dashboards",
     "bar",
     "baz",
     "zorge",

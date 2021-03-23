@@ -3,7 +3,7 @@
 exports[`SuggestionComponent Should display the suggestion and use the provided ariaId 1`] = `
 <div
   aria-selected={false}
-  className="kbnTypeahead__item"
+  className="osdTypeahead__item"
   data-test-subj="autocompleteSuggestion-value-as-promised,-not-helpful"
   id="suggestion-1"
   onClick={[Function]}
@@ -11,23 +11,23 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
   role="option"
 >
   <div
-    className="kbnSuggestionItem kbnSuggestionItem--value"
+    className="osdSuggestionItem osdSuggestionItem--value"
   >
     <div
-      className="kbnSuggestionItem__type"
+      className="osdSuggestionItem__type"
     >
       <EuiIcon
-        type="kqlValue"
+        type="dqlValue"
       />
     </div>
     <div
-      className="kbnSuggestionItem__text"
+      className="osdSuggestionItem__text"
       data-test-subj="autoCompleteSuggestionText"
     >
       as promised, not helpful
     </div>
     <div
-      className="kbnSuggestionItem__description"
+      className="osdSuggestionItem__description"
     >
       This is not a helpful suggestion
     </div>
@@ -38,7 +38,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
 exports[`SuggestionComponent Should make the element active if the selected prop is true 1`] = `
 <div
   aria-selected={true}
-  className="kbnTypeahead__item active"
+  className="osdTypeahead__item active"
   data-test-subj="autocompleteSuggestion-value-as-promised,-not-helpful"
   id="suggestion-1"
   onClick={[Function]}
@@ -46,23 +46,23 @@ exports[`SuggestionComponent Should make the element active if the selected prop
   role="option"
 >
   <div
-    className="kbnSuggestionItem kbnSuggestionItem--value"
+    className="osdSuggestionItem osdSuggestionItem--value"
   >
     <div
-      className="kbnSuggestionItem__type"
+      className="osdSuggestionItem__type"
     >
       <EuiIcon
-        type="kqlValue"
+        type="dqlValue"
       />
     </div>
     <div
-      className="kbnSuggestionItem__text"
+      className="osdSuggestionItem__text"
       data-test-subj="autoCompleteSuggestionText"
     >
       as promised, not helpful
     </div>
     <div
-      className="kbnSuggestionItem__description"
+      className="osdSuggestionItem__description"
     >
       This is not a helpful suggestion
     </div>

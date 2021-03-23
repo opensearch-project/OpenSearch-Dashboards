@@ -130,8 +130,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "euiIconType": "inputOutput",
-            "id": "kibana",
-            "label": "Kibana",
+            "id": "opensearchDashboards",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -186,8 +186,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "euiIconType": "inputOutput",
-            "id": "kibana",
-            "label": "Kibana",
+            "id": "opensearchDashboards",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -200,8 +200,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "euiIconType": "inputOutput",
-            "id": "kibana",
-            "label": "Kibana",
+            "id": "opensearchDashboards",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -726,7 +726,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         >
                           <EuiListGroup
                             aria-label="Recently viewed links"
-                            className="kbnCollapsibleNav__recentsListGroup"
+                            className="osdCollapsibleNav__recentsListGroup"
                             color="subdued"
                             gutterSize="none"
                             listItems={
@@ -754,7 +754,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           >
                             <ul
                               aria-label="Recently viewed links"
-                              className="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                              className="euiListGroup osdCollapsibleNav__recentsListGroup"
                               style={
                                 Object {
                                   "maxWidth": "none",
@@ -853,13 +853,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               className="euiFlexItem eui-yScroll"
             >
               <EuiCollapsibleNavGroup
-                data-test-subj="collapsibleNavGroup-kibana"
+                data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 iconType="inputOutput"
                 initialIsOpen={true}
                 isCollapsible={true}
-                key="kibana"
+                key="opensearchDashboards"
                 onToggle={[Function]}
-                title="Kibana"
+                title="OpenSearch Dashboards"
               >
                 <EuiAccordion
                   arrowDisplay="right"
@@ -886,14 +886,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__title"
                             id="mockId__title"
                           >
-                            Kibana
+                            OpenSearch Dashboards
                           </h3>
                         </EuiTitle>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   }
                   className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-kibana"
+                  data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   id="mockId"
                   initialIsOpen={true}
                   isLoading={false}
@@ -903,7 +903,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 >
                   <div
                     className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                    data-test-subj="collapsibleNavGroup-kibana"
+                    data-test-subj="collapsibleNavGroup-opensearchDashboards"
                     onToggle={[Function]}
                   >
                     <div
@@ -971,7 +971,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                       id="mockId__title"
                                     >
-                                      Kibana
+                                      OpenSearch Dashboards
                                     </h3>
                                   </EuiTitle>
                                 </div>
@@ -996,7 +996,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               className="euiCollapsibleNavGroup__children"
                             >
                               <EuiListGroup
-                                aria-label="Primary navigation links, Kibana"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 color="subdued"
                                 gutterSize="none"
                                 listItems={
@@ -1031,7 +1031,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 size="s"
                               >
                                 <ul
-                                  aria-label="Primary navigation links, Kibana"
+                                  aria-label="Primary navigation links, OpenSearch Dashboards"
                                   className="euiListGroup"
                                   style={
                                     Object {

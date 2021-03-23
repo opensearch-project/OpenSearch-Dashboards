@@ -7,19 +7,19 @@ exports[`ManageData render 1`] = `
     margin="xl"
   />
   <section
-    aria-labelledby="kbnOverviewDataManage__title"
-    className="kbnOverviewDataManage"
-    data-test-subj="kbnOverviewDataManage"
+    aria-labelledby="osdOverviewDataManage__title"
+    className="osdOverviewDataManage"
+    data-test-subj="osdOverviewDataManage"
   >
     <EuiTitle
       size="s"
     >
       <h2
-        id="kbnOverviewDataManage__title"
+        id="osdOverviewDataManage__title"
       >
         <FormattedMessage
           defaultMessage="Manage your data"
-          id="kibanaOverview.manageData.sectionTitle"
+          id="opensearchDashboardsOverview.manageData.sectionTitle"
           values={Object {}}
         />
       </h2>
@@ -28,11 +28,11 @@ exports[`ManageData render 1`] = `
       size="m"
     />
     <EuiFlexGroup
-      className="kbnOverviewDataManage__content"
+      className="osdOverviewDataManage__content"
       wrap={true}
     >
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        className="osdOverviewDataManage__item"
         key="security"
       >
         <RedirectAppLinks>
@@ -48,7 +48,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        className="osdOverviewDataManage__item"
         key="monitoring"
       >
         <RedirectAppLinks>
@@ -64,7 +64,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        className="osdOverviewDataManage__item"
         key="snapshot_restore"
       >
         <RedirectAppLinks>
@@ -80,7 +80,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        className="osdOverviewDataManage__item"
         key="index_lifecycle_management"
       >
         <RedirectAppLinks>

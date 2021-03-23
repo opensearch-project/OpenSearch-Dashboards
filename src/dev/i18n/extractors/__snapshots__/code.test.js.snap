@@ -3,21 +3,21 @@
 exports[`dev/i18n/extractors/code extracts React, server-side and angular service default messages 1`] = `
 Array [
   Array [
-    "kbn.mgmt.id-1",
+    "osd.mgmt.id-1",
     Object {
       "description": undefined,
       "message": "Message text 1",
     },
   ],
   Array [
-    "kbn.mgmt.id-2",
+    "osd.mgmt.id-2",
     Object {
       "description": "Message description",
       "message": "Message text 2",
     },
   ],
   Array [
-    "kbn.mgmt.id-3",
+    "osd.mgmt.id-3",
     Object {
       "description": undefined,
       "message": "Message text 3",

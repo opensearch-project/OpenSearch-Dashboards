@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`esdsl correctly handles filter, query and timerange on context 1`] = `
+exports[`opensearchdsl correctly handles filter, query and timerange on context 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -33,15 +33,15 @@ Object {
           },
         },
       },
-      "index": "kibana_sample_data_logs",
+      "index": "opensearch_dashboards_sample_data_logs",
       "size": 4,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;
 
-exports[`esdsl correctly handles input adds filters 1`] = `
+exports[`opensearchdsl correctly handles input adds filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -65,11 +65,11 @@ Object {
       "size": 0,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;
 
-exports[`esdsl correctly handles input adds filters to query with filters 1`] = `
+exports[`opensearchdsl correctly handles input adds filters to query with filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -96,15 +96,15 @@ Object {
           },
         },
       },
-      "index": "kibana_sample_data_logs",
+      "index": "opensearch_dashboards_sample_data_logs",
       "size": 4,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;
 
-exports[`esdsl correctly handles input adds query 1`] = `
+exports[`opensearchdsl correctly handles input adds query 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -129,11 +129,11 @@ Object {
       "size": 0,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;
 
-exports[`esdsl correctly handles input adds query to a query with filters 1`] = `
+exports[`opensearchdsl correctly handles input adds query to a query with filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -160,15 +160,15 @@ Object {
           },
         },
       },
-      "index": "kibana_sample_data_logs",
+      "index": "opensearch_dashboards_sample_data_logs",
       "size": 4,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;
 
-exports[`esdsl correctly handles input ignores timerange 1`] = `
+exports[`opensearchdsl correctly handles input ignores timerange 1`] = `
 Object {
   "body": Object {
     "params": Object {
@@ -186,6 +186,6 @@ Object {
       "size": 0,
     },
   },
-  "type": "es_raw_response",
+  "type": "opensearch_raw_response",
 }
 `;

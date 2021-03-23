@@ -20,7 +20,7 @@ exports[`SolutionTitle renders the title section of the solution panel 1`] = `
       size="s"
     >
       <h3>
-        Kibana
+        OpenSearch Dashboards
       </h3>
     </EuiTitle>
     <EuiText

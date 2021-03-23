@@ -3,13 +3,13 @@
 exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
 <EuiFlexItem
   className="homSolutions__group homSolutions__group--single homSolutions__item"
-  data-test-subj="homSolutionPanel homSolutionPanel_kibana"
+  data-test-subj="homSolutionPanel homSolutionPanel_opensearchDashboards"
   grow={1}
-  key="kibana"
+  key="opensearchDashboards"
 >
   <a
-    className="homSolutionPanel homSolutionPanel--kibana"
-    href="kibana_landing_page"
+    className="homSolutionPanel homSolutionPanel--opensearchDashboards"
+    href="opensearch_dashboards_landing_page"
     onClick={[Function]}
   >
     <EuiPanel
@@ -26,7 +26,7 @@ exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
           <SolutionTitle
             iconType="inputOutput"
             subtitle="Visualize & analyze"
-            title="Kibana"
+            title="OpenSearch Dashboards"
           />
         </EuiFlexItem>
         <EuiFlexItem

@@ -47,13 +47,13 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           data-test-subj="groupByField"
           fields={
             Object {
-              "kibana_sample_data_flights": Array [
+              "opensearch_dashboards_sample_data_flights": Array [
                 Object {
                   "aggregatable": true,
-                  "esTypes": Array [
+                  "name": "OriginCityName",
+                  "opensearchTypes": Array [
                     "keyword",
                   ],
-                  "name": "OriginCityName",
                   "readFromDocValues": true,
                   "searchable": true,
                   "type": "string",
@@ -61,7 +61,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
               ],
             }
           }
-          indexPattern="kibana_sample_data_flights"
+          indexPattern="opensearch_dashboards_sample_data_flights"
           onChange={[Function]}
           type="terms"
           value="OriginCityName"

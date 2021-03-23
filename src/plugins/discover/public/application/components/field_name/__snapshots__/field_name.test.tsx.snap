@@ -8,7 +8,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <span
-      class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small osdFieldIcon"
     >
       <div
         aria-label="Geo point field"
@@ -39,7 +39,7 @@ exports[`FieldName renders a number field by providing a field record, useShortD
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <span
-      class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small osdFieldIcon"
     >
       <div
         aria-label="Number field"
@@ -70,7 +70,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <span
-      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small osdFieldIcon"
     >
       <div
         aria-label="String field"

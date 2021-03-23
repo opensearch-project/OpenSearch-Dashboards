@@ -258,9 +258,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -289,9 +290,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -320,9 +322,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -352,9 +355,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -718,18 +722,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -787,18 +787,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -856,18 +852,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -925,18 +917,14 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -1344,9 +1332,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -1375,9 +1364,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -1406,9 +1396,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -1437,9 +1428,10 @@ exports[`NewVisModal should render as expected 1`] = `
                                   <div
                                     class="euiKeyPadMenuItem__icon"
                                   >
-                                    <div
-                                      color="secondary"
-                                      data-euiicon-type="empty"
+                                    <img
+                                      alt=""
+                                      class="visNewVisDialog__typeImage"
+                                      src="visTimelion"
                                     />
                                   </div>
                                   <p
@@ -1752,18 +1744,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -1821,18 +1809,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -1890,18 +1874,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p
@@ -1959,18 +1939,14 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <VisTypeIcon>
-                                                    <EuiIcon
-                                                      color="secondary"
-                                                      size="l"
-                                                      type="empty"
-                                                    >
-                                                      <div
-                                                        color="secondary"
-                                                        data-euiicon-type="empty"
-                                                        size="l"
-                                                      />
-                                                    </EuiIcon>
+                                                  <VisTypeIcon
+                                                    image="visTimelion"
+                                                  >
+                                                    <img
+                                                      alt=""
+                                                      className="visNewVisDialog__typeImage"
+                                                      src="visTimelion"
+                                                    />
                                                   </VisTypeIcon>
                                                 </div>
                                                 <p

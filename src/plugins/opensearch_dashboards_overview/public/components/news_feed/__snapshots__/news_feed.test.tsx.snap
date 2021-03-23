@@ -2,18 +2,18 @@
 
 exports[`FeedItem render 1`] = `
 <section
-  aria-labelledby="kbnOverviewNews__title"
-  className="kbnOverviewNews"
+  aria-labelledby="osdOverviewNews__title"
+  className="osdOverviewNews"
 >
   <EuiTitle
     size="s"
   >
     <h2
-      id="kbnOverviewNews__title"
+      id="osdOverviewNews__title"
     >
       <FormattedMessage
         defaultMessage="What's new"
-        id="kibanaOverview.news.title"
+        id="opensearchDashboardsOverview.news.title"
         values={Object {}}
       />
     </h2>
@@ -22,10 +22,10 @@ exports[`FeedItem render 1`] = `
     size="m"
   />
   <div
-    className="kbnOverviewNews__content"
+    className="osdOverviewNews__content"
   >
     <article
-      aria-labelledby="kbnOverviewNews__title0"
+      aria-labelledby="osdOverviewNews__title0"
       key="Blog Post 1"
     >
       <header>
@@ -33,7 +33,7 @@ exports[`FeedItem render 1`] = `
           size="xxs"
         >
           <h3
-            id="kbnOverviewNews__title0"
+            id="osdOverviewNews__title0"
           >
             <EuiLink
               href="link-blog-post-1"
@@ -65,7 +65,7 @@ exports[`FeedItem render 1`] = `
       </EuiText>
     </article>
     <article
-      aria-labelledby="kbnOverviewNews__title1"
+      aria-labelledby="osdOverviewNews__title1"
       key="Alerting and anomaly detection for uptime and reliability"
     >
       <header>
@@ -73,7 +73,7 @@ exports[`FeedItem render 1`] = `
           size="xxs"
         >
           <h3
-            id="kbnOverviewNews__title1"
+            id="osdOverviewNews__title1"
           >
             <EuiLink
               href="link-blog-post-2"
@@ -105,7 +105,7 @@ exports[`FeedItem render 1`] = `
       </EuiText>
     </article>
     <article
-      aria-labelledby="kbnOverviewNews__title2"
+      aria-labelledby="osdOverviewNews__title2"
       key="Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management"
     >
       <header>
@@ -113,7 +113,7 @@ exports[`FeedItem render 1`] = `
           size="xxs"
         >
           <h3
-            id="kbnOverviewNews__title2"
+            id="osdOverviewNews__title2"
           >
             <EuiLink
               href="link-blog-post-3"

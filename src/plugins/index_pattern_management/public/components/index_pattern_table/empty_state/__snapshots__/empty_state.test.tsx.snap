@@ -13,7 +13,7 @@ exports[`EmptyState should render normally 1`] = `
         <EuiTitle>
           <h2>
             <FormattedMessage
-              defaultMessage="Ready to try Kibana? First, you need data."
+              defaultMessage="Ready to try OpenSearch Dashboards? First, you need data."
               id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
               values={Object {}}
             />
@@ -91,7 +91,7 @@ exports[`EmptyState should render normally 1`] = `
             className="inpEmptyState__card"
             description={
               <FormattedMessage
-                defaultMessage="Load a data set and a Kibana dashboard."
+                defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
                 id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
                 values={Object {}}
               />
@@ -132,7 +132,7 @@ exports[`EmptyState should render normally 1`] = `
                   Object {
                     "description": <EuiLink
                       external={true}
-                      href="https://www.opensearch.co/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
+                      href="https://www.opensearch.com/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
                       target="_blank"
                     >
                       <FormattedMessage

@@ -21,7 +21,7 @@ exports[`LoadingState should render normally 1`] = `
         }
       >
         <FormattedMessage
-          defaultMessage="Checking for Elasticsearch data"
+          defaultMessage="Checking for OpenSearch data"
           id="indexPatternManagement.createIndexPattern.loadingState.checkingLabel"
           values={Object {}}
         />

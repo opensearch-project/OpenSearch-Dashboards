@@ -95,7 +95,7 @@ Object {
 exports[`should inject an environment variable value when setting a value with \${ENV_VAR} 1`] = `
 Object {
   "bar": "pre-val1-mid-val2-post",
-  "opensearch": Object {
+  "elasticsearch": Object {
     "requestHeadersWhitelist": Array [
       "val1",
       "val2",

@@ -1302,8 +1302,6 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
-  kibanaDocLink="/docs"
-  kibanaVersion="1.0.0"
   loadingCount$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1507,8 +1505,8 @@ exports[`Header renders 1`] = `
         Object {
           "baseUrl": "",
           "href": "",
-          "id": "kibana",
-          "title": "kibana",
+          "id": "opensearchDashboards",
+          "title": "opensearchDashboards",
         },
       ],
       "closed": false,
@@ -1594,6 +1592,8 @@ exports[`Header renders 1`] = `
     }
   }
   onIsLockedUpdate={[Function]}
+  opensearchDashboardsDocLink="/docs"
+  opensearchDashboardsVersion="1.0.0"
   recentlyAccessed$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1722,8 +1722,8 @@ exports[`Header renders 1`] = `
                         Object {
                           "baseUrl": "",
                           "href": "",
-                          "id": "kibana",
-                          "title": "kibana",
+                          "id": "opensearchDashboards",
+                          "title": "opensearchDashboards",
                         },
                       ],
                       "closed": false,
@@ -2693,8 +2693,8 @@ exports[`Header renders 1`] = `
                       "thrownError": null,
                     }
                   }
-                  kibanaDocLink="/docs"
-                  kibanaVersion="1.0.0"
+                  opensearchDashboardsDocLink="/docs"
+                  opensearchDashboardsVersion="1.0.0"
                   useDefaultContent={true}
                 />,
                 <HeaderNavControls
@@ -2828,8 +2828,8 @@ exports[`Header renders 1`] = `
                           Object {
                             "baseUrl": "",
                             "href": "",
-                            "id": "kibana",
-                            "title": "kibana",
+                            "id": "opensearchDashboards",
+                            "title": "opensearchDashboards",
                           },
                         ],
                         "closed": false,
@@ -2947,7 +2947,7 @@ exports[`Header renders 1`] = `
                         <span
                           className="euiHeaderLogo__text"
                         >
-                          Elastic
+                          OpenSearch Dashboards
                         </span>
                       </a>
                     </EuiHeaderLogo>
@@ -3016,13 +3016,13 @@ exports[`Header renders 1`] = `
                     <EuiLoadingSpinner
                       aria-hidden={true}
                       aria-label="Loading content"
-                      className="kbnLoadingIndicator-hidden"
+                      className="osdLoadingIndicator-hidden"
                       data-test-subj="globalLoadingIndicator-hidden"
                     >
                       <span
                         aria-hidden={true}
                         aria-label="Loading content"
-                        className="euiLoadingSpinner euiLoadingSpinner--medium kbnLoadingIndicator-hidden"
+                        className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
                         data-test-subj="globalLoadingIndicator-hidden"
                       />
                     </EuiLoadingSpinner>
@@ -3839,8 +3839,8 @@ exports[`Header renders 1`] = `
                         "thrownError": null,
                       }
                     }
-                    kibanaDocLink="/docs"
-                    kibanaVersion="1.0.0"
+                    opensearchDashboardsDocLink="/docs"
+                    opensearchDashboardsVersion="1.0.0"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -4644,8 +4644,8 @@ exports[`Header renders 1`] = `
                           "timeZone": null,
                         }
                       }
-                      kibanaDocLink="/docs"
-                      kibanaVersion="1.0.0"
+                      opensearchDashboardsDocLink="/docs"
+                      opensearchDashboardsVersion="1.0.0"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -5292,8 +5292,8 @@ exports[`Header renders 1`] = `
             Object {
               "baseUrl": "",
               "href": "",
-              "id": "kibana",
-              "title": "kibana",
+              "id": "opensearchDashboards",
+              "title": "opensearchDashboards",
             },
           ],
           "closed": false,
@@ -5800,18 +5800,18 @@ exports[`Header renders 1`] = `
                             >
                               <EuiListGroup
                                 aria-label="Recently viewed links"
-                                className="kbnCollapsibleNav__recentsListGroup"
+                                className="osdCollapsibleNav__recentsListGroup"
                                 color="subdued"
                                 gutterSize="none"
                                 listItems={
                                   Array [
                                     Object {
-                                      "aria-label": "dashboard, type: kibana",
+                                      "aria-label": "dashboard, type: opensearchDashboards",
                                       "data-test-subj": "collapsibleNavAppLink--recent",
                                       "href": "http://localhost/",
                                       "label": "dashboard",
                                       "onClick": [Function],
-                                      "title": "dashboard, type: kibana",
+                                      "title": "dashboard, type: opensearchDashboards",
                                     },
                                   ]
                                 }
@@ -5820,7 +5820,7 @@ exports[`Header renders 1`] = `
                               >
                                 <ul
                                   aria-label="Recently viewed links"
-                                  className="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                  className="euiListGroup osdCollapsibleNav__recentsListGroup"
                                   style={
                                     Object {
                                       "maxWidth": "none",
@@ -5828,7 +5828,7 @@ exports[`Header renders 1`] = `
                                   }
                                 >
                                   <EuiListGroupItem
-                                    aria-label="dashboard, type: kibana"
+                                    aria-label="dashboard, type: opensearchDashboards"
                                     color="subdued"
                                     data-test-subj="collapsibleNavAppLink--recent"
                                     href="http://localhost/"
@@ -5837,20 +5837,20 @@ exports[`Header renders 1`] = `
                                     onClick={[Function]}
                                     showToolTip={false}
                                     size="s"
-                                    title="dashboard, type: kibana"
+                                    title="dashboard, type: opensearchDashboards"
                                     wrapText={false}
                                   >
                                     <li
                                       className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                                     >
                                       <a
-                                        aria-label="dashboard, type: kibana"
+                                        aria-label="dashboard, type: opensearchDashboards"
                                         className="euiListGroupItem__button"
                                         data-test-subj="collapsibleNavAppLink--recent"
                                         href="http://localhost/"
                                         onClick={[Function]}
                                         rel="noreferrer"
-                                        title="dashboard, type: kibana"
+                                        title="dashboard, type: opensearchDashboards"
                                       >
                                         <span
                                           className="euiListGroupItem__label"
@@ -5907,7 +5907,7 @@ exports[`Header renders 1`] = `
                               data-test-subj="collapsibleNavAppLink"
                               href=""
                               isActive={false}
-                              label="kibana"
+                              label="opensearchDashboards"
                               onClick={[Function]}
                               size="s"
                             >
@@ -5923,9 +5923,9 @@ exports[`Header renders 1`] = `
                                 >
                                   <span
                                     className="euiListGroupItem__label"
-                                    title="kibana"
+                                    title="opensearchDashboards"
                                   >
-                                    kibana
+                                    opensearchDashboards
                                   </span>
                                 </button>
                               </li>

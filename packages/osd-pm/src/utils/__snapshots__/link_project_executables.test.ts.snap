@@ -8,10 +8,10 @@ Object {
   "isDirectory": Array [],
   "isFile": Array [
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
     ],
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
     ],
   ],
   "isSymlink": Array [],
@@ -26,43 +26,43 @@ exports[`bin script points to a file creates a symlink in the project node_modul
 Object {
   "chmod": Array [
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin/bar",
+      "<repoRoot>/packages/osd-pm/src/utils/foo/node_modules/.bin/bar",
       "755",
     ],
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin/bar",
+      "<repoRoot>/packages/osd-pm/src/utils/baz/node_modules/.bin/bar",
       "755",
     ],
   ],
   "copyDirectory": Array [],
   "createSymlink": Array [
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin/bar",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/foo/node_modules/.bin/bar",
       "exec",
     ],
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin/bar",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/baz/node_modules/.bin/bar",
       "exec",
     ],
   ],
   "isDirectory": Array [],
   "isFile": Array [
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
     ],
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
     ],
   ],
   "isSymlink": Array [],
   "mkdirp": Array [
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin",
+      "<repoRoot>/packages/osd-pm/src/utils/foo/node_modules/.bin",
     ],
     Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin",
+      "<repoRoot>/packages/osd-pm/src/utils/baz/node_modules/.bin",
     ],
   ],
   "readFile": Array [],

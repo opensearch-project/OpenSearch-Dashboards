@@ -142,45 +142,45 @@ describe('setPasswords', () => {
     });
 
     expect(mockClient.security.changePassword.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    Object {
-      "body": Object {
-        "password": "bar",
-      },
-      "refresh": "wait_for",
-      "username": "opensearch_dashboards_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "logstash_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "opensearch",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "beats_system",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          Object {
+            "body": Object {
+              "password": "bar",
+            },
+            "refresh": "wait_for",
+            "username": "opensearch_dashboards_system",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": undefined,
+            },
+            "refresh": "wait_for",
+            "username": "logstash_system",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": undefined,
+            },
+            "refresh": "wait_for",
+            "username": "opensearch",
+          },
+        ],
+        Array [
+          Object {
+            "body": Object {
+              "password": undefined,
+            },
+            "refresh": "wait_for",
+            "username": "beats_system",
+          },
+        ],
+      ]
+    `);
   });
 });
 
