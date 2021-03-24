@@ -57,8 +57,7 @@ type PortalTooltipProps = {
   chartId: string;
 };
 
-function addToPadding(padding?: Partial<Padding> | number, extra: number = 0): Padding | number | undefined {
-  if (!padding) return undefined;
+function addToPadding(padding: Partial<Padding> | number = 0, extra: number = 0): Padding | number | undefined {
   if (typeof padding === 'number') return padding + extra;
 
   const { top = 0, right = 0, bottom = 0, left = 0 } = padding;
