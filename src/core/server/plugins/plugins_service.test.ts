@@ -388,7 +388,6 @@ describe('PluginsService', () => {
           initialize: true,
           pluginSearchPaths: [
             resolve(process.cwd(), 'src', 'plugins'),
-            resolve(process.cwd(), 'x-pack', 'plugins'),
             resolve(process.cwd(), 'plugins'),
             resolve(process.cwd(), '..', 'opensearch-dashboards-extra'),
           ],

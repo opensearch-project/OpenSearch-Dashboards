@@ -2,8 +2,8 @@
 
 exports[`AddData render 1`] = `
 <section
-  aria-labelledby="kbnOverviewDataAdd__title"
-  className="kbnOverviewDataAdd"
+  aria-labelledby="osdOverviewDataAdd__title"
+  className="osdOverviewDataAdd"
 >
   <EuiFlexGroup
     alignItems="center"
@@ -15,23 +15,23 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="kbnOverviewDataAdd__title"
+          id="osdOverviewDataAdd__title"
         >
           <FormattedMessage
             defaultMessage="Ingest your data"
-            id="kibanaOverview.addData.sectionTitle"
+            id="opensearchDashboardsOverview.addData.sectionTitle"
             values={Object {}}
           />
         </h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      className="kbnOverviewDataAdd__actions"
+      className="osdOverviewDataAdd__actions"
       grow={false}
     >
       <div>
         <EuiButtonEmpty
-          className="kbnOverviewDataAdd__actionButton"
+          className="osdOverviewDataAdd__actionButton"
           flush="left"
           href="#/tutorial_directory/sampleData"
           iconType="visTable"
@@ -39,7 +39,7 @@ exports[`AddData render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Try our sample data"
-            id="kibanaOverview.addData.sampleDataButtonLabel"
+            id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -50,7 +50,7 @@ exports[`AddData render 1`] = `
     size="m"
   />
   <EuiFlexGroup
-    className="kbnOverviewDataAdd__content"
+    className="osdOverviewDataAdd__content"
   >
     <EuiFlexItem
       key="home_tutorial_directory"

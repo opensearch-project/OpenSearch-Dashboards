@@ -237,7 +237,7 @@ it('rewrites mocha reports with minimal changes', async () => {
      ‹/body›
      ‹/html›
 
-         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/osd-es/src/artifact.js:95:13)
+         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/osd-opensearch/src/artifact.js:95:13)
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]›
     -      ‹/failure›
     +    at process._tickCallback (internal/process/next_tick.js:68:7)

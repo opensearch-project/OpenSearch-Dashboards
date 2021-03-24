@@ -70,10 +70,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 1,
+            "name": "category",
             "opensearchTypes": Array [
               "text",
             ],
-            "name": "category",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -84,10 +84,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
+            "name": "currency",
             "opensearchTypes": Array [
               "keyword",
             ],
-            "name": "currency",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -98,10 +98,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
+            "name": "customer_birth_date",
             "opensearchTypes": Array [
               "date",
             ],
-            "name": "customer_birth_date",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,

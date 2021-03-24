@@ -88,7 +88,9 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"foo\\":\\"bar\\",\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\": {\\"foo\\": \\"bar\\"}} -->
+
+      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -102,7 +104,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
 
     expect(
@@ -114,7 +116,9 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"some-other\\":{\\"foo\\":\\"bar\\"},\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"some-other\\": {\\"foo\\": \\"bar\\"}} -->
+
+      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -128,7 +132,9 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- opensearchDashboardsCiData = {\\"failed-test\\" -->
+
+      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 });

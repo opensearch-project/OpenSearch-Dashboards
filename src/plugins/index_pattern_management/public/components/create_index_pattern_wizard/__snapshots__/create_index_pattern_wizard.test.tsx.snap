@@ -207,7 +207,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
       allIndices={
         Array [
           Object {
-            "name": ".kibana ",
+            "name": ".opensearch_dashboards ",
           },
         ]
       }

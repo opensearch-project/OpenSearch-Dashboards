@@ -11,8 +11,8 @@ Usage:
 Options:
   --help                         Display this menu and exit. 
   --config <file>                Pass in a config. Can pass in multiple configs. 
-  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or snapshot
-  --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --opensearchFrom <snapshot|source> Build OpenSearch from source or run from snapshot. Default: $TEST_OPENSEARCH_FROM or snapshot
+  --opensearch-dashboards-install-dir <dir> Run OpenSearch Dashboards from existing install directory instead of from source. 
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
@@ -34,8 +34,8 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -56,8 +56,8 @@ Object {
   ],
   "createLogger": [Function],
   "debug": true,
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -77,8 +77,8 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -100,10 +100,10 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": Object {
+  "extraOsdOpts": Object {
     "server.foo": "bar",
   },
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -122,8 +122,8 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "quiet": true,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -143,8 +143,8 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "silent": true,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -157,15 +157,15 @@ Object {
 }
 `;
 
-exports[`process options for run tests CLI accepts source value for $TEST_ES_FROM 1`] = `
+exports[`process options for run tests CLI accepts source value for $TEST_OPENSEARCH_FROM 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "source",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "source",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -177,15 +177,15 @@ Object {
 }
 `;
 
-exports[`process options for run tests CLI accepts source value for esFrom 1`] = `
+exports[`process options for run tests CLI accepts source value for opensearchFrom 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "source",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "source",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -197,16 +197,16 @@ Object {
 }
 `;
 
-exports[`process options for run tests CLI accepts string value for kibana-install-dir 1`] = `
+exports[`process options for run tests CLI accepts string value for opensearch-dashboards-install-dir 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
   "installDir": "foo",
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -225,9 +225,9 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
   "grep": "management",
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -246,8 +246,8 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -260,15 +260,15 @@ Object {
 }
 `;
 
-exports[`process options for run tests CLI prioritizes source flag over $TEST_ES_FROM 1`] = `
+exports[`process options for run tests CLI prioritizes source flag over $TEST_OPENSEARCH_FROM 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
-  "extraKbnOpts": undefined,
+  "extraOsdOpts": undefined,
+  "opensearchFrom": "snapshot",
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],

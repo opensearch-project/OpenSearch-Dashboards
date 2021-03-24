@@ -58,11 +58,11 @@ exports[`SolutionsSection renders a single solution 1`] = `
               "Analyze data in dashboards",
             ],
             "icon": "inputOutput",
-            "id": "kibana",
+            "id": "opensearchDashboards",
             "order": 1,
-            "path": "kibana_landing_page",
+            "path": "opensearch_dashboards_landing_page",
             "subtitle": "Visualize & analyze",
-            "title": "Kibana",
+            "title": "OpenSearch Dashboards",
           }
         }
       />
@@ -75,7 +75,7 @@ exports[`SolutionsSection renders a single solution 1`] = `
 </Fragment>
 `;
 
-exports[`SolutionsSection renders multiple solutions in a single column when Kibana apps are not enabled 1`] = `
+exports[`SolutionsSection renders multiple solutions in a single column when OpenSearch Dashboards apps are not enabled 1`] = `
 <Fragment>
   <section
     aria-labelledby="homSolutions__title"
@@ -168,7 +168,7 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
 </Fragment>
 `;
 
-exports[`SolutionsSection renders multiple solutions in two columns with Kibana in its own column 1`] = `
+exports[`SolutionsSection renders multiple solutions in two columns with OpenSearch Dashboards in its own column 1`] = `
 <Fragment>
   <section
     aria-labelledby="homSolutions__title"
@@ -260,11 +260,11 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
               "Analyze data in dashboards",
             ],
             "icon": "inputOutput",
-            "id": "kibana",
+            "id": "opensearchDashboards",
             "order": 1,
-            "path": "kibana_landing_page",
+            "path": "opensearch_dashboards_landing_page",
             "subtitle": "Visualize & analyze",
-            "title": "Kibana",
+            "title": "OpenSearch Dashboards",
           }
         }
       />

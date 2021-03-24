@@ -2,20 +2,20 @@
 
 exports[`fieldAction is rendered 1`] = `
 <div
-  className="kbnFieldButton"
+  className="osdFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
   </button>
   <div
-    className="kbnFieldButton__fieldAction"
+    className="osdFieldButton__fieldAction"
   >
     <span>
       fieldAction
@@ -26,21 +26,21 @@ exports[`fieldAction is rendered 1`] = `
 
 exports[`fieldIcon is rendered 1`] = `
 <div
-  className="kbnFieldButton"
+  className="osdFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__fieldIcon"
+      className="osdFieldButton__fieldIcon"
     >
       <span>
         fieldIcon
       </span>
     </span>
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
@@ -50,14 +50,14 @@ exports[`fieldIcon is rendered 1`] = `
 
 exports[`isActive defaults to false 1`] = `
 <div
-  className="kbnFieldButton"
+  className="osdFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
@@ -67,14 +67,14 @@ exports[`isActive defaults to false 1`] = `
 
 exports[`isActive renders true 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton-isActive"
+  className="osdFieldButton osdFieldButton-isActive"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
@@ -84,14 +84,14 @@ exports[`isActive renders true 1`] = `
 
 exports[`isDraggable is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--isDraggable"
+  className="osdFieldButton osdFieldButton--isDraggable"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
@@ -101,14 +101,14 @@ exports[`isDraggable is rendered 1`] = `
 
 exports[`sizes m is applied 1`] = `
 <div
-  className="kbnFieldButton"
+  className="osdFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>
@@ -118,14 +118,14 @@ exports[`sizes m is applied 1`] = `
 
 exports[`sizes s is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--small"
+  className="osdFieldButton osdFieldButton--small"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__button"
+    className="osd-resetFocusState osdFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="osdFieldButton__name"
     >
       name
     </span>

@@ -7,7 +7,7 @@ Object {
     "baz": Array [
       "bar",
     ],
-    "kibana": Array [],
+    "opensearch-dashboards": Array [],
     "quux": Array [
       "bar",
       "baz",
@@ -17,7 +17,7 @@ Object {
   "projects": Array [
     "bar",
     "baz",
-    "kibana",
+    "opensearch-dashboards",
     "quux",
     "with-additional-projects",
   ],
@@ -27,12 +27,12 @@ Object {
 exports[`excludes projects if multiple \`exclude\` filter are specified 1`] = `
 Object {
   "graph": Object {
-    "kibana": Array [],
+    "opensearch-dashboards": Array [],
     "quux": Array [],
     "with-additional-projects": Array [],
   },
   "projects": Array [
-    "kibana",
+    "opensearch-dashboards",
     "quux",
     "with-additional-projects",
   ],
@@ -79,7 +79,7 @@ Object {
       "bar",
     ],
     "foo": Array [],
-    "kibana": Array [
+    "opensearch-dashboards": Array [
       "foo",
     ],
     "quux": Array [
@@ -92,7 +92,7 @@ Object {
     "bar",
     "baz",
     "foo",
-    "kibana",
+    "opensearch-dashboards",
     "quux",
     "with-additional-projects",
   ],

@@ -2,7 +2,7 @@
 
 exports[`TableHeader with time column renders correctly 1`] = `
 <tr
-  class="kbnDocTableHeader"
+  class="osdDocTableHeader"
   data-test-subj="docTableHeader"
 >
   <th
@@ -38,7 +38,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
         />
       </span>
@@ -47,7 +47,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move first column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="fa fa-angle-double-right osdDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
         />
       </span>
@@ -65,7 +65,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
         />
       </span>
@@ -74,7 +74,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="fa fa-angle-double-left osdDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
         />
       </span>
@@ -83,7 +83,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="fa fa-angle-double-right osdDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
         />
       </span>
@@ -101,7 +101,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
         />
       </span>
@@ -110,7 +110,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move last column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="fa fa-angle-double-left osdDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"
         />
       </span>
@@ -121,7 +121,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
 
 exports[`TableHeader without time column renders correctly 1`] = `
 <tr
-  class="kbnDocTableHeader"
+  class="osdDocTableHeader"
   data-test-subj="docTableHeader"
 >
   <th
@@ -139,7 +139,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
         />
       </span>
@@ -148,7 +148,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move first column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="fa fa-angle-double-right osdDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
         />
       </span>
@@ -166,7 +166,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
         />
       </span>
@@ -175,7 +175,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="fa fa-angle-double-left osdDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
         />
       </span>
@@ -184,7 +184,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the right"
-          class="fa fa-angle-double-right kbnDocTableHeader__move"
+          class="fa fa-angle-double-right osdDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
         />
       </span>
@@ -202,7 +202,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="fa fa-remove kbnDocTableHeader__move"
+          class="fa fa-remove osdDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
         />
       </span>
@@ -211,7 +211,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move last column to the left"
-          class="fa fa-angle-double-left kbnDocTableHeader__move"
+          class="fa fa-angle-double-left osdDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"
         />
       </span>

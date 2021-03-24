@@ -119,6 +119,6 @@ Object {
 }
 `;
 
-exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the Kibana server"`;
+exports[`#remove throws an error if key is overridden 1`] = `"Unable to update \\"bar\\" because its value is overridden by the OpenSearch Dashboards server"`;
 
-exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the Kibana server"`;
+exports[`#set throws an error if key is overridden 1`] = `"Unable to update \\"foo\\" because its value is overridden by the OpenSearch Dashboards server"`;

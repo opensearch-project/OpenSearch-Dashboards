@@ -788,7 +788,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           </strong>
            
           <FormattedMessage
-            defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
+            defaultMessage="{language} is deprecated and support will be removed in the next major version of OpenSearch Dashboards and OpenSearch. We recommend using {painlessLink} for new scripted fields."
             id="indexPatternManagement.warningLabel.warningDetail"
             values={
               Object {

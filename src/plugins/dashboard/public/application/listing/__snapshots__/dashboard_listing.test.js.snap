@@ -92,15 +92,15 @@ exports[`after fetch initialFilter 1`] = `
             <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
                   values={Object {}}
                 />
               </p>
               <p>
                 <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
@@ -194,15 +194,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
                   values={Object {}}
                 />
               </p>
               <p>
                 <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
@@ -296,15 +296,15 @@ exports[`after fetch renders table rows 1`] = `
             <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
                   values={Object {}}
                 />
               </p>
               <p>
                 <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
@@ -398,15 +398,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
                   values={Object {}}
                 />
               </p>
               <p>
                 <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
@@ -499,15 +499,15 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
             <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
                   values={Object {}}
                 />
               </p>
               <p>
                 <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink

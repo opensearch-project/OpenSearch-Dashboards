@@ -3,7 +3,7 @@
 exports[`FieldIcon changes fill when scripted is true 1`] = `
 <EuiToken
   aria-label="test"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   fill="dark"
   iconType="tokenNumber"
   size="s"
@@ -14,7 +14,7 @@ exports[`FieldIcon changes fill when scripted is true 1`] = `
 exports[`FieldIcon renders an icon for an unknown type 1`] = `
 <EuiToken
   aria-label="test"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   color="gray"
   iconType="questionInCircle"
   size="s"
@@ -25,7 +25,7 @@ exports[`FieldIcon renders an icon for an unknown type 1`] = `
 exports[`FieldIcon renders known field types _source is rendered 1`] = `
 <EuiToken
   aria-label="_source"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   color="gray"
   iconType="editorCodeBlock"
   size="s"
@@ -36,7 +36,7 @@ exports[`FieldIcon renders known field types _source is rendered 1`] = `
 exports[`FieldIcon renders known field types boolean is rendered 1`] = `
 <EuiToken
   aria-label="boolean"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenBoolean"
   size="s"
   title="boolean"
@@ -46,7 +46,7 @@ exports[`FieldIcon renders known field types boolean is rendered 1`] = `
 exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 <EuiToken
   aria-label="conflict"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   color="euiVisColor9"
   iconType="alert"
   size="s"
@@ -57,7 +57,7 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 exports[`FieldIcon renders known field types date is rendered 1`] = `
 <EuiToken
   aria-label="date"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenDate"
   size="s"
   title="date"
@@ -67,7 +67,7 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
 exports[`FieldIcon renders known field types geo_point is rendered 1`] = `
 <EuiToken
   aria-label="geo_point"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenGeo"
   size="s"
   title="geo_point"
@@ -77,7 +77,7 @@ exports[`FieldIcon renders known field types geo_point is rendered 1`] = `
 exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
 <EuiToken
   aria-label="geo_shape"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenGeo"
   size="s"
   title="geo_shape"
@@ -87,7 +87,7 @@ exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
 exports[`FieldIcon renders known field types ip is rendered 1`] = `
 <EuiToken
   aria-label="ip"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenIP"
   size="s"
   title="ip"
@@ -97,7 +97,7 @@ exports[`FieldIcon renders known field types ip is rendered 1`] = `
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenFile"
   size="s"
   title="murmur3"
@@ -107,7 +107,7 @@ exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 exports[`FieldIcon renders known field types nested is rendered 1`] = `
 <EuiToken
   aria-label="nested"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenNested"
   size="s"
   title="nested"
@@ -117,7 +117,7 @@ exports[`FieldIcon renders known field types nested is rendered 1`] = `
 exports[`FieldIcon renders known field types number is rendered 1`] = `
 <EuiToken
   aria-label="number"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenNumber"
   size="s"
   title="number"
@@ -127,7 +127,7 @@ exports[`FieldIcon renders known field types number is rendered 1`] = `
 exports[`FieldIcon renders known field types string is rendered 1`] = `
 <EuiToken
   aria-label="string"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   iconType="tokenString"
   size="s"
   title="string"
@@ -137,7 +137,7 @@ exports[`FieldIcon renders known field types string is rendered 1`] = `
 exports[`FieldIcon renders with className if provided 1`] = `
 <EuiToken
   aria-label="test"
-  className="kbnFieldIcon myClass"
+  className="osdFieldIcon myClass"
   color="gray"
   iconType="questionInCircle"
   size="s"
@@ -148,7 +148,7 @@ exports[`FieldIcon renders with className if provided 1`] = `
 exports[`FieldIcon supports same props as EuiToken 1`] = `
 <EuiToken
   aria-label="test"
-  className="kbnFieldIcon"
+  className="osdFieldIcon"
   color="euiColorVis0"
   fill="none"
   iconType="tokenNumber"

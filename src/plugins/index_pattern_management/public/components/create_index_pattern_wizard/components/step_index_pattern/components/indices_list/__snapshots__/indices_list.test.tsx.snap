@@ -11,7 +11,7 @@ exports[`IndicesList should change pages 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -19,7 +19,7 @@ exports[`IndicesList should change pages 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -113,7 +113,7 @@ exports[`IndicesList should change per page 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -216,12 +216,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <span>
-            <strong>
-              ki
-            </strong>
-            bana
-          </span>
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -229,7 +224,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -323,7 +318,7 @@ exports[`IndicesList should render normally 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -331,7 +326,7 @@ exports[`IndicesList should render normally 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -425,7 +420,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -433,7 +428,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -441,7 +436,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="2"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -449,7 +444,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="3"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -457,7 +452,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="4"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -465,7 +460,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="5"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -473,7 +468,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="6"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -481,7 +476,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="7"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -489,7 +484,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="8"
       >
         <EuiTableRowCell>
-          kibana
+          opensearch-dashboards
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -497,7 +492,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="9"
       >
         <EuiTableRowCell>
-          es
+          opensearch
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>

@@ -2,7 +2,7 @@
 
 exports[`OverviewPageFooter render 1`] = `
 <footer
-  className="kbnOverviewPageFooter"
+  className="osdOverviewPageFooter"
 >
   <EuiFlexGroup
     justifyContent="spaceBetween"
@@ -28,7 +28,7 @@ exports[`OverviewPageFooter render 1`] = `
           }
         >
           <EuiButtonEmpty
-            className="kbnOverviewPageFooter__button"
+            className="osdOverviewPageFooter__button"
             data-test-subj="allPlugins"
             flush="both"
             href="/app/home#/feature_directory"
@@ -37,7 +37,7 @@ exports[`OverviewPageFooter render 1`] = `
           >
             <FormattedMessage
               defaultMessage="View app directory"
-              id="kibana-react.pageFooter.appDirectoryButtonLabel"
+              id="opensearch-dashboards-react.pageFooter.appDirectoryButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>

@@ -2,25 +2,25 @@
 
 exports[`GettingStarted dark mode on 1`] = `
 <section
-  aria-labelledby="kbnOverviewGettingStarted__title"
-  className="kbnOverviewGettingStarted"
+  aria-labelledby="osdOverviewGettingStarted__title"
+  className="osdOverviewGettingStarted"
 >
   <EuiFlexGroup
     alignItems="center"
   >
     <EuiFlexItem
-      className="kbnOverviewGettingStarted__content"
+      className="osdOverviewGettingStarted__content"
     >
       <div>
         <EuiTitle
           size="s"
         >
           <h2
-            id="kbnOverviewGettingStarted__title"
+            id="osdOverviewGettingStarted__title"
           >
             <FormattedMessage
-              defaultMessage="Getting started with Kibana"
-              id="kibanaOverview.gettingStarted.title"
+              defaultMessage="Getting started with OpenSearch Dashboards"
+              id="opensearchDashboardsOverview.gettingStarted.title"
               values={Object {}}
             />
           </h2>
@@ -31,8 +31,8 @@ exports[`GettingStarted dark mode on 1`] = `
         <EuiText>
           <p>
             <FormattedMessage
-              defaultMessage="Kibana empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
-              id="kibanaOverview.gettingStarted.description"
+              defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+              id="opensearchDashboardsOverview.gettingStarted.description"
               values={Object {}}
             />
           </p>
@@ -41,7 +41,7 @@ exports[`GettingStarted dark mode on 1`] = `
           size="xl"
         />
         <EuiFlexGrid
-          className="kbnOverviewGettingStarted__apps"
+          className="osdOverviewGettingStarted__apps"
           columns={2}
         >
           <EuiFlexItem
@@ -171,12 +171,12 @@ exports[`GettingStarted dark mode on 1`] = `
         <RedirectAppLinks>
           <EuiButton
             fill={true}
-            href="/app/management/kibana/indexPatterns"
+            href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
             <FormattedMessage
               defaultMessage="Add your data"
-              id="kibanaOverview.gettingStarted.addDataButtonLabel"
+              id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -184,11 +184,11 @@ exports[`GettingStarted dark mode on 1`] = `
       </div>
     </EuiFlexItem>
     <EuiFlexItem
-      className="kbnOverviewGettingStarted__graphic"
+      className="osdOverviewGettingStarted__graphic"
     >
       <EuiImage
-        alt="Kibana visualizations illustration"
-        url="/plugins/kibanaOverview/assets/kibana_montage_dark.svg"
+        alt="OpenSearch Dashboards visualizations illustration"
+        url="/plugins/opensearchDashboardsOverview/assets/opensearch_dashboards_montage_dark.svg"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -197,25 +197,25 @@ exports[`GettingStarted dark mode on 1`] = `
 
 exports[`GettingStarted render 1`] = `
 <section
-  aria-labelledby="kbnOverviewGettingStarted__title"
-  className="kbnOverviewGettingStarted"
+  aria-labelledby="osdOverviewGettingStarted__title"
+  className="osdOverviewGettingStarted"
 >
   <EuiFlexGroup
     alignItems="center"
   >
     <EuiFlexItem
-      className="kbnOverviewGettingStarted__content"
+      className="osdOverviewGettingStarted__content"
     >
       <div>
         <EuiTitle
           size="s"
         >
           <h2
-            id="kbnOverviewGettingStarted__title"
+            id="osdOverviewGettingStarted__title"
           >
             <FormattedMessage
-              defaultMessage="Getting started with Kibana"
-              id="kibanaOverview.gettingStarted.title"
+              defaultMessage="Getting started with OpenSearch Dashboards"
+              id="opensearchDashboardsOverview.gettingStarted.title"
               values={Object {}}
             />
           </h2>
@@ -226,8 +226,8 @@ exports[`GettingStarted render 1`] = `
         <EuiText>
           <p>
             <FormattedMessage
-              defaultMessage="Kibana empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
-              id="kibanaOverview.gettingStarted.description"
+              defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+              id="opensearchDashboardsOverview.gettingStarted.description"
               values={Object {}}
             />
           </p>
@@ -236,7 +236,7 @@ exports[`GettingStarted render 1`] = `
           size="xl"
         />
         <EuiFlexGrid
-          className="kbnOverviewGettingStarted__apps"
+          className="osdOverviewGettingStarted__apps"
           columns={2}
         >
           <EuiFlexItem
@@ -366,12 +366,12 @@ exports[`GettingStarted render 1`] = `
         <RedirectAppLinks>
           <EuiButton
             fill={true}
-            href="/app/management/kibana/indexPatterns"
+            href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
             <FormattedMessage
               defaultMessage="Add your data"
-              id="kibanaOverview.gettingStarted.addDataButtonLabel"
+              id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -379,11 +379,11 @@ exports[`GettingStarted render 1`] = `
       </div>
     </EuiFlexItem>
     <EuiFlexItem
-      className="kbnOverviewGettingStarted__graphic"
+      className="osdOverviewGettingStarted__graphic"
     >
       <EuiImage
-        alt="Kibana visualizations illustration"
-        url="/plugins/kibanaOverview/assets/kibana_montage_light.svg"
+        alt="OpenSearch Dashboards visualizations illustration"
+        url="/plugins/opensearchDashboardsOverview/assets/opensearch_dashboards_montage_light.svg"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

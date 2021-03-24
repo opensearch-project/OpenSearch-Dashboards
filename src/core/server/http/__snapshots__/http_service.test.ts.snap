@@ -12,7 +12,7 @@ exports[`spins up notReady server until started if configured with \`autoListen:
 Object {
   "body": Array [
     Array [
-      "Kibana server is not ready yet",
+      "OpenSearch Dashboards server is not ready yet",
     ],
   ],
   "code": Array [

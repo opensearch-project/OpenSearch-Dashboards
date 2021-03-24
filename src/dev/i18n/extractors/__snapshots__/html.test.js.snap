@@ -3,21 +3,21 @@
 exports[`dev/i18n/extractors/html extracts default messages from HTML 1`] = `
 Array [
   Array [
-    "kbn.dashboard.id-1",
+    "osd.dashboard.id-1",
     Object {
       "description": "Message description 1",
       "message": "Message text 1 {value}",
     },
   ],
   Array [
-    "kbn.dashboard.id-2",
+    "osd.dashboard.id-2",
     Object {
       "description": undefined,
       "message": "Message text 2",
     },
   ],
   Array [
-    "kbn.dashboard.id-3",
+    "osd.dashboard.id-3",
     Object {
       "description": "Message description 3",
       "message": "Message text 3",
@@ -29,7 +29,7 @@ Array [
 exports[`dev/i18n/extractors/html extracts default messages from HTML with one-time binding 1`] = `
 Array [
   Array [
-    "kbn.id",
+    "osd.id",
     Object {
       "description": undefined,
       "message": "Message text with {value}",

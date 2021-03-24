@@ -213,7 +213,7 @@ describe('task rejection', () => {
     await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"FOO"`);
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " info [  opensearchDashboards  ] foo",
+        " info [  opensearch-dashboards  ] foo",
         "   │ERROR failure 0 sec",
         "   │ERROR Error: FOO",
         "   │          <stacktrace>",
@@ -240,7 +240,7 @@ describe('task rejection', () => {
     await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"FOO"`);
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " info [  opensearchDashboards  ] foo",
+        " info [  opensearch-dashboards  ] foo",
         "",
       ]
     `);
