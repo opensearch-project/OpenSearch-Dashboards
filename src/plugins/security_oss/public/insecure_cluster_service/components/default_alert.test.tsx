@@ -19,7 +19,8 @@
 
 import { defaultAlertText } from './default_alert';
 
-describe('defaultAlertText', () => {
+// TODO: Ignoring because the defaultAlertText was commented out because it upsells a hosted solution.
+xdescribe('defaultAlertText', () => {
   it('creates a valid MountPoint that can cleanup correctly', () => {
     const mountPoint = defaultAlertText(jest.fn());
 

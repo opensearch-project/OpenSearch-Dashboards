@@ -230,11 +230,9 @@ describe('plugins discovery system', () => {
       .toPromise();
 
     const srcPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins');
-    const xpackPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'x-pack', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
         `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
-        `Error: ENOENT, no such file or directory '${xpackPluginsPath}' (invalid-search-path, ${xpackPluginsPath})`,
       ])
     );
   });
