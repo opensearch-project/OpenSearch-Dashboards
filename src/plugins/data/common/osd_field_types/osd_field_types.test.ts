@@ -60,7 +60,7 @@ describe('utils/osd_field_types', () => {
     test('returns a OsdFieldType instance by name', () => {
       const osdFieldType = getOsdFieldType(OPENSEARCH_FIELD_TYPES.STRING);
 
-      expect(osdFieldType).toBeInstanceOf(osdFieldType);
+      expect(osdFieldType).toBeInstanceOf(OsdFieldType);
       expect(osdFieldType).toHaveProperty('name', OPENSEARCH_FIELD_TYPES.STRING);
     });
 

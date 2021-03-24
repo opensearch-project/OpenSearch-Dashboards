@@ -23,7 +23,7 @@ import { SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/s
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
-  const ID = 'bf00ad16941fc51420f91a93428b27a0';
+  const ID = '631b8fa45c5d0b8948aaf38cc3a001ca';
   const TYPE = 'url';
   const URL = 'http://opensearch.co';
 

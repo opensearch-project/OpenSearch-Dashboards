@@ -20,7 +20,7 @@
 import {
   savedObjectsRepositoryMock,
   loggingSystemMock,
-  opensearchDashboardsServiceMock,
+  opensearchServiceMock,
 } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
@@ -54,7 +54,7 @@ describe('telemetry_application_usage', () => {
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
   const callCluster = jest.fn();
-  const opensearchClient = opensearchDashboardsServiceMock.createClusterClient().asInternalUser;
+  const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
 
   beforeAll(() =>
     registerApplicationUsageCollector(logger, usageCollectionMock, registerType, getUsageCollector)

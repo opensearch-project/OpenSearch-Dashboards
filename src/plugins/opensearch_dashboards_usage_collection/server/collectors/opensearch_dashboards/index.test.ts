@@ -47,7 +47,7 @@ describe('telemetry_opensearch_dashboards', () => {
 
   test('fetch', async () => {
     expect(await collector.fetch(callCluster)).toStrictEqual({
-      index: '.opensearch_dashboards-tests',
+      index: '.opensearch_dashboards_tests',
       dashboard: { total: 0 },
       visualization: { total: 0 },
       search: { total: 0 },
@@ -59,7 +59,7 @@ describe('telemetry_opensearch_dashboards', () => {
 
   test('formatForBulkUpload', async () => {
     const resultFromFetch = {
-      index: '.opensearch_dashboards-tests',
+      index: '.opensearch_dashboards_tests',
       dashboard: { total: 0 },
       visualization: { total: 0 },
       search: { total: 0 },

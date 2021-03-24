@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../core/server/mocks';
+import { opensearchServiceMock } from '../../../../../core/server/mocks';
 import { shimAbortSignal } from '.';
 
 describe('shimAbortSignal', () => {
   it('aborts the promise if the signal is aborted', () => {
-    const promise = elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    const promise = opensearchServiceMock.createSuccessTransportRequestPromise({
       success: true,
     });
     const controller = new AbortController();
@@ -33,7 +33,7 @@ describe('shimAbortSignal', () => {
   });
 
   it('returns the original promise', async () => {
-    const promise = elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    const promise = opensearchServiceMock.createSuccessTransportRequestPromise({
       success: true,
     });
     const controller = new AbortController();
@@ -43,7 +43,7 @@ describe('shimAbortSignal', () => {
   });
 
   it('allows the promise to be aborted manually', () => {
-    const promise = elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    const promise = opensearchServiceMock.createSuccessTransportRequestPromise({
       success: true,
     });
     const controller = new AbortController();

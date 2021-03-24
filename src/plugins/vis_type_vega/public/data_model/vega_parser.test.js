@@ -191,7 +191,7 @@ describe('VegaParser._resolveOpenSearchQueries', () => {
   test(
     'opensearch 2',
     check(
-      { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
+      { data: { name: 'requestId', url: { '%type%': 'opensearch', index: 'a' } } },
       { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42] } }
     )
   );
