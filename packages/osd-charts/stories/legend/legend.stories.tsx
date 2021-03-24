@@ -30,6 +30,7 @@ export { Example as right } from './1_legend_right';
 export { Example as bottom } from './2_legend_bottom';
 export { Example as left } from './3_legend_left';
 export { Example as top } from './4_legend_top';
+export { Example as insideChart } from './13_inside_chart';
 export { Example as changingSpecs } from './5_changing_specs';
 export { Example as hideLegendItemsBySeries } from './6_hide_legend';
 export { Example as displayValuesInLegendElements } from './7_display_values';

@@ -20,7 +20,8 @@
 import { CategoryKey } from '../../../../common/category';
 import { map } from '../../../../common/iterables';
 import { LegendItem } from '../../../../common/legend';
-import { identity, Position } from '../../../../utils/common';
+import { LegendPositionConfig } from '../../../../specs/settings';
+import { identity } from '../../../../utils/common';
 import { isHierarchicalLegend } from '../../../../utils/legend';
 import { Layer } from '../../specs';
 import { QuadViewModel } from '../types/viewmodel_types';
@@ -45,7 +46,7 @@ export function getLegendItems(
   layers: Layer[],
   flatLegend: boolean | undefined,
   legendMaxDepth: number,
-  legendPosition: Position,
+  legendPosition: LegendPositionConfig,
   quadViewModel: QuadViewModel[],
 ): LegendItem[] {
   const uniqueNames = new Set(map(({ dataName, fillColor }) => makeKey(dataName, fillColor), quadViewModel));

@@ -19,16 +19,17 @@
 
 import createCachedSelector from 're-reselect';
 
-import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_type_utils';
 import { LEGEND_HIERARCHY_MARGIN } from '../../components/legend/legend_item';
+import { LEGEND_TO_FULL_CONFIG } from '../../components/legend/position_style';
+import { LegendPositionConfig } from '../../specs/settings';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import { CanvasTextBBoxCalculator } from '../../utils/bbox/canvas_text_bbox_calculator';
-import { Position, isDefined } from '../../utils/common';
+import { Position, isDefined, LayoutDirection } from '../../utils/common';
 import { GlobalChartState } from '../chart_state';
 import { getChartIdSelector } from './get_chart_id';
 import { getChartThemeSelector } from './get_chart_theme';
+import { getLegendConfigSelector } from './get_legend_config_selector';
 import { getLegendItemsLabelsSelector } from './get_legend_items_labels';
-import { getSettingsSpecSelector } from './get_settings_specs';
 
 const getParentDimensionSelector = (state: GlobalChartState) => state.parentDimensions;
 
@@ -42,13 +43,17 @@ const TOP_MARGIN = 2;
 /** @internal */
 export type LegendSizing = BBox & {
   margin: number;
-  position: Position;
+  position: LegendPositionConfig;
 };
 
 /** @internal */
 export const getLegendSizeSelector = createCachedSelector(
-  [getSettingsSpecSelector, getChartThemeSelector, getParentDimensionSelector, getLegendItemsLabelsSelector],
-  (settings, theme, parentDimensions, labels): LegendSizing => {
+  [getLegendConfigSelector, getChartThemeSelector, getParentDimensionSelector, getLegendItemsLabelsSelector],
+  (legendConfig, theme, parentDimensions, labels): LegendSizing => {
+    if (!legendConfig.showLegend) {
+      return { width: 0, height: 0, margin: 0, position: LEGEND_TO_FULL_CONFIG[Position.Right] };
+    }
+
     const bboxCalculator = new CanvasTextBBoxCalculator();
     const bbox = labels.reduce(
       (acc, { label, depth }) => {
@@ -73,28 +78,27 @@ export const getLegendSizeSelector = createCachedSelector(
     );
 
     bboxCalculator.destroy();
-    const { showLegend, showLegendExtra: showLegendDisplayValue, legendPosition: position, legendAction } = settings;
+    const { showLegendExtra: showLegendDisplayValue, legendPosition, legendAction } = legendConfig;
     const {
       legend: { verticalWidth, spacingBuffer, margin },
     } = theme;
-    if (!showLegend) {
-      return { width: 0, height: 0, margin: 0, position };
-    }
+
     const actionDimension = isDefined(legendAction) ? 24 : 0; // max width plus margin
     const legendItemWidth =
       MARKER_WIDTH + MARKER_LEFT_MARGIN + bbox.width + (showLegendDisplayValue ? VALUE_LEFT_MARGIN : 0);
-    if (isVerticalAxis(position)) {
+
+    if (legendPosition.direction === LayoutDirection.Vertical) {
       const legendItemHeight = bbox.height + VERTICAL_PADDING * 2;
       const legendHeight = legendItemHeight * labels.length + TOP_MARGIN;
-      const scollBarDimension = legendHeight > parentDimensions.height ? SCROLL_BAR_WIDTH : 0;
+      const scrollBarDimension = legendHeight > parentDimensions.height ? SCROLL_BAR_WIDTH : 0;
 
       return {
         width: Math.floor(
-          Math.min(legendItemWidth + spacingBuffer + actionDimension + scollBarDimension, verticalWidth),
+          Math.min(legendItemWidth + spacingBuffer + actionDimension + scrollBarDimension, verticalWidth),
         ),
-        height: legendItemHeight,
+        height: legendHeight,
         margin,
-        position,
+        position: legendPosition,
       };
     }
     const isSingleLine = (parentDimensions.width - 20) / 200 > labels.length;
@@ -102,7 +106,7 @@ export const getLegendSizeSelector = createCachedSelector(
       height: isSingleLine ? bbox.height + 16 : bbox.height * 2 + 24,
       width: Math.floor(Math.min(legendItemWidth + spacingBuffer + actionDimension, verticalWidth)),
       margin,
-      position,
+      position: legendPosition,
     };
   },
 )(getChartIdSelector);

@@ -119,7 +119,7 @@ describe('Partition - Legend item extra values', () => {
     expect(extraValues.values()).toMatchSnapshot();
   });
 
-  it('filters all extraValues is depth is 0', () => {
+  it('filters all extraValues if depth is 0', () => {
     const settings = MockGlobalSpec.settings({ legendMaxDepth: 0 });
     MockStore.addSpecs([settings, spec], store);
 
@@ -127,7 +127,7 @@ describe('Partition - Legend item extra values', () => {
     expect([...extraValues.keys()]).toEqual([]);
   });
 
-  it('filters all extraValues is depth is NaN', () => {
+  it('filters all extraValues if depth is NaN', () => {
     const settings = MockGlobalSpec.settings({ legendMaxDepth: NaN });
     MockStore.addSpecs([settings, spec], store);
 

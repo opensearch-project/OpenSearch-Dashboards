@@ -44,6 +44,7 @@ const customConfig = {
   ...(isDebug
     ? {
         launch: {
+          args: ['--no-sandbox'], // required to connect puppeteer to chromium devtools ws
           dumpio: false,
           headless: false,
           slowMo: 500,

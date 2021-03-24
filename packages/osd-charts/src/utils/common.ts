@@ -23,6 +23,22 @@ import { v1 as uuidV1 } from 'uuid';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { Point } from './point';
 
+export const Position = Object.freeze({
+  Top: 'top' as const,
+  Bottom: 'bottom' as const,
+  Left: 'left' as const,
+  Right: 'right' as const,
+});
+/** @public */
+export type Position = $Values<typeof Position>;
+
+export const LayoutDirection = Object.freeze({
+  Horizontal: 'horizontal' as const,
+  Vertical: 'vertical' as const,
+});
+/** @public */
+export type LayoutDirection = $Values<typeof LayoutDirection>;
+
 /**
  * Color variants that are unique to `@elastic/charts`. These go beyond the standard
  * static color allocations.
@@ -42,15 +58,15 @@ export type ColorVariant = $Values<typeof ColorVariant>;
 
 export const HorizontalAlignment = Object.freeze({
   Center: 'center' as const,
-  Right: 'right' as const,
-  Left: 'left' as const,
+  Right: Position.Right,
+  Left: Position.Left,
   /**
    * Aligns to near side of axis depending on position
    *
    * Examples:
    * - Left Axis, `Near` will push the label to the `Right`, _near_ the axis
    * - Right Axis, `Near` will push the axis labels to the `Left`
-   * - Top/Bottom Axes, `Near` will default to `center`
+   * - Top/Bottom Axes, `Near` will default to `Center`
    */
   Near: 'near' as const,
   /**
@@ -59,10 +75,11 @@ export const HorizontalAlignment = Object.freeze({
    * Examples:
    * - Left Axis, `Far` will push the label to the `Left`, _far_ from the axis
    * - Right Axis, `Far` will push the axis labels to the `Right`
-   * - Top/Bottom Axes, `Far` will default to `center`
+   * - Top/Bottom Axes, `Far` will default to `Center`
    */
   Far: 'far' as const,
 });
+
 /**
  * Horizontal text alignment
  * @public
@@ -71,15 +88,15 @@ export type HorizontalAlignment = $Values<typeof HorizontalAlignment>;
 
 export const VerticalAlignment = Object.freeze({
   Middle: 'middle' as const,
-  Top: 'top' as const,
-  Bottom: 'bottom' as const,
+  Top: Position.Top,
+  Bottom: Position.Bottom,
   /**
    * Aligns to near side of axis depending on position
    *
    * Examples:
    * - Top Axis, `Near` will push the label to the `Right`, _near_ the axis
    * - Bottom Axis, `Near` will push the axis labels to the `Left`
-   * - Left/Right Axes, `Near` will default to `middle`
+   * - Left/Right Axes, `Near` will default to `Middle`
    */
   Near: 'near' as const,
   /**
@@ -88,10 +105,11 @@ export const VerticalAlignment = Object.freeze({
    * Examples:
    * - Top Axis, `Far` will push the label to the `Top`, _far_ from the axis
    * - Bottom Axis, `Far` will push the axis labels to the `Bottom`
-   * - Left/Right Axes, `Far` will default to `middle`
+   * - Left/Right Axes, `Far` will default to `Middle`
    */
   Far: 'far' as const,
 });
+
 /**
  * Vertical text alignment
  * @public
@@ -106,15 +124,6 @@ export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 export type Color = string; // todo static/runtime type it this for proper color string content; several places in the code, and ultimate use, dictate it not be an empty string
 export type StrokeStyle = Color; // now narrower than string | CanvasGradient | CanvasPattern
-
-export const Position = Object.freeze({
-  Top: 'top' as const,
-  Bottom: 'bottom' as const,
-  Left: 'left' as const,
-  Right: 'right' as const,
-});
-/** @public */
-export type Position = $Values<typeof Position>;
 
 /** @internal */
 export function identity<T>(value: T): T {

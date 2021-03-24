@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { LegendPositionConfig } from '../../specs/settings';
 import { BBox } from '../../utils/bbox/bbox_calculator';
-import { Position } from '../../utils/common';
+import { LayoutDirection } from '../../utils/common';
 import { Margins } from '../../utils/dimensions';
-import { isHorizontalLegend } from '../../utils/legend';
 import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
 
 /** @internal */
@@ -51,13 +51,13 @@ export interface LegendListStyle {
  * @internal
  */
 export function getLegendListStyle(
-  position: Position,
+  direction: LegendPositionConfig['direction'],
   chartMargins: Margins,
   legendStyle: ThemeLegendStyle,
 ): LegendListStyle {
   const { top: paddingTop, bottom: paddingBottom, left: paddingLeft, right: paddingRight } = chartMargins;
 
-  if (isHorizontalLegend(position)) {
+  if (direction === LayoutDirection.Horizontal) {
     return {
       paddingLeft,
       paddingRight,
@@ -74,8 +74,8 @@ export function getLegendListStyle(
  * Get the legend global style
  * @internal
  */
-export function getLegendStyle(position: Position, size: BBox, margin: number): LegendStyle {
-  if (position === Position.Left || position === Position.Right) {
+export function getLegendStyle(direction: LegendPositionConfig['direction'], size: BBox, margin: number): LegendStyle {
+  if (direction === LayoutDirection.Vertical) {
     const width = `${size.width}px`;
     return {
       width,

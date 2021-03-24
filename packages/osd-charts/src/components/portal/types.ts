@@ -70,7 +70,7 @@ export interface PortalAnchorRef {
   /**
    * Anchor ref element to use as position reference
    *
-   * @default document.body
+   * @defaultValue document.body
    */
   ref: HTMLElement | null;
 }

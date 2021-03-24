@@ -23,16 +23,15 @@ import { Provider } from 'react-redux';
 import { createStore, Store, Unsubscribe, StoreEnhancer, applyMiddleware, Middleware } from 'redux';
 import uuid from 'uuid';
 
-import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_type_utils';
-import { PointerEvent } from '../specs';
+import { LegendPositionConfig, PointerEvent } from '../specs';
 import { SpecsParser } from '../specs/specs_parser';
 import { onExternalPointerEvent } from '../state/actions/events';
 import { onComputedZIndex } from '../state/actions/z_index';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
 import { getInternalIsInitializedSelector, InitStatus } from '../state/selectors/get_internal_is_intialized';
-import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { getLegendConfigSelector } from '../state/selectors/get_legend_config_selector';
 import { ChartSize, getChartSize } from '../utils/chart_size';
-import { Position } from '../utils/common';
+import { LayoutDirection } from '../utils/common';
 import { ChartBackground } from './chart_background';
 import { ChartContainer } from './chart_container';
 import { ChartResizer } from './chart_resizer';
@@ -53,7 +52,7 @@ interface ChartProps {
 }
 
 interface ChartState {
-  legendPosition: Position;
+  legendDirection: LegendPositionConfig['direction'];
 }
 
 const getMiddlware = (id: string): StoreEnhancer => {
@@ -93,7 +92,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     const enhancer = getMiddlware(id);
     this.chartStore = createStore(storeReducer, enhancer);
     this.state = {
-      legendPosition: Position.Right,
+      legendDirection: LayoutDirection.Vertical,
     };
     this.unsubscribeToStore = this.chartStore.subscribe(() => {
       const state = this.chartStore.getState();
@@ -101,10 +100,12 @@ export class Chart extends React.Component<ChartProps, ChartState> {
         return;
       }
 
-      const settings = getSettingsSpecSelector(state);
-      if (this.state.legendPosition !== settings.legendPosition) {
+      const {
+        legendPosition: { direction },
+      } = getLegendConfigSelector(state);
+      if (this.state.legendDirection !== direction) {
         this.setState({
-          legendPosition: settings.legendPosition,
+          legendDirection: direction,
         });
       }
       if (state.internalChartState) {
@@ -164,9 +165,8 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   render() {
     const { size, className } = this.props;
     const containerSizeStyle = getChartSize(size);
-    const horizontal = isHorizontalAxis(this.state.legendPosition);
     const chartClassNames = classNames('echChart', className, {
-      'echChart--column': horizontal,
+      'echChart--column': this.state.legendDirection === LayoutDirection.Horizontal,
     });
 
     return (

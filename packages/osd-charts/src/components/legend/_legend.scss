@@ -1,6 +1,5 @@
 .echLegend {
-  &--top,
-  &--bottom {
+  &--horizontal {
     .echLegendList {
       display: grid;
       grid-column-gap: $echLegendColumnGap;
@@ -10,8 +9,7 @@
     }
   }
 
-  &--left,
-  &--right {
+  &--vertical {
     .echLegendList {
       flex-direction: column;
     }
@@ -38,7 +36,7 @@
     overflow-y: auto;
     overflow-x: hidden;
 
-    .echLegendItem--right :focus {
+    .echLegendItem--vertical :focus {
       margin-right: $euiSizeXS;
     }
 

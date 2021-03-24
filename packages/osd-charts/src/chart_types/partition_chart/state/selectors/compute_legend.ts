@@ -21,14 +21,14 @@ import createCachedSelector from 're-reselect';
 
 import { LegendItem } from '../../../../common/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { getLegendConfigSelector } from '../../../../state/selectors/get_legend_config_selector';
 import { getLegendItems } from '../../layout/utils/legend';
 import { partitionMultiGeometries } from './geometries';
 import { getPartitionSpecs } from './get_partition_specs';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
-  [getPartitionSpecs, getSettingsSpecSelector, partitionMultiGeometries],
+  [getPartitionSpecs, getLegendConfigSelector, partitionMultiGeometries],
   (specs, { flatLegend, legendMaxDepth, legendPosition }, geometries): LegendItem[] =>
     specs.flatMap((partitionSpec, i) => {
       const quadViewModel = geometries.filter((g) => g.index === i).flatMap((g) => g.quadViewModel);

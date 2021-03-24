@@ -707,7 +707,7 @@ export const DEFAULT_TOOLTIP_TYPE: "vertical";
 // Warning: (ae-missing-release-tag) "DefaultSettingsProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'showLegend' | 'debug' | 'tooltip' | 'showLegendExtra' | 'theme' | 'legendPosition' | 'legendMaxDepth' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents';
+export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'debug' | 'tooltip' | 'theme' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents' | 'showLegend' | 'showLegendExtra' | 'legendPosition' | 'legendMaxDepth';
 
 // Warning: (ae-missing-release-tag) "DEPTH_KEY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1221,6 +1221,17 @@ export interface LayerValue {
     value: number;
 }
 
+// Warning: (ae-missing-release-tag) "LayoutDirection" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const LayoutDirection: Readonly<{
+    Horizontal: "horizontal";
+    Vertical: "vertical";
+}>;
+
+// @public (undocumented)
+export type LayoutDirection = $Values<typeof LayoutDirection>;
+
 // @public
 export type LegendAction = ComponentType<LegendActionProps>;
 
@@ -1260,6 +1271,37 @@ export type LegendPathElement = {
     index: number;
     value: CategoryKey;
 };
+
+// @public
+export type LegendPositionConfig = {
+    vAlign: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
+    hAlign: typeof HorizontalAlignment.Left | typeof HorizontalAlignment.Right;
+    direction: LayoutDirection;
+    floating: boolean;
+};
+
+// @public
+export interface LegendSpec {
+    flatLegend?: boolean;
+    legendAction?: LegendAction;
+    // (undocumented)
+    legendColorPicker?: LegendColorPicker;
+    legendMaxDepth: number;
+    legendPosition: Position | LegendPositionConfig;
+    legendStrategy?: LegendStrategy;
+    // (undocumented)
+    onLegendItemClick?: LegendItemListener;
+    // (undocumented)
+    onLegendItemMinusClick?: LegendItemListener;
+    // (undocumented)
+    onLegendItemOut?: BasicListener;
+    // (undocumented)
+    onLegendItemOver?: LegendItemListener;
+    // (undocumented)
+    onLegendItemPlusClick?: LegendItemListener;
+    showLegend: boolean;
+    showLegendExtra: boolean;
+}
 
 // @public (undocumented)
 export const LegendStrategy: Readonly<{
@@ -1942,7 +1984,7 @@ export type SeriesTypes = $Values<typeof SeriesTypes>;
 export const Settings: React_2.FunctionComponent<SettingsSpecProps>;
 
 // @public
-export interface SettingsSpec extends Spec {
+export interface SettingsSpec extends Spec, LegendSpec {
     allowBrushingLastHistogramBucket?: boolean;
     // (undocumented)
     animateData: boolean;
@@ -1953,14 +1995,7 @@ export interface SettingsSpec extends Spec {
     debugState?: boolean;
     // @alpha
     externalPointerEvents: ExternalPointerEventsSettings;
-    flatLegend?: boolean;
     hideDuplicateAxes: boolean;
-    legendAction?: LegendAction;
-    // (undocumented)
-    legendColorPicker?: LegendColorPicker;
-    legendMaxDepth: number;
-    legendPosition: Position;
-    legendStrategy?: LegendStrategy;
     minBrushDelta?: number;
     noResults?: ComponentType | ReactChild;
     // (undocumented)
@@ -1971,16 +2006,6 @@ export interface SettingsSpec extends Spec {
     onElementOut?: BasicListener;
     // (undocumented)
     onElementOver?: ElementOverListener;
-    // (undocumented)
-    onLegendItemClick?: LegendItemListener;
-    // (undocumented)
-    onLegendItemMinusClick?: LegendItemListener;
-    // (undocumented)
-    onLegendItemOut?: BasicListener;
-    // (undocumented)
-    onLegendItemOver?: LegendItemListener;
-    // (undocumented)
-    onLegendItemPlusClick?: LegendItemListener;
     // (undocumented)
     onPointerUpdate?: PointerUpdateListener;
     onProjectionClick?: ProjectionClickListener;
@@ -1996,9 +2021,6 @@ export interface SettingsSpec extends Spec {
     // (undocumented)
     rotation: Rotation;
     roundHistogramBrushValues?: boolean;
-    // (undocumented)
-    showLegend: boolean;
-    showLegendExtra: boolean;
     theme?: PartialTheme | PartialTheme[];
     tooltip: TooltipSettings;
     // (undocumented)

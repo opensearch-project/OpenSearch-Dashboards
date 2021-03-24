@@ -86,8 +86,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     }
   }
 
-  &--right,
-  &--left {
+  &--vertical {
     padding-top: $legendItemVerticalPadding / 2;
     padding-bottom: $legendItemVerticalPadding / 2;
 

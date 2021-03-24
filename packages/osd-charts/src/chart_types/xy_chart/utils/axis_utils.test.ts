@@ -756,7 +756,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 85,
       y: 0,
-      align: 'right',
+      horizontalAlign: 'right',
       verticalAlign: 'middle',
     });
 
@@ -782,7 +782,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 80,
       y: 0,
-      align: 'center',
+      horizontalAlign: 'center',
       verticalAlign: 'middle',
     });
 
@@ -808,7 +808,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 20,
       y: 0,
-      align: 'center',
+      horizontalAlign: 'center',
       verticalAlign: 'middle',
     });
 
@@ -830,7 +830,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 20,
       y: 0,
-      align: 'left',
+      horizontalAlign: 'left',
       verticalAlign: 'middle',
     });
   });
@@ -865,7 +865,7 @@ describe('Axis computational utils', () => {
       textOffsetX: 0,
       x: 0,
       y: -5,
-      align: 'center',
+      horizontalAlign: 'center',
       verticalAlign: 'bottom',
     });
 
@@ -887,7 +887,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 0,
       y: -10,
-      align: 'right',
+      horizontalAlign: 'right',
       verticalAlign: 'middle',
     });
 
@@ -909,7 +909,7 @@ describe('Axis computational utils', () => {
       textOffsetY: 0,
       x: 0,
       y: 20,
-      align: 'left',
+      horizontalAlign: 'left',
       verticalAlign: 'middle',
     });
 
@@ -935,7 +935,7 @@ describe('Axis computational utils', () => {
       textOffsetY: -50,
       x: 0,
       y: 20,
-      align: 'center',
+      horizontalAlign: 'center',
       verticalAlign: 'top',
     });
   });

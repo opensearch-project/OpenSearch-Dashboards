@@ -22,7 +22,13 @@ import React, { Component, createRef, MouseEventHandler } from 'react';
 
 import { LegendItem, LegendItemExtraValues } from '../../common/legend';
 import { SeriesIdentifier } from '../../common/series_id';
-import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs/settings';
+import {
+  LegendItemListener,
+  BasicListener,
+  LegendColorPicker,
+  LegendAction,
+  LegendPositionConfig,
+} from '../../specs/settings';
 import {
   clearTemporaryColors as clearTemporaryColorsAction,
   setTemporaryColor as setTemporaryColorAction,
@@ -33,7 +39,7 @@ import {
   onLegendItemOverAction,
   onToggleDeselectSeriesAction,
 } from '../../state/actions/legend';
-import { Position, Color } from '../../utils/common';
+import { Color, LayoutDirection } from '../../utils/common';
 import { deepEqual } from '../../utils/fast_deep_equal';
 import { Color as ItemColor } from './color';
 import { renderExtra } from './extra';
@@ -47,7 +53,7 @@ export const LEGEND_HIERARCHY_MARGIN = 10;
 export interface LegendItemProps {
   item: LegendItem;
   totalItems: number;
-  position: Position;
+  positionConfig: LegendPositionConfig;
   extraValues: Map<string, LegendItemExtraValues>;
   showExtra: boolean;
   colorPicker?: LegendColorPicker;
@@ -61,36 +67,6 @@ export interface LegendItemProps {
   setTemporaryColorAction: typeof setTemporaryColorAction;
   setPersistedColorAction: typeof setPersistedColorAction;
   toggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
-}
-
-/** @internal */
-export function renderLegendItem(
-  item: LegendItem,
-  props: Omit<LegendItemProps, 'item'>,
-  totalItems: number,
-  index: number,
-) {
-  return (
-    <LegendListItem
-      key={`${index}`}
-      item={item}
-      totalItems={totalItems}
-      position={props.position}
-      colorPicker={props.colorPicker}
-      action={props.action}
-      extraValues={props.extraValues}
-      showExtra={props.showExtra}
-      toggleDeselectSeriesAction={props.toggleDeselectSeriesAction}
-      mouseOutAction={props.mouseOutAction}
-      mouseOverAction={props.mouseOverAction}
-      clearTemporaryColorsAction={props.clearTemporaryColorsAction}
-      setTemporaryColorAction={props.setTemporaryColorAction}
-      setPersistedColorAction={props.setPersistedColorAction}
-      onMouseOver={props.onMouseOver}
-      onMouseOut={props.onMouseOut}
-      onClick={props.onClick}
-    />
-  );
 }
 
 interface LegendItemState {
@@ -199,11 +175,12 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
   }
 
   render() {
-    const { extraValues, item, showExtra, colorPicker, position, totalItems, action: Action } = this.props;
+    const { extraValues, item, showExtra, colorPicker, totalItems, action: Action, positionConfig } = this.props;
     const { color, isSeriesHidden, isItemHidden, seriesIdentifiers, label } = item;
-    const itemClassNames = classNames('echLegendItem', `echLegendItem--${position}`, {
+    const itemClassNames = classNames('echLegendItem', {
       'echLegendItem--hidden': isSeriesHidden,
       'echLegendItem__extra--hidden': isItemHidden,
+      'echLegendItem--vertical': positionConfig.direction === LayoutDirection.Vertical,
     });
     const hasColorPicker = Boolean(colorPicker);
     const extra = showExtra && getExtra(extraValues, item, totalItems);
@@ -247,4 +224,14 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
       </>
     );
   }
+}
+
+/** @internal */
+export function renderLegendItem(
+  item: LegendItem,
+  props: Omit<LegendItemProps, 'item'>,
+  totalItems: number,
+  index: number,
+) {
+  return <LegendListItem key={`${index}`} item={item} {...props} />;
 }

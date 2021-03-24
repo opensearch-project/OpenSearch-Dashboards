@@ -90,6 +90,7 @@ export {
   ShowAccessor,
   ValueAccessor,
   ValueFormatter,
+  LayoutDirection,
 } from './utils/common';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export * from './utils/themes/merge_utils';
