@@ -48,8 +48,10 @@ describe('Legend stories', () => {
   });
 
   it('should render color picker on mouse click', async () => {
-    const action = async () =>
+    const action = async () => {
+      await common.disableAnimations();
       await common.clickMouseRelativeToDOMElement({ left: 0, top: 0 }, '.echLegendItem__color');
+    };
     await common.expectElementAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--color-picker',
       'body',

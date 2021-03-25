@@ -19,6 +19,8 @@
 
 import Url from 'url';
 
+import { AXNode } from 'puppeteer';
+
 import { DRAG_DETECTION_TIMEOUT } from '../../src/state/reducers/interactions';
 // @ts-ignore
 import defaults from '../defaults';
@@ -458,6 +460,19 @@ class CommonPage {
    */
   async waitForElement(waitSelector: string, timeout = 10000) {
     await page.waitForSelector(waitSelector, { timeout });
+  }
+
+  /**
+   * puppeteer accessibility functionality
+   * @param {string} [url]
+   * @param {string} [waitSelector]
+   */
+  async testAccessibilityTree(url: string, waitSelector: string): Promise<AXNode> {
+    await this.loadElementFromURL(url, waitSelector);
+    const accessibilitySnapshot = await page.accessibility.snapshot().then((value) => {
+      return value;
+    });
+    return accessibilitySnapshot;
   }
 }
 

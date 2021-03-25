@@ -145,6 +145,7 @@ class XYChartComponent extends React.Component<XYChartProps> {
     this.ctx = canvas && canvas.getContext('2d');
   }
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   render() {
     const {
       forwardStageRef,
@@ -168,6 +169,9 @@ class XYChartComponent extends React.Component<XYChartProps> {
           width,
           height,
         }}
+        aria-label="Chart"
+        // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
+        role="img"
       />
     );
   }
