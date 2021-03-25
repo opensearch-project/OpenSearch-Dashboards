@@ -118,21 +118,6 @@ describe('validation', () => {
   });
 });
 
-describe('image', () => {
-  it('responds with exact file data', async () => {
-    const server = createServer();
-    const response = await server.inject({
-      url: '/1234/bundles/plugin/foo/image.png',
-    });
-
-    expect(response.statusCode).toBe(200);
-    const image = readFileSync(resolve(fooPluginFixture, 'image.png'));
-    expect(response.headers).toHaveProperty('content-length', image.length);
-    expect(response.headers).toHaveProperty('content-type', 'image/png');
-    expect(image).toEqual(response.rawPayload);
-  });
-});
-
 describe('js file', () => {
   it('responds with no content-length and exact file data', async () => {
     const server = createServer();
