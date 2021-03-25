@@ -21,7 +21,7 @@ import { color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Chart, Settings, Wordcloud } from '../../src';
-import { WeightFun, WordModel } from '../../src/chart_types/wordcloud/layout/types/viewmodel_types';
+import { WeightFn, WordModel } from '../../src/chart_types/wordcloud/layout/types/viewmodel_types';
 import { getRandomNumberGenerator } from '../../src/mocks/utils';
 import { palettes as euiPalettes } from '../../src/utils/themes/colors';
 
@@ -77,7 +77,7 @@ const configs = {
     shape: 'archimedean',
     palette: 'turquoise',
     backgroundColor: '#1c1c24',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   single: {
     startAngle: 0,
@@ -93,7 +93,7 @@ const configs = {
     shape: 'rectangular',
     palette: 'greyScale',
     backgroundColor: '#9fa714',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   rightAngled: {
     startAngle: 0,
@@ -109,7 +109,7 @@ const configs = {
     shape: 'rectangular',
     palette: 'euiLight',
     backgroundColor: '#ffffff',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   multiple: {
     startAngle: -90,
@@ -125,7 +125,7 @@ const configs = {
     shape: 'archimedean',
     palette: 'redBlue',
     backgroundColor: '#1c1c24',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   squareWords: {
     startAngle: -45,
@@ -141,7 +141,7 @@ const configs = {
     shape: 'archimedean',
     palette: 'weight',
     backgroundColor: '#4a6960',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   smallWaves: {
     startAngle: -15,
@@ -157,7 +157,7 @@ const configs = {
     shape: 'rectangular',
     palette: 'euiColorBlind',
     backgroundColor: '#ffffff',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
   sparse: {
     startAngle: 0,
@@ -173,7 +173,7 @@ const configs = {
     shape: 'rectangular',
     palette: 'vivid',
     backgroundColor: '#1c1c24',
-    weightFun: WeightFun.exponential,
+    weightFn: WeightFn.exponential,
   },
 };
 
@@ -263,17 +263,17 @@ export const Example = () => {
         Object.keys(palettes).reduce((p, k) => ({ ...p, [k]: k }), {}),
         startConfig.palette,
       );
-  const weightFun = template
-    ? startConfig.weightFun
+  const weightFn = template
+    ? startConfig.weightFn
     : select(
-        'weightFun',
+        'weightFn',
         {
-          linear: WeightFun.linear,
-          exponential: WeightFun.exponential,
-          squareRoot: WeightFun.squareRoot,
-          log: WeightFun.log,
+          linear: WeightFn.linear,
+          exponential: WeightFn.exponential,
+          squareRoot: WeightFn.squareRoot,
+          log: WeightFn.log,
         },
-        startConfig.weightFun,
+        startConfig.weightFn,
       );
 
   return (
@@ -300,7 +300,7 @@ export const Example = () => {
         spiral={spiral}
         exponent={exponent}
         data={sampleData(text, palette as keyof typeof palettes)}
-        weightFun={weightFun}
+        weightFn={weightFn}
         outOfRoomCallback={(wordCount: number, renderedWordCount: number, renderedWords: string[]) => {
           // eslint-disable-next-line no-console
           console.log(

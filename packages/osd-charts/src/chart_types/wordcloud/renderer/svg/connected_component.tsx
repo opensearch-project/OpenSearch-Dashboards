@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import d3TagCloud from 'd3-cloud';
-import React, { MouseEvent, RefObject } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
@@ -92,18 +92,18 @@ function log(minFontSize: number, maxFontSize: number, _exponent: number, weight
   return minFontSize + (maxFontSize - minFontSize) * Math.log2(weight + 1);
 }
 
-const weightFunLookup = { linear, exponential, log, squareRoot };
+const weightFnLookup = { linear, exponential, log, squareRoot };
 
 function layoutMaker(config: Configs, data: Datum[]) {
   const words = data.map((d) => {
-    const weightFun = weightFunLookup[config.weightFun];
+    const weightFn = weightFnLookup[config.weightFn];
     return {
       text: d.text,
       color: d.color,
       fontFamily: config.fontFamily,
       style: config.fontStyle,
       fontWeight: config.fontWeight,
-      size: weightFun(config.minFontSize, config.maxFontSize, config.exponent, d.weight),
+      size: weightFn(config.minFontSize, config.maxFontSize, config.exponent, d.weight),
     };
   });
   return d3TagCloud()
@@ -127,7 +127,6 @@ const View = ({ words, conf }: { words: Word[]; conf: Configs }) => (
           <text
             key={String(i)}
             style={{
-              transform: `translate(${d.x}, ${d.y}) rotate(${d.rotate})`,
               fontSize: getFontSize(d),
               fontStyle: getFontStyle(d),
               fontFamily: getFont(d),
@@ -155,72 +154,27 @@ interface ReactiveChartDispatchProps {
   onChartRendered: typeof onChartRendered;
 }
 
-interface ReactiveChartOwnProps {
-  forwardStageRef: RefObject<HTMLCanvasElement>;
-}
-
-type Props = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
+type Props = ReactiveChartStateProps & ReactiveChartDispatchProps;
 
 class Component extends React.Component<Props> {
   static displayName = 'Wordcloud';
 
-  // firstRender = true; // this'll be useful for stable resizing of treemaps
-  private ctx: CanvasRenderingContext2D | null;
-
-  // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
-  private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
-
-  constructor(props: Readonly<Props>) {
-    super(props);
-    this.ctx = null;
-    this.devicePixelRatio = window.devicePixelRatio;
-  }
-
   componentDidMount() {
-    /*
-     * the DOM element has just been appended, and getContext('2d') is always non-null,
-     * so we could use a couple of ! non-null assertions but no big plus
-     */
-    this.tryCanvasContext();
     if (this.props.initialized) {
-      this.drawCanvas();
       this.props.onChartRendered();
     }
   }
 
   componentDidUpdate() {
-    if (!this.ctx) {
-      this.tryCanvasContext();
-    }
     if (this.props.initialized) {
-      this.drawCanvas();
       this.props.onChartRendered();
     }
-  }
-
-  handleMouseMove(e: MouseEvent<HTMLCanvasElement>) {
-    const {
-      initialized,
-      chartContainerDimensions: { width, height },
-      forwardStageRef,
-      geometries,
-    } = this.props;
-    if (!forwardStageRef.current || !this.ctx || !initialized || width === 0 || height === 0) {
-      return;
-    }
-    const picker = geometries.pickQuads;
-    const box = forwardStageRef.current.getBoundingClientRect();
-    const { chartCenter } = geometries;
-    const x = e.clientX - box.left - chartCenter.x;
-    const y = e.clientY - box.top - chartCenter.y;
-    return picker(x, y);
   }
 
   render() {
     const {
       initialized,
       chartContainerDimensions: { width, height },
-      forwardStageRef,
       geometries: { wordcloudViewModel },
     } = this.props;
     if (!initialized || width === 0 || height === 0) {
@@ -240,7 +194,7 @@ class Component extends React.Component<Props> {
       maxFontSize: wordcloudViewModel.maxFontSize,
       spiral: wordcloudViewModel.spiral,
       exponent: wordcloudViewModel.exponent,
-      weightFun: wordcloudViewModel.weightFun,
+      weightFn: wordcloudViewModel.weightFn,
     };
 
     const layout = layoutMaker(conf1, wordcloudViewModel.data);
@@ -260,38 +214,7 @@ class Component extends React.Component<Props> {
       );
     }
 
-    return (
-      <>
-        <canvas
-          ref={forwardStageRef}
-          className="echCanvasRenderer"
-          width={width * this.devicePixelRatio}
-          height={height * this.devicePixelRatio}
-          onMouseMove={this.handleMouseMove.bind(this)}
-          style={{
-            width,
-            height,
-          }}
-        />
-        <View words={renderedWordObjects} conf={conf1} />
-      </>
-    );
-  }
-
-  private tryCanvasContext() {
-    const canvas = this.props.forwardStageRef.current;
-    this.ctx = canvas && canvas.getContext('2d');
-  }
-
-  private drawCanvas() {
-    if (this.ctx) {
-      /*      const { width, height }: Dimensions = this.props.chartContainerDimensions;
-                renderCanvas2d(this.ctx, this.devicePixelRatio, {
-             ...this.props.geometries,
-             config: { ...this.props.geometries.config, width, height },
-           });
-      */
-    }
+    return <View words={renderedWordObjects} conf={conf1} />;
   }
 }
 

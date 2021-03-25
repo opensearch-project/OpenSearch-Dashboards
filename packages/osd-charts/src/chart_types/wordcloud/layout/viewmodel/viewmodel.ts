@@ -46,7 +46,7 @@ export function shapeViewModel(spec: WordcloudSpec, config: Config): ShapeViewMo
     spiral,
     exponent,
     data,
-    weightFun,
+    weightFn,
     outOfRoomCallback,
   } = spec;
 
@@ -63,7 +63,7 @@ export function shapeViewModel(spec: WordcloudSpec, config: Config): ShapeViewMo
     spiral,
     exponent,
     data,
-    weightFun,
+    weightFn,
     outOfRoomCallback,
   };
 

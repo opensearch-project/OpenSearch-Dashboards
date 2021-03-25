@@ -2444,10 +2444,10 @@ export interface WordcloudSpec extends Spec {
     spiral: string;
     // (undocumented)
     startAngle: number;
-    // Warning: (ae-forgotten-export) The symbol "WeightFun" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "WeightFn" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    weightFun: WeightFun;
+    weightFn: WeightFn;
 }
 
 // Warning: (ae-missing-release-tag) "XScaleType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

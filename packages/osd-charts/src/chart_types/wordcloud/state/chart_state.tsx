@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { RefObject } from 'react';
+import React from 'react';
 
 import { ChartTypes } from '../..';
 import { DEFAULT_CSS_CURSOR } from '../../../common/constants';
@@ -84,11 +84,11 @@ export class WordcloudState implements InternalChartState {
     return EMPTY_MAP;
   }
 
-  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
+  chartRenderer(containerRef: BackwardRef) {
     return (
       <>
         <Tooltip getChartContainerRef={containerRef} />
-        <Wordcloud forwardStageRef={forwardStageRef} />
+        <Wordcloud />
       </>
     );
   }
