@@ -88,11 +88,11 @@ describe('opensearchDashboards cli', function () {
             "bin",
             "bin/executable",
             "bin/not-executable",
-            "opensearch_dashboards.json",
             "node_modules",
             "node_modules/some-package",
             "node_modules/some-package/index.js",
             "node_modules/some-package/package.json",
+            "opensearch_dashboards.json",
             "public",
             "public/index.js",
           ]
@@ -170,7 +170,7 @@ describe('opensearchDashboards cli', function () {
       it('throw an error if there an invalid plugin name', async () => {
         await copyReplyFile('invalid_name.zip');
         await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"No opensearch-dashboards plugins found in archive"`
+          `"Invalid plugin name [invalid name] in opensearch_dashboards.json, expected it to be valid camelCase"`
         );
       });
     });
