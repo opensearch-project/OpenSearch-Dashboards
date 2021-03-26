@@ -47,7 +47,15 @@ describe('opensearchDashboards cli', function () {
     describe('analyzeArchive', function () {
       it('returns array of plugins', async () => {
         const packages = await analyzeArchive(archivePath);
-        expect(packages).toMatchInlineSnapshot(`Array []`);
+        expect(packages).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "testPlugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/test-plugin",
+            },
+          ]
+        `);
       });
     });
 
@@ -56,7 +64,20 @@ describe('opensearchDashboards cli', function () {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'opensearch-dashboards/test-plugin');
 
-        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`Array []`);
+        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+          Array [
+            "bin",
+            "bin/executable",
+            "bin/not-executable",
+            "node_modules",
+            "node_modules/some-package",
+            "node_modules/some-package/index.js",
+            "node_modules/some-package/package.json",
+            "opensearch_dashboards.json",
+            "public",
+            "public/index.js",
+          ]
+        `);
       });
     });
 

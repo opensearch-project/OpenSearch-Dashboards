@@ -154,8 +154,8 @@ describe('plugins discovery system', () => {
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toHaveLength(3);
-    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB', 'pluginC']));
+    expect(pluginNames).toHaveLength(2);
+    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB']));
   });
 
   it('return errors when the manifest is invalid or incompatible', async () => {
@@ -230,11 +230,9 @@ describe('plugins discovery system', () => {
       .toPromise();
 
     const srcPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins');
-    const xpackPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'x-pack', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
         `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
-        `Error: ENOENT, no such file or directory '${xpackPluginsPath}' (invalid-search-path, ${xpackPluginsPath})`,
       ])
     );
   });

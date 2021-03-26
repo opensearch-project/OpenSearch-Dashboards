@@ -26,7 +26,7 @@ const HAS_METADATA = dedent`
 
   some text
 
-  <!-- opensearchDashboardsCiData = {"failed-test": {"foo": "bar"}} -->
+  <!-- OpenSearchDashboardsCiData = {"failed-test": {"foo": "bar"}} -->
 `;
 
 const HAS_SOME_OTHER_METADATA = dedent`
@@ -34,7 +34,7 @@ const HAS_SOME_OTHER_METADATA = dedent`
 
   some text
 
-  <!-- opensearchDashboardsCiData = {"some-other": {"foo": "bar"}} -->
+  <!-- OpenSearchDashboardsCiData = {"some-other": {"foo": "bar"}} -->
 `;
 
 const INVALID_METADATA = dedent`
@@ -42,7 +42,7 @@ const INVALID_METADATA = dedent`
 
   some text
 
-  <!-- opensearchDashboardsCiData = {"failed-test" -->
+  <!-- OpenSearchDashboardsCiData = {"failed-test" -->
 `;
 
 const MISSING_METADATA = dedent`
@@ -88,9 +88,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"failed-test\\": {\\"foo\\": \\"bar\\"}} -->
-
-      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"foo\\":\\"bar\\",\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -116,9 +114,7 @@ describe('updateIssueMetadata', () => {
 
       some text
 
-      <!-- opensearchDashboardsCiData = {\\"some-other\\": {\\"foo\\": \\"bar\\"}} -->
-
-      <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
+      <!-- OpenSearchDashboardsCiData = {\\"some-other\\":{\\"foo\\":\\"bar\\"},\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
 
@@ -131,8 +127,6 @@ describe('updateIssueMetadata', () => {
       "# my issue
 
       some text
-
-      <!-- opensearchDashboardsCiData = {\\"failed-test\\" -->
 
       <!-- OpenSearchDashboardsCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);

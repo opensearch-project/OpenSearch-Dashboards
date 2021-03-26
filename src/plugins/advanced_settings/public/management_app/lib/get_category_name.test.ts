@@ -24,7 +24,7 @@ describe('Settings', function () {
   describe('Advanced', function () {
     describe('getCategoryName(category)', function () {
       it('should capitalize unknown category', function () {
-        expect(getCategoryName('opensearch')).to.be('OpenSearch');
+        expect(getCategoryName('unknown')).to.be('Unknown');
       });
 
       it('should return empty string for no category', function () {

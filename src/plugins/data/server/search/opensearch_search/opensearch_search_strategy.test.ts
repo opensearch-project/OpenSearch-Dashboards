@@ -42,7 +42,7 @@ describe('OpenSearch search strategy', () => {
           get: () => {},
         },
       },
-      elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } },
+      opensearch: { client: { asCurrentUser: { search: mockApiCaller } } },
     },
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;

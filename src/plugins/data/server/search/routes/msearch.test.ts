@@ -53,7 +53,7 @@ describe('msearch route', () => {
     const mockClient = { msearch: jest.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
-        elasticsearch: { client: { asCurrentUser: mockClient } },
+        opensearch: { client: { asCurrentUser: mockClient } },
         uiSettings: { client: { get: jest.fn() } },
       },
     };
@@ -99,7 +99,7 @@ describe('msearch route', () => {
     };
     const mockContext = {
       core: {
-        elasticsearch: { client: { asCurrentUser: mockClient } },
+        opensearch: { client: { asCurrentUser: mockClient } },
         uiSettings: { client: { get: jest.fn() } },
       },
     };

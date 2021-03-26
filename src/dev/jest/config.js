@@ -73,7 +73,12 @@ export default {
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
   coverageReporters: ['html', 'text'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
-  modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  modulePathIgnorePatterns: [
+    '__fixtures__/',
+    'target/',
+    '<rootDir>/src/plugins/maps_legacy',
+    '<rootDir>/src/plugins/region_map',
+  ],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// TODO: Replace this logic with OpenSearchDashboardsURL once it is available.
 // https://github.com/elastic/kibana/issues/64497
 export class OpenSearchDashboardsURL {
   public readonly path: string;

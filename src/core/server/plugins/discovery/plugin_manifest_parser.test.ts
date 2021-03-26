@@ -403,7 +403,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
         JSON.stringify({
           id: 'someId',
           version: 'some-version',
-          opensearchDashboardsVersion: 'opensearch-dashboards',
+          opensearchDashboardsVersion: 'opensearchDashboards',
           requiredPlugins: ['some-required-plugin'],
           server: true,
           ui: true,
@@ -416,7 +416,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     id: 'someId',
     configPath: 'some_id',
     version: 'some-version',
-    opensearchDashboardsVersion: 'opensearch-dashboards',
+    opensearchDashboardsVersion: 'opensearchDashboards',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],

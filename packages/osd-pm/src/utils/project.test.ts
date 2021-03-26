@@ -180,7 +180,7 @@ describe('#getExecutables()', () => {
     });
 
     expect(project.getExecutables()).toEqual({
-      opensearchDashboards: resolve(rootPath, 'bin/script.js'),
+      'opensearch-dashboards': resolve(rootPath, 'bin/script.js'),
     });
   });
 
