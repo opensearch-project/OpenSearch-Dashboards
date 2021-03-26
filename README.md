@@ -38,19 +38,19 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 ## Getting Started
 
 To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
-* Clone the OpenSearch Repo [here](https://github.com/opensearch-project/OpenSearch.git)
+* Clone the OpenSearch repo with ```git clone git@github.com:opensearch-project/OpenSearch.git```
 * Follow installation and setup instructions in the OpenSearch repo
 * Run ```./gradlew assemble``` to generate build artifacts for all platforms
 * Run ```./gradlew run -Drun.distribution=oss``` to run the oss build
 
 Or
-* You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory.
+* You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory with ```tar -xvf /path/to/tar/file```
 * After extracting, run ```bin/opensearch``` inside of the extracted build artifact dir
 
 To run Dashboards with OpenSearch
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
 * While OpenSearch is running locally, run ```yarn start --oss```
-* Dashboards runs by default on port 5601
+* You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
 
 ## How you can help
 
