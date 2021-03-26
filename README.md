@@ -45,12 +45,12 @@ To run OpenSearch Dashboards locally, you first need build artifacts from OpenSe
 
 Or
 * You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory.
-* After extracting, run ```bin/opensearch`` inside of the extracted build artifact dir
+* After extracting, run ```bin/opensearch``` inside of the extracted build artifact dir
 
 To run Dashboards with OpenSearch
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
 * While OpenSearch is running locally, run ```yarn start --oss```
-* Dashboards should be running locally on port 5601
+* Dashboards runs by default on port 5601
 
 ## How you can help
 
