@@ -132,7 +132,7 @@ exports[`EmptyState should render normally 1`] = `
                   Object {
                     "description": <EuiLink
                       external={true}
-                      href="https://www.opensearch.com/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
+                      href="https://www.opensearch.co/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
                       target="_blank"
                     >
                       <FormattedMessage

@@ -54,7 +54,7 @@ test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () 
 });
 
 // TODO: In @elastic/eui/src/services/url.ts it is unknown if it does not match the regex
-// TODO: [renameme] if we fork EUI and update that regex then we can include this test again
+// TODO: [RENAMEME] if we fork EUI and update that regex then we can include this test again
 xtest('should only add `nooopener` to known links in new tabs', () => {
   const component = shallow(
     <Markdown openLinksInNewTab={true} markdown="[link](https://www.opensearch.co/cool/path" />

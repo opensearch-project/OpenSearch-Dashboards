@@ -42,7 +42,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
   return {
     active: false,
     serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
-    // TODO: serverUrl
+    // TODO: [RENAMEME] Update serverUrl and secretToken if we have replacements
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
