@@ -39,8 +39,8 @@ const createRegistryMock = (): jest.Mocked<
   mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
   mock.getImportableAndExportableTypes.mockReturnValue([]);
-  mock.getIndex.mockReturnValue('.opensearch_dashboards-test');
-  mock.getIndex.mockReturnValue('.opensearch_dashboards-test');
+  mock.getIndex.mockReturnValue('.opensearch_dashboards_test');
+  mock.getIndex.mockReturnValue('.opensearch_dashboards_test');
   mock.isHidden.mockReturnValue(false);
   mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
   mock.isSingleNamespace.mockImplementation(

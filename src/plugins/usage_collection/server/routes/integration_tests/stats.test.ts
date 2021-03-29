@@ -63,7 +63,7 @@ describe('/api/stats', () => {
       }),
       config: {
         allowAnonymous: true,
-        opensearchDashboardsIndex: '.opensearch_dashboards-test',
+        opensearchDashboardsIndex: '.opensearch_dashboards_test',
         opensearchDashboardsVersion: '8.8.8-SNAPSHOT',
         server: {
           name: 'myopensearchDashboards',
@@ -89,7 +89,7 @@ describe('/api/stats', () => {
       opensearchDashboards: {
         uuid: 'xxx-xxxxx',
         name: 'myopensearchDashboards',
-        index: '.opensearch_dashboards-test',
+        index: '.opensearch_dashboards_test',
         host: 'myopensearchDashboards.com',
         locale: 'en',
         transport_address: `myopensearchDashboards.com:1234`,

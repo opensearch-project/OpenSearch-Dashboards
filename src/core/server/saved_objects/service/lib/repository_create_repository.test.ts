@@ -79,7 +79,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       originalRepository.createRepository(
         (migrator as unknown) as OpenSearchDashboardsMigrator,
         typeRegistry,
-        '.opensearch_dashboards-test',
+        '.opensearch_dashboards_test',
         callAdminCluster,
         ['unMappedType1', 'unmappedType2']
       );
@@ -94,7 +94,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
-      '.opensearch_dashboards-test',
+      '.opensearch_dashboards_test',
       callAdminCluster,
       [],
       SavedObjectsRepository
@@ -112,7 +112,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
-      '.opensearch_dashboards-test',
+      '.opensearch_dashboards_test',
       callAdminCluster,
       ['hiddenType', 'hiddenType', 'hiddenType'],
       SavedObjectsRepository

@@ -26,8 +26,8 @@ jest.doMock('../../opensearch/legacy/scoped_cluster_client', () => ({
   ),
 }));
 
-jest.doMock('opensearch', () => {
-  const realOpenSearch = jest.requireActual('opensearch');
+jest.doMock('elasticsearch', () => {
+  const realOpenSearch = jest.requireActual('elasticsearch');
   return {
     ...realOpenSearch,
     // eslint-disable-next-line object-shorthand

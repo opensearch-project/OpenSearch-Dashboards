@@ -237,7 +237,7 @@ describe('SavedObjectsRepository', () => {
     const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
-      index: '.opensearch_dashboards-test',
+      index: '.opensearch_dashboards_test',
       mappings,
       client,
       migrator,
@@ -689,7 +689,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], {
           method: 'create',
-          _index: '.opensearch_dashboards-test',
+          _index: '.opensearch_dashboards_test',
         });
       });
 
@@ -1937,7 +1937,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.opensearch_dashboards-test' }),
+          expect.objectContaining({ index: '.opensearch_dashboards_test' }),
           expect.anything()
         );
       });
@@ -2416,7 +2416,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.opensearch_dashboards-test', 'custom'] }),
+          expect.objectContaining({ index: ['.opensearch_dashboards_test', 'custom'] }),
           expect.anything()
         );
       });
@@ -3450,7 +3450,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.delete).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.opensearch_dashboards-test' }),
+              expect.objectContaining({ index: '.opensearch_dashboards_test' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessDelete(expectFn);
@@ -3527,7 +3527,7 @@ describe('SavedObjectsRepository', () => {
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.update).toHaveBeenCalledWith(
-              expect.objectContaining({ index: '.opensearch_dashboards-test' }),
+              expect.objectContaining({ index: '.opensearch_dashboards_test' }),
               expect.anything()
             );
           await deleteFromNamespacesSuccessUpdate(expectFn);

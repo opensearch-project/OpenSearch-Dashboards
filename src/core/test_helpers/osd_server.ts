@@ -149,7 +149,7 @@ export const request: Record<
   put: (root, path) => getSupertest(root, 'put', path),
 };
 
-export interface TestOpenSearchhServer {
+export interface TestOpenSearchServer {
   getStartTimeout: () => number;
   start: (opensearchArgs: string[], opensearchEnvVars: Record<string, string>) => Promise<void>;
   stop: () => Promise<void>;
@@ -161,7 +161,7 @@ export interface TestOpenSearchhServer {
 
 export interface TestOpenSearchUtils {
   stop: () => Promise<void>;
-  opensearch: TestOpenSearchhServer;
+  opensearch: TestOpenSearchServer;
   hosts: string[];
   username: string;
   password: string;
