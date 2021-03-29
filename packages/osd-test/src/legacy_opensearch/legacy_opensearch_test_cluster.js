@@ -35,7 +35,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
     password = 'changeme',
     license = 'oss',
     log,
-    basePath = resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
+    basePath = resolve(OPENSEARCH_DASHBOARDS_ROOT, '../OpenSearch'),
     opensearchFrom = opensearchTestConfig.getBuildFrom(),
     dataArchive,
     opensearchArgs: customOpenSearchArgs = [],
@@ -58,7 +58,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
   const config = {
     version: opensearchTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
-    sourcePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '../opensearch'),
+    sourcePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '../OpenSearch'),
     password,
     license,
     basePath,
@@ -78,6 +78,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
     async start() {
       let installPath;
 
+      console.log('I"M RUNNING WOOO');
       if (opensearchFrom === 'source') {
         installPath = (await cluster.installSource(config)).installPath;
       } else if (opensearchFrom === 'snapshot') {

@@ -57,7 +57,7 @@ export async function runOpenSearch({ config, options }) {
       : config.get('servers.opensearch.password'),
     license,
     log,
-    basePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
+    basePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '../OpenSearch'),
     opensearchFrom: opensearchFrom || config.get('opensearchTestCluster.from'),
     dataArchive: config.get('opensearchTestCluster.dataArchive'),
     opensearchArgs,

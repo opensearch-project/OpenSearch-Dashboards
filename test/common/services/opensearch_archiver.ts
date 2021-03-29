@@ -22,7 +22,7 @@ import { OpenSearchArchiver } from '@osd/opensearch-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // @ts-ignore not TS yet
-import * as OpenSearchDashboardsServer from './opensearch_dasboards_server';
+import * as OpenSearchDashboardsServer from './opensearch_dashboards_server';
 
 export function OpenSearchArchiverProvider({
   getService,

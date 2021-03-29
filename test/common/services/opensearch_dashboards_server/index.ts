@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { OpenSearchDashboardsServerProvider } from './opensearch_dasboards_server';
+export { OpenSearchDashboardsServerProvider } from './opensearch_dashboards_server';
 // @ts-ignore
 export { extendOpenSearchArchiver } from './extend_opensearch_archiver';
