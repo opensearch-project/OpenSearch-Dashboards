@@ -381,15 +381,15 @@ export interface LegendSpec {
    */
   showLegendExtra: boolean;
   /**
-   * Limit the legend to a max depth when showing a hierarchical legend
+   * Limit the legend to the specified maximal depth when showing a hierarchical legend
    */
   legendMaxDepth: number;
   /**
-   * Display the legend as a flat hierarchy
+   * Display the legend as a flat list. If true, legendStrategy is always `LegendStrategy.Key`.
    */
   flatLegend?: boolean;
   /**
-   * Choose a partition highlighting strategy for hovering over legend items
+   * Choose a partition highlighting strategy for hovering over legend items. It's obligate `LegendStrategy.Key` if `flatLegend` is true.
    */
   legendStrategy?: LegendStrategy;
   onLegendItemOver?: LegendItemListener;

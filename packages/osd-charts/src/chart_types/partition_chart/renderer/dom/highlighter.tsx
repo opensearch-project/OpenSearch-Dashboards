@@ -148,16 +148,19 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
   renderAsMask() {
     const {
       chartId,
-      canvasDimension: { width, height },
+      canvasDimension: { width },
       highlightSets,
     } = this.props;
 
     const maskId = (ind: number, ind2: number) => `echHighlighterMask__${chartId}__${ind}__${ind2}`;
 
+    const someGeometriesHighlighted = highlightSets.some(({ geometries }) => geometries.length > 0);
+    const renderedHighlightSet = someGeometriesHighlighted ? highlightSets : [];
+
     return (
       <>
         <defs>
-          {highlightSets
+          {renderedHighlightSet
             .filter(({ geometries }) => geometries.length > 0)
             .map(
               ({
@@ -167,17 +170,17 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
                 index,
                 innerIndex,
                 partitionLayout,
-                top: topRatio,
-                left: leftRatio,
-                width: widthRatio,
-                height: heightRatio,
+                marginLeftPx,
+                marginTopPx,
+                panelInnerWidth,
+                panelInnerHeight,
               }) => (
-                <mask key={`${index}__${innerIndex}`} id={maskId(index, innerIndex)}>
+                <mask key={maskId(index, innerIndex)} id={maskId(index, innerIndex)}>
                   <rect
-                    x={width * leftRatio}
-                    y={height * topRatio}
-                    width={width * widthRatio}
-                    height={height * heightRatio}
+                    x={marginLeftPx}
+                    y={marginTopPx}
+                    width={panelInnerWidth}
+                    height={panelInnerHeight}
                     fill="white"
                   />
                   <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
@@ -187,41 +190,39 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
               ),
             )}
         </defs>
-        {highlightSets
-          .filter(({ geometries }) => geometries.length > 0)
-          .map(
-            ({
-              diskCenter,
-              outerRadius,
-              index,
-              innerIndex,
-              partitionLayout,
-              top: topRatio,
-              left: leftRatio,
-              width: widthRatio,
-              height: heightRatio,
-            }) =>
-              isSunburst(partitionLayout) ? (
-                <circle
-                  key={`${index}__${innerIndex}`}
-                  cx={diskCenter.x}
-                  cy={diskCenter.y}
-                  r={outerRadius}
-                  mask={`url(#${maskId(index, innerIndex)})`}
-                  className="echHighlighter__mask"
-                />
-              ) : (
-                <rect
-                  key={`${index}__${innerIndex}`}
-                  x={width * leftRatio}
-                  y={height * topRatio}
-                  width={width * widthRatio}
-                  height={height * heightRatio}
-                  mask={`url(#${maskId(index, innerIndex)})`}
-                  className="echHighlighter__mask"
-                />
-              ),
-          )}
+        {renderedHighlightSet.map(
+          ({
+            diskCenter,
+            outerRadius,
+            index,
+            innerIndex,
+            partitionLayout,
+            marginLeftPx,
+            marginTopPx,
+            panelInnerWidth,
+            panelInnerHeight,
+          }) =>
+            isSunburst(partitionLayout) ? (
+              <circle
+                key={`${index}__${innerIndex}`}
+                cx={diskCenter.x}
+                cy={diskCenter.y}
+                r={outerRadius}
+                mask={`url(#${maskId(index, innerIndex)})`}
+                className="echHighlighter__mask"
+              />
+            ) : (
+              <rect
+                key={`${index}__${innerIndex}`}
+                x={marginLeftPx}
+                y={marginTopPx}
+                width={panelInnerWidth}
+                height={panelInnerHeight}
+                mask={`url(#${maskId(index, innerIndex)})`}
+                className="echHighlighter__mask"
+              />
+            ),
+        )}
       </>
     );
   }
@@ -285,23 +286,12 @@ export const DEFAULT_PROPS: HighlighterProps = {
 /** @internal */
 export function highlightSetMapper(geometries: QuadViewModel[], foci: IndexedContinuousDomainFocus[]) {
   return (vm: ShapeViewModel): HighlightSet => {
+    const { index } = vm;
+    const { innerIndex } = vm;
     return {
-      index: vm.index,
-      innerIndex: vm.innerIndex,
-      panelTitle: vm.panelTitle,
-      partitionLayout: vm.partitionLayout,
-      width: vm.width,
-      height: vm.height,
-      top: vm.top,
-      left: vm.left,
-      diskCenter: vm.diskCenter,
-      outerRadius: vm.outerRadius,
-      geometries: geometries.filter(({ index: i, innerIndex: ii }) => vm.index === i && vm.innerIndex === ii),
-      geometriesFoci: foci.filter(({ index: i, innerIndex: ii }) => vm.index === i && vm.innerIndex === ii),
-      innerRowIndex: vm.innerRowIndex,
-      innerColumnIndex: vm.innerColumnIndex,
-      innerRowCount: vm.innerRowCount,
-      innerColumnCount: vm.innerColumnCount,
+      ...vm,
+      geometries: geometries.filter(({ index: i, innerIndex: ii }) => index === i && innerIndex === ii),
+      geometriesFoci: foci.filter(({ index: i, innerIndex: ii }) => index === i && innerIndex === ii),
     };
   };
 }

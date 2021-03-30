@@ -38,12 +38,14 @@ const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   const geometriesFoci = partitionDrilldownFocus(state);
   const pickedGeometries = getPickedShapes(state);
 
+  const highlightSets = allGeometries.map(highlightSetMapper(pickedGeometries, geometriesFoci));
+
   return {
     chartId,
     initialized: true,
     renderAsOverlay: true,
     canvasDimension,
-    highlightSets: allGeometries.map(highlightSetMapper(pickedGeometries, geometriesFoci)),
+    highlightSets,
   };
 };
 

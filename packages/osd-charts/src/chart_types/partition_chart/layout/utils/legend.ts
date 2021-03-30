@@ -21,7 +21,6 @@ import { CategoryKey } from '../../../../common/category';
 import { map } from '../../../../common/iterables';
 import { LegendItem } from '../../../../common/legend';
 import { LegendPositionConfig } from '../../../../specs/settings';
-import { identity } from '../../../../utils/common';
 import { isHierarchicalLegend } from '../../../../utils/legend';
 import { Layer } from '../../specs';
 import { QuadViewModel } from '../types/viewmodel_types';
@@ -30,7 +29,12 @@ function makeKey(...keyParts: CategoryKey[]): string {
   return keyParts.join('---');
 }
 
-function compareTreePaths({ path: a }: QuadViewModel, { path: b }: QuadViewModel): number {
+function compareTreePaths(
+  { index: oiA, innerIndex: iiA, path: a }: QuadViewModel,
+  { index: oiB, innerIndex: iiB, path: b }: QuadViewModel,
+): number {
+  if (oiA !== oiB) return oiA - oiB;
+  if (iiA !== iiB) return iiA - iiB;
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
     const diff = a[i].index - b[i].index;
     if (diff) {
@@ -52,10 +56,21 @@ export function getLegendItems(
   const uniqueNames = new Set(map(({ dataName, fillColor }) => makeKey(dataName, fillColor), quadViewModel));
   const useHierarchicalLegend = isHierarchicalLegend(flatLegend, legendPosition);
 
+  const formattedLabel = ({ dataName, depth }: QuadViewModel) => {
+    const formatter = layers[depth - 1]?.nodeLabel;
+    return formatter ? formatter(dataName) : dataName;
+  };
+
+  function compareNames(aItem: QuadViewModel, bItem: QuadViewModel): number {
+    const a = formattedLabel(aItem);
+    const b = formattedLabel(bItem);
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
   const excluded: Set<string> = new Set();
   const items = quadViewModel.filter(({ depth, dataName, fillColor }) => {
-    if (legendMaxDepth != null) {
-      return depth <= legendMaxDepth;
+    if (legendMaxDepth !== null && depth > legendMaxDepth) {
+      return false;
     }
     if (!useHierarchicalLegend) {
       const key = makeKey(dataName, fillColor);
@@ -67,13 +82,13 @@ export function getLegendItems(
     return true;
   });
 
-  items.sort(compareTreePaths);
+  items.sort(flatLegend ? compareNames : compareTreePaths);
 
-  return items.map<LegendItem>(({ dataName, fillColor, depth, path }) => {
-    const formatter = layers[depth - 1]?.nodeLabel ?? identity;
+  return items.map<LegendItem>((item) => {
+    const { dataName, fillColor, depth, path } = item;
     return {
       color: fillColor,
-      label: formatter(dataName),
+      label: formattedLabel(item),
       childId: dataName,
       depth: useHierarchicalLegend ? depth - 1 : 0,
       path,

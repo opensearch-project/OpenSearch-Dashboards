@@ -26,11 +26,10 @@ import {
   Pixels,
   PointTuple,
   Radius,
-  Ratio,
   trueBearingToStandardPositionAngle,
 } from '../../../../common/geometry';
 import { Part, TextMeasure } from '../../../../common/text_utils';
-import { SmallMultiplesStyle, RelativeBandsPadding } from '../../../../specs';
+import { SmallMultiplesStyle } from '../../../../specs';
 import { StrokeStyle, ValueFormatter, Color, RecursivePartial } from '../../../../utils/common';
 import { Layer } from '../../specs';
 import { config as defaultConfig, MODEL_KEY, percentValueGetter } from '../config';
@@ -262,15 +261,6 @@ const rawChildNodes = (
 /** @internal */
 export type PanelPlacement = PartitionSmallMultiplesModel;
 
-function getInterMarginSize(size: Pixels, startMargin: Ratio, endMargin: Ratio) {
-  return size * (1 - Math.min(1, startMargin + endMargin));
-}
-
-function bandwidth(range: Pixels, bandCount: number, { outer, inner }: RelativeBandsPadding) {
-  // same convention as d3.scaleBand https://observablehq.com/@d3/d3-scaleband
-  return range / (2 * outer + bandCount + bandCount * inner - inner);
-}
-
 /**
  * Todo move it to config
  * @internal
@@ -295,7 +285,6 @@ export function shapeViewModel(
   const {
     width,
     height,
-    margin,
     emptySizeRatio,
     outerSizeRatio,
     fillOutside,
@@ -307,21 +296,7 @@ export function shapeViewModel(
     sectorLineWidth,
   } = config;
 
-  const innerWidth = getInterMarginSize(width, margin.left, margin.right);
-  const innerHeight = getInterMarginSize(height, margin.top, margin.bottom);
-
-  const panelInnerWidth = bandwidth(innerWidth, panel.innerColumnCount, smallMultiplesStyle.horizontalPanelPadding);
-
-  const panelInnerHeight = bandwidth(innerHeight, panel.innerRowCount, smallMultiplesStyle.verticalPanelPadding);
-
-  const marginLeftPx =
-    width * margin.left +
-    panelInnerWidth * smallMultiplesStyle.horizontalPanelPadding.outer +
-    panel.innerColumnIndex * (panelInnerWidth * (1 + smallMultiplesStyle.horizontalPanelPadding.inner));
-  const marginTopPx =
-    height * margin.top +
-    panelInnerHeight * smallMultiplesStyle.verticalPanelPadding.outer +
-    panel.innerRowIndex * (panelInnerHeight * (1 + smallMultiplesStyle.verticalPanelPadding.inner));
+  const { marginLeftPx, marginTopPx, panelInnerWidth, panelInnerHeight } = panel;
 
   const treemapLayout = isTreemap(partitionLayout);
   const sunburstLayout = isSunburst(partitionLayout);
@@ -494,6 +469,10 @@ export function shapeViewModel(
     innerColumnCount: panel.innerColumnCount,
     innerRowIndex: panel.innerRowIndex,
     innerColumnIndex: panel.innerColumnIndex,
+    marginLeftPx: panel.marginLeftPx,
+    marginTopPx: panel.marginTopPx,
+    panelInnerWidth: panel.panelInnerWidth,
+    panelInnerHeight: panel.panelInnerHeight,
 
     config,
     layers,

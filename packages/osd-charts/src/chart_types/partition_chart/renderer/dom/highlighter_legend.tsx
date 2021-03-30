@@ -36,12 +36,16 @@ const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   const geometries = legendHoverHighlightNodes(state);
   const geometriesFoci = partitionDrilldownFocus(state);
   const canvasDimension = getChartContainerDimensionsSelector(state);
+  const multiGeometries = partitionMultiGeometries(state);
+  const highlightMapper = highlightSetMapper(geometries, geometriesFoci);
+  const highlightSets = multiGeometries.map(highlightMapper);
+
   return {
     chartId,
     initialized: true,
     renderAsOverlay: false,
     canvasDimension,
-    highlightSets: partitionMultiGeometries(state).map(highlightSetMapper(geometries, geometriesFoci)),
+    highlightSets,
   };
 };
 

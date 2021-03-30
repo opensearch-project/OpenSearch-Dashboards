@@ -31,10 +31,10 @@ const getHighlightedLegendItemPath = (state: GlobalChartState) => state.interact
 /** @internal */
 export const legendHoverHighlightNodes = createCachedSelector(
   [getSettingsSpecSelector, getHighlightedLegendItemPath, partitionMultiGeometries],
-  ({ legendStrategy }, highlightedLegendItemPath, geometries): QuadViewModel[] => {
+  ({ legendStrategy, flatLegend }, highlightedLegendItemPath, geometries): QuadViewModel[] => {
     if (highlightedLegendItemPath.length === 0) return [];
     return geometries.flatMap(({ quadViewModel }) =>
-      highlightedGeoms(legendStrategy, quadViewModel, highlightedLegendItemPath),
+      highlightedGeoms(legendStrategy, flatLegend, quadViewModel, highlightedLegendItemPath),
     );
   },
 )(getChartIdSelector);

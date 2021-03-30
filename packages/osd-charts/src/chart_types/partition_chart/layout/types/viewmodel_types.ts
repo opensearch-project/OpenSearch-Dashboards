@@ -122,6 +122,10 @@ export interface PartitionSmallMultiplesModel extends SmallMultiplesIndices {
   innerColumnCount: number;
   innerRowIndex: number;
   innerColumnIndex: number;
+  marginLeftPx: Pixels;
+  marginTopPx: Pixels;
+  panelInnerWidth: Pixels;
+  panelInnerHeight: Pixels;
 }
 
 /** @internal */
@@ -159,6 +163,10 @@ export const nullPartitionSmallMultiplesModel = (partitionLayout: PartitionLayou
   innerColumnCount: 0,
   innerRowIndex: 0,
   innerColumnIndex: 0,
+  marginLeftPx: 0,
+  marginTopPx: 0,
+  panelInnerWidth: 0,
+  panelInnerHeight: 0,
   partitionLayout,
 });
 

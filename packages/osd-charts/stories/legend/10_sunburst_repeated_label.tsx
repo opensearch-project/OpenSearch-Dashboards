@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { boolean, number } from '@storybook/addon-knobs';
+import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Partition, Settings } from '../../src';
+import { Chart, LegendStrategy, Partition, Settings } from '../../src';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 export const Example = () => {
@@ -35,7 +35,13 @@ export const Example = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend flatLegend={flatLegend} legendMaxDepth={legendMaxDepth} theme={STORYBOOK_LIGHT_THEME} />
+      <Settings
+        showLegend
+        flatLegend={flatLegend}
+        legendStrategy={select('legendStrategy', LegendStrategy, LegendStrategy.Key)}
+        legendMaxDepth={legendMaxDepth}
+        theme={STORYBOOK_LIGHT_THEME}
+      />
       <Partition
         id="spec_1"
         data={[

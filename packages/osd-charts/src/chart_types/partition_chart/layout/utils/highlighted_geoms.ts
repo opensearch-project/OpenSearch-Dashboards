@@ -88,9 +88,10 @@ const defaultStrategy: LegendStrategy = LegendStrategy.Key;
 /** @internal */
 export function highlightedGeoms(
   legendStrategy: LegendStrategy | undefined,
+  flatLegend: boolean | undefined,
   quadViewModel: QuadViewModel[],
   highlightedLegendItemPath: LegendPath,
 ) {
-  const pickedLogic: LegendStrategy = legendStrategy ?? defaultStrategy;
+  const pickedLogic: LegendStrategy = flatLegend ? LegendStrategy.Key : legendStrategy ?? defaultStrategy;
   return quadViewModel.filter(legendStrategies[pickedLogic](highlightedLegendItemPath));
 }
