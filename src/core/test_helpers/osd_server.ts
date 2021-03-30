@@ -262,14 +262,14 @@ export function createTestServers({
           opensearchPort: opensearchTestConfig.getUrlParts().port,
           updates: [
             ...usersToBeAdded,
-            // user elastic
+            // user opensearch
             opensearchTestConfig.getUrlParts(),
             // user opensearchDashboards
             osdTestConfig.getUrlParts(),
           ],
         });
 
-        // Override provided configs, we know what the elastic user is now
+        // Override provided configs, we know what the opensearch user is now
         osdSettings.opensearch = {
           hosts: [opensearchTestConfig.getUrl()],
           username: opensearchDashboardsServerTestUser.username,
