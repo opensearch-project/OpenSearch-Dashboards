@@ -82,7 +82,8 @@ describe('createOrUpgradeSavedConfig()', () => {
     await osd.stop();
   }, 30000);
 
-  it('upgrades the previous version on each increment', async function () {
+  // TODO: [RENAMEME] Test can be enabled once there is a valid snapshot URL
+  xit('upgrades the previous version on each increment', async function () {
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
