@@ -1,3 +1,15 @@
+# [27.0.0](https://github.com/elastic/elastic-charts/compare/v26.1.0...v27.0.0) (2021-03-31)
+
+
+### Features
+
+* **partitions:** Small multiples legends ([#1094](https://github.com/elastic/elastic-charts/issues/1094)) ([c39d113](https://github.com/elastic/elastic-charts/commit/c39d11388f74bbaef1dc2ed0b4febabd25b35241))
+
+
+### BREAKING CHANGES
+
+* **partitions:** the `flatLegend` (true) option yields alphabetical, formatted name based sorting for unique name/color occurrences, to make it easy for the user to look up names in the legend as it's alphabetically sorted
+
 # [26.1.0](https://github.com/elastic/elastic-charts/compare/v26.0.0...v26.1.0) (2021-03-26)
 
 
