@@ -86,7 +86,7 @@ describe('/api/stats', () => {
   it('successfully returns data', async () => {
     const response = await supertest(httpSetup.server.listener).get('/api/stats').expect(200);
     expect(response.body).toMatchObject({
-      opensearchDashboards: {
+      opensearch_dashboards: {
         uuid: 'xxx-xxxxx',
         name: 'myopensearchDashboards',
         index: '.opensearch_dashboards_test',
