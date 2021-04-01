@@ -336,4 +336,24 @@ describe('Interactions', () => {
       { left: 350, top: 130 },
     );
   });
+
+  describe('legend items with color picker clicking hidden or unhidden', () => {
+    // eslint-disable-next-line jest/expect-expect
+    it('legend items should not move when color picker series is hidden or unhidden', async () => {
+      await common.moveMouse(0, 0);
+      await common.expectChartWithKeyboardEventsAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/legend--color-picker',
+        [
+          {
+            key: 'tab',
+            count: 2,
+          },
+          {
+            key: 'enter',
+            count: 1,
+          },
+        ],
+      );
+    });
+  });
 });
