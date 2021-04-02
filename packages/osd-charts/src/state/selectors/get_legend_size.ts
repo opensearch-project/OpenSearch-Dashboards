@@ -35,8 +35,7 @@ const getParentDimensionSelector = (state: GlobalChartState) => state.parentDime
 
 const SCROLL_BAR_WIDTH = 6; // ~1em
 const MARKER_WIDTH = 16;
-const MARKER_LEFT_MARGIN = 4;
-const VALUE_LEFT_MARGIN = 4;
+const SHARED_MARGIN = 4;
 const VERTICAL_PADDING = 4;
 const TOP_MARGIN = 2;
 
@@ -84,8 +83,7 @@ export const getLegendSizeSelector = createCachedSelector(
     } = theme;
 
     const actionDimension = isDefined(legendAction) ? 24 : 0; // max width plus margin
-    const legendItemWidth =
-      MARKER_WIDTH + MARKER_LEFT_MARGIN + bbox.width + (showLegendDisplayValue ? VALUE_LEFT_MARGIN : 0);
+    const legendItemWidth = MARKER_WIDTH + SHARED_MARGIN + bbox.width + (showLegendDisplayValue ? SHARED_MARGIN : 0);
 
     if (legendPosition.direction === LayoutDirection.Vertical) {
       const legendItemHeight = bbox.height + VERTICAL_PADDING * 2;

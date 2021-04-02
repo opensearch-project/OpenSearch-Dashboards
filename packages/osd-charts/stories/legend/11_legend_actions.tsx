@@ -45,10 +45,7 @@ import {
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { getPositionKnob, getEuiPopoverPositionKnob } from '../utils/knobs';
 
-const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition): LegendAction => ({
-  series,
-  label,
-}) => {
+const getAction = (anchorPosition: PopoverAnchorPosition): LegendAction => ({ series, label }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const getPanels = (series: XYChartSeriesIdentifier[]): EuiContextMenuPanelDescriptor[] => [
@@ -107,9 +104,8 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100%',
-        marginLeft: 4,
-        marginRight: 4,
+        paddingLeft: 2,
+        paddingRight: 2,
       }}
       onClick={() => setPopoverOpen(!popoverOpen)}
     >
@@ -120,10 +116,11 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
   return (
     <EuiPopover
       id="contextMenuNormal"
-      button={hideActions ? <div /> : Button}
+      button={Button}
       isOpen={popoverOpen}
       closePopover={() => setPopoverOpen(false)}
       panelPaddingSize="none"
+      offset={4}
       anchorPosition={anchorPosition}
       ownFocus
     >
@@ -160,7 +157,7 @@ export const Example = () => {
         showLegend
         showLegendExtra={showLegendExtra}
         legendPosition={legendPosition}
-        legendAction={getAction(hideActions, euiPopoverPosition)}
+        legendAction={hideActions ? undefined : getAction(euiPopoverPosition)}
         legendColorPicker={showColorPicker ? renderColorPicker(euiPopoverPosition) : undefined}
       />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />

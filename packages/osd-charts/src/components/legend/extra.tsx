@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import classNames from 'classnames';
 import React from 'react';
 
 /**
@@ -25,12 +24,9 @@ import React from 'react';
  * @param extra
  * @param isSeriesHidden
  */
-export function renderExtra(extra: string | number, isSeriesHidden?: boolean) {
-  const extraClassNames = classNames('echLegendItem__extra', {
-    'echLegendItem__extra--hidden': isSeriesHidden,
-  });
+export function renderExtra(extra: string | number) {
   return (
-    <div className={extraClassNames} title={`${extra}`}>
+    <div className="echLegendItem__extra" title={`${extra}`}>
       {extra}
     </div>
   );

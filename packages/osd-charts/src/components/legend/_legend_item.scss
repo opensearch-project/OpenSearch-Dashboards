@@ -8,11 +8,15 @@ $legendItemHeight: #{$euiFontSizeXS * $euiLineHeight};
   justify-content: space-between;
   align-items: center;
   position: relative;
-  margin-left: 5px;
 
   > *:not(.background) {
     // euiPopover adds a div with height of 19px otherwise
     height: $legendItemHeight; // prevents color dot from shifting
+    margin-left: $euiSizeXS;
+
+    &:last-child:not(.echLegendItem__extra) {
+      margin-right: $euiSizeXS;
+    }
   }
 
   &:not(&--hidden) {
@@ -39,14 +43,19 @@ $legendItemHeight: #{$euiFontSizeXS * $euiLineHeight};
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: $euiSizeXS;
-    height: 16px;
-    width: 20px;
+    max-width: calc(#{$legendItemHeight} + #{$euiSizeXS * 2});
+
+    .euiPopover,
+    .euiPopover__anchor,
+    .euiPopover__anchor > *:first-child {
+      // makes custom buttons in eui popover take full action size
+      height: 100%;
+      width: 100%;
+    }
   }
 
   &__color {
     display: flex;
-    margin-right: $euiSizeXS;
     line-height: 1.5;
     align-items: center;
   }
@@ -75,10 +84,6 @@ $legendItemHeight: #{$euiFontSizeXS * $euiLineHeight};
     margin-left: $euiSizeXS;
     font-feature-settings: 'tnum';
     letter-spacing: unset;
-
-    &--hidden {
-      display: none;
-    }
   }
 
   &--vertical {

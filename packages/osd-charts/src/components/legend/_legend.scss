@@ -36,10 +36,6 @@
     overflow-y: auto;
     overflow-x: hidden;
 
-    .echLegendItem--vertical :focus {
-      margin-right: $euiSizeXS;
-    }
-
     :focus {
       @include euiFocusRing;
       background-color: $euiFocusBackgroundColor;

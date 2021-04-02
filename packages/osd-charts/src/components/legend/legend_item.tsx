@@ -177,9 +177,11 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
   render() {
     const { extraValues, item, showExtra, colorPicker, totalItems, action: Action, positionConfig } = this.props;
     const { color, isSeriesHidden, isItemHidden, seriesIdentifiers, label } = item;
+
+    if (isItemHidden) return null;
+
     const itemClassNames = classNames('echLegendItem', {
       'echLegendItem--hidden': isSeriesHidden,
-      'echLegendItem__extra--hidden': isItemHidden,
       'echLegendItem--vertical': positionConfig.direction === LayoutDirection.Vertical,
     });
     const hasColorPicker = Boolean(colorPicker);
@@ -213,7 +215,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
             onClick={this.handleLabelClick(seriesIdentifiers)}
             isSeriesHidden={isSeriesHidden}
           />
-          {extra && renderExtra(extra, isSeriesHidden)}
+          {extra && !isSeriesHidden && renderExtra(extra)}
           {Action && (
             <div className="echLegendItem__action">
               <Action series={seriesIdentifiers} color={color} label={label} />

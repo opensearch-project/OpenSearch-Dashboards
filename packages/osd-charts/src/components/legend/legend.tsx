@@ -79,7 +79,8 @@ function LegendComponent(props: LegendStateProps & LegendDispatchProps) {
     containerDimensions,
     config,
   } = props;
-  if (items.length === 0) {
+
+  if (items.length === 0 || items.every(({ isItemHidden }) => isItemHidden)) {
     return null;
   }
 
