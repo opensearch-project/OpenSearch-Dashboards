@@ -63,7 +63,7 @@ describe('/api/stats', () => {
       }),
       config: {
         allowAnonymous: true,
-        opensearchDashboardsIndex: '.opensearch_dashboards-test',
+        opensearchDashboardsIndex: '.opensearch_dashboards_test',
         opensearchDashboardsVersion: '8.8.8-SNAPSHOT',
         server: {
           name: 'myopensearchDashboards',
@@ -86,10 +86,10 @@ describe('/api/stats', () => {
   it('successfully returns data', async () => {
     const response = await supertest(httpSetup.server.listener).get('/api/stats').expect(200);
     expect(response.body).toMatchObject({
-      opensearchDashboards: {
+      opensearch_dashboards: {
         uuid: 'xxx-xxxxx',
         name: 'myopensearchDashboards',
-        index: '.opensearch_dashboards-test',
+        index: '.opensearch_dashboards_test',
         host: 'myopensearchDashboards.com',
         locale: 'en',
         transport_address: `myopensearchDashboards.com:1234`,

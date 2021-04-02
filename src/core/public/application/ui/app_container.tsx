@@ -25,7 +25,7 @@ import React, {
   useState,
   MutableRefObject,
 } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
@@ -120,7 +120,7 @@ export const AppContainer: FunctionComponent<Props> = ({
       {appNotFound && <AppNotFound />}
       {showSpinner && (
         <div className="appContainer__loading">
-          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
+          <EuiLoadingSpinner aria-label="Loading application" size="xl" />
         </div>
       )}
       <div key={appId} ref={elementRef} />
