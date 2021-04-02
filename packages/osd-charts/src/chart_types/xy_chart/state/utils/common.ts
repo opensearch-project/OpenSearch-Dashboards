@@ -20,7 +20,7 @@
 import { LegendItem } from '../../../../common/legend';
 import { getDistance, Rotation } from '../../../../utils/common';
 import { Point } from '../../../../utils/point';
-import { BasicSeriesSpec, SeriesTypes } from '../../utils/specs';
+import { BasicSeriesSpec, SeriesType } from '../../utils/specs';
 import { GeometriesCounts } from './types';
 
 export const MAX_ANIMATABLE_BARS = 300;
@@ -41,7 +41,7 @@ export function isVerticalRotation(chartRotation: Rotation) {
  * @internal
  */
 export function isLineAreaOnlyChart(specs: BasicSeriesSpec[]) {
-  return !specs.some((spec) => spec.seriesType === SeriesTypes.Bar);
+  return !specs.some((spec) => spec.seriesType === SeriesType.Bar);
 }
 
 /** @internal */

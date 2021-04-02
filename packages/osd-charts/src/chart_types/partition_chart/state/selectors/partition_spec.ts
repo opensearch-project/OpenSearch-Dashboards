@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs';
+import { ChartType } from '../../..';
+import { SpecType } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { PartitionSpec } from '../../specs';
 
 /** @internal */
 export function getPartitionSpecs(state: GlobalChartState): PartitionSpec[] {
-  return getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
+  return getSpecsFromStore<PartitionSpec>(state.specs, ChartType.Partition, SpecType.Series);
 }
 
 /** @internal */

@@ -19,16 +19,16 @@
 
 import React from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SeriesTypes } from '../utils/specs';
+import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SeriesType } from '../utils/specs';
 
 const defaultProps = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
-  seriesType: SeriesTypes.Line,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
+  seriesType: SeriesType.Line,
   groupId: DEFAULT_GLOBAL_ID,
   xScaleType: ScaleType.Ordinal,
   yScaleType: ScaleType.Linear,

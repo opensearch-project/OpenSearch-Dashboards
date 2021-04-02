@@ -19,10 +19,10 @@
 
 import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { CategoryKey } from '../../../../common/category';
 import { Pixels, Ratio } from '../../../../common/geometry';
-import { RelativeBandsPadding, SmallMultiplesSpec, SpecTypes } from '../../../../specs';
+import { RelativeBandsPadding, SmallMultiplesSpec, SpecType } from '../../../../specs';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
@@ -52,11 +52,7 @@ function bandwidth(range: Pixels, bandCount: number, { outer, inner }: RelativeB
 export const partitionMultiGeometries = createCachedSelector(
   [getSpecs, getPartitionSpecs, getChartContainerDimensionsSelector, getTrees, getChartThemeSelector],
   (specs, partitionSpecs, parentDimensions, trees, { background }): ShapeViewModel[] => {
-    const smallMultiplesSpecs = getSpecsFromStore<SmallMultiplesSpec>(
-      specs,
-      ChartTypes.Global,
-      SpecTypes.SmallMultiples,
-    );
+    const smallMultiplesSpecs = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartType.Global, SpecType.SmallMultiples);
 
     // todo make it part of configuration
     const outerSpecDirection = ['horizontal', 'vertical', 'zigzag'][0];

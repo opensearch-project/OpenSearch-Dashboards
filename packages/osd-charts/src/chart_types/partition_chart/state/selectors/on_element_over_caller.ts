@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { getOnElementOverSelector } from '../../../../common/event_handler_selectors';
 import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
@@ -39,7 +39,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   const prev: { pickedShapes: LayerValue[][] } = { pickedShapes: [] };
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.Partition) {
+    if (selector === null && state.chartType === ChartType.Partition) {
       selector = createCachedSelector(
         [getPartitionSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
         getOnElementOverSelector(prev),

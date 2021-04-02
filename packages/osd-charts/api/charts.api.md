@@ -44,13 +44,13 @@ export interface AngleFromTo {
 }
 
 // @public
-export type AnnotationDomainType = $Values<typeof AnnotationDomainTypes>;
-
-// @public
-export const AnnotationDomainTypes: Readonly<{
+export const AnnotationDomainType: Readonly<{
     XDomain: "xDomain";
     YDomain: "yDomain";
 }>;
+
+// @public
+export type AnnotationDomainType = $Values<typeof AnnotationDomainType>;
 
 // @public (undocumented)
 export type AnnotationId = string;
@@ -67,17 +67,17 @@ export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 // @public (undocumented)
 export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 
-// @public (undocumented)
-export type AnnotationType = $Values<typeof AnnotationTypes>;
-
-// Warning: (ae-missing-release-tag) "AnnotationTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "AnnotationType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const AnnotationTypes: Readonly<{
+export const AnnotationType: Readonly<{
     Line: "line";
     Rectangle: "rectangle";
     Text: "text";
 }>;
+
+// @public (undocumented)
+export type AnnotationType = $Values<typeof AnnotationType>;
 
 // Warning: (ae-missing-release-tag) "ArcSeriesStyle" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -107,7 +107,7 @@ export const AreaSeries: React_2.FunctionComponent<SpecRequiredProps & SpecOptio
 
 // @public
 export type AreaSeriesSpec = BasicSeriesSpec & HistogramConfig & Postfixes & {
-    seriesType: typeof SeriesTypes.Area;
+    seriesType: typeof SeriesType.Area;
     curve?: CurveType;
     areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
     stackMode?: StackMode;
@@ -170,7 +170,7 @@ export type AxisId = string;
 // @public
 export interface AxisSpec extends Spec {
     // (undocumented)
-    chartType: typeof ChartTypes.XYAxis;
+    chartType: typeof ChartType.XYAxis;
     domain?: YDomainRange;
     gridLine?: Partial<GridLineStyle>;
     groupId: GroupId;
@@ -185,7 +185,7 @@ export interface AxisSpec extends Spec {
     showOverlappingLabels: boolean;
     showOverlappingTicks: boolean;
     // (undocumented)
-    specType: typeof SpecTypes.Axis;
+    specType: typeof SpecType.Axis;
     style?: RecursivePartial<Omit<AxisStyle, 'gridLine'>>;
     tickFormat?: TickFormatter;
     ticks?: number;
@@ -266,7 +266,7 @@ export const BarSeries: React_2.FunctionComponent<SpecRequiredProps_2 & SpecOpti
 
 // @public
 export type BarSeriesSpec = BasicSeriesSpec & Postfixes & {
-    seriesType: typeof SeriesTypes.Bar;
+    seriesType: typeof SeriesType.Bar;
     enableHistogramMode?: boolean;
     barSeriesStyle?: RecursivePartial<BarSeriesStyle>;
     stackMode?: StackMode;
@@ -295,15 +295,15 @@ export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 // Warning: (ae-missing-release-tag) "BaseAnnotationSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface BaseAnnotationSpec<T extends typeof AnnotationTypes.Rectangle | typeof AnnotationTypes.Line, D extends RectAnnotationDatum | LineAnnotationDatum, S extends RectAnnotationStyle | LineAnnotationStyle> extends Spec, AnnotationPortalSettings {
+export interface BaseAnnotationSpec<T extends typeof AnnotationType.Rectangle | typeof AnnotationType.Line, D extends RectAnnotationDatum | LineAnnotationDatum, S extends RectAnnotationStyle | LineAnnotationStyle> extends Spec, AnnotationPortalSettings {
     annotationType: T;
     // (undocumented)
-    chartType: typeof ChartTypes.XYAxis;
+    chartType: typeof ChartType.XYAxis;
     dataValues: D[];
     groupId: GroupId;
     hideTooltips?: boolean;
     // (undocumented)
-    specType: typeof SpecTypes.Annotation;
+    specType: typeof SpecType.Annotation;
     style?: Partial<S>;
     zIndex?: number;
 }
@@ -364,7 +364,7 @@ export const BubbleSeries: React_2.FunctionComponent<SpecRequiredProps_3 & SpecO
 
 // @alpha
 export type BubbleSeriesSpec = BasicSeriesSpec & {
-    seriesType: typeof SeriesTypes.Bubble;
+    seriesType: typeof SeriesType.Bubble;
     bubbleSeriesStyle?: RecursivePartial<BubbleSeriesStyle>;
     pointStyleAccessor?: PointStyleAccessor;
 };
@@ -459,10 +459,10 @@ export interface ChartSizeObject {
     width?: number | string;
 }
 
-// Warning: (ae-missing-release-tag) "ChartTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "ChartType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export const ChartTypes: Readonly<{
+export const ChartType: Readonly<{
     Global: "global";
     Goal: "goal";
     Partition: "partition";
@@ -472,7 +472,7 @@ export const ChartTypes: Readonly<{
 }>;
 
 // @public (undocumented)
-export type ChartTypes = $Values<typeof ChartTypes>;
+export type ChartType = $Values<typeof ChartType>;
 
 // Warning: (ae-missing-release-tag) "CHILDREN_KEY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -886,7 +886,7 @@ export interface GoalSpec extends Spec {
     // (undocumented)
     centralMinor: string | BandFillColorAccessor;
     // (undocumented)
-    chartType: typeof ChartTypes.Goal;
+    chartType: typeof ChartType.Goal;
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -896,7 +896,7 @@ export interface GoalSpec extends Spec {
     // (undocumented)
     labelMinor: string | BandFillColorAccessor;
     // (undocumented)
-    specType: typeof SpecTypes.Series;
+    specType: typeof SpecType.Series;
     // Warning: (ae-forgotten-export) The symbol "GoalSubtype" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1094,7 +1094,7 @@ export type HeatmapElementEvent = [Cell, SeriesIdentifier];
 // @alpha (undocumented)
 export interface HeatmapSpec extends Spec {
     // (undocumented)
-    chartType: typeof ChartTypes.Heatmap;
+    chartType: typeof ChartType.Heatmap;
     // (undocumented)
     colors: Color[];
     // Warning: (ae-forgotten-export) The symbol "HeatmapScaleType" needs to be exported by the entry point index.d.ts
@@ -1115,7 +1115,7 @@ export interface HeatmapSpec extends Spec {
     // (undocumented)
     ranges?: number[] | [number, number];
     // (undocumented)
-    specType: typeof SpecTypes.Series;
+    specType: typeof SpecType.Series;
     // (undocumented)
     valueAccessor: Accessor | AccessorFn;
     // (undocumented)
@@ -1346,7 +1346,7 @@ export interface LineAnnotationDatum {
 }
 
 // @public (undocumented)
-export type LineAnnotationSpec = BaseAnnotationSpec<typeof AnnotationTypes.Line, LineAnnotationDatum, LineAnnotationStyle> & {
+export type LineAnnotationSpec = BaseAnnotationSpec<typeof AnnotationType.Line, LineAnnotationDatum, LineAnnotationStyle> & {
     domainType: AnnotationDomainType;
     marker?: JSX.Element;
     markerDimensions?: {
@@ -1375,7 +1375,7 @@ export const LineSeries: React_2.FunctionComponent<SpecRequiredProps_6 & SpecOpt
 
 // @public
 export type LineSeriesSpec = BasicSeriesSpec & HistogramConfig & {
-    seriesType: typeof SeriesTypes.Line;
+    seriesType: typeof SeriesType.Line;
     curve?: CurveType;
     lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
     pointStyleAccessor?: PointStyleAccessor;
@@ -1764,7 +1764,7 @@ export interface RectAnnotationDatum {
 }
 
 // @public (undocumented)
-export type RectAnnotationSpec = BaseAnnotationSpec<typeof AnnotationTypes.Rectangle, RectAnnotationDatum, RectAnnotationStyle> & {
+export type RectAnnotationSpec = BaseAnnotationSpec<typeof AnnotationType.Rectangle, RectAnnotationDatum, RectAnnotationStyle> & {
     renderTooltip?: AnnotationTooltipFormatter;
     zIndex?: number;
 };
@@ -1939,7 +1939,7 @@ export interface SeriesScales {
 // @public (undocumented)
 export interface SeriesSpec extends Spec {
     // (undocumented)
-    chartType: typeof ChartTypes.XYAxis;
+    chartType: typeof ChartType.XYAxis;
     color?: SeriesColorAccessor;
     data: Datum[];
     // (undocumented)
@@ -1948,11 +1948,11 @@ export interface SeriesSpec extends Spec {
     groupId: string;
     hideInLegend?: boolean;
     name?: SeriesNameAccessor;
-    seriesType: SeriesTypes;
+    seriesType: SeriesType;
     // @deprecated
     sortIndex?: number;
     // (undocumented)
-    specType: typeof SpecTypes.Series;
+    specType: typeof SpecType.Series;
     tickFormat?: TickFormatter;
     useDefaultGroupDomain?: boolean | string;
     // Warning: (ae-forgotten-export) The symbol "AccessorFormat" needs to be exported by the entry point index.d.ts
@@ -1965,10 +1965,10 @@ export interface SeriesSpec extends Spec {
 // @public (undocumented)
 export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
 
-// Warning: (ae-missing-release-tag) "SeriesTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SeriesType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SeriesTypes: Readonly<{
+export const SeriesType: Readonly<{
     Area: "area";
     Bar: "bar";
     Line: "line";
@@ -1976,7 +1976,7 @@ export const SeriesTypes: Readonly<{
 }>;
 
 // @public
-export type SeriesTypes = $Values<typeof SeriesTypes>;
+export type SeriesType = $Values<typeof SeriesType>;
 
 // Warning: (ae-missing-release-tag) "Settings" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2127,7 +2127,7 @@ export interface SortSeriesByConfig {
 //
 // @public (undocumented)
 export interface Spec {
-    chartType: ChartTypes;
+    chartType: ChartType;
     id: string;
     specType: string;
 }
@@ -2135,10 +2135,10 @@ export interface Spec {
 // @public (undocumented)
 export type SpecId = string;
 
-// Warning: (ae-missing-release-tag) "SpecTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SpecType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SpecTypes: Readonly<{
+export const SpecType: Readonly<{
     Series: "series";
     Axis: "axis";
     Annotation: "annotation";
@@ -2148,7 +2148,7 @@ export const SpecTypes: Readonly<{
 }>;
 
 // @public (undocumented)
-export type SpecTypes = $Values<typeof SpecTypes>;
+export type SpecType = $Values<typeof SpecType>;
 
 // @public
 export const StackMode: Readonly<{
@@ -2411,7 +2411,7 @@ export interface WordcloudSpec extends Spec {
     // (undocumented)
     angleCount: number;
     // (undocumented)
-    chartType: typeof ChartTypes.Wordcloud;
+    chartType: typeof ChartType.Wordcloud;
     // (undocumented)
     config: RecursivePartial<PartitionConfig>;
     // Warning: (ae-forgotten-export) The symbol "WordModel" needs to be exported by the entry point index.d.ts
@@ -2439,7 +2439,7 @@ export interface WordcloudSpec extends Spec {
     // (undocumented)
     padding: number;
     // (undocumented)
-    specType: typeof SpecTypes.Series;
+    specType: typeof SpecType.Series;
     // (undocumented)
     spiral: string;
     // (undocumented)

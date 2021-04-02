@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
@@ -38,7 +38,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   let prevPickedShapes: number | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.Heatmap) {
+    if (selector === null && state.chartType === ChartType.Heatmap) {
       selector = createCachedSelector(
         [getSpecOrNull, getPickedShapes, getSettingsSpecSelector],
         (spec, pickedShapes, settings): void => {

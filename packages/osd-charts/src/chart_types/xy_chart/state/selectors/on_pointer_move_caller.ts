@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs';
 import { PointerEventType } from '../../../../specs/constants';
@@ -109,7 +109,7 @@ export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
   let prevPointerEvent: PointerEvent | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.XYAxis) {
+    if (selector === null && state.chartType === ChartType.XYAxis) {
       selector = createCachedSelector(
         [getSettingsSpecSelector, getPointerEventSelector, getChartIdSelector],
         (settings: SettingsSpec, nextPointerEvent: PointerEvent, chartId: string): void => {

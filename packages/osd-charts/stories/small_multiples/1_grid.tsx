@@ -34,7 +34,7 @@ import {
   Fit,
   LineAnnotation,
   BubbleSeries,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Rotation,
   RectAnnotation,
 } from '../../src';
@@ -144,7 +144,7 @@ export const Example = () => {
         <LineAnnotation
           dataValues={[{ dataValue: 4 }]}
           id="test"
-          domainType={AnnotationDomainTypes.XDomain}
+          domainType={AnnotationDomainType.XDomain}
           marker={<div style={{ width: 10, height: 10, background: 'red' }} />}
           style={{
             line: {
@@ -159,7 +159,7 @@ export const Example = () => {
         <LineAnnotation
           dataValues={[{ dataValue: 5 }]}
           id="test2"
-          domainType={AnnotationDomainTypes.YDomain}
+          domainType={AnnotationDomainType.YDomain}
           marker={<div style={{ width: 10, height: 10, background: 'blue' }} />}
           style={{
             line: {

@@ -20,12 +20,12 @@
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs/specs';
 import { MockStore } from '../../../mocks/store/store';
 import { Scale } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 import { Position, mergePartial } from '../../../utils/common';
@@ -118,8 +118,8 @@ describe('Axis computational utils', () => {
     isHidden: false,
   };
   const verticalAxisSpec = MockGlobalSpec.axis({
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_1',
     title: 'Axis 1',
     groupId: 'group_1',
@@ -133,8 +133,8 @@ describe('Axis computational utils', () => {
   });
 
   const horizontalAxisSpec = MockGlobalSpec.axis({
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_2',
     title: 'Axis 2',
     groupId: 'group_1',
@@ -147,8 +147,8 @@ describe('Axis computational utils', () => {
   });
 
   const verticalAxisSpecWTitle = MockGlobalSpec.axis({
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_1',
     groupId: 'group_1',
     title: 'v axis',
@@ -161,8 +161,8 @@ describe('Axis computational utils', () => {
     integersOnly: false,
   });
   const xAxisWithTime = MockGlobalSpec.axis({
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_1',
     groupId: 'group_1',
     title: 'v axis',

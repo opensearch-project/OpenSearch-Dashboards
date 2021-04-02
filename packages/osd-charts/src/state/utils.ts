@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ChartTypes } from '../chart_types';
+import { ChartType } from '../chart_types';
 import { Spec } from '../specs';
 import { SpecList, PointerState } from './chart_state';
 
 /** @internal */
-export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: ChartTypes, specType?: string): U[] {
+export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: ChartType, specType?: string): U[] {
   return Object.keys(specs)
     .filter((specId) => {
       const currentSpec = specs[specId];

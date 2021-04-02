@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { SettingsSpec } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
@@ -69,7 +69,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   let prevProps: Props | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.XYAxis) {
+    if (selector === null && state.chartType === ChartType.XYAxis) {
       selector = createCachedSelector(
         [getTooltipInfoAndGeometriesSelector, getSettingsSpecSelector],
         ({ highlightedGeometries }: TooltipAndHighlightedGeoms, settings: SettingsSpec): void => {

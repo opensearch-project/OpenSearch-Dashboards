@@ -19,10 +19,10 @@
 import React from 'react';
 
 import { Spec } from '.';
-import { ChartTypes } from '../chart_types';
+import { ChartType } from '../chart_types';
 import { Ratio } from '../common/geometry';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
-import { SpecTypes } from './constants';
+import { SpecType } from './constants';
 
 /**
  * Can be used for margin or padding start/end (eg. left/right or top/bottom)
@@ -82,8 +82,8 @@ export interface SmallMultiplesSpec extends Spec {
 
 const DEFAULT_SMALL_MULTIPLES_PROPS = {
   id: '__global__small_multiples___',
-  chartType: ChartTypes.Global,
-  specType: SpecTypes.SmallMultiples,
+  chartType: ChartType.Global,
+  specType: SpecType.SmallMultiples,
 };
 
 /** @alpha */

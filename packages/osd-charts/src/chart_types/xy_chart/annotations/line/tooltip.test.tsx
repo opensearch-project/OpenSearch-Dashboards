@@ -19,18 +19,18 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { Chart } from '../../../../components/chart';
 import { MockAnnotationLineProps, MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { ScaleType } from '../../../../scales/constants';
-import { SpecTypes } from '../../../../specs/constants';
+import { SpecType } from '../../../../specs/constants';
 import { Settings } from '../../../../specs/settings';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationId } from '../../../../utils/ids';
 import { LineAnnotation } from '../../specs/line_annotation';
 import { LineSeries } from '../../specs/line_series';
-import { AnnotationDomainTypes, AnnotationTypes, AxisSpec, RectAnnotationSpec } from '../../utils/specs';
+import { AnnotationDomainType, AnnotationType, AxisSpec, RectAnnotationSpec } from '../../utils/specs';
 import { computeRectAnnotationTooltipState } from '../tooltip';
 import { AnnotationDimensions } from '../types';
 import { AnnotationLineProps } from './types';
@@ -57,7 +57,7 @@ describe('Annotation tooltips', () => {
           />
           <LineAnnotation
             id="foo"
-            domainType={AnnotationDomainTypes.YDomain}
+            domainType={AnnotationDomainType.YDomain}
             dataValues={[{ dataValue: 2, details: 'foo' }]}
             marker={<div style={{ width: '10px', height: '10px' }} />}
           />
@@ -95,7 +95,7 @@ describe('Annotation tooltips', () => {
           />
           <LineAnnotation
             id="foo"
-            domainType={AnnotationDomainTypes.YDomain}
+            domainType={AnnotationDomainType.YDomain}
             dataValues={[{ dataValue: 2, details: 'foo' }]}
             marker={<div style={{ width: '10px', height: '10px' }} />}
             hideTooltips
@@ -144,11 +144,11 @@ describe('Annotation tooltips', () => {
 
     // rect annotation tooltip
     const annotationRectangle: RectAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
+      chartType: ChartType.XYAxis,
+      specType: SpecType.Annotation,
       id: 'rect',
       groupId,
-      annotationType: AnnotationTypes.Rectangle,
+      annotationType: AnnotationType.Rectangle,
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };
 
@@ -170,7 +170,7 @@ describe('Annotation tooltips', () => {
 
     expect(rectTooltipState).toMatchObject({
       isVisible: true,
-      annotationType: AnnotationTypes.Rectangle,
+      annotationType: AnnotationType.Rectangle,
       anchor: {
         left: 18,
         top: 9,

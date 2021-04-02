@@ -19,12 +19,12 @@
 
 import { $Values } from 'utility-types';
 
-import { ChartTypes } from '../chart_types';
+import { ChartType } from '../chart_types';
 import { Position } from '../utils/common';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { SettingsSpec } from './settings';
 
-export const SpecTypes = Object.freeze({
+export const SpecType = Object.freeze({
   Series: 'series' as const,
   Axis: 'axis' as const,
   Annotation: 'annotation' as const,
@@ -33,7 +33,7 @@ export const SpecTypes = Object.freeze({
   SmallMultiples: 'small_multiples' as const,
 });
 /** @public */
-export type SpecTypes = $Values<typeof SpecTypes>;
+export type SpecType = $Values<typeof SpecType>;
 
 /**
  * Type of bin aggregations
@@ -129,8 +129,8 @@ export const DEFAULT_LEGEND_CONFIG = {
 
 export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   id: '__global__settings___',
-  chartType: ChartTypes.Global,
-  specType: SpecTypes.Settings,
+  chartType: ChartType.Global,
+  specType: SpecType.Settings,
   rendering: 'canvas' as const,
   rotation: 0 as const,
   animateData: true,

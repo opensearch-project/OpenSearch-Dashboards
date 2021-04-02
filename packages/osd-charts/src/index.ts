@@ -17,7 +17,7 @@
  * under the License.
  */
 export * from './components';
-export { ChartTypes } from './chart_types';
+export { ChartType } from './chart_types';
 export { ChartSize, ChartSizeArray, ChartSizeObject } from './utils/chart_size';
 
 export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';

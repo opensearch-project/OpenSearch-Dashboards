@@ -4,8 +4,8 @@ The bar chart with axis example in the `Types of charts` section includes only s
 
 | Prop | Type | Default | Note |
 |:------|:------:|:---------:|:------|
-| chartType | `typeof ChartTypes.XYAxis` | ChartTypes.XYAxis  |  |
-| specType  | `typeof SpecTypes.Axis` | SpecTypes.Axis  |  |
+| chartType | `typeof ChartType.XYAxis` | ChartType.XYAxis  |  |
+| specType  | `typeof SpecType.Axis` | SpecType.Axis  |  |
 | groupId | GroupId | `__global__`  | The ID of the axis group |
 | hide  | boolean  | false  | Hide this axis |
 | showOverlappingTicks | boolean | false  | Shows all ticks, also the one from the overlapping labels   |

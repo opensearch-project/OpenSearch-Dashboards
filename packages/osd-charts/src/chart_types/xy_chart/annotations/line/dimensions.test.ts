@@ -25,7 +25,7 @@ import { Position } from '../../../../utils/common';
 import { AnnotationId } from '../../../../utils/ids';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/merge_utils';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
-import { AnnotationDomainTypes } from '../../utils/specs';
+import { AnnotationDomainType } from '../../utils/specs';
 import { AnnotationDimensions } from '../types';
 import { AnnotationLineProps } from './types';
 
@@ -72,7 +72,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo',
       groupId,
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
     });
 
@@ -115,7 +115,7 @@ describe('Annotation utils', () => {
 
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo',
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -134,7 +134,7 @@ describe('Annotation utils', () => {
 
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -177,7 +177,7 @@ describe('Annotation utils', () => {
 
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -221,7 +221,7 @@ describe('Annotation utils', () => {
 
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -264,7 +264,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -294,7 +294,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 'a', details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -337,7 +337,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -379,7 +379,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -421,7 +421,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 'a', details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -464,7 +464,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -508,7 +508,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -551,7 +551,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -594,7 +594,7 @@ describe('Annotation utils', () => {
     const lineAnnotation = MockAnnotationSpec.line({
       id: 'foo-line',
       groupId: 'other-group',
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     });
@@ -636,7 +636,7 @@ describe('Annotation utils', () => {
     const annotationId = 'foo-line';
     const invalidXLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 'e', details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -649,7 +649,7 @@ describe('Annotation utils', () => {
 
     const invalidStringXLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: '', details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -664,7 +664,7 @@ describe('Annotation utils', () => {
 
     const outOfBoundsXLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: -999, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -679,7 +679,7 @@ describe('Annotation utils', () => {
 
     const invalidYLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: 'e', details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -694,7 +694,7 @@ describe('Annotation utils', () => {
 
     const outOfBoundsYLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: -999, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -709,7 +709,7 @@ describe('Annotation utils', () => {
 
     const invalidStringYLineAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.YDomain,
+      domainType: AnnotationDomainType.YDomain,
       dataValues: [{ dataValue: '', details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
@@ -724,7 +724,7 @@ describe('Annotation utils', () => {
 
     const validHiddenAnnotation = MockAnnotationSpec.line({
       id: annotationId,
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,

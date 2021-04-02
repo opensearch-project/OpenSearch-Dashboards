@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ChartTypes } from '../../chart_types';
+import { ChartType } from '../../chart_types';
 import { drilldownActive } from '../../chart_types/partition_chart/state/selectors/drilldown_active';
 import { getPickedShapesLayerValues } from '../../chart_types/partition_chart/state/selectors/picked_shapes';
 import { LegendItem } from '../../common/legend';
@@ -206,7 +206,7 @@ function toggleDeselectedDataSeries(
 }
 
 function getDrilldownData(globalState: GlobalChartState) {
-  if (globalState.chartType !== ChartTypes.Partition || !drilldownActive(globalState)) {
+  if (globalState.chartType !== ChartType.Partition || !drilldownActive(globalState)) {
     return [];
   }
   const layerValues: LayerValue[] = getPickedShapesLayerValues(globalState)[0];

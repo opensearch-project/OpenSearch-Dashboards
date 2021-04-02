@@ -19,13 +19,13 @@
 
 import { $Values } from 'utility-types';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { TooltipPortalSettings } from '../../../components/portal/types';
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { LogScaleOptions } from '../../../scales/scale_continuous';
 import { Spec } from '../../../specs';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { RecursivePartial, Color, Position, Datum } from '../../../utils/common';
 import { CurveType } from '../../../utils/curves';
@@ -51,7 +51,7 @@ export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 /** @public */
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
 
-export const SeriesTypes = Object.freeze({
+export const SeriesType = Object.freeze({
   Area: 'area' as const,
   Bar: 'bar' as const,
   Line: 'line' as const,
@@ -62,7 +62,7 @@ export const SeriesTypes = Object.freeze({
  * XY series type
  * @public
  */
-export type SeriesTypes = $Values<typeof SeriesTypes>;
+export type SeriesType = $Values<typeof SeriesType>;
 
 /**
  * The offset and mode applied when stacking values
@@ -346,8 +346,8 @@ export interface DisplayValueSpec {
 }
 
 export interface SeriesSpec extends Spec {
-  specType: typeof SpecTypes.Series;
-  chartType: typeof ChartTypes.XYAxis;
+  specType: typeof SpecType.Series;
+  chartType: typeof ChartType.XYAxis;
   /**
    * The name of the spec. Also a mechanism to provide custom series names.
    */
@@ -366,7 +366,7 @@ export interface SeriesSpec extends Spec {
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */
-  seriesType: SeriesTypes;
+  seriesType: SeriesType;
   /** Set colors for specific series */
   color?: SeriesColorAccessor;
   /**
@@ -494,8 +494,8 @@ export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
  */
 export type BarSeriesSpec = BasicSeriesSpec &
   Postfixes & {
-    /** @defaultValue `bar` {@link (SeriesTypes:type) | SeriesTypes.Bar} */
-    seriesType: typeof SeriesTypes.Bar;
+    /** @defaultValue `bar` {@link (SeriesType:type) | SeriesType.Bar} */
+    seriesType: typeof SeriesType.Bar;
     /** If true, will stack all BarSeries and align bars to ticks (instead of centered on ticks) */
     enableHistogramMode?: boolean;
     barSeriesStyle?: RecursivePartial<BarSeriesStyle>;
@@ -554,8 +554,8 @@ export type FitConfig = {
  */
 export type LineSeriesSpec = BasicSeriesSpec &
   HistogramConfig & {
-    /** @defaultValue `line` {@link (SeriesTypes:type) | SeriesTypes.Line} */
-    seriesType: typeof SeriesTypes.Line;
+    /** @defaultValue `line` {@link (SeriesType:type) | SeriesType.Line} */
+    seriesType: typeof SeriesType.Line;
     curve?: CurveType;
     lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
     /**
@@ -574,8 +574,8 @@ export type LineSeriesSpec = BasicSeriesSpec &
  * @alpha
  */
 export type BubbleSeriesSpec = BasicSeriesSpec & {
-  /** @defaultValue `bubble` {@link (SeriesTypes:type) | SeriesTypes.Bubble} */
-  seriesType: typeof SeriesTypes.Bubble;
+  /** @defaultValue `bubble` {@link (SeriesType:type) | SeriesType.Bubble} */
+  seriesType: typeof SeriesType.Bubble;
   bubbleSeriesStyle?: RecursivePartial<BubbleSeriesStyle>;
   /**
    * An optional functional accessor to return custom color or style for point datum
@@ -590,8 +590,8 @@ export type BubbleSeriesSpec = BasicSeriesSpec & {
 export type AreaSeriesSpec = BasicSeriesSpec &
   HistogramConfig &
   Postfixes & {
-    /** @defaultValue `area` {@link (SeriesTypes:type) | SeriesTypes.Area} */
-    seriesType: typeof SeriesTypes.Area;
+    /** @defaultValue `area` {@link (SeriesType:type) | SeriesType.Area} */
+    seriesType: typeof SeriesType.Area;
     /** The type of interpolator to be used to interpolate values between points */
     curve?: CurveType;
     areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
@@ -631,8 +631,8 @@ export type HistogramModeAlignment = 'start' | 'center' | 'end';
  * This spec describe the configuration for a chart axis.
  */
 export interface AxisSpec extends Spec {
-  specType: typeof SpecTypes.Axis;
-  chartType: typeof ChartTypes.XYAxis;
+  specType: typeof SpecType.Axis;
+  chartType: typeof ChartType.XYAxis;
   /** The ID of the spec */
   id: AxisId;
   /** Style options for grid line */
@@ -694,19 +694,19 @@ export type TickFormatterOptions = {
 /** @public */
 export type TickFormatter<V = any> = (value: V, options?: TickFormatterOptions) => string;
 
-export const AnnotationTypes = Object.freeze({
+export const AnnotationType = Object.freeze({
   Line: 'line' as const,
   Rectangle: 'rectangle' as const,
   Text: 'text' as const,
 });
 /** @public */
-export type AnnotationType = $Values<typeof AnnotationTypes>;
+export type AnnotationType = $Values<typeof AnnotationType>;
 
 /**
  * The domain type enum that can be associated with an annotation
  * @public
  */
-export const AnnotationDomainTypes = Object.freeze({
+export const AnnotationDomainType = Object.freeze({
   XDomain: 'xDomain' as const,
   YDomain: 'yDomain' as const,
 });
@@ -715,7 +715,7 @@ export const AnnotationDomainTypes = Object.freeze({
  * The domain type that can be associated with an annotation
  * @public
  */
-export type AnnotationDomainType = $Values<typeof AnnotationDomainTypes>;
+export type AnnotationDomainType = $Values<typeof AnnotationDomainType>;
 
 /**
  * The descriptive object of a line annotation
@@ -738,7 +738,7 @@ export interface LineAnnotationDatum {
 
 /** @public */
 export type LineAnnotationSpec = BaseAnnotationSpec<
-  typeof AnnotationTypes.Line,
+  typeof AnnotationType.Line,
   LineAnnotationDatum,
   LineAnnotationStyle
 > & {
@@ -810,7 +810,7 @@ export interface RectAnnotationDatum {
 
 /** @public */
 export type RectAnnotationSpec = BaseAnnotationSpec<
-  typeof AnnotationTypes.Rectangle,
+  typeof AnnotationType.Rectangle,
   RectAnnotationDatum,
   RectAnnotationStyle
 > & {
@@ -844,13 +844,13 @@ export type AnnotationPortalSettings = TooltipPortalSettings<'chart'> & {
 };
 
 export interface BaseAnnotationSpec<
-  T extends typeof AnnotationTypes.Rectangle | typeof AnnotationTypes.Line,
+  T extends typeof AnnotationType.Rectangle | typeof AnnotationType.Line,
   D extends RectAnnotationDatum | LineAnnotationDatum,
   S extends RectAnnotationStyle | LineAnnotationStyle
 > extends Spec,
     AnnotationPortalSettings {
-  chartType: typeof ChartTypes.XYAxis;
-  specType: typeof SpecTypes.Annotation;
+  chartType: typeof ChartType.XYAxis;
+  specType: typeof SpecType.Annotation;
   /**
    * Annotation type: line, rectangle
    */
@@ -884,32 +884,32 @@ export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 
 /** @internal */
 export function isLineAnnotation(spec: AnnotationSpec): spec is LineAnnotationSpec {
-  return spec.annotationType === AnnotationTypes.Line;
+  return spec.annotationType === AnnotationType.Line;
 }
 
 /** @internal */
 export function isRectAnnotation(spec: AnnotationSpec): spec is RectAnnotationSpec {
-  return spec.annotationType === AnnotationTypes.Rectangle;
+  return spec.annotationType === AnnotationType.Rectangle;
 }
 
 /** @internal */
 export function isBarSeriesSpec(spec: BasicSeriesSpec): spec is BarSeriesSpec {
-  return spec.seriesType === SeriesTypes.Bar;
+  return spec.seriesType === SeriesType.Bar;
 }
 
 /** @internal */
 export function isBubbleSeriesSpec(spec: BasicSeriesSpec): spec is BubbleSeriesSpec {
-  return spec.seriesType === SeriesTypes.Bubble;
+  return spec.seriesType === SeriesType.Bubble;
 }
 
 /** @internal */
 export function isLineSeriesSpec(spec: BasicSeriesSpec): spec is LineSeriesSpec {
-  return spec.seriesType === SeriesTypes.Line;
+  return spec.seriesType === SeriesType.Line;
 }
 
 /** @internal */
 export function isAreaSeriesSpec(spec: BasicSeriesSpec): spec is AreaSeriesSpec {
-  return spec.seriesType === SeriesTypes.Area;
+  return spec.seriesType === SeriesType.Area;
 }
 
 /** @internal */

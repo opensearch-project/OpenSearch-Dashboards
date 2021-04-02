@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { MockBarGeometry } from '../../../mocks';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { Position, RecursivePartial } from '../../../utils/common';
 import { BarGeometry } from '../../../utils/geometry';
 import { AxisStyle } from '../../../utils/themes/theme';
@@ -52,8 +52,8 @@ describe('Tooltip formatting', () => {
     y0Accessors: [1],
   });
   const YAXIS_SPEC = MockGlobalSpec.axis({
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_1',
     groupId: SPEC_GROUP_ID_1,
     hide: false,

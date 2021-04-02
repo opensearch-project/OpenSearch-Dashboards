@@ -26,7 +26,7 @@ import { Position } from '../../../utils/common';
 import { PointGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
-import { SeriesTypes } from '../utils/specs';
+import { SeriesType } from '../utils/specs';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -115,7 +115,7 @@ describe('Rendering points - line', () => {
     const pointSeriesSpec1 = MockSeriesSpec.line({
       id: spec1Id,
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Line,
+      seriesType: SeriesType.Line,
       data: [
         [0, 10],
         [1, 5],

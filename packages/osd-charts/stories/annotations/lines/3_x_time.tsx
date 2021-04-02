@@ -21,7 +21,7 @@ import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   BarSeries,
   Chart,
@@ -68,7 +68,7 @@ export const Example = () => {
       <Settings debug={debug} rotation={rotation} />
       <LineAnnotation
         id="annotation_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={dataValues}
         marker={<Icon type="alert" />}
         markerPosition={markerPosition === 'undefined' ? undefined : markerPosition}

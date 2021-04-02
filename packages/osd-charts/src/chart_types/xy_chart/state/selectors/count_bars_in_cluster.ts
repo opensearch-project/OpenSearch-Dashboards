@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { SeriesTypes } from '../../../../specs';
+import { SeriesType } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { groupBy } from '../../utils/group_data_series';
 import { SeriesDomainsAndData } from '../utils/types';
@@ -35,7 +35,7 @@ export const countBarsInClusterSelector = createCachedSelector(
 
 /** @internal */
 export function countBarsInCluster({ formattedDataSeries }: SeriesDomainsAndData, isHistogramEnabled: boolean): number {
-  const barDataSeries = formattedDataSeries.filter(({ seriesType }) => seriesType === SeriesTypes.Bar);
+  const barDataSeries = formattedDataSeries.filter(({ seriesType }) => seriesType === SeriesType.Bar);
 
   const dataSeriesGroupedByPanel = groupBy(
     barDataSeries,

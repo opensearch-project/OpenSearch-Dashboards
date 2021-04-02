@@ -22,7 +22,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { createStore, Store } from 'redux';
 
-import { LineAnnotation, AnnotationDomainTypes } from '../../../specs';
+import { LineAnnotation, AnnotationDomainType } from '../../../specs';
 import { SpecsParser } from '../../../specs/specs_parser';
 import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
 import { LineSeries } from './line_series';
@@ -45,7 +45,7 @@ function LineAnnotationChart(props: { chartStore: Store<GlobalChartState> }) {
         />
         <LineAnnotation
           id="threshold"
-          domainType={AnnotationDomainTypes.YDomain}
+          domainType={AnnotationDomainType.YDomain}
           dataValues={[{ dataValue: 120, details: 'threshold' }]}
         />
       </SpecsParser>

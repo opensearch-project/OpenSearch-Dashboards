@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { SeriesIdentifier } from '../../../../common/series_id';
 import { SettingsSpec } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
@@ -42,7 +42,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   let prevClick: PointerState | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.Heatmap) {
+    if (selector === null && state.chartType === ChartType.Heatmap) {
       selector = createCachedSelector(
         [getSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapes],
         (spec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {

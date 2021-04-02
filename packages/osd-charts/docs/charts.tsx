@@ -28,7 +28,7 @@ import {
   Position,
   Settings,
   LineAnnotation,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   LineAnnotationDatum,
 } from '../src';
@@ -127,7 +127,7 @@ export const lineBasicXDomainContinuous = () => {
       <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
         id="anno_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={dataValues}
         style={style}
         marker={<Icon type="alert" />}
@@ -161,7 +161,7 @@ export const lineBasicXDomainOrdinal = () => {
       <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
         id="anno_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={dataValues}
         marker={<Icon type="alert" />}
       />

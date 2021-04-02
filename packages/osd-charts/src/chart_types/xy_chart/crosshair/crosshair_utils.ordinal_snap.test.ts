@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { computeSeriesDomains } from '../state/utils/utils';
 import { computeXScale } from '../utils/scales';
-import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
+import { BasicSeriesSpec, SeriesType } from '../utils/specs';
 import { getSnapPosition } from './crosshair_utils';
 
 describe('Crosshair utils ordinal scales', () => {
@@ -32,11 +32,11 @@ describe('Crosshair utils ordinal scales', () => {
   const lineSeries2SpecId = 'lineSeries2';
 
   const barSeries1: BasicSeriesSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Series,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Series,
     id: barSeries1SpecId,
     groupId: 'group1',
-    seriesType: SeriesTypes.Bar,
+    seriesType: SeriesType.Bar,
     data: [
       ['a', 0],
       ['b', 0],
@@ -48,11 +48,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleType: ScaleType.Linear,
   };
   const barSeries2: BasicSeriesSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Series,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Series,
     id: barSeries2SpecId,
     groupId: 'group1',
-    seriesType: SeriesTypes.Bar,
+    seriesType: SeriesType.Bar,
     data: [
       ['a', 2],
       ['b', 2],
@@ -64,11 +64,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleType: ScaleType.Linear,
   };
   const lineSeries1: BasicSeriesSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Series,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Series,
     id: lineSeries1SpecId,
     groupId: 'group1',
-    seriesType: SeriesTypes.Line,
+    seriesType: SeriesType.Line,
     data: [
       ['a', 0],
       ['b', 0],
@@ -80,11 +80,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleType: ScaleType.Linear,
   };
   const lineSeries2: BasicSeriesSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Series,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Series,
     id: lineSeries2SpecId,
     groupId: 'group1',
-    seriesType: SeriesTypes.Line,
+    seriesType: SeriesType.Line,
     data: [
       ['a', 2],
       ['b', 2],

@@ -19,7 +19,7 @@
 
 import { RefObject } from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { DEFAULT_CSS_CURSOR } from '../../../common/constants';
 import { BackwardRef, GlobalChartState, InternalChartState } from '../../../state/chart_state';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
@@ -38,7 +38,7 @@ import { getTooltipInfoSelector } from './selectors/tooltip';
 
 /** @internal */
 export class PartitionState implements InternalChartState {
-  chartType = ChartTypes.Partition;
+  chartType = ChartType.Partition;
 
   onElementClickCaller: (state: GlobalChartState) => void;
 

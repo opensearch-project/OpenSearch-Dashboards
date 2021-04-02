@@ -31,7 +31,7 @@ import {
   Settings,
   BarSeries,
   LineAnnotation,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
@@ -94,7 +94,7 @@ export const Example = () => {
           },
         ]}
         id="threshold"
-        domainType={AnnotationDomainTypes.YDomain}
+        domainType={AnnotationDomainType.YDomain}
         marker={marker}
         style={{
           line: {

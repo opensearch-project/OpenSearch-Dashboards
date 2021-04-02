@@ -19,11 +19,11 @@
 
 import React from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { Predicate } from '../../../common/predicate';
 import { ScaleType } from '../../../scales/constants';
 import { SeriesScales, Spec } from '../../../specs';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { Accessor, AccessorFn } from '../../../utils/accessor';
 import { Color, Datum, RecursivePartial } from '../../../utils/common';
@@ -31,8 +31,8 @@ import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
 
 const defaultProps = {
-  chartType: ChartTypes.Heatmap,
-  specType: SpecTypes.Series,
+  chartType: ChartType.Heatmap,
+  specType: SpecType.Series,
   data: [],
   colors: ['red', 'yellow', 'green'],
   colorScale: ScaleType.Linear,
@@ -54,8 +54,8 @@ export type HeatmapScaleType =
 
 /** @alpha */
 export interface HeatmapSpec extends Spec {
-  specType: typeof SpecTypes.Series;
-  chartType: typeof ChartTypes.Heatmap;
+  specType: typeof SpecType.Series;
+  chartType: typeof ChartType.Heatmap;
   data: Datum[];
   colorScale?: HeatmapScaleType;
   ranges?: number[] | [number, number];

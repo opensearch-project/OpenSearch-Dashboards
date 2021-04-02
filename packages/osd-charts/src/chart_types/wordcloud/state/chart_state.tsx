@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { DEFAULT_CSS_CURSOR } from '../../../common/constants';
 import { LegendItem } from '../../../common/legend';
 import { InternalChartState, GlobalChartState } from '../../../state/chart_state';
@@ -40,7 +40,7 @@ const EMPTY_LEGEND_ITEM_LIST: LegendItemLabel[] = [];
 
 /** @internal */
 export class WordcloudState implements InternalChartState {
-  chartType = ChartTypes.Wordcloud;
+  chartType = ChartType.Wordcloud;
 
   onElementClickCaller: (state: GlobalChartState) => void;
 

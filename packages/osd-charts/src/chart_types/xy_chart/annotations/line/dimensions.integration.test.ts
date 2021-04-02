@@ -22,7 +22,7 @@ import { MockSeriesSpec, MockAnnotationSpec, MockGlobalSpec } from '../../../../
 import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
-import { AnnotationDomainTypes } from '../../utils/specs';
+import { AnnotationDomainType } from '../../utils/specs';
 
 function expectAnnotationAtPosition(
   data: Array<{ x: number; y: number }>,
@@ -142,7 +142,7 @@ describe('Render vertical line annotation within', () => {
       ],
     });
     const annotation = MockAnnotationSpec.line({
-      domainType: AnnotationDomainTypes.XDomain,
+      domainType: AnnotationDomainType.XDomain,
       dataValues: [{ dataValue: 9.5, details: 'foo' }],
     });
 

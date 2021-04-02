@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/constants';
+import { ChartType } from '../..';
+import { SpecType } from '../../../specs/constants';
 import { Position } from '../../../utils/common';
 import { Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
@@ -62,8 +62,8 @@ describe('Computed chart dimensions', () => {
     isHidden: false,
   };
   const axisLeftSpec: AxisSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Axis,
+    chartType: ChartType.XYAxis,
+    specType: SpecType.Axis,
     id: 'axis_1',
     groupId: 'group_1',
     hide: false,

@@ -19,8 +19,8 @@
 
 import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/constants';
+import { ChartType } from '../../..';
+import { SpecType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
@@ -35,7 +35,7 @@ const getParentDimensions = (state: GlobalChartState) => state.parentDimensions;
 export const geometries = createCachedSelector(
   [getSpecs, getParentDimensions],
   (specs, parentDimensions): ShapeViewModel => {
-    const wordcloudSpecs = getSpecsFromStore<WordcloudSpec>(specs, ChartTypes.Wordcloud, SpecTypes.Series);
+    const wordcloudSpecs = getSpecsFromStore<WordcloudSpec>(specs, ChartType.Wordcloud, SpecType.Series);
     return wordcloudSpecs.length === 1 ? render(wordcloudSpecs[0], parentDimensions) : nullShapeViewModel();
   },
 )((state) => state.chartId);

@@ -27,7 +27,7 @@ import { getSpecDomainGroupId } from '../state/utils/spec';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { groupBy } from '../utils/group_data_series';
 import { DataSeries } from '../utils/series';
-import { BasicSeriesSpec, YDomainRange, SeriesTypes, StackMode } from '../utils/specs';
+import { BasicSeriesSpec, YDomainRange, SeriesType, StackMode } from '../utils/specs';
 import { YDomain } from './types';
 
 export type YBasicSeriesSpec = Pick<
@@ -47,8 +47,7 @@ export function mergeYDomain(dataSeries: DataSeries[], domainsByGroupId: Map<Gro
     const nonStacked = groupedDataSeries.filter(({ isStacked, isFiltered }) => !isStacked && !isFiltered);
     const customDomain = domainsByGroupId.get(groupId);
     const hasNonZeroBaselineTypes = groupedDataSeries.some(
-      ({ seriesType, isFiltered }) =>
-        seriesType === SeriesTypes.Bar || (seriesType === SeriesTypes.Area && !isFiltered),
+      ({ seriesType, isFiltered }) => seriesType === SeriesType.Bar || (seriesType === SeriesType.Area && !isFiltered),
     );
     const domain = mergeYDomainForGroup(stacked, nonStacked, hasNonZeroBaselineTypes, customDomain);
     if (!domain) {
@@ -187,7 +186,7 @@ export function groupSeriesByYGroup(specs: YBasicSeriesSpec[]) {
  * @internal
  */
 export function isHistogramEnabled(specs: YBasicSeriesSpec[]) {
-  return specs.some(({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode);
+  return specs.some(({ seriesType, enableHistogramMode }) => seriesType === SeriesType.Bar && enableHistogramMode);
 }
 
 /**
@@ -197,7 +196,7 @@ export function isHistogramEnabled(specs: YBasicSeriesSpec[]) {
  * @internal
  */
 export function isStackedSpec(spec: YBasicSeriesSpec, histogramEnabled: boolean) {
-  const isBarAndHistogram = spec.seriesType === SeriesTypes.Bar && histogramEnabled;
+  const isBarAndHistogram = spec.seriesType === SeriesType.Bar && histogramEnabled;
   const hasStackAccessors = spec.stackAccessors && spec.stackAccessors.length > 0;
   return isBarAndHistogram || hasStackAccessors;
 }

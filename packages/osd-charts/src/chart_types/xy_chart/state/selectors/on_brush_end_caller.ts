@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { Scale } from '../../../../scales';
 import { GroupBrushExtent, XYBrushArea } from '../../../../specs';
 import { BrushAxis } from '../../../../specs/constants';
@@ -51,7 +51,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
   let prevProps: DragCheckProps | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.XYAxis) {
+    if (selector === null && state.chartType === ChartType.XYAxis) {
       if (!isBrushAvailableSelector(state)) {
         selector = null;
         prevProps = null;

@@ -19,11 +19,11 @@
 
 import { Store } from 'redux';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs/specs';
 import { MockStore } from '../../../mocks/store/store';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { onToggleDeselectSeriesAction } from '../../../state/actions/legend';
 import { GlobalChartState } from '../../../state/chart_state';
 import { Position, RecursivePartial } from '../../../utils/common';
@@ -31,7 +31,7 @@ import { AxisStyle } from '../../../utils/themes/theme';
 import { computeLegendSelector } from '../state/selectors/compute_legend';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import { getSeriesName } from '../utils/series';
-import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';
+import { AxisSpec, BasicSeriesSpec, SeriesType } from '../utils/specs';
 import { getLegendExtra } from './legend';
 
 const nullDisplayValue = {
@@ -41,12 +41,12 @@ const nullDisplayValue = {
 };
 
 const spec1: BasicSeriesSpec = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
   id: 'spec1',
   name: 'Spec 1 title',
   groupId: 'group',
-  seriesType: SeriesTypes.Line,
+  seriesType: SeriesType.Line,
   yScaleType: ScaleType.Log,
   xScaleType: ScaleType.Linear,
   xAccessor: 'x',
@@ -55,11 +55,11 @@ const spec1: BasicSeriesSpec = {
   hideInLegend: false,
 };
 const spec2: BasicSeriesSpec = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
   id: 'spec2',
   groupId: 'group',
-  seriesType: SeriesTypes.Line,
+  seriesType: SeriesType.Line,
   yScaleType: ScaleType.Log,
   xScaleType: ScaleType.Linear,
   xAccessor: 'x',
@@ -76,8 +76,8 @@ const style: RecursivePartial<AxisStyle> = {
 };
 const axesSpecs: AxisSpec[] = [];
 const axisSpec: AxisSpec = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Axis,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Axis,
   id: 'axis1',
   groupId: 'group1',
   hide: false,

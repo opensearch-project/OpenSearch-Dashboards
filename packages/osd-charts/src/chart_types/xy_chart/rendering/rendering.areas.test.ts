@@ -916,11 +916,11 @@ describe('Rendering points - areas', () => {
 
   // describe('Error guards for scaled values', () => {
   //   const pointSeriesSpec: AreaSeriesSpec = {
-  //     chartType: ChartTypes.XYAxis,
-  //     specType: SpecTypes.Series,
+  //     chartType: ChartType.XYAxis,
+  //     specType: SpecType.Series,
   //     id: SPEC_ID,
   //     groupId: GROUP_ID,
-  //     seriesType: SeriesTypes.Area,
+  //     seriesType: SeriesType.Area,
   //     data: [
   //       [0, 10],
   //       [1, 5],

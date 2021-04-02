@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { getOnElementClickSelector } from '../../../../common/event_handler_selectors';
 import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
@@ -39,7 +39,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   const prev: { click: PointerStates['lastClick'] } = { click: null };
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.Partition) {
+    if (selector === null && state.chartType === ChartType.Partition) {
       selector = createCachedSelector(
         [getPartitionSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
         getOnElementClickSelector(prev),

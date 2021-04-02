@@ -30,7 +30,7 @@ import {
   ScaleType,
   Settings,
   Fit,
-  SeriesTypes,
+  SeriesType,
 } from '../../src';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
@@ -103,10 +103,10 @@ export const Example = () => {
   const seriesType = select<string>(
     'seriesType',
     {
-      Area: SeriesTypes.Area,
-      Line: SeriesTypes.Line,
+      Area: SeriesType.Area,
+      Line: SeriesType.Line,
     },
-    SeriesTypes.Area,
+    SeriesType.Area,
   );
   const dataKey = select<keyof typeof dataTypes>(
     'dataset',
@@ -179,7 +179,7 @@ export const Example = () => {
       />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left" title="Left axis" position={Position.Left} />
-      {seriesType === SeriesTypes.Area ? (
+      {seriesType === SeriesType.Area ? (
         <AreaSeries
           id="test"
           xScaleType={xScaleType}

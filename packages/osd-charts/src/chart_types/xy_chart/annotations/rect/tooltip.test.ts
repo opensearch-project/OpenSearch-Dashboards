@@ -18,7 +18,7 @@
  */
 import { MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { Dimensions } from '../../../../utils/dimensions';
-import { AnnotationTypes } from '../../utils/specs';
+import { AnnotationType } from '../../utils/specs';
 import { AnnotationTooltipState } from '../types';
 import { getRectAnnotationTooltipState } from './tooltip';
 import { AnnotationRectProps } from './types';
@@ -43,7 +43,7 @@ describe('Rect annotation tooltip', () => {
     const visibleTooltip = getRectAnnotationTooltipState(cursorPosition, annotationRects, 0, chartDimensions);
     const expectedVisibleTooltipState: AnnotationTooltipState = {
       isVisible: true,
-      annotationType: AnnotationTypes.Rectangle,
+      annotationType: AnnotationType.Rectangle,
       anchor: {
         top: cursorPosition.y,
         left: cursorPosition.x,

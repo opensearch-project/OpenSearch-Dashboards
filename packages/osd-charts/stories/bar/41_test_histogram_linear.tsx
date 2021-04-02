@@ -21,7 +21,7 @@ import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   AreaSeries,
   Axis,
   BarSeries,
@@ -109,7 +109,7 @@ export const Example = () => {
       <Settings rotation={getChartRotationKnob()} theme={theme} debug={boolean('debug', true)} />
       <LineAnnotation
         id="line-annotation"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={[{ dataValue: 2 }, { dataValue: 2.5 }, { dataValue: 3.5 }]}
         style={lineAnnotationStyle}
         marker={<div style={{ background: 'red', width: 10, height: 10 }} />}

@@ -19,16 +19,16 @@
 
 import React from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
+import { SpecType } from '../../../specs/constants';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
+import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesType } from '../utils/specs';
 
 const defaultProps = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
-  seriesType: SeriesTypes.Bar,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
+  seriesType: SeriesType.Bar,
   groupId: DEFAULT_GLOBAL_ID,
   xScaleType: ScaleType.Linear,
   yScaleType: ScaleType.Linear,

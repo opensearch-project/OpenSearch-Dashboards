@@ -28,7 +28,7 @@ import {
   ScaleType,
   Settings,
   LineAnnotation,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotationDatum,
 } from '../../../src';
 import { CustomAnnotationTooltip } from '../../../src/chart_types/xy_chart/annotations/types';
@@ -79,7 +79,7 @@ export const Example = () => {
       <Settings rotation={rotation} />
       <LineAnnotation
         id="annotation_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         offset={offset}
         dataValues={dataValues}
         boundary={boundary}

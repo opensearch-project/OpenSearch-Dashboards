@@ -28,7 +28,7 @@ import { SmallMultipleScales } from '../../state/selectors/compute_small_multipl
 import { isHorizontalRotation } from '../../state/utils/common';
 import { computeXScaleOffset } from '../../state/utils/utils';
 import { getPanelSize } from '../../utils/panel';
-import { AnnotationDomainTypes, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
+import { AnnotationDomainType, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
 import { AnnotationLineProps } from './types';
 
 function computeYDomainLineAnnotationDimensions(
@@ -253,7 +253,7 @@ export function computeLineAnnotationDimensions(
     return null;
   }
 
-  if (domainType === AnnotationDomainTypes.XDomain) {
+  if (domainType === AnnotationDomainType.XDomain) {
     return computeXDomainLineAnnotationDimensions(
       annotationSpec,
       xScale,

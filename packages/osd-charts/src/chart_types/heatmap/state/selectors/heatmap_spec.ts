@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/constants';
+import { ChartType } from '../../..';
+import { SpecType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { HeatmapSpec } from '../../specs/heatmap';
 
 /** @internal */
 export function getSpecOrNull(state: GlobalChartState): HeatmapSpec | null {
-  const specs = getSpecsFromStore<HeatmapSpec>(state.specs, ChartTypes.Heatmap, SpecTypes.Series);
+  const specs = getSpecsFromStore<HeatmapSpec>(state.specs, ChartType.Heatmap, SpecType.Series);
   return specs.length > 0 ? specs[0] : null;
 }

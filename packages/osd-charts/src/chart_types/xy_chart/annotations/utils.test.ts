@@ -20,7 +20,7 @@
 import { MockGlobalSpec } from '../../../mocks/specs';
 import { Position, Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
-import { AnnotationDomainTypes } from '../utils/specs';
+import { AnnotationDomainType } from '../utils/specs';
 import { getAnnotationAxis, getTransformedCursor, invertTranformedCursor } from './utils';
 
 describe('Annotation utils', () => {
@@ -38,15 +38,15 @@ describe('Annotation utils', () => {
   });
 
   test('should get associated axis for an annotation', () => {
-    const noAxis = getAnnotationAxis([], groupId, AnnotationDomainTypes.XDomain, 0);
+    const noAxis = getAnnotationAxis([], groupId, AnnotationDomainType.XDomain, 0);
     expect(noAxis).toBeUndefined();
 
     const localAxesSpecs = [horizontalAxisSpec, verticalAxisSpec];
 
-    const xAnnotationAxisPosition = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainTypes.XDomain, 0);
+    const xAnnotationAxisPosition = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainType.XDomain, 0);
     expect(xAnnotationAxisPosition).toEqual(Position.Bottom);
 
-    const yAnnotationAxisPosition = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainTypes.YDomain, 0);
+    const yAnnotationAxisPosition = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainType.YDomain, 0);
     expect(yAnnotationAxisPosition).toEqual(Position.Left);
   });
 

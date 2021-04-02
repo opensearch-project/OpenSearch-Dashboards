@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { Pixels } from '../../../../common/geometry';
 import { Fill, Line, Stroke } from '../../../../geoms/types';
 import { Point } from '../../../../utils/point';
@@ -126,7 +126,7 @@ export const nullShapeViewModel = (specifiedConfig?: Config): ShapeViewModel => 
   config: specifiedConfig || config,
   heatmapViewModel: nullHeatmapViewModel,
   pickQuads: () => [],
-  pickDragArea: () => ({ cells: [], x: [], y: [], chartType: ChartTypes.Heatmap }),
+  pickDragArea: () => ({ cells: [], x: [], y: [], chartType: ChartType.Heatmap }),
   pickDragShape: () => ({ x: 0, y: 0, width: 0, height: 0 }),
   pickHighlightedArea: () => ({ x: 0, y: 0, width: 0, height: 0 }),
 });

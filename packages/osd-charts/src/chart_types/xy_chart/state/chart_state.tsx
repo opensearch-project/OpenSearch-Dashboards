@@ -19,7 +19,7 @@
 
 import React, { RefObject } from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { LegendItemExtraValues } from '../../../common/legend';
 import { SeriesKey } from '../../../common/series_id';
 import { BrushTool } from '../../../components/brush/brush';
@@ -54,7 +54,7 @@ import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
 
 /** @internal */
 export class XYAxisChartState implements InternalChartState {
-  chartType: ChartTypes;
+  chartType: ChartType;
 
   legendId: string;
 
@@ -75,7 +75,7 @@ export class XYAxisChartState implements InternalChartState {
     this.onBrushEndCaller = createOnBrushEndCaller();
     this.onPointerMoveCaller = createOnPointerMoveCaller();
 
-    this.chartType = ChartTypes.XYAxis;
+    this.chartType = ChartType.XYAxis;
     this.legendId = htmlIdGenerator()('legend');
   }
 

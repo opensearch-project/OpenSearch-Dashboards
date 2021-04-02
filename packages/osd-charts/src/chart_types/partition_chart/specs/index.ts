@@ -19,10 +19,10 @@
 
 import React from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { Pixels } from '../../../common/geometry';
 import { Spec } from '../../../specs';
-import { SpecTypes } from '../../../specs/constants'; // kept as unshortened import on separate line otherwise import circularity emerges
+import { SpecType } from '../../../specs/constants'; // kept as unshortened import on separate line otherwise import circularity emerges
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { IndexedAccessorFn } from '../../../utils/accessor';
 import {
@@ -49,8 +49,8 @@ export interface Layer {
 }
 
 const defaultProps = {
-  chartType: ChartTypes.Partition,
-  specType: SpecTypes.Series,
+  chartType: ChartType.Partition,
+  specType: SpecType.Series,
   config,
   valueAccessor: (d: Datum) => (typeof d === 'number' ? d : 0),
   valueGetter: (n: ShapeTreeNode): number => n[AGGREGATE_KEY],
@@ -69,8 +69,8 @@ const defaultProps = {
 };
 
 export interface PartitionSpec extends Spec {
-  specType: typeof SpecTypes.Series;
-  chartType: typeof ChartTypes.Partition;
+  specType: typeof SpecType.Series;
+  chartType: typeof ChartType.Partition;
   config: RecursivePartial<Config>;
   data: Datum[];
   valueAccessor: ValueAccessor;

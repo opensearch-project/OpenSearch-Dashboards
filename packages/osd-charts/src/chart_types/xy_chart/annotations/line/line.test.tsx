@@ -28,7 +28,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { Position } from '../../../../utils/common';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/merge_utils';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
-import { AnnotationDomainTypes } from '../../utils/specs';
+import { AnnotationDomainType } from '../../utils/specs';
 import { AnnotationLineProps } from './types';
 
 describe('annotation marker', () => {
@@ -43,7 +43,7 @@ describe('annotation marker', () => {
   });
   const lineYDomainAnnotation = MockAnnotationSpec.line({
     id,
-    domainType: AnnotationDomainTypes.YDomain,
+    domainType: AnnotationDomainType.YDomain,
     dataValues: [{ dataValue: 2, details: 'foo' }],
     style: DEFAULT_ANNOTATION_LINE_STYLE,
     marker: <div />,
@@ -51,7 +51,7 @@ describe('annotation marker', () => {
 
   const lineXDomainAnnotation = MockAnnotationSpec.line({
     id,
-    domainType: AnnotationDomainTypes.XDomain,
+    domainType: AnnotationDomainType.XDomain,
     dataValues: [{ dataValue: 2, details: 'foo' }],
     style: DEFAULT_ANNOTATION_LINE_STYLE,
     marker: <div />,

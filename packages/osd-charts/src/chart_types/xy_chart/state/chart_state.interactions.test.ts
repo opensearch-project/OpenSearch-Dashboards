@@ -21,19 +21,19 @@
 
 import { Store } from 'redux';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { Rect } from '../../../geoms/types';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { SettingsSpec, XScaleType, XYBrushArea } from '../../../specs';
-import { SpecTypes, DEFAULT_SETTINGS_SPEC, TooltipType, BrushAxis } from '../../../specs/constants';
+import { SpecType, DEFAULT_SETTINGS_SPEC, TooltipType, BrushAxis } from '../../../specs/constants';
 import { onExternalPointerEvent } from '../../../state/actions/events';
 import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';
 import { GlobalChartState } from '../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../state/selectors/get_settings_specs';
 import { Position, RecursivePartial } from '../../../utils/common';
 import { AxisStyle } from '../../../utils/themes/theme';
-import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesTypes } from '../utils/specs';
+import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesType } from '../utils/specs';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
 import { getCursorBandPositionSelector } from './selectors/get_cursor_band';
 import { getProjectedPointerPositionSelector } from './selectors/get_projected_pointer_position';
@@ -51,11 +51,11 @@ const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
 
 const ordinalBarSeries: BarSeriesSpec = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
   id: SPEC_ID,
   groupId: GROUP_ID,
-  seriesType: SeriesTypes.Bar,
+  seriesType: SeriesType.Bar,
   data: [
     [0, 10],
     [1, 5],
@@ -67,11 +67,11 @@ const ordinalBarSeries: BarSeriesSpec = {
   hideInLegend: false,
 };
 const linearBarSeries: BarSeriesSpec = {
-  chartType: ChartTypes.XYAxis,
-  specType: SpecTypes.Series,
+  chartType: ChartType.XYAxis,
+  specType: SpecType.Series,
   id: SPEC_ID,
   groupId: GROUP_ID,
-  seriesType: SeriesTypes.Bar,
+  seriesType: SeriesType.Bar,
   data: [
     [0, 10],
     [1, 5],
@@ -692,8 +692,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     };
     beforeEach(() => {
       leftAxis = {
-        chartType: ChartTypes.XYAxis,
-        specType: SpecTypes.Axis,
+        chartType: ChartType.XYAxis,
+        specType: SpecType.Axis,
         hide: true,
         id: 'yaxis',
         groupId: GROUP_ID,
@@ -704,8 +704,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
         style,
       };
       bottomAxis = {
-        chartType: ChartTypes.XYAxis,
-        specType: SpecTypes.Axis,
+        chartType: ChartType.XYAxis,
+        specType: SpecType.Axis,
         hide: true,
         id: 'xaxis',
         groupId: GROUP_ID,

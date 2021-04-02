@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { getPredicateFn } from '../../../../common/predicate';
 import {
   DEFAULT_SM_PANEL_PADDING,
@@ -27,7 +27,7 @@ import {
   GroupBySpec,
   SmallMultiplesSpec,
   SmallMultiplesStyle,
-  SpecTypes,
+  SpecType,
 } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSpecs } from '../../../../state/selectors/get_settings_specs';
@@ -41,7 +41,7 @@ import { PartitionSpec } from '../../specs';
 import { getPartitionSpecs } from './get_partition_specs';
 
 const getGroupBySpecs = createCachedSelector([getSpecs], (specs) =>
-  getSpecsFromStore<GroupBySpec>(specs, ChartTypes.Global, SpecTypes.IndexOrder),
+  getSpecsFromStore<GroupBySpec>(specs, ChartType.Global, SpecType.IndexOrder),
 )(getChartIdSelector);
 
 /** @internal */
@@ -68,7 +68,7 @@ function getTreesForSpec(
 
   if (groupBySpec) {
     const { by, sort, format = (name) => String(name) } = groupBySpec;
-    const accessorSpec = { id: spec.id, chartType: spec.chartType, specType: SpecTypes.Series };
+    const accessorSpec = { id: spec.id, chartType: spec.chartType, specType: SpecType.Series };
     const groups = data.reduce((map: Map<ReturnType<GroupByAccessor>, Datum[]>, next) => {
       const groupingValue = by(accessorSpec, next);
       const preexistingGroup = map.get(groupingValue);

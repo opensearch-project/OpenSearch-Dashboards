@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { ProjectedValues, SettingsSpec } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
@@ -46,7 +46,7 @@ export function createOnClickCaller(): (state: GlobalChartState) => void {
     if (selector) {
       return selector(state);
     }
-    if (state.chartType !== ChartTypes.XYAxis) {
+    if (state.chartType !== ChartType.XYAxis) {
       return;
     }
     selector = createCachedSelector(

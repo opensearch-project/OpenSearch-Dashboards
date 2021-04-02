@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ChartTypes } from '../chart_types';
-import { SpecTypes } from '../specs/constants';
+import { ChartType } from '../chart_types';
+import { SpecType } from '../specs/constants';
 import { getSpecsFromStore } from './utils';
 
 describe('State utils', () => {
   it('getSpecsFromStore shall return always the same object reference excluding the array', () => {
-    const spec1 = { id: 'id1', chartType: ChartTypes.XYAxis, specType: SpecTypes.Series };
-    const specs = getSpecsFromStore({ id1: spec1 }, ChartTypes.XYAxis, SpecTypes.Series);
+    const spec1 = { id: 'id1', chartType: ChartType.XYAxis, specType: SpecType.Series };
+    const specs = getSpecsFromStore({ id1: spec1 }, ChartType.XYAxis, SpecType.Series);
     expect(specs[0]).toBe(spec1);
   });
 });

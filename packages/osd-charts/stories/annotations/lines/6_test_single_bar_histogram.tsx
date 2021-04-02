@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AnnotationDomainTypes, Axis, BarSeries, Chart, LineAnnotation, ScaleType, Settings } from '../../../src';
+import { AnnotationDomainType, Axis, BarSeries, Chart, LineAnnotation, ScaleType, Settings } from '../../../src';
 import { Position } from '../../../src/utils/common';
 import { getChartRotationKnob } from '../../utils/knobs';
 
@@ -58,7 +58,7 @@ export const Example = () => {
       <Settings debug={debug} rotation={rotation} xDomain={xDomain} />
       <LineAnnotation
         id="annotation_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={dataValues}
         style={style}
       />

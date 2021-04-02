@@ -19,7 +19,7 @@
 
 import React, { useCallback } from 'react';
 
-import { AnnotationTypes, LineAnnotationDatum, RectAnnotationDatum } from '../../../../specs';
+import { AnnotationType, LineAnnotationDatum, RectAnnotationDatum } from '../../../../specs';
 import { AnnotationTooltipState } from '../../../annotations/types';
 
 /** @internal */
@@ -64,10 +64,10 @@ export const TooltipContent = ({
   }
 
   switch (annotationType) {
-    case AnnotationTypes.Line: {
+    case AnnotationType.Line: {
       return renderLine();
     }
-    case AnnotationTypes.Rectangle: {
+    case AnnotationType.Rectangle: {
       return renderRect();
     }
     default:

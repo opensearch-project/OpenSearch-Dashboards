@@ -1,6 +1,6 @@
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   AnnotationTooltipFormatter,
   Axis,
   BarSeries,
@@ -31,7 +31,7 @@ Here is a basic `line` annotation with `x domain continuous`
     <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
       id="anno_1"
-      domainType={AnnotationDomainTypes.XDomain}
+      domainType={AnnotationDomainType.XDomain}
       dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
       marker={<Icon type="alert" />}
       style = {{line: {
@@ -64,7 +64,7 @@ Here is a basic `line` annotation with `x domain continuous`
 </Chart>
 
 The code sample for the above chart is shown below in the details. What you should especially pay attention to is:
-* dataValues within the `<LineAnnotation/>` component 
+* dataValues within the `<LineAnnotation/>` component
 * You can add the style prop within `<LineAnnotation/>` to customize further
 
 <details>
@@ -74,7 +74,7 @@ The code sample for the above chart is shown below in the details. What you shou
     <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
       id="anno_1"
-      domainType={AnnotationDomainTypes.XDomain}
+      domainType={AnnotationDomainType.XDomain}
       dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
       marker={<Icon type="alert" />}
       style = {{line: {
@@ -114,7 +114,7 @@ Instead of `continuous` you can use `ordinal` annotations
     <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
     id="anno_1"
-    domainType={AnnotationDomainTypes.XDomain}
+    domainType={AnnotationDomainType.XDomain}
     dataValues={[{dataValue: 'a', details: 'detail-0'}, {dataValue: 'c', details:'details-1'}]}
     marker={<Icon type="alert" />}
     />
@@ -136,7 +136,7 @@ Instead of `continuous` you can use `ordinal` annotations
     />
 </Chart>
 
-The code sample for the above chart can be seen below. 
+The code sample for the above chart can be seen below.
 <details>
 
 ```js
@@ -144,7 +144,7 @@ The code sample for the above chart can be seen below.
     <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
     id="anno_1"
-    domainType={AnnotationDomainTypes.XDomain}
+    domainType={AnnotationDomainType.XDomain}
     dataValues={[{dataValue: 'a', details: 'detail-0'}, {dataValue: 'c', details:'details-1'}]}
     marker={<Icon type="alert" />}
     />

@@ -25,13 +25,7 @@ import { Point } from '../../../utils/point';
 import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from '../state/utils/common';
 import { getAxesSpecForSpecId } from '../state/utils/spec';
-import {
-  AnnotationDomainType,
-  AnnotationDomainTypes,
-  AnnotationSpec,
-  AxisSpec,
-  isLineAnnotation,
-} from '../utils/specs';
+import { AnnotationDomainType, AnnotationSpec, AxisSpec, isLineAnnotation } from '../utils/specs';
 import { computeLineAnnotationDimensions } from './line/dimensions';
 import { computeRectAnnotationDimensions } from './rect/dimensions';
 import { AnnotationDimensions } from './types';
@@ -53,7 +47,7 @@ export function getAnnotationAxis(
 
 /** @internal */
 export function isXDomain(domainType: AnnotationDomainType): boolean {
-  return domainType === AnnotationDomainTypes.XDomain;
+  return domainType === AnnotationDomainType.XDomain;
 }
 
 /** @internal */

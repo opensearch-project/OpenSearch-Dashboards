@@ -19,7 +19,7 @@
 
 import React, { RefObject } from 'react';
 
-import { ChartTypes } from '../..';
+import { ChartType } from '../..';
 import { BrushTool } from '../../../components/brush/brush';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
@@ -49,7 +49,7 @@ const EMPTY_MAP = new Map();
 
 /** @internal */
 export class HeatmapState implements InternalChartState {
-  chartType = ChartTypes.Heatmap;
+  chartType = ChartType.Heatmap;
 
   onElementClickCaller: (state: GlobalChartState) => void = createOnElementClickCaller();
 

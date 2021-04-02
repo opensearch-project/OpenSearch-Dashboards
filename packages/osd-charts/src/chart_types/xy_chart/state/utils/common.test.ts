@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { LegendItem } from '../../../../common/legend';
 import { ScaleType } from '../../../../scales/constants';
-import { SpecTypes } from '../../../../specs';
+import { SpecType } from '../../../../specs';
 import { BARCHART_1Y1G } from '../../../../utils/data_samples/test_dataset';
 import { Point } from '../../../../utils/point';
-import { AreaSeriesSpec, SeriesTypes, LineSeriesSpec, BarSeriesSpec } from '../../utils/specs';
+import { AreaSeriesSpec, SeriesType, LineSeriesSpec, BarSeriesSpec } from '../../utils/specs';
 import {
   isHorizontalRotation,
   isVerticalRotation,
@@ -54,11 +54,11 @@ describe('Type Checks', () => {
   describe('#isLineAreaOnlyChart', () => {
     it('is an area or line only map', () => {
       const area: AreaSeriesSpec = {
-        chartType: ChartTypes.XYAxis,
-        specType: SpecTypes.Series,
+        chartType: ChartType.XYAxis,
+        specType: SpecType.Series,
         id: 'area',
         groupId: 'group1',
-        seriesType: SeriesTypes.Area,
+        seriesType: SeriesType.Area,
         yScaleType: ScaleType.Log,
         xScaleType: ScaleType.Linear,
         xAccessor: 'x',
@@ -67,11 +67,11 @@ describe('Type Checks', () => {
         data: BARCHART_1Y1G,
       };
       const line: LineSeriesSpec = {
-        chartType: ChartTypes.XYAxis,
-        specType: SpecTypes.Series,
+        chartType: ChartType.XYAxis,
+        specType: SpecType.Series,
         id: 'line',
         groupId: 'group2',
-        seriesType: SeriesTypes.Line,
+        seriesType: SeriesType.Line,
         yScaleType: ScaleType.Log,
         xScaleType: ScaleType.Linear,
         xAccessor: 'x',
@@ -81,11 +81,11 @@ describe('Type Checks', () => {
         data: BARCHART_1Y1G,
       };
       const bar: BarSeriesSpec = {
-        chartType: ChartTypes.XYAxis,
-        specType: SpecTypes.Series,
+        chartType: ChartType.XYAxis,
+        specType: SpecType.Series,
         id: 'bar',
         groupId: 'group2',
-        seriesType: SeriesTypes.Bar,
+        seriesType: SeriesType.Bar,
         yScaleType: ScaleType.Log,
         xScaleType: ScaleType.Linear,
         xAccessor: 'x',

@@ -18,8 +18,8 @@
  */
 import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../chart_types';
-import { SpecTypes } from '../../specs/constants';
+import { ChartType } from '../../chart_types';
+import { SpecType } from '../../specs/constants';
 import { SmallMultiplesSpec } from '../../specs/small_multiples';
 import { getSpecsFromStore } from '../utils';
 import { getChartIdSelector } from './get_chart_id';
@@ -30,7 +30,7 @@ import { getSpecs } from './get_settings_specs';
  * @internal
  */
 export const getSmallMultiplesSpecs = createCachedSelector([getSpecs], (specs) =>
-  getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples),
+  getSpecsFromStore<SmallMultiplesSpec>(specs, ChartType.Global, SpecType.SmallMultiples),
 )(getChartIdSelector);
 
 /**

@@ -125,7 +125,7 @@ export interface SeriesSpec {
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */
-  seriesType: SeriesTypes;
+  seriesType: SeriesType;
   /** Set colors for specific series */
   color?: SeriesColorAccessor;
   /** If the series should appear in the legend
@@ -178,7 +178,7 @@ A `BarSeriesSpec` for example is the following intersection type:
 export type BarSeriesSpec = SeriesSpec &
   SeriesAccessors &
   SeriesScales & {
-    seriesType: SeriesTypes.Bar;
+    seriesType: SeriesType.Bar;
   };
 ```
 

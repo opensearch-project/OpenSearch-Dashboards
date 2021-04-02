@@ -19,7 +19,7 @@
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
-import { ChartTypes } from '../../..';
+import { ChartType } from '../../..';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLastDragSelector } from '../../../../state/selectors/get_last_drag';
@@ -39,7 +39,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
   let prevProps: DragCheckProps | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.Heatmap) {
+    if (selector === null && state.chartType === ChartType.Heatmap) {
       if (!isBrushEndProvided(state)) {
         selector = null;
         prevProps = null;
