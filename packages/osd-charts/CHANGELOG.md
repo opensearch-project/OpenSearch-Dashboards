@@ -1,3 +1,22 @@
+# [28.0.0](https://github.com/elastic/elastic-charts/compare/v27.0.0...v28.0.0) (2021-04-02)
+
+
+### Bug Fixes
+
+* **annotations:** provide fallback for line annotation markers ([#1091](https://github.com/elastic/elastic-charts/issues/1091)) ([0bd61f1](https://github.com/elastic/elastic-charts/commit/0bd61f198743461c267eed74706797b49508e250))
+* **legend:** action sizing ui and focus states ([#1102](https://github.com/elastic/elastic-charts/issues/1102)) ([3a76a2c](https://github.com/elastic/elastic-charts/commit/3a76a2c3977983f8eec1c88d0b4cb73bc5d1e8ee))
+* **legend:** stop legend color picker dot twitching ([#1101](https://github.com/elastic/elastic-charts/issues/1101)) ([c89b767](https://github.com/elastic/elastic-charts/commit/c89b767c698b677cef96da365901dc046d6e27a8))
+
+
+### Code Refactoring
+
+* rename enum types to singular ([#1064](https://github.com/elastic/elastic-charts/issues/1064)) ([396b3d1](https://github.com/elastic/elastic-charts/commit/396b3d1aefc995b89c6acb369c19a82f2a68d7b5)), closes [#767](https://github.com/elastic/elastic-charts/issues/767)
+
+
+### BREAKING CHANGES
+
+* `AnnotationDomainTypes`, `AnnotationTypes`, `SeriesTypes`, `ChartTypes`, and `SpecTypes` are renamed to `AnnotationDomainType`, `AnnotationType`, `SeriesType`, `ChartType`, and `SpecType`
+
 # [27.0.0](https://github.com/elastic/elastic-charts/compare/v26.1.0...v27.0.0) (2021-03-31)
 
 
