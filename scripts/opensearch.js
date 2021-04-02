@@ -28,8 +28,8 @@ osdOpenSearch
     license: 'oss',
     password: 'changeme',
     version: pkg.version,
-    'source-path': resolve(__dirname, '../../OpenSearch'),
-    'base-path': resolve(__dirname, '../../OpenSearch'),
+    'source-path': resolve(__dirname, '../../opensearch'),
+    'base-path': resolve(__dirname, '../.opensearch'),
     ssl: false,
   })
   .catch(function (e) {
