@@ -25,7 +25,7 @@ import { Dimensions, Size } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { mergeWithDefaultAnnotationLine } from '../../../../utils/themes/merge_utils';
 import { SmallMultipleScales } from '../../state/selectors/compute_small_multiple_scales';
-import { isHorizontalRotation } from '../../state/utils/common';
+import { isHorizontalRotation, isVerticalRotation } from '../../state/utils/common';
 import { computeXScaleOffset } from '../../state/utils/utils';
 import { getPanelSize } from '../../utils/panel';
 import { AnnotationDomainType, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
@@ -52,7 +52,6 @@ function computeYDomainLineAnnotationDimensions(
   // let's use a default Bottom-X/Left-Y axis orientation if we are not showing an axis
   // but we are displaying a line annotation
 
-  const alignment = getAnchorPosition(false, isHorizontalChartRotation, specMarkerPosition, axisPosition);
   const lineProps: AnnotationLineProps[] = [];
   const [domainStart, domainEnd] = yScale.domain;
 
@@ -84,6 +83,8 @@ function computeYDomainLineAnnotationDimensions(
 
         const width = isHorizontalChartRotation ? horizontal.bandwidth : vertical.bandwidth;
         const height = isHorizontalChartRotation ? vertical.bandwidth : horizontal.bandwidth;
+        const linePathPoints = getYLinePath({ width, height }, annotationValueYPosition);
+        const alignment = getAnchorPosition(false, chartRotation, axisPosition, specMarkerPosition);
 
         const position = getMarkerPositionForYAnnotation(
           panelSize,
@@ -92,8 +93,6 @@ function computeYDomainLineAnnotationDimensions(
           annotationValueYPosition,
           dimension,
         );
-
-        const linePathPoints = getYLinePath({ width, height }, annotationValueYPosition);
 
         const lineProp: AnnotationLineProps = {
           specId,
@@ -147,7 +146,6 @@ function computeXDomainLineAnnotationDimensions(
 
   const lineProps: AnnotationLineProps[] = [];
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
-  const alignment = getAnchorPosition(true, isHorizontalChartRotation, specMarkerPosition, axisPosition);
   const panelSize = getPanelSize({ vertical, horizontal });
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
@@ -197,6 +195,9 @@ function computeXDomainLineAnnotationDimensions(
         const width = isHorizontalChartRotation ? horizontal.bandwidth : vertical.bandwidth;
         const height = isHorizontalChartRotation ? vertical.bandwidth : horizontal.bandwidth;
 
+        const linePathPoints = getXLinePath({ width, height }, annotationValueXPosition);
+        const alignment = getAnchorPosition(true, chartRotation, axisPosition, specMarkerPosition);
+
         const position = getMarkerPositionForXAnnotation(
           panelSize,
           chartRotation,
@@ -204,8 +205,6 @@ function computeXDomainLineAnnotationDimensions(
           annotationValueXPosition,
           dimension,
         );
-
-        const linePathPoints = getXLinePath({ width, height }, annotationValueXPosition);
 
         const lineProp: AnnotationLineProps = {
           specId,
@@ -281,22 +280,21 @@ export function computeLineAnnotationDimensions(
 
 function getAnchorPosition(
   isXDomain: boolean,
-  isChartHorizontal: boolean,
-  specMarkerPosition?: Position,
+  chartRotation: Rotation,
   axisPosition?: Position,
+  specMarkerPosition?: Position,
 ): Position {
-  const dflPositionFromAxis = getDefaultMarkerPositionFromAxis(isXDomain, isChartHorizontal, axisPosition);
-
+  const dflPositionFromAxis = getDefaultMarkerPositionFromAxis(isXDomain, chartRotation, axisPosition);
   if (specMarkerPosition !== undefined) {
     // validate specMarkerPosition against domain
-    const validatedPosFromMarkerPos = validateMarkerPosition(isXDomain, isChartHorizontal, specMarkerPosition);
+    const validatedPosFromMarkerPos = validateMarkerPosition(isXDomain, chartRotation, specMarkerPosition);
     return validatedPosFromMarkerPos ?? dflPositionFromAxis;
   }
   return dflPositionFromAxis;
 }
 
-function validateMarkerPosition(isXDomain: boolean, isHorizontal: boolean, position: Position): Position | undefined {
-  if ((isXDomain && isHorizontal) || (!isXDomain && !isHorizontal)) {
+function validateMarkerPosition(isXDomain: boolean, chartRotation: Rotation, position: Position): Position | undefined {
+  if ((isXDomain && isHorizontalRotation(chartRotation)) || (!isXDomain && isVerticalRotation(chartRotation))) {
     return position === Position.Top || position === Position.Bottom ? position : undefined;
   }
   return position === Position.Left || position === Position.Right ? position : undefined;
@@ -304,13 +302,13 @@ function validateMarkerPosition(isXDomain: boolean, isHorizontal: boolean, posit
 
 function getDefaultMarkerPositionFromAxis(
   isXDomain: boolean,
-  isHorizontal: boolean,
+  chartRotation: Rotation,
   axisPosition?: Position,
 ): Position {
   if (axisPosition) {
     return axisPosition;
   }
-  if ((isXDomain && isHorizontal) || (!isXDomain && !isHorizontal)) {
+  if ((isXDomain && isVerticalRotation(chartRotation)) || (!isXDomain && isHorizontalRotation(chartRotation))) {
     return Position.Left;
   }
   return Position.Bottom;

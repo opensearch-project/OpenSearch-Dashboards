@@ -19,27 +19,41 @@
 
 import React from 'react';
 
-import { Chart, BarSeries, ScaleType, Settings } from '../src';
+import { Chart, BarSeries, ScaleType, LineAnnotation, AnnotationDomainTypes, LineAnnotationDatum } from '../src';
 
+function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
+  return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
+}
 export class Playground extends React.Component {
   render() {
     return (
-      <div className="story-chart story-root root">
+      <div className="App">
         <Chart size={[500, 200]}>
-          <Settings showLegend showLegendExtra />
+          <LineAnnotation
+            domainType={AnnotationDomainTypes.XDomain}
+            id="ann"
+            dataValues={[{ dataValue: 'bags' }]}
+            marker={<div style={{ background: 'red' }}>hello</div>}
+            // markerPosition="top"
+          />
+          <LineAnnotation
+            domainType={AnnotationDomainTypes.YDomain}
+            id="ann1"
+            dataValues={generateAnnotationData([30])}
+            marker={<div style={{ background: 'yellow' }}>Horizontal</div>}
+            // markerPosition="right"
+          />
           <BarSeries
-            id="areas"
-            name="area"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor={0}
-            yAccessors={[1]}
-            splitSeriesAccessors={[2]}
+            id="bars"
+            name="amount"
+            xScaleType={ScaleType.Ordinal}
+            xAccessor="x"
+            yAccessors={['y']}
             data={[
-              [0, 123, 'group0'],
-              [0, 123, 'group1'],
-              [0, 123, 'group2'],
-              [0, 123, 'group3'],
+              { x: 'trousers', y: 390, val: 1222 },
+              { x: 'watches', y: 23, val: 1222 },
+              { x: 'bags', y: 750, val: 1222 },
+              { x: 'cocktail dresses', y: 854, val: 1222 },
             ]}
           />
         </Chart>

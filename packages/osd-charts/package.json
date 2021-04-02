@@ -123,6 +123,7 @@
     "@types/jsdom": "^16.2.5",
     "@types/lodash": "^4.14.121",
     "@types/luxon": "^1.25.0",
+    "@types/marked": "^2.0.1",
     "@types/moment-timezone": "^0.5.30",
     "@types/puppeteer": "^5.4.2",
     "@types/react-dom": "^16.9.8",
