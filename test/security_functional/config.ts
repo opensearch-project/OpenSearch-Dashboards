@@ -45,7 +45,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig
           .get('osdTestServer.serverArgs')
           .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning')),
-        '--security.showInsecureClusterWarning=true',
+        // '--security.showInsecureClusterWarning=true',
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
       ],
