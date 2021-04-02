@@ -35,7 +35,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
     password = 'changeme',
     license = 'oss',
     log,
-    basePath = resolve(OPENSEARCH_DASHBOARDS_ROOT, '../OpenSearch'),
+    basePath = resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
     opensearchFrom = opensearchTestConfig.getBuildFrom(),
     dataArchive,
     opensearchArgs: customOpenSearchArgs = [],
