@@ -49,12 +49,6 @@ export const CreatePackageJson: Task = {
       dependencies: pkg.dependencies,
     };
 
-    if (build.isOss()) {
-      newPkg.workspaces.packages = newPkg.workspaces.packages.filter(
-        (p) => !p.startsWith('x-pack')
-      );
-    }
-
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
   },
 };

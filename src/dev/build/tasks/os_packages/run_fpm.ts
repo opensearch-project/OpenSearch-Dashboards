@@ -38,11 +38,7 @@ export async function runFpm(
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
-    if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    } else {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    }
+    return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
   };
 
   const args = [
@@ -65,7 +61,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards',
+    'opensearch-dashboards',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -81,8 +77,7 @@ export async function runFpm(
 
     // prevent installing opensearch-dashboards if installing opensearch-dashboards-oss and vice versa
     '--conflicts',
-    build.isOss() ? 'opensearch-dashboards' : 'opensearch-dashboards',
-
+    'opensearch-dashboards',
     // define install/uninstall scripts
     '--after-install',
     resolve(__dirname, 'package_scripts/post_install.sh'),

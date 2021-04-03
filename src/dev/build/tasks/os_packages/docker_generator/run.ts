@@ -45,19 +45,15 @@ export async function runDockerGenerator(
   const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
 
   // General docker var config
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
-  const imageFlavor = build.isOss() ? '-oss' : '';
+  const license = 'ASL 2.0';
+  const imageFlavor = '';
   const imageTag = 'docker.opensearch.co/opensearch-dashboards/opensearch-dashboards';
   const version = config.getBuildVersion();
   const artifactTarball = `opensearch-dashboards${imageFlavor}-${version}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
   // That would produce oss, default and default-ubi7
-  const dockerBuildDir = config.resolveFromRepo(
-    'build',
-    'opensearch-dashboards-docker',
-    build.isOss() ? `oss` : `default${ubiImageFlavor}`
-  );
+  const dockerBuildDir = config.resolveFromRepo('build', 'opensearch-dashboards-docker');
   const dockerTargetFilename = config.resolveFromTarget(
     `opensearch-dashboards${imageFlavor}${ubiImageFlavor}-${version}-docker-image.tar.gz`
   );
@@ -128,9 +124,5 @@ export async function runDockerGenerator(
 
 export async function runDockerGeneratorForUBI(config: Config, log: ToolingLog, build: Build) {
   // Only run ubi docker image build for default distribution
-  if (build.isOss()) {
-    return;
-  }
-
-  await runDockerGenerator(config, log, build, true);
+  return;
 }

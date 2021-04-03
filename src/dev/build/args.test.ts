@@ -37,8 +37,6 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerPackage": false,
@@ -60,8 +58,6 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerPackage": true,
@@ -83,8 +79,6 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerPackage": false,
@@ -106,8 +100,6 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerPackage": false,
@@ -130,8 +122,6 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerPackage": true,
@@ -154,8 +144,6 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerPackage": true,
