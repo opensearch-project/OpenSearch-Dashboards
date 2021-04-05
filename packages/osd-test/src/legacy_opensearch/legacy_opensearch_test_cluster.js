@@ -58,7 +58,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
   const config = {
     version: opensearchTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
-    sourcePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
+    sourcePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '../opensearch'),
     password,
     license,
     basePath,
