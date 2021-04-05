@@ -66,10 +66,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
 
-  if (opts.oss) {
-    delete rawConfig.xpack;
-  }
-
   if (opts.dev) {
     set('env', 'development');
 
@@ -179,12 +175,10 @@ export default function (program) {
   }
 
   if (!IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE) {
-    command
-      .option('--oss', 'Start OpenSearch Dashboards without X-Pack')
-      .option(
-        '--run-examples',
-        'Adds plugin paths for all the OpenSearch Dashboards example plugins and runs with no base path'
-      );
+    command.option(
+      '--run-examples',
+      'Adds plugin paths for all the OpenSearch Dashboards example plugins and runs with no base path'
+    );
   }
 
   if (CAN_CLUSTER) {
@@ -236,7 +230,6 @@ export default function (program) {
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         disableOptimizer: !opts.optimizer,
-        oss: !!opts.oss,
         cache: !!opts.cache,
         dist: !!opts.dist,
       },

@@ -37,7 +37,6 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
-  oss: boolean;
   /** @deprecated use disableOptimizer to know if the @osd/optimizer is disabled in development */
   optimize?: boolean;
   runExamples: boolean;
