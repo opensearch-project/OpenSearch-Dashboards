@@ -77,7 +77,7 @@ function mergeYDomainForGroup(
 
   let domain: ContinuousDomain;
   if (stackMode === StackMode.Percentage) {
-    domain = computeContinuousDataDomain([0, 1], identity, customDomain);
+    domain = computeContinuousDataDomain([0, 1], identity, groupYScaleType, customDomain);
   } else {
     // TODO remove when removing yScaleToDataExtent
     const newCustomDomain = customDomain ? { ...customDomain } : {};
@@ -87,13 +87,18 @@ function mergeYDomainForGroup(
     }
 
     // compute stacked domain
-    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs);
+    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs, groupYScaleType, newCustomDomain);
 
     // compute non stacked domain
-    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs);
+    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs, groupYScaleType, newCustomDomain);
 
     // merge stacked and non stacked domain together
-    domain = computeContinuousDataDomain([...stackedDomain, ...nonStackedDomain], identity, newCustomDomain);
+    domain = computeContinuousDataDomain(
+      [...stackedDomain, ...nonStackedDomain],
+      identity,
+      groupYScaleType,
+      newCustomDomain,
+    );
 
     const [computedDomainMin, computedDomainMax] = domain;
 
@@ -127,7 +132,12 @@ function mergeYDomainForGroup(
   };
 }
 
-function computeYDomain(dataSeries: DataSeries[], hasZeroBaselineSpecs: boolean) {
+function computeYDomain(
+  dataSeries: DataSeries[],
+  hasZeroBaselineSpecs: boolean,
+  scaleType: ScaleType,
+  customDomain?: YDomainRange,
+) {
   const yValues = new Set<any>();
   dataSeries.forEach(({ data }) => {
     for (let i = 0; i < data.length; i++) {
@@ -141,7 +151,12 @@ function computeYDomain(dataSeries: DataSeries[], hasZeroBaselineSpecs: boolean)
   if (yValues.size === 0) {
     return [];
   }
-  return computeContinuousDataDomain([...yValues.values()], identity, null);
+  const domainOptions = {
+    ...customDomain,
+    // padding already applied, set to 0 here to avoid duplicating
+    padding: 0,
+  };
+  return computeContinuousDataDomain([...yValues.values()], identity, scaleType, domainOptions);
 }
 
 /** @internal */

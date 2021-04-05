@@ -29,3 +29,4 @@ export default {
 export { Example as noSeries } from './1_no_series';
 export { Example as chromePathBugFix } from './2_chrome_path_bug_fix';
 export { Example as noAxesAnnotationBugFix } from './3_no_axes_annotation';
+export { Example as filterZerosInLogFitDomain } from './4_filter_zero_values_log';

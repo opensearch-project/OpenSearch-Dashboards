@@ -76,7 +76,7 @@ export function mergeXDomain(
       }
     }
   } else {
-    seriesXComputedDomains = computeContinuousDataDomain(values, identity, {
+    seriesXComputedDomains = computeContinuousDataDomain(values, identity, mainXScaleType.scaleType, {
       fit: true,
     });
     let customMinInterval: undefined | number;
