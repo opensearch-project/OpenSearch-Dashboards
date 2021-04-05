@@ -59,7 +59,7 @@ export enum ManagementSectionId {
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
   Security = 'security',
-  OpenSearchDashboards = 'opensearchDashboards',
+  OpenSearchDashboards = 'opensearch-dashboards',
   Stack = 'stack',
 }
 
