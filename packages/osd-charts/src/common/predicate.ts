@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { $Values as Values } from 'utility-types';
+import { $Values } from 'utility-types';
 
+/** @public */
 export const Predicate = Object.freeze({
   NumAsc: 'numAsc' as const,
   NumDesc: 'numDesc' as const,
@@ -28,8 +29,9 @@ export const Predicate = Object.freeze({
 });
 
 /** @public */
-export type Predicate = Values<typeof Predicate>;
+export type Predicate = $Values<typeof Predicate>;
 
+/** @internal */
 export function getPredicateFn<T>(predicate: Predicate, accessor?: keyof T): (a: T, b: T) => number {
   switch (predicate) {
     case 'alphaAsc':

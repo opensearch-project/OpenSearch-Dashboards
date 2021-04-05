@@ -28,6 +28,7 @@ import { GeometryStateStyle, SharedGeometryStateStyle } from '../../../utils/the
 import { DataSeriesDatum, FilledValues, XYChartSeriesIdentifier } from '../utils/series';
 import { DEFAULT_HIGHLIGHT_PADDING } from './constants';
 
+/** @internal */
 export interface MarkSizeOptions {
   enabled: boolean;
   ratio?: number;

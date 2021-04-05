@@ -90,6 +90,7 @@ const validCache: Map<string | undefined, boolean> = new Map();
 
 /**
  * Return true if the color is a valid CSS color, false otherwise
+ * @param color a color written in string
  * @internal
  */
 export function isColorValid(color?: string): color is Color {

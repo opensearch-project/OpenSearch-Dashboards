@@ -22,19 +22,29 @@ import { Relation } from '../../../../common/text_utils';
 import { LegendPath } from '../../../../state/actions/legend';
 import { Datum, ValueAccessor } from '../../../../utils/common';
 
+/** @public */
 export const AGGREGATE_KEY = 'value';
+/** @public */
 export const STATISTICS_KEY = 'statistics';
+/** @public */
 export const DEPTH_KEY = 'depth';
+/** @public */
 export const CHILDREN_KEY = 'children';
+/** @public */
 export const INPUT_KEY = 'inputIndex';
+/** @public */
 export const PARENT_KEY = 'parent';
+/** @public */
 export const SORT_INDEX_KEY = 'sortIndex';
+/** @public */
 export const PATH_KEY = 'path';
 
+/** @public */
 export interface Statistics {
   globalAggregate: number;
 }
 
+/** @public */
 export interface NodeDescriptor {
   [AGGREGATE_KEY]: number;
   [DEPTH_KEY]: number;
@@ -42,8 +52,11 @@ export interface NodeDescriptor {
   [INPUT_KEY]?: Array<number>;
 }
 
+/** @public */
 export type ArrayEntry = [Key, ArrayNode];
+/** @public */
 export type HierarchyOfArrays = Array<ArrayEntry>;
+/** @public */
 export interface ArrayNode extends NodeDescriptor {
   [CHILDREN_KEY]: HierarchyOfArrays;
   [PARENT_KEY]: ArrayNode;
@@ -62,27 +75,37 @@ export const HIERARCHY_ROOT_KEY: Key = '__root_key__';
 
 /** @public */
 export type PrimitiveValue = string | number | null; // there could be more but sufficient for now
+/** @public */
 export type Key = CategoryKey;
+/** @public */
 export type Sorter = (a: number, b: number) => number;
 type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 
+/** @public */
 export const entryKey = ([key]: ArrayEntry) => key;
+/** @public */
 export const entryValue = ([, value]: ArrayEntry) => value;
+/** @public */
 export function depthAccessor(n: ArrayEntry) {
   return entryValue(n)[DEPTH_KEY];
 }
+/** @public */
 export function aggregateAccessor(n: ArrayEntry): number {
   return entryValue(n)[AGGREGATE_KEY];
 }
+/** @public */
 export function parentAccessor(n: ArrayEntry): ArrayNode {
   return entryValue(n)[PARENT_KEY];
 }
+/** @public */
 export function childrenAccessor(n: ArrayEntry) {
   return entryValue(n)[CHILDREN_KEY];
 }
+/** @public */
 export function sortIndexAccessor(n: ArrayEntry) {
   return entryValue(n)[SORT_INDEX_KEY];
 }
+/** @public */
 export function pathAccessor(n: ArrayEntry) {
   return entryValue(n)[PATH_KEY];
 }

@@ -21,6 +21,7 @@ import { $Values } from 'utility-types';
 
 import { GlobalChartState } from '../chart_state';
 
+/** @internal */
 export const InitStatus = Object.freeze({
   ParentSizeInvalid: 'ParentSizeInvalid' as const,
   SpecNotInitialized: 'SpecNotInitialized' as const,
@@ -29,6 +30,7 @@ export const InitStatus = Object.freeze({
   Initialized: 'Initialized' as const,
 });
 
+/** @internal */
 export type InitStatus = $Values<typeof InitStatus>;
 
 /** @internal */

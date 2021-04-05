@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { BasicSeriesSpec, DEFAULT_GLOBAL_ID, Spec } from '../../../../specs';
 import { GroupId } from '../../../../utils/ids';
 import { isVerticalAxis } from '../../utils/axis_type_utils';

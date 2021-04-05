@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { SeriesKey } from '../../../../common/series_id';
 import { XDomain } from '../../domains/types';
 import { isDatumFilled } from '../../rendering/utils';

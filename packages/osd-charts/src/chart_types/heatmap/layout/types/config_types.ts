@@ -22,7 +22,9 @@ import { Font, FontFamily, TextAlign, TextBaseline } from '../../../../common/te
 import { Color } from '../../../../utils/common';
 import { Cell } from './viewmodel_types';
 
-/** potential internal */
+/**
+ * @public
+ */
 export interface Config {
   width: Pixels;
   height: Pixels;
@@ -108,6 +110,7 @@ export interface Config {
   maxLegendHeight?: number;
 }
 
+/** @public */
 export type HeatmapBrushEvent = {
   cells: Cell[];
   x: (string | number)[];

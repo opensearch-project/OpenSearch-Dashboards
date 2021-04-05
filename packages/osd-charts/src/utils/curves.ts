@@ -31,6 +31,7 @@ import {
 } from 'd3-shape';
 import { $Values } from 'utility-types';
 
+/** @public */
 export const CurveType = Object.freeze({
   CURVE_CARDINAL: 0 as const,
   CURVE_NATURAL: 1 as const,

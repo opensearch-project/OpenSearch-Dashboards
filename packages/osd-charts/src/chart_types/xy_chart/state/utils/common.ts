@@ -23,7 +23,9 @@ import { Point } from '../../../../utils/point';
 import { BasicSeriesSpec, SeriesType } from '../../utils/specs';
 import { GeometriesCounts } from './types';
 
+/** @internal */
 export const MAX_ANIMATABLE_BARS = 300;
+/** @internal */
 export const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
 
 /** @internal */

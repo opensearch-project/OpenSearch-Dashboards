@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { ScaleType } from '../../../scales/constants';
 import { DataSeries } from './series';
 import { BasicSeriesSpec, isLineSeriesSpec, isAreaSeriesSpec } from './specs';

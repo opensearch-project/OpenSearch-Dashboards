@@ -19,9 +19,11 @@
 
 import { $Values } from 'utility-types';
 
+/** @public */
 export const GoalSubtype = Object.freeze({
   Goal: 'goal' as const,
   HorizontalBullet: 'horizontalBullet' as const,
   VerticalBullet: 'verticalBullet' as const,
 });
+/** @public */
 export type GoalSubtype = $Values<typeof GoalSubtype>;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const KIBANA_METRICS = {
   metrics: {
     kibana_os_load: [

@@ -22,11 +22,13 @@ import moment from 'moment-timezone';
 import { TickFormatter, TickFormatterOptions } from '../../chart_types/xy_chart/utils/specs';
 import { getMomentWithTz } from './date_time';
 
+/** @public */
 export function timeFormatter(format: string): TickFormatter {
   return (value: number, options?: TickFormatterOptions): string =>
     getMomentWithTz(value, options && options.timeZone).format(format);
 }
 
+/** @public */
 export function niceTimeFormatter(domain: [number, number]): TickFormatter {
   const minDate = moment(domain[0]);
   const maxDate = moment(domain[1]);
@@ -35,6 +37,7 @@ export function niceTimeFormatter(domain: [number, number]): TickFormatter {
   return timeFormatter(format);
 }
 
+/** @public */
 export function niceTimeFormatByDay(days: number) {
   if (days > 30) {
     return 'YYYY-MM-DD';

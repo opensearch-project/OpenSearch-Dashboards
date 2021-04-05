@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export interface ColorScales {
   [key: string]: string;
 }
@@ -63,6 +64,7 @@ const echPaletteForStatus: EchPalette = {
   ],
 };
 
+/** @internal */
 export const palettes = {
   echPaletteColorBlind,
   echPaletteForLightBackground,

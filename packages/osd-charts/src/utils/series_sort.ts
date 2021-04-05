@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { SeriesIdentifier } from '../common/series_id';
 import { SettingsSpec, SortSeriesByConfig } from '../specs/settings';
 
@@ -23,6 +24,7 @@ import { SettingsSpec, SortSeriesByConfig } from '../specs/settings';
  * A compare function used to determine the order of the elements. It is expected to return
  * a negative value if first argument is less than second argument, zero if they're equal and a positive
  * value otherwise.
+ * @public
  */
 export type SeriesCompareFn = (siA: SeriesIdentifier, siB: SeriesIdentifier) => number;
 

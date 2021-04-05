@@ -22,6 +22,7 @@ import { CategoryKey } from './category';
 
 /**
  * A string key used to uniquely identify a series
+ * @public
  */
 export type SeriesKey = CategoryKey;
 

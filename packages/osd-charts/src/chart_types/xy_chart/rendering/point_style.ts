@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { OpacityFn, stringToRGB } from '../../../common/color_library_wrappers';
 import { getColorFromVariant, mergePartial } from '../../../utils/common';
 import { PointGeometryStyle } from '../../../utils/geometry';
 import { PointShape, PointStyle } from '../../../utils/themes/theme';
 
+/** @internal */
 export function buildPointGeometryStyles(
   color: string,
   themePointStyle: PointStyle,

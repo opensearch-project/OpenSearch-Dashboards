@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Dimensions } from '../../../../utils/dimensions';
 import { RectAnnotationDatum } from '../../utils/specs';
 

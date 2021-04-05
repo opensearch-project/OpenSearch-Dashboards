@@ -69,6 +69,7 @@ export function isHTMLElement(value: any): value is HTMLElement {
  * @param element {HTMLElement}
  * @param cousin {HTMLElement}
  * @returns {number}
+ * @internal
  */
 export function getElementZIndex(element: HTMLElement, cousin: HTMLElement): number {
   /**

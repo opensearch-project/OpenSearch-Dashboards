@@ -42,6 +42,7 @@ const defaultProps = {
 type SpecRequiredProps = Pick<HistogramBarSeriesSpec, 'id' | 'data'>;
 type SpecOptionalProps = Partial<Omit<HistogramBarSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
 
+/** @public */
 export const HistogramBarSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     HistogramBarSeriesSpec,

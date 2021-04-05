@@ -75,23 +75,28 @@ export interface LayerValue {
   path: LegendPath;
 }
 
+/** @public */
 export interface GroupBrushExtent {
   groupId: GroupId;
   extent: [number, number];
 }
+/** @public */
 export interface XYBrushArea {
   x?: [number, number];
   y?: Array<GroupBrushExtent>;
 }
 
+/** @public */
 export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
+/** @public */
 export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
+/** @public */
 export type HeatmapElementEvent = [Cell, SeriesIdentifier];
 
 /**
- * @public
  * An object that contains the scaled mouse position based on
  * the current chart configuration.
+ * @public
  */
 export type ProjectedValues = {
   /**
@@ -120,23 +125,31 @@ export type ProjectedValues = {
  */
 export type ProjectionClickListener = (values: ProjectedValues) => void;
 
+/** @public */
 export type ElementClickListener = (
   elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
 ) => void;
+/** @public */
 export type ElementOverListener = (
   elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
 ) => void;
+/** @public */
 export type BrushEndListener = (brushArea: XYBrushArea) => void;
+/** @public */
 export type LegendItemListener = (series: SeriesIdentifier[]) => void;
+/** @public */
 export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
  * Listener to be called when chart render state changes
  *
  * `isRendered` value is `true` when rendering is complete and `false` otherwise
+ * @public
  */
 export type RenderChangeListener = (isRendered: boolean) => void;
+/** @public */
 export type BasicListener = () => undefined | void;
 
+/** @public */
 export interface BasePointerEvent {
   chartId: string;
   type: PointerEventType;
@@ -145,6 +158,7 @@ export interface BasePointerEvent {
  * Event used to synchronize pointers/mouse positions between Charts.
  *
  * fired as callback argument for `PointerUpdateListener`
+ * @public
  */
 export interface PointerOverEvent extends BasePointerEvent {
   type: typeof PointerEventType.Over;
@@ -156,10 +170,12 @@ export interface PointerOverEvent extends BasePointerEvent {
   unit?: string;
   value: number | string | null;
 }
+/** @public */
 export interface PointerOutEvent extends BasePointerEvent {
   type: typeof PointerEventType.Out;
 }
 
+/** @public */
 export type PointerEvent = PointerOverEvent | PointerOutEvent;
 
 /**
@@ -303,6 +319,7 @@ export interface LegendActionProps {
  */
 export type LegendAction = ComponentType<LegendActionProps>;
 
+/** @public */
 export interface LegendColorPickerProps {
   /**
    * Anchor used to position picker
@@ -325,10 +342,12 @@ export interface LegendColorPickerProps {
    */
   seriesIdentifiers: SeriesIdentifier[];
 }
+/** @public */
 export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 
 /**
  * Buffer between cursor and point to trigger interaction
+ * @public
  */
 export type MarkBuffer = number | ((radius: number) => number);
 
@@ -530,6 +549,7 @@ export interface SettingsSpec extends Spec, LegendSpec {
 /**
  * An object of compare functions to sort
  * series in different part of the chart like tooltip, legend and rendering order.
+ * @public
  */
 export interface SortSeriesByConfig {
   /**
@@ -565,6 +585,7 @@ export interface OrderBy {
   direction?: Direction;
 }
 
+/** @public */
 export type DefaultSettingsProps =
   | 'id'
   | 'chartType'
@@ -585,8 +606,10 @@ export type DefaultSettingsProps =
   | 'legendPosition'
   | 'legendMaxDepth';
 
+/** @public */
 export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
 
+/** @public */
 export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()(
   specComponentFactory<SettingsSpec, DefaultSettingsProps>(DEFAULT_SETTINGS_SPEC),
 );

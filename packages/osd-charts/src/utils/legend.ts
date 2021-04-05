@@ -20,8 +20,10 @@
 import { LegendPositionConfig } from '../specs/settings';
 import { LayoutDirection } from './common';
 
+/** @internal */
 export const isHorizontalLegend = (legendPosition: LegendPositionConfig) =>
   legendPosition.direction === LayoutDirection.Horizontal;
 
+/** @internal */
 export const isHierarchicalLegend = (flatLegend: boolean | undefined, legendPosition: LegendPositionConfig) =>
   !flatLegend && !isHorizontalLegend(legendPosition);

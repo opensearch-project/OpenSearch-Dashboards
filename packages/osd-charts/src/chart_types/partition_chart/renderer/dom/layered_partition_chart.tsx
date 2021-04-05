@@ -25,6 +25,7 @@ import { Partition } from '../canvas/partition';
 import { HighlighterFromHover } from './highlighter_hover';
 import { HighlighterFromLegend } from './highlighter_legend';
 
+/** @internal */
 export function render(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
   return (
     <>

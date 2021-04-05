@@ -23,8 +23,11 @@ import { YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
 import { getPercentageValue } from './common';
 
+/** @public */
 export type OrdinalDomain = (number | string)[];
+/** @public */
 export type ContinuousDomain = [min: number, max: number];
+/** @public */
 export type Range = [min: number, max: number];
 
 /** @internal */

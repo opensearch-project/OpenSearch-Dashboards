@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { area } from 'd3-shape';
 
 import { Scale } from '../../../scales';

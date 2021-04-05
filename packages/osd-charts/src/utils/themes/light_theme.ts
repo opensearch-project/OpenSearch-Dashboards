@@ -26,6 +26,7 @@ import {
   DEFAULT_MISSING_COLOR,
 } from './theme_common';
 
+/** @public */
 export const LIGHT_THEME: Theme = {
   chartPaddings: DEFAULT_CHART_PADDING,
   chartMargins: DEFAULT_CHART_MARGINS,

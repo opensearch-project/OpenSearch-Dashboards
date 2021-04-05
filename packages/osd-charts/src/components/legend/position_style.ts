@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { CSSProperties } from 'react';
 
 import { LegendSpec, LegendPositionConfig } from '../../specs/settings';
@@ -25,6 +26,7 @@ import { Dimensions } from '../../utils/dimensions';
 
 const INSIDE_PADDING = 10;
 
+/** @internal */
 export function legendPositionStyle(
   { legendPosition }: LegendSpec,
   legendSize: BBox,

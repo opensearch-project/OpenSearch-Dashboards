@@ -29,4 +29,5 @@
 /** @public */
 export type CategoryKey = string;
 
+/** @internal */
 export type CategoryLabel = string;

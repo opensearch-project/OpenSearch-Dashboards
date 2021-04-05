@@ -34,7 +34,9 @@ import {
   TickFormatterOptions,
 } from '../utils/specs';
 
+/** @internal */
 export const Y0_ACCESSOR_POSTFIX = ' - lower';
+/** @internal */
 export const Y1_ACCESSOR_POSTFIX = ' - upper';
 
 /** @internal */

@@ -21,8 +21,11 @@ type Group<T> = Record<string, T[]>;
 type GroupByKeyFn<T> = (data: T) => string;
 type GroupKeysOrKeyFn<T> = Array<keyof T> | GroupByKeyFn<T>;
 
+/** @internal */
 export function groupBy<T>(data: T[], keysOrKeyFn: GroupKeysOrKeyFn<T>, asArray: false): Group<T>;
+/** @internal */
 export function groupBy<T>(data: T[], keysOrKeyFn: GroupKeysOrKeyFn<T>, asArray: true): T[][];
+/** @internal */
 export function groupBy<T>(data: T[], keysOrKeyFn: GroupKeysOrKeyFn<T>, asArray: boolean): T[][] | Group<T> {
   const keyFn = Array.isArray(keysOrKeyFn) ? getUniqueKey(keysOrKeyFn) : keysOrKeyFn;
   const grouped = data.reduce<Group<T>>((acc, curr) => {
@@ -36,6 +39,7 @@ export function groupBy<T>(data: T[], keysOrKeyFn: GroupKeysOrKeyFn<T>, asArray:
   return asArray ? Object.values(grouped) : grouped;
 }
 
+/** @internal */
 export function getUniqueKey<T>(keys: Array<keyof T>, concat = '|') {
   return (data: T): string => {
     return keys

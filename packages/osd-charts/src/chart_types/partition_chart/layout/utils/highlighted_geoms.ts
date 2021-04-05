@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { $Values as Values } from 'utility-types';
 
 import { LegendPath } from '../../../../state/actions/legend';

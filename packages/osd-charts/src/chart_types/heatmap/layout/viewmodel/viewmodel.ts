@@ -41,6 +41,7 @@ import {
   ShapeViewModel,
 } from '../types/viewmodel_types';
 
+/** @public */
 export interface HeatmapCellDatum {
   x: string | number;
   y: string | number;
@@ -48,6 +49,7 @@ export interface HeatmapCellDatum {
   originalIndex: number;
 }
 
+/** @internal */
 export interface TextBox extends Box {
   value: string | number;
   x: number;

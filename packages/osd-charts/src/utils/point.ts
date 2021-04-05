@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export interface Point {
   x: number;
   y: number;

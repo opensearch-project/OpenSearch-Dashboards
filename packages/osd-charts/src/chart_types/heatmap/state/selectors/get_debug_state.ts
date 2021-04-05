@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import createCachedSelector from 're-reselect';
 
 import { RGBtoString } from '../../../../common/color_library_wrappers';

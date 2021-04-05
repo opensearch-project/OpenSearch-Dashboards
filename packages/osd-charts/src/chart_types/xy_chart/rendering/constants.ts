@@ -17,4 +17,5 @@
  * under the License.
  */
 
+/** @internal */
 export const DEFAULT_HIGHLIGHT_PADDING = 10;

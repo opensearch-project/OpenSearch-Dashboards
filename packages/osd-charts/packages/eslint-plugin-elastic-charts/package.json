@@ -1,0 +1,6 @@
+{
+  "name": "eslint-plugin-elastic-charts",
+  "description": "Custom elastic-charts lint plugin",
+  "version": "1.0.0",
+  "main": "index.js"
+}

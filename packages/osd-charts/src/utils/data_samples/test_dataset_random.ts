@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const SINGLE_SERIES_DATASET_50 = [
   {
     x: 0,
@@ -220,6 +221,7 @@ export const SINGLE_SERIES_DATASET_50 = [
   },
 ];
 
+/** @internal */
 export const SINGLE_SERIES_DATASET_50_2 = [
   {
     x: 0,
@@ -423,6 +425,7 @@ export const SINGLE_SERIES_DATASET_50_2 = [
   },
 ];
 
+/** @internal */
 export const GROUPED_DATASERIES_RANDOM_50 = [
   {
     x: 0,

@@ -32,6 +32,7 @@ export interface Value {
   formatted: string;
 }
 
+/** @public */
 export interface Cell {
   x: number;
   y: number;

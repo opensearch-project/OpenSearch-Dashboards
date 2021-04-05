@@ -22,7 +22,7 @@ import { FontFamily } from '../../../../common/text_utils';
 import { Color } from '../../../../utils/common';
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
-/** potential internal */
+/** @public */
 export interface Config {
   angleStart: number;
   angleEnd: number;

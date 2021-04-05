@@ -20,6 +20,7 @@
 import { Position } from '../../../utils/common';
 import { CompleteBoundedDomain, LowerBoundedDomain, UpperBoundedDomain, DomainRange } from './specs';
 
+/** @internal */
 export function isLowerBound(domain: Partial<CompleteBoundedDomain>): domain is LowerBoundedDomain {
   return domain.min != null;
 }

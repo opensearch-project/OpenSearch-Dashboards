@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { action } from '@storybook/addon-actions';
 import { extent } from 'd3-array';
 import React from 'react';

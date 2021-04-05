@@ -47,8 +47,10 @@ import {
 import { conjunctiveConstraint, INFINITY_RADIUS, makeRowCircline } from '../utils/circline_geometry';
 import { RectangleConstruction } from './viewmodel';
 
-/** @internal */
-// todo pick a better unique key for the slices (D3 doesn't keep track of an index)
+/**
+ * todo pick a better unique key for the slices (D3 doesn't keep track of an index)
+ * @internal
+ */
 export function nodeId(node: ShapeTreeNode): string {
   return `${node.x0}|${node.y0}`;
 }

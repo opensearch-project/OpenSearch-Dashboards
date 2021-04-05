@@ -21,7 +21,7 @@ import { Pixels, SizeRatio } from '../../../../common/geometry';
 import { FontFamily } from '../../../../common/text_utils';
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
-/** potential internal */
+/** @public */
 export interface Config {
   // shape geometry
   width: number;

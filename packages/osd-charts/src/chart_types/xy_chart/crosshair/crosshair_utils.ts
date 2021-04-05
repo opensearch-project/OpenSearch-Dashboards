@@ -27,6 +27,7 @@ import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';
 import { ChartDimensions } from '../utils/dimensions';
 
+/** @internal */
 export const DEFAULT_SNAP_POSITION_BAND = 1;
 
 /** @internal */

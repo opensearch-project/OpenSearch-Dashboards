@@ -37,11 +37,12 @@ function significantDigitCount(d: number): number {
   return Math.floor(Math.log(n) / LOG_10) + 1;
 }
 
+/** @internal */
 export function sumValueGetter(node: ShapeTreeNode): number {
   return node[AGGREGATE_KEY];
 }
 
-/**
+/*
  * It's an unfortunate accident that 'parent' is used both
  *   - for linking an ArrayNode to a QuadViewModel, and
  *   - for recursively linking the parent ArrayNode to an ArrayNode (child) in the tree
@@ -56,15 +57,19 @@ export function sumValueGetter(node: ShapeTreeNode): number {
 /** @public */
 export const MODEL_KEY = 'parent';
 
+/** @public */
 export function percentValueGetter(node: ShapeTreeNode): number {
   return (100 * node[AGGREGATE_KEY]) / node[MODEL_KEY][STATISTICS_KEY].globalAggregate;
 }
 
+/** @public */
 export function ratioValueGetter(node: ShapeTreeNode): number {
   return node[AGGREGATE_KEY] / node[MODEL_KEY][STATISTICS_KEY].globalAggregate;
 }
 
+/** @public */
 export const VALUE_GETTERS = Object.freeze({ percent: percentValueGetter, ratio: ratioValueGetter } as const);
+/** @public */
 export type ValueGetterName = keyof typeof VALUE_GETTERS;
 
 function defaultFormatter(d: number): string {
@@ -77,6 +82,7 @@ function defaultFormatter(d: number): string {
       });
 }
 
+/** @internal */
 export function percentFormatter(d: number): string {
   return `${Math.round(d)}%`;
 }
@@ -317,6 +323,7 @@ export const configMetadata: Record<string, ConfigItem> = {
   animation: { type: 'group', values: { duration: { dflt: 0, min: 0, max: 3000, type: 'number' } } },
 };
 
+/** @internal */
 export const config: Config = configMap<Config>((item: ConfigItem) => item.dflt, configMetadata);
 
 /**
@@ -328,5 +335,7 @@ export const config: Config = configMap<Config>((item: ConfigItem) => item.dflt,
  * https://mboehm7.github.io/teaching/ss19_dbs/04_RelationalAlgebra.pdf p21
  * It's now `count` and `sum` but subject to change
  *
- * potential internal, or removable */
+ * potential internal, or removable
+ * @internal
+ */
 export type AdditiveAggregation = 'count' | 'sum';

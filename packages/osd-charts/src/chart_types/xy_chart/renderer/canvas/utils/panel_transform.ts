@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Rect } from '../../../../../geoms/types';
 import { withContext } from '../../../../../renderers/canvas';
 import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { computeChartTransform } from '../../../state/utils/utils';
 
+/** @internal */
 export function withPanelTransform(
   context: CanvasRenderingContext2D,
   panel: Dimensions,

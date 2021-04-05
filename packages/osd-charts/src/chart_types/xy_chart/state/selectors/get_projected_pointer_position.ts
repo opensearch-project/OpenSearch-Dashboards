@@ -30,6 +30,7 @@ import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compu
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
+/** @internal */
 export type PointerPosition = Point & { horizontalPanelValue: PrimitiveValue; verticalPanelValue: PrimitiveValue };
 /**
  * Get the x and y pointer position relative to the chart projection area

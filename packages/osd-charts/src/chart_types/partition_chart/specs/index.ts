@@ -40,6 +40,7 @@ import { AGGREGATE_KEY, PrimitiveValue } from '../layout/utils/group_by_rollup';
 
 interface ExtendedFillLabelConfig extends FillLabelConfig, FillFontSizeRange {}
 
+/** @public */
 export interface Layer {
   groupByRollup: IndexedAccessorFn;
   nodeLabel?: LabelAccessor;
@@ -68,6 +69,7 @@ const defaultProps = {
   ],
 };
 
+/** @public */
 export interface PartitionSpec extends Spec {
   specType: typeof SpecType.Series;
   chartType: typeof ChartType.Partition;
@@ -85,6 +87,7 @@ export interface PartitionSpec extends Spec {
 type SpecRequiredProps = Pick<PartitionSpec, 'id' | 'data'>;
 type SpecOptionalProps = Partial<Omit<PartitionSpec, 'chartType' | 'specType' | 'id' | 'data'>>;
 
+/** @public */
 export const Partition: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     PartitionSpec,

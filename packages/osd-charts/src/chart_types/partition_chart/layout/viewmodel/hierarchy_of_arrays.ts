@@ -38,7 +38,9 @@ import {
 } from '../utils/group_by_rollup';
 import { isSunburst, isTreemap } from './viewmodel';
 
-/* @internal */
+/**
+ * @internal
+ */
 export function getHierarchyOfArrays(
   rawFacts: Relation,
   valueAccessor: ValueAccessor,

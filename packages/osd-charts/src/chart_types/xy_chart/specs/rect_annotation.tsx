@@ -34,6 +34,7 @@ const defaultProps = {
   style: DEFAULT_ANNOTATION_RECT_STYLE,
 };
 
+/** @public */
 export const RectAnnotation: React.FunctionComponent<
   Pick<RectAnnotationSpec, 'id' | 'dataValues'> &
     Partial<

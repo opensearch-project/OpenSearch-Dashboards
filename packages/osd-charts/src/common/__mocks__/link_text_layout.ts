@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const module = jest.requireActual('../../link_text_layout.ts');
 
 export const linkTextLayout = jest.fn(module.linkTextLayout);

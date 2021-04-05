@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const BARCHART_1Y0G = [
   { x: 0, y: 1 },
   { x: 1, y: 2 },
@@ -24,12 +25,14 @@ export const BARCHART_1Y0G = [
   { x: 3, y: 6 },
 ];
 
+/** @internal */
 export const BARCHART_1Y0G_LINEAR = [
   { x: 0, y: 1 },
   { x: 1, y: 2 },
   { x: 2.5, y: 10 },
   { x: 3.5, y: 6 },
 ];
+/** @internal */
 export const BARCHART_1Y1G = [
   { x: 0, g: 'a', y: 1 },
   { x: 0, g: 'b', y: 2 },
@@ -40,6 +43,7 @@ export const BARCHART_1Y1G = [
   { x: 3, g: 'a', y: 4 },
   { x: 3, g: 'b', y: 5 },
 ];
+/** @internal */
 export const BARCHART_1Y1G_ORDINAL = [
   { x: 'a', g: 'a', y: 1 },
   { x: 'a', g: 'b', y: 2 },
@@ -51,6 +55,7 @@ export const BARCHART_1Y1G_ORDINAL = [
   { x: 'e', g: 'b', y: 5 },
 ];
 
+/** @internal */
 export const BARCHART_1Y1G_LINEAR = [
   { x: 0, g: 'a', y: 1 },
   { x: 0, g: 'b', y: 1 },
@@ -63,6 +68,7 @@ export const BARCHART_1Y1G_LINEAR = [
   { x: 7, g: 'b', y: 3 },
 ];
 
+/** @internal */
 export const BARCHART_1Y2G = [
   { x: 0, g1: 'a', g2: 's', y: 1 },
   { x: 0, g1: 'a', g2: 'p', y: 1 },
@@ -82,6 +88,7 @@ export const BARCHART_1Y2G = [
   { x: 3, g1: 'b', g2: 'p', y: 6 },
 ];
 
+/** @internal */
 export const BARCHART_2Y0G = [
   { x: 0, y1: 1, y2: 3 },
   { x: 1, y1: 2, y2: 7 },
@@ -89,6 +96,7 @@ export const BARCHART_2Y0G = [
   { x: 3, y1: 6, y2: 10 },
 ];
 
+/** @internal */
 export const CHART_ORDINAL_2Y0G = [
   { x: 'a', y1: 1, y2: 3 },
   { x: 'b', y1: 2, y2: 7 },
@@ -96,6 +104,7 @@ export const CHART_ORDINAL_2Y0G = [
   { x: 'd', y1: 6, y2: 10 },
 ];
 
+/** @internal */
 export const BARCHART_2Y1G = [
   { x: 0, g: 'a', y1: 1, y2: 4 },
   { x: 0, g: 'b', y1: 3, y2: 6 },
@@ -107,6 +116,7 @@ export const BARCHART_2Y1G = [
   { x: 3, g: 'b', y1: 6, y2: 4 },
 ];
 
+/** @internal */
 export const BARCHART_2Y2G = [
   { x: 0, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 1, y2: 4 },
   { x: 0, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 1, y2: 4 },
@@ -130,6 +140,7 @@ export const BARCHART_2Y2G = [
   { x: 6, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 6, y2: 4 },
 ];
 
+/** @internal */
 export const BARCHART_2Y3G = [
   { x: 0, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 1, y2: 4, g3: 'somevalue' },
   { x: 0, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 1, y2: 4, g3: 'newvalue' },
@@ -155,6 +166,7 @@ export const BARCHART_2Y3G = [
 
 const NOW = Date.now();
 const DAY = 24 * 60 * 60 * 1000;
+/** @internal */
 export const TIME_CHART_2Y0G = [
   { x: NOW, y1: 1, y2: 3 },
   { x: NOW + DAY, y1: 2, y2: 7 },

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { max as d3Max } from 'd3-array';
 import createCachedSelector from 're-reselect';
 

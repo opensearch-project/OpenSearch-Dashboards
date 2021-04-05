@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const TSVB_DATASET = {
   id: '61ca57f0-469d-11e7-af02-69e470af7417',
   series: [

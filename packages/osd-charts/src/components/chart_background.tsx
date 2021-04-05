@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
 import { connect } from 'react-redux';
 
@@ -27,6 +28,7 @@ interface ChartBackgroundProps {
   backgroundColor: string;
 }
 
+/** @internal */
 export class ChartBackgroundComponent extends React.Component<ChartBackgroundProps> {
   static displayName = 'ChartBackground';
 

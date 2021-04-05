@@ -20,14 +20,17 @@
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { ScaleType } from './constants';
 
+/** @public */
 export type ScaleContinuousType =
   | typeof ScaleType.Linear
   | typeof ScaleType.Time
   | typeof ScaleType.Log
   | typeof ScaleType.Sqrt;
 
+/** @public */
 export type ScaleOrdinalType = typeof ScaleType.Ordinal;
 
+/** @public */
 export type ScaleBandType = ScaleOrdinalType;
 
 /**
@@ -73,7 +76,6 @@ export interface Scale {
 
 /** @internal */
 export { ScaleBand } from './scale_band';
-
 /** @internal */
 export { ScaleContinuous } from './scale_continuous';
 

@@ -41,6 +41,7 @@ const defaultProps = {
 type SpecRequiredProps = Pick<LineSeriesSpec, 'id' | 'data'>;
 type SpecOptionalProps = Partial<Omit<LineSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
 
+/** @public */
 export const LineSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     LineSeriesSpec,

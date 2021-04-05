@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const module = jest.requireActual('../../viewmodel/fill_text_layout.ts');
 
 export const getTextColorIfTextInvertible = jest.fn(module.getTextColorIfTextInvertible);

@@ -17,16 +17,19 @@
  * under the License.
  */
 
+/** @internal */
 export interface BBox {
   width: number;
   height: number;
 }
 
+/** @internal */
 export const DEFAULT_EMPTY_BBOX = {
   width: 0,
   height: 0,
 };
 
+/** @internal */
 export interface BBoxCalculator {
   compute(text: string, padding: number, fontSize?: number, fontFamily?: string): BBox;
   destroy(): void;

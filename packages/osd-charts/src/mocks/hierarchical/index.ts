@@ -23,6 +23,7 @@ import { observabilityTreeMock } from './observability_tree';
 import { pieMock } from './pie';
 import { sunburstMock } from './sunburst';
 
+/** @internal */
 export const mocks = {
   pie: pieMock,
   sunburst: sunburstMock,

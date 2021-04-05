@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const manyPieMock = [
   { origin: 'chn', exportVal: 1680027842644 },
   { origin: 'usa', exportVal: 1102566931395 },

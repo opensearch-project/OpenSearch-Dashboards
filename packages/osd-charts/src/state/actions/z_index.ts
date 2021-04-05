@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/** @internal */
 export const Z_INDEX_EVENT = 'Z_INDEX_EVENT';
 
 interface ZIndexEvent {

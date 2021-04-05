@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const fs = require('fs');
 
 const sassGraph = require('sass-graph');

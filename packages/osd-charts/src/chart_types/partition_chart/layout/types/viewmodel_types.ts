@@ -189,8 +189,10 @@ export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointO
   outerRadius: 0,
 });
 
+/** @public */
 export type TreeLevel = number;
 
+/** @public */
 export interface AngleFromTo {
   x0: Radian;
   x1: Radian;
@@ -202,7 +204,9 @@ export interface LayerFromTo {
   y1: TreeLevel;
 }
 
-/** potential internal */
+/**
+ * @public
+ */
 export interface TreeNode extends AngleFromTo {
   x0: Radian;
   x1: Radian;
@@ -211,14 +215,18 @@ export interface TreeNode extends AngleFromTo {
   fill?: Color;
 }
 
-/** potential internal */
+/**
+ * @public
+ */
 export interface SectorGeomSpecY {
   y0px: Distance;
   y1px: Distance;
 }
 
+/** @public */
 export type DataName = CategoryKey; // todo consider narrowing it to eg. primitives
 
+/** @public */
 export interface ShapeTreeNode extends TreeNode, SectorGeomSpecY {
   yMidPx: Distance;
   depth: number;
@@ -229,7 +237,11 @@ export interface ShapeTreeNode extends TreeNode, SectorGeomSpecY {
   [MODEL_KEY]: ArrayNode;
 }
 
+/** @public */
 export type RawTextGetter = (node: ShapeTreeNode) => string;
+/** @public */
 export type ValueGetterFunction = (node: ShapeTreeNode) => number;
+/** @public */
 export type ValueGetter = ValueGetterFunction | ValueGetterName;
+/** @public */
 export type NodeColorAccessor = (d: ShapeTreeNode, index: number, array: HierarchyOfArrays) => string;

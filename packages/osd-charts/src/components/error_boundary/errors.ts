@@ -19,6 +19,7 @@
 
 import { $Values } from 'utility-types';
 
+/** @public */
 export const ErrorType = Object.freeze({
   Graceful: 'graceful' as const,
 });
@@ -27,11 +28,13 @@ export type ErrorType = $Values<typeof ErrorType>;
 
 /**
  * Error to used to gracefully render empty chart
+ * @internal
  */
 export class GracefulError extends Error {
   type = ErrorType.Graceful;
 }
 
+/** @internal */
 export function isGracefulError(error: Error): error is GracefulError {
   return (error as GracefulError)?.type === ErrorType.Graceful;
 }

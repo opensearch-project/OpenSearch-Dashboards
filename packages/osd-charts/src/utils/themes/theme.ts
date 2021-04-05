@@ -22,10 +22,12 @@ import { $Values } from 'utility-types';
 import { Color, ColorVariant, HorizontalAlignment, RecursivePartial, VerticalAlignment } from '../common';
 import { Margins, SimplePadding } from '../dimensions';
 
+/** @public */
 export interface Visible {
   visible: boolean;
 }
 
+/** @public */
 export interface TextStyle {
   fontSize: number;
   fontFamily: string;
@@ -65,7 +67,10 @@ export interface TextAlignment {
   vertical: VerticalAlignment;
 }
 
-/** Shared style properties for varies geometries */
+/**
+ * Shared style properties for varies geometries
+ * @public
+ */
 export interface GeometryStyle {
   /**
    * Opacity multiplier
@@ -75,7 +80,10 @@ export interface GeometryStyle {
   opacity: number;
 }
 
-/** Shared style properties for varies geometries */
+/**
+ * Shared style properties for varies geometries
+ * @public
+ */
 export interface GeometryStateStyle {
   /**
    * Opacity multiplier
@@ -85,6 +93,7 @@ export interface GeometryStateStyle {
   opacity: number;
 }
 
+/** @public */
 export interface SharedGeometryStateStyle {
   default: GeometryStateStyle;
   highlighted: GeometryStateStyle;
@@ -123,15 +132,18 @@ export interface StrokeDashArray {
   /** The dash array for dashed strokes */
   dash: number[];
 }
+/** @public */
 export interface FillStyle {
   /** The fill color in hex, rgba, hsl */
   fill: Color;
 }
+/** @public */
 export interface Opacity {
   /** The opacity value from 0 to 1 */
   opacity: number;
 }
 
+/** @public */
 export interface AxisStyle {
   axisTitle: TextStyle & Visible;
   axisPanelTitle: TextStyle & Visible;
@@ -165,6 +177,7 @@ export interface GridLineStyle {
   opacity: number;
   dash: number[];
 }
+/** @public */
 export interface ScalesConfig {
   /**
    * The proportion of the range that is reserved for blank space between bands.
@@ -179,6 +192,7 @@ export interface ScalesConfig {
    */
   histogramPadding: number;
 }
+/** @public */
 export interface ColorConfig {
   vizColors: Color[];
   defaultVizColor: Color;
@@ -194,6 +208,7 @@ export interface BackgroundStyle {
    */
   color: string;
 }
+/** @public */
 export interface LegendStyle {
   /**
    * Max width used for left/right legend
@@ -220,6 +235,7 @@ export interface LegendStyle {
    */
   margin: number;
 }
+/** @public */
 export interface Theme {
   /**
    * Space btw parent DOM element and first available element of the chart (axis if exists, else the chart itself)
@@ -308,6 +324,7 @@ export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
   };
 };
 
+/** @public */
 export const PointShape = Object.freeze({
   Circle: 'circle' as const,
   Square: 'square' as const,
@@ -319,6 +336,7 @@ export const PointShape = Object.freeze({
 /** @public */
 export type PointShape = $Values<typeof PointShape>;
 
+/** @public */
 export interface PointStyle {
   /** is the point visible or hidden */
   visible: boolean;
@@ -336,6 +354,7 @@ export interface PointStyle {
   shape?: PointShape;
 }
 
+/** @public */
 export interface LineStyle {
   /** is the line visible or hidden ? */
   visible: boolean;
@@ -349,6 +368,7 @@ export interface LineStyle {
   dash?: number[];
 }
 
+/** @public */
 export interface AreaStyle {
   /** is the area is visible or hidden ? */
   visible: boolean;
@@ -358,6 +378,7 @@ export interface AreaStyle {
   opacity: number;
 }
 
+/** @public */
 export interface ArcStyle {
   /** is the arc is visible or hidden ? */
   visible: boolean;
@@ -371,6 +392,7 @@ export interface ArcStyle {
   opacity: number;
 }
 
+/** @public */
 export interface RectStyle {
   /** a static fill color if defined, if not it will use the color of the series */
   fill?: Color | ColorVariant;
@@ -378,6 +400,7 @@ export interface RectStyle {
   opacity: number;
 }
 
+/** @public */
 export interface RectBorderStyle {
   /**
    * Border visibility
@@ -396,31 +419,37 @@ export interface RectBorderStyle {
    */
   strokeOpacity?: number;
 }
+/** @public */
 export interface BarSeriesStyle {
   rect: RectStyle;
   rectBorder: RectBorderStyle;
   displayValue: DisplayValueStyle;
 }
 
+/** @public */
 export interface BubbleSeriesStyle {
   point: PointStyle;
 }
 
+/** @public */
 export interface LineSeriesStyle {
   line: LineStyle;
   point: PointStyle;
 }
 
+/** @public */
 export interface AreaSeriesStyle {
   area: AreaStyle;
   line: LineStyle;
   point: PointStyle;
 }
 
+/** @public */
 export interface ArcSeriesStyle {
   arc: ArcStyle;
 }
 
+/** @public */
 export interface CrosshairStyle {
   band: FillStyle & Visible;
   line: StrokeStyle & Visible & Partial<StrokeDashArray>;

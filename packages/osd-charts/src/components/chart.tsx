@@ -69,6 +69,7 @@ const getMiddlware = (id: string): StoreEnhancer => {
   return applyMiddleware(...middlware);
 };
 
+/** @public */
 export class Chart extends React.Component<ChartProps, ChartState> {
   static defaultProps: ChartProps = {
     renderer: 'canvas',

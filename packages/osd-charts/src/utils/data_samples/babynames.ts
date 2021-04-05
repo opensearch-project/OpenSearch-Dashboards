@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// data taken from https://www.data-to-viz.com/graph/streamgraph.html
+
+/**
+ * data taken from https://www.data-to-viz.com/graph/streamgraph.html
+ * @internal
+ */
 export const BABYNAME_DATA = [
   [1880, 'F', 'Helen', 636, 0.00651612638826278],
   [1880, 'F', 'Amanda', 241, 0.00246916109995492],

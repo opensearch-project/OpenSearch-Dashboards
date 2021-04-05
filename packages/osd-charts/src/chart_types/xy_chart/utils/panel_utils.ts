@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Point } from '../../../utils/point';
 import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 

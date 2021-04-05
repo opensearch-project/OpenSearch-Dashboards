@@ -25,18 +25,24 @@
 
 import { RIGHT_ANGLE, TAU } from './constants';
 
+/** @public */
+export type Pixels = number;
 /**
  * A finite number that expresses a ratio
  * @public
  */
 export type Ratio = number;
-
-export type Pixels = number;
+/** @public */
 export type SizeRatio = Ratio;
-type Cartesian = number;
+/** @public */
+export type Cartesian = number;
+/** @internal */
 export type Coordinate = Cartesian;
+/** @public */
 export type Radius = Cartesian;
+/** @public */
 export type Radian = Cartesian; // we measure angle in radians, and there's unity between radians and cartesian distances which is the whole point of radians; this is also relevant as we use small-angle approximations
+/** @public */
 export type Distance = Cartesian;
 
 /** @internal */
@@ -77,7 +83,7 @@ type CirclinePredicateSet = CirclinePredicate[];
 /** @internal */
 export type RingSectorConstruction = CirclinePredicateSet;
 
-/** potential internal */
+/** @public */
 export type TimeMs = number;
 
 /** @internal */

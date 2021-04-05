@@ -25,6 +25,7 @@ interface NoResultsProps {
   renderFn?: SettingsSpecProps['noResults'];
 }
 
+/** @internal */
 export const NoResults: FC<NoResultsProps> = ({ renderFn }) => (
   <Suspense fallback={() => null}>
     <div className="echReactiveChart_noResults">{renderFn ?? <p>No data to display</p>}</div>

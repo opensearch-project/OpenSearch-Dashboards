@@ -29,6 +29,7 @@ import { MockSeriesIdentifier } from './series/series_identifiers';
 const DEFAULT_MOCK_POINT_COLOR = 'red';
 const { barSeriesStyle, lineSeriesStyle, areaSeriesStyle, bubbleSeriesStyle } = LIGHT_THEME;
 
+/** @internal */
 export class MockPointGeometry {
   private static readonly base: PointGeometry = {
     x: 0,
@@ -94,6 +95,7 @@ export class MockPointGeometry {
   }
 }
 
+/** @internal */
 export class MockBarGeometry {
   private static readonly base: BarGeometry = {
     x: 0,
@@ -137,6 +139,7 @@ export class MockBarGeometry {
   }
 }
 
+/** @internal */
 export class MockLineGeometry {
   private static readonly base: LineGeometry = {
     line: '',
@@ -157,6 +160,7 @@ export class MockLineGeometry {
   }
 }
 
+/** @internal */
 export class MockAreaGeometry {
   private static readonly base: AreaGeometry = {
     area: '',
@@ -180,6 +184,7 @@ export class MockAreaGeometry {
   }
 }
 
+/** @internal */
 export class MockBubbleGeometry {
   private static readonly base: BubbleGeometry = {
     points: [],

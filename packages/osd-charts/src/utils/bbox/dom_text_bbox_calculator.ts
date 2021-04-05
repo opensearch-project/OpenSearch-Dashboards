@@ -19,6 +19,7 @@
 
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
+/** @internal */
 export class DOMTextBBoxCalculator implements BBoxCalculator {
   private attachedRoot: HTMLElement;
 

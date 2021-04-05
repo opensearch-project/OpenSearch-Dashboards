@@ -46,6 +46,7 @@ import {
  * under the License.
  */
 
+/** @internal */
 export class MockStyles {
   static rect(partial: RecursivePartial<RectStyle> = {}): RectStyle {
     return mergePartial(

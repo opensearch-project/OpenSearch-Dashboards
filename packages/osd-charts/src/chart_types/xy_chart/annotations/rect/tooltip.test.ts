@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationType } from '../../utils/specs';

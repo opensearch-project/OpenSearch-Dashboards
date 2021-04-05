@@ -20,12 +20,15 @@
 import { RgbObject } from '../common/color_library_wrappers';
 import { Radian } from '../common/geometry';
 
-/** potential internal */
+/**
+ * @internal
+ */
 export interface Text {
   text: string;
   x: number;
   y: number;
 }
+/** @internal */
 export interface Line {
   x1: number;
   y1: number;
@@ -33,6 +36,7 @@ export interface Line {
   y2: number;
 }
 
+/** @internal */
 export interface Rect {
   x: number;
   y: number;
@@ -40,6 +44,7 @@ export interface Rect {
   height: number;
 }
 
+/** @internal */
 export interface Arc {
   x: number;
   y: number;
@@ -48,6 +53,7 @@ export interface Arc {
   endAngle: Radian;
 }
 
+/** @internal */
 export interface Circle {
   x: number;
   y: number;
@@ -56,6 +62,7 @@ export interface Circle {
 
 /**
  * Fill style for every geometry
+ * @public
  */
 export interface Fill {
   /**
@@ -66,6 +73,7 @@ export interface Fill {
 
 /**
  * Stroke style for every geometry
+ * @public
  */
 export interface Stroke {
   /**

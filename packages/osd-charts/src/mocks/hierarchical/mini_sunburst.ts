@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const miniSunburstMock = [
   { sitc1: '7', dest: 'usa', exportVal: 553359100104 },
   { sitc1: '7', dest: 'chn', exportVal: 392617281424 },

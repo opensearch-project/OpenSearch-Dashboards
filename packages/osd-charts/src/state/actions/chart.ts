@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/** @internal */
 export const CHART_RENDERED = 'CHART_RENDERED';
 
 interface ChartRenderedAction {

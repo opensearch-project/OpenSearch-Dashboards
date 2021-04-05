@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export interface Dimensions {
   top: number;
   left: number;
@@ -24,12 +25,16 @@ export interface Dimensions {
   height: number;
 }
 
+/** @internal */
 export interface Size {
   width: number;
   height: number;
 }
 
-// fixme consider switching from `number` to `Pixels` or similar, once nominal typing is added
+/**
+ * fixme consider switching from `number` to `Pixels` or similar, once nominal typing is added
+ * @public
+ */
 export interface PerSideDistance {
   top: number;
   bottom: number;
@@ -37,12 +42,14 @@ export interface PerSideDistance {
   right: number;
 }
 
-/*
+/**
  * fixme consider deactivating @typescript-eslint/no-empty-interface
  * see https://github.com/elastic/elastic-charts/pull/660#discussion_r419474171
+ * @public
  */
 export type Margins = PerSideDistance;
 
+/** @public */
 export type Padding = PerSideDistance;
 
 /**
@@ -59,6 +66,7 @@ export interface SimplePadding {
  *
  * @param padding
  * @param minPadding should be at least one to avoid browser measureText inconsistencies
+ * @internal
  */
 export function getSimplePadding(padding: number | Partial<SimplePadding>, minPadding = 0): SimplePadding {
   if (typeof padding === 'number') {

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @internal */
 export const productDimension = [
   { sitc1: '0', name: 'Food and live animals' },
   { sitc1: '1', name: 'Beverages and tobacco' },
@@ -30,6 +31,7 @@ export const productDimension = [
   { sitc1: '9', name: 'Commodities and transactions not classified elsewhere' },
 ];
 
+/** @internal */
 export const regionDimension = [
   { region: 'af', regionName: 'Africa' },
   { region: 'as', regionName: 'Asia' },
@@ -39,6 +41,7 @@ export const regionDimension = [
   { region: 'oc', regionName: 'Oceania' },
 ];
 
+/** @internal */
 export const countryDimension = [
   { continentCountry: 'afago', country: 'ago', name: 'Angola' },
   { continentCountry: 'afbdi', country: 'bdi', name: 'Burundi' },

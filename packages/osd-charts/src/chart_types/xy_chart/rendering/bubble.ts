@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Scale } from '../../../scales';
 import { Color } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';

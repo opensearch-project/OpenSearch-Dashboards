@@ -50,6 +50,7 @@ import { LegendItemLabel } from './selectors/get_legend_items_labels';
 import { DebugState } from './types';
 import { getInitialPointerState } from './utils';
 
+/** @internal */
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
 /**

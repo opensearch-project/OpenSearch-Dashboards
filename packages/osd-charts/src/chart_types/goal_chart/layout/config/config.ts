@@ -53,4 +53,5 @@ export const configMetadata: Record<string, ConfigItem> = {
   sectorLineWidth: { dflt: 1, min: 0, max: 4, type: 'number' },
 };
 
+/** @internal */
 export const config: Config = configMap<Config>((item: ConfigItem) => item.dflt, configMetadata);

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { withContext } from '../../../../../renderers/canvas';
 import { Point } from '../../../../../utils/point';

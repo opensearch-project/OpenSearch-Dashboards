@@ -45,6 +45,7 @@ type SpecOptionalProps = Partial<
   >
 >;
 
+/** @public */
 export const LineAnnotation: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<LineAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
 );

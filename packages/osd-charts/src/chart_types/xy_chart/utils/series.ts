@@ -67,6 +67,7 @@ export interface DataSeriesDatum<T = any> {
   filled?: FilledValues;
 }
 
+/** @public */
 export interface XYChartSeriesIdentifier extends SeriesIdentifier {
   yAccessor: Accessor;
   splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional

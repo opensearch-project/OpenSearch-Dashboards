@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { mergePartial } from '../common';
 import { LIGHT_THEME } from './light_theme';
 import { LineAnnotationStyle, PartialTheme, RectAnnotationStyle, Theme } from './theme';
 
+/** @public */
 export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {
   line: {
     stroke: '#777',
@@ -34,6 +36,7 @@ export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {
     padding: 0,
   },
 };
+/** @public */
 export const DEFAULT_ANNOTATION_RECT_STYLE: RectAnnotationStyle = {
   stroke: '#FFEEBC',
   strokeWidth: 0,
@@ -41,6 +44,7 @@ export const DEFAULT_ANNOTATION_RECT_STYLE: RectAnnotationStyle = {
   fill: '#FFEEBC',
 };
 
+/** @public */
 export function mergeWithDefaultAnnotationLine(config?: Partial<LineAnnotationStyle>): LineAnnotationStyle {
   const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
   const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
@@ -67,6 +71,7 @@ export function mergeWithDefaultAnnotationLine(config?: Partial<LineAnnotationSt
   return mergedConfig;
 }
 
+/** @public */
 export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationStyle>): RectAnnotationStyle {
   if (!config) {
     return DEFAULT_ANNOTATION_RECT_STYLE;
@@ -86,6 +91,8 @@ export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationSt
  * @param theme - primary partial theme
  * @param defaultTheme - base theme
  * @param axillaryThemes - additional themes to be merged
+ *
+ * @public
  */
 export function mergeWithDefaultTheme(
   theme: PartialTheme,

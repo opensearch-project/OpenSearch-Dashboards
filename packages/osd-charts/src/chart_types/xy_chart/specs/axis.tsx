@@ -38,6 +38,7 @@ const defaultProps = {
 type SpecRequired = Pick<AxisSpec, 'id'>;
 type SpecOptionals = Partial<Omit<AxisSpec, 'chartType' | 'specType' | 'seriesType' | 'id'>>;
 
+/** @public */
 export const Axis: React.FunctionComponent<SpecRequired & SpecOptionals> = getConnect()(
   specComponentFactory<AxisSpec, 'groupId' | 'hide' | 'showOverlappingTicks' | 'showOverlappingLabels' | 'position'>(
     defaultProps,

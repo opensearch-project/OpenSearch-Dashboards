@@ -19,6 +19,7 @@
 
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
+/** @internal */
 export class SvgTextBBoxCalculator implements BBoxCalculator {
   svgElem: SVGSVGElement;
 

@@ -19,6 +19,7 @@
 
 import { Config } from '../types/config_types';
 
+/** @internal */
 export const config: Config = {
   width: 500,
   height: 500,

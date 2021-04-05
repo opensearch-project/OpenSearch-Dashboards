@@ -46,6 +46,7 @@ const defaultProps = {
   config,
 };
 
+/** @public */
 export type HeatmapScaleType =
   | typeof ScaleType.Linear
   | typeof ScaleType.Quantile

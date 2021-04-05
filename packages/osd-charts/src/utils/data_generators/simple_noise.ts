@@ -19,6 +19,7 @@
 
 import { RandomNumberGenerator } from './data_generator';
 
+/** @internal */
 export class Simple1DNoise {
   private maxVertices: number;
 

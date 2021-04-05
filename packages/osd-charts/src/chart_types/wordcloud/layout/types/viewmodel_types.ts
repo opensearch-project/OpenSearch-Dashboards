@@ -31,6 +31,7 @@ export interface WordModel {
   color: Color;
 }
 
+/** @public */
 export const WeightFn = Object.freeze({
   log: 'log' as const,
   linear: 'linear' as const,
@@ -83,6 +84,7 @@ export interface Configs {
   width: number;
 }
 
+/** @public */
 export type OutOfRoomCallback = (wordCount: number, renderedWordCount: number, renderedWords: string[]) => void;
 
 /** @internal */
