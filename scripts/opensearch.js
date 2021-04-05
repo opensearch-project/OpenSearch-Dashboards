@@ -25,7 +25,7 @@ var osdOpenSearch = require('@osd/opensearch');
 
 osdOpenSearch
   .run({
-    license: 'basic',
+    license: 'oss',
     password: 'changeme',
     version: pkg.version,
     'source-path': resolve(__dirname, '../../opensearch'),

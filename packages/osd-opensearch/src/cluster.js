@@ -291,9 +291,9 @@ exports.Cluster = class Cluster {
     this._process = execa(OPENSEARCH_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath
-          ? { OPENSEARCH_TMPDIR: path.resolve(installPath, 'OPENSEARCH_TMPDIR') }
-          : {}),
+        //...(installPath
+        //? { OPENSEARCH_TMPDIR: path.resolve(installPath, 'OPENSEARCH_TMPDIR') }
+        //: {}),
         ...process.env,
         ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
         ...(options.opensearchEnvVars || {}),

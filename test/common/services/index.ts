@@ -19,9 +19,9 @@
 
 import { DeploymentProvider } from './deployment';
 import { LegacyOpenSearchProvider } from './legacy_opensearch';
-import { OpenSearchearchProvider } from './opensearch';
+import { OpenSearchProvider } from './opensearch';
 import { OpenSearchArchiverProvider } from './opensearch_archiver';
-import { OpenSearchDashboardsServerProvider } from './opensearch_dasboards_server';
+import { OpenSearchDashboardsServerProvider } from './opensearch_dashboards_server';
 import { RetryProvider } from './retry';
 import { RandomnessProvider } from './randomness';
 import { SecurityServiceProvider } from './security';
@@ -29,7 +29,7 @@ import { SecurityServiceProvider } from './security';
 export const services = {
   deployment: DeploymentProvider,
   legacyOpenSearch: LegacyOpenSearchProvider,
-  opensearch: OpenSearchearchProvider,
+  opensearch: OpenSearchProvider,
   opensearchArchiver: OpenSearchArchiverProvider,
   opensearchDashboardsServer: OpenSearchDashboardsServerProvider,
   retry: RetryProvider,
