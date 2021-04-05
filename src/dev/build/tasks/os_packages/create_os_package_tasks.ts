@@ -46,7 +46,7 @@ export const CreateDockerPackage: Task = {
   description: 'Creating docker package',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
+    // Builds Docker targets
     await runDockerGenerator(config, log, build);
   },
 };

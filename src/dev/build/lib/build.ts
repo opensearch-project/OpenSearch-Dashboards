@@ -23,16 +23,9 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
-  private name = this.oss ? 'opensearch-dashboards-oss' : 'opensearch-dashboards';
-  private logTag = this.oss
-    ? chalk`{magenta [opensearch-dashboards-oss]}`
-    : chalk`{cyan [  opensearch-dashboards  ]}`;
+  private name = 'opensearch-dashboards';
 
-  constructor(private config: Config, private oss: boolean) {}
-
-  isOss() {
-    return !!this.oss;
-  }
+  constructor(private config: Config) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -41,7 +34,6 @@ export class Build {
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
     return this.config.resolveFromRepo(
       'build',
-      this.oss ? 'oss' : 'default',
       `opensearch-dashboards-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
@@ -60,6 +52,6 @@ export class Build {
   }
 
   getLogTag() {
-    return this.logTag;
+    return chalk`{cyan [  opensearch-dashboards  ]}`;
   }
 }

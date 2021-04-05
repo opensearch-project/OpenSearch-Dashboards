@@ -54,45 +54,29 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const ossBuild = new Build(config, true);
-const defaultBuild = new Build(config, false);
-
-describe('#isOss()', () => {
-  it('returns true for oss', () => {
-    expect(ossBuild.isOss()).toBe(true);
-  });
-
-  it('returns false for default build', () => {
-    expect(defaultBuild.isOss()).toBe(false);
-  });
-});
+const build = new Build(config);
 
 describe('#getName()', () => {
-  it('returns opensearch-dashboards for default build', () => {
-    expect(defaultBuild.getName()).toBe('opensearch-dashboards');
-  });
-
-  it('returns opensearch-dashboards-oss for oss', () => {
-    expect(ossBuild.getName()).toBe('opensearch-dashboards-oss');
+  it('returns opensearch-dashboards for  build', () => {
+    expect(build.getName()).toBe('opensearch-dashboards');
   });
 });
 
 describe('#getLogTag()', () => {
   it('returns string with build name in it', () => {
-    expect(defaultBuild.getLogTag()).toContain(defaultBuild.getName());
-    expect(ossBuild.getLogTag()).toContain(ossBuild.getName());
+    expect(build.getLogTag()).toContain(build.getName());
   });
 });
 
 describe('#resolvePath()', () => {
   it('uses passed config to resolve a path relative to the repo', () => {
-    expect(ossBuild.resolvePath('bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/opensearch-dashboards-oss/bar`
+    expect(build.resolvePath('bar')).toMatchInlineSnapshot(
+      `<absolute path>/build/opensearch-dashboards/bar`
     );
   });
 
   it('passes all arguments to config.resolveFromRepo()', () => {
-    expect(defaultBuild.resolvePath('bar', 'baz', 'box')).toMatchInlineSnapshot(
+    expect(build.resolvePath('bar', 'baz', 'box')).toMatchInlineSnapshot(
       `<absolute path>/build/opensearch-dashboards/bar/baz/box`
     );
   });
@@ -100,22 +84,22 @@ describe('#resolvePath()', () => {
 
 describe('#resolvePathForPlatform()', () => {
   it('uses config.resolveFromRepo(), config.getBuildVersion(), and platform.getBuildName() to create path', () => {
-    expect(ossBuild.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/oss/opensearch-dashboards-8.0.0-linux-x86_64/foo/bar`
+    expect(build.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
+      `<absolute path>/build/opensearch-dashboards-8.0.0-linux-x86_64/foo/bar`
     );
   });
 });
 
 describe('#getPlatformArchivePath()', () => {
   it('creates correct path for different platforms', () => {
-    expect(ossBuild.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-linux-x86_64.tar.gz`
+    expect(build.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/opensearch-dashboards-8.0.0-linux-x86_64.tar.gz`
     );
-    expect(ossBuild.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-linux-aarch64.tar.gz`
+    expect(build.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/opensearch-dashboards-8.0.0-linux-aarch64.tar.gz`
     );
-    expect(ossBuild.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-oss-8.0.0-windows-x86_64.zip`
+    expect(build.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
+      `<absolute path>/target/opensearch-dashboards-8.0.0-windows-x86_64.zip`
     );
   });
 });

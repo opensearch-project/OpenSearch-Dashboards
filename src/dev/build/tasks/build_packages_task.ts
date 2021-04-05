@@ -74,7 +74,7 @@ export const BuildPackages: Task = {
     await buildProductionProjects({
       opensearchDashboardsRoot: config.resolveFromRepo(),
       buildRoot: build.resolvePath(),
-      onlyOSS: build.isOss(),
+      onlyOSS: true,
     });
   },
 };

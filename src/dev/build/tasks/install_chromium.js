@@ -20,10 +20,7 @@
 export const InstallChromium = {
   description: 'Installing Chromium',
 
-  async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    }
+  async run() {
     return;
   },
 };
