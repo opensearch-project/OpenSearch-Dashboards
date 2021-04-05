@@ -38,7 +38,6 @@ import { Worker } from './worker';
 
 const CLI_ARGS: SomeCliArgs = {
   disableOptimizer: true,
-  oss: false,
   quiet: false,
   repl: false,
   runExamples: false,

@@ -117,7 +117,6 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [
           opensearchDashboardsPath,
-          '--oss',
           '--config',
           configFilePath,
           '--verbose',
@@ -163,7 +162,6 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [
           opensearchDashboardsPath,
-          '--oss',
           '--config',
           legacyConfig,
           '--logging.dest',
@@ -191,7 +189,6 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [
           opensearchDashboardsPath,
-          '--oss',
           '--config',
           configFilePath,
         ]);
@@ -242,7 +239,6 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [
           opensearchDashboardsPath,
-          '--oss',
           '--config',
           configFilePath,
         ]);

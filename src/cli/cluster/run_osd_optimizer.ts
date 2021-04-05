@@ -31,7 +31,7 @@ import { runOptimizer, OptimizerConfig, logOptimizerState } from '@osd/optimizer
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
 
-type SomeCliArgs = Pick<CliArgs, 'watch' | 'cache' | 'dist' | 'oss' | 'runExamples'>;
+type SomeCliArgs = Pick<CliArgs, 'watch' | 'cache' | 'dist' | 'runExamples'>;
 
 export function runOsdOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
   const optimizerConfig = OptimizerConfig.create({
@@ -40,7 +40,6 @@ export function runOsdOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
     includeCoreBundle: true,
     cache: !!opts.cache,
     dist: !!opts.dist,
-    oss: !!opts.oss,
     examples: !!opts.runExamples,
     pluginPaths: config.get('plugins.paths'),
   });

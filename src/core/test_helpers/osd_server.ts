@@ -76,7 +76,6 @@ export function createRootWithSettings(
       repl: false,
       basePath: false,
       runExamples: false,
-      oss: true,
       disableOptimizer: true,
       cache: true,
       dist: false,
