@@ -1,3 +1,10 @@
+## [28.0.1](https://github.com/elastic/elastic-charts/compare/v28.0.0...v28.0.1) (2021-04-06)
+
+
+### Bug Fixes
+
+* filter out zero values on fitted log domains ([#1057](https://github.com/elastic/elastic-charts/issues/1057)) ([88d71ff](https://github.com/elastic/elastic-charts/commit/88d71ff810d33756d5c568b7f5c603a84837490d))
+
 # [28.0.0](https://github.com/elastic/elastic-charts/compare/v27.0.0...v28.0.0) (2021-04-02)
 
 
