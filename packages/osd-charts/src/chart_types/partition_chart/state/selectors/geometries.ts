@@ -90,8 +90,7 @@ export const partitionMultiGeometries = createCachedSelector(
       const marginBottom = spec.config.margin?.bottom ?? config.margin.bottom;
 
       const chartHeight = getInterMarginSize(marginedHeight, marginTop, marginBottom);
-
-      return trees.map(({ name, style, tree: t }: StyledTree, innerIndex, a) => {
+      return trees.map(({ name, smAccessorValue, style, tree: t }: StyledTree, innerIndex, a) => {
         const innerPanelCount = a.length;
         const outerPanelWidth = chartWidth * outerWidthRatio;
         const outerPanelHeight = chartHeight * outerHeightRatio;
@@ -190,6 +189,7 @@ export const partitionMultiGeometries = createCachedSelector(
           innerIndex,
           partitionLayout: spec.config.partitionLayout ?? config.partitionLayout,
           panelTitle: String(name),
+          smAccessorValue,
           top: topOuterRatio + topInnerRatio,
           height: panelHeightRatio,
           left: leftOuterRatio + leftInnerRatio,
@@ -227,10 +227,10 @@ export const partitionDrilldownFocus = createCachedSelector(
     (state) => state.interactions.prevDrilldown,
   ],
   (multiGeometries, chartDimensions, drilldown, prevDrilldown): IndexedContinuousDomainFocus[] =>
-    multiGeometries.map(({ quadViewModel, index, innerIndex }) => {
+    multiGeometries.map(({ quadViewModel, smAccessorValue, index, innerIndex }) => {
       const { x0: currentFocusX0, x1: currentFocusX1 } = focusRect(quadViewModel, chartDimensions, drilldown);
       const { x0: prevFocusX0, x1: prevFocusX1 } = focusRect(quadViewModel, chartDimensions, prevDrilldown);
-      return { currentFocusX0, currentFocusX1, prevFocusX0, prevFocusX1, index, innerIndex };
+      return { currentFocusX0, currentFocusX1, prevFocusX0, prevFocusX1, smAccessorValue, index, innerIndex };
     }),
 )((state) => state.chartId);
 

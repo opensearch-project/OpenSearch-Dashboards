@@ -47,6 +47,7 @@ export const getPickedShapesLayerValues = createCachedSelector(
     const elements = pickedShapes.map<Array<LayerValue>>((model) => {
       const values: Array<LayerValue> = [];
       values.push({
+        smAccessorValue: '',
         groupByRollup: 'Word count',
         value: model.data.length,
         sortIndex: 0,

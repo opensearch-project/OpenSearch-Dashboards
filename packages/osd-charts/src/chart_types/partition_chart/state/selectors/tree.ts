@@ -45,7 +45,12 @@ const getGroupBySpecs = createCachedSelector([getSpecs], (specs) =>
 )(getChartIdSelector);
 
 /** @internal */
-export type StyledTree = { name: string | number; style: SmallMultiplesStyle; tree: HierarchyOfArrays };
+export type StyledTree = {
+  smAccessorValue: ReturnType<GroupByAccessor>;
+  name: string;
+  style: SmallMultiplesStyle;
+  tree: HierarchyOfArrays;
+};
 
 function getTreesForSpec(
   spec: PartitionSpec,
@@ -81,6 +86,7 @@ function getTreesForSpec(
       .sort(getPredicateFn(sort))
       .map(([groupKey, subData]) => ({
         name: format(groupKey),
+        smAccessorValue: groupKey,
         style: smStyle,
         tree: partitionTree(
           subData,
@@ -94,6 +100,7 @@ function getTreesForSpec(
     return [
       {
         name: '',
+        smAccessorValue: '',
         style: smStyle,
         tree: partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout),
       },

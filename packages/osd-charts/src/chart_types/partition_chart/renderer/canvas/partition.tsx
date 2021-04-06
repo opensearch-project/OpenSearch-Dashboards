@@ -33,7 +33,7 @@ import {
   nullShapeViewModel,
   QuadViewModel,
   ShapeViewModel,
-  SmallMultiplesIndices,
+  SmallMultiplesDescriptors,
 } from '../../layout/types/viewmodel_types';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { isSimpleLinear } from '../../layout/viewmodel/viewmodel';
@@ -50,7 +50,7 @@ export interface ContinuousDomainFocus {
 }
 
 /** @internal */
-export interface IndexedContinuousDomainFocus extends ContinuousDomainFocus, SmallMultiplesIndices {}
+export interface IndexedContinuousDomainFocus extends ContinuousDomainFocus, SmallMultiplesDescriptors {}
 
 interface ReactiveChartStateProps {
   initialized: boolean;

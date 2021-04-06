@@ -817,11 +817,9 @@ export interface GroupBrushExtent {
 // @alpha (undocumented)
 export const GroupBy: React_2.FunctionComponent<GroupByProps>;
 
-// @alpha (undocumented)
+// @public (undocumented)
 export type GroupByAccessor = (spec: Spec, datum: any) => string | number;
 
-// Warning: (ae-incompatible-release-tags) The symbol "GroupByFormatter" is marked as @public, but its signature references "GroupByAccessor" which is marked as @alpha
-//
 // @public
 export type GroupByFormatter = (value: ReturnType<GroupByAccessor>) => string;
 
@@ -1073,6 +1071,7 @@ export interface LayerValue {
     depth: number;
     groupByRollup: PrimitiveValue;
     path: LegendPath;
+    smAccessorValue: ReturnType<GroupByAccessor>;
     sortIndex: number;
     value: number;
 }

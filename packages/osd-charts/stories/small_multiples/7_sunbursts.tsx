@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { action } from '@storybook/addon-actions';
 import { boolean, select, number } from '@storybook/addon-knobs';
 import React from 'react';
 
@@ -58,6 +59,12 @@ const countryToColor = new Map(
     }),
 );
 
+const onElementListeners = {
+  onElementClick: action('onElementClick'),
+  onElementOver: action('onElementOver'),
+  onElementOut: action('onElementOut'),
+};
+
 export const Example = () => {
   const layout = select(
     'Inner breakdown layout',
@@ -76,6 +83,7 @@ export const Example = () => {
         legendStrategy={LegendStrategy.Key}
         flatLegend={boolean('Flat legend', true)}
         theme={STORYBOOK_LIGHT_THEME}
+        {...onElementListeners}
       />
       <GroupBy
         id="split"

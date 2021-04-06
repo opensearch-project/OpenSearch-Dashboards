@@ -25,7 +25,7 @@ import { Predicate } from '../common/predicate';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { SpecType } from './constants';
 
-/** @alpha */
+/** @public */
 export type GroupByAccessor = (spec: Spec, datum: any) => string | number;
 /** @alpha */
 export type GroupBySort = Predicate;

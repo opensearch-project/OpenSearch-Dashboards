@@ -35,7 +35,9 @@ const onElementListeners = {
   onElementOver: action('onElementOver'),
   onElementOut: action('onElementOut'),
 };
+
 type PieDatum = [string, number, string, number];
+
 const pieData: Array<PieDatum> = [
   ['CN', 301, 'IN', 44],
   ['CN', 301, 'US', 24],

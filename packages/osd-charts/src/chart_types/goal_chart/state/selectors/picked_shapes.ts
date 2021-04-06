@@ -48,6 +48,7 @@ export const getPickedShapesLayerValues = createCachedSelector(
     const elements = pickedShapes.map<Array<LayerValue>>((model) => {
       const values: Array<LayerValue> = [];
       values.push({
+        smAccessorValue: '',
         groupByRollup: 'Actual',
         value: model.actual,
         sortIndex: 0,

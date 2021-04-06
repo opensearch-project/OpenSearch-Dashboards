@@ -29,6 +29,7 @@ import {
   SizeRatio,
 } from '../../../../common/geometry';
 import { Font, VerticalAlignments } from '../../../../common/text_utils';
+import { GroupByAccessor } from '../../../../specs';
 import { LegendPath } from '../../../../state/actions/legend';
 import { Color } from '../../../../utils/common';
 import { ContinuousDomainFocus } from '../../renderer/canvas/partition';
@@ -89,13 +90,14 @@ export interface RowSet {
 }
 
 /** @internal */
-export interface SmallMultiplesIndices {
+export interface SmallMultiplesDescriptors {
+  smAccessorValue: ReturnType<GroupByAccessor>;
   index: number;
   innerIndex: number;
 }
 
 /** @internal */
-export interface QuadViewModel extends ShapeTreeNode, SmallMultiplesIndices {
+export interface QuadViewModel extends ShapeTreeNode, SmallMultiplesDescriptors {
   strokeWidth: number;
   strokeStyle: string;
   fillColor: string;
@@ -111,8 +113,9 @@ export interface OutsideLinksViewModel {
 export type PickFunction = (x: Pixels, y: Pixels, focus: ContinuousDomainFocus) => Array<QuadViewModel>;
 
 /** @internal */
-export interface PartitionSmallMultiplesModel extends SmallMultiplesIndices {
+export interface PartitionSmallMultiplesModel extends SmallMultiplesDescriptors {
   panelTitle: string;
+  smAccessorValue: number | string;
   partitionLayout: PartitionLayout;
   top: SizeRatio;
   left: SizeRatio;
@@ -154,6 +157,7 @@ const defaultFont: Font = {
 export const nullPartitionSmallMultiplesModel = (partitionLayout: PartitionLayout): PartitionSmallMultiplesModel => ({
   index: 0,
   innerIndex: 0,
+  smAccessorValue: '',
   panelTitle: '',
   top: 0,
   left: 0,

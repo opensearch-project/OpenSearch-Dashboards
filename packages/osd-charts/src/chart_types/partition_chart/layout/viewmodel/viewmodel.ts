@@ -29,7 +29,7 @@ import {
   trueBearingToStandardPositionAngle,
 } from '../../../../common/geometry';
 import { Part, TextMeasure } from '../../../../common/text_utils';
-import { SmallMultiplesStyle } from '../../../../specs';
+import { GroupByAccessor, SmallMultiplesStyle } from '../../../../specs';
 import { StrokeStyle, ValueFormatter, Color, RecursivePartial } from '../../../../utils/common';
 import { Layer } from '../../specs';
 import { config as defaultConfig, MODEL_KEY, percentValueGetter } from '../config';
@@ -137,6 +137,7 @@ export function makeQuadViewModel(
   layers: Layer[],
   sectorLineWidth: Pixels,
   sectorLineStroke: StrokeStyle,
+  smAccessorValue: ReturnType<GroupByAccessor>,
   index: number,
   innerIndex: number,
   fillLabel: FillLabelConfig,
@@ -159,7 +160,7 @@ export function makeQuadViewModel(
       !isSunburstLayout && textNegligible
         ? 'transparent'
         : fillTextColor(textColor, textInvertible, textContrast, fillColor, containerBackgroundColor);
-    return { index, innerIndex, strokeWidth, strokeStyle, fillColor, textColor: color, ...node };
+    return { index, innerIndex, smAccessorValue, strokeWidth, strokeStyle, fillColor, textColor: color, ...node };
   });
 }
 
@@ -360,6 +361,7 @@ export function shapeViewModel(
     layers,
     config.sectorLineWidth,
     config.sectorLineStroke,
+    panel.smAccessorValue,
     panel.index,
     panel.innerIndex,
     config.fillLabel,
@@ -463,7 +465,7 @@ export function shapeViewModel(
   // combined viewModel
   return {
     partitionLayout: config?.partitionLayout ?? defaultConfig.partitionLayout,
-
+    smAccessorValue: panel.smAccessorValue,
     panelTitle: panel.panelTitle,
     index: panel.index,
     innerIndex: panel.innerIndex,
