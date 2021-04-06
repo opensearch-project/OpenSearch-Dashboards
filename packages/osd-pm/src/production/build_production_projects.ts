@@ -36,13 +36,11 @@ import {
 export async function buildProductionProjects({
   opensearchDashboardsRoot,
   buildRoot,
-  onlyOSS,
 }: {
   opensearchDashboardsRoot: string;
   buildRoot: string;
-  onlyOSS?: boolean;
 }) {
-  const projects = await getProductionProjects(opensearchDashboardsRoot, onlyOSS);
+  const projects = await getProductionProjects(opensearchDashboardsRoot);
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
@@ -65,7 +63,7 @@ export async function buildProductionProjects({
  * we only include OpenSearch Dashboards 's transitive _production_ dependencies. If onlyOSS
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
-async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
+async function getProductionProjects(rootPath: string) {
   const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
   const projectsSubset = [projects.get('opensearch-dashboards')!];
@@ -77,14 +75,11 @@ async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards
   productionProjects.delete('opensearch-dashboards');
 
-  if (onlyOSS) {
-    productionProjects.forEach((project) => {
-      if (project.getBuildConfig().oss === false) {
-        productionProjects.delete(project.json.name);
-      }
-    });
-  }
-
+  productionProjects.forEach((project) => {
+    if (project.getBuildConfig().oss === false) {
+      productionProjects.delete(project.json.name);
+    }
+  });
   return productionProjects;
 }
 
