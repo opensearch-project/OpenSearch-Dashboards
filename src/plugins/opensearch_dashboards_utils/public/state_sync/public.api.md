@@ -20,6 +20,16 @@ export const createOsdUrlStateStorage: ({ useHash, history, onGetError, onSetErr
 // @public
 export const createSessionStorageStateStorage: (storage?: Storage) => ISessionStorageStateStorage;
 
+// Warning: (ae-forgotten-export) The symbol "BaseState" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "BaseStateContainer" needs to be exported by the entry point index.d.ts
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "opensearch-dashboards" does not have an export "BaseStateContainer"
+//
+// @public
+export interface INullableBaseStateContainer<State extends BaseState> extends BaseStateContainer<State> {
+    // (undocumented)
+    set: (state: State | null) => void;
+}
+
 // @public
 export interface IOsdUrlStateStorage extends IStateStorage {
     cancel: () => void;
@@ -34,16 +44,6 @@ export interface IOsdUrlStateStorage extends IStateStorage {
     set: <State>(key: string, state: State, opts?: {
         replace: boolean;
     }) => Promise<string | undefined>;
-}
-
-// Warning: (ae-forgotten-export) The symbol "BaseState" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "BaseStateContainer" needs to be exported by the entry point index.d.ts
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "opensearch-dashboards" does not have an export "BaseStateContainer"
-//
-// @public
-export interface INullableBaseStateContainer<State extends BaseState> extends BaseStateContainer<State> {
-    // (undocumented)
-    set: (state: State | null) => void;
 }
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "opensearch-dashboards" does not have an export "Storage"
