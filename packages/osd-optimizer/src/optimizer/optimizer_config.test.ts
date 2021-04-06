@@ -128,7 +128,6 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
@@ -156,7 +155,6 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
@@ -184,10 +182,8 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/x-pack/plugins,
           <absolute path>/plugins,
           <absolute path>/examples,
-          <absolute path>/x-pack/examples,
           <absolute path>/opensearch-dashboards-extra,
         ],
         "profileWebpack": false,
@@ -200,7 +196,6 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        oss: true,
       })
     ).toMatchInlineSnapshot(`
       Object {

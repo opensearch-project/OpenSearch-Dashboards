@@ -27282,13 +27282,6 @@ function getProjectPaths({
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'examples/*'));
 
-  if (!ossOnly) {
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/legacy/plugins/*'));
-    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/test/functional_with_es_ssl/fixtures/plugins/*'));
-  }
-
   if (!skipOpenSearchDashboardsPlugins) {
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../opensearch-dashboards-extra/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../opensearch-dashboards-extra/*/packages/*'));
@@ -38181,7 +38174,7 @@ async function validateDependencies(osd, yarnLock) {
     `);
     process.exit(1);
   } // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
-  // and make sure they aren't included in the production dependencies of OpenSearch Dashboards 
+  // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
 
 
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
@@ -58228,10 +58221,9 @@ __webpack_require__.r(__webpack_exports__);
 
 async function buildProductionProjects({
   opensearchDashboardsRoot,
-  buildRoot,
-  onlyOSS
+  buildRoot
 }) {
-  const projects = await getProductionProjects(opensearchDashboardsRoot, onlyOSS);
+  const projects = await getProductionProjects(opensearchDashboardsRoot);
   const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
   const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
@@ -58253,31 +58245,22 @@ async function buildProductionProjects({
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
 
-async function getProductionProjects(rootPath, onlyOSS) {
+async function getProductionProjects(rootPath) {
   const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])({
     rootPath
   });
   const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
   const projectsSubset = [projects.get('opensearch-dashboards')];
-
-  if (projects.has('x-pack')) {
-    projectsSubset.push(projects.get('x-pack'));
-  }
-
   const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
     onlyProductionDependencies: true
-  }); // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards 
+  }); // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards
 
   productionProjects.delete('opensearch-dashboards');
-
-  if (onlyOSS) {
-    productionProjects.forEach(project => {
-      if (project.getBuildConfig().oss === false) {
-        productionProjects.delete(project.json.name);
-      }
-    });
-  }
-
+  productionProjects.forEach(project => {
+    if (project.getBuildConfig().oss === false) {
+      productionProjects.delete(project.json.name);
+    }
+  });
   return productionProjects;
 }
 

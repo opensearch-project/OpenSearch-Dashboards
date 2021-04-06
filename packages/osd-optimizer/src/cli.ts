@@ -38,11 +38,6 @@ run(
       throw createFlagError('expected --watch to have no value');
     }
 
-    const oss = flags.oss ?? false;
-    if (typeof oss !== 'boolean') {
-      throw createFlagError('expected --oss to have no value');
-    }
-
     const cache = flags.cache ?? true;
     if (typeof cache !== 'boolean') {
       throw createFlagError('expected --cache to have no value');
@@ -109,7 +104,6 @@ run(
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
-      oss: oss && !(validateLimits || updateLimits),
       dist: dist || updateLimits,
       cache,
       examples: examples && !(validateLimits || updateLimits),
@@ -148,7 +142,6 @@ run(
       boolean: [
         'core',
         'watch',
-        'oss',
         'examples',
         'dist',
         'cache',
@@ -169,7 +162,6 @@ run(
       help: `
         --watch            run the optimizer in watch mode
         --workers          max number of workers to use
-        --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable the cache
