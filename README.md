@@ -49,7 +49,7 @@ Or
 
 To run Dashboards with OpenSearch
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
-* While OpenSearch is running locally, run ```yarn start --oss```
+* While OpenSearch is running locally, run ```yarn start```
 * You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
 
 ## How you can help

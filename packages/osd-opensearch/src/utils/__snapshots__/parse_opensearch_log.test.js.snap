@@ -17,8 +17,8 @@ Caused by: java.net.BindException: Address already in use
 
 exports[`parses data containing exception 3`] = `"[o.e.g.GatewayService] [qEfPPg8] recovered [0] indices into cluster_state"`;
 
-exports[`parses multiple lines 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-security]"`;
+exports[`parses multiple lines 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [osd-security]"`;
 
-exports[`parses multiple lines 2`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-watcher]"`;
+exports[`parses multiple lines 2`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [osd-watcher]"`;
 
 exports[`parses single line 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded module [lang-expression]"`;

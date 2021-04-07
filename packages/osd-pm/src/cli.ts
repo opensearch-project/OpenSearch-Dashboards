@@ -44,7 +44,6 @@ function help() {
 
         -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e opensearch-dashboards -e @osd/pm'.
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
-        --oss                   Do not include the x-pack when running command.
         --skip-opensearch-dashboards-plugins   Filter all plugins in ./plugins and ../opensearch-dashboards-extra when running command.
         --no-cache              Disable the bootstrap cache
         --verbose               Set log level to verbose

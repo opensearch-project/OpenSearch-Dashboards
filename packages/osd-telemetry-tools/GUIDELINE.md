@@ -28,7 +28,7 @@ node scripts/telemetry_check.js --path=<relative_path_to_collector>.ts
 
 ### 1. Update the telemetryrc file
 
-Make sure your collector is not excluded in the `telemetryrc.json` files (located at the root of the OpenSearch Dashboards project, and another on in the `x-pack` dir).
+Make sure your collector is not excluded in the `telemetryrc.json` file located at the root of the OpenSearch Dashboards project.
 
 ```s
 [

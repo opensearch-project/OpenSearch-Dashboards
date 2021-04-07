@@ -36,7 +36,6 @@ fi
 
 
 export OPENSEARCH_DASHBOARDS_DIR="$dir"
-export XPACK_DIR="$OPENSEARCH_DASHBOARDS_DIR/x-pack"
 
 parentDir="$(cd "$OPENSEARCH_DASHBOARDS_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"

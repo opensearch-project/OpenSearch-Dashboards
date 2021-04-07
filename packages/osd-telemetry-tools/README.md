@@ -71,7 +71,7 @@ What will not be caught by the validator:
 
 * Fields in the schema that are never collected. If you are trying to report a field from OpenSearch but that value is never stored in OpenSearch, the check will not be able to detect if that field is ever collected in the first palce. It is advised to add unit/functional tests to check that all the fields are being reported as expected.
 
-The tool looks for `.telemetryrc.json` files in the root of the project and in the `x-pack` dir for its runtime configurations.
+The tool looks for `.telemetryrc.json` files in the root of the project for its runtime configurations.
 
 Currently auto-fixer (`--fix`) can automatically fix the json files with the following errors:
 

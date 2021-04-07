@@ -32,8 +32,8 @@ test('parses single line', () => {
 
 test('parses multiple lines', () => {
   const data = dedent(`
-    [2018-02-23T10:13:40,405][INFO ][o.e.p.PluginsService     ] [qEfPPg8] loaded plugin [x-pack-security]
-    [2018-02-23T10:13:40,405][INFO ][o.e.p.PluginsService     ] [qEfPPg8] loaded plugin [x-pack-watcher]
+    [2018-02-23T10:13:40,405][INFO ][o.e.p.PluginsService     ] [qEfPPg8] loaded plugin [osd-security]
+    [2018-02-23T10:13:40,405][INFO ][o.e.p.PluginsService     ] [qEfPPg8] loaded plugin [osd-watcher]
   `);
 
   const lines = parseOpenSearchLog(data);

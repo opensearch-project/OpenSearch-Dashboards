@@ -102,23 +102,12 @@ const settings = {
       defVal: ['test'],
     },
   ],
-  'x-pack': [
-    {
-      ...defaults,
-      name: 'xpack:test:setting',
-      ariaName: 'xpack test setting',
-      displayName: 'X-Pack test setting',
-      category: ['x-pack'],
-      description: 'bar',
-    },
-  ],
 };
 
-const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
+const categories = ['general', 'dashboard', 'hiddenCategory'];
 const categoryCounts = {
   general: 2,
   dashboard: 1,
-  'x-pack': 10,
 };
 const save = jest.fn((changes: SettingsChanges) => Promise.resolve([true]));
 
