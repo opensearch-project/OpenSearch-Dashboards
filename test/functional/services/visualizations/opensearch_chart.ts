@@ -26,7 +26,7 @@ export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  class ElasticChart {
+  class OpenSearchChart {
     public async getCanvas() {
       return await find.byCssSelector('.echChart canvas:last-of-type');
     }
@@ -40,7 +40,7 @@ export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
       const rendered = await chart.findAllByCssSelector('.echChart[data-ech-render-complete=true]');
       expect(rendered).to.equal(
         1,
-        `Rendering for elastic-chart with data-test-subj='${dataTestSubj}' was not finished in time`
+        `Rendering for opensearch-chart with data-test-subj='${dataTestSubj}' was not finished in time`
       );
     }
 
@@ -60,5 +60,5 @@ export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
     }
   }
 
-  return new ElasticChart();
+  return new OpenSearchChart();
 }

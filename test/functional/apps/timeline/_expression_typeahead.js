@@ -29,7 +29,7 @@ export default function ({ getPageObjects }) {
     });
 
     it('should display function suggestions filtered by function name', async () => {
-      await PageObjects.timeline.setExpression('.e');
+      await PageObjects.timeline.setExpression('.o');
       const suggestions = await PageObjects.timeline.getSuggestionItemsText();
       expect(suggestions.length).to.eql(2);
       expect(suggestions[0].includes('.opensearch()')).to.eql(true);
