@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const RESTRICTED_GLOBALS = require('./restricted_globals');
 const RESTRICTED_MODULES = { paths: ['gulp-util'] };
 
@@ -10,13 +29,7 @@ module.exports = {
       files: ['**/*.js'],
       parser: require.resolve('babel-eslint'),
 
-      plugins: [
-        'mocha',
-        'babel',
-        'import',
-        'no-unsanitized',
-        'prefer-object-spread',
-      ],
+      plugins: ['mocha', 'babel', 'import', 'no-unsanitized', 'prefer-object-spread'],
 
       settings: {
         'import/resolver': {
@@ -41,12 +54,12 @@ module.exports = {
 
       rules: {
         'block-scoped-var': 'error',
-        camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
+        camelcase: ['error', { properties: 'never', allow: ['^UNSAFE_'] }],
         'consistent-return': 'off',
-        'dot-notation': [ 'error', { allowKeywords: true } ],
-        eqeqeq: [ 'error', 'allow-null' ],
+        'dot-notation': ['error', { allowKeywords: true }],
+        eqeqeq: ['error', 'allow-null'],
         'guard-for-in': 'error',
-        'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
+        'new-cap': ['error', { capIsNewExceptions: ['Private'] }],
         'no-bitwise': 'off',
         'no-caller': 'error',
         'no-cond-assign': 'off',
@@ -77,20 +90,20 @@ module.exports = {
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        'no-unused-vars': [ 'error' ],
-        'no-use-before-define': [ 'error', 'nofunc' ],
+        'no-unused-vars': ['error'],
+        'no-use-before-define': ['error', 'nofunc'],
         'no-var': 'error',
         'no-with': 'error',
-        'one-var': [ 'error', 'never' ],
+        'one-var': ['error', 'never'],
         'prefer-const': 'error',
-        strict: [ 'error', 'never' ],
+        strict: ['error', 'never'],
         'valid-typeof': 'error',
         yoda: 'off',
 
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
 
-        'import/no-unresolved': [ 'error', { 'amd': true, 'commonjs': true } ],
+        'import/no-unresolved': ['error', { amd: true, commonjs: true }],
         'import/named': 'error',
         'import/namespace': 'error',
         'import/default': 'error',
@@ -101,7 +114,7 @@ module.exports = {
         'import/no-dynamic-require': 'error',
 
         'prefer-object-spread/prefer-object-spread': 'error',
-      }
+      },
     },
-  ]
+  ],
 };

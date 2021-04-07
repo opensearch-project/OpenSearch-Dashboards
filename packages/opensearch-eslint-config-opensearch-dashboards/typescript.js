@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 // NOTE: This is the configuration to apply the typescript eslint parser
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
@@ -6,7 +25,8 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
-const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
+const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint')
+  .rules;
 
 // The current implementation excluded all the variables matching the regexp.
 // We should remove it as soon as multiple underscores are supported by the linter.
@@ -19,13 +39,7 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: [
-        '@typescript-eslint',
-        'ban',
-        'import',
-        'prefer-object-spread',
-        'eslint-comments'
-      ],
+      plugins: ['@typescript-eslint', 'ban', 'import', 'prefer-object-spread', 'eslint-comments'],
 
       settings: {
         'import/resolver': {
@@ -50,7 +64,7 @@ module.exports = {
         ecmaVersion: 6,
         ecmaFeatures: {
           experimentalObjectRestSpread: true,
-          jsx: true
+          jsx: true,
         },
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
         // typescript eslint. As we are not using rules that need types information, we can safely
@@ -59,7 +73,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/issues/389
         // https://github.com/typescript-eslint/typescript-eslint/issues/243
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined
+        project: undefined,
       },
 
       // NOTE: we can't override the extends option here to apply
@@ -69,39 +83,45 @@ module.exports = {
       //
       // For now we are using an workaround to create
       // those extended rules arrays
-      rules: Object.assign(
-        {
+      rules: {
+        ...{
           // Most of the ports were done according
           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
-          '@typescript-eslint/ban-types': ['error', {
-            types: {
-              SFC: {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'FC'
+          '@typescript-eslint/array-type': [
+            'error',
+            { default: 'array-simple', readonly: 'array-simple' },
+          ],
+          '@typescript-eslint/ban-types': [
+            'error',
+            {
+              types: {
+                SFC: {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'FC',
+                },
+                'React.SFC': {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'React.FC',
+                },
+                StatelessComponent: {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'FunctionComponent',
+                },
+                'React.StatelessComponent': {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'React.FunctionComponent',
+                },
+                // used in the codebase in the wild
+                '{}': false,
+                object: false,
+                Function: false,
               },
-              'React.SFC': {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'React.FC'
-              },
-              StatelessComponent: {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'FunctionComponent'
-              },
-              'React.StatelessComponent': {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'React.FunctionComponent'
-              },
-              // used in the codebase in the wild
-              '{}': false,
-              'object': false,
-              'Function': false,
-            }
-          }],
-          'camelcase': 'off',
+            },
+          ],
+          camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -109,8 +129,8 @@ module.exports = {
               format: ['camelCase'],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'variable',
@@ -121,19 +141,16 @@ module.exports = {
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'parameter',
-              format: [
-                'camelCase',
-                'PascalCase',
-              ],
+              format: ['camelCase', 'PascalCase'],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'memberLike',
@@ -141,23 +158,23 @@ module.exports = {
                 'camelCase',
                 'PascalCase',
                 'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE'
+                'UPPER_CASE',
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'function',
               format: [
                 'camelCase',
-                'PascalCase' // React.FunctionComponent =
+                'PascalCase', // React.FunctionComponent =
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'typeLike',
@@ -170,44 +187,50 @@ module.exports = {
               format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
             },
           ],
-          '@typescript-eslint/explicit-member-accessibility': ['error',
+          '@typescript-eslint/explicit-member-accessibility': [
+            'error',
             {
               accessibility: 'off',
               overrides: {
                 accessors: 'explicit',
                 constructors: 'no-public',
-                parameterProperties: 'explicit'
-              }
-            }
+                parameterProperties: 'explicit',
+              },
+            },
           ],
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-          '@typescript-eslint/member-ordering': ['error', {
-            'default': ['public-static-field', 'static-field', 'instance-field']
-          }],
+          '@typescript-eslint/member-ordering': [
+            'error',
+            {
+              default: ['public-static-field', 'static-field', 'instance-field'],
+            },
+          ],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-extra-non-null-assertion': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
-          '@typescript-eslint/triple-slash-reference': ['error', {
-            path: 'never',
-            types: 'never',
-            lib: 'never'
-          }],
+          '@typescript-eslint/triple-slash-reference': [
+            'error',
+            {
+              path: 'never',
+              types: 'never',
+              lib: 'never',
+            },
+          ],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/unified-signatures': 'error',
           'constructor-super': 'error',
           'dot-notation': 'error',
-          'eqeqeq': ['error', 'always', {'null': 'ignore'}],
+          eqeqeq: ['error', 'always', { null: 'ignore' }],
           'guard-for-in': 'error',
-          'import/order': ['error', {
-            'groups': [
-              ['external', 'builtin'],
-              'internal',
-              ['parent', 'sibling', 'index'],
-            ],
-          }],
+          'import/order': [
+            'error',
+            {
+              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
+            },
+          ],
           'max-classes-per-file': ['error', 1],
           'no-bitwise': 'error',
           'no-caller': 'error',
@@ -229,30 +252,33 @@ module.exports = {
           'no-unused-labels': 'error',
           'no-var': 'error',
           'object-shorthand': 'error',
-          'one-var': [ 'error', 'never' ],
+          'one-var': ['error', 'never'],
           'prefer-const': 'error',
           'prefer-rest-params': 'error',
-          'radix': 'error',
-          'spaced-comment': ["error", "always", {
-            "exceptions": ["/"]
-          }],
+          radix: 'error',
+          'spaced-comment': [
+            'error',
+            'always',
+            {
+              exceptions: ['/'],
+            },
+          ],
           'use-isnan': 'error',
 
           // Old tslint yml override or defined rules
           'ban/ban': [
             2,
-            {'name': ['describe', 'only'], 'message': 'No exclusive suites.'},
-            {'name': ['it', 'only'], 'message': 'No exclusive tests.'},
-            {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
-
+            { name: ['describe', 'only'], message: 'No exclusive suites.' },
+            { name: ['it', 'only'], message: 'No exclusive tests.' },
+            { name: ['test', 'only'], message: 'No exclusive tests.' },
           ],
           'import/no-default-export': 'error',
 
           'eslint-comments/no-unused-disable': 'error',
-          'eslint-comments/no-unused-enable': 'error'
+          'eslint-comments/no-unused-enable': 'error',
         },
-        eslintConfigPrettierTypescriptEslintRules
-      )
+        ...eslintConfigPrettierTypescriptEslintRules,
+      },
     },
-  ]
+  ],
 };
