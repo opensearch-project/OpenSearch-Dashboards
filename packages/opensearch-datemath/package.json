@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/datemath",
+  "name": "@opensearch/datemath",
   "version": "5.0.3",
   "description": "opensearch datemath parser, used in OpenSearch Dashboards",
   "license": "Apache-2.0",
