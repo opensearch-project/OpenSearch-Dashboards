@@ -56,7 +56,7 @@ export const IGNORE_FILE_GLOBS = [
   'api-documenter.json',
 
   // filename must match upstream filenames from lodash
-  'packages/elastic-safer-lodash-set/**/*',
+  'packages/opensearch-safer-lodash-set/**/*',
 
   // TODO fix file names in APM to remove these
 
