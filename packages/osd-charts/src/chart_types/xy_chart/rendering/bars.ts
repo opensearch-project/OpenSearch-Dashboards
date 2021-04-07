@@ -39,7 +39,7 @@ export function renderBars(
   sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
   styleAccessor?: BarStyleAccessor,
-  minBarHeight?: number,
+  minBarHeight: number = 0,
   stackMode?: StackMode,
   chartRotation?: number,
 ): {
@@ -54,7 +54,6 @@ export function renderBars(
   // default padding to 1 for now
   const padding = 1;
   const { fontSize, fontFamily } = sharedSeriesStyle.displayValue;
-  const absMinHeight = minBarHeight && Math.abs(minBarHeight);
 
   dataSeries.data.forEach((datum) => {
     const { y0, y1, initialY1, filled } = datum;
@@ -78,20 +77,16 @@ export function renderBars(
       }
     } else {
       y = yScale.scale(y1);
-      if (yScale.isInverted) {
-        // use always zero as baseline if y0 is null
-        y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
-      } else {
-        y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
-      }
+      // use always zero as baseline if y0 is null
+      y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
     }
 
     if (y === null || y0Scaled === null) {
       return;
     }
-    let height = y0Scaled - y;
 
-    // handle minBarHeight adjustment
+    const absMinHeight = Math.abs(minBarHeight);
+    let height = y0Scaled - y;
     if (absMinHeight !== undefined && height !== 0 && Math.abs(height) < absMinHeight) {
       const heightDelta = absMinHeight - Math.abs(height);
       if (height < 0) {
@@ -102,6 +97,9 @@ export function renderBars(
         y -= heightDelta;
       }
     }
+    const isUpsideDown = height < 0;
+    height = Math.abs(height);
+    y = isUpsideDown ? y - height : y;
 
     const xScaled = xScale.scale(datum.x);
 

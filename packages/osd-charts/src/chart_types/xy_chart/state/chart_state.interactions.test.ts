@@ -24,10 +24,11 @@ import { Store } from 'redux';
 
 import { ChartType } from '../..';
 import { Rect } from '../../../geoms/types';
+import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { SettingsSpec, XScaleType, XYBrushArea } from '../../../specs';
-import { SpecType, DEFAULT_SETTINGS_SPEC, TooltipType, BrushAxis } from '../../../specs/constants';
+import { SpecType, TooltipType, BrushAxis } from '../../../specs/constants';
 import { onExternalPointerEvent } from '../../../state/actions/events';
 import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';
 import { GlobalChartState } from '../../../state/chart_state';
@@ -44,6 +45,7 @@ import {
 } from './selectors/get_tooltip_values_highlighted_geoms';
 import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
 import { createOnBrushEndCaller } from './selectors/on_brush_end_caller';
+import { createOnClickCaller } from './selectors/on_click_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
@@ -51,12 +53,9 @@ import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
 
-const ordinalBarSeries: BarSeriesSpec = {
-  chartType: ChartType.XYAxis,
-  specType: SpecType.Series,
+const ordinalBarSeries = MockSeriesSpec.bar({
   id: SPEC_ID,
   groupId: GROUP_ID,
-  seriesType: SeriesType.Bar,
   data: [
     [0, 10],
     [1, 5],
@@ -66,8 +65,8 @@ const ordinalBarSeries: BarSeriesSpec = {
   xScaleType: ScaleType.Ordinal,
   yScaleType: ScaleType.Linear,
   hideInLegend: false,
-};
-const linearBarSeries: BarSeriesSpec = {
+});
+const linearBarSeries = MockSeriesSpec.bar({
   chartType: ChartType.XYAxis,
   specType: SpecType.Series,
   id: SPEC_ID,
@@ -82,11 +81,10 @@ const linearBarSeries: BarSeriesSpec = {
   xScaleType: ScaleType.Linear,
   yScaleType: ScaleType.Linear,
   hideInLegend: false,
-};
+});
 const chartTop = 10;
 const chartLeft = 10;
-const settingSpec: SettingsSpec = {
-  ...DEFAULT_SETTINGS_SPEC,
+const settingSpec = MockGlobalSpec.settings({
   tooltip: {
     type: TooltipType.VerticalCursor,
   },
@@ -98,7 +96,7 @@ const settingSpec: SettingsSpec = {
       barsPadding: 0,
     },
   },
-};
+});
 
 function initStore(spec: BasicSeriesSpec) {
   const store = MockStore.default({ width: 100, height: 100, top: chartTop, left: chartLeft }, 'chartId');
@@ -1067,3 +1065,49 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     });
   });
 }
+
+describe('Negative bars click and hover', () => {
+  let store: Store<GlobalChartState>;
+  let onElementClick: jest.Mock<void, any[]>;
+  beforeEach(() => {
+    store = MockStore.default({ width: 100, height: 100, top: 0, left: 0 }, 'chartId');
+    onElementClick = jest.fn<void, any[]>((): void => undefined);
+    const onElementClickCaller = createOnClickCaller();
+    store.subscribe(() => {
+      onElementClickCaller(store.getState());
+    });
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.settingsNoMargins({
+          onElementClick,
+        }),
+        MockSeriesSpec.bar({
+          xAccessor: 0,
+          yAccessors: [1],
+          data: [
+            [0, 10],
+            [1, -10],
+            [2, 10],
+          ],
+        }),
+      ],
+      store,
+    );
+  });
+
+  test('highlight negative bars', () => {
+    store.dispatch(onPointerMove({ x: 50, y: 75 }, 0));
+    const highlightedGeoms = getHighlightedGeomsSelector(store.getState());
+    expect(highlightedGeoms.length).toBe(1);
+    expect(highlightedGeoms[0].value.datum).toEqual([1, -10]);
+  });
+  test('click negative bars', () => {
+    store.dispatch(onPointerMove({ x: 50, y: 75 }, 0));
+    store.dispatch(onMouseDown({ x: 50, y: 75 }, 100));
+    store.dispatch(onMouseUp({ x: 50, y: 75 }, 200));
+
+    expect(onElementClick).toBeCalled();
+    const callArgs = onElementClick.mock.calls[0][0];
+    expect(callArgs[0][0].datum).toEqual([1, -10]);
+  });
+});

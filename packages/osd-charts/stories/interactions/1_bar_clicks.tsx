@@ -70,7 +70,7 @@ export const Example = () => {
         data={[
           { x: 0, y: 2, obj: { from: 10, to: 20 }, sObj: 'from 10 to 20' },
           { x: 1, y: 7, obj: { from: 20, to: 30 }, sObj: 'from 20 to 30' },
-          { x: 2, y: 3, obj: { from: 30, to: 40 }, sObj: 'from 30 to 40' },
+          { x: 2, y: -3, obj: { from: 30, to: 40 }, sObj: 'from 30 to 40' },
           { x: 3, y: 6, obj: { from: 40, to: 50 }, sObj: 'from 40 to 50' },
         ]}
       />
