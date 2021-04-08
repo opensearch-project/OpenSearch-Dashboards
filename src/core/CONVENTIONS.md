@@ -19,9 +19,8 @@ Definition of done for a feature:
 - has been verified manually by at least one reviewer
 - can be used by first & third party plugins
 - there is no contradiction between client and server API
-- works for version
-   - works with and without a `server.basePath` configured
-   - cannot crash the OpenSearch Dashboards server when it fails
+- works with and without a `server.basePath` configured
+- cannot crash the OpenSearch Dashboards server when it fails
 - has unit & integration tests for public contracts
 - has functional tests for user scenarios
 - uses standard tooling:
