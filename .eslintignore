@@ -22,7 +22,8 @@ target
 /src/plugins/vis_type_timeline/public/_generated_/**
 
 # package overrides
-/packages/elastic-eslint-config-kibana
+/packages/opensearch-eslint-config-opensearch-dashboards
+/packages/opensearch-safer-lodash-set
 /packages/osd-interpreter/src/common/lib/grammar.js
 /packages/osd-plugin-generator/template
 /packages/osd-pm/dist
