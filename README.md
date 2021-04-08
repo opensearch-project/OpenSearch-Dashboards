@@ -14,6 +14,8 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 * Core plugins (non-3rd party)
 * New project name should be used everywhere.
 * ```yarn osd bootstrap```, ESLint and commit hook should be passing.
+* Jest Unit Tests
+* Jest Integration Tests
 * CI / CD with DCO check
 
 ## What doesn’t works
