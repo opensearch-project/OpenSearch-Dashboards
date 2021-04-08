@@ -18,8 +18,6 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 
 ## What doesn’t works
 
-* Jest Unit test cases
-* Integration test cases
 * Functional test cases
 * 3rd party plugins (including OpenDistro)
 
@@ -49,8 +47,19 @@ Or
 
 To run Dashboards with OpenSearch
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
-* While OpenSearch is running locally, run ```yarn start --oss```
+* While OpenSearch is running locally, run ```yarn start```
 * You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
+
+## Running tests
+
+### Jest Unit Tests
+
+Run the command ```yarn test:jest``` in the OpenSearch Dashboards project directory to run unit tests
+
+### Jest Integration Tests
+
+For the integration tests, you must pass the absolute path of your extracted OpenSearch build artifacts through the ```TEST_OPENSEARCH_FROM``` env variable so that Dashboards can run an OpenSearch cluster. You can run:
+```TEST_OPENSEARCH_FROM=/path/to/extracted/build/artifact yarn test:jest_integration```
 
 ## How you can help
 
