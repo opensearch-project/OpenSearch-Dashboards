@@ -1,7 +1,7 @@
 {
-  "name": "@elastic/datemath",
+  "name": "@opensearch/datemath",
   "version": "5.0.3",
-  "description": "elasticsearch datemath parser, used in kibana",
+  "description": "opensearch datemath parser, used in OpenSearch Dashboards",
   "license": "Apache-2.0",
   "main": "index.js",
   "typings": "index.d.ts",

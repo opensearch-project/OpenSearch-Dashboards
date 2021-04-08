@@ -39,7 +39,7 @@ const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
 const isValidDate = (d) => isDate(d) && !isNaN(d.valueOf());
 
 /*
- * This is a simplified version of elasticsearch's date parser.
+ * This is a simplified version of opensearch's date parser.
  * If you pass in a momentjs instance as the third parameter the calculation
  * will be done using this (and its locale settings) instead of the one bundled
  * with this library.
