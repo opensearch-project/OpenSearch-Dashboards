@@ -23,9 +23,8 @@ import { TaskContext } from './task_context';
 
 export function parseConfigsTask() {
   const opensearchDashboardsRoot = process.cwd();
-  const xpackRoot = path.join(opensearchDashboardsRoot, 'x-pack');
 
-  const configRoots = [opensearchDashboardsRoot, xpackRoot];
+  const configRoots = [opensearchDashboardsRoot];
 
   return configRoots.map((configRoot) => ({
     task: async (context: TaskContext) => {

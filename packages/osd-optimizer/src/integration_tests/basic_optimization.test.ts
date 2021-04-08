@@ -75,7 +75,7 @@ afterAll(async () => {
 it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
     dist: false,
   });
@@ -111,7 +111,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
-  assert('produce three bundle cache events while initializing', bundleCacheStates.length === 3);
+  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
 
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
@@ -126,7 +126,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
 
   const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce three "bundle not cached" events', bundleNotCachedEvents.length === 3);
+  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
 
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
@@ -185,26 +185,12 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
-
-  const baz = config.bundles.find((b) => b.id === 'baz')!;
-  expect(baz).toBeTruthy();
-  baz.cache.refresh();
-  expect(baz.cache.getModuleCount()).toBe(3);
-
-  expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
-    Array [
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/opensearch_dashboards.json,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
-      <absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js,
-    ]
-  `);
 });
 
 it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
     dist: false,
   });
@@ -225,7 +211,6 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initializing",
-      "initializing",
       "initialized",
       "success",
     ]
@@ -235,7 +220,7 @@ it('uses cache on second run and exist cleanly', async () => {
 it('prepares assets for distribution', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
     dist: true,
   });
@@ -248,7 +233,6 @@ it('prepares assets for distribution', async () => {
     'foo async bundle'
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
-  expectFileMatchesSnapshotWithCompression('x-pack/baz/target/public/baz.plugin.js', 'baz bundle');
 });
 
 /**

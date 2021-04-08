@@ -20,7 +20,7 @@ pipeline {
               stage('bootstrap') {
                   echo "Bootstrap here"
                   sh 'yarn osd bootstrap'
-                  sh 'node scripts/build_opensearch_dashboards_platform_plugins --oss --no-examples --workers 10'
+                  sh 'node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10'
               }
           }
         }

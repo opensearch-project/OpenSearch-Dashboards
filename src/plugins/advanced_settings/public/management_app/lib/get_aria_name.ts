@@ -24,7 +24,7 @@ import { words } from 'lodash';
  * @returns {string} a space delimited, lowercase string with
  *          special characters removed.
  *
- * Example: 'xPack:fooBar:foo_bar_baz' -> 'x pack foo bar foo bar baz'
+ * Example: 'doc_table:highlight' -> 'doc table highlight'
  */
 export function getAriaName(name?: string) {
   return words(name || '')

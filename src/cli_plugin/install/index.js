@@ -54,8 +54,8 @@ export function installCommand(program) {
     .description(
       'install a plugin',
       `Common examples:
-  install file:///Path/to/my/x-pack.zip
-  install https://path.to/my/x-pack.zip`
+  install file:///Path/to/my/plugin-example.zip
+  install https://path.to/my/plugin-example.zip`
     )
     .action(processCommand);
 }

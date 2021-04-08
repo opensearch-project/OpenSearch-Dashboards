@@ -27,15 +27,12 @@ import { download } from './download';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
-import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './opensearch_dashboards';
 
 const mkdir = promisify(Fs.mkdir);
 
 export async function install(settings, logger) {
   try {
-    errorIfXPackInstall(settings, logger);
-
     await cleanPrevious(settings, logger);
 
     await mkdir(settings.workingPath, { recursive: true });

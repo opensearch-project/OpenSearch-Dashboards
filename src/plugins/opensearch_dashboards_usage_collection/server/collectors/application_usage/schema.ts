@@ -60,41 +60,4 @@ export const applicationUsageSchema = {
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
   timeline: commonSchema,
   visualize: commonSchema,
-
-  // X-Pack
-  apm: commonSchema,
-  csm: commonSchema,
-  canvas: commonSchema,
-  dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
-  enterpriseSearch: commonSchema,
-  appSearch: commonSchema,
-  workplaceSearch: commonSchema,
-  graph: commonSchema,
-  logs: commonSchema,
-  metrics: commonSchema,
-  infra: commonSchema, // It's a forward app so we'll likely never report it
-  ingestManager: commonSchema,
-  lens: commonSchema,
-  maps: commonSchema,
-  ml: commonSchema,
-  monitoring: commonSchema,
-  'observability-overview': commonSchema,
-  security_account: commonSchema,
-  security_access_agreement: commonSchema,
-  security_capture_url: commonSchema, // It's a forward app so we'll likely never report it
-  security_logged_out: commonSchema,
-  security_login: commonSchema,
-  security_logout: commonSchema,
-  security_overwritten_session: commonSchema,
-  securitySolution: commonSchema, // It's a forward app so we'll likely never report it
-  'securitySolution:overview': commonSchema,
-  'securitySolution:detections': commonSchema,
-  'securitySolution:hosts': commonSchema,
-  'securitySolution:network': commonSchema,
-  'securitySolution:timelines': commonSchema,
-  'securitySolution:case': commonSchema,
-  'securitySolution:administration': commonSchema,
-  siem: commonSchema,
-  space_selector: commonSchema,
-  uptime: commonSchema,
 };

@@ -18,7 +18,6 @@ git pull --depth=1 origin master
 
 ### Usage
 
-You need to run the command twice: once for the **OSS** specs and once for the **X-Pack** specs  
 At the root of the OpenSearch Dashboards repository, run the following commands:
 
 ```sh

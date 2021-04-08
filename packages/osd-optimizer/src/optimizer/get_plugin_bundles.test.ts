@@ -50,13 +50,6 @@ it('returns a bundle for core and each plugin', () => {
           extraPublicDirs: [],
           manifestPath: '/outside/of/repo/plugins/baz/opensearch_dashboards.json',
         },
-        {
-          directory: '/repo/x-pack/plugins/box',
-          id: 'box',
-          isUiPlugin: true,
-          extraPublicDirs: [],
-          manifestPath: '/repo/x-pack/plugins/box/opensearch_dashboards.json',
-        },
       ],
       '/repo',
       '/output'
@@ -81,20 +74,6 @@ it('returns a bundle for core and each plugin', () => {
         "id": "baz",
         "manifestPath": <outsideOfRepo>/plugins/baz/opensearch_dashboards.json,
         "outputDir": <outsideOfRepo>/plugins/baz/target/public,
-        "publicDirNames": Array [
-          "public",
-        ],
-        "sourceRoot": <repoRoot>,
-        "type": "plugin",
-      },
-      Object {
-        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
-     * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
-    ",
-        "contextDir": <repoRoot>/x-pack/plugins/box,
-        "id": "box",
-        "manifestPath": <repoRoot>/x-pack/plugins/box/opensearch_dashboards.json,
-        "outputDir": <outputRoot>/x-pack/plugins/box/target/public,
         "publicDirNames": Array [
           "public",
         ],

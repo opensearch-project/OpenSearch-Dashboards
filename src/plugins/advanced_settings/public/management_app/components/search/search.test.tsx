@@ -26,7 +26,7 @@ import { Query } from '@elastic/eui';
 import { Search } from './search';
 
 const query = Query.parse('');
-const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
+const categories = ['general', 'dashboard', 'hiddenCategory'];
 
 describe('Search', () => {
   it('should render normally', async () => {

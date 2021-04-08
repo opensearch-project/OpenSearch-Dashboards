@@ -33,7 +33,7 @@ it('renders help if `--help` passed', () => {
   `);
 });
 
-it('build default and oss dist for current platform, without packages, by default', () => {
+it('build dist for current platform, without packages, by default', () => {
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {

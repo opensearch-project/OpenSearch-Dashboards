@@ -168,8 +168,7 @@ node scripts/i18n_integrate --source path/to/locale.json
 
 * `--source` path to the JSON file with translations that should be integrated.
 * `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from
-[.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of OpenSearch Dashboards built-in
-translations that are located in a single JSON file within `x-pack/translations` plugin.
+[.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of OpenSearch Dashboards built-in.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.
 * `--ignore-incompatible` specifies whether tool should ignore incompatible translations. It may be useful when the code base you're
 integrating translations to has changed and some default messages switched to ICU structure that is incompatible with the one used in corresponding translation.

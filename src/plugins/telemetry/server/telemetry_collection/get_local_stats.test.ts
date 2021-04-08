@@ -182,7 +182,7 @@ describe.skip('get_local_stats', () => {
   };
 
   describe.skip('handleLocalStats', () => {
-    it('returns expected object without xpack or OpenSearch Dashboards data', () => {
+    it('returns expected object without OpenSearch Dashboards data', () => {
       const result = handleLocalStats(
         clusterInfo,
         clusterStatsWithNodesUsage,

@@ -162,9 +162,9 @@ export function getClauseForReference(reference: HasReferenceQueryParams) {
 //
 // Additionally, we treat the `*` namespace as the `default` namespace.
 // In the Default Distribution, the `*` is automatically expanded to include all available namespaces.
-// However, the OSS distribution (and certain configurations of the Default Distribution) can allow the `*`
+// However, the distribution (and certain configurations of the Default Distribution) can allow the `*`
 // to pass through to the SO Repository, and eventually to this module. When this happens, we translate to `default`,
-// since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
+// since that is consistent with how a single-namespace search behaves in the distribution. Leaving the wildcard in place
 // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
 // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
 const normalizeNamespaces = (namespacesToNormalize?: string[]) =>

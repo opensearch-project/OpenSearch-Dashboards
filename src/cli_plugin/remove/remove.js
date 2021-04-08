@@ -21,15 +21,12 @@ import { statSync } from 'fs';
 
 import del from 'del';
 
-import { errorIfXPackRemove } from '../lib/error_if_x_pack';
-
 export function remove(settings, logger) {
   try {
     let stat;
     try {
       stat = statSync(settings.pluginPath);
     } catch (e) {
-      errorIfXPackRemove(settings, logger);
       throw new Error(`Plugin [${settings.plugin}] is not installed`);
     }
 
