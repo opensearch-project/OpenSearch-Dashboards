@@ -6,7 +6,7 @@ OpenSearch Dashboards is a visualization tool derived from Kibana 7.10.2.
 
 ## Current State
 
-We officially began work on the new fork on January 21st, 2021. Since then, we've been removing non-Apache code and doing a full deep rename of the project. As this is an early phase, we don't expect the codebase to be bug free or to work perfectly. If you find an issue, feel free to open an issue [here](https://github.com/opensearch-project/OpenSearch-Dashboards/issues). 
+We officially began work on the new fork on January 21st, 2021. Since then, we've been removing non-Apache 2.0 code and doing a full deep rename of the project. As this is an early phase, we don't expect the codebase to be bug free or to work perfectly. If you find an issue, feel free to open an issue [here](https://github.com/opensearch-project/OpenSearch-Dashboards/issues). 
 
 ## What works
 
