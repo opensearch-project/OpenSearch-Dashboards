@@ -1,4 +1,12 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -16,6 +24,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/*
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+const NEW_OSS_HEADER = `
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a 
+ * compatible open source license.
+ */
+`;
+
+const OSS_MODIFIED_HEADER = `
+/*
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+`;
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -121,7 +151,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: APACHE_2_0_LICENSE_HEADER,
+            license: NEW_OSS_HEADER,
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -186,10 +216,12 @@ module.exports = {
           'error',
           {
             licenses: [
+              NEW_OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              OSS_MODIFIED_HEADER,
             ],
           },
         ],
@@ -208,10 +240,12 @@ module.exports = {
           'error',
           {
             licenses: [
+              NEW_OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              OSS_MODIFIED_HEADER,
             ],
           },
         ],
