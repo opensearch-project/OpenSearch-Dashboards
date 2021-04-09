@@ -493,7 +493,7 @@ export class SenseEditor {
       const opensearchData = req.data;
 
       // this is the first url defined in opensearch.hosts
-      const url = opensearch.orgnstructOpenSearchUrl(opensearchBaseUrl, opensearchPath);
+      const url = opensearch.constructOpenSearchUrl(opensearchBaseUrl, opensearchPath);
 
       let ret = 'curl -X' + opensearchMethod + ' "' + url + '"';
       if (opensearchData && opensearchData.length) {
