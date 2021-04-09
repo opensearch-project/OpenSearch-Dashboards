@@ -18,7 +18,7 @@ We officially began work on the new fork on January 21st, 2021. Since then, we'v
 * Jest Integration Tests
 * CI / CD with DCO check
 
-## What doesn’t works
+## What doesn’t work
 
 * Functional test cases
 * 3rd party plugins (including OpenDistro)
@@ -50,7 +50,8 @@ Or
 To run Dashboards with OpenSearch
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
 * While OpenSearch is running locally, run ```yarn start```
-* You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
+* You can now navigate to ```http://localhost:5603``` where Dashboards runs by default
+* If you pass ```--no-base-path``` then it will default to port 5601
 
 ## Running tests
 
