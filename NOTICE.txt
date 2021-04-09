@@ -1,6 +1,7 @@
-Kibana source code with Kibana X-Pack source code
+OpenSearch
+Copyright 2021 OpenSearch Contributors
+This product includes software, including Kibana source code, developed by Elasticsearch (http://www.elastic.co).
 Copyright 2012-2021 Elasticsearch B.V.
-
 ---
 Pretty handling of logarithmic axes.
 Copyright (c) 2007-2014 IOLA and Ole Laursen.
