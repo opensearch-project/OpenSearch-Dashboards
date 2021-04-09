@@ -11,6 +11,6 @@
       "_analyze",
       "{indices}/_analyze"
     ],
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-analyze.html"
   }
 }

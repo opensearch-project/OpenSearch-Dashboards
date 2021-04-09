@@ -40,7 +40,7 @@ describe('CallOuts', () => {
     const component = shallow(
       <CallOuts
         deprecatedLangsInUse={['php']}
-        painlessDocLink="http://www.opensearch.co/painlessDocs"
+        painlessDocLink="http://www.opensearch.org/painlessDocs"
       />
     );
 
@@ -49,7 +49,7 @@ describe('CallOuts', () => {
 
   test('should render without any call outs', () => {
     const component = shallow(
-      <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.opensearch.co/painlessDocs" />
+      <CallOuts deprecatedLangsInUse={[]} painlessDocLink="http://www.opensearch.org/painlessDocs" />
     );
 
     expect(component).toMatchSnapshot();

@@ -232,21 +232,21 @@ test('opens XHR request and sends specified body', async () => {
   expect(env.xhr.send).toHaveBeenCalledTimes(0);
 
   fetchStreaming({
-    url: 'http://opensearch.co',
+    url: 'http://opensearch.org',
     method: 'GET',
     body: 'foobar',
   });
 
   expect(env.xhr.open).toHaveBeenCalledTimes(1);
   expect(env.xhr.send).toHaveBeenCalledTimes(1);
-  expect(env.xhr.open).toHaveBeenCalledWith('GET', 'http://opensearch.co');
+  expect(env.xhr.open).toHaveBeenCalledWith('GET', 'http://opensearch.org');
   expect(env.xhr.send).toHaveBeenCalledWith('foobar');
 });
 
 test('uses POST request method by default', async () => {
   const env = setup();
   fetchStreaming({
-    url: 'http://opensearch.co',
+    url: 'http://opensearch.org',
   });
-  expect(env.xhr.open).toHaveBeenCalledWith('POST', 'http://opensearch.co');
+  expect(env.xhr.open).toHaveBeenCalledWith('POST', 'http://opensearch.org');
 });

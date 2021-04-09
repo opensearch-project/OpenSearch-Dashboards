@@ -16,7 +16,7 @@ EE='localhost'
 
 ## Step 2. Generate PKCS12 key stores
 
-Using [opensearch-certutil](https://www.opensearch.co/guide/en/opensearch/reference/current/certutil.html):
+Using [opensearch-certutil](https://www.opensearch.org/guide/en/opensearch/reference/current/certutil.html):
 
 ```sh
 bin/opensearch-certutil ca --ca-dn "CN=Test Root CA" -days 18250 --out $CA1.p12 --pass castorepass

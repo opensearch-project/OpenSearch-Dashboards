@@ -61,19 +61,19 @@ export const createZoomWarningMsg = (function () {
               { wms } or { configSettings} for more information."
               values={{
                 defaultDistribution: (
-                  <a target="_blank" href="https://www.opensearch.co/downloads/kibana">
+                  <a target="_blank" href="https://www.opensearch.org/downloads/kibana">
                     {`default distribution `}
                   </a>
                 ),
                 ems: (
-                  <a target="_blank" href="https://www.opensearch.co/elastic-maps-service">
+                  <a target="_blank" href="https://www.opensearch.org/elastic-maps-service">
                     {`OpenSearch Maps Service`}
                   </a>
                 ),
                 wms: (
                   <a
                     target="_blank"
-                    href="https://www.opensearch.co/guide/en/kibana/current/tilemap.html"
+                    href="https://www.opensearch.org/guide/en/kibana/current/tilemap.html"
                   >
                     {`Custom WMS Configuration`}
                   </a>
@@ -81,7 +81,7 @@ export const createZoomWarningMsg = (function () {
                 configSettings: (
                   <a
                     target="_blank"
-                    href="https://www.opensearch.co/guide/en/kibana/current/settings.html"
+                    href="https://www.opensearch.org/guide/en/kibana/current/settings.html"
                   >
                     {`Custom TMS Using Config Settings`}
                   </a>

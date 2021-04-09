@@ -51,7 +51,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',
           values: {
             cellDimensionsLink:
-              `<a href="http://www.opensearch.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
+              `<a href="http://www.opensearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
             target="_blank" rel="noopener">` +
               i18n.translate(
                 'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',

@@ -26,6 +26,6 @@
     "patterns": [
       "_cat/tasks"
     ],
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/tasks.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/tasks.html"
   }
 }

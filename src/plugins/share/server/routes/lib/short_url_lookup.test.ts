@@ -36,9 +36,9 @@ import { SavedObjectsClientContract, SavedObject } from 'opensearch-dashboards/s
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
-  const ID = '631b8fa45c5d0b8948aaf38cc3a001ca';
+  const ID = 'a54b76ec86771ee865a0f74a305dfff8';
   const TYPE = 'url';
-  const URL = 'http://opensearch.co';
+  const URL = 'http://opensearch.org';
 
   let savedObjects: jest.Mocked<SavedObjectsClientContract>;
   let deps: { savedObjects: SavedObjectsClientContract };

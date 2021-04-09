@@ -168,7 +168,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
         defaultMessage: 'Used for the {dateNanosLink} datatype of OpenSearch',
         values: {
           dateNanosLink:
-            '<a href="https://www.opensearch.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.opensearch.org/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('core.ui_settings.params.dateNanosLinkTitle', {
               defaultMessage: 'date_nanos',
             }) +

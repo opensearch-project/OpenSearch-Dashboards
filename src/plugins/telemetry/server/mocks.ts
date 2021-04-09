@@ -42,7 +42,7 @@ export const telemetryPluginMock = {
 };
 
 function createSetupContract(): Setup {
-  const telemetryUrl = new URL('https://telemetry-staging.opensearch.co/xpack/MOCK_URL/send');
+  const telemetryUrl = new URL('https://telemetry-staging.opensearch.org/xpack/MOCK_URL/send');
   const setupContract: Setup = {
     getTelemetryUrl: jest.fn().mockResolvedValue(telemetryUrl),
   };

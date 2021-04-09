@@ -24,7 +24,7 @@ OpenSearch Dashboards has a special handling for the fields surrounded by "%".  
       %timefield%: @timestamp
 
 /*
-See .search() documentation for :  https://www.opensearch.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
+See .search() documentation for :  https://www.opensearch.org/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
 */
 
       // Which index to search

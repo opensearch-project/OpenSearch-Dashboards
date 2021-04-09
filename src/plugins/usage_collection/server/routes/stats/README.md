@@ -1,6 +1,6 @@
 # `/api/stats`
 
-This API returns the metrics for the OpenSearch Dashboards server and usage stats. It allows the [Metricbeat OpenSearch Dashboards module](https://www.opensearch.co/guide/en/beats/metricbeat/current/metricbeat-module-kibana.html) to collect the [stats metricset](https://www.opensearch.co/guide/en/beats/metricbeat/current/metricbeat-metricset-kibana-stats.html).
+This API returns the metrics for the OpenSearch Dashboards server and usage stats. It allows the [Metricbeat OpenSearch Dashboards module](https://www.opensearch.org/guide/en/beats/metricbeat/current/metricbeat-module-kibana.html) to collect the [stats metricset](https://www.opensearch.org/guide/en/beats/metricbeat/current/metricbeat-metricset-kibana-stats.html).
 
 By default, it returns the simplest level of stats; consisting of the OpenSearch Dashboards server's ops metrics, version, status, and basic config like the server name, host, port, and locale.
 

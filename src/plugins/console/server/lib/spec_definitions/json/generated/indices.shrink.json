@@ -13,6 +13,6 @@
     "patterns": [
       "{indices}/_shrink/{target}"
     ],
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
   }
 }

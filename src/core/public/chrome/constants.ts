@@ -31,9 +31,9 @@
  */
 
 // export const OPENSEARCH_DASHBOARDS_FEEDBACK_LINK =
-//  'https://www.opensearch.co/products/kibana/feedback?blade=kibanafeedback';
+//  'https://www.opensearch.org/products/kibana/feedback?blade=kibanafeedback';
 // export const OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK =
-// 'https://www.opensearch.co/products/kibana/ask-elastic?blade=kibanaaskelastic';
+// 'https://www.opensearch.org/products/kibana/ask-elastic?blade=kibanaaskelastic';
 // export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose';
 
 export const OPENSEARCH_DASHBOARDS_FEEDBACK_LINK = 'https://github.com/opensearch-project';
