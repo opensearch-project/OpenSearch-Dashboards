@@ -8,11 +8,11 @@
 #
 # eg. Setting the environment variable:
 #
-#       ELASTICSEARCH_LOGQUERIES=true
+#       OPENSEARCH_LOGQUERIES=true
 #
 # will cause OpenSearch Dashboards to be invoked with:
 #
-#       --elasticsearch.logQueries=true
+#       --opensearch.logQueries=true
 
 opensearch_dashboards_vars=(
     console.enabled
@@ -25,28 +25,28 @@ opensearch_dashboards_vars=(
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
-    elasticsearch.customHeaders
-    elasticsearch.hosts
-    elasticsearch.logQueries
-    elasticsearch.password
-    elasticsearch.pingTimeout
-    elasticsearch.requestHeadersWhitelist
-    elasticsearch.requestTimeout
-    elasticsearch.shardTimeout
-    elasticsearch.sniffInterval
-    elasticsearch.sniffOnConnectionFault
-    elasticsearch.sniffOnStart
-    elasticsearch.ssl.alwaysPresentCertificate
-    elasticsearch.ssl.certificate
-    elasticsearch.ssl.certificateAuthorities
-    elasticsearch.ssl.key
-    elasticsearch.ssl.keyPassphrase
-    elasticsearch.ssl.keystore.path
-    elasticsearch.ssl.keystore.password
-    elasticsearch.ssl.truststore.path
-    elasticsearch.ssl.truststore.password
-    elasticsearch.ssl.verificationMode
-    elasticsearch.username
+    opensearch.customHeaders
+    opensearch.hosts
+    opensearch.logQueries
+    opensearch.password
+    opensearch.pingTimeout
+    opensearch.requestHeadersWhitelist
+    opensearch.requestTimeout
+    opensearch.shardTimeout
+    opensearch.sniffInterval
+    opensearch.sniffOnConnectionFault
+    opensearch.sniffOnStart
+    opensearch.ssl.alwaysPresentCertificate
+    opensearch.ssl.certificate
+    opensearch.ssl.certificateAuthorities
+    opensearch.ssl.key
+    opensearch.ssl.keyPassphrase
+    opensearch.ssl.keystore.path
+    opensearch.ssl.keystore.password
+    opensearch.ssl.truststore.path
+    opensearch.ssl.truststore.password
+    opensearch.ssl.verificationMode
+    opensearch.username
     i18n.locale
     interpreter.enableInVisualize
     opensearchDashboards.autocompleteTerminateAfter
@@ -76,15 +76,15 @@ opensearch_dashboards_vars=(
     monitoring.enabled
     monitoring.opensearchDashboards.collection.enabled
     monitoring.opensearchDashboards.collection.interval
-    monitoring.ui.container.elasticsearch.enabled
+    monitoring.ui.container.opensearch.enabled
     monitoring.ui.container.logstash.enabled
-    monitoring.ui.elasticsearch.password
-    monitoring.ui.elasticsearch.pingTimeout
-    monitoring.ui.elasticsearch.hosts
-    monitoring.ui.elasticsearch.username
-    monitoring.ui.elasticsearch.logFetchCount
-    monitoring.ui.elasticsearch.ssl.certificateAuthorities
-    monitoring.ui.elasticsearch.ssl.verificationMode
+    monitoring.ui.opensearch.password
+    monitoring.ui.opensearch.pingTimeout
+    monitoring.ui.opensearch.hosts
+    monitoring.ui.opensearch.username
+    monitoring.ui.opensearch.logFetchCount
+    monitoring.ui.opensearch.ssl.certificateAuthorities
+    monitoring.ui.opensearch.ssl.verificationMode
     monitoring.ui.enabled
     monitoring.ui.max_bucket_size
     monitoring.ui.min_interval_seconds
@@ -162,7 +162,7 @@ opensearch_dashboards_vars=(
     xpack.code.security.gitProtocolWhitelist
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
-    xpack.fleet.agents.elasticsearch.host
+    xpack.fleet.agents.opensearch.host
     xpack.fleet.agents.opensearchDashboards.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.graph.enabled
@@ -264,7 +264,7 @@ opensearch_dashboards_vars=(
 
 longopts=''
 for opensearch_dashboards_var in ${opensearch_dashboards_vars[*]}; do
-    # 'elasticsearch.hosts' -> 'ELASTICSEARCH_HOSTS'
+    # 'opensearch.hosts' -> 'OPENSEARCH_HOSTS'
     env_var=$(echo ${opensearch_dashboards_var^^} | tr . _)
 
     # Indirectly lookup env var values via the name of the var.
