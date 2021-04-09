@@ -171,7 +171,7 @@ export class GuideNav extends Component {
             <span className="guideNav__version">{this.props.version}</span>
           </Link>
           <a
-            href="http://opensearch.co"
+            href="http://opensearch.org"
             className="guideNav__elasticLogo"
             aria-label="Go to the Elastic website"
           />

@@ -114,7 +114,7 @@ export function Doc(props: DocProps) {
               values={{ indexName: props.index }}
             />{' '}
             <EuiLink
-              href={`https://www.opensearch.co/guide/en/elasticsearch/reference/${
+              href={`https://www.opensearch.org/guide/en/elasticsearch/reference/${
                 getServices().metadata.branch
               }/indices-exists.html`}
               target="_blank"

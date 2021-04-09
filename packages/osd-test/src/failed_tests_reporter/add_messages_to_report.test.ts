@@ -239,9 +239,9 @@ it('rewrites mocha reports with minimal changes', async () => {
     +
            ‹/system-out›
     -      ‹failure›
-    -        ‹![CDATA[Error: Unable to read artifact info from https://artifacts-api.opensearch.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+    -        ‹![CDATA[Error: Unable to read artifact info from https://artifacts-api.opensearch.org/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
     +      ‹failure›‹![CDATA[
-    +        Error: Unable to read artifact info from https://artifacts-api.opensearch.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+    +        Error: Unable to read artifact info from https://artifacts-api.opensearch.org/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
        ‹html›
      ‹head›‹title›503 Service Temporarily Unavailable‹/title›‹/head›
      ‹body bgcolor="white"›

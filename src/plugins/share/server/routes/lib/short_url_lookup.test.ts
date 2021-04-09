@@ -38,7 +38,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/s
 describe('shortUrlLookupProvider', () => {
   const ID = '631b8fa45c5d0b8948aaf38cc3a001ca';
   const TYPE = 'url';
-  const URL = 'http://opensearch.co';
+  const URL = 'http://opensearch.org';
 
   let savedObjects: jest.Mocked<SavedObjectsClientContract>;
   let deps: { savedObjects: SavedObjectsClientContract };

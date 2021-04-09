@@ -654,7 +654,7 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 describe('shortUrlLookup', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
   const TYPE = 'url';
-  const URL = 'http://opensearch.co';
+  const URL = 'http://opensearch.org';
 
   const mockSavedObjectsClient = savedObjectsClientMock.create();
 

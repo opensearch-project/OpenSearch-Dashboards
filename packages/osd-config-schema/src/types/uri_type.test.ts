@@ -51,8 +51,8 @@ test('returns value for valid URI as per RFC3986', () => {
   expect(uriSchema.validate('ftp://ftp.ietf.org/rfc/rfc3986.txt')).toBe(
     'ftp://ftp.ietf.org/rfc/rfc3986.txt'
   );
-  expect(uriSchema.validate('mailto:Platform.OpenSearchDashboards@opensearch.co')).toBe(
-    'mailto:Platform.OpenSearchDashboards@opensearch.co'
+  expect(uriSchema.validate('mailto:Platform.OpenSearchDashboards@opensearch.org')).toBe(
+    'mailto:Platform.OpenSearchDashboards@opensearch.org'
   );
   expect(uriSchema.validate('tel:+500-111-222-333')).toBe('tel:+500-111-222-333');
   expect(uriSchema.validate('file:///opensearch_dashboards.log')).toBe(
@@ -98,14 +98,14 @@ describe('#scheme', () => {
   test('returns value when URI has required scheme', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(uriSchema.validate('http://opensearch.co')).toBe('http://opensearch.co');
-    expect(uriSchema.validate('https://opensearch.co')).toBe('https://opensearch.co');
+    expect(uriSchema.validate('http://opensearch.org')).toBe('http://opensearch.org');
+    expect(uriSchema.validate('https://opensearch.org')).toBe('https://opensearch.org');
   });
 
   test('returns error when shorter string', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(() => uriSchema.validate('ftp://opensearch.co')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => uriSchema.validate('ftp://opensearch.org')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
     expect(() =>

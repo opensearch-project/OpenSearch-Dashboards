@@ -9,7 +9,7 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
       values={
         Object {
           "privacyStatementLink": <EuiLink
-            href="https://www.opensearch.co/legal/privacy-statement"
+            href="https://www.opensearch.org/legal/privacy-statement"
             target="_blank"
           >
             <FormattedMessage
@@ -111,7 +111,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   values={
                     Object {
                       "privacyStatementLink": <EuiLink
-                        href="https://www.opensearch.co/legal/privacy-statement"
+                        href="https://www.opensearch.org/legal/privacy-statement"
                         target="_blank"
                       >
                         <FormattedMessage

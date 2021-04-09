@@ -19,6 +19,6 @@
         "rest_actions"
       ]
     },
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/cluster-nodes-usage.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-usage.html"
   }
 }

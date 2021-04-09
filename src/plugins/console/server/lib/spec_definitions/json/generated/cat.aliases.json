@@ -22,6 +22,6 @@
       "_cat/aliases",
       "_cat/aliases/{name}"
     ],
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/cat-alias.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-alias.html"
   }
 }

@@ -28,6 +28,6 @@
       "{indices}/_mappings",
       "_mapping/{type}"
     ],
-    "documentation": "https://www.opensearch.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
+    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
   }
 }

@@ -105,7 +105,7 @@ async function getBody(
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
-  // https://www.opensearch.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+  // https://www.opensearch.org/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 

@@ -18,7 +18,7 @@ The `setup` function exposes the following interface:
   An async function that resolves into the telemetry Url used to send telemetry. The url is wrapped with node's [URL constructor](https://nodejs.org/api/url.html). Here is an example on how to grab the url origin:
   ```
   const telemetryUrl = await getTelemetryUrl();
-    > telemetryUrl.origin; // 'https://telemetry.opensearch.co'
+    > telemetryUrl.origin; // 'https://telemetry.opensearch.org'
   ```
   Note that the telemetry URL is a opensearch_dashboards.yml configuration hence it is recommended to call the `getTelemetryUrl` everytime before using the actual url.
 

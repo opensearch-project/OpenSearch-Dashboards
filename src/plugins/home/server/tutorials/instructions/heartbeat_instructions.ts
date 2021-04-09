@@ -46,7 +46,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'tar xzvf heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
         'cd heartbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
@@ -60,12 +60,12 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-amd64.deb',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-amd64.deb',
         'sudo dpkg -i heartbeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.co/downloads/beats/heartbeat' },
+        values: { link: 'https://www.opensearch.org/downloads/beats/heartbeat' },
       }),
     },
     RPM: {
@@ -77,12 +77,12 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
         'sudo rpm -vi heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.co/downloads/beats/heartbeat' },
+        values: { link: 'https://www.opensearch.org/downloads/beats/heartbeat' },
       }),
     },
     WINDOWS: {
@@ -105,7 +105,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             heartbeatLink:
               '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
-            opensearchLink: 'https://www.opensearch.co/downloads/beats/heartbeat',
+            opensearchLink: 'https://www.opensearch.org/downloads/beats/heartbeat',
           },
         }
       ),
@@ -360,7 +360,7 @@ export function heartbeatEnableInstructionsCloud() {
   const defaultCommands = [
     'heartbeat.monitors:',
     '- type: http',
-    '  urls: ["http://opensearch.co"]',
+    '  urls: ["http://opensearch.org"]',
     '  schedule: "@every 10s"',
   ];
   const defaultTextPost = i18n.translate(

@@ -40,11 +40,11 @@ export const configSchema = schema.object({
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
-  emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.opensearch.co' }),
-  emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.opensearch.co' }),
-  emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.opensearch.co/v7.10' }),
+  emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.opensearch.org' }),
+  emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.opensearch.org' }),
+  emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.opensearch.org/v7.10' }),
   emsFontLibraryUrl: schema.string({
-    defaultValue: 'https://tiles.maps.opensearch.co/fonts/{fontstack}/{range}.pbf',
+    defaultValue: 'https://tiles.maps.opensearch.org/fonts/{fontstack}/{range}.pbf',
   }),
   emsTileLayerId: schema.object({
     bright: schema.string({ defaultValue: 'road_map' }),

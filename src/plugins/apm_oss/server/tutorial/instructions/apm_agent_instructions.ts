@@ -480,7 +480,7 @@ export const createGoAgentInstructions = (apmServerUrl = '', secretToken = '') =
     textPre: i18n.translate('apmOss.tutorial.goClient.install.textPre', {
       defaultMessage: 'Install the APM agent packages for Go.',
     }),
-    commands: ['go get go.opensearch.co/apm'],
+    commands: ['go get go.opensearch.org/apm'],
   },
   {
     title: i18n.translate('apmOss.tutorial.goClient.configure.title', {
@@ -539,7 +539,7 @@ by using the tracer API directly.',
 import (
 	"net/http"
 
-	"go.opensearch.co/apm/module/apmhttp"
+	"go.opensearch.org/apm/module/apmhttp"
 )
 
 func main() {curlyOpen}

@@ -67,7 +67,7 @@ export const createLogstashInstructions = () => ({
           }
         ),
         commands: [
-          'curl -L -O https://artifacts.opensearch.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.tar.gz',
+          'curl -L -O https://artifacts.opensearch.org/downloads/logstash/logstash-{config.opensearchDashboards.version}.tar.gz',
           'tar xzvf logstash-{config.opensearchDashboards.version}.tar.gz',
         ],
       },
@@ -109,7 +109,7 @@ export const createLogstashInstructions = () => ({
               logstashLink:
                 '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
               opensearchLink:
-                'https://artifacts.opensearch.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
+                'https://artifacts.opensearch.org/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
             },
           }
         ),

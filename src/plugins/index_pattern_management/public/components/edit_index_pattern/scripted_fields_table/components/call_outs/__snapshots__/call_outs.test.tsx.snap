@@ -21,7 +21,7 @@ exports[`CallOuts should render normally 1`] = `
           Object {
             "deprecatedLangsInUse": "php",
             "link": <EuiLink
-              href="http://www.opensearch.co/painlessDocs"
+              href="http://www.opensearch.org/painlessDocs"
             >
               <FormattedMessage
                 defaultMessage="Painless"

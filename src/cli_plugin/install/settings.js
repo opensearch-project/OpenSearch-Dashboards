@@ -39,7 +39,7 @@ import { fromRoot } from '../../core/server/utils';
 function generateUrls({ version, plugin }) {
   return [
     plugin,
-    `https://artifacts.opensearch.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
+    `https://artifacts.opensearch.org/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
   ];
 }
 
