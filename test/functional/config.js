@@ -62,7 +62,6 @@ export default async function ({ readConfigFile }) {
       ...commonConfig.get('osdTestServer'),
       serverArgs: [
         ...commonConfig.get('osdTestServer.serverArgs'),
-        '--oss',
         // '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
       ],
