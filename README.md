@@ -29,6 +29,35 @@ Here are the principles we use to guide our development.  From [opensearch.org](
 >
 >**8. A place to invent**. You will be able to innovate rapidly. This project will have a stable and predictable foundation that is modular, making it easy to extend.
 
+## Getting Started
+
+To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
+* Clone the OpenSearch repo with ```git clone git@github.com:opensearch-project/OpenSearch.git```
+* Follow installation and setup instructions in the OpenSearch repo
+* Run ```./gradlew assemble``` to generate build artifacts for all platforms
+* Run ```./gradlew run -Drun.distribution=oss``` to run the oss build
+
+Or
+* You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory with ```tar -xvf /path/to/tar/file```
+* After extracting, run ```bin/opensearch``` inside of the extracted build artifact dir
+
+To run Dashboards with OpenSearch
+* Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
+* While OpenSearch is running locally, run ```yarn start```
+* You can now navigate to ```http://localhost:5603``` where Dashboards runs by default
+* If you pass ```--no-base-path``` then it will default to port 5601
+
+## Running tests
+
+### Jest Unit Tests
+
+Run the command ```yarn test:jest``` in the OpenSearch Dashboards project directory to run unit tests
+
+### Jest Integration Tests
+
+For the integration tests, you must pass the absolute path of your extracted OpenSearch build artifacts through the ```TEST_OPENSEARCH_FROM``` env variable so that Dashboards can run an OpenSearch cluster. You can run:
+```TEST_OPENSEARCH_FROM=/path/to/extracted/build/artifact yarn test:jest_integration```
+
 ## How you can help
 
 ### Look for the tag "help wanted"
