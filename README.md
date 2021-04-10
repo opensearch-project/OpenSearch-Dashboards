@@ -67,6 +67,6 @@ If you're excited to jump in, we've marked a few issues that would be [really he
 ### Watch the forum, because there are a bunch of things we want to talk about
 As we've been working, we've come up with a bunch of questions that we wanted to get community feedback on.  Now that we're done with this first pass of renaming, you'll see us posting those questions to the [forums](https://discuss.opendistrocommunity.dev/).  Please let us know your thoughts!
 
-### Questions?  Feedback?
+### Questions? Feedback?
 
-Let us know in the [forums](https://discuss.opendistrocommunity.dev/).
+Let us know in the [forums](https://discuss.opendistrocommunity.dev/). w00t!!!
