@@ -28,4 +28,4 @@ jobs:
     - run: yarn osd bootstrap
     - run: yarn lint
     # TODO: Remove -u https://github.com/opensearch-project/OpenSearch-Dashboards/issues/278
-    - run: yarn test:jest -u
+    - run: yarn test:jest -u --ci
