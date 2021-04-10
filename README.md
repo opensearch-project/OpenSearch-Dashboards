@@ -1,4 +1,4 @@
-# OpenSearch
+# OpenSearch Dashboards
 
 Hello!
 
