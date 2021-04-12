@@ -30,6 +30,7 @@ export const PartitionLayout = Object.freeze({
   treemap: 'treemap' as const,
   icicle: 'icicle' as const,
   flame: 'flame' as const,
+  mosaic: 'mosaic' as const,
 });
 
 /** @public */

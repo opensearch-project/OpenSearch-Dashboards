@@ -30,7 +30,7 @@ import {
   QuadViewModel,
   ShapeViewModel,
 } from '../../layout/types/viewmodel_types';
-import { isSunburst, isTreemap } from '../../layout/viewmodel/viewmodel';
+import { isSunburst, isTreemap, isMosaic } from '../../layout/viewmodel/viewmodel';
 import { ContinuousDomainFocus, IndexedContinuousDomainFocus } from '../canvas/partition';
 
 interface HighlightSet extends PartitionSmallMultiplesModel {
@@ -123,7 +123,8 @@ function renderGeometries(
 ) {
   const maxDepth = geoms.reduce((acc, geom) => Math.max(acc, geom.depth), 0);
   // we should render only the deepest geometries of the tree to avoid overlaying highlighted geometries
-  const highlightedGeoms = isTreemap(partitionLayout) ? geoms.filter((g) => g.depth >= maxDepth) : geoms;
+  const highlightedGeoms =
+    isTreemap(partitionLayout) || isMosaic(partitionLayout) ? geoms.filter((g) => g.depth >= maxDepth) : geoms;
   const renderGeom = isSunburst(partitionLayout) ? renderSector : renderRectangles;
   return highlightedGeoms.map((geometry, index) =>
     renderGeom(

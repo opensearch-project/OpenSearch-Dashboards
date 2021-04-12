@@ -35,7 +35,7 @@ import {
   NodeSorter,
   Sorter,
 } from '../utils/group_by_rollup';
-import { isSunburst, isTreemap } from './viewmodel';
+import { isMosaic, isSunburst, isTreemap } from './viewmodel';
 
 function aggregateComparator(accessor: (v: any) => any, sorter: Sorter): NodeSorter {
   return (a, b) => sorter(accessor(a), accessor(b));
@@ -50,6 +50,7 @@ const childOrders = {
 };
 
 const descendingValueNodes = aggregateComparator(mapEntryValue, childOrders.descending);
+const ascendingValueNodes = aggregateComparator(mapEntryValue, childOrders.ascending);
 
 /**
  * @internal
@@ -78,8 +79,15 @@ export function getHierarchyOfArrays(
   return mapsToArrays(groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts), sortSpecs);
 }
 
-const sorter = (layout: PartitionLayout) => ({ sortPredicate }: Layer) =>
-  sortPredicate || (isTreemap(layout) || isSunburst(layout) ? descendingValueNodes : null);
+const sorter = (layout: PartitionLayout) => ({ sortPredicate }: Layer, i: number) =>
+  sortPredicate ||
+  (isTreemap(layout) || isSunburst(layout)
+    ? descendingValueNodes
+    : isMosaic(layout)
+    ? i === 2
+      ? ascendingValueNodes
+      : descendingValueNodes
+    : null);
 
 /** @internal */
 export function partitionTree(

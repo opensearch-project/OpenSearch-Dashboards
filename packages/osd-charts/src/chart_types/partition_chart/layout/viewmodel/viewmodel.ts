@@ -60,7 +60,7 @@ import {
   pathAccessor,
 } from '../utils/group_by_rollup';
 import { sunburst } from '../utils/sunburst';
-import { getTopPadding, treemap } from '../utils/treemap';
+import { getTopPadding, LayerLayout, treemap } from '../utils/treemap';
 import {
   fillTextLayout,
   getRectangleRowGeometry,
@@ -69,6 +69,9 @@ import {
   nodeId,
 } from './fill_text_layout';
 import { linkTextLayout } from './link_text_layout';
+
+/** @internal */
+export const isMosaic = (p: PartitionLayout | undefined) => p === PartitionLayout.mosaic;
 
 /** @internal */
 export const isTreemap = (p: PartitionLayout | undefined) => p === PartitionLayout.treemap;
@@ -236,7 +239,8 @@ const rawChildNodes = (
       return sunburst(tree, sunburstAreaAccessor, { x0: 0, y0: -1 }, clockwiseSectors, specialFirstInnermostSector);
 
     case PartitionLayout.treemap:
-      const treemapInnerArea = isTreemap(partitionLayout) ? width * height : 1; // assuming 1 x 1 unit square
+    case PartitionLayout.mosaic:
+      const treemapInnerArea = width * height; // assuming 1 x 1 unit square
       const treemapValueToAreaScale = treemapInnerArea / totalValue;
       const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
       return treemap(
@@ -250,7 +254,7 @@ const rawChildNodes = (
           width,
           height,
         },
-        [],
+        isMosaic(partitionLayout) ? [LayerLayout.vertical, LayerLayout.horizontal] : [],
       );
 
     case PartitionLayout.icicle:
@@ -313,6 +317,7 @@ export function shapeViewModel(
   const { marginLeftPx, marginTopPx, panelInnerWidth, panelInnerHeight } = panel;
 
   const treemapLayout = isTreemap(partitionLayout);
+  const mosaicLayout = isMosaic(partitionLayout);
   const sunburstLayout = isSunburst(partitionLayout);
   const icicleLayout = isIcicle(partitionLayout);
   const flameLayout = isFlame(partitionLayout);
@@ -400,7 +405,7 @@ export function shapeViewModel(
     : simpleLinear
     ? () => [] // no multirow layout needed for simpleLinear partitions
     : fillTextLayout(
-        rectangleConstruction(treeHeight, treemapLayout ? topGroove : null),
+        rectangleConstruction(treeHeight, treemapLayout || mosaicLayout ? topGroove : null),
         getRectangleRowGeometry,
         () => 0,
       );
@@ -414,7 +419,7 @@ export function shapeViewModel(
     layers,
     textFillOrigins,
     !sunburstLayout,
-    !treemapLayout,
+    !(treemapLayout || mosaicLayout),
   );
 
   // whiskers (ie. just lines, no text) for fill text outside the outer radius
@@ -424,7 +429,7 @@ export function shapeViewModel(
   const currentY = [-height, -height, -height, -height];
 
   const nodesWithoutRoom =
-    fillOutside || treemapLayout || icicleLayout || flameLayout
+    fillOutside || treemapLayout || mosaicLayout || icicleLayout || flameLayout
       ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
       : quadViewModel.filter((n: ShapeTreeNode) => {
           const id = nodeId(n);
