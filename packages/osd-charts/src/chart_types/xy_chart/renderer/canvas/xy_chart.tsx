@@ -48,12 +48,13 @@ import {
 import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_series_geometries';
 import { getAxesStylesSelector } from '../../state/selectors/get_axis_styles';
 import { getHighlightedSeriesSelector } from '../../state/selectors/get_highlighted_series';
+import { getSeriesTypes } from '../../state/selectors/get_series_types';
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { Geometries, Transform } from '../../state/utils/types';
 import { LinesGrid } from '../../utils/grid_lines';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
-import { AxisSpec, AnnotationSpec } from '../../utils/specs';
+import { AxisSpec, AnnotationSpec, SeriesType } from '../../utils/specs';
 import { renderXYChartCanvas2d } from './renderers';
 
 /** @internal */
@@ -76,6 +77,7 @@ export interface ReactiveChartStateProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
   panelGeoms: PanelGeoms;
+  seriesTypes: Set<SeriesType>;
 }
 
 interface ReactiveChartDispatchProps {
@@ -152,6 +154,7 @@ class XYChartComponent extends React.Component<XYChartProps> {
       initialized,
       isChartEmpty,
       chartContainerDimensions: { width, height },
+      seriesTypes,
     } = this.props;
 
     if (!initialized || isChartEmpty) {
@@ -159,20 +162,29 @@ class XYChartComponent extends React.Component<XYChartProps> {
       return null;
     }
 
+    const chartSeriesTypes =
+      seriesTypes.size > 1 ? `Mixed chart: ${[...seriesTypes].join(' and ')} chart` : `${[...seriesTypes]} chart`;
+
     return (
-      <canvas
-        ref={forwardStageRef}
-        className="echCanvasRenderer"
-        width={width * this.devicePixelRatio}
-        height={height * this.devicePixelRatio}
-        style={{
-          width,
-          height,
-        }}
-        aria-label="Chart"
-        // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
-        role="img"
-      />
+      <figure>
+        <canvas
+          ref={forwardStageRef}
+          className="echCanvasRenderer"
+          width={width * this.devicePixelRatio}
+          height={height * this.devicePixelRatio}
+          style={{
+            width,
+            height,
+          }}
+          // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
+          role="presentation"
+        >
+          <dl className="echScreen-reader">
+            <dt>Chart type</dt>
+            <dd>{chartSeriesTypes}</dd>
+          </dl>
+        </canvas>
+      </figure>
     );
   }
 }
@@ -224,6 +236,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
   annotationDimensions: new Map(),
   annotationSpecs: [],
   panelGeoms: [],
+  seriesTypes: new Set(),
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
@@ -252,6 +265,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     annotationDimensions: computeAnnotationDimensionsSelector(state),
     annotationSpecs: getAnnotationSpecsSelector(state),
     panelGeoms: computePanelsSelectors(state),
+    seriesTypes: getSeriesTypes(state),
   };
 };
 

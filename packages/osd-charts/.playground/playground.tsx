@@ -19,29 +19,32 @@
 
 import React from 'react';
 
-import { Chart, BarSeries, ScaleType, LineAnnotation, AnnotationDomainTypes, LineAnnotationDatum } from '../src';
+import { Chart, AreaSeries, LineSeries, BarSeries, ScaleType } from '../src';
 
-function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
-  return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
-}
 export class Playground extends React.Component {
   render() {
     return (
       <div className="App">
         <Chart size={[500, 200]}>
-          <LineAnnotation
-            domainType={AnnotationDomainTypes.XDomain}
-            id="ann"
-            dataValues={[{ dataValue: 'bags' }]}
-            marker={<div style={{ background: 'red' }}>hello</div>}
-            // markerPosition="top"
+          <AreaSeries
+            id="lines"
+            name="test2"
+            data={[
+              { x: 'trousers', y: 300, val: 1232 },
+              { x: 'watches', y: 20, val: 1232 },
+              { x: 'bags', y: 700, val: 1232 },
+              { x: 'cocktail dresses', y: 804, val: 1232 },
+            ]}
           />
-          <LineAnnotation
-            domainType={AnnotationDomainTypes.YDomain}
-            id="ann1"
-            dataValues={generateAnnotationData([30])}
-            marker={<div style={{ background: 'yellow' }}>Horizontal</div>}
-            // markerPosition="right"
+          <LineSeries
+            id="lines2"
+            name="test"
+            data={[
+              { x: 'trousers', y: 300, val: 1232 },
+              { x: 'watches', y: 20, val: 1232 },
+              { x: 'bags', y: 700, val: 1232 },
+              { x: 'cocktail dresses', y: 804, val: 1232 },
+            ]}
           />
           <BarSeries
             id="bars"

@@ -72,8 +72,19 @@ exports[`Chart should render the legend name test 1`] = `
                   </Crosshair>
                 </Connect(Crosshair)>
                 <Connect(XYChart) forwardStageRef={{...}}>
-                  <XYChart forwardStageRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} onChartRendered={[Function (anonymous)]}>
-                    <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} aria-label=\\"Chart\\" role=\\"img\\" />
+                  <XYChart forwardStageRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} seriesTypes={{...}} onChartRendered={[Function (anonymous)]}>
+                    <figure>
+                      <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} role=\\"presentation\\">
+                        <dl className=\\"echScreen-reader\\">
+                          <dt>
+                            Chart type
+                          </dt>
+                          <dd>
+                            bar chart
+                          </dd>
+                        </dl>
+                      </canvas>
+                    </figure>
                   </XYChart>
                 </Connect(XYChart)>
                 <Connect(Tooltip) getChartContainerRef={[Function (anonymous)]}>
