@@ -43,11 +43,15 @@ const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 beforeEach(async () => {
-  await del(GENERATED_DIR, { force: true });
+  await del([`${GENERATED_DIR}/**`, `!${GENERATED_DIR}`, `!${GENERATED_DIR}/.gitignore`], {
+    force: true,
+  });
 });
 
 afterEach(async () => {
-  await del(GENERATED_DIR, { force: true });
+  await del([`${GENERATED_DIR}/**`, `!${GENERATED_DIR}`, `!${GENERATED_DIR}/.gitignore`], {
+    force: true,
+  });
 });
 
 it('generates a plugin', async () => {
@@ -66,6 +70,7 @@ it('generates a plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/.gitignore,
       <absolute path>/plugins/foo/.eslintrc.js,
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/.i18nrc.json,
@@ -105,6 +110,7 @@ it('generates a plugin without UI', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/.gitignore,
       <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/.i18nrc.json,
@@ -137,6 +143,7 @@ it('generates a plugin without server plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/.gitignore,
       <absolute path>/plugins/baz/.eslintrc.js,
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/.i18nrc.json,
