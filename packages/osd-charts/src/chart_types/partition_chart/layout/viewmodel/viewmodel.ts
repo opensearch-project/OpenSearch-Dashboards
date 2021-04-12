@@ -239,12 +239,19 @@ const rawChildNodes = (
       const treemapInnerArea = isTreemap(partitionLayout) ? width * height : 1; // assuming 1 x 1 unit square
       const treemapValueToAreaScale = treemapInnerArea / totalValue;
       const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
-      return treemap(tree, treemapAreaAccessor, topGrooveAccessor(topGroove), grooveAccessor, {
-        x0: 0,
-        y0: 0,
-        width,
-        height,
-      });
+      return treemap(
+        tree,
+        treemapAreaAccessor,
+        topGrooveAccessor(topGroove),
+        grooveAccessor,
+        {
+          x0: 0,
+          y0: 0,
+          width,
+          height,
+        },
+        [],
+      );
 
     case PartitionLayout.icicle:
     case PartitionLayout.flame:

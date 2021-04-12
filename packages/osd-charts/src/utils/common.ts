@@ -21,6 +21,7 @@ import { $Values } from 'utility-types';
 import { v1 as uuidV1 } from 'uuid';
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { AdditiveNumber } from './accessor';
 import { Point } from './point';
 
 /** @public */
@@ -465,7 +466,7 @@ export function getUniqueValues<T>(fullArray: T[], uniqueProperty: keyof T, filt
 /** @public */
 export type ValueFormatter = (value: number) => string;
 /** @public */
-export type ValueAccessor = (d: Datum) => number;
+export type ValueAccessor = (d: Datum) => AdditiveNumber;
 /** @public */
 export type LabelAccessor = (value: PrimitiveValue) => string;
 /** @public */

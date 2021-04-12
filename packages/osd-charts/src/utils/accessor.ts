@@ -100,9 +100,6 @@ export function getAccessorFormatLabel(accessor: AccessorFormat, label: string):
 
 /**
  * Helper function to get accessor value from string, number or function
- *
- * @param  {Datum} datum
- * @param  {AccessorString|AccessorFn} accessor
  * @internal
  */
 export function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
@@ -112,3 +109,9 @@ export function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) 
 
   return datum[accessor];
 }
+
+/**
+ * Additive numbers: numbers whose semantics are conducive to addition; eg. counts and sums are additive, but averages aren't
+ * @public
+ */
+export type AdditiveNumber = number;

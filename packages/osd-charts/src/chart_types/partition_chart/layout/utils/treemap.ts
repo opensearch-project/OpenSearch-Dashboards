@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { $Values as Values } from 'utility-types';
+
 import { GOLDEN_RATIO } from '../../../../common/constants';
 import { Pixels } from '../../../../common/geometry';
 import { Part } from '../../../../common/text_utils';
-import { ArrayEntry, CHILDREN_KEY, entryValue, HierarchyOfArrays } from './group_by_rollup';
+import { ArrayEntry, CHILDREN_KEY, DEPTH_KEY, entryValue, HierarchyOfArrays } from './group_by_rollup';
 
 const MAX_U_PADDING_RATIO = 0.0256197; // this limits area distortion to <10% (which occurs due to pixel padding) with very small rectangles
 const MAX_TOP_PADDING_RATIO = 0.33; // this limits further area distortion to ~33%
@@ -62,7 +64,28 @@ const NullLayoutElement: LayoutElement = {
   sectionOffsets: [],
 };
 
-function bestVector(nodes: HierarchyOfArrays, height: number, areaAccessor: (e: ArrayEntry) => number): LayoutElement {
+/**
+ * Specifies whether partitions are laid out horizontally, vertically or treemap-like tiling for preferably squarish aspect ratios
+ * @public
+ */
+export const LayerLayout = Object.freeze({
+  horizontal: 'horizontal' as const,
+  vertical: 'vertical' as const,
+  squarifying: 'squarifying' as const,
+});
+
+/**
+ * Specifies whether partitions are laid out horizontally, vertically or treemap-like tiling for preferably squarish aspect ratios
+ * @public
+ */
+export type LayerLayout = Values<typeof LayerLayout>; // could use ValuesType<typeof HierarchicalChartTypes>
+
+function bestVector(
+  nodes: HierarchyOfArrays,
+  height: number,
+  areaAccessor: (e: ArrayEntry) => number,
+  layout: LayerLayout,
+): LayoutElement {
   let previousWorstAspectRatio = -1;
   let currentWorstAspectRatio = 0;
 
@@ -75,9 +98,9 @@ function bestVector(nodes: HierarchyOfArrays, height: number, areaAccessor: (e: 
     previousWorstAspectRatio = currentWorstAspectRatio;
     currentVectorLayout = layVector(nodes.slice(0, currentCount), height, areaAccessor);
     currentWorstAspectRatio = leastSquarishAspectRatio(currentVectorLayout);
-  } while (currentCount++ < nodes.length && currentWorstAspectRatio > previousWorstAspectRatio);
+  } while (currentCount++ < nodes.length && (layout || currentWorstAspectRatio > previousWorstAspectRatio));
 
-  return currentWorstAspectRatio >= previousWorstAspectRatio ? currentVectorLayout : previousVectorLayout;
+  return layout || currentWorstAspectRatio >= previousWorstAspectRatio ? currentVectorLayout : previousVectorLayout;
 }
 
 function vectorNodeCoordinates(vectorLayout: LayoutElement, x0Base: number, y0Base: number, vertical: boolean) {
@@ -107,12 +130,15 @@ export function treemap(
     width: outerWidth,
     height: outerHeight,
   }: { x0: number; y0: number; width: number; height: number },
+  layouts: LayerLayout[],
 ): Array<Part> {
   if (nodes.length === 0) return [];
   // some bias toward horizontal rectangles with a golden ratio of width to height
-  const vertical = outerWidth / GOLDEN_RATIO <= outerHeight;
+  const depth = nodes[0][1][DEPTH_KEY] - 1;
+  const layerLayout = layouts[depth] ?? null;
+  const vertical = layerLayout === LayerLayout.vertical || (!layerLayout && outerWidth / GOLDEN_RATIO <= outerHeight);
   const independentSize = vertical ? outerWidth : outerHeight;
-  const vectorElements = bestVector(nodes, independentSize, areaAccessor);
+  const vectorElements = bestVector(nodes, independentSize, areaAccessor, layerLayout);
   const vector = vectorNodeCoordinates(vectorElements, outerX0, outerY0, vertical);
   const { dependentSize } = vectorElements;
   return vector
@@ -143,6 +169,7 @@ export function treemap(
             width,
             height,
           },
+          layouts,
         );
       }),
     )
@@ -155,6 +182,7 @@ export function treemap(
         vertical
           ? { x0: outerX0, y0: outerY0 + dependentSize, width: outerWidth, height: outerHeight - dependentSize }
           : { x0: outerX0 + dependentSize, y0: outerY0, width: outerWidth - dependentSize, height: outerHeight },
+        layouts,
       ),
     );
 }
