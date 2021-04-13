@@ -1,3 +1,21 @@
+# [28.1.0](https://github.com/elastic/elastic-charts/compare/v28.0.1...v28.1.0) (2021-04-13)
+
+
+### Bug Fixes
+
+* **legend:** sizing for short labels with scrollbar ([#1115](https://github.com/elastic/elastic-charts/issues/1115)) ([6e1f223](https://github.com/elastic/elastic-charts/commit/6e1f223d5126c2707101d269ebaa5dc117ac61c4))
+* **xy:** negative bar highlight and click ([#1109](https://github.com/elastic/elastic-charts/issues/1109)) ([ec17cb2](https://github.com/elastic/elastic-charts/commit/ec17cb2eb2f13e0be4370a2dc89d3872f9b6de5a)), closes [#1100](https://github.com/elastic/elastic-charts/issues/1100)
+
+
+### Features
+
+* **a11y:** improve chart figure ([#1104](https://github.com/elastic/elastic-charts/issues/1104)) ([815cf39](https://github.com/elastic/elastic-charts/commit/815cf39873e3e1f0a526dd88bb06c2b87f22f9e8))
+* **partition:** order slices and sectors ([#1112](https://github.com/elastic/elastic-charts/issues/1112)) ([74df29b](https://github.com/elastic/elastic-charts/commit/74df29b5554eaa5b88c670c71321ce676683da6f))
+* **partitions:** small multipies events pass on smAccessorValue ([#1106](https://github.com/elastic/elastic-charts/issues/1106)) ([a3234fe](https://github.com/elastic/elastic-charts/commit/a3234feee9e579cf7bdb21d487f80c8200a0fa73))
+* **xy:** optionally rounds the domain to nice values ([#1087](https://github.com/elastic/elastic-charts/issues/1087)) ([f644cc4](https://github.com/elastic/elastic-charts/commit/f644cc4653bf4bea3180057b981f80bdcabee00f))
+* **xy:** specify pixel and ratio width for bars ([#1114](https://github.com/elastic/elastic-charts/issues/1114)) ([58de413](https://github.com/elastic/elastic-charts/commit/58de413564a5f0b9a8bef9f5cb2119cdde18794f))
+* mosaic ([#1113](https://github.com/elastic/elastic-charts/issues/1113)) ([64bdd88](https://github.com/elastic/elastic-charts/commit/64bdd88836210a4c4c997dc207859c3fbd773d80))
+
 ## [28.0.1](https://github.com/elastic/elastic-charts/compare/v28.0.0...v28.0.1) (2021-04-06)
 
 
