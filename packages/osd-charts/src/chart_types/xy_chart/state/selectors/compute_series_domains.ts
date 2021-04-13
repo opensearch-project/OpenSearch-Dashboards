@@ -24,8 +24,8 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { SeriesDomainsAndData } from '../utils/types';
 import { computeSeriesDomains } from '../utils/utils';
+import { getScaleConfigsFromSpecsSelector } from './get_api_scale_configs';
 import { getSeriesSpecsSelector, getSmallMultiplesIndexOrderSelector } from './get_specs';
-import { mergeYCustomDomainsByGroupIdSelector } from './merge_y_custom_domains';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
@@ -33,17 +33,16 @@ const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interacti
 export const computeSeriesDomainsSelector = createCachedSelector(
   [
     getSeriesSpecsSelector,
-    mergeYCustomDomainsByGroupIdSelector,
     getDeselectedSeriesSelector,
     getSettingsSpecSelector,
     getSmallMultiplesIndexOrderSelector,
+    getScaleConfigsFromSpecsSelector,
   ],
-  (seriesSpecs, customYDomainsByGroupId, deselectedDataSeries, settingsSpec, smallMultiples): SeriesDomainsAndData => {
+  (seriesSpecs, deselectedDataSeries, settingsSpec, smallMultiples, scaleConfigs): SeriesDomainsAndData => {
     return computeSeriesDomains(
       seriesSpecs,
-      customYDomainsByGroupId,
+      scaleConfigs,
       deselectedDataSeries,
-      settingsSpec.xDomain,
       settingsSpec.orderOrdinalBinsBy,
       smallMultiples,
       // @ts-ignore

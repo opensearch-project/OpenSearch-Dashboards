@@ -28,6 +28,7 @@ import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';
 import { groupSeriesByYGroup, isHistogramEnabled, isStackedSpec } from '../domains/y_domain';
+import { X_SCALE_DEFAULT } from '../scales/scale_defaults';
 import { SmallMultiplesGroupBy } from '../state/selectors/get_specs';
 import { applyFitFunctionToDataSeries } from './fit_function_utils';
 import { groupBy } from './group_data_series';
@@ -455,7 +456,7 @@ export function getDataSeriesFromSpecs(
     // keep the user order for ordinal scales
     xValues,
     ...smallMultipleUniqueValues,
-    fallbackScale: !isOrdinalScale && !isNumberArray ? ScaleType.Ordinal : undefined,
+    fallbackScale: !isOrdinalScale && !isNumberArray ? X_SCALE_DEFAULT.type : undefined,
   };
 }
 

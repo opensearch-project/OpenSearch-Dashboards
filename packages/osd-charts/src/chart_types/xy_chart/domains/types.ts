@@ -18,35 +18,31 @@
  */
 
 import { ScaleContinuousType } from '../../../scales';
-import { ScaleType } from '../../../scales/constants';
 import { LogScaleOptions } from '../../../scales/scale_continuous';
 import { OrdinalDomain, ContinuousDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
+import { XScaleType } from '../utils/specs';
 
 /** @internal */
-export interface BaseDomain {
-  scaleType: typeof ScaleType.Ordinal | ScaleContinuousType;
+export type XDomain = Pick<LogScaleOptions, 'logBase'> & {
+  type: XScaleType;
+  nice: boolean;
   /* if the scale needs to be a band scale: used when displaying bars */
   isBandScale: boolean;
-}
+  /* the minimum interval of the scale if not-ordinal band-scale */
+  minInterval: number;
+  /** if x domain is time, we should also specify the timezone */
+  timeZone?: string;
+  domain: OrdinalDomain | ContinuousDomain;
+  desiredTickCount: number;
+};
 
 /** @internal */
-export type XDomain = BaseDomain &
-  Pick<LogScaleOptions, 'logBase'> & {
-    type: 'xDomain';
-    /* the minimum interval of the scale if not-ordinal band-scale */
-    minInterval: number;
-    /** if x domain is time, we should also specify the timezone */
-    timeZone?: string;
-    domain: OrdinalDomain | ContinuousDomain;
-  };
-
-/** @internal */
-export type YDomain = BaseDomain &
-  LogScaleOptions & {
-    type: 'yDomain';
-    isBandScale: false;
-    scaleType: ScaleContinuousType;
-    groupId: GroupId;
-    domain: ContinuousDomain;
-  };
+export type YDomain = LogScaleOptions & {
+  type: ScaleContinuousType;
+  nice: boolean;
+  isBandScale: false;
+  groupId: GroupId;
+  domain: ContinuousDomain;
+  desiredTickCount: number;
+};

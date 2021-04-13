@@ -18,9 +18,12 @@
  */
 
 import { ChartType } from '../..';
+import { MockGlobalSpec } from '../../../mocks/specs/specs';
+import { MockXDomain } from '../../../mocks/xy/domains';
 import { ScaleType } from '../../../scales/constants';
 import { SpecType } from '../../../specs/constants';
 import { Dimensions } from '../../../utils/dimensions';
+import { getScaleConfigsFromSpecs } from '../state/selectors/get_api_scale_configs';
 import { computeSeriesDomains } from '../state/utils/utils';
 import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec, SeriesType } from '../utils/specs';
@@ -97,22 +100,35 @@ describe('Crosshair utils linear scale', () => {
     yScaleType: ScaleType.Linear,
   };
 
-  const domainGroup = new Map([['group1', { fit: true }]]);
-
   const barSeries = [barSeries1];
-  const barSeriesDomains = computeSeriesDomains(barSeries, domainGroup);
+  const barSeriesDomains = computeSeriesDomains(
+    barSeries,
+    getScaleConfigsFromSpecs([], barSeries, MockGlobalSpec.settings()),
+  );
 
   const multiBarSeries = [barSeries1, barSeries2];
-  const multiBarSeriesDomains = computeSeriesDomains(multiBarSeries, domainGroup);
+  const multiBarSeriesDomains = computeSeriesDomains(
+    multiBarSeries,
+    getScaleConfigsFromSpecs([], multiBarSeries, MockGlobalSpec.settings()),
+  );
 
   const lineSeries = [lineSeries1];
-  const lineSeriesDomains = computeSeriesDomains(lineSeries, domainGroup);
+  const lineSeriesDomains = computeSeriesDomains(
+    lineSeries,
+    getScaleConfigsFromSpecs([], lineSeries, MockGlobalSpec.settings()),
+  );
 
   const multiLineSeries = [lineSeries1, lineSeries2];
-  const multiLineSeriesDomains = computeSeriesDomains(multiLineSeries, domainGroup);
+  const multiLineSeriesDomains = computeSeriesDomains(
+    multiLineSeries,
+    getScaleConfigsFromSpecs([], multiLineSeries, MockGlobalSpec.settings()),
+  );
 
   const mixedLinesBars = [lineSeries1, lineSeries2, barSeries1, barSeries2];
-  const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBars, domainGroup);
+  const mixedLinesBarsSeriesDomains = computeSeriesDomains(
+    mixedLinesBars,
+    getScaleConfigsFromSpecs([], mixedLinesBars, MockGlobalSpec.settings()),
+  );
 
   const barSeriesScale = computeXScale({
     xDomain: barSeriesDomains.xDomain,
@@ -1456,13 +1472,11 @@ describe('Crosshair utils linear scale', () => {
     const chartDimensions: Dimensions = { top: 0, left: 0, width: 120, height: 120 };
     test('cursor at begin of domain', () => {
       const barSeriesScaleLimited = computeXScale({
-        xDomain: {
+        xDomain: MockXDomain.fromScaleType(ScaleType.Linear, {
           domain: [0.5, 3.5],
           isBandScale: true,
           minInterval: 1,
-          scaleType: ScaleType.Linear,
-          type: 'xDomain',
-        },
+        }),
         totalBarsInCluster: 1,
         range: [0, 120],
       });
@@ -1487,13 +1501,11 @@ describe('Crosshair utils linear scale', () => {
     });
     test('cursor at end of domain', () => {
       const barSeriesScaleLimited = computeXScale({
-        xDomain: {
+        xDomain: MockXDomain.fromScaleType(ScaleType.Linear, {
           domain: [-0.5, 2.5],
           isBandScale: true,
           minInterval: 1,
-          scaleType: ScaleType.Linear,
-          type: 'xDomain',
-        },
+        }),
         totalBarsInCluster: barSeries.length,
         range: [0, 120],
       });
@@ -1518,13 +1530,11 @@ describe('Crosshair utils linear scale', () => {
     });
     test('cursor at top begin of domain', () => {
       const barSeriesScaleLimited = computeXScale({
-        xDomain: {
+        xDomain: MockXDomain.fromScaleType(ScaleType.Linear, {
           domain: [0.5, 3.5],
           isBandScale: true,
           minInterval: 1,
-          scaleType: ScaleType.Linear,
-          type: 'xDomain',
-        },
+        }),
         totalBarsInCluster: 1,
         range: [0, 120],
       });
@@ -1549,13 +1559,11 @@ describe('Crosshair utils linear scale', () => {
     });
     test('cursor at top end of domain', () => {
       const barSeriesScaleLimited = computeXScale({
-        xDomain: {
+        xDomain: MockXDomain.fromScaleType(ScaleType.Linear, {
           domain: [-0.5, 2.5],
           isBandScale: true,
           minInterval: 1,
-          scaleType: ScaleType.Linear,
-          type: 'xDomain',
-        },
+        }),
         totalBarsInCluster: barSeries.length,
         range: [0, 120],
       });

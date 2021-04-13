@@ -23,11 +23,13 @@ import { identity } from '../../../utils/common';
 import { computeContinuousDataDomain, ContinuousDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
+import { ScaleConfigs } from '../state/selectors/get_api_scale_configs';
 import { getSpecDomainGroupId } from '../state/utils/spec';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { groupBy } from '../utils/group_data_series';
 import { DataSeries } from '../utils/series';
 import { BasicSeriesSpec, YDomainRange, SeriesType, StackMode } from '../utils/specs';
+import { areAllNiceDomain } from './nice';
 import { YDomain } from './types';
 
 /** @internal */
@@ -37,20 +39,16 @@ export type YBasicSeriesSpec = Pick<
 > & { stackMode?: StackMode; enableHistogramMode?: boolean };
 
 /** @internal */
-export function mergeYDomain(dataSeries: DataSeries[], domainsByGroupId: Map<GroupId, YDomainRange>): YDomain[] {
+export function mergeYDomain(dataSeries: DataSeries[], yScaleAPIConfig: ScaleConfigs['y']): YDomain[] {
   const dataSeriesByGroupId = groupBy(dataSeries, ({ spec }) => getSpecDomainGroupId(spec), true);
 
   return dataSeriesByGroupId.reduce<YDomain[]>((acc, groupedDataSeries) => {
-    const [{ spec }] = groupedDataSeries;
-    const groupId = getSpecDomainGroupId(spec);
-
     const stacked = groupedDataSeries.filter(({ isStacked, isFiltered }) => isStacked && !isFiltered);
     const nonStacked = groupedDataSeries.filter(({ isStacked, isFiltered }) => !isStacked && !isFiltered);
-    const customDomain = domainsByGroupId.get(groupId);
     const hasNonZeroBaselineTypes = groupedDataSeries.some(
       ({ seriesType, isFiltered }) => seriesType === SeriesType.Bar || (seriesType === SeriesType.Area && !isFiltered),
     );
-    const domain = mergeYDomainForGroup(stacked, nonStacked, hasNonZeroBaselineTypes, customDomain);
+    const domain = mergeYDomainForGroup(stacked, nonStacked, hasNonZeroBaselineTypes, yScaleAPIConfig);
     if (!domain) {
       return acc;
     }
@@ -62,22 +60,20 @@ function mergeYDomainForGroup(
   stacked: DataSeries[],
   nonStacked: DataSeries[],
   hasZeroBaselineSpecs: boolean,
-  customDomain?: YDomainRange,
+  yScaleConfig: ScaleConfigs['y'],
 ): YDomain | null {
   const dataSeries = [...stacked, ...nonStacked];
   if (dataSeries.length === 0) {
     return null;
   }
-  const yScaleTypes = dataSeries.map(({ spec: { yScaleType } }) => ({
-    yScaleType,
-  }));
-  const groupYScaleType = coerceYScaleTypes(yScaleTypes);
+
   const [{ stackMode, spec }] = dataSeries;
   const groupId = getSpecDomainGroupId(spec);
+  const { customDomain, type, nice, desiredTickCount } = yScaleConfig[groupId];
 
   let domain: ContinuousDomain;
   if (stackMode === StackMode.Percentage) {
-    domain = computeContinuousDataDomain([0, 1], identity, groupYScaleType, customDomain);
+    domain = computeContinuousDataDomain([0, 1], identity, type, customDomain);
   } else {
     // TODO remove when removing yScaleToDataExtent
     const newCustomDomain = customDomain ? { ...customDomain } : {};
@@ -87,18 +83,13 @@ function mergeYDomainForGroup(
     }
 
     // compute stacked domain
-    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs, groupYScaleType, newCustomDomain);
+    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs, type, newCustomDomain);
 
     // compute non stacked domain
-    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs, groupYScaleType, newCustomDomain);
+    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs, type, newCustomDomain);
 
     // merge stacked and non stacked domain together
-    domain = computeContinuousDataDomain(
-      [...stackedDomain, ...nonStackedDomain],
-      identity,
-      groupYScaleType,
-      newCustomDomain,
-    );
+    domain = computeContinuousDataDomain([...stackedDomain, ...nonStackedDomain], identity, type, newCustomDomain);
 
     const [computedDomainMin, computedDomainMax] = domain;
 
@@ -122,13 +113,14 @@ function mergeYDomainForGroup(
     }
   }
   return {
-    type: 'yDomain',
+    type,
+    nice,
     isBandScale: false,
-    scaleType: groupYScaleType,
     groupId,
     domain,
     logBase: customDomain?.logBase,
     logMinLimit: customDomain?.logMinLimit,
+    desiredTickCount,
   };
 }
 
@@ -228,19 +220,28 @@ export function isStackedSpec(spec: YBasicSeriesSpec, histogramEnabled: boolean)
  * @returns {ScaleContinuousType}
  * @internal
  */
-export function coerceYScaleTypes(scales: { yScaleType: ScaleContinuousType }[]): ScaleContinuousType {
-  const scaleTypes = new Set<ScaleContinuousType>();
-  scales.forEach(({ yScaleType }) => {
-    scaleTypes.add(yScaleType);
-  });
-  return coerceYScale(scaleTypes);
-}
-
-function coerceYScale(scaleTypes: Set<ScaleContinuousType>): ScaleContinuousType {
-  if (scaleTypes.size === 1) {
-    const scales = scaleTypes.values();
-    const { value } = scales.next();
-    return value;
-  }
-  return ScaleType.Linear;
+export function coerceYScaleTypes(
+  scales: Array<{ type: ScaleContinuousType; nice: boolean }>,
+): { type: ScaleContinuousType; nice: boolean } {
+  const scaleCollection = scales.reduce<{
+    types: Set<ScaleContinuousType>;
+    nice: Array<boolean>;
+  }>(
+    (acc, scale) => {
+      acc.types.add(scale.type);
+      acc.nice.push(scale.nice);
+      return acc;
+    },
+    {
+      types: new Set(),
+      nice: [],
+    },
+  );
+  const nice = areAllNiceDomain(scaleCollection.nice);
+  return scaleCollection.types.size === 1
+    ? { type: scaleCollection.types.values().next().value, nice }
+    : {
+        type: ScaleType.Linear,
+        nice,
+      };
 }

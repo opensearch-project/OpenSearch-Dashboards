@@ -20,8 +20,8 @@
 import { DateTime, Settings } from 'luxon';
 
 import { ScaleContinuous, ScaleBand } from '.';
-import { XDomain } from '../chart_types/xy_chart/domains/types';
 import { computeXScale } from '../chart_types/xy_chart/utils/scales';
+import { MockXDomain } from '../mocks/xy/domains';
 import { ContinuousDomain, Range } from '../utils/domain';
 import { LOG_MIN_ABS_DOMAIN, ScaleType } from './constants';
 import { limitLogScaleDomain } from './scale_continuous';
@@ -101,13 +101,11 @@ describe('Scale Continuous', () => {
   });
   test('invert with step x value on linear band scale', () => {
     const data = [0, 1, 2];
-    const xDomain: XDomain = {
+    const xDomain = MockXDomain.fromScaleType(ScaleType.Linear, {
       domain: [0, 2],
       isBandScale: true,
       minInterval: 1,
-      scaleType: ScaleType.Linear,
-      type: 'xDomain',
-    };
+    });
 
     const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 119], barsPadding: 0 });
     expect(scaleLinear.bandwidth).toBe(119 / 3);
@@ -142,13 +140,11 @@ describe('Scale Continuous', () => {
   test('can get the right x value on linear scale with band', () => {
     const data = [0, 10, 20, 50, 90];
 
-    const xDomain: XDomain = {
+    const xDomain = MockXDomain.fromScaleType(ScaleType.Linear, {
       domain: [0, 100],
       isBandScale: true,
       minInterval: 10,
-      scaleType: ScaleType.Linear,
-      type: 'xDomain',
-    };
+    });
     // we tweak the maxRange removing the bandwidth to correctly compute
     // a band linear scale in computeXScale
     const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 109], barsPadding: 0 });

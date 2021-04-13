@@ -20,7 +20,7 @@
 import { getPredicateFn, Predicate } from '../../../../common/predicate';
 import { SeriesKey, SeriesIdentifier } from '../../../../common/series_id';
 import { Scale } from '../../../../scales';
-import { CustomXDomain, SortSeriesByConfig } from '../../../../specs';
+import { SortSeriesByConfig } from '../../../../specs';
 import { OrderBy } from '../../../../specs/settings';
 import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/common';
 import { CurveType } from '../../../../utils/curves';
@@ -62,9 +62,9 @@ import {
   Fit,
   FitConfig,
   isBubbleSeriesSpec,
-  YDomainRange,
 } from '../../utils/specs';
 import { SmallMultipleScales } from '../selectors/compute_small_multiple_scales';
+import { ScaleConfigs } from '../selectors/get_api_scale_configs';
 import { SmallMultiplesGroupBy } from '../selectors/get_specs';
 import { isHorizontalRotation } from './common';
 import { getSpecsById, getAxesSpecForSpecId, getSpecDomainGroupId } from './spec';
@@ -116,22 +116,12 @@ export function getCustomSeriesColors(dataSeries: DataSeries[]): Map<SeriesKey, 
 
 /**
  * Compute data domains for all specified specs.
- * @param seriesSpecs a map of all the series specs
- * @param customYDomainsByGroupId custom Y domains grouped by GroupId
- * @param customXDomain if specified in <Settings />, the custom X domain
- * @param deselectedDataSeries is optional; if not supplied,
- * @param customXDomain is optional; if not supplied,
- * @param orderOrdinalBinsBy
- * @param smallMultiples
- * @param sortSeriesBy
- * @returns `SeriesDomainsAndData`
  * @internal
  */
 export function computeSeriesDomains(
   seriesSpecs: BasicSeriesSpec[],
-  customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
+  scaleConfigs: ScaleConfigs,
   deselectedDataSeries: SeriesIdentifier[] = [],
-  customXDomain?: CustomXDomain,
   orderOrdinalBinsBy?: OrderBy,
   smallMultiples?: SmallMultiplesGroupBy,
   sortSeriesBy?: SeriesCompareFn | SortSeriesByConfig,
@@ -143,21 +133,21 @@ export function computeSeriesDomains(
     smallMultiples,
   );
   // compute the x domain merging any custom domain
-  const xDomain = mergeXDomain(seriesSpecs, xValues, customXDomain, fallbackScale);
+  const xDomain = mergeXDomain(scaleConfigs.x, xValues, fallbackScale);
 
   // fill series with missing x values
-  const filledDataSeries = fillSeries(dataSeries, xValues, xDomain.scaleType);
+  const filledDataSeries = fillSeries(dataSeries, xValues, xDomain.type);
 
   const seriesSortFn = getRenderingCompareFn(sortSeriesBy, (a: SeriesIdentifier, b: SeriesIdentifier) => {
     return defaultXYSeriesSort(a as DataSeries, b as DataSeries);
   });
 
-  const formattedDataSeries = getFormattedDataSeries(seriesSpecs, filledDataSeries, xValues, xDomain.scaleType).sort(
+  const formattedDataSeries = getFormattedDataSeries(seriesSpecs, filledDataSeries, xValues, xDomain.type).sort(
     seriesSortFn,
   );
 
   // let's compute the yDomains after computing all stacked values
-  const yDomains = mergeYDomain(formattedDataSeries, customYDomainsByGroupId);
+  const yDomains = mergeYDomain(formattedDataSeries, scaleConfigs.y);
 
   // sort small multiples values
   const horizontalPredicate = smallMultiples?.horizontal?.sort ?? Predicate.DataIndex;

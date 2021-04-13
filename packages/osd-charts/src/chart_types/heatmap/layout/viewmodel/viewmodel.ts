@@ -110,15 +110,16 @@ export function shapeViewModel(
   let xValues = xDomain.domain as any[];
 
   const timeScale =
-    xDomain.scaleType === ScaleType.Time
+    xDomain.type === ScaleType.Time
       ? new ScaleContinuous(
           {
             type: ScaleType.Time,
             domain: xDomain.domain,
             range: [0, chartDimensions.width],
+            nice: false,
           },
           {
-            ticks: getTicks(chartDimensions.width, config.xAxisLabel),
+            desiredTickCount: getTicks(chartDimensions.width, config.xAxisLabel),
             timeZone: config.timeZone,
           },
         )
@@ -315,7 +316,7 @@ export function shapeViewModel(
    * @param y
    */
   const pickHighlightedArea: PickHighlightedArea = (x: Array<string | number>, y: Array<string | number>) => {
-    if (xDomain.scaleType !== ScaleType.Time) {
+    if (xDomain.type !== ScaleType.Time) {
       return null;
     }
     const [startValue, endValue] = x;

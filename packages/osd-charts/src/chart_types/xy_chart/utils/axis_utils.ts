@@ -177,7 +177,6 @@ export function getScaleForAxisSpec(
     const yScales = computeYScales({
       yDomains,
       range,
-      ticks: axisSpec.ticks,
       integersOnly: axisSpec.integersOnly,
     });
     if (yScales.has(axisSpec.groupId)) {
@@ -191,7 +190,6 @@ export function getScaleForAxisSpec(
     range,
     barsPadding,
     enableHistogramMode,
-    ticks: axisSpec.ticks,
     integersOnly: axisSpec.integersOnly,
   });
 }

@@ -46,7 +46,12 @@ describe('Scale Test', () => {
     const data = [0, 10];
     const minRange = 0;
     const maxRange = 100;
-    const linearScale = new ScaleContinuous({ type: ScaleType.Linear, domain: data, range: [minRange, maxRange] });
+    const linearScale = new ScaleContinuous({
+      type: ScaleType.Linear,
+      domain: data,
+      range: [minRange, maxRange],
+      nice: false,
+    });
     const { domain, range } = linearScale;
     expect(domain).toEqual([0, 10]);
     expect(range).toEqual([minRange, maxRange]);
@@ -66,7 +71,12 @@ describe('Scale Test', () => {
     const data = [date1, date3];
     const minRange = 0;
     const maxRange = 100;
-    const timeScale = new ScaleContinuous({ type: ScaleType.Time, domain: data, range: [minRange, maxRange] });
+    const timeScale = new ScaleContinuous({
+      type: ScaleType.Time,
+      domain: data,
+      range: [minRange, maxRange],
+      nice: false,
+    });
     const { domain, range } = timeScale;
     expect(domain).toEqual([date1, date3]);
     expect(range).toEqual([minRange, maxRange]);
@@ -81,7 +91,12 @@ describe('Scale Test', () => {
     const data = [1, 10];
     const minRange = 0;
     const maxRange = 100;
-    const logScale = new ScaleContinuous({ type: ScaleType.Log, domain: data, range: [minRange, maxRange] });
+    const logScale = new ScaleContinuous({
+      type: ScaleType.Log,
+      domain: data,
+      range: [minRange, maxRange],
+      nice: false,
+    });
     const { domain, range } = logScale;
     expect(domain).toEqual([1, 10]);
     expect(range).toEqual([minRange, maxRange]);
@@ -94,7 +109,12 @@ describe('Scale Test', () => {
     const data = [0, 10];
     const minRange = 0;
     const maxRange = 100;
-    const logScale = new ScaleContinuous({ type: ScaleType.Log, domain: data, range: [minRange, maxRange] });
+    const logScale = new ScaleContinuous({
+      type: ScaleType.Log,
+      domain: data,
+      range: [minRange, maxRange],
+      nice: false,
+    });
     const { domain, range } = logScale;
     expect(domain).toEqual([1, 10]);
     expect(range).toEqual([minRange, maxRange]);
@@ -107,7 +127,12 @@ describe('Scale Test', () => {
     const data = [0, 10];
     const minRange = 0;
     const maxRange = 100;
-    const sqrtScale = new ScaleContinuous({ type: ScaleType.Sqrt, domain: data, range: [minRange, maxRange] });
+    const sqrtScale = new ScaleContinuous({
+      type: ScaleType.Sqrt,
+      domain: data,
+      range: [minRange, maxRange],
+      nice: false,
+    });
     const { domain, range } = sqrtScale;
     expect(domain).toEqual([0, 10]);
     expect(range).toEqual([minRange, maxRange]);
@@ -165,7 +190,7 @@ describe('Scale Test', () => {
     const maxRange = 120;
     const bandwidth = maxRange / 3;
     const linearScale = new ScaleContinuous(
-      { type: ScaleType.Linear, domain: domainLinear, range: [minRange, maxRange - bandwidth] }, // we currently limit the range like that a band linear scale
+      { type: ScaleType.Linear, domain: domainLinear, range: [minRange, maxRange - bandwidth], nice: false }, // we currently limit the range like that a band linear scale
       { bandwidth, minInterval: 1 },
     );
     const ordinalScale = new ScaleBand(domainOrdinal, [minRange, maxRange]);
@@ -188,6 +213,7 @@ describe('Scale Test', () => {
         type: ScaleType.Linear,
         domain: dataLinear,
         range: [minRange, maxRange - bandwidth],
+        nice: false,
       }, // we currently limit the range like that a band linear scale
       { bandwidth, minInterval: 1 },
     );

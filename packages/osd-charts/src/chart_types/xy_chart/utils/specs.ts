@@ -266,11 +266,11 @@ interface DomainBase {
   /**
    * Custom minInterval for the domain which will affect data bucket size.
    * The minInterval cannot be greater than the computed minimum interval between any two adjacent data points.
-   * Further, if you specify a custom numeric minInterval for a timeseries, please note that due to the restriction
+   * Further, if you specify a custom numeric minInterval for a time-series, please note that due to the restriction
    * above, the specified numeric minInterval will be interpreted as a fixed interval.
-   * This means that, for example, if you have yearly timeseries data that ranges from 2016 to 2019 and you manually
+   * This means that, for example, if you have yearly time-series data that ranges from 2016 to 2019 and you manually
    * compute the interval between 2016 and 2017, you'll have 366 days due to 2016 being a leap year.  This will not
-   * be a valid interval because it is greater than the computed minInterval of 365 days betwen the other years.
+   * be a valid interval because it is greater than the computed minInterval of 365 days between the other years.
    */
   minInterval?: number;
 }
@@ -463,6 +463,11 @@ export interface SeriesScales {
    */
   xScaleType: XScaleType;
   /**
+   * Extends the x domain so that it starts and ends on nice round values.
+   * @defaultValue `false`
+   */
+  xNice?: boolean;
+  /**
    * If using a ScaleType.Time this timezone identifier is required to
    * compute a nice set of xScale ticks. Can be any IANA zone supported by
    * the host environment, or a fixed-offset name of the form 'utc+3',
@@ -474,6 +479,11 @@ export interface SeriesScales {
    * @defaultValue `linear` {@link (ScaleType:type) | ScaleType.Linear}
    */
   yScaleType: ScaleContinuousType;
+  /**
+   * Extends the y domain so that it starts and ends on nice round values.
+   * @defaultValue `false`
+   */
+  yNice?: boolean;
   /**
    * if true, the min y value is set to the minimum domain value, 0 otherwise
    * @deprecated use `domain.fit` instead

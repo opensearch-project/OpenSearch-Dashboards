@@ -731,6 +731,7 @@ describe('Rendering points - line', () => {
     const axis = MockGlobalSpec.axis({ position: Position.Left, hide: true, domain: { max: 1 } });
     const store = MockStore.default({ width: 100, height: 100, top: 0, left: 0 });
     MockStore.addSpecs([pointSeriesSpec, axis, settings], store);
+
     const {
       geometries: { lines },
       geometriesIndex,

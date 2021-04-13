@@ -29,6 +29,7 @@ import { Accessor, AccessorFn } from '../../../utils/accessor';
 import { Color, Datum, RecursivePartial } from '../../../utils/common';
 import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
+import { X_SCALE_DEFAULT } from './scale_defaults';
 
 const defaultProps = {
   chartType: ChartType.Heatmap,
@@ -38,7 +39,7 @@ const defaultProps = {
   colorScale: ScaleType.Linear,
   xAccessor: ({ x }: { x: string | number }) => x,
   yAccessor: ({ y }: { y: string | number }) => y,
-  xScaleType: ScaleType.Ordinal,
+  xScaleType: X_SCALE_DEFAULT.type,
   valueAccessor: ({ value }: { value: string | number }) => value,
   valueFormatter: (value: number) => `${value}`,
   xSortPredicate: Predicate.AlphaAsc,

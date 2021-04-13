@@ -17,23 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation } from '../../../../utils/common';
 import { GroupId } from '../../../../utils/ids';
 import { isCompleteBound, isLowerBound, isUpperBound, isBounded } from '../../utils/axis_type_utils';
 import { isYDomain } from '../../utils/axis_utils';
 import { AxisSpec, YDomainRange } from '../../utils/specs';
-import { getAxisSpecsSelector } from './get_specs';
-
-/** @internal */
-export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
-  [getAxisSpecsSelector, getSettingsSpecSelector],
-  (axisSpecs, settingsSpec): Map<GroupId, YDomainRange> =>
-    mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0),
-)(getChartIdSelector);
 
 /** @internal */
 export function mergeYCustomDomainsByGroupId(
