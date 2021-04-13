@@ -1562,6 +1562,8 @@ export interface RectBorderStyle {
 export interface RectStyle {
     fill?: Color | ColorVariant;
     opacity: number;
+    widthPixel?: Pixels;
+    widthRatio?: Ratio;
 }
 
 // @public

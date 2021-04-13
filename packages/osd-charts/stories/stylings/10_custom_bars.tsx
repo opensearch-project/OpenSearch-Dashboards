@@ -20,7 +20,7 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
@@ -39,7 +39,10 @@ function range(title: string, min: number, max: number, value: number, groupId?:
 
 export const Example = () => {
   const applyBarStyle = boolean('apply bar style (bar 1 series)', true, 'Chart Global Theme');
-
+  const changeRectWidthPixel = boolean('enable custom rect width (px)', false, 'Bar width');
+  const rectWidthPixel = range('rect width (px)', 0, 100, 30, 'Bar width', 1);
+  const changeRectWidthRatio = boolean('enable custom rect width (ratio)', false, 'Bar width');
+  const rectWidthRatio = range('rect width (ratio)', 0, 1, 0.5, 'Bar width', 0.01);
   const barSeriesStyle = {
     rectBorder: {
       stroke: color('border stroke', 'blue', 'Bar 1 Style'),
@@ -52,7 +55,7 @@ export const Example = () => {
     },
   };
 
-  const theme = {
+  const theme: PartialTheme = {
     barSeriesStyle: {
       rectBorder: {
         stroke: color('theme border stroke', 'red', 'Chart Global Theme'),
@@ -61,6 +64,8 @@ export const Example = () => {
       },
       rect: {
         opacity: range('theme opacity ', 0, 1, 0.9, 'Chart Global Theme', 0.1),
+        widthPixel: changeRectWidthPixel ? rectWidthPixel : undefined,
+        widthRatio: changeRectWidthRatio ? rectWidthRatio : undefined,
       },
     },
   };

@@ -19,6 +19,7 @@
 
 import { $Values } from 'utility-types';
 
+import { Pixels, Ratio } from '../../common/geometry';
 import { Color, ColorVariant, HorizontalAlignment, RecursivePartial, VerticalAlignment } from '../common';
 import { Margins, SimplePadding } from '../dimensions';
 
@@ -398,6 +399,12 @@ export interface RectStyle {
   fill?: Color | ColorVariant;
   /** the opacity of each rect on the theme/series */
   opacity: number;
+  /** The width of the rect in pixel. If expressed together with `widthRatio` then the `widthRatio`
+   * will express the max available size, where the `widthPixel` express the derived/min width. */
+  widthPixel?: Pixels;
+  /** The ratio of the width limited to [0,1]. If expressed together with `widthPixel` then the `widthRatio`
+   * will express the max available size, where the `widthPixel` express the derived/min width. */
+  widthRatio?: Ratio;
 }
 
 /** @public */
