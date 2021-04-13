@@ -33,7 +33,7 @@ import { getLegendItemsLabelsSelector } from './get_legend_items_labels';
 
 const getParentDimensionSelector = (state: GlobalChartState) => state.parentDimensions;
 
-const SCROLL_BAR_WIDTH = 6; // ~1em
+const SCROLL_BAR_WIDTH = 16; // ~1em
 const MARKER_WIDTH = 16;
 const SHARED_MARGIN = 4;
 const VERTICAL_PADDING = 4;
