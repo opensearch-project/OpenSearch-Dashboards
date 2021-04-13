@@ -32,8 +32,8 @@ Here are the principles we use to guide our development.  From [opensearch.org](
 ## Getting Started
 
 To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
-* Clone the OpenSearch repo with ```git clone git@github.com:opensearch-project/OpenSearch.git```
-* Follow installation and setup instructions in the OpenSearch repo
+* Clone the OpenSearch repo with ```git clone http://github.com/opensearch-project/OpenSearch-Dashboards.git```
+* Follow installation and setup instructions in the [OpenSearch repo Developer Guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md)
 * Run ```./gradlew assemble``` to generate build artifacts for all platforms
 * Run ```./gradlew run -Drun.distribution=oss``` to run the oss build
 
