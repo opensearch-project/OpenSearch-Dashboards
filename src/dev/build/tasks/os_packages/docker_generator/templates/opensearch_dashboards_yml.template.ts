@@ -39,7 +39,6 @@ function generator({ imageFlavor }: TemplateContext) {
   server.name: opensearch-dashboards
   server.host: "0"
   opensearch.hosts: [ "http://opensearch:9200" ]
-  ${!imageFlavor ? 'monitoring.ui.container.opensearch.enabled: true' : ''}
   `);
 }
 
