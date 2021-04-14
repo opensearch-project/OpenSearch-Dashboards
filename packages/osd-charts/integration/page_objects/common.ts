@@ -474,6 +474,16 @@ class CommonPage {
     });
     return accessibilitySnapshot;
   }
+
+  /**
+   * Get HTML for element to test aria labels etc
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getElementHTML(url: string) {
+    await this.loadElementFromURL(url);
+    // https://github.com/puppeteer/puppeteer/issues/406#issuecomment-323555639
+    return await page.evaluate(() => new XMLSerializer().serializeToString(document));
+  }
 }
 
 export const common = new CommonPage();

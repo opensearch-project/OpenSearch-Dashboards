@@ -31,3 +31,4 @@ export { Example as chromePathBugFix } from './2_chrome_path_bug_fix';
 export { Example as noAxesAnnotationBugFix } from './3_no_axes_annotation';
 export { Example as filterZerosInLogFitDomain } from './4_filter_zero_values_log';
 export { Example as legendScrollBarSizing } from './5_legend_scroll_bar_sizing';
+export { Example as addCustomDescription } from './6_a11y_custom_description';

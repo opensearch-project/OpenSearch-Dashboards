@@ -617,7 +617,7 @@ export const DEFAULT_TOOLTIP_SNAP = true;
 export const DEFAULT_TOOLTIP_TYPE: "vertical";
 
 // @public (undocumented)
-export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'debug' | 'tooltip' | 'theme' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents' | 'showLegend' | 'showLegendExtra' | 'legendPosition' | 'legendMaxDepth';
+export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'debug' | 'tooltip' | 'theme' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents' | 'showLegend' | 'showLegendExtra' | 'legendPosition' | 'legendMaxDepth' | 'description' | 'useDefaultSummary';
 
 // @public (undocumented)
 export const DEPTH_KEY = "depth";
@@ -1739,6 +1739,7 @@ export interface SettingsSpec extends Spec, LegendSpec {
     debug: boolean;
     // @alpha
     debugState?: boolean;
+    description?: string;
     // @alpha
     externalPointerEvents: ExternalPointerEventsSettings;
     hideDuplicateAxes: boolean;
@@ -1769,6 +1770,7 @@ export interface SettingsSpec extends Spec, LegendSpec {
     roundHistogramBrushValues?: boolean;
     theme?: PartialTheme | PartialTheme[];
     tooltip: TooltipSettings;
+    useDefaultSummary: boolean;
     // (undocumented)
     xDomain?: CustomXDomain;
 }

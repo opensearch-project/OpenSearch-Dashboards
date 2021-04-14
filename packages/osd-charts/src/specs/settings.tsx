@@ -548,6 +548,15 @@ export interface SettingsSpec extends Spec, LegendSpec {
    * Render component for no results UI
    */
   noResults?: ComponentType | ReactChild;
+  /**
+   * User can provide a custom description to be read by a screen reader about their chart
+   */
+  description?: string;
+  /**
+   * Disable the automated charts series types from being provided for screen readers
+   * @defaultValue true
+   */
+  useDefaultSummary: boolean;
 }
 
 /**
@@ -608,7 +617,9 @@ export type DefaultSettingsProps =
   | 'showLegend'
   | 'showLegendExtra'
   | 'legendPosition'
-  | 'legendMaxDepth';
+  | 'legendMaxDepth'
+  | 'description'
+  | 'useDefaultSummary';
 
 /** @public */
 export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
