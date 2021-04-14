@@ -48,14 +48,14 @@ export async function runDockerGenerator(
   ubi: boolean = false
 ) {
   // UBI var config
-  const baseOSImage = ubi ? 'docker.opensearch.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  const baseOSImage = ubi ? 'docker.opensearch.org/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
   const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
 
   // General docker var config
   const license = 'ASL 2.0';
   const imageFlavor = '';
-  const imageTag = 'docker.opensearch.co/opensearch-dashboards/opensearch-dashboards';
+  const imageTag = 'docker.opensearch.org/opensearch-dashboards/opensearch-dashboards';
   const version = config.getBuildVersion();
   const artifactTarball = `opensearch-dashboards${imageFlavor}-${version}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
