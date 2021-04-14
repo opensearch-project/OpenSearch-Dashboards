@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, radios } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
@@ -62,6 +62,15 @@ const productToColor = new Map(
 );
 
 export const Example = () => {
+  const partitionLayout = radios(
+    'Partition layout',
+    {
+      [PartitionLayout.mosaic]: PartitionLayout.mosaic,
+      [PartitionLayout.treemap]: PartitionLayout.treemap,
+      [PartitionLayout.sunburst]: PartitionLayout.sunburst,
+    },
+    PartitionLayout.mosaic,
+  );
   return (
     <Chart className="story-chart">
       <Settings showLegend={boolean('Show legend', true)} showLegendExtra={boolean('Show legend values', true)} />
@@ -78,7 +87,7 @@ export const Example = () => {
               fontWeight: 400,
             },
             shape: {
-              fillColor: () => 'white',
+              fillColor: partitionLayout === PartitionLayout.sunburst ? 'lightgrey' : 'white',
             },
           },
           {
@@ -103,7 +112,9 @@ export const Example = () => {
           },
         ]}
         config={{
-          partitionLayout: PartitionLayout.mosaic,
+          partitionLayout,
+          linkLabel: { maxCount: 0 }, // relevant for sunburst only
+          outerSizeRatio: 0.9, // relevant for sunburst only
         }}
       />
     </Chart>
