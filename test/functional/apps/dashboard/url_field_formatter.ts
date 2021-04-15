@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/79463
   describe.skip('Changing field formatter to Url', () => {
     before(async function () {
-      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

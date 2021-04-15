@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }) {
         'animals',
         'test_logstash_reader',
       ]);
-      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
