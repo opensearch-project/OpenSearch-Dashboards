@@ -19,13 +19,14 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config';
 import { mocks } from '../../src/mocks/hierarchical';
 import { indexInterpolatedFillColor, interpolatorCET2s, productLookup } from '../utils/utils';
 
 export const Example = () => (
   <Chart className="story-chart">
+    <Settings debugState />
     <Partition
       id="spec_1"
       data={mocks.pie.slice(0, 2)}

@@ -36,7 +36,7 @@ const defaultFillColor = (colorMaker: any) => (d: any, i: number, a: any[]) => c
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings theme={STORYBOOK_LIGHT_THEME} />
+    <Settings theme={STORYBOOK_LIGHT_THEME} debugState />
     <Partition
       id="spec_1"
       data={mocks.pie}

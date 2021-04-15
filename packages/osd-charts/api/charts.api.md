@@ -582,6 +582,10 @@ export interface DebugState {
     //
     // (undocumented)
     lines?: DebugStateLine[];
+    // Warning: (ae-forgotten-export) The symbol "PartitionDebugState" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    partition?: PartitionDebugState[];
 }
 
 // @public (undocumented)

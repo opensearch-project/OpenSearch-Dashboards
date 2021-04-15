@@ -18,6 +18,7 @@
  */
 
 import type { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
+import { Pixels } from '../common/geometry';
 import type { Position } from '../utils/common';
 import type { GeometryValue } from '../utils/geometry';
 
@@ -97,6 +98,21 @@ type HeatmapDebugState = {
   };
 };
 
+/** @public */
+export type SinglePartitionDebugState = {
+  name: string;
+  depth: number;
+  color: string;
+  value: number;
+  coords: [Pixels, Pixels];
+};
+
+/** @public */
+export type PartitionDebugState = {
+  panelTitle: string;
+  partitions: Array<SinglePartitionDebugState>;
+};
+
 /**
  * Describes _visible_ chart state for use in functional tests
  *
@@ -111,4 +127,5 @@ export interface DebugState {
   bars?: DebugStateBar[];
   /** Heatmap chart debug state */
   heatmap?: HeatmapDebugState;
+  partition?: PartitionDebugState[];
 }
