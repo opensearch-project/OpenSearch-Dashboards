@@ -17,8 +17,8 @@ jobs:
         run: yarn test:tz --ci
       - name: Testing
         run: yarn test --coverage --ci
-      - uses: codecov/codecov-action@v1
-        with:
-          flags: unittests # optional
-          name: gha # optional
-          fail_ci_if_error: false
+#      - uses: codecov/codecov-action@v1
+#        with:
+#          flags: unittests # optional
+#          name: gha # optional
+#          fail_ci_if_error: false
