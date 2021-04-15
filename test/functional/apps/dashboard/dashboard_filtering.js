@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
     this.tags('includeFirefox');
 
     before(async () => {
-      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
       await security.testUser.setRoles([
         'opensearch_dashboards_admin',
         'test_logstash_reader',

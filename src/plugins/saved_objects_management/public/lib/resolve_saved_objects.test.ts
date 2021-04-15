@@ -100,7 +100,7 @@ describe('resolveSavedObjects', () => {
           type: 'search',
           get: async () => {
             return {
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
@@ -113,7 +113,7 @@ describe('resolveSavedObjects', () => {
           type: 'dashboard',
           get: async () => {
             return {
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
@@ -126,7 +126,7 @@ describe('resolveSavedObjects', () => {
           type: 'visualization',
           get: async () => {
             return {
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
@@ -192,7 +192,7 @@ describe('resolveSavedObjects', () => {
           type: 'search',
           get: async () => {
             return {
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'search',
@@ -205,7 +205,7 @@ describe('resolveSavedObjects', () => {
           type: 'dashboard',
           get: async () => {
             return {
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',
@@ -219,7 +219,7 @@ describe('resolveSavedObjects', () => {
           get: async () => {
             return {
               savedSearchId: '1',
-              applyESResp: async () => {},
+              applyOpenSearchResp: async () => {},
               save: async () => {
                 throw new SavedObjectNotFound({
                   savedObjectType: 'index-pattern',

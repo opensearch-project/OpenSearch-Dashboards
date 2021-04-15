@@ -147,7 +147,7 @@ async function importIndexPattern(
 }
 
 async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {
-  await obj.applyESResp({
+  await obj.applyOpenSearchResp({
     references: doc._references || [],
     ...cloneDeep(doc),
   });
