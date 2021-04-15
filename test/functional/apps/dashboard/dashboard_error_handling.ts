@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    */
   describe('dashboard error handling', () => {
     before(async () => {
-      await opensearchArchiver.loadIfNeeded('dashboard/current/opensearch-dashboards');
+      await opensearchArchiver.loadIfNeeded('dashboard/current/opensearch_dashboards');
       await PageObjects.common.navigateToApp('dashboard');
     });
 

@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['opensearch_dashboards_admin', 'animals']);
-      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
@@ -67,7 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await log.debug(`Current url is ${currentUrl}`);
       testDashboardId = /#\/view\/(.+)\?/.exec(currentUrl)![1];
       opensearchDashboardsLegacyBaseUrl =
-        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/kibana';
+        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) +
+        '/app/opensearch-dashboards';
       opensearchDashboardsVisualizeBaseUrl =
         currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/visualize';
       await log.debug(`id is ${testDashboardId}`);
