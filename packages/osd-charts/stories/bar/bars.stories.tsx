@@ -85,3 +85,4 @@ export { Example as testMinHeightPositiveAndNegativeValues } from './46_test_min
 export { Example as testTooltipAndRotation } from './48_test_tooltip';
 export { Example as tooltipBoundary } from './55_tooltip_boundary';
 export { Example as testDualYAxis } from './49_test_dual_axis';
+export { Example as testUseDefaultGroupDomain } from './56_test_use_dfl_gdomain';

@@ -33,6 +33,7 @@ import { isHorizontalAxis, isVerticalAxis } from '../../utils/axis_type_utils';
 import { groupBy } from '../../utils/group_data_series';
 import { AxisSpec, BasicSeriesSpec, CustomXDomain, XScaleType, YDomainRange } from '../../utils/specs';
 import { isHorizontalRotation } from '../utils/common';
+import { getSpecDomainGroupId } from '../utils/spec';
 import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { mergeYCustomDomainsByGroupId } from './merge_y_custom_domains';
 
@@ -83,14 +84,15 @@ export function getScaleConfigsFromSpecs(
   };
 
   // y axes
-  const scaleConfigsByGroupId = groupBy(seriesSpecs, ['groupId'], true).reduce<
+  const scaleConfigsByGroupId = groupBy(seriesSpecs, getSpecDomainGroupId, true).reduce<
     Record<GroupId, { nice: boolean; type: ScaleContinuousType }>
   >((acc, series) => {
     const yScaleTypes = series.map(({ yScaleType, yNice }) => ({
       nice: getYNiceFromSpec(yNice),
       type: getYScaleTypeFromSpec(yScaleType),
     }));
-    acc[series[0].groupId] = coerceYScaleTypes(yScaleTypes);
+    const groupId = getSpecDomainGroupId(series[0]);
+    acc[groupId] = coerceYScaleTypes(yScaleTypes);
     return acc;
   }, {});
 
