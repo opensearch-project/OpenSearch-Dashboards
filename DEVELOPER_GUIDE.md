@@ -40,6 +40,15 @@ Or
 * While OpenSearch is running locally, run ```yarn start```
 * You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
 
+### Building the Docker Image
+
+To build the Docker image, run the following:
+
+```
+yarn osd bootstrap
+yarn build --docker
+```
+
 ## General
 
 ### Filenames
