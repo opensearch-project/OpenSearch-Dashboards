@@ -45,6 +45,7 @@ import {
   getOperatorFromFilter,
   getOperatorOptions,
   isFilterValid,
+  validateParams,
 } from './filter_editor_utils';
 
 import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
@@ -146,6 +147,69 @@ describe('Filter editor utils', () => {
       const operatorOptions = getOperatorOptions(field);
       const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
+    });
+  });
+
+  describe('validateParams', () => {
+    it('should return false if date is not string', () => {
+      const isValidParams = validateParams(1234, 'date');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return false if date is not valid string', () => {
+      const isValidParams = validateParams('this is not a date', 'date');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return true if date is valid relative time', () => {
+      const isValidParams = validateParams('now-15m', 'date');
+      expect(isValidParams).toBe(true);
+    });
+
+    it('should return true if date is valid absolute time', () => {
+      const isValidParams = validateParams('1997-01-03', 'date');
+      expect(isValidParams).toBe(true);
+    });
+
+    it('should return false if ip address is not valid CIDR or IP', () => {
+      const isValidParams = validateParams('not.a.valid.ip', 'ip');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return false if ip address is has out-of-range octets', () => {
+      const isValidParams = validateParams('1.1.1.256', 'ip');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return false if ip address CIDR has invalid mask', () => {
+      const isValidParams = validateParams('1.1.1.1/33', 'ip');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return false if ip address CIDR has invalid network', () => {
+      const isValidParams = validateParams('256.256.256.256/24', 'ip');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return false if ip address CIDR is invalid CIDR', () => {
+      const isValidParams = validateParams('192.168.0.0//24', 'ip');
+      expect(isValidParams).toBe(false);
+    });
+
+    it('should return true if ip address is valid string', () => {
+      const isValidParams = validateParams('1.1.1.1', 'ip');
+      expect(isValidParams).toBe(true);
+    });
+
+    it('should return true if ip address is valid CIDR string', () => {
+      const isValidParams = validateParams('192.168.0.0/24', 'ip');
+      expect(isValidParams).toBe(true);
+    });
+
+    it('should return true if type is not ip or date', () => {
+      const testTypes = ['text', 'version', 'keyword'];
+      const isValidParams = testTypes.every((type) => validateParams('test filter', type));
+      expect(isValidParams).toBe(true);
     });
   });
 
