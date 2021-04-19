@@ -69,7 +69,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('complete config', function describeIndexTests() {
+    // TODO: [RENAMEME] Re-enable once a valid maps service is in place.
+    // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/221
+    xdescribe('complete config', function describeIndexTests() {
       before(async function () {
         await browser.setWindowSize(1280, 1000);
 
@@ -240,7 +242,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('zoom warning behavior', function describeIndexTests() {
+    // TODO: [RENAMEME] Re-enable once a valid maps service is in place.
+    // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/221
+    xdescribe('zoom warning behavior', function describeIndexTests() {
       // Zoom warning is only applicable to OSS
       this.tags(['skipCloud', 'skipFirefox']);
 

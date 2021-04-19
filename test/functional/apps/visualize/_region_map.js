@@ -33,7 +33,9 @@
 import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  describe('vector map', function () {
+  // TODO: [RENAMEME] Re-enable once a valid maps service is in place.
+  // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/221
+  xdescribe('vector map', function () {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
