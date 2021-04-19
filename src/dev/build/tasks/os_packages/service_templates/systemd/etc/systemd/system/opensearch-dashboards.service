@@ -3,8 +3,8 @@ Description=OpenSearch Dashboards
 
 [Service]
 Type=simple
-User=opensearchDashboards
-Group=opensearchDashboards
+User=opensearch-dashboards
+Group=opensearch-dashboards
 # Load env vars from /etc/default/ and /etc/sysconfig/ if they exist.
 # Prefixing the path with '-' makes it try to load, but if the file doesn't
 # exist, it continues onward.
