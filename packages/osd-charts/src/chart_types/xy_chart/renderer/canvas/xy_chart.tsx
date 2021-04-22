@@ -22,10 +22,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { LegendItem } from '../../../../common/legend';
+import { Description } from '../../../../components/accessibility/description';
+import { Label } from '../../../../components/accessibility/label';
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
+import {
+  A11ySettings,
+  DEFAULT_A11_SETTINGS,
+  getA11ySettingsSelector,
+} from '../../../../state/selectors/get_accessibility_config';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
@@ -79,9 +85,7 @@ export interface ReactiveChartStateProps {
   annotationSpecs: AnnotationSpec[];
   panelGeoms: PanelGeoms;
   seriesTypes: Set<SeriesType>;
-  description?: string;
-  useDefaultSummary: boolean;
-  chartId: string;
+  a11ySettings: A11ySettings;
 }
 
 interface ReactiveChartDispatchProps {
@@ -159,9 +163,7 @@ class XYChartComponent extends React.Component<XYChartProps> {
       isChartEmpty,
       chartContainerDimensions: { width, height },
       seriesTypes,
-      description,
-      useDefaultSummary,
-      chartId,
+      a11ySettings,
     } = this.props;
 
     if (!initialized || isChartEmpty) {
@@ -171,9 +173,9 @@ class XYChartComponent extends React.Component<XYChartProps> {
 
     const chartSeriesTypes =
       seriesTypes.size > 1 ? `Mixed chart: ${[...seriesTypes].join(' and ')} chart` : `${[...seriesTypes]} chart`;
-    const chartIdDescription = `${chartId}--description`;
+
     return (
-      <figure>
+      <figure aria-labelledby={a11ySettings.labelId} aria-describedby={a11ySettings.descriptionId}>
         <canvas
           ref={forwardStageRef}
           className="echCanvasRenderer"
@@ -185,19 +187,17 @@ class XYChartComponent extends React.Component<XYChartProps> {
           }}
           // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
           role="presentation"
-          {...(description ? { 'aria-describedby': chartIdDescription } : {})}
         >
-          {(description || useDefaultSummary) && (
-            <div className="echScreenReaderOnly">
-              {description && <p id={chartIdDescription}>{description}</p>}
-              {useDefaultSummary && (
-                <dl>
-                  <dt>Chart type</dt>
-                  <dd>{chartSeriesTypes}</dd>
-                </dl>
-              )}
-            </div>
-          )}
+          <div className="echScreenReaderOnly">
+            <Label {...a11ySettings} />
+            <Description {...a11ySettings} />
+            {a11ySettings.defaultSummaryId && (
+              <dl id={a11ySettings.defaultSummaryId}>
+                <dt>Chart type</dt>
+                <dd>{chartSeriesTypes}</dd>
+              </dl>
+            )}
+          </div>
         </canvas>
       </figure>
     );
@@ -252,9 +252,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
   annotationSpecs: [],
   panelGeoms: [],
   seriesTypes: new Set(),
-  description: undefined,
-  useDefaultSummary: true,
-  chartId: '',
+  a11ySettings: DEFAULT_A11_SETTINGS,
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
@@ -263,7 +261,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   }
 
   const { geometries, geometriesIndex } = computeSeriesGeometriesSelector(state);
-  const { debug, description, useDefaultSummary } = getSettingsSpecSelector(state);
+  const { debug } = getSettingsSpecSelector(state);
 
   return {
     initialized: true,
@@ -285,9 +283,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     annotationSpecs: getAnnotationSpecsSelector(state),
     panelGeoms: computePanelsSelectors(state),
     seriesTypes: getSeriesTypes(state),
-    description,
-    useDefaultSummary,
-    chartId: getChartIdSelector(state),
+    a11ySettings: getA11ySettingsSelector(state),
   };
 };
 

@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import { SB_SOURCE_PANEL } from '../utils/storybook';
+import React from 'react';
 
-export default {
-  title: 'Test Cases',
-  parameters: {
-    options: { selectedPanel: SB_SOURCE_PANEL },
-  },
-};
+import { A11ySettings } from '../../state/selectors/get_accessibility_config';
 
-export { Example as noSeries } from './1_no_series';
-export { Example as chromePathBugFix } from './2_chrome_path_bug_fix';
-export { Example as noAxesAnnotationBugFix } from './3_no_axes_annotation';
-export { Example as filterZerosInLogFitDomain } from './4_filter_zero_values_log';
-export { Example as legendScrollBarSizing } from './5_legend_scroll_bar_sizing';
-export { Example as accessibilityCustomizations } from './6_a11y_custom_description';
+/** @internal */
+export function Description(props: A11ySettings) {
+  if (!props.description) return null;
+  return <p id={props.descriptionId}>{props.description}</p>;
+}

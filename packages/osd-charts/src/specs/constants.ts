@@ -155,7 +155,7 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   baseTheme: LIGHT_THEME,
   brushAxis: BrushAxis.X,
   minBrushDelta: 2,
-  useDefaultSummary: true,
-
+  ariaUseDefaultSummary: true,
+  ariaLabelHeadingLevel: 'h2',
   ...DEFAULT_LEGEND_CONFIG,
 };
