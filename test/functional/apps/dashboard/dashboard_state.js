@@ -155,7 +155,9 @@ export default function ({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    // TODO: [RENAMEME] Re-enable once a valid maps service is in place.
+    // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/221
+    xit('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
