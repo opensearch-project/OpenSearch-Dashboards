@@ -73,7 +73,6 @@ function encodeString(string: string) {
  */
 const storiesToSkip: Record<string, string[]> = {
   // Interactions: ['Some story name'],
-  Legend: ['Actions'],
   'Test Cases': ['No Series'],
 };
 

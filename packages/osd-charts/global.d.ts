@@ -18,3 +18,43 @@
  */
 
 import 'jest-extended'; // https://github.com/jest-community/jest-extended
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      /**
+       * Node enviroment
+       */
+      NODE_ENV: 'development' | 'production' | 'test';
+      /**
+       * Port used for dev servers including:
+       *  - storybook
+       *  - playground
+       */
+      PORT?: string;
+      /**
+       * Timezone flag used on jest.ts.config.js
+       */
+      TZ: string;
+      /**
+       * Flag used to enable a more suitable version of storybook for visual regression tests.
+       *
+       * Including:
+       * - disabling animations
+       * - preloading icons
+       */
+      STORYBOOK_VRT: string;
+      /**
+       * Flag used to enable debug state on visual regression test runnner
+       */
+      DEBUG: string;
+      /**
+       * String used for seeding a random number generator used in storybook and test files
+       *
+       * When seeded all rng use a deterministic random set of numbers.
+       * When no see is provided a truely _random_ number set will be used.
+       */
+      RNG_SEED: string;
+    }
+  }
+}

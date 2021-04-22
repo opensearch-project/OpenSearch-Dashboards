@@ -20,7 +20,6 @@
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { switchTheme } from '../../.storybook/theme_service';
 import {
   AreaSeries,
   Axis,
@@ -38,6 +37,7 @@ import {
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { palettes } from '../../src/utils/themes/colors';
+import { switchTheme } from '../../storybook/theme_service';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
   return number(

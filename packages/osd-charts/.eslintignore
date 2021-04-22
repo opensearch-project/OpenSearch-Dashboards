@@ -1,7 +1,4 @@
 # Force include
-!.storybook
-!.storybook-docs
-!.playground
 !.*.js
 
 # Ignore

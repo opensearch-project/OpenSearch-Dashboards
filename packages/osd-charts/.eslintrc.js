@@ -423,7 +423,7 @@ module.exports = {
       },
     },
     {
-      files: ['.playground/**/*.ts?(x)'],
+      files: ['playground/**/*.ts?(x)'],
       rules: {
         'react/prefer-stateless-function': 0,
       },

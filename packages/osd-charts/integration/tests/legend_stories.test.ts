@@ -49,7 +49,6 @@ describe('Legend stories', () => {
 
   it('should render color picker on mouse click', async () => {
     const action = async () => {
-      await common.disableAnimations();
       await common.clickMouseRelativeToDOMElement({ left: 0, top: 0 }, '.echLegendItem__color');
     };
     await common.expectElementAtUrlToMatchScreenshot(
@@ -58,19 +57,16 @@ describe('Legend stories', () => {
       {
         action,
         waitSelector: common.chartWaitSelector,
-        delay: 500, // needed for popover animation to complete
       },
     );
   });
 
   it('should render legend action on mouse hover', async () => {
     const action = async () => {
-      await common.disableAnimations();
       await common.moveMouseRelativeToDOMElement({ left: 30, top: 10 }, '.echLegendItem');
     };
     await common.expectChartAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--actions', {
       action,
-      delay: 500, // needed for icon to load
     });
   });
 

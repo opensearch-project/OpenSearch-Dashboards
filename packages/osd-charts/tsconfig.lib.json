@@ -4,6 +4,7 @@
     "removeComments": false
   },
   "extends": "./tsconfig",
+  "files": [],
   "include": ["src/**/*"],
   "exclude": ["**/*.test.*", "**/__mocks__", "src/mocks/**/*", "src/utils/data_samples/**/*"]
 }

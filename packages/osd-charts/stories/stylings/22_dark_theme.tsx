@@ -20,7 +20,6 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { switchTheme } from '../../.storybook/theme_service';
 import {
   AreaSeries,
   Axis,
@@ -36,6 +35,7 @@ import {
   TooltipType,
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { switchTheme } from '../../storybook/theme_service';
 
 const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);

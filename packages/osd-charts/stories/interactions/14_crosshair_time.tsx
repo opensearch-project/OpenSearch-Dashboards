@@ -20,7 +20,6 @@
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { switchTheme } from '../../.storybook/theme_service';
 import {
   Axis,
   BarSeries,
@@ -36,6 +35,7 @@ import {
   TooltipType,
 } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { switchTheme } from '../../storybook/theme_service';
 import { getChartRotationKnob } from '../utils/knobs';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 

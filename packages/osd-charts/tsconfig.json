@@ -17,8 +17,9 @@
     "allowJs": false,
     "skipLibCheck": true,
     "downlevelIteration": true,
-    "typeRoots": ["./node_modules/@types/", "./global.d.ts"],
     "stripInternal": true,
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types", "./global.d.ts"]
+  },
+  "files": ["./global.d.ts", "./scripts/custom_matchers.ts"]
 }

@@ -25,7 +25,6 @@ describe('Test cases stories', () => {
       'http://localhost:9001/?path=/story/test-cases--no-series&knob-Show custom no results=true',
       {
         waitSelector: '.echReactiveChart_noResults .euiIcon:not(.euiIcon-isLoading)',
-        delay: 500, // wait for icon to load
       },
     );
   });

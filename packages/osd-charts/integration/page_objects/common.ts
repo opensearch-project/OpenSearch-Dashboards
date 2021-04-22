@@ -388,7 +388,6 @@ class CommonPage {
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
     const action = async () => {
-      await this.disableAnimations();
       // click to focus within the chart
       await this.clickMouseRelativeToDOMElement({ top: 0, left: 0 }, this.chartSelector);
       // eslint-disable-next-line no-restricted-syntax
@@ -443,12 +442,6 @@ class CommonPage {
     // activate peripheral visibility
     await page.evaluate(() => {
       document.querySelector('html')!.classList.add('echVisualTesting');
-    });
-  }
-
-  async disableAnimations() {
-    await page.evaluate(() => {
-      document.querySelector('#story-root')!.classList.add('disable-animations');
     });
   }
 

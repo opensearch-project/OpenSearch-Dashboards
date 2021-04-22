@@ -4,5 +4,6 @@
     "declaration": false,
     "declarationMap": false
   },
+  "files": [],
   "extends": "./tsconfig.lib"
 }

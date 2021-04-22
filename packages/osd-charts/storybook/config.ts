@@ -22,10 +22,16 @@ import { withKnobs } from '@storybook/addon-knobs';
 import { addDecorator, configure, addParameters } from '@storybook/react';
 import { create } from '@storybook/theming';
 
+import { preloadIcons } from './preload_icons';
 import { switchTheme } from './theme_service';
 import './style.scss';
 
 switchTheme('light');
+
+if (process.env.STORYBOOK_VRT) {
+  preloadIcons();
+  document.querySelector('html')?.classList.add('disable-animations');
+}
 
 addParameters({
   options: {

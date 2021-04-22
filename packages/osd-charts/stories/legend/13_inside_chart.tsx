@@ -20,7 +20,6 @@
 import { select, boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { switchTheme } from '../../.storybook/theme_service';
 import {
   AreaSeries,
   Axis,
@@ -37,6 +36,7 @@ import {
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { switchTheme } from '../../storybook/theme_service';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();
