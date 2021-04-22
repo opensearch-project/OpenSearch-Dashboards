@@ -17,31 +17,19 @@
  * under the License.
  */
 
+import { Position } from '../../src';
+import { eachRotation } from '../helpers';
 import { common } from '../page_objects';
 
 describe('Annotations stories', () => {
   describe('rotation', () => {
-    it('rotation - 0', async () => {
+    eachRotation.it(async (rotation) => {
       await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-lines--single-bar-histogram&knob-debug=&knob-chartRotation=0',
-      );
-    });
-    it('rotation - 90', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-lines--single-bar-histogram&knob-debug=&knob-chartRotation=90',
-      );
-    });
-    it('rotation - negative 90', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-lines--single-bar-histogram&knob-debug=&knob-chartRotation=-90',
-      );
-    });
-    it('rotation - 180', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-lines--single-bar-histogram&knob-debug=&knob-chartRotation=180',
+        `http://localhost:9001/?path=/story/annotations-lines--single-bar-histogram&knob-debug=&knob-chartRotation=${rotation}`,
       );
     });
   });
+
   describe('Render within domain', () => {
     it('cover from 0 to end domain', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
@@ -69,6 +57,7 @@ describe('Annotations stories', () => {
       );
     });
   });
+
   describe('Render with zero domain or fit to domain', () => {
     it('show annotation when yDomain is not zero value', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
@@ -101,6 +90,7 @@ describe('Annotations stories', () => {
       );
     });
   });
+
   describe('Render with no group id provided', () => {
     it('show annotation when group id is provided no y0 nor y1 values specified', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
@@ -126,6 +116,18 @@ describe('Annotations stories', () => {
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/annotations-rects--with-group-id&knob-enable%20annotation=true&knob-Annotation%20groupId=&knob-x0=5&knob-x1=10&knob-enable%20y0%20and%20y1%20values=true&knob-y0=0&knob-y1=3',
       );
+    });
+  });
+
+  describe('Advanced markers', () => {
+    describe.each<Position>(Object.values(Position))('Annotation marker side - %s', (side) => {
+      eachRotation.describe((rotation) => {
+        it.each<number>([0, 15, 30])('renders marker annotation within chart canvas - metric: %i', async (metric) => {
+          await common.expectChartAtUrlToMatchScreenshot(
+            `http://localhost:9001/?path=/story/annotations-lines--advanced-markers&knob-Debug=&knob-show legend=true&knob-chartRotation=${rotation}&knob-Side=${side}&knob-TickLine padding for markerBody=30&knob-Annotation metric=${metric}`,
+          );
+        });
+      });
     });
   });
 });

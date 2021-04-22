@@ -125,7 +125,7 @@ export class XYAxisChartState implements InternalChartState {
         <Crosshair />
         <XYChart forwardStageRef={forwardStageRef} />
         <Tooltip getChartContainerRef={containerRef} />
-        <Annotations getChartContainerRef={containerRef} />
+        <Annotations getChartContainerRef={containerRef} chartAreaRef={forwardStageRef} />
         <Highlighter />
         <BrushTool />
       </>

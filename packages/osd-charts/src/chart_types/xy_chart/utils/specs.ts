@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ReactNode } from 'react';
 import { $Values } from 'utility-types';
 
 import { ChartType } from '../..';
@@ -43,7 +44,11 @@ import {
   AxisStyle,
 } from '../../../utils/themes/theme';
 import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
-import { AnnotationTooltipFormatter, CustomAnnotationTooltip } from '../annotations/types';
+import {
+  AnnotationTooltipFormatter,
+  ComponentWithAnnotationDatum,
+  CustomAnnotationTooltip,
+} from '../annotations/types';
 import { XYChartSeriesIdentifier, DataSeriesDatum } from './series';
 
 /** @public */
@@ -767,8 +772,10 @@ export type LineAnnotationSpec = BaseAnnotationSpec<
   LineAnnotationStyle
 > & {
   domainType: AnnotationDomainType;
-  /** Custom marker */
-  marker?: JSX.Element;
+  /** Optional Custom marker icon centered on data value */
+  marker?: ReactNode | ComponentWithAnnotationDatum;
+  /** Optional marker body, always contained within chart area */
+  markerBody?: ReactNode | ComponentWithAnnotationDatum;
   /**
    * Custom marker dimensions; will be computed internally
    * Any user-supplied values will be overwritten

@@ -20,11 +20,11 @@
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill, Stroke } from '../../../../../geoms/types';
 import { MockStyles } from '../../../../../mocks';
-import { getColorFromVariant } from '../../../../../utils/common';
+import * as common from '../../../../../utils/common';
 import { buildBarStyles } from './bar';
 
 jest.mock('../../../../../common/color_library_wrappers');
-jest.mock('../../../../../utils/common');
+jest.spyOn(common, 'getColorFromVariant');
 
 const COLOR = 'aquamarine';
 
@@ -48,11 +48,11 @@ describe('Bar styles', () => {
     });
 
     it('should call getColorFromVariant with correct args for fill', () => {
-      expect(getColorFromVariant).nthCalledWith(1, baseColor, themeRectStyle.fill);
+      expect(common.getColorFromVariant).nthCalledWith(1, baseColor, themeRectStyle.fill);
     });
 
     it('should call getColorFromVariant with correct args for border', () => {
-      expect(getColorFromVariant).nthCalledWith(1, baseColor, themeRectBorderStyle.stroke);
+      expect(common.getColorFromVariant).nthCalledWith(1, baseColor, themeRectBorderStyle.stroke);
     });
 
     describe('Colors', () => {
@@ -61,8 +61,8 @@ describe('Bar styles', () => {
 
       beforeAll(() => {
         setDefaults();
-        (getColorFromVariant as jest.Mock).mockImplementation(() => {
-          const { length } = (getColorFromVariant as jest.Mock).mock.calls;
+        (common.getColorFromVariant as jest.Mock).mockImplementation(() => {
+          const { length } = (common.getColorFromVariant as jest.Mock).mock.calls;
           return length === 1 ? fillColor : strokeColor;
         });
       });
@@ -95,8 +95,8 @@ describe('Bar styles', () => {
         themeRectStyle = MockStyles.rect({ opacity: fillOpacity });
         themeRectBorderStyle = MockStyles.rectBorder({ strokeOpacity });
         geometryStateStyle = MockStyles.geometryState({ opacity: geoOpacity });
-        (getColorFromVariant as jest.Mock).mockImplementation(() => {
-          const { length } = (getColorFromVariant as jest.Mock).mock.calls;
+        (common.getColorFromVariant as jest.Mock).mockImplementation(() => {
+          const { length } = (common.getColorFromVariant as jest.Mock).mock.calls;
           return length === 1 ? fillColor : strokeColor;
         });
       });

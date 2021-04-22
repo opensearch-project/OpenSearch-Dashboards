@@ -17,10 +17,14 @@
  * under the License.
  */
 
+/* eslint-disable jest/no-export */
+
 import { lstatSync, readdirSync } from 'fs';
 import path from 'path';
 
 import { getStorybook, configure } from '@storybook/react';
+
+import { Rotation } from '../src';
 
 export type StoryInfo = [string, string, number];
 
@@ -106,3 +110,27 @@ export function getStorybookInfo(): StoryGroupInfo[] {
     })
     .filter(([, , stories]) => stories.length > 0);
 }
+
+const rotationCases: [string, Rotation][] = [
+  ['0', 0],
+  ['90', 90],
+  ['180', 180],
+  ['negative 90', -90],
+];
+
+/**
+ * This is a wrapper around it.each for Rotations
+ * This is needed as the negative sign (-) will be excluded from the png filename
+ */
+export const eachRotation = {
+  it(fn: (rotation: Rotation) => any, title = 'rotation - %s') {
+    // eslint-disable-next-line jest/valid-title
+    return it.each<[string, Rotation]>(rotationCases)(title, (_, r) => fn(r));
+  },
+  describe(fn: (rotation: Rotation) => any, title = 'rotation - %s') {
+    // eslint-disable-next-line jest/valid-title, jest/valid-describe
+    return describe.each<[string, Rotation]>(rotationCases)(title, (_, r) => fn(r));
+  },
+};
+
+/* eslint-enable jest/no-export */

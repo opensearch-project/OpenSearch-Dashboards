@@ -20,11 +20,11 @@
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill } from '../../../../../geoms/types';
 import { MockStyles } from '../../../../../mocks';
-import { getColorFromVariant } from '../../../../../utils/common';
+import * as common from '../../../../../utils/common';
 import { buildAreaStyles } from './area';
 
 jest.mock('../../../../../common/color_library_wrappers');
-jest.mock('../../../../../utils/common');
+jest.spyOn(common, 'getColorFromVariant');
 
 const COLOR = 'aquamarine';
 
@@ -46,7 +46,7 @@ describe('Area styles', () => {
     });
 
     it('should call getColorFromVariant with correct args for fill', () => {
-      expect(getColorFromVariant).nthCalledWith(1, baseColor, themeAreaStyle.fill);
+      expect(common.getColorFromVariant).nthCalledWith(1, baseColor, themeAreaStyle.fill);
     });
 
     describe('Colors', () => {
@@ -54,7 +54,7 @@ describe('Area styles', () => {
 
       beforeAll(() => {
         setDefaults();
-        (getColorFromVariant as jest.Mock).mockReturnValue(fillColor);
+        (common.getColorFromVariant as jest.Mock).mockReturnValue(fillColor);
       });
 
       it('should call stringToRGB with values from getColorFromVariant', () => {
@@ -76,7 +76,7 @@ describe('Area styles', () => {
         setDefaults();
         themeAreaStyle = MockStyles.area({ opacity: fillOpacity });
         geometryStateStyle = MockStyles.geometryState({ opacity: geoOpacity });
-        (getColorFromVariant as jest.Mock).mockReturnValue(fillColor);
+        (common.getColorFromVariant as jest.Mock).mockReturnValue(fillColor);
       });
 
       it('should return correct fill opacity', () => {

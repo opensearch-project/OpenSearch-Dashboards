@@ -33,7 +33,11 @@ export { SimplePadding, Padding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
 export { SeriesIdentifier, SeriesKey } from './common/series_id';
 export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
-export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
+export {
+  AnnotationTooltipFormatter,
+  CustomAnnotationTooltip,
+  ComponentWithAnnotationDatum,
+} from './chart_types/xy_chart/annotations/types';
 export { GeometryValue, BandedAccessorType } from './utils/geometry';
 export { LegendPath, LegendPathElement } from './state/actions/legend';
 export { CategoryKey } from './common/category';

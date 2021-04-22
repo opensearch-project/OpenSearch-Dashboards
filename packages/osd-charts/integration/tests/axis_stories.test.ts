@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Position, Rotation } from '../../src';
+import { Position } from '../../src';
+import { eachRotation } from '../helpers';
 import { common } from '../page_objects';
 
 describe('Axis stories', () => {
@@ -78,16 +79,11 @@ describe('Axis stories', () => {
     );
   });
 
-  it.each<[string, Rotation]>([
-    ['0', 0],
-    ['90', 90],
-    ['180', 180],
-    ['negative 90', -90],
-  ])('should render correctly rotated ticks - %s', async (_, rotation) => {
+  eachRotation.it(async (rotation) => {
     await common.expectChartAtUrlToMatchScreenshot(
       `http://localhost:9001/?path=/story/axes--tick-label-rotation&knob-disable axis overrides_general=true&knob-Tick label rotation_shared=${rotation}`,
     );
-  });
+  }, 'should render correctly rotated ticks - %s');
 
   describe('Small multiples', () => {
     const allPositions = [Position.Top, Position.Right, Position.Bottom, Position.Left];

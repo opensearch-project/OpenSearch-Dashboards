@@ -20,11 +20,11 @@
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Stroke } from '../../../../../geoms/types';
 import { MockStyles } from '../../../../../mocks';
-import { getColorFromVariant } from '../../../../../utils/common';
+import * as common from '../../../../../utils/common';
 import { buildLineStyles } from './line';
 
 jest.mock('../../../../../common/color_library_wrappers');
-jest.mock('../../../../../utils/common');
+jest.spyOn(common, 'getColorFromVariant');
 
 const COLOR = 'aquamarine';
 
@@ -46,7 +46,7 @@ describe('Line styles', () => {
     });
 
     it('should call getColorFromVariant with correct args for stroke', () => {
-      expect(getColorFromVariant).nthCalledWith(1, baseColor, themeLineStyle.stroke);
+      expect(common.getColorFromVariant).nthCalledWith(1, baseColor, themeLineStyle.stroke);
     });
 
     it('should set strokeWidth from themeLineStyle', () => {
@@ -62,7 +62,7 @@ describe('Line styles', () => {
 
       beforeAll(() => {
         setDefaults();
-        (getColorFromVariant as jest.Mock).mockReturnValue(strokeColor);
+        (common.getColorFromVariant as jest.Mock).mockReturnValue(strokeColor);
       });
 
       it('should call stringToRGB with values from getColorFromVariant', () => {
@@ -84,7 +84,7 @@ describe('Line styles', () => {
         setDefaults();
         themeLineStyle = MockStyles.line({ opacity: strokeOpacity });
         geometryStateStyle = MockStyles.geometryState({ opacity: geoOpacity });
-        (getColorFromVariant as jest.Mock).mockReturnValue(strokeColor);
+        (common.getColorFromVariant as jest.Mock).mockReturnValue(strokeColor);
       });
 
       it('should return correct stroke opacity', () => {

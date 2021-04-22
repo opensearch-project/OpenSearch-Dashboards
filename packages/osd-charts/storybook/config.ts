@@ -27,6 +27,7 @@ import { switchTheme } from './theme_service';
 import './style.scss';
 
 switchTheme('light');
+preloadIcons();
 
 if (process.env.STORYBOOK_VRT) {
   preloadIcons();

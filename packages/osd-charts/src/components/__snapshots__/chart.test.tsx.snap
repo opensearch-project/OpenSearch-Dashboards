@@ -98,8 +98,8 @@ exports[`Chart should render the legend name test 1`] = `
                     </TooltipPortal>
                   </Tooltip>
                 </Connect(Tooltip)>
-                <Connect(Annotations) getChartContainerRef={[Function (anonymous)]}>
-                  <Annotations getChartContainerRef={[Function (anonymous)]} isChartEmpty={false} chartDimensions={{...}} annotationDimensions={{...}} annotationSpecs={{...}} tooltipState={{...}} chartId=\\"chart1\\" zIndex={0} onPointerMove={[Function (anonymous)]} onDOMElementLeave={[Function (anonymous)]} onDOMElementEnter={[Function (anonymous)]}>
+                <Connect(Annotations) getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}}>
+                  <Annotations getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}} isChartEmpty={false} chartDimensions={{...}} annotationDimensions={{...}} annotationSpecs={{...}} tooltipState={{...}} chartId=\\"chart1\\" zIndex={0} onPointerMove={[Function (anonymous)]} onDOMElementLeave={[Function (anonymous)]} onDOMElementEnter={[Function (anonymous)]}>
                     <AnnotationTooltip chartId=\\"chart1\\" zIndex={0} state={{...}} chartRef={{...}} onScroll={[Function (anonymous)]} />
                   </Annotations>
                 </Connect(Annotations)>

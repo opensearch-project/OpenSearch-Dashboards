@@ -17,28 +17,14 @@
  * under the License.
  */
 
+import { eachRotation } from '../helpers';
 import { common } from '../page_objects';
 
 describe('Line series stories', () => {
   describe('rotation', () => {
-    it('rotation - 0', async () => {
+    eachRotation.it(async (rotation) => {
       await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/line-chart--ordinal-with-axis&knob-chartRotation=0',
-      );
-    });
-    it('rotation - 90', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/line-chart--ordinal-with-axis&knob-chartRotation=90',
-      );
-    });
-    it('rotation - negative 90', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/line-chart--ordinal-with-axis&knob-chartRotation=-90',
-      );
-    });
-    it('rotation - 180', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/line-chart--ordinal-with-axis&knob-chartRotation=180',
+        `http://localhost:9001/?path=/story/line-chart--ordinal-with-axis&knob-chartRotation=${rotation}`,
       );
     });
   });

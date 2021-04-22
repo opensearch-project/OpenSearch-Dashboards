@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Rotation, Placement } from '../../src';
+import { Placement } from '../../src';
+import { eachRotation } from '../helpers';
 import { common } from '../page_objects';
 
 describe('Interactions', () => {
@@ -29,12 +30,7 @@ describe('Interactions', () => {
       const right = 20;
 
       describe.each<string>(['default', 'chart'])('Boundary El - %s', (boundary) => {
-        describe.each<[string, Rotation]>([
-          ['0', 0],
-          ['90', 90],
-          ['180', 180],
-          ['negative 90', -90],
-        ])('rotation - %s', (_, rotation) => {
+        eachRotation.describe((rotation) => {
           describe.each<Placement>([Placement.Right, Placement.Left, Placement.Top, Placement.Bottom])(
             'Placement - %s',
             (placement) => {

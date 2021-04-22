@@ -25,7 +25,7 @@ import { mergePartial, RecursivePartial } from '../../utils/common';
 /** @internal */
 export class MockAnnotationLineProps {
   private static readonly base: AnnotationLineProps = {
-    id: getAnnotationLinePropsId('spec1', { dataValue: 0 }),
+    id: getAnnotationLinePropsId('spec1', { dataValue: 0 }, 0),
     specId: 'spec1',
     linePathPoints: {
       x1: 0,
@@ -45,6 +45,7 @@ export class MockAnnotationLineProps {
         ...MockAnnotationLineProps.base.datum,
         ...partial?.datum,
       },
+      0,
       smVerticalValue,
       smHorizontalValue,
     );

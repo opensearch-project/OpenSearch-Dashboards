@@ -42,6 +42,7 @@ function computeYDomainLineAnnotationDimensions(
     id: specId,
     dataValues,
     marker: icon,
+    markerBody: body,
     markerDimensions: dimension,
     markerPosition: specMarkerPosition,
     style,
@@ -57,7 +58,7 @@ function computeYDomainLineAnnotationDimensions(
 
   const panelSize = getPanelSize({ vertical, horizontal });
 
-  dataValues.forEach((datum: LineAnnotationDatum) => {
+  dataValues.forEach((datum: LineAnnotationDatum, i) => {
     const { dataValue } = datum;
 
     // avoid rendering invalid annotation value
@@ -96,13 +97,14 @@ function computeYDomainLineAnnotationDimensions(
 
         const lineProp: AnnotationLineProps = {
           specId,
-          id: getAnnotationLinePropsId(specId, datum, verticalValue, horizontalValue),
+          id: getAnnotationLinePropsId(specId, datum, i, verticalValue, horizontalValue),
           datum,
           linePathPoints,
           markers: icon
             ? [
                 {
                   icon,
+                  body,
                   color,
                   dimension,
                   position,
@@ -137,6 +139,7 @@ function computeXDomainLineAnnotationDimensions(
     id: specId,
     dataValues,
     marker: icon,
+    markerBody: body,
     markerDimensions: dimension,
     markerPosition: specMarkerPosition,
     style,
@@ -148,7 +151,7 @@ function computeXDomainLineAnnotationDimensions(
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
   const panelSize = getPanelSize({ vertical, horizontal });
 
-  dataValues.forEach((datum: LineAnnotationDatum) => {
+  dataValues.forEach((datum: LineAnnotationDatum, i) => {
     const { dataValue } = datum;
     let annotationValueXPosition = xScale.scale(dataValue);
     if (isNil(annotationValueXPosition)) {
@@ -208,13 +211,14 @@ function computeXDomainLineAnnotationDimensions(
 
         const lineProp: AnnotationLineProps = {
           specId,
-          id: getAnnotationLinePropsId(specId, datum, verticalValue, horizontalValue),
+          id: getAnnotationLinePropsId(specId, datum, i, verticalValue, horizontalValue),
           datum,
           linePathPoints,
           markers: icon
             ? [
                 {
                   icon,
+                  body,
                   color,
                   dimension,
                   position,
@@ -403,8 +407,9 @@ function getMarkerPositionForYAnnotation(
 export function getAnnotationLinePropsId(
   specId: string,
   datum: LineAnnotationDatum,
+  index: number,
   verticalValue?: any,
   horizontalValue?: any,
 ) {
-  return [specId, verticalValue, horizontalValue, datum.header, datum.details].join('__');
+  return [specId, verticalValue, horizontalValue, datum.header, datum.details, index].join('__');
 }

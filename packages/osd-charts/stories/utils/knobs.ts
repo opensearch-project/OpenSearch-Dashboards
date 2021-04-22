@@ -100,7 +100,7 @@ export const getKnobsFromEnum = <T extends SelectTypeKnobValue, O extends Record
     group,
   ) || undefined;
 
-export const getPositionKnob = (name = 'chartRotation', defaultValue = Position.Right) =>
+export const getPositionKnob = (name = 'chartRotation', defaultValue: Position = Position.Right) =>
   select<Position>(
     name,
     {

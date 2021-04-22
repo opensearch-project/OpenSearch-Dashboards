@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ComponentType } from 'react';
+import { ComponentType, ReactNode } from 'react';
 
 import { TooltipPortalSettings } from '../../../components/portal';
 import { Position, Color } from '../../../utils/common';
@@ -45,11 +45,18 @@ export interface AnnotationDetails {
 }
 
 /**
+ * Component to render based on annotation datum
+ *
+ * @public
+ */
+export type ComponentWithAnnotationDatum = ComponentType<LineAnnotationDatum>;
+
+/**
  * The marker for an Annotation. Usually a JSX element
  * @internal
  */
 export interface AnnotationMarker {
-  icon: JSX.Element;
+  icon?: ReactNode | ComponentWithAnnotationDatum;
   position: {
     top: number;
     left: number;
@@ -58,6 +65,7 @@ export interface AnnotationMarker {
     width: number;
     height: number;
   };
+  body?: ReactNode | ComponentWithAnnotationDatum;
   alignment: Position;
   color: Color;
 }
