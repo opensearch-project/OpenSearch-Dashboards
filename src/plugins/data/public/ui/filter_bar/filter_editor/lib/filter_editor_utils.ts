@@ -33,6 +33,7 @@
 import dateMath from '@elastic/datemath';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import {
+  CidrMask,
   isFilterable,
   IIndexPattern,
   IFieldType,
@@ -68,7 +69,9 @@ export function validateParams(params: any, type: string) {
       return Boolean(typeof params === 'string' && moment && moment.isValid());
     case 'ip':
       try {
-        return Boolean(new Ipv4Address(params));
+        return params.includes('/')
+          ? Boolean(new CidrMask(params))
+          : Boolean(new Ipv4Address(params));
       } catch (e) {
         return false;
       }
