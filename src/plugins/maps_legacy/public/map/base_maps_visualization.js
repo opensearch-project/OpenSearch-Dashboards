@@ -107,7 +107,7 @@ export function BaseMapsVisualizationProvider() {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       const modules = await lazyLoadMapsLegacyModules();
-      this._opensearchDashboardsMap = new modules.OpenSearchDashboardMap(this._container, options);
+      this._opensearchDashboardsMap = new modules.OpenSearchDashboardsMap(this._container, options);
       this._opensearchDashboardsMap.setMinZoom(WMS_MINZOOM); //use a default
       this._opensearchDashboardsMap.setMaxZoom(WMS_MAXZOOM); //use a default
 

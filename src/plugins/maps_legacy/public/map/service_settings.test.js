@@ -53,7 +53,7 @@ describe('service_settings (FKA tile_map test)', function () {
   const defaultMapConfig = {
     emsFileApiUrl,
     emsTileApiUrl,
-    includeOpenSearchDashboardsMapsService: true,
+    includeOpenSearchMapsService: true,
     emsTileLayerId: {
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
@@ -252,7 +252,7 @@ describe('service_settings (FKA tile_map test)', function () {
       it('should exclude EMS', async () => {
         serviceSettings = makeServiceSettings(
           {
-            includeOpenSearchDashboardsMapsService: false,
+            includeOpenSearchMapsService: false,
           },
           {
             url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -276,7 +276,7 @@ describe('service_settings (FKA tile_map test)', function () {
 
       it('should exclude all when not configured', async () => {
         serviceSettings = makeServiceSettings({
-          includeOpenSearchDashboardsMapsService: false,
+          includeOpenSearchMapsService: false,
         });
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [];
@@ -331,7 +331,7 @@ describe('service_settings (FKA tile_map test)', function () {
 
     it('should exclude all when not configured', async () => {
       const serviceSettings = makeServiceSettings({
-        includeOpenSearchDashboardsMapsService: false,
+        includeOpenSearchMapsService: false,
       });
       const fileLayers = await serviceSettings.getFileLayers();
       const expected = [];
