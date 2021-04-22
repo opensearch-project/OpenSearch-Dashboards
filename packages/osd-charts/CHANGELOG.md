@@ -1,3 +1,18 @@
+# [29.0.0](https://github.com/elastic/elastic-charts/compare/v28.2.0...v29.0.0) (2021-04-22)
+
+
+### Features
+
+* **a11y:** add label for screen readers ([#1121](https://github.com/elastic/elastic-charts/issues/1121)) ([920e585](https://github.com/elastic/elastic-charts/commit/920e5856d4c52416c0ea394e5605bb756266b178)), closes [#1096](https://github.com/elastic/elastic-charts/issues/1096)
+* **annotations:** marker body with dynamic positioning ([#1116](https://github.com/elastic/elastic-charts/issues/1116)) ([601abac](https://github.com/elastic/elastic-charts/commit/601abacc4247755ad1203439e6e95c6fa8574ab2))
+
+
+### BREAKING CHANGES
+
+* **a11y:** `description` prop in `<Settings/>` is renamed to `ariaDescription`
+
+Co-authored-by: Marco Vettorello <vettorello.marco@gmail.com>
+
 # [28.2.0](https://github.com/elastic/elastic-charts/compare/v28.1.0...v28.2.0) (2021-04-15)
 
 
