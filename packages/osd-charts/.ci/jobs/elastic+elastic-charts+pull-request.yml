@@ -19,11 +19,6 @@
       - multijob:
           name: run child jobs
           projects:
-            - name: elastic+elastic-charts+pr-lint
-              predefined-parameters: branch_specifier=${ghprbActualCommit}
-              current-parameters: true
-            - name: elastic+elastic-charts+pr-unit-tests
-              predefined-parameters: branch_specifier=${ghprbActualCommit}
             - name: elastic+elastic-charts+pr-vrts
               predefined-parameters: branch_specifier=${ghprbActualCommit}
             - name: elastic+elastic-charts+pr-vrts-2
