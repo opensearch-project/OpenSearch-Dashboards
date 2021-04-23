@@ -269,6 +269,10 @@ export type TooltipProps = TooltipPortalSettings<'chart'> & {
    * Render custom tooltip given header and values
    */
   customTooltip?: CustomTooltip;
+  /**
+   * Stick the tooltip to a specific position within the current cursor
+   */
+  stickTo?: Position;
 };
 
 /**

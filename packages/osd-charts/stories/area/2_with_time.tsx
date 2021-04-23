@@ -17,16 +17,28 @@
  * under the License.
  */
 
+import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, timeFormatter } from '../../src';
+import { AreaSeries, Axis, Chart, Placement, Position, ScaleType, Settings, timeFormatter } from '../../src';
+import { isDefined } from '../../src/utils/common';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { getPlacementKnob, getPositionKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dateFormatter = timeFormatter('HH:mm');
 
 export const Example = () => (
   <Chart className="story-chart">
+    <Settings
+      tooltip={{
+        stickTo: getPositionKnob('stickTo', Position.Top),
+        placement: getPlacementKnob('placement', Placement.RightEnd),
+        fallbackPlacements: [getPlacementKnob('fallback placement', Placement.LeftStart)].filter(isDefined),
+        offset: number('placement offset', 5),
+      }}
+      rotation={0}
+    />
     <Axis
       id="bottom"
       title="timestamp per 1 minute"
@@ -40,7 +52,6 @@ export const Example = () => (
       position={Position.Left}
       tickFormat={(d) => Number(d).toFixed(2)}
     />
-
     <AreaSeries
       id="area"
       xScaleType={ScaleType.Time}

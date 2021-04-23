@@ -21,7 +21,8 @@ import { TooltipAnchorPosition } from '../../../components/tooltip/types';
 import { Line, Rect } from '../../../geoms/types';
 import { Scale } from '../../../scales';
 import { isContinuousScale } from '../../../scales/types';
-import { Rotation } from '../../../utils/common';
+import { TooltipProps } from '../../../specs/settings';
+import { Position, Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';
@@ -177,10 +178,25 @@ export function getTooltipAnchorPosition(
   cursorBandPosition: Line | Rect,
   cursorPosition: { x: number; y: number },
   panel: Dimensions,
+  stickTo?: TooltipProps['stickTo'],
 ): TooltipAnchorPosition {
   const isRotated = isVerticalRotation(chartRotation);
-  const hPosition = getHorizontalTooltipPosition(cursorPosition.x, cursorBandPosition, panel, offset.left, isRotated);
-  const vPosition = getVerticalTooltipPosition(cursorPosition.y, cursorBandPosition, panel, offset.top, isRotated);
+  const hPosition = getHorizontalTooltipPosition(
+    cursorPosition.x,
+    cursorBandPosition,
+    panel,
+    offset.left,
+    isRotated,
+    stickTo,
+  );
+  const vPosition = getVerticalTooltipPosition(
+    cursorPosition.y,
+    cursorBandPosition,
+    panel,
+    offset.top,
+    isRotated,
+    stickTo,
+  );
   return {
     isRotated,
     ...vPosition,
@@ -194,6 +210,7 @@ function getHorizontalTooltipPosition(
   panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
+  stickTo?: TooltipProps['stickTo'],
 ): { x0?: number; x1: number } {
   if (!isRotated) {
     const left = 'x1' in cursorBandPosition ? cursorBandPosition.x1 : cursorBandPosition.x;
@@ -203,10 +220,11 @@ function getHorizontalTooltipPosition(
       x1: left + width + globalOffset,
     };
   }
+  const x = stickTo === Position.Left ? 0 : stickTo === Position.Right ? panel.width : cursorXPosition;
   return {
     // NOTE: x0 set to zero blocks tooltip placement on left when rotated 90 deg
     // Delete this comment before merging and verifying this doesn't break anything.
-    x1: panel.left + cursorXPosition + globalOffset,
+    x1: panel.left + x + globalOffset,
   };
 }
 
@@ -216,15 +234,17 @@ function getVerticalTooltipPosition(
   panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
+  stickTo?: TooltipProps['stickTo'],
 ): {
   y0: number;
   y1: number;
 } {
+  const y = stickTo === Position.Top ? 0 : stickTo === Position.Bottom ? panel.height : cursorYPosition;
   if (!isRotated) {
-    const y = cursorYPosition + panel.top + globalOffset;
+    const yPos = y + panel.top + globalOffset;
     return {
-      y0: y,
-      y1: y,
+      y0: yPos,
+      y1: yPos,
     };
   }
   const top = 'y1' in cursorBandPosition ? cursorBandPosition.y1 : cursorBandPosition.y;
