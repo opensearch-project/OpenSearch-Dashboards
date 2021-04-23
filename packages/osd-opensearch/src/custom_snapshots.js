@@ -42,7 +42,7 @@ function getCustomSnapshotUrl() {
     !process.env.OSD_OPENSEARCH_SNAPSHOT_URL &&
     !process.argv.some(isVersionFlag)
   ) {
-    // return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}-{os}-x86_64.{ext}'; //TODO
+    // return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}-{os}-x64.{ext}'; //TODO
     return undefined;
   }
 

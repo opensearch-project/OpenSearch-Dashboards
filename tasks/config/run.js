@@ -35,7 +35,7 @@ import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 const { version } = require('../../package.json');
 const OPENSEARCH_DASHBOARDS_INSTALL_DIR =
   process.env.OPENSEARCH_DASHBOARDS_INSTALL_DIR ||
-  `./build/oss/opensearch-dashboards-${version}-SNAPSHOT-${process.platform}-x86_64`;
+  `./build/oss/opensearch-dashboards-${version}-SNAPSHOT-${process.platform}-x64`;
 
 module.exports = function () {
   const NODE = 'node';

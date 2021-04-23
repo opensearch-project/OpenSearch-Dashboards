@@ -46,9 +46,9 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'tar xzvf heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'cd heartbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'tar xzvf heartbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'cd heartbeat-{config.opensearchDashboards.version}-darwin-x64/',
       ],
     },
     DEB: {
@@ -77,8 +77,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
-        'sudo rpm -vi heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-x64.rpm',
+        'sudo rpm -vi heartbeat-{config.opensearchDashboards.version}-x64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',

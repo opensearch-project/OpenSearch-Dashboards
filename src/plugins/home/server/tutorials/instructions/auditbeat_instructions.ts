@@ -48,9 +48,9 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'tar xzvf auditbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'cd auditbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'tar xzvf auditbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'cd auditbeat-{config.opensearchDashboards.version}-darwin-x64/',
       ],
     },
     DEB: {
@@ -85,8 +85,8 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
-        'sudo rpm -vi auditbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/auditbeat/auditbeat-{config.opensearchDashboards.version}-x64.rpm',
+        'sudo rpm -vi auditbeat-{config.opensearchDashboards.version}-x64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
