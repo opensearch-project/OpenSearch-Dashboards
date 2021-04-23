@@ -94,16 +94,11 @@ export function runCli() {
           plugin
         );
 
-        if (semver.satisfies(opensearchDashboardsVersion, '<7.9')) {
+        if (semver.satisfies(opensearchDashboardsVersion, '>1.0')) {
           log.error(
-            'These tools are not designed to work with version before 7.9, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
+            'These tools are not designed to work with version greater than 1.0, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
           );
           process.exit(1);
-        }
-        if (semver.satisfies(opensearchDashboardsVersion, '~7.9.0')) {
-          log.warning(
-            'These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info'
-          );
         }
 
         const sourceDir = plugin.directory;
