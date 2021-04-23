@@ -2,5 +2,7 @@
 .echCrosshair__cursor,
 .echCrosshair__crossLine {
   position: absolute;
+  top: 0;
+  left: 0;
   pointer-events: none;
 }

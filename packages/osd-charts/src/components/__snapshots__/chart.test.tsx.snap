@@ -66,10 +66,7 @@ exports[`Chart should render the legend name test 1`] = `
             <ChartContainer getChartContainerRef={[Function (anonymous)]} forwardStageRef={{...}} status=\\"Initialized\\" initialized={true} isChartEmpty={false} pointerCursor=\\"default\\" isBrushingAvailable={false} isBrushing={false} internalChartRenderer={[Function (anonymous)]} settings={{...}} onPointerMove={[Function (anonymous)]} onMouseUp={[Function (anonymous)]} onMouseDown={[Function (anonymous)]} onKeyPress={[Function (anonymous)]}>
               <div className=\\"echChartPointerContainer\\" style={{...}} onMouseMove={[Function (anonymous)]} onMouseLeave={[Function (anonymous)]} onMouseDown={[Function (anonymous)]} onMouseUp={[Function (anonymous)]}>
                 <Connect(Crosshair)>
-                  <Crosshair theme={{...}} chartRotation={0} cursorPosition={[undefined]} cursorCrossLinePosition={[undefined]} tooltipType=\\"vertical\\" fromExternalEvent={[undefined]} zIndex={0} dispatch={[Function: dispatch]}>
-                    <svg className=\\"echCrosshair__cursor\\" width=\\"100%\\" height=\\"100%\\" style={{...}} />
-                    <svg className=\\"echCrosshair__crossLine\\" width=\\"100%\\" height=\\"100%\\" style={{...}} />
-                  </Crosshair>
+                  <Crosshair theme={{...}} chartRotation={0} cursorPosition={[undefined]} cursorCrossLinePosition={[undefined]} tooltipType=\\"vertical\\" fromExternalEvent={[undefined]} zIndex={0} dispatch={[Function: dispatch]} />
                 </Connect(Crosshair)>
                 <Connect(XYChart) forwardStageRef={{...}}>
                   <XYChart forwardStageRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} seriesTypes={{...}} a11ySettings={{...}} onChartRendered={[Function (anonymous)]}>
@@ -92,11 +89,7 @@ exports[`Chart should render the legend name test 1`] = `
                   </XYChart>
                 </Connect(XYChart)>
                 <Connect(Tooltip) getChartContainerRef={[Function (anonymous)]}>
-                  <Tooltip getChartContainerRef={[Function (anonymous)]} visible={false} zIndex={0} info={{...}} position={{...}} headerFormatter={[undefined]} settings={{...}} rotation={0} chartId=\\"chart1\\" backgroundColor=\\"transparent\\" onPointerMove={[Function (anonymous)]}>
-                    <TooltipPortal scope=\\"MainTooltip\\" zIndex={100} anchor={{...}} settings={{...}} chartId=\\"chart1\\" visible={false}>
-                      <Portal containerInfo={{...}} />
-                    </TooltipPortal>
-                  </Tooltip>
+                  <Tooltip getChartContainerRef={[Function (anonymous)]} visible={false} zIndex={0} info={{...}} position={{...}} headerFormatter={[undefined]} settings={{...}} rotation={0} chartId=\\"chart1\\" backgroundColor=\\"transparent\\" onPointerMove={[Function (anonymous)]} />
                 </Connect(Tooltip)>
                 <Connect(Annotations) getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}}>
                   <Annotations getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}} isChartEmpty={false} chartDimensions={{...}} annotationDimensions={{...}} annotationSpecs={{...}} tooltipState={{...}} chartId=\\"chart1\\" zIndex={0} onPointerMove={[Function (anonymous)]} onDOMElementLeave={[Function (anonymous)]} onDOMElementEnter={[Function (anonymous)]}>

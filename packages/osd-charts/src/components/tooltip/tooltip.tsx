@@ -204,6 +204,9 @@ const TooltipComponent = ({
     };
   }, [settings, chartRef, rotation]);
 
+  if (!visible) {
+    return null;
+  }
   return (
     <TooltipPortal
       scope="MainTooltip"
