@@ -19,7 +19,6 @@
     "downlevelIteration": true,
     "stripInternal": true,
     "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "./global.d.ts"]
-  },
-  "files": ["./global.d.ts", "./scripts/custom_matchers.ts"]
+    "typeRoots": ["./node_modules/@types", "./**/*.d.ts", "./scripts/custom_matchers.ts"]
+  }
 }

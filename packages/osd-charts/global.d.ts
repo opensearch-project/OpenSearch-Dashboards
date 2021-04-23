@@ -42,6 +42,7 @@ declare global {
        * Including:
        * - disabling animations
        * - preloading icons
+       * - setting rng seed
        */
       STORYBOOK_VRT: string;
       /**
