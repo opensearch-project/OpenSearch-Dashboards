@@ -94,9 +94,9 @@ export function runCli() {
           plugin
         );
 
-        if (semver.satisfies(opensearchDashboardsVersion, '>1.0')) {
+        if (semver.satisfies(opensearchDashboardsVersion, '>=2.0.0')) {
           log.error(
-            'These tools are not designed to work with version greater than 1.0, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
+            'These tools are not designed to work with version greater than 1.x, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
           );
           process.exit(1);
         }
