@@ -57,7 +57,7 @@ export async function runDockerGenerator(
   const imageFlavor = '';
   const imageTag = 'docker.opensearch.org/opensearch-dashboards/opensearch-dashboards';
   const version = config.getBuildVersion();
-  const artifactTarball = `opensearch-dashboards${imageFlavor}-${version}-linux-x86_64.tar.gz`;
+  const artifactTarball = `opensearch-dashboards${imageFlavor}-${version}-linux-x64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
   // That would produce oss, default and default-ubi7

@@ -41,7 +41,7 @@ const log = new ToolingLog();
 let MOCKS;
 
 const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
-const ARCHITECTURE = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
+const ARCHITECTURE = process.arch === 'arm64' ? 'arm64' : 'x64';
 const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';

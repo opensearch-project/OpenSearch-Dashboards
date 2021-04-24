@@ -46,7 +46,7 @@ export const CreateRpmPackage: Task = {
   description: 'Creating rpm package',
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', ['--architecture', 'x86_64', '--rpm-os', 'linux']);
+    await runFpm(config, log, build, 'rpm', ['--architecture', 'x64', '--rpm-os', 'linux']);
   },
 };
 

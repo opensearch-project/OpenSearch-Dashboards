@@ -48,9 +48,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-        'cd functionbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-darwin-x64/',
       ],
     },
     LINUX: {
@@ -67,9 +67,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         }
       ),
       commands: [
-        'curl -L -O https://artifacts.opensearch.org/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
-        'cd functionbeat-{config.opensearchDashboards.version}-linux-x86_64/',
+        'curl -L -O https://artifacts.opensearch.org/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-linux-x64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-linux-x64/',
       ],
     },
     WINDOWS: {

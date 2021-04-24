@@ -133,7 +133,7 @@ it('checks shasums for each downloaded node build', async () => {
           <Config>,
           Platform {
             "architecture": "x64",
-            "buildName": "linux-x86_64",
+            "buildName": "linux-x64",
             "name": "linux",
           },
         ],
@@ -141,7 +141,7 @@ it('checks shasums for each downloaded node build', async () => {
           <Config>,
           Platform {
             "architecture": "arm64",
-            "buildName": "linux-aarch64",
+            "buildName": "linux-arm64",
             "name": "linux",
           },
         ],
@@ -149,7 +149,7 @@ it('checks shasums for each downloaded node build', async () => {
           <Config>,
           Platform {
             "architecture": "x64",
-            "buildName": "darwin-x86_64",
+            "buildName": "darwin-x64",
             "name": "darwin",
           },
         ],
@@ -157,7 +157,7 @@ it('checks shasums for each downloaded node build', async () => {
           <Config>,
           Platform {
             "architecture": "x64",
-            "buildName": "windows-x86_64",
+            "buildName": "windows-x64",
             "name": "win32",
           },
         ],
