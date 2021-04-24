@@ -35,7 +35,7 @@ import _ from 'lodash';
 export default {
   columns: [
     {
-      label: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1: agent.raw',
+      label: 'Mozilla/5.0 (X11; Linux x64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1: agent.raw',
       xAxisLabel: 'filters',
       yAxisLabel: 'Count of documents',
       series: [

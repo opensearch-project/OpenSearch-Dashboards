@@ -87,9 +87,9 @@ const createDownloadServerTitle = () =>
 export const createDownloadServerOsx = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.opensearch.org/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-    'tar xzvf apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
-    'cd apm-server-{config.opensearchDashboards.version}-darwin-x86_64/',
+    'curl -L -O https://artifacts.opensearch.org/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+    'tar xzvf apm-server-{config.opensearchDashboards.version}-darwin-x64.tar.gz',
+    'cd apm-server-{config.opensearchDashboards.version}-darwin-x64/',
   ],
 });
 
@@ -110,8 +110,8 @@ export const createDownloadServerDeb = () => ({
 export const createDownloadServerRpm = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.opensearch.org/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
-    'sudo rpm -vi apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
+    'curl -L -O https://artifacts.opensearch.org/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-x64.rpm',
+    'sudo rpm -vi apm-server-{config.opensearchDashboards.version}-x64.rpm',
   ],
   textPost: i18n.translate('apmOss.tutorial.downloadServerRpm', {
     defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',

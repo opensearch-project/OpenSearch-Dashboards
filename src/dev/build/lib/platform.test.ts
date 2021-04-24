@@ -41,7 +41,7 @@ describe('getNodeArch()', () => {
 
 describe('getBuildName()', () => {
   it('returns the build name for the passed name', () => {
-    expect(new Platform('linux', 'arm64', 'linux-aarch64').getBuildName()).toBe('linux-aarch64');
+    expect(new Platform('linux', 'arm64', 'linux-arm64').getBuildName()).toBe('linux-arm64');
   });
 });
 

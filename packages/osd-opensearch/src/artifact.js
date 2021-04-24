@@ -129,7 +129,7 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   const manifest = JSON.parse(json);
 
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
-  const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
 
   const archive = manifest.archives.find(
     (archive) =>
