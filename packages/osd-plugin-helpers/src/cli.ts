@@ -32,7 +32,6 @@
 
 import Path from 'path';
 
-import semver from 'semver';
 import { RunWithCommands, createFlagError, createFailError } from '@osd/dev-utils';
 
 import { findOpenSearchDashboardsJson } from './find_opensearch_dashboards_json';
@@ -93,13 +92,6 @@ export function runCli() {
           versionFlag,
           plugin
         );
-
-        if (semver.satisfies(opensearchDashboardsVersion, '>=2.0.0')) {
-          log.error(
-            'These tools are not designed to work with version greater than 1.x, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
-          );
-          process.exit(1);
-        }
 
         const sourceDir = plugin.directory;
         const buildDir = Path.resolve(
