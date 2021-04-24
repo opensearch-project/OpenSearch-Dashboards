@@ -29,21 +29,23 @@ exports[`AddData render 1`] = `
       className="osdOverviewDataAdd__actions"
       grow={false}
     >
-      <div>
-        <EuiButtonEmpty
-          className="osdOverviewDataAdd__actionButton"
-          flush="left"
-          href="#/tutorial_directory/sampleData"
-          iconType="visTable"
-          size="xs"
-        >
-          <FormattedMessage
-            defaultMessage="Try our sample data"
-            id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </div>
+      <RedirectAppLinks>
+        <div>
+          <EuiButtonEmpty
+            className="osdOverviewDataAdd__actionButton"
+            flush="left"
+            href="/app/home#/tutorial_directory/sampleData"
+            iconType="visTable"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Try our sample data"
+              id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </div>
+      </RedirectAppLinks>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
