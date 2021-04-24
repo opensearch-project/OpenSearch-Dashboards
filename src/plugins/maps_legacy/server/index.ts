@@ -38,8 +38,8 @@ import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   exposeToBrowser: {
-    includeOpenSearchDashboardsMapsService: true,
-    proxyOpenSearchDashboardsMapsServiceInMaps: true,
+    includeOpenSearchMapsService: true,
+    proxyOpenSearchMapsServiceInMaps: true,
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,

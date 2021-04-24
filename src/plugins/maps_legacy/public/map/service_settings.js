@@ -119,7 +119,7 @@ export class ServiceSettings {
   };
 
   async getFileLayers() {
-    if (!this._mapConfig.includeOpenSearchDashboardsMapsService) {
+    if (!this._mapConfig.includeOpenSearchMapsService) {
       return [];
     }
 
@@ -141,7 +141,7 @@ export class ServiceSettings {
       allServices.push(tmsService);
     }
 
-    if (this._mapConfig.includeOpenSearchDashboardsMapsService) {
+    if (this._mapConfig.includeOpenSearchMapsService) {
       const servicesFromManifest = await this._emsClient.getTMSServices();
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest

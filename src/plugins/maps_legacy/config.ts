@@ -35,8 +35,8 @@ import { configSchema as tilemapSchema } from '../tile_map/config';
 import { configSchema as regionmapSchema } from '../region_map/config';
 
 export const configSchema = schema.object({
-  includeOpenSearchDashboardsMapsService: schema.boolean({ defaultValue: true }),
-  proxyOpenSearchDashboardsMapsServiceInMaps: schema.boolean({ defaultValue: false }),
+  includeOpenSearchMapsService: schema.boolean({ defaultValue: true }),
+  proxyOpenSearchMapsServiceInMaps: schema.boolean({ defaultValue: false }),
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
