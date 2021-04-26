@@ -42,8 +42,12 @@ export default function ({ getService, getPageObjects }) {
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
-      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_testhuge_reader']);
+      await security.testUser.setRoles(
+        ['opensearch_dashboards_admin', 'test_testhuge_reader'],
+        false
+      );
       await opensearchArchiver.loadIfNeeded('large_fields');
+      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 

@@ -2,409 +2,95 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".opensearch_dashboards": {
-      }
     },
-    "index": ".opensearch_dashboards_1",
+    "index": "opensearch_dashboards_sample_data_flights",
     "mappings": {
-      "_meta": {
-        "migrationMappingPropertyHashes": {
-          "application_usage_daily": "43b8830d5d0df85a6823d290885fc9fd",
-          "application_usage_totals": "3d1b76c39bfb2cc8296b024d73854724",
-          "application_usage_transactional": "3d1b76c39bfb2cc8296b024d73854724",
-          "config": "c63748b75f39d0c54de12d12c1ccbc20",
-          "dashboard": "1ca04b5b225a4f82ce7a95022b4878d2",
-          "dql-telemetry": "d12a98a6f19a2d273696597547e064ee",
-          "index-pattern": "45915a1ad866812242df474eb0479052",
-          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
-          "namespace": "2f4316de49999235636386fe51dc06c1",
-          "namespaces": "2f4316de49999235636386fe51dc06c1",
-          "originId": "2f4316de49999235636386fe51dc06c1",
-          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
-          "references": "7997cf5a56cc02bdc9c93361bde732b0",
-          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
-          "search": "13fbeb9f14daaf74513983d587178c9e",
-          "search-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "timeline-sheet": "4d044870a975ad8dfe28919134ec3240",
-          "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
-          "type": "2f4316de49999235636386fe51dc06c1",
-          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
-          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-          "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "visualization": "26d0b900a88ae9f671fbfaab64db304f"
-        }
-      },
-      "dynamic": "strict",
       "properties": {
-        "application_usage_daily": {
-          "dynamic": "false",
-          "properties": {
-            "timestamp": {
-              "type": "date"
-            }
-          }
+        "AvgTicketPrice": {
+          "type": "float"
         },
-        "application_usage_totals": {
-          "dynamic": "false",
-          "type": "object"
+        "Cancelled": {
+          "type": "boolean"
         },
-        "application_usage_transactional": {
-          "dynamic": "false",
-          "type": "object"
-        },
-        "config": {
-          "dynamic": "false",
-          "properties": {
-            "buildNum": {
-              "type": "keyword"
-            }
-          }
-        },
-        "dashboard": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "doc_values": false,
-              "index": false,
-              "type": "integer"
-            },
-            "opensearchDashboardsSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "index": false,
-                  "type": "text"
-                }
-              }
-            },
-            "optionsJSON": {
-              "index": false,
-              "type": "text"
-            },
-            "panelsJSON": {
-              "index": false,
-              "type": "text"
-            },
-            "refreshInterval": {
-              "properties": {
-                "display": {
-                  "doc_values": false,
-                  "index": false,
-                  "type": "keyword"
-                },
-                "pause": {
-                  "doc_values": false,
-                  "index": false,
-                  "type": "boolean"
-                },
-                "section": {
-                  "doc_values": false,
-                  "index": false,
-                  "type": "integer"
-                },
-                "value": {
-                  "doc_values": false,
-                  "index": false,
-                  "type": "integer"
-                }
-              }
-            },
-            "timeFrom": {
-              "doc_values": false,
-              "index": false,
-              "type": "keyword"
-            },
-            "timeRestore": {
-              "doc_values": false,
-              "index": false,
-              "type": "boolean"
-            },
-            "timeTo": {
-              "doc_values": false,
-              "index": false,
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "dql-telemetry": {
-          "properties": {
-            "optInCount": {
-              "type": "long"
-            },
-            "optOutCount": {
-              "type": "long"
-            }
-          }
-        },
-        "index-pattern": {
-          "dynamic": "false",
-          "properties": {
-            "title": {
-              "type": "text"
-            },
-            "type": {
-              "type": "keyword"
-            }
-          }
-        },
-        "migrationVersion": {
-          "dynamic": "true",
-          "properties": {
-            "config": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "namespace": {
+        "Carrier": {
           "type": "keyword"
         },
-        "namespaces": {
+        "Dest": {
           "type": "keyword"
         },
-        "originId": {
+        "DestAirportID": {
           "type": "keyword"
         },
-        "query": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "filters": {
-              "enabled": false,
-              "type": "object"
-            },
-            "query": {
-              "properties": {
-                "language": {
-                  "type": "keyword"
-                },
-                "query": {
-                  "index": false,
-                  "type": "keyword"
-                }
-              }
-            },
-            "timefilter": {
-              "enabled": false,
-              "type": "object"
-            },
-            "title": {
-              "type": "text"
-            }
-          }
-        },
-        "references": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
-            }
-          },
-          "type": "nested"
-        },
-        "sample-data-telemetry": {
-          "properties": {
-            "installCount": {
-              "type": "long"
-            },
-            "unInstallCount": {
-              "type": "long"
-            }
-          }
-        },
-        "search": {
-          "properties": {
-            "columns": {
-              "doc_values": false,
-              "index": false,
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "doc_values": false,
-              "index": false,
-              "type": "integer"
-            },
-            "opensearchDashboardsSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "index": false,
-                  "type": "text"
-                }
-              }
-            },
-            "sort": {
-              "doc_values": false,
-              "index": false,
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "search-telemetry": {
-          "dynamic": "false",
-          "type": "object"
-        },
-        "server": {
-          "dynamic": "false",
-          "type": "object"
-        },
-        "timeline-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "opensearchDashboardsSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timeline_chart_height": {
-              "type": "integer"
-            },
-            "timeline_columns": {
-              "type": "integer"
-            },
-            "timeline_interval": {
-              "type": "keyword"
-            },
-            "timeline_other_interval": {
-              "type": "keyword"
-            },
-            "timeline_rows": {
-              "type": "integer"
-            },
-            "timeline_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "tsvb-validation-telemetry": {
-          "properties": {
-            "failedRequests": {
-              "type": "long"
-            }
-          }
-        },
-        "type": {
+        "DestCityName": {
           "type": "keyword"
         },
-        "ui-metric": {
-          "properties": {
-            "count": {
-              "type": "integer"
-            }
-          }
+        "DestCountry": {
+          "type": "keyword"
         },
-        "updated_at": {
+        "DestLocation": {
+          "type": "geo_point"
+        },
+        "DestRegion": {
+          "type": "keyword"
+        },
+        "DestWeather": {
+          "type": "keyword"
+        },
+        "DistanceKilometers": {
+          "type": "float"
+        },
+        "DistanceMiles": {
+          "type": "float"
+        },
+        "FlightDelay": {
+          "type": "boolean"
+        },
+        "FlightDelayMin": {
+          "type": "integer"
+        },
+        "FlightDelayType": {
+          "type": "keyword"
+        },
+        "FlightNum": {
+          "type": "keyword"
+        },
+        "FlightTimeHour": {
+          "type": "keyword"
+        },
+        "FlightTimeMin": {
+          "type": "float"
+        },
+        "Origin": {
+          "type": "keyword"
+        },
+        "OriginAirportID": {
+          "type": "keyword"
+        },
+        "OriginCityName": {
+          "type": "keyword"
+        },
+        "OriginCountry": {
+          "type": "keyword"
+        },
+        "OriginLocation": {
+          "type": "geo_point"
+        },
+        "OriginRegion": {
+          "type": "keyword"
+        },
+        "OriginWeather": {
+          "type": "keyword"
+        },
+        "dayOfWeek": {
+          "type": "integer"
+        },
+        "timestamp": {
           "type": "date"
-        },
-        "url": {
-          "properties": {
-            "accessCount": {
-              "type": "long"
-            },
-            "accessDate": {
-              "type": "date"
-            },
-            "createDate": {
-              "type": "date"
-            },
-            "url": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "visualization": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "opensearchDashboardsSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "index": false,
-                  "type": "text"
-                }
-              }
-            },
-            "savedSearchRefName": {
-              "doc_values": false,
-              "index": false,
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "index": false,
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            },
-            "visState": {
-              "index": false,
-              "type": "text"
-            }
-          }
         }
       }
     },
     "settings": {
       "index": {
-        "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
         "number_of_shards": "1"
       }
