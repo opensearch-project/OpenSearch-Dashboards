@@ -103,9 +103,9 @@ export async function runFpm(
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
     '--template-value',
-    `user=opensearchDashboards`,
+    `user=opensearch-dashboards`,
     '--template-value',
-    `group=opensearchDashboards`,
+    `group=opensearch-dashboards`,
     '--template-value',
     `optimizeDir=/usr/share/opensearch-dashboards/optimize`,
     '--template-value',
