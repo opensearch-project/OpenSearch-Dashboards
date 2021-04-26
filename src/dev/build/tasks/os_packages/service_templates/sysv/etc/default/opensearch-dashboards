@@ -1,5 +1,5 @@
-user="opensearchDashboards"
-group="opensearchDashboards"
+user="opensearch-dashboards"
+group="opensearch-dashboards"
 chroot="/"
 chdir="/"
 nice=""
@@ -10,4 +10,4 @@ nice=""
 # The default behavior is to simply log a message "program stop failed; still running"
 KILL_ON_STOP_TIMEOUT=0
 
-OSD_PATH_CONF="/etc/opensearch_dashboards"
+OSD_PATH_CONF="/etc/opensearch-dashboards"
