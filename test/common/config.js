@@ -69,7 +69,7 @@ export default function () {
         // These are *very* important to have them pointing to staging
         // '--telemetry.url=https://telemetry-staging.opensearch.org/xpack/v2/send',
         // '--telemetry.optInStatusUrl=https://telemetry-staging.opensearch.org/opt_in_status/v2/send',
-        `--server.maxPayloadBytes=1679958`,
+        `--server.maxPayloadBytes=1759977`,
         // newsfeed mock service
         // `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
         // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
