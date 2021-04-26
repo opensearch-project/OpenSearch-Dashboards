@@ -38,10 +38,10 @@ exports[`Chart should render the legend name test 1`] = `
                         </Icon>
                       </div>
                     </ForwardRef>
-                    <Label label=\\"test\\" isToggleable={true} onClick={[Function (anonymous)]} isSeriesHidden={false}>
-                      <button type=\\"button\\" className=\\"echLegendItem__label echLegendItem__label--clickable\\" title=\\"test\\" onClick={[Function (anonymous)]} aria-label=\\"test; Activate to hide series in graph\\">
+                    <Label label=\\"test\\" isToggleable={false} onClick={[undefined]} isSeriesHidden={false}>
+                      <div className=\\"echLegendItem__label\\" title=\\"test\\" onClick={[undefined]}>
                         test
-                      </button>
+                      </div>
                     </Label>
                   </li>
                 </LegendItem>

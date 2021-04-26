@@ -20,7 +20,7 @@
 import { common } from '../page_objects/common';
 
 describe('Accessibility tree', () => {
-  it('should include the series types if one type of series', async () => {
+  it.skip('should include the series types if one type of series', async () => {
     const tree = await common.testAccessibilityTree(
       'http://localhost:9001/iframe.html?id=annotations-lines--x-continuous-domain',
       '.echCanvasRenderer',

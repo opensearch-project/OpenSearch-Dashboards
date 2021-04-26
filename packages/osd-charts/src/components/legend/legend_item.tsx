@@ -125,9 +125,8 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
    * Returns click function only if toggleable or click listern is provided
    */
   handleLabelClick = (legendItemId: SeriesIdentifier[]): MouseEventHandler | undefined => {
-    const { item, onClick, toggleDeselectSeriesAction } = this.props;
-
-    if (!item.isToggleable && !onClick) {
+    const { item, onClick, toggleDeselectSeriesAction, totalItems } = this.props;
+    if (totalItems <= 1 || (!item.isToggleable && !onClick)) {
       return;
     }
 
@@ -211,7 +210,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           />
           <ItemLabel
             label={label}
-            isToggleable={item.isToggleable}
+            isToggleable={totalItems > 1 && item.isToggleable}
             onClick={this.handleLabelClick(seriesIdentifiers)}
             isSeriesHidden={isSeriesHidden}
           />
