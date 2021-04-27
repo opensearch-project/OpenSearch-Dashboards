@@ -19,6 +19,7 @@
 
 import Url from 'url';
 
+import { JSDOM } from 'jsdom';
 import { AXNode } from 'puppeteer';
 
 import { DRAG_DETECTION_TIMEOUT } from '../../src/state/reducers/interactions';
@@ -472,10 +473,10 @@ class CommonPage {
    * Get HTML for element to test aria labels etc
    */
   // eslint-disable-next-line class-methods-use-this
-  async getElementHTML(url: string) {
-    await this.loadElementFromURL(url);
-    // https://github.com/puppeteer/puppeteer/issues/406#issuecomment-323555639
-    return await page.evaluate(() => new XMLSerializer().serializeToString(document));
+  async getSelectorHTML(url: string, tagName: string) {
+    await this.loadElementFromURL(url, '.echCanvasRenderer');
+    const xml = await page.evaluate(() => new XMLSerializer().serializeToString(document));
+    return new JSDOM(xml, { contentType: 'text/xml' }).window.document.getElementsByTagName(tagName);
   }
 }
 
