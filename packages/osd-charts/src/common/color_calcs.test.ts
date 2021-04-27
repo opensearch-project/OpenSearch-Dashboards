@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { integerSnap, monotonicHillClimb } from '../solvers/monotonic_hill_climb';
 import { makeHighContrastColor, combineColors } from './color_calcs';
-import { integerSnap, monotonicHillClimb } from './optimize';
 
 describe('calcs', () => {
   describe('test makeHighContrastColor', () => {

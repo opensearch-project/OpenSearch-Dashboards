@@ -30,8 +30,8 @@ import {
   wrapToTau,
 } from '../../../../common/geometry';
 import { logarithm } from '../../../../common/math';
-import { integerSnap, monotonicHillClimb } from '../../../../common/optimize';
 import { Box, Font, PartialFont, TextMeasure, VerticalAlignments } from '../../../../common/text_utils';
+import { integerSnap, monotonicHillClimb } from '../../../../solvers/monotonic_hill_climb';
 import { ValueFormatter } from '../../../../utils/common';
 import { Layer } from '../../specs';
 import { Config, Padding } from '../types/config_types';

@@ -20,9 +20,9 @@
 import { $Values as Values } from 'utility-types';
 
 import { ArrayEntry } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { integerSnap, monotonicHillClimb } from '../solvers/monotonic_hill_climb';
 import { Datum } from '../utils/common';
 import { Pixels } from './geometry';
-import { integerSnap, monotonicHillClimb } from './optimize';
 
 /** @public */
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
