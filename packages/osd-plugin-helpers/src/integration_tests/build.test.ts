@@ -41,7 +41,7 @@ import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
-const OPENSEARCH_DASHBOARDS_VERSION = '7.9.0';
+const OPENSEARCH_DASHBOARDS_VERSION = '1.0.0';
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
 const PLUGIN_ARCHIVE = Path.resolve(
@@ -94,8 +94,7 @@ it('builds a generated plugin into a viable archive', async () => {
   );
 
   expect(buildProc.all).toMatchInlineSnapshot(`
-    " warn These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info
-     info deleting the build and target directories
+    " info deleting the build and target directories
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
@@ -105,7 +104,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-7.9.0.zip]"
+     info compressing plugin into [fooTestPlugin-1.0.0.zip]"
   `);
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
@@ -140,7 +139,7 @@ it('builds a generated plugin into a viable archive', async () => {
   ).toMatchInlineSnapshot(`
     Object {
       "id": "fooTestPlugin",
-      "opensearchDashboardsVersion": "7.9.0",
+      "opensearchDashboardsVersion": "1.0.0",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [
         "navigation",
