@@ -68,20 +68,22 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
         </EuiFlexItem>
 
         <EuiFlexItem className="osdOverviewDataAdd__actions" grow={false}>
-          <div>
-            <EuiButtonEmpty
-              className="osdOverviewDataAdd__actionButton"
-              flush="left"
-              href={addBasePath('#/tutorial_directory/sampleData')}
-              iconType="visTable"
-              size="xs"
-            >
-              <FormattedMessage
-                id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
-                defaultMessage="Try our sample data"
-              />
-            </EuiButtonEmpty>
-          </div>
+          <RedirectAppLinks application={application}>
+            <div>
+              <EuiButtonEmpty
+                className="osdOverviewDataAdd__actionButton"
+                flush="left"
+                href={addBasePath('/app/home#/tutorial_directory/sampleData')}
+                iconType="visTable"
+                size="xs"
+              >
+                <FormattedMessage
+                  id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
+                  defaultMessage="Try our sample data"
+                />
+              </EuiButtonEmpty>
+            </div>
+          </RedirectAppLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
 
