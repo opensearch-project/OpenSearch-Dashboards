@@ -40,6 +40,9 @@ export const configSchema = schema.object({
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
+  opensearchManifestServiceUrl: schema.string({
+    defaultValue: 'https://maps.search-services.aws.a2z.com/v4/us-east-1/manifest',
+  }),
   emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.opensearch.org' }),
   emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.opensearch.org' }),
   emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.opensearch.org/v7.10' }),

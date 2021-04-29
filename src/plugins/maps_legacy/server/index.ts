@@ -43,6 +43,7 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,
+    opensearchManifestServiceUrl: true,
     emsFileApiUrl: true,
     emsTileApiUrl: true,
     emsLandingPageUrl: true,
