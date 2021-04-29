@@ -9,10 +9,10 @@
 import { EMSClient } from '@elastic/ems-client';
 
 export class OpenSearchMapsClient extends EMSClient {
-  constructor({ kbnVersion, manifestServiceUrl, language, landingPageUrl, fetchFunction }) {
-    super({ kbnVersion, manifestServiceUrl, language, landingPageUrl, fetchFunction });
+  constructor({ osdVersion, manifestServiceUrl, language, landingPageUrl, fetchFunction }) {
+    super({ osdVersion, manifestServiceUrl, language, landingPageUrl, fetchFunction });
     this._queryParams = {
-      kbn_version: kbnVersion,
+      osd_version: osdVersion,
       opensearch_tos_agree: true,
     };
     this._manifestServiceUrl = manifestServiceUrl;
