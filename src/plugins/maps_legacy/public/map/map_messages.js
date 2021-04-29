@@ -30,6 +30,7 @@
  * GitHub history for details.
  */
 
+/* eslint-disable react/no-multi-comp */
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -37,6 +38,7 @@ import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export const createRegionBlockedWarning = (function () {
+  /* eslint-disable react/prefer-stateless-function */
   class RegionBlockedWarningOverlay extends React.Component {
     constructor(props) {
       super(props);
