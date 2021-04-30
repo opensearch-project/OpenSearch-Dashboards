@@ -36,7 +36,7 @@ export const forcedType = <T extends Record<string, unknown>>(obj: Partial<T>): 
  * @internal
  */
 export const getRNGSeed = (fallback?: string): string | undefined =>
-  process.env.RNG_SEED ?? (process.env.STORYBOOK_VRT ? 'elastic-charts' : fallback);
+  process.env.RNG_SEED ?? (process.env.VRT ? 'elastic-charts' : fallback);
 
 /**
  * Returns rng function with optional `min`, `max` and `fractionDigits` params

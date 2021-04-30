@@ -23,7 +23,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       /**
-       * Node enviroment
+       * Node environment
        */
       NODE_ENV: 'development' | 'production' | 'test';
       /**
@@ -37,23 +37,31 @@ declare global {
        */
       TZ: string;
       /**
-       * Flag used to enable a more suitable version of storybook for visual regression tests.
+       * Flag used to enable custom configuration under visual regression tests.
        *
        * Including:
        * - disabling animations
        * - preloading icons
        * - setting rng seed
        */
-      STORYBOOK_VRT: string;
+      VRT: string;
       /**
-       * Flag used to enable debug state on visual regression test runnner
+       * Flag used to enable the legacy, Storybook, server for visual regression tests.
+       */
+      LEGACY_VRT_SERVER: string;
+      /**
+       * Flag used to connect an existing local server for visual regression tests.
+       */
+      LOCAL_VRT_SERVER: string;
+      /**
+       * Flag used to enable debug state on visual regression test runner
        */
       DEBUG: string;
       /**
        * String used for seeding a random number generator used in storybook and test files
        *
        * When seeded all rng use a deterministic random set of numbers.
-       * When no see is provided a truely _random_ number set will be used.
+       * When no seed is provided a positive _random_ number set will be used.
        */
       RNG_SEED: string;
     }

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-module.exports = {
-  PORT: '9009',
-  HOST: process.env.DEBUG === 'true' ? 'localhost' : 'host.docker.internal',
-  LOCAL_STORYBOOK_VRT: false,
+module.exports = function routeComponentTemplate(index, url) {
+  return `{path === '${url}' && <Component${index} />}`;
 };

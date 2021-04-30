@@ -41,7 +41,12 @@ const MAX_CYCLES = 0;
 let numCyclesDetected = 0;
 
 module.exports = async ({ config }) => {
-  config.plugins.push(new webpack.EnvironmentPlugin({ RNG_SEED: null }));
+  config.plugins.push(
+    new webpack.EnvironmentPlugin({
+      RNG_SEED: null,
+      VRT: process.env.VRT ?? null,
+    }),
+  );
   config.plugins.push(
     new CircularDependencyPlugin({
       onStart() {

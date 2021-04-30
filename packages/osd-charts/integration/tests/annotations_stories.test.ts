@@ -109,12 +109,12 @@ describe('Annotations stories', () => {
     });
     it('show annotation when no group id provided and no y0 nor y1 values specified', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-rects--with-group-id&knob-enable annotation=true&knob-Annotation groupId=&knob-x0=5&knob-x1=10&knob-enable y0 and y1 values=',
+        'http://localhost:9001/?path=/story/annotations-rects--with-group-id&knob-enable annotation=true&knob-Annotation groupId=none&knob-x0=5&knob-x1=10&knob-enable y0 and y1 values=',
       );
     });
     it('does not show annotation when no group id provided and y0 and y1 values specified', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/annotations-rects--with-group-id&knob-enable%20annotation=true&knob-Annotation%20groupId=&knob-x0=5&knob-x1=10&knob-enable%20y0%20and%20y1%20values=true&knob-y0=0&knob-y1=3',
+        'http://localhost:9001/?path=/story/annotations-rects--with-group-id&knob-enable%20annotation=true&knob-Annotation%20groupId=none&knob-x0=5&knob-x1=10&knob-enable%20y0%20and%20y1%20values=true&knob-y0=0&knob-y1=3',
       );
     });
   });

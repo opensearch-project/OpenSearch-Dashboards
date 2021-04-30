@@ -25,6 +25,8 @@ import path from 'path';
 import { getStorybook, configure } from '@storybook/react';
 
 import { Rotation } from '../src';
+// @ts-ignore
+import { isLegacyVRTServer } from './config';
 
 export type StoryInfo = [string, string, number];
 
@@ -75,9 +77,11 @@ function encodeString(string: string) {
 /**
  * Stories to skip in all vrt based on group.
  */
-const storiesToSkip: Record<string, string[]> = {
-  // Interactions: ['Some story name'],
-  'Test Cases': ['No Series'],
+const storiesToSkip: Record<string, Record<string, string[]>> = {
+  'Test Cases': {
+    storybook: ['No Series'],
+    examples: ['noSeries'],
+  },
 };
 
 /**
@@ -90,25 +94,43 @@ const storiesToDelay: Record<string, Record<string, number>> = {
 };
 
 export function getStorybookInfo(): StoryGroupInfo[] {
-  configure(requireAllStories(__dirname, '../stories'), module);
+  if (isLegacyVRTServer) {
+    configure(requireAllStories(__dirname, '../stories'), module);
 
-  return getStorybook()
-    .filter(({ kind }) => kind)
-    .map(({ kind: group, stories: storiesRaw }) => {
-      const stories: StoryInfo[] = storiesRaw
-        .filter(({ name }) => name && !storiesToSkip[group]?.includes(name))
-        .map(({ name: title }) => {
-          // cleans story name to match url params
-          const encodedTitle = encodeString(title);
-          const delay = (storiesToDelay[group] ?? {})[title];
-          return [title, encodedTitle, delay];
-        });
+    return getStorybook()
+      .filter(({ kind }) => kind)
+      .map(({ kind: group, stories: storiesRaw }) => {
+        const stories: StoryInfo[] = storiesRaw
+          .filter(({ name }) => name && !storiesToSkip[group]?.storybook.includes(name))
+          .map(({ name: title }) => {
+            // cleans story name to match url params
+            const encodedTitle = encodeString(title);
+            const delay = (storiesToDelay[group] ?? {})[title];
+            return [title, encodedTitle, delay];
+          });
 
-      const encodedGroup = encodeString(group);
+        const encodedGroup = encodeString(group);
 
-      return [group, encodedGroup, stories] as StoryGroupInfo;
-    })
-    .filter(([, , stories]) => stories.length > 0);
+        return [group, encodedGroup, stories] as StoryGroupInfo;
+      })
+      .filter(([, , stories]) => stories.length > 0);
+  }
+  try {
+    const examples = require('./tmp/examples.json');
+    return examples.map((d: any) => {
+      return [
+        d.groupTitle,
+        d.slugifiedGroupTitle,
+        d.exampleFiles
+          .filter(({ name }: any) => name && !storiesToSkip[d.groupTitle]?.examples.includes(name))
+          .map((example: any) => {
+            return [example.name, example.slugifiedName, 0];
+          }),
+      ];
+    });
+  } catch {
+    throw new Error('A required file is not available, please run yarn test:integration:generate');
+  }
 }
 
 const rotationCases: [string, Rotation][] = [

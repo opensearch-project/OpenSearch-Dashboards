@@ -21,6 +21,8 @@ const jestPuppeteerDocker = require('jest-puppeteer-docker/jest-preset');
 const jestPuppeteer = require('jest-puppeteer/jest-preset');
 const tsPreset = require('ts-jest/jest-preset');
 
+const { debug } = require('./config');
+
 module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest_env_setup.ts'],
   globals: {
@@ -37,6 +39,6 @@ module.exports = {
     window: {},
     HTMLElement: {},
   },
-  ...(process.env.DEBUG === 'true' ? jestPuppeteer : jestPuppeteerDocker),
+  ...(debug ? jestPuppeteer : jestPuppeteerDocker),
   ...tsPreset,
 };

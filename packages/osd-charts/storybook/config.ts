@@ -29,7 +29,7 @@ import './style.scss';
 switchTheme('light');
 preloadIcons();
 
-if (process.env.STORYBOOK_VRT) {
+if (process.env.VRT) {
   preloadIcons();
   document.querySelector('html')?.classList.add('disable-animations');
 }

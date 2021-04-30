@@ -25,8 +25,14 @@ import { Position } from '../../../src/utils/common';
 
 const getKnobs = () => {
   const enabled = boolean('enable annotation', true);
-  const groupId =
-    select('Annotation groupId', { group1: 'group1', group2: 'group2', none: undefined }, 'group1') || undefined;
+  let groupId: string | undefined = select(
+    'Annotation groupId',
+    { group1: 'group1', group2: 'group2', none: 'none' },
+    'group1',
+  );
+  if (groupId === 'none') {
+    groupId = undefined;
+  }
   const x0 = number('x0', 5);
   const x1 = number('x1', 10);
   const yDefined = boolean('enable y0 and y1 values', false);

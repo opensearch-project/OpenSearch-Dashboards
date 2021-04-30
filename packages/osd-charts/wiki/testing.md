@@ -30,20 +30,29 @@ Each test with the specific timezone postfix will be executed only on that timez
 These tests are not included in the code coverage yet.
 
 
-## Storybook screenshot testing aka VRT
+## Visual Regression Testing
 
-Every story in storybook is tested through a Visual Regression Test suite.
+Every story created for Storybook is tested through our Visual Regression Test suite.
 The tests are available in `integration/tests` folder. One main test `all.test.ts` goes through all stories, takes screenshots of each story
-and compare it to the existing baseline available at `integration/test/__image_snapshots__`.
+and compare it to the existing baseline available at `integration/test/__image_snapshots__`. You can add your own test,
+using Puppeteer to drive the page/chart interactions and use Jest screenshot interactions.
 
 To run the suite
 ```
+yarn test:integration:generate
+
 yarn test:integration
+
 ```
 
-This will start a separate storybook server and a docker machine with chromium, controlled by pupetteer and jest, that takes and compare screeshots.
+The first command will generate the required code to be run on the server, extracting all the stories from Storybook
+and compiling a simple web app for the testing. You need to run this only the first time you need to run VRTs and only
+if you have added a new story to Storybook. You don't need to run it if you have just changed the existing stories.
 
-If the screenshot differ from the baseline, a test error is rised and a diff image is stored in `integration/test/__image_snapshots__/__diff_output__`.
+The second command will automatically start a separate server and a docker machine with chromium,
+controlled by Puppeteer and Jest, that takes and compare screenshots.
+
+If the screenshot differ from the baseline, a test error is raised and a diff image will be stored in `integration/test/__image_snapshots__/__diff_output__`.
 
 If a new test is added, a new screenshot `.png` file is written as part of the baseline.
 
@@ -52,8 +61,16 @@ To update all existing screenshot baselines to the new version run:
 yarn test:integration -u
 ```
 
+The VRT suite starts automatically the server, but this can take a significant amount of time everytime you want to 
+run your suite. You can avoid starting everytime the server by running the following command that keep the server up and
+running:
 
-To run the VRT against your current storybook server (will reduce the running time of the test locally) run:
+```
+yarn test:integration:server
+```
+The server is accessible at `http://localhost:9002`
+
+To run the VRT against that local server you can use:
 ```
 yarn test:integration:local
 ```
@@ -61,7 +78,7 @@ yarn test:integration:local
 To run a specific test file run
 ```
 yarn test:integration test_file_name
-# or
+# or with local server
 yarn test:integration:local test_file_name
 ```
 

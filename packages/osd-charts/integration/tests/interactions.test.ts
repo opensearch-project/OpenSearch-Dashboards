@@ -152,14 +152,14 @@ describe('Interactions', () => {
       );
     });
 
-    it('should render corrent tooltip for split and y accessors', async () => {
+    it('should render current tooltip for split and y accessors', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
-        'http://localhost:9001/iframe.html?id=bar-chart--bar-chart-2-y-2-g',
+        'http://localhost:9001/?path=/story/bar-chart--bar-chart2y2g',
         { left: 330, top: 40 },
       );
     });
 
-    it('should render corrent tooltip in dark theme', async () => {
+    it('should render current tooltip in dark theme', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/stylings--dark-theme',
         { left: 120, bottom: 80 },

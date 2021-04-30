@@ -18,7 +18,6 @@
  */
 
 import { boolean, number } from '@storybook/addon-knobs';
-import { NumberTypeKnobOptions } from '@storybook/addon-knobs/dist/components/types';
 import React from 'react';
 
 import { ScaleType, Position, Chart, Axis, GroupBy, SmallMultiples, Settings, BarSeries } from '../../src';
@@ -49,7 +48,7 @@ const data = [
   { x: 345, split: 'Sunny', y: 8 },
   { x: 360, split: 'Sunny', y: 10 },
 ];
-const numberOptions: NumberTypeKnobOptions = {
+const numberOptions = {
   min: 0,
   max: 1,
   step: 0.05,
