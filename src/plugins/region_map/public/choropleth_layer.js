@@ -193,6 +193,10 @@ Make sure the file exists at that location.",
               values: { name: name },
             }
           );
+        } else if (e.config.url.includes('aws.a2z.com')) {
+          // AES Region Maps will throw CORS exception when accessed from Embargo Regions.
+          // OPTIONS will fail before GET. Thus CORS error.
+          errorMessage = 'The vector map ' + name + ' is not available.';
         } else {
           errorMessage = i18n.translate(
             'regionMap.choroplethLayer.downloadingVectorDataErrorMessage',

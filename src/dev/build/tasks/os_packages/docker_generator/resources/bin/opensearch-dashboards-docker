@@ -64,8 +64,8 @@ opensearch_dashboards_vars=(
     logging.silent
     logging.useUTC
     logging.verbose
-    map.includeElasticMapsService
-    map.proxyElasticMapsServiceInMaps
+    map.includeOpenSearchMapsService
+    map.proxyOpenSearchMapsServiceInMaps
     map.regionmap
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom

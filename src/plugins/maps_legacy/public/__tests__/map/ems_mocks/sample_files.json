@@ -33,7 +33,7 @@
           "type": "id",
           "id": "iso2",
           "label": {
-            "en": "ISO 3166-1 alpha-2 code",
+            "en": "ISO 3166-1 alpha-2 Code",
             "af": "landkode (ISO 3166-1 alpha-2)",
             "ar": "أيزو 3166-1 حرفي-2",
             "be": "код краіны (ISO 3166-1 alpha-2)",
@@ -115,7 +115,7 @@
           "type": "id",
           "id": "iso3",
           "label": {
-            "en": "ISO 3166-1 alpha-3 code",
+            "en": "ISO 3166-1 alpha-3 Code",
             "af": "landkode (ISO 3166-1 alpha-3)",
             "ar": "أيزو 3166-1 حرفي-3",
             "be": "код краіны (ISO 3166-1 alpha-3)",
@@ -195,7 +195,7 @@
           "type": "property",
           "id": "name",
           "label": {
-            "en": "name",
+            "en": "Name",
             "am": "ስም",
             "ar": "الاسم",
             "ast": "alcuñu",
@@ -439,7 +439,7 @@
           "type": "id",
           "id": "iso2",
           "label": {
-            "en": "ISO 3166-1 alpha-2 code"
+            "en": "ISO 3166-1 alpha-2 Code"
           }
         }
       ],

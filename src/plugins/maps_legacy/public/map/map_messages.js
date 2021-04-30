@@ -30,10 +30,66 @@
  * GitHub history for details.
  */
 
-import React from 'react';
+/* eslint-disable react/no-multi-comp */
+import React, { Fragment } from 'react';
+import ReactDOM from 'react-dom';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+
+export const createRegionBlockedWarning = (function () {
+  /* eslint-disable react/prefer-stateless-function */
+  class RegionBlockedWarningOverlay extends React.Component {
+    constructor(props) {
+      super(props);
+    }
+
+    render() {
+      return (
+        <EuiEmptyPrompt
+          iconType="gisApp"
+          iconColor={null}
+          title={<h2>The default Web Map Service is currently not available in your region.</h2>}
+          titleSize="xs"
+          body={
+            <Fragment>
+              <p>
+                You can configure OpenSearch Dash to use a different map server for coordinate maps
+                by modifying the default WMS properties.
+              </p>
+            </Fragment>
+          }
+        />
+      );
+    }
+  }
+  return () => {
+    let messageBlock = document.getElementById('blocker-div');
+    if (!messageBlock) {
+      messageBlock = document.createElement('div');
+      messageBlock.id = 'blocker-div';
+      messageBlock.setAttribute('class', 'visError leaflet-popup-pane');
+      Array.prototype.forEach.call(
+        document.getElementsByClassName('leaflet-container'),
+        (leafletDom) => {
+          ReactDOM.render(
+            new RegionBlockedWarningOverlay().render(),
+            leafletDom.appendChild(messageBlock)
+          );
+        }
+      );
+    }
+  };
+})();
+
+export const removeRegionBlockedWarning = (function () {
+  return () => {
+    const childEle = document.getElementById('blocker-div');
+    if (childEle) {
+      childEle.parentNode.removeChild(childEle);
+    }
+  };
+})();
 
 export const createZoomWarningMsg = (function () {
   let disableZoomMsg = false;
@@ -59,6 +115,7 @@ export const createZoomWarningMsg = (function () {
               access to additional zoom levels for free through the {ems}.
               Or, you can configure your own map server. Please go to
               { wms } or { configSettings} for more information."
+              // TODO: [RENAMEME] Need valid URLs
               values={{
                 defaultDistribution: (
                   <a target="_blank" href="https://www.opensearch.org/downloads/kibana">

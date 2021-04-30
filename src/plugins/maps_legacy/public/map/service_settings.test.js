@@ -309,9 +309,9 @@ describe('service_settings (FKA tile_map test)', function () {
           '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a rel="noreferrer noopener" href="https://www.opensearch.org/elastic-maps-service">OpenSearch Maps Service</a>',
         format: 'geojson',
         fields: [
-          { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 code' },
-          { type: 'id', name: 'iso3', description: 'ISO 3166-1 alpha-3 code' },
-          { type: 'property', name: 'name', description: 'name' },
+          { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 Code' },
+          { type: 'id', name: 'iso3', description: 'ISO 3166-1 alpha-3 Code' },
+          { type: 'property', name: 'name', description: 'Name' },
         ],
         created_at: '2017-04-26T17:12:15.978370', //not present in 6.6
         name: 'World Countries',
