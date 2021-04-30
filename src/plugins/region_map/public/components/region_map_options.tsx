@@ -117,29 +117,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           label={i18n.translate('regionMap.visParams.vectorMapLabel', {
             defaultMessage: 'Vector map',
           })}
-          labelAppend={
-            stateParams.emsHotLink && (
-              <EuiText size="xs">
-                <EuiLink
-                  href={stateParams.emsHotLink}
-                  target="_blank"
-                  title={i18n.translate('regionMap.visParams.previewOnEMSLinkTitle', {
-                    defaultMessage: 'Preview {selectedLayerName} on the OpenSearch Maps Service',
-                    values: {
-                      selectedLayerName:
-                        stateParams.selectedLayer && stateParams.selectedLayer.name,
-                    },
-                  })}
-                >
-                  <FormattedMessage
-                    id="regionMap.visParams.previewOnEMSLinkText"
-                    defaultMessage="Preview on EMS"
-                  />{' '}
-                  <EuiIcon type="popout" size="s" />
-                </EuiLink>
-              </EuiText>
-            )
-          }
           options={vectorLayerOptions}
           paramName="selectedLayer"
           value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}

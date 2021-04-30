@@ -31,7 +31,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { createZoomWarningMsg } from './map_messages';
+import {
+  createZoomWarningMsg,
+  createRegionBlockedWarning,
+  removeRegionBlockedWarning,
+} from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
@@ -606,6 +610,11 @@ export class OpenSearchDashboardsMap extends EventEmitter {
       baseLayer.on('loading', () => {
         this.emit('baseLayer:loading');
       });
+      baseLayer.on('tileerror', () => {
+        if (baseLayer._url.includes('search-services.aws.a2z.com')) {
+          createRegionBlockedWarning();
+        }
+      });
 
       this._leafletBaseLayer = baseLayer;
       if (settings.options.showZoomMessage) {
@@ -684,6 +693,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
   }
 
   _updateDesaturation() {
+    removeRegionBlockedWarning();
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps
     if (get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
