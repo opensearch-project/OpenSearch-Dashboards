@@ -48,7 +48,7 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiCallOut,
   EuiSpacer,
   EuiLink,
@@ -624,7 +624,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingElastic size="xl" />
+            <EuiLoadingSpinner size="xl" />
             <EuiSpacer size="m" />
             <EuiText>
               <p>{loadingMessage}</p>

@@ -39,7 +39,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiCallOut,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiInMemoryTable,
   EuiToolTip,
   EuiText,
@@ -132,7 +132,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     }
 
     if (isLoading) {
-      return <EuiLoadingElastic size="xl" />;
+      return <EuiLoadingSpinner size="xl" />;
     }
 
     const columns = [
