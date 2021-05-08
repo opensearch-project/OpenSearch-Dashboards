@@ -12,7 +12,7 @@ exports[`news_loading rendering renders the default News Loading 1`] = `
     </p>
   }
   title={
-    <EuiLoadingElastic
+    <EuiLoadingSpinner
       size="xl"
     />
   }
