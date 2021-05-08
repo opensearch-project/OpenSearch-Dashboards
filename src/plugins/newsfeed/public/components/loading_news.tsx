@@ -28,12 +28,12 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 export const NewsLoadingPrompt = () => {
   return (
     <EuiEmptyPrompt
-      title={<EuiLoadingElastic size="xl" />}
+      title={<EuiLoadingSpinner size="xl" />}
       body={
         <p>
           <FormattedMessage

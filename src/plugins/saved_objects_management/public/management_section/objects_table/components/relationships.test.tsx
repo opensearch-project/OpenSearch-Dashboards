@@ -100,7 +100,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingElastic').length).toBe(1);
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -167,7 +167,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingElastic').length).toBe(1);
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -234,7 +234,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingElastic').length).toBe(1);
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -301,7 +301,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingElastic').length).toBe(1);
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
