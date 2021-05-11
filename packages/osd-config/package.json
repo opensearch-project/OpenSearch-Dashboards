@@ -16,7 +16,7 @@
     "@osd/std": "1.0.0",
     "js-yaml": "^3.14.0",
     "load-json-file": "^6.2.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "rxjs": "^6.5.5",
     "type-detect": "^4.0.8"

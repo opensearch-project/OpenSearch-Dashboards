@@ -13,7 +13,7 @@
     "osd:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "@osd/dev-utils": "1.0.0",
     "@osd/utility-types": "1.0.0",
     "@types/normalize-path": "^3.0.0",
