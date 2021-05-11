@@ -75,7 +75,7 @@ export const calculateStatus$ = (
       if (openSearchStatus.level >= ServiceStatusLevels.unavailable) {
         return {
           level: ServiceStatusLevels.unavailable,
-          summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
+          summary: `SavedObjects service is not available without a healthy OpenSearch connection`,
         };
       } else if (migratorStatus.level === ServiceStatusLevels.unavailable) {
         return migratorStatus;
