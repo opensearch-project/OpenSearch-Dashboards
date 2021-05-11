@@ -26,25 +26,25 @@ pipeline {
         }
       }
     }
-    stage('Unit tests') {
-      steps {
-        script { 
-          DOCKER_IMAGE.inside {
-              sh 'yarn test:jest -u --ci --verbose' // TODO::Need to remove -u and fix the CI
-          }
-        }
-      }
-    }
-    stage('Integ tests') {
-      steps {
-        script {
-          DOCKER_IMAGE.inside {
-              sh 'yarn test:jest_integration -u --ci --verbose' // TODO::Need to remove -u and fix the CI
-              sh 'yarn test:mocha'
-          }
-        }
-      }
-    }
+    // stage('Unit tests') {
+    //   steps {
+    //     script { 
+    //       DOCKER_IMAGE.inside {
+    //           sh 'yarn test:jest -u --ci --verbose' // TODO::Need to remove -u and fix the CI
+    //       }
+    //     }
+    //   }
+    // }
+    // stage('Integ tests') {
+    //   steps {
+    //     script {
+    //       DOCKER_IMAGE.inside {
+    //           sh 'yarn test:jest_integration -u --ci --verbose' // TODO::Need to remove -u and fix the CI
+    //           sh 'yarn test:mocha'
+    //       }
+    //     }
+    //   }
+    // }
 		stage("Functional tests") {
       steps {
         functionalDynamicParallelSteps(DOCKER_IMAGE)
