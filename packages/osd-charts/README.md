@@ -21,7 +21,7 @@
 
 You should check out our [living style guide][docs], which contains many examples on how charts look and feel, and how to use them in your products.
 
-You could also check and fork the [codesandbox](https://codesandbox.io/s/elasticcharts-playground-puj4y) example here to play with the code directly
+You could also check and fork the [codesandbox](https://codesandbox.io/s/elastic-charts-playground-87y7g?file=/src/App.tsx) example here to play with the code directly
 
 ## Installation
 
