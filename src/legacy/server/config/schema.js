@@ -205,11 +205,11 @@ export default () =>
       opensearchManifestServiceUrl: Joi.string().default(
         'https://maps.search-services.aws.a2z.com/v4/ap-southeast-1/manifest'
       ),
-      emsFileApiUrl: Joi.string().default('https://vector.maps.opensearch.org'),
-      emsTileApiUrl: Joi.string().default('https://tiles.maps.opensearch.org'),
-      emsLandingPageUrl: Joi.string().default('https://maps.opensearch.org/v7.10'),
+      emsFileApiUrl: Joi.string().default('https://vectors.maps.search-services.aws.a2z.com'),
+      emsTileApiUrl: Joi.string().default('https://tiles.maps.search-services.aws.a2z.com'),
+      emsLandingPageUrl: Joi.string().default('https://maps.search-services.aws.a2z.com/v4'),
       emsFontLibraryUrl: Joi.string().default(
-        'https://tiles.maps.opensearch.org/fonts/{fontstack}/{range}.pbf'
+        'https://tiles.maps.search-services.aws.a2z.com/fonts/{fontstack}/{range}.pbf'
       ),
       emsTileLayerId: Joi.object({
         bright: Joi.string().default('road_map'),
