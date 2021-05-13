@@ -37,7 +37,7 @@ If you've thought of a way that OpenSearch Dashboards could be better, we want t
 
 ### Documentation Changes
 
-// TODO
+If you would like to contribute to the documentation, please see [OpenSearch Docs repo](https://github.com/opensearch-project/documentation-website/blob/main/README.md).
 
 ### Contributing Code
 
