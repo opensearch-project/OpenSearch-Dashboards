@@ -93,7 +93,11 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
 
   let noticeText = '';
   noticeText += `${productName}\n`;
-  noticeText += `Copyright 2012-${new Date().getUTCFullYear()} Elasticsearch B.V.\n`;
+  noticeText += `Copyright ${new Date().getUTCFullYear()} OpenSearch Contributors\n\n`;
+  noticeText += `This product includes software developed by Elasticsearch (http://www.elastic.co).\n`;
+  noticeText += `Copyright 2009-2018 Elasticsearch\n\n`;
+  noticeText += `This product includes software developed by The Apache Software Foundation (http://www.apache.org/)\n\n`;
+  noticeText += `This product includes software developed by Joda.org (http://www.joda.org/).\n`;
 
   for (const comment of noticeComments.sort()) {
     noticeText += '\n---\n';
