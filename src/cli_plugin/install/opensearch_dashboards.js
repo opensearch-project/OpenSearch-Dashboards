@@ -32,12 +32,13 @@
 
 import path from 'path';
 import { statSync } from 'fs';
+import { kebabCase } from 'lodash';
 
 import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
   try {
-    statSync(path.join(settings.pluginDir, settings.plugins[0].id));
+    statSync(path.join(settings.pluginDir, kebabCase(settings.plugins[0].id)));
 
     logger.error(
       `Plugin ${settings.plugins[0].id} already exists, please remove before installing a new version`
