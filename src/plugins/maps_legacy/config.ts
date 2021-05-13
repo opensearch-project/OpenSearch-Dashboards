@@ -43,11 +43,13 @@ export const configSchema = schema.object({
   opensearchManifestServiceUrl: schema.string({
     defaultValue: 'https://maps.search-services.aws.a2z.com/v4/us-east-1/manifest',
   }),
-  emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.opensearch.org' }),
-  emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.opensearch.org' }),
-  emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.opensearch.org/v7.10' }),
+  emsFileApiUrl: schema.string({
+    defaultValue: 'https://vectors.maps.search-services.aws.a2z.com',
+  }),
+  emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.search-services.aws.a2z.com' }),
+  emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.search-services.aws.a2z.com/v4' }),
   emsFontLibraryUrl: schema.string({
-    defaultValue: 'https://tiles.maps.opensearch.org/fonts/{fontstack}/{range}.pbf',
+    defaultValue: 'https://tiles.maps.search-services.aws.a2z.com/fonts/{fontstack}/{range}.pbf',
   }),
   emsTileLayerId: schema.object({
     bright: schema.string({ defaultValue: 'road_map' }),
