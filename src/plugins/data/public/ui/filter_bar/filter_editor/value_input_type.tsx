@@ -41,6 +41,7 @@ interface Props {
   type: string;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
+  fullWidth?: boolean;
   placeholder: string;
   intl: InjectedIntl;
   controlOnly?: boolean;
@@ -55,6 +56,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'string':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -66,6 +68,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number':
         inputElement = (
           <EuiFieldNumber
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
@@ -77,6 +80,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -90,6 +94,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'ip':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -102,6 +107,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'boolean':
         inputElement = (
           <EuiSelect
+            fullWidth={this.props.fullWidth}
             options={[
               { value: undefined, text: this.props.placeholder },
               {

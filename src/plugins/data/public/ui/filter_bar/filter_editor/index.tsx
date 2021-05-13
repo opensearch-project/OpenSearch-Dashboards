@@ -283,6 +283,7 @@ class FilterEditorUI extends Component<Props, State> {
       >
         <FieldComboBox
           id="fieldInput"
+          fullWidth={true}
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'data.filter.filterEditor.fieldSelectPlaceholder',
@@ -294,7 +295,6 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
-          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
@@ -342,6 +342,7 @@ class FilterEditorUI extends Component<Props, State> {
         label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
           defaultMessage: 'OpenSearch Query DSL',
         })}
+        fullWidth={true}
       >
         <EuiCodeEditor
           value={this.state.queryDsl}

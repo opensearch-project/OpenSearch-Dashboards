@@ -84,6 +84,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        fullWidth={false}
         aria-label={props.intl.formatMessage({
           id: 'data.filter.filterEditor.rangeInputLabel',
           defaultMessage: 'Range',
