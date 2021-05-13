@@ -31,6 +31,8 @@ Here are the principles we use to guide our development.  From [opensearch.org](
 
 ## Getting Started
 
+If you would like to install and run this project, please see the [Downloads Page](https://opensearch.org/downloads.html).
+
 To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
 * Clone the OpenSearch repo with ```git clone https://github.com/opensearch-project/OpenSearch.git```
 * Follow installation and setup instructions in the [OpenSearch Developer Guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md)
@@ -71,4 +73,5 @@ As we've been working, we've come up with a bunch of questions that we wanted to
 
 ### Questions? Feedback?
 
-Let us know in the [forums](https://discuss.opendistrocommunity.dev/). w00t!!!
+Found a bug or need to leave feedback? Make sure you open an [issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose).
+Questions and discussions on this project can be found on the project [forums](https://discuss.opendistrocommunity.dev/). w00t!!!
