@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
+import createCachedSelector from 're-reselect';
 
-import { A11ySettings } from '../../state/selectors/get_accessibility_config';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { SeriesType } from '../../utils/specs';
+import { getSeriesSpecsSelector } from './get_specs';
 
 /** @internal */
-export function ScreenReaderLabel(props: A11ySettings) {
-  if (!props.label) return null;
-  const Heading = props.labelHeadingLevel;
-  return <Heading id={props.labelId}>{props.label}</Heading>;
-}
+export const getChartTypeDescriptionSelector = createCachedSelector([getSeriesSpecsSelector], (specs): string => {
+  const seriesTypes = new Set<SeriesType>();
+  specs.forEach((value) => seriesTypes.add(value.seriesType));
+  const chartSeriesTypes =
+    seriesTypes.size > 1 ? `Mixed chart: ${[...seriesTypes].join(' and ')} chart` : `${[...seriesTypes]} chart`;
+  return chartSeriesTypes;
+})(getChartIdSelector);

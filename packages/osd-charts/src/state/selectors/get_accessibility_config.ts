@@ -40,7 +40,7 @@ export type A11ySettings = {
 };
 
 /** @internal */
-export const DEFAULT_A11_SETTINGS: A11ySettings = {
+export const DEFAULT_A11Y_SETTINGS: A11ySettings = {
   labelHeadingLevel: DEFAULT_SETTINGS_SPEC.ariaLabelHeadingLevel,
 };
 
@@ -63,7 +63,7 @@ export const getA11ySettingsSelector = createCachedSelector(
       labelId: ariaLabelledBy ?? (ariaLabel && `${chartId}--label`),
       labelHeadingLevel: isValidHeadingLevel(ariaLabelHeadingLevel)
         ? ariaLabelHeadingLevel
-        : DEFAULT_A11_SETTINGS.labelHeadingLevel,
+        : DEFAULT_A11Y_SETTINGS.labelHeadingLevel,
       // don't use a description if ariaDescribedBy id is provided
       description: ariaDescribedBy ? undefined : ariaDescription,
       // concat all the ids

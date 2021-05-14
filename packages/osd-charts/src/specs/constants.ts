@@ -156,6 +156,6 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   brushAxis: BrushAxis.X,
   minBrushDelta: 2,
   ariaUseDefaultSummary: true,
-  ariaLabelHeadingLevel: 'h2',
+  ariaLabelHeadingLevel: 'p',
   ...DEFAULT_LEGEND_CONFIG,
 };

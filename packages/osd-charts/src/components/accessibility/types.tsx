@@ -21,9 +21,17 @@ import React from 'react';
 
 import { A11ySettings } from '../../state/selectors/get_accessibility_config';
 
+interface ScreenReaderTypesProps {
+  chartTypeDescription: string;
+}
+
 /** @internal */
-export function ScreenReaderLabel(props: A11ySettings) {
-  if (!props.label) return null;
-  const Heading = props.labelHeadingLevel;
-  return <Heading id={props.labelId}>{props.label}</Heading>;
+export function ScreenReaderTypes(props: A11ySettings & ScreenReaderTypesProps) {
+  if (!props.defaultSummaryId) return null;
+  return (
+    <dl>
+      <dt>Chart type:</dt>
+      <dd id={props.defaultSummaryId}>{props.chartTypeDescription}</dd>
+    </dl>
+  );
 }

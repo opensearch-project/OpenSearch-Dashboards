@@ -22,7 +22,7 @@ import { Store } from 'redux';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store/store';
 import { GlobalChartState } from '../../../state/chart_state';
-import { DEFAULT_A11_SETTINGS } from '../../../state/selectors/get_accessibility_config';
+import { DEFAULT_A11Y_SETTINGS } from '../../../state/selectors/get_accessibility_config';
 import { getSettingsSpecSelector } from '../../../state/selectors/get_settings_specs';
 
 describe('test accessibility prop defaults', () => {
@@ -53,7 +53,7 @@ describe('test accessibility prop defaults', () => {
     } = getSettingsSpecSelector(state);
     expect(ariaDescription).toBeUndefined();
     expect(ariaUseDefaultSummary).toBeTrue();
-    expect(ariaLabelHeadingLevel).toBe(DEFAULT_A11_SETTINGS.labelHeadingLevel);
+    expect(ariaLabelHeadingLevel).toBe(DEFAULT_A11Y_SETTINGS.labelHeadingLevel);
     expect(ariaLabel).toBeUndefined();
     expect(ariaLabelledBy).toBeUndefined();
   });

@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { SeriesType } from '../../utils/specs';
-import { getSeriesSpecsSelector } from './get_specs';
+import { GlobalChartState } from '../chart_state';
 
 /** @internal */
-export const getSeriesTypes = createCachedSelector(
-  [getSeriesSpecsSelector],
-  (specs): Set<SeriesType> => {
-    const seriesTypes = new Set<SeriesType>();
-    specs.forEach((value) => seriesTypes.add(value.seriesType));
-    return seriesTypes;
-  },
-)(getChartIdSelector);
+export const getChartTypeDescriptionSelector = (state: GlobalChartState): string => {
+  if (state.internalChartState) {
+    return state.internalChartState.getChartTypeDescription(state);
+  }
+  // need to return something so there is always a string returned
+  return 'unknown chart type';
+};

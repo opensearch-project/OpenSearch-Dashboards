@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+import createCachedSelector from 're-reselect';
 
-import { A11ySettings } from '../../state/selectors/get_accessibility_config';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getPartitionSpec } from './partition_spec';
 
 /** @internal */
-export function ScreenReaderLabel(props: A11ySettings) {
-  if (!props.label) return null;
-  const Heading = props.labelHeadingLevel;
-  return <Heading id={props.labelId}>{props.label}</Heading>;
-}
+export const getChartTypeDescriptionSelector = createCachedSelector([getPartitionSpec], (partitionSpec): string => {
+  return `${partitionSpec?.config.partitionLayout} chart` ?? 'Partition chart';
+})(getChartIdSelector);

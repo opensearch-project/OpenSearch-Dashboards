@@ -22,13 +22,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { LegendItem } from '../../../../common/legend';
-import { Description } from '../../../../components/accessibility/description';
-import { Label } from '../../../../components/accessibility/label';
+import { ScreenReaderSummary } from '../../../../components/accessibility';
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
 import {
   A11ySettings,
-  DEFAULT_A11_SETTINGS,
+  DEFAULT_A11Y_SETTINGS,
   getA11ySettingsSelector,
 } from '../../../../state/selectors/get_accessibility_config';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
@@ -55,13 +54,12 @@ import {
 import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_series_geometries';
 import { getAxesStylesSelector } from '../../state/selectors/get_axis_styles';
 import { getHighlightedSeriesSelector } from '../../state/selectors/get_highlighted_series';
-import { getSeriesTypes } from '../../state/selectors/get_series_types';
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { Geometries, Transform } from '../../state/utils/types';
 import { LinesGrid } from '../../utils/grid_lines';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
-import { AxisSpec, AnnotationSpec, SeriesType } from '../../utils/specs';
+import { AxisSpec, AnnotationSpec } from '../../utils/specs';
 import { renderXYChartCanvas2d } from './renderers';
 
 /** @internal */
@@ -84,7 +82,6 @@ export interface ReactiveChartStateProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
   panelGeoms: PanelGeoms;
-  seriesTypes: Set<SeriesType>;
   a11ySettings: A11ySettings;
 }
 
@@ -162,7 +159,6 @@ class XYChartComponent extends React.Component<XYChartProps> {
       initialized,
       isChartEmpty,
       chartContainerDimensions: { width, height },
-      seriesTypes,
       a11ySettings,
     } = this.props;
 
@@ -170,9 +166,6 @@ class XYChartComponent extends React.Component<XYChartProps> {
       this.ctx = null;
       return null;
     }
-
-    const chartSeriesTypes =
-      seriesTypes.size > 1 ? `Mixed chart: ${[...seriesTypes].join(' and ')} chart` : `${[...seriesTypes]} chart`;
 
     return (
       <figure aria-labelledby={a11ySettings.labelId} aria-describedby={a11ySettings.descriptionId}>
@@ -188,16 +181,7 @@ class XYChartComponent extends React.Component<XYChartProps> {
           // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
           role="presentation"
         >
-          <div className="echScreenReaderOnly">
-            <Label {...a11ySettings} />
-            <Description {...a11ySettings} />
-            {a11ySettings.defaultSummaryId && (
-              <dl id={a11ySettings.defaultSummaryId}>
-                <dt>Chart type</dt>
-                <dd>{chartSeriesTypes}</dd>
-              </dl>
-            )}
-          </div>
+          <ScreenReaderSummary />
         </canvas>
       </figure>
     );
@@ -251,8 +235,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
   annotationDimensions: new Map(),
   annotationSpecs: [],
   panelGeoms: [],
-  seriesTypes: new Set(),
-  a11ySettings: DEFAULT_A11_SETTINGS,
+  a11ySettings: DEFAULT_A11Y_SETTINGS,
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
@@ -282,7 +265,6 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     annotationDimensions: computeAnnotationDimensionsSelector(state),
     annotationSpecs: getAnnotationSpecsSelector(state),
     panelGeoms: computePanelsSelectors(state),
-    seriesTypes: getSeriesTypes(state),
     a11ySettings: getA11ySettingsSelector(state),
   };
 };

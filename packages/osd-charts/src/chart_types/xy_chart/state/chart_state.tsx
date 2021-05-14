@@ -35,6 +35,7 @@ import { Highlighter } from '../renderer/dom/highlighter';
 import { computeChartDimensionsSelector } from './selectors/compute_chart_dimensions';
 import { computeLegendSelector } from './selectors/compute_legend';
 import { getBrushAreaSelector } from './selectors/get_brush_area';
+import { getChartTypeDescriptionSelector } from './selectors/get_chart_type_description';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
 import { getDebugStateSelector } from './selectors/get_debug_state';
 import { getHighlightedValuesSelector } from './selectors/get_highlighted_values';
@@ -158,5 +159,9 @@ export class XYAxisChartState implements InternalChartState {
 
   getDebugState(globalState: GlobalChartState) {
     return getDebugStateSelector(globalState);
+  }
+
+  getChartTypeDescription(globalState: GlobalChartState) {
+    return getChartTypeDescriptionSelector(globalState);
   }
 }

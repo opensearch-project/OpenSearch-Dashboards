@@ -27,6 +27,7 @@ import { DebugState } from '../../../state/types';
 import { Dimensions } from '../../../utils/dimensions';
 import { render } from '../renderer/dom/layered_partition_chart';
 import { computeLegendSelector } from './selectors/compute_legend';
+import { getChartTypeDescriptionSelector } from './selectors/get_chart_type_description';
 import { getDebugStateSelector } from './selectors/get_debug_state';
 import { getLegendItemsExtra } from './selectors/get_legend_items_extra';
 import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
@@ -133,5 +134,9 @@ export class PartitionState implements InternalChartState {
 
   getDebugState(state: GlobalChartState): DebugState {
     return getDebugStateSelector(state);
+  }
+
+  getChartTypeDescription(state: GlobalChartState): string {
+    return getChartTypeDescriptionSelector(state);
   }
 }

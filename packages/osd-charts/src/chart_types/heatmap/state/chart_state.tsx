@@ -130,6 +130,10 @@ export class HeatmapState implements InternalChartState {
     return getDebugStateSelector(globalState);
   }
 
+  getChartTypeDescription() {
+    return 'Heatmap chart';
+  }
+
   eventCallbacks(globalState: GlobalChartState) {
     this.onElementOverCaller(globalState);
     this.onElementOutCaller(globalState);

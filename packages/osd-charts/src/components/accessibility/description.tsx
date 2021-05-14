@@ -22,7 +22,7 @@ import React from 'react';
 import { A11ySettings } from '../../state/selectors/get_accessibility_config';
 
 /** @internal */
-export function Description(props: A11ySettings) {
+export function ScreenReaderDescription(props: A11ySettings) {
   if (!props.description) return null;
   return <p id={props.descriptionId}>{props.description}</p>;
 }

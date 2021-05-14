@@ -113,6 +113,10 @@ export class WordcloudState implements InternalChartState {
     this.onElementClickCaller(globalState);
   }
 
+  getChartTypeDescription() {
+    return 'Word cloud chart';
+  }
+
   // TODO
   getProjectionContainerArea(): Dimensions {
     return { width: 0, height: 0, top: 0, left: 0 };

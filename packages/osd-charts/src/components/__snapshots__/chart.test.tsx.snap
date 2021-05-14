@@ -54,7 +54,7 @@ exports[`Chart should render the legend name test 1`] = `
         <Connect(SpecsParserComponent)>
           <SpecsParserComponent specParsed={[Function (anonymous)]} specUnmounted={[Function (anonymous)]}>
             <Connect(SpecInstance) debug={true} rendering=\\"svg\\" showLegend={true}>
-              <SpecInstance debug={true} rendering=\\"svg\\" showLegend={true} upsertSpec={[Function (anonymous)]} removeSpec={[Function (anonymous)]} id=\\"__global__settings___\\" chartType=\\"global\\" specType=\\"settings\\" rotation={0} animateData={true} resizeDebounce={10} tooltip={{...}} externalPointerEvents={{...}} hideDuplicateAxes={false} baseTheme={{...}} brushAxis=\\"x\\" minBrushDelta={2} ariaUseDefaultSummary={true} ariaLabelHeadingLevel=\\"h2\\" showLegendExtra={false} legendMaxDepth={Infinity} legendPosition=\\"right\\" />
+              <SpecInstance debug={true} rendering=\\"svg\\" showLegend={true} upsertSpec={[Function (anonymous)]} removeSpec={[Function (anonymous)]} id=\\"__global__settings___\\" chartType=\\"global\\" specType=\\"settings\\" rotation={0} animateData={true} resizeDebounce={10} tooltip={{...}} externalPointerEvents={{...}} hideDuplicateAxes={false} baseTheme={{...}} brushAxis=\\"x\\" minBrushDelta={2} ariaUseDefaultSummary={true} ariaLabelHeadingLevel=\\"p\\" showLegendExtra={false} legendMaxDepth={Infinity} legendPosition=\\"right\\" />
             </Connect(SpecInstance)>
             <Connect(SpecInstance) id=\\"test\\" data={{...}}>
               <SpecInstance id=\\"test\\" data={{...}} upsertSpec={[Function (anonymous)]} removeSpec={[Function (anonymous)]} chartType=\\"xy_axis\\" specType=\\"series\\" seriesType=\\"bar\\" groupId=\\"__global__\\" xScaleType=\\"ordinal\\" yScaleType=\\"linear\\" xAccessor=\\"x\\" yAccessors={{...}} yScaleToDataExtent={false} hideInLegend={false} enableHistogramMode={false} />
@@ -69,21 +69,27 @@ exports[`Chart should render the legend name test 1`] = `
                   <Crosshair theme={{...}} chartRotation={0} cursorPosition={[undefined]} cursorCrossLinePosition={[undefined]} tooltipType=\\"vertical\\" fromExternalEvent={[undefined]} zIndex={0} dispatch={[Function: dispatch]} />
                 </Connect(Crosshair)>
                 <Connect(XYChart) forwardStageRef={{...}}>
-                  <XYChart forwardStageRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} seriesTypes={{...}} a11ySettings={{...}} onChartRendered={[Function (anonymous)]}>
+                  <XYChart forwardStageRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} a11ySettings={{...}} onChartRendered={[Function (anonymous)]}>
                     <figure aria-labelledby={[undefined]} aria-describedby=\\"chart1--defaultSummary\\">
                       <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} role=\\"presentation\\">
-                        <div className=\\"echScreenReaderOnly\\">
-                          <Label label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"h2\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
-                          <Description label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"h2\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
-                          <dl id=\\"chart1--defaultSummary\\">
-                            <dt>
-                              Chart type
-                            </dt>
-                            <dd>
-                              bar chart
-                            </dd>
-                          </dl>
-                        </div>
+                        <Connect(ScreenReaderSummaryComponent)>
+                          <ScreenReaderSummaryComponent chartTypeDescription=\\"bar chart\\" a11ySettings={{...}} dispatch={[Function: dispatch]}>
+                            <div className=\\"echScreenReaderOnly\\">
+                              <ScreenReaderLabel label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
+                              <ScreenReaderDescription label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
+                              <ScreenReaderTypes label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" chartTypeDescription=\\"bar chart\\">
+                                <dl>
+                                  <dt>
+                                    Chart type:
+                                  </dt>
+                                  <dd id=\\"chart1--defaultSummary\\">
+                                    bar chart
+                                  </dd>
+                                </dl>
+                              </ScreenReaderTypes>
+                            </div>
+                          </ScreenReaderSummaryComponent>
+                        </Connect(ScreenReaderSummaryComponent)>
                       </canvas>
                     </figure>
                   </XYChart>
