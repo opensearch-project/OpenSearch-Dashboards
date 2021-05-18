@@ -121,7 +121,7 @@ function FilterBarUI(props: Props) {
           withTitle
           panelPaddingSize="none"
           ownFocus={true}
-          initialFocus='[data-test-subj="filterFieldSuggestionList"] [data-test-subj="comboBoxSearchInput"]'
+          initialFocus=".globalFilterEditor__fieldInput input"
           repositionOnScroll
         >
           <EuiFlexItem grow={false}>
