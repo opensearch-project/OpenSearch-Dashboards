@@ -97,8 +97,8 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
               "template": "http://company.net/groups?id={{value}}",
             },
             Object {
-              "input": "/images/favicon-heatmap.ico",
-              "output": "http://www.site.com/images/favicon-heatmap.ico",
+              "input": "/images/favicon.ico",
+              "output": "http://www.site.com/images/favicon.ico",
               "template": "http://www.site.com{{rawValue}}",
             },
           ]

@@ -102,9 +102,9 @@ export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => 
                 output: 'http://company.net/groups?id=users%2Fadmin',
               },
               {
-                input: '/images/favicon-heatmap.ico',
+                input: '/images/favicon.ico',
                 template: 'http://www.site.com{{rawValue}}',
-                output: 'http://www.site.com/images/favicon-heatmap.ico',
+                output: 'http://www.site.com/images/favicon.ico',
               },
             ]}
             columns={[
