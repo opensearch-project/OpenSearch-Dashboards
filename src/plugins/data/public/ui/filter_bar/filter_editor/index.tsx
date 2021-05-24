@@ -163,12 +163,14 @@ class FilterEditorUI extends Component<Props, State> {
               <div>
                 <EuiSpacer size="m" />
                 <EuiFormRow
+                  fullWidth={true}
                   label={this.props.intl.formatMessage({
                     id: 'data.filter.filterEditor.createCustomLabelInputLabel',
                     defaultMessage: 'Custom label',
                   })}
                 >
                   <EuiFieldText
+                    fullWidth={true}
                     value={`${this.state.customLabel}`}
                     onChange={this.onCustomLabelChange}
                   />
@@ -295,6 +297,7 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
