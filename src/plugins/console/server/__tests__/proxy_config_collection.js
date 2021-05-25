@@ -54,7 +54,7 @@ describe('ProxyConfigCollection', function () {
         protocol: 'https',
         host: 'localhost',
         port: 5601,
-        path: '/.opensearch_dashboards',
+        path: '/.kibana',
       },
 
       timeout: 1,

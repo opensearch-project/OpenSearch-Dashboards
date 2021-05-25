@@ -43,7 +43,7 @@ export default function ({ getService }) {
     before(() => opensearchArchiver.load('saved_objects/basic'));
     after(() => opensearchArchiver.unload('saved_objects/basic'));
 
-    it('should increment the opt *in* counter in the .opensearch_dashboards/dql-telemetry document', async () => {
+    it('should increment the opt *in* counter in the .kibana/dql-telemetry document', async () => {
       await supertest
         .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
@@ -52,7 +52,7 @@ export default function ({ getService }) {
 
       return opensearch
         .search({
-          index: '.opensearch_dashboards',
+          index: '.kibana',
           q: 'type:dql-telemetry',
         })
         .then((response) => {
@@ -61,7 +61,7 @@ export default function ({ getService }) {
         });
     });
 
-    it('should increment the opt *out* counter in the .opensearch_dashboards/dql-telemetry document', async () => {
+    it('should increment the opt *out* counter in the .kibana/dql-telemetry document', async () => {
       await supertest
         .post('/api/opensearch-dashboards/dql_opt_in_stats')
         .set('content-type', 'application/json')
@@ -70,7 +70,7 @@ export default function ({ getService }) {
 
       return opensearch
         .search({
-          index: '.opensearch_dashboards',
+          index: '.kibana',
           q: 'type:dql-telemetry',
         })
         .then((response) => {

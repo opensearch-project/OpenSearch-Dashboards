@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch_dashboards index and update configDoc
+      // delete .kibana index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });

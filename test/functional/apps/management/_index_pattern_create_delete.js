@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // Delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
+      // Delete .kibana index and then wait for OpenSearch Dashboards to re-create it
       return opensearchDashboardsServer.uiSettings
         .replace({})
         .then(function () {

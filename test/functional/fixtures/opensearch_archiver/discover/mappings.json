@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".opensearch_dashboards",
+    "index": ".kibana",
     "mappings": {
       "properties": {
         "config": {

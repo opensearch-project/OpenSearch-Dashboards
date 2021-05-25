@@ -85,7 +85,7 @@ describe('CoreUsageDataService', () => {
         opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.opensearch_dashboards_task_manager_1',
+              name: '.kibana_task_manager_1',
               'docs.count': 10,
               'docs.deleted': 10,
               'store.size': 1000,
@@ -96,7 +96,7 @@ describe('CoreUsageDataService', () => {
         opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.opensearch_dashboards_1',
+              name: '.kibana_1',
               'docs.count': 20,
               'docs.deleted': 20,
               'store.size': 2000,
@@ -106,8 +106,8 @@ describe('CoreUsageDataService', () => {
         } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
-          { name: 'type 1', indexPattern: '.opensearch_dashboards' },
-          { name: 'type 2', indexPattern: '.opensearch_dashboards_task_manager' },
+          { name: 'type 1', indexPattern: '.kibana' },
+          { name: 'type 2', indexPattern: '.kibana_task_manager' },
         ] as any);
 
         const { getCoreUsageData } = service.start({
@@ -215,14 +215,14 @@ describe('CoreUsageDataService', () => {
               "savedObjects": Object {
                 "indices": Array [
                   Object {
-                    "alias": ".opensearch_dashboards_task_manager",
+                    "alias": ".kibana_task_manager",
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,
                     "storeSizeBytes": 1000,
                   },
                   Object {
-                    "alias": ".opensearch_dashboards_task_manager",
+                    "alias": ".kibana_task_manager",
                     "docsCount": 20,
                     "docsDeleted": 20,
                     "primaryStoreSizeBytes": 4000,

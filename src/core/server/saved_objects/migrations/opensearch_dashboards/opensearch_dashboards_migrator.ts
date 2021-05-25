@@ -115,7 +115,7 @@ export class OpenSearchDashboardsMigrator {
    *
    * @param rerun - If true, method will run a new migration when called again instead of
    * returning the result of the initial migration. This should only be used when factors external
-   * to OpenSearch Dashboards itself alter the .opensearch_dashboards index causing the saved objects mappings or data to change
+   * to OpenSearch Dashboards itself alter the .kibana index causing the saved objects mappings or data to change
    * after the OpenSearch Dashboards server performed the initial migration.
    *
    * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration

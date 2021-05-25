@@ -31,7 +31,7 @@
  */
 
 const OPENSEARCH_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
-const OPENSEARCH_DASHBOARDS_INDEX = '.opensearch_dashboards';
+const OPENSEARCH_DASHBOARDS_INDEX = '.kibana';
 
 export function extendOpenSearchArchiver({
   opensearchArchiver,

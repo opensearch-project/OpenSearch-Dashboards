@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('index result field sort', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
+      // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
     });
 

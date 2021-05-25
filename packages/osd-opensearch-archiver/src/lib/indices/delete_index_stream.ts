@@ -52,7 +52,7 @@ export function createDeleteIndexStream(
         if (!record || record.type === 'index') {
           const { index } = record.value;
 
-          if (index.startsWith('.opensearch_dashboards')) {
+          if (index.startsWith('.kibana')) {
             await cleanOpenSearchDashboardsIndices({
               client,
               stats,
