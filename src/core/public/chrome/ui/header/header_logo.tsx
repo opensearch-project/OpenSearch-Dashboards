@@ -37,6 +37,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
+import { OpenSearchDashboardsLogoDarkMode } from './branding/opensearch_dashboards_logo_darkmode';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -112,14 +113,12 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
-      iconType="heatmap"
+      iconType={OpenSearchDashboardsLogoDarkMode}
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
-    >
-      OpenSearch Dashboards
-    </EuiHeaderLogo>
+    />
   );
 }

@@ -53,6 +53,7 @@ import { getServices } from '../opensearch_dashboards_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 
 import { SampleDataCard } from './sample_data';
+import OpenSearchMarkCentered from '../../assets/logos/opensearch_mark_centered.svg';
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
@@ -148,7 +149,7 @@ export class Welcome extends React.Component<Props> {
             <div className="homWelcome__content eui-textCenter">
               <EuiSpacer size="xl" />
               <span className="homWelcome__logo">
-                <EuiIcon type="heatmap" size="xxl" />
+                <EuiIcon type={OpenSearchMarkCentered} size="original" />
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>

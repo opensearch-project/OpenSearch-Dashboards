@@ -40,6 +40,8 @@ export interface ExitFullScreenButtonProps {
 }
 
 import './index.scss';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import OpenSearchMarkDarkMode from '../../../home/public/assets/logos/opensearch_mark_darkmode.svg';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
@@ -83,7 +85,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="heatmap" size="l" />
+                <EuiIcon type={OpenSearchMarkDarkMode} size="l" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
                 <div>

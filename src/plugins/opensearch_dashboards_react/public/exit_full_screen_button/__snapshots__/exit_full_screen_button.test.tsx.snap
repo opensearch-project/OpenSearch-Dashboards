@@ -37,10 +37,10 @@ exports[`is rendered 1`] = `
               >
                 <EuiIcon
                   size="l"
-                  type="heatmap"
+                  type="test-file-stub"
                 >
                   <div
-                    data-euiicon-type="heatmap"
+                    data-euiicon-type="test-file-stub"
                     size="l"
                   />
                 </EuiIcon>
