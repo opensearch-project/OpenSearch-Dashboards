@@ -77,14 +77,14 @@ export default function ({ getService }) {
                     // cheat for some of the more complex attributes
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
-                    opensearchDashboardsSavedObjectMeta:
-                      resp.body.saved_objects[0].attributes.opensearchDashboardsSavedObjectMeta,
+                    kibanaSavedObjectMeta:
+                      resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   namespaces: ['default'],
                   references: [
                     {
-                      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                       type: 'index-pattern',
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                     },

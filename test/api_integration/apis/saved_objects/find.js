@@ -65,7 +65,7 @@ export default function ({ getService }) {
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                       type: 'index-pattern',
                     },
                   ],
@@ -160,7 +160,7 @@ export default function ({ getService }) {
                     references: [
                       {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                         type: 'index-pattern',
                       },
                     ],
@@ -196,7 +196,7 @@ export default function ({ getService }) {
                     references: [
                       {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                         type: 'index-pattern',
                       },
                     ],
@@ -230,9 +230,9 @@ export default function ({ getService }) {
                       uiStateJSON: '{"spy":{"mode":{"name":null,"fill":false}}}',
                       description: '',
                       version: 1,
-                      opensearchDashboardsSavedObjectMeta: {
+                      kibanaSavedObjectMeta: {
                         searchSourceJSON:
-                          resp.body.saved_objects[0].attributes.opensearchDashboardsSavedObjectMeta
+                          resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                             .searchSourceJSON,
                       },
                     },
@@ -240,7 +240,7 @@ export default function ({ getService }) {
                     score: 0,
                     references: [
                       {
-                        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                         type: 'index-pattern',
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                       },

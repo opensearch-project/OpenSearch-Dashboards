@@ -8,7 +8,7 @@
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
-      "opensearchDashboardsSavedObjectMeta": {
+      "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"d1e4c910-a2e6-11e7-bb30-233be9be6a15\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
     },

@@ -50,7 +50,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
       uiStateJSON: '{}',
       version: 1,
       timeRestore: false,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"filter":[{"query":{"query_string":{"query":"n: 6","analyze_wildcard":true}}}],"highlightAll":true,"version":true}',
       },
@@ -64,7 +64,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
     Object {
       "attributes": Object {
         "description": "",
-        "opensearchDashboardsSavedObjectMeta": Object {
+        "kibanaSavedObjectMeta": Object {
           "searchSourceJSON": "{\\"filter\\":[],\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"n: 6\\",\\"language\\":\\"lucene\\"}}",
         },
         "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
@@ -95,7 +95,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
         '{"P-9":{"vis":{"params":{"sort":{"columnIndex":null,"direction":null}}}},"P-3":{"vis":{"defaultColors":{"0 - 88":"rgb(247,252,245)","88 - 175":"rgb(199,233,192)","175 - 263":"rgb(116,196,118)","263 - 350":"rgb(35,139,69)"}}},"P-10":{"vis":{"defaultColors":{"0 - 50":"rgb(0,104,55)","50 - 75":"rgb(255,255,190)","75 - 100":"rgb(165,0,38)"}}},"P-11":{"vis":{"defaultColors":{"0 - 100":"rgb(0,104,55)"}}},"P-12":{"vis":{"defaultColors":{"0 - 100":"rgb(0,104,55)"}}}}',
       version: 1,
       timeRestore: false,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"filter":[{"query":{"match_all":{}}}],"highlightAll":true,"version":true}',
       },
@@ -105,9 +105,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
   const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
-  const parsedSearchSource = JSON.parse(
-    newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-  );
+  const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
   expect(parsedSearchSource.query.query).toBe('');
 
@@ -129,7 +127,7 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
       panelsJSON:
         '[{"id":"funky-funky","type":"visualization","size_x":7,"size_y":5,"col":1,"row":1},{"id":"funky-funky2","type":"search","size_x":5,"size_y":5,"col":8,"row":1,"columns":["_source"],"sort":["@timestamp","desc"]}]',
       optionsJSON: '{"darkTheme":false}',
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"filter":[{"query":{"query_string":{"query":"user:spiderman","analyze_wildcard":true}}}]}',
       },
@@ -139,9 +137,7 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
   const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
-  const parsedSearchSource = JSON.parse(
-    newDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-  );
+  const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
   expect(parsedSearchSource.query.query).toBe('user:spiderman');
 
@@ -160,7 +156,7 @@ test('dashboard migration 7.3.0 migrates panels', () => {
       uiStateJSON: '{}',
       version: 1,
       timeRestore: false,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"filter":[],"highlightAll":true,"version":true}',
       },
       panelsJSON:

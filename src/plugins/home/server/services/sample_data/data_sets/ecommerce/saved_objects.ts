@@ -51,7 +51,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -73,7 +73,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -96,7 +96,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -117,7 +117,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -138,7 +138,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -159,7 +159,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -181,7 +181,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -203,7 +203,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 50":"rgb(165,0,38)","50 - 75":"rgb(255,255,190)","75 - 100":"rgb(0,104,55)"}}}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -226,7 +226,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 2":"rgb(165,0,38)","2 - 3":"rgb(255,255,190)","3 - 4":"rgb(0,104,55)"}}}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -248,7 +248,7 @@ export const getSavedObjects = (): SavedObject[] => [
       columns: ['category', 'sku', 'taxful_total_price', 'total_quantity'],
       sort: [['order_date', 'desc']],
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","highlightAll":true,"version":true,"query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -270,7 +270,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -292,7 +292,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
@@ -403,7 +403,7 @@ export const getSavedObjects = (): SavedObject[] => [
         pause: false,
         value: 900000,
       },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
       },
     },

@@ -28,8 +28,8 @@
         ],
         "description": "",
         "hits": 0,
-        "opensearchDashboardsSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"number\",\"negate\":false,\"params\":{\"query\":123},\"type\":\"phrase\",\"value\":\"123\",\"indexRefName\":\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"number\":{\"query\":123,\"type\":\"phrase\"}}}}],\"indexRefName\":\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\"}"
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"number\",\"negate\":false,\"params\":{\"query\":123},\"type\":\"phrase\",\"value\":\"123\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"number\":{\"query\":123,\"type\":\"phrase\"}}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [
           [

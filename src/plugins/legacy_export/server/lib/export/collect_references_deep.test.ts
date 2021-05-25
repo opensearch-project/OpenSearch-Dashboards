@@ -58,15 +58,15 @@ const data: Array<SavedObject<SavedObjectAttributes>> = [
     id: '2',
     type: 'visualization',
     attributes: {
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({
-          indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         }),
       },
     },
     references: [
       {
-        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
         id: '4',
       },
@@ -98,15 +98,15 @@ const data: Array<SavedObject<SavedObjectAttributes>> = [
     id: '5',
     type: 'search',
     attributes: {
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({
-          indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         }),
       },
     },
     references: [
       {
-        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
         id: '4',
       },
@@ -150,15 +150,15 @@ test('collects dashboard and all dependencies', async () => {
       },
       Object {
         "attributes": Object {
-          "opensearchDashboardsSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\\"}",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
           },
         },
         "id": "2",
         "references": Array [
           Object {
             "id": "4",
-            "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
             "type": "index-pattern",
           },
         ],
@@ -188,15 +188,15 @@ test('collects dashboard and all dependencies', async () => {
       },
       Object {
         "attributes": Object {
-          "opensearchDashboardsSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\\"}",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
           },
         },
         "id": "5",
         "references": Array [
           Object {
             "id": "4",
-            "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
             "type": "index-pattern",
           },
         ],

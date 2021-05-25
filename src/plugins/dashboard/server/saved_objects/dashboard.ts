@@ -60,7 +60,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
       optionsJSON: { type: 'text', index: false },

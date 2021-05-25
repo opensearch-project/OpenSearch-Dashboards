@@ -114,7 +114,7 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
         );
       }
       const obj = await getSavedObject('search', args.savedSearchId);
-      const search = obj.attributes.opensearchDashboardsSavedObjectMeta as {
+      const search = obj.attributes.kibanaSavedObjectMeta as {
         searchSourceJSON: string;
       };
       const { query, filter } = getParsedValue(search.searchSourceJSON, {});

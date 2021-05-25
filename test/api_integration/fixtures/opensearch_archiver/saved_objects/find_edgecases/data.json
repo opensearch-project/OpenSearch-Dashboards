@@ -12,7 +12,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -35,7 +35,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -59,7 +59,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -82,7 +82,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },

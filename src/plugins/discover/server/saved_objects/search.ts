@@ -61,7 +61,7 @@ export const searchSavedObjectType: SavedObjectsType = {
       columns: { type: 'keyword', index: false, doc_values: false },
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         properties: {
           searchSourceJSON: { type: 'text', index: false },
         },

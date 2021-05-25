@@ -41,10 +41,7 @@ import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
  * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(
-    doc,
-    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
-  );
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -61,7 +58,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               ...searchSource,
               query: {
@@ -79,10 +76,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(
-    doc,
-    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
-  );
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
   }
@@ -95,7 +89,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 
   if (searchSource.index && Array.isArray(doc.references)) {
-    searchSource.indexRefName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
+    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
       type: 'index-pattern',
@@ -108,7 +102,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       if (!filterRow.meta || !filterRow.meta.index || !Array.isArray(doc.references)) {
         return;
       }
-      filterRow.meta.indexRefName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
@@ -118,9 +112,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     });
   }
 
-  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
-    searchSource
-  );
+  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 
   return doc;
 };
