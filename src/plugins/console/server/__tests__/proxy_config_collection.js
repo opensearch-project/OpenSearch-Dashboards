@@ -105,9 +105,9 @@ describe('ProxyConfigCollection', function () {
     });
   });
 
-  describe('https://localhost:5601/.opensearch_dashboards', function () {
+  describe('https://localhost:5601/.kibana', function () {
     it('defaults to the first matching timeout', function () {
-      expect(getTimeout('https://localhost:5601/.opensearch_dashboards')).to.be(1);
+      expect(getTimeout('https://localhost:5601/.kibana')).to.be(1);
     });
   });
 
