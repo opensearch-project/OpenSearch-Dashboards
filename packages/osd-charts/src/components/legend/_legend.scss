@@ -1,17 +1,14 @@
 .echLegend {
+  .echLegendList {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
   &--horizontal {
     .echLegendList {
-      display: grid;
       grid-column-gap: $echLegendColumnGap;
       grid-row-gap: $echLegendRowGap;
       margin-top: $echLegendRowGap;
       margin-bottom: $echLegendRowGap;
-    }
-  }
-
-  &--vertical {
-    .echLegendList {
-      flex-direction: column;
     }
   }
 

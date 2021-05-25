@@ -42,9 +42,21 @@ import { SB_KNOBS_PANEL } from '../utils/storybook';
 const dg = new SeededDataGenerator();
 const data = dg.generateGroupedSeries(10, 20);
 export const Example = () => {
-  const numberOfSeries = number('Number of series', 5);
+  const numberOfSeries = number('Number of series', 5, { min: 1, max: 20, step: 1, range: true });
+  const seriesWithLongName = number('Series with long name', 3, {
+    min: 0,
+    max: numberOfSeries - 1,
+    step: 1,
+    range: true,
+  });
 
   const floating: LegendPositionConfig['floating'] = boolean('Inside chart', true, 'Legend');
+  const floatingColumns: LegendPositionConfig['floatingColumns'] = number(
+    'floating columns',
+    2,
+    { min: 1, max: 10, range: true, step: 1 },
+    'Legend',
+  );
   const vAlign: LegendPositionConfig['vAlign'] = select(
     'vAlign',
     {
@@ -91,6 +103,7 @@ export const Example = () => {
           hAlign,
           direction,
           floating,
+          floatingColumns,
         }}
         theme={darkMode ? DARK_THEME : LIGHT_THEME}
       />
@@ -109,7 +122,15 @@ export const Example = () => {
         yAccessors={['y']}
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        data={data.slice(0, numberOfSeries * 10)}
+        data={data.slice(0, numberOfSeries * 10).map((d, i) => {
+          if (i >= seriesWithLongName * 10 && i < seriesWithLongName * 10 + 10) {
+            return {
+              ...d,
+              g: 'long name',
+            };
+          }
+          return d;
+        })}
       />
     </Chart>
   );

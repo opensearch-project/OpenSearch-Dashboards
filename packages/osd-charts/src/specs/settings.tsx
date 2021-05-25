@@ -383,7 +383,11 @@ export type LegendPositionConfig = {
    * @defaultValue false
    */
   floating: boolean;
-  // TODO add custom number of columns
+  /**
+   * The number of columns in floating configuration
+   * @defaultValue 1
+   */
+  floatingColumns?: number;
   // TODO add grow factor: fill, shrink, fixed column size
 };
 
