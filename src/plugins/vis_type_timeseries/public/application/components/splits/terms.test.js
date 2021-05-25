@@ -69,7 +69,7 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
             readFromDocValues: true,
             searchable: true,
             type: 'string',
-            opensearchTypes: ['keyword'],
+            esTypes: ['keyword'],
           },
         ],
       },

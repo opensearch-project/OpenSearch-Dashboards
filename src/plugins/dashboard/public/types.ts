@@ -73,9 +73,9 @@ interface FieldSubType {
 export interface Field {
   name: string;
   type: string;
-  // opensearchTypes might be undefined on old index patterns that have not been refreshed since we added
+  // esTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
-  opensearchTypes?: string[];
+  esTypes?: string[];
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;

@@ -50,7 +50,7 @@ describe('calculateHistogramInterval', () => {
           min: 0,
           max: 1,
         },
-        opensearchTypes: [],
+        esTypes: [],
       };
     });
 
@@ -63,7 +63,7 @@ describe('calculateHistogramInterval', () => {
             min: 1,
             max: 50,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
+          esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
         };
         expect(calculateHistogramInterval(p)).toEqual(1);
       });
@@ -77,7 +77,7 @@ describe('calculateHistogramInterval', () => {
             min: 521,
             max: 689,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
+          esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
         };
         expect(calculateHistogramInterval(p)).toEqual(1);
       });
@@ -90,7 +90,7 @@ describe('calculateHistogramInterval', () => {
             min: 400,
             max: 790,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER, OPENSEARCH_FIELD_TYPES.SHORT],
+          esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER, OPENSEARCH_FIELD_TYPES.SHORT],
         };
         expect(calculateHistogramInterval(p)).toEqual(5);
       });
@@ -104,7 +104,7 @@ describe('calculateHistogramInterval', () => {
             min: 567,
             max: 3456778,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.LONG],
+          esTypes: [OPENSEARCH_FIELD_TYPES.LONG],
         };
         expect(calculateHistogramInterval(p)).toEqual(50000);
       });
@@ -117,7 +117,7 @@ describe('calculateHistogramInterval', () => {
             min: 0,
             max: 1,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+          esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
         };
         expect(calculateHistogramInterval(p)).toEqual(0.01);
       });
@@ -130,7 +130,7 @@ describe('calculateHistogramInterval', () => {
             min: 0,
             max: 1,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER, OPENSEARCH_FIELD_TYPES.FLOAT],
+          esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER, OPENSEARCH_FIELD_TYPES.FLOAT],
         };
         expect(calculateHistogramInterval(p)).toEqual(0.01);
       });
@@ -143,7 +143,7 @@ describe('calculateHistogramInterval', () => {
             min: 150,
             max: 250,
           },
-          opensearchTypes: [OPENSEARCH_FIELD_TYPES.SHORT],
+          esTypes: [OPENSEARCH_FIELD_TYPES.SHORT],
         };
         expect(calculateHistogramInterval(p)).toEqual(1);
       });
@@ -157,7 +157,7 @@ describe('calculateHistogramInterval', () => {
               min: 0.1,
               max: 0.9,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+            esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
           })
         ).toBe(0.02);
       });
@@ -171,7 +171,7 @@ describe('calculateHistogramInterval', () => {
               min: 10.45,
               max: 1000.05,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+            esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
           })
         ).toBe(100);
       });
@@ -186,7 +186,7 @@ describe('calculateHistogramInterval', () => {
               min: 0,
               max: 100,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.BYTE],
+            esTypes: [OPENSEARCH_FIELD_TYPES.BYTE],
           })
         ).toEqual(1);
       });
@@ -199,7 +199,7 @@ describe('calculateHistogramInterval', () => {
               min: 1,
               max: 10,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
+            esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
           })
         ).toEqual(1);
       });
@@ -213,7 +213,7 @@ describe('calculateHistogramInterval', () => {
               min: 45678,
               max: 90123,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
+            esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
           })
         ).toEqual(500);
       });
@@ -228,7 +228,7 @@ describe('calculateHistogramInterval', () => {
               min: 1.245,
               max: 2.9,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+            esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
           })
         ).toEqual(0.02);
         expect(
@@ -238,7 +238,7 @@ describe('calculateHistogramInterval', () => {
               min: 0.5,
               max: 2.3,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+            esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
           })
         ).toEqual(0.02);
       });
@@ -252,7 +252,7 @@ describe('calculateHistogramInterval', () => {
               min: 0.1,
               max: 0.9,
             },
-            opensearchTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
+            esTypes: [OPENSEARCH_FIELD_TYPES.FLOAT],
           })
         ).toBe(0.01);
       });

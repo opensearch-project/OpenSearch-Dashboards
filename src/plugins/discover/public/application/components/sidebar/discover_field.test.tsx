@@ -89,7 +89,7 @@ function getComponent({
       {
         name: 'bytes',
         type: 'number',
-        opensearchTypes: ['long'],
+        esTypes: ['long'],
         count: 10,
         scripted: false,
         searchable: true,
@@ -135,7 +135,7 @@ describe('discover sidebar field', function () {
       {
         name: '_source',
         type: '_source',
-        opensearchTypes: ['_source'],
+        esTypes: ['_source'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,

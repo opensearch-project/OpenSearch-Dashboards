@@ -95,7 +95,7 @@ function stubbedLogstashFields() {
     return {
       name,
       type,
-      opensearchTypes: [opensearchType],
+      esTypes: [opensearchType],
       readFromDocValues: shouldReadFieldFromDocValues(aggregatable, opensearchType),
       aggregatable,
       searchable,

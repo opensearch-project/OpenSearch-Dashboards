@@ -156,7 +156,7 @@ export interface FieldSpecExportFmt {
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
   type: OSD_FIELD_TYPES;
-  opensearchTypes?: string[];
+  esTypes?: string[];
   scripted: boolean;
   searchable: boolean;
   aggregatable: boolean;
@@ -175,7 +175,7 @@ export interface FieldSpec {
 
   name: string;
   type: string;
-  opensearchTypes?: string[];
+  esTypes?: string[];
   scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;

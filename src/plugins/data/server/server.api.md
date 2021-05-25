@@ -164,7 +164,7 @@ interface FieldDescriptor {
     // (undocumented)
     name: string;
     // (undocumented)
-    opensearchTypes: string[];
+    esTypes: string[];
     // (undocumented)
     readFromDocValues: boolean;
     // (undocumented)
@@ -333,7 +333,7 @@ export interface IFieldType {
     // (undocumented)
     name: string;
     // (undocumented)
-    opensearchTypes?: string[];
+    esTypes?: string[];
     // (undocumented)
     readFromDocValues?: boolean;
     // (undocumented)
