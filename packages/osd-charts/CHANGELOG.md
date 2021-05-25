@@ -1,3 +1,17 @@
+# [29.2.0](https://github.com/elastic/elastic-charts/compare/v29.1.0...v29.2.0) (2021-05-25)
+
+
+### Bug Fixes
+
+* **legend:** disable handleLabelClick for one legend item ([#1134](https://github.com/elastic/elastic-charts/issues/1134)) ([a7242af](https://github.com/elastic/elastic-charts/commit/a7242af3fe22db0b5cd4d8776e150972a665f242)), closes [#1055](https://github.com/elastic/elastic-charts/issues/1055)
+
+
+### Features
+
+* **a11y:** add alt text for all chart types  ([#1118](https://github.com/elastic/elastic-charts/issues/1118)) ([9e42229](https://github.com/elastic/elastic-charts/commit/9e42229b9fba27ca4396d76f45f4bf5785e445b0)), closes [#1107](https://github.com/elastic/elastic-charts/issues/1107)
+* **legend:** specify number of columns on floating legend ([#1159](https://github.com/elastic/elastic-charts/issues/1159)) ([c2e4652](https://github.com/elastic/elastic-charts/commit/c2e465224d3e56790f6c9d3c5e0f4083051c38e1)), closes [#1158](https://github.com/elastic/elastic-charts/issues/1158)
+* simple screenspace constraint solver ([#1141](https://github.com/elastic/elastic-charts/issues/1141)) ([eb11480](https://github.com/elastic/elastic-charts/commit/eb11480e2c8a1651c6449decc46b3cdf7311f68f))
+
 # [29.1.0](https://github.com/elastic/elastic-charts/compare/v29.0.0...v29.1.0) (2021-04-23)
 
 
