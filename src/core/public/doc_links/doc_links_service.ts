@@ -43,7 +43,8 @@ export class DocLinksService {
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getOpenSearchDashboardsBranch();
     const OPENSEARCH_WEBSITE_URL = 'https://www.opensearch.org/';
-    const OPENSEARCH_DOCS = `${OPENSEARCH_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const OPENSEARCH_DOCS = `https://docs-beta.opensearch.org/docs/opensearch/`;
+    const OPENSEARCH_DASHBOARDS_DOCS = `https://docs-beta.opensearch.org/docs/opensearch-dashboards/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -126,7 +127,7 @@ export class DocLinksService {
           introduction: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
         },
         addData: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
-        opensearchDashboards: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        opensearchDashboards: `${OPENSEARCH_DASHBOARDS_DOCS}`,
         siem: {
           guide: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -134,8 +135,8 @@ export class DocLinksService {
         query: {
           eql: `${OPENSEARCH_DOCS}eql.html`,
           luceneQuerySyntax: `${OPENSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
-          queryDsl: `${OPENSEARCH_DOCS}query-dsl.html`,
-          kueryQuerySyntax: `${OPENSEARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
+          queryDsl: `${OPENSEARCH_DOCS}query-dsl`,
+          kueryQuerySyntax: `${OPENSEARCH_DOCS}query-dsl`,
         },
         date: {
           dateMath: `${OPENSEARCH_DOCS}common-options.html#date-math`,
