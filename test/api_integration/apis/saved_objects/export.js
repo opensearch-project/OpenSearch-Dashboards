@@ -268,9 +268,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    opensearchDashboardsSavedObjectMeta: {
+                    kibanaSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -301,9 +301,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(
-                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-                )
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -329,9 +327,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    opensearchDashboardsSavedObjectMeta: {
+                    kibanaSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -362,9 +360,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(
-                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-                )
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -395,9 +391,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    opensearchDashboardsSavedObjectMeta: {
+                    kibanaSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -428,9 +424,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(
-                  objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-                )
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();

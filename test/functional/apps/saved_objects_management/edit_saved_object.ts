@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'opensearch-dashboards/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
       const visualizationRefs = [
         {
-          name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           type: 'index-pattern',
           id: 'logstash-*',
         },

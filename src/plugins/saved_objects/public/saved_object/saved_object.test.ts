@@ -318,16 +318,16 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                opensearchDashboardsSavedObjectMeta: {
+                kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
-                    indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
 
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'my-index',
               });
@@ -358,15 +358,15 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                opensearchDashboardsSavedObjectMeta: {
+                kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
-                    indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'non-existant-index',
               });
@@ -396,13 +396,13 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                opensearchDashboardsSavedObjectMeta: {
+                kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
                     filter: [
                       {
                         meta: {
                           indexRefName:
-                            'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                            'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                         },
                       },
                     ],
@@ -411,7 +411,7 @@ describe('Saved Object', () => {
               });
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                 type: 'index-pattern',
                 id: 'my-index',
               });
@@ -601,12 +601,11 @@ describe('Saved Object', () => {
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
       return savedObject.init!().then(async () => {
         const searchSourceJSON = JSON.stringify({
-          indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           filter: [
             {
               meta: {
-                indexRefName:
-                  'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
               },
             },
           ],
@@ -614,18 +613,18 @@ describe('Saved Object', () => {
         const response = {
           found: true,
           _source: {
-            opensearchDashboardsSavedObjectMeta: {
+            kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
           },
           references: [
             {
-              name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
               type: 'index-pattern',
               id: 'my-index-1',
             },
             {
-              name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
               type: 'index-pattern',
               id: 'my-index-2',
             },

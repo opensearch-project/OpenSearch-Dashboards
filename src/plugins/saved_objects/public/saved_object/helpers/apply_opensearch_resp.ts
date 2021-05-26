@@ -62,8 +62,8 @@ export async function applyOpenSearchResp(
     throw new SavedObjectNotFound(opensearchType, savedObject.id || '');
   }
 
-  const meta = resp._source.opensearchDashboardsSavedObjectMeta || {};
-  delete resp._source.opensearchDashboardsSavedObjectMeta;
+  const meta = resp._source.kibanaSavedObjectMeta || {};
+  delete resp._source.kibanaSavedObjectMeta;
 
   if (!config.indexPattern && savedObject._source.indexPattern) {
     config.indexPattern = savedObject._source.indexPattern as IndexPattern;
@@ -109,7 +109,7 @@ export async function applyOpenSearchResp(
         // if parsing the search source fails because the index pattern wasn't found,
         // remember the reference - this is required for error handling on legacy imports
         savedObject.unresolvedIndexPatternReference = {
-          name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           id: JSON.parse(meta.searchSourceJSON).index,
           type: 'index-pattern',
         };

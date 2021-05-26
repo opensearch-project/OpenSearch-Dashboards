@@ -60,13 +60,12 @@ export default function ({ getService }) {
                 // cheat for some of the more complex attributes
                 visState: resp.body.attributes.visState,
                 uiStateJSON: resp.body.attributes.uiStateJSON,
-                opensearchDashboardsSavedObjectMeta:
-                  resp.body.attributes.opensearchDashboardsSavedObjectMeta,
+                kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
               },
               references: [
                 {
                   type: 'index-pattern',
-                  name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                 },
               ],

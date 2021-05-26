@@ -189,7 +189,7 @@ export async function resolveIndexPatternConflicts(
 
   for (const { obj, doc } of conflictedIndexPatterns) {
     const serializedSearchSource = JSON.parse(
-      doc._source.opensearchDashboardsSavedObjectMeta?.searchSourceJSON || '{}'
+      doc._source.kibanaSavedObjectMeta?.searchSourceJSON || '{}'
     );
     const oldIndexId = serializedSearchSource.index;
     let allResolved = true;

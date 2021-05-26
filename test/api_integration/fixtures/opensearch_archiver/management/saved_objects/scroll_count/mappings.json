@@ -40,7 +40,7 @@
             "hits": {
               "type": "integer"
             },
-            "opensearchDashboardsSavedObjectMeta": {
+            "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"
@@ -125,7 +125,7 @@
             "hits": {
               "type": "integer"
             },
-            "opensearchDashboardsSavedObjectMeta": {
+            "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"
@@ -183,7 +183,7 @@
             "description": {
               "type": "text"
             },
-            "opensearchDashboardsSavedObjectMeta": {
+            "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"

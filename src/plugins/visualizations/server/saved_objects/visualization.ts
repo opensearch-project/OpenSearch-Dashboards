@@ -59,7 +59,7 @@ export const visualizationSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       description: { type: 'text' },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
       savedSearchRefName: { type: 'keyword', index: false, doc_values: false },

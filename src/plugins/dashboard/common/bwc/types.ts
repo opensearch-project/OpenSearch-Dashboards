@@ -35,7 +35,7 @@ import { SavedObjectReference } from 'opensearch-dashboards/public';
 import { GridData } from '../';
 
 interface SavedObjectAttributes {
-  opensearchDashboardsSavedObjectMeta: {
+  kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }

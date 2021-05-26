@@ -38,10 +38,7 @@ import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720 } from '../../common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
-  const searchSourceJSON = get(
-    doc,
-    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
-  );
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return;
   }
@@ -53,7 +50,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     return;
   }
   if (searchSource.index) {
-    searchSource.indexRefName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
+    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
       type: 'index-pattern',
@@ -66,7 +63,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       if (!filterRow.meta || !filterRow.meta.index) {
         return;
       }
-      filterRow.meta.indexRefName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
@@ -75,9 +72,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       delete filterRow.meta.index;
     });
   }
-  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
-    searchSource
-  );
+  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
 const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To720 => {

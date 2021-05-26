@@ -20,7 +20,7 @@
       "uiStateJSON": "{}",
       "description": "AreaChart",
       "version": 1,
-      "opensearchDashboardsSavedObjectMeta": {
+      "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"f1e4c910-a2e6-11e7-bb30-233be9be6a15\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
       }
     },

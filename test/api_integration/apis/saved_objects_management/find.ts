@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                       type: 'index-pattern',
                     },
                   ],
