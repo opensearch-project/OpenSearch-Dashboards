@@ -91,7 +91,7 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
   linkType: 'documentation';
   /**
    * URL to documentation page.
-   * i.e. `${OPENSEARARCH_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
+   * i.e. `${OPENSEARCH_DOCS}${appName}`,
    */
   href: string;
 };
@@ -365,7 +365,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        <div style={{ maxWidth: 240 }}>
+        <div style={{ maxWidth: 270 }}>
           {defaultContent}
           {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
           {customContent}

@@ -41,7 +41,7 @@ describe('DocLinksService#start()', () => {
     const api = service.start({ injectedMetadata });
     expect(api.DOC_LINK_VERSION).toEqual('test-branch');
     expect(api.links.opensearchDashboards).toEqual(
-      'https://www.opensearch.org/guide/en/kibana/test-branch/index.html'
+      'https://docs-beta.opensearch.org/docs/opensearch-dashboards/'
     );
   });
 });
