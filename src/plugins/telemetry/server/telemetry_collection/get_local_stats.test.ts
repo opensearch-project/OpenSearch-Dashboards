@@ -225,7 +225,7 @@ describe.skip('get_local_stats', () => {
       expect(cluster.collection).toBe(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).toBe(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).toBe(combinedStatsResult.cluster_name);
-      expect(stack.opensearch_dashboards).toBe(undefined); // not mocked for this test
+      expect(stack.kibana).toBe(undefined); // not mocked for this test
       expect(stack.data).toBe(undefined); // not mocked for this test
 
       expect(cluster.version).toEqual(combinedStatsResult.version);

@@ -40,7 +40,7 @@ describe('Sample Data Fetch', () => {
     callClusterMock = sinon.stub();
   });
 
-  test('uninitialized .opensearch_dashboards', async () => {
+  test('uninitialized .kibana', async () => {
     const fetch = fetchProvider('index');
     const telemetry = await fetch(callClusterMock);
 

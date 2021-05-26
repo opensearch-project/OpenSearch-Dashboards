@@ -83,7 +83,7 @@ export default function ({ getService }) {
         async () =>
           // just in case the opensearch-dashboards server has recreated it
           await opensearch.indices.delete({
-            index: '.opensearch_dashboards',
+            index: '.kibana',
             ignore: [404],
           })
       );
@@ -123,7 +123,7 @@ export default function ({ getService }) {
             expect(resp.body.migrationVersion).to.be.ok();
           });
 
-        expect(await opensearch.indices.exists({ index: '.opensearch_dashboards' })).to.be(true);
+        expect(await opensearch.indices.exists({ index: '.kibana' })).to.be(true);
       });
     });
   });

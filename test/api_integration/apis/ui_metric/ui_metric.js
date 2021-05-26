@@ -64,7 +64,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const response = await opensearch.search({
-        index: '.opensearch_dashboards',
+        index: '.kibana',
         q: 'type:ui-metric',
       });
       const ids = response.hits.hits.map(({ _id }) => _id);
@@ -92,7 +92,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const response = await opensearch.search({
-        index: '.opensearch_dashboards',
+        index: '.kibana',
         q: 'type:ui-metric',
       });
       const ids = response.hits.hits.map(({ _id }) => _id);

@@ -62,7 +62,7 @@ export interface OpenSearchDashboardsSavedObjectCounts {
 
 export async function getSavedObjectsCounts(
   callCluster: LegacyAPICaller,
-  opensearchDashboardsIndex: string // Typically '.opensearch_dashboards'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
+  opensearchDashboardsIndex: string // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
 ): Promise<OpenSearchDashboardsSavedObjectCounts> {
   const savedObjectCountSearchParams = {
     index: opensearchDashboardsIndex,

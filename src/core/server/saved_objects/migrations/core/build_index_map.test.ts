@@ -46,7 +46,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 
 test('mappings without index pattern goes to default index', () => {
   const result = createIndexMap({
-    opensearchDashboardsIndexName: '.opensearch_dashboards',
+    opensearchDashboardsIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
@@ -62,7 +62,7 @@ test('mappings without index pattern goes to default index', () => {
     },
   });
   expect(result).toEqual({
-    '.opensearch_dashboards': {
+    '.kibana': {
       typeMappings: {
         type1: {
           properties: {
@@ -78,7 +78,7 @@ test('mappings without index pattern goes to default index', () => {
 
 test(`mappings with custom index pattern doesn't go to default index`, () => {
   const result = createIndexMap({
-    opensearchDashboardsIndexName: '.opensearch_dashboards',
+    opensearchDashboardsIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
@@ -111,7 +111,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
 
 test('creating a script gets added to the index pattern', () => {
   const result = createIndexMap({
-    opensearchDashboardsIndexName: '.opensearch_dashboards',
+    opensearchDashboardsIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
@@ -145,7 +145,7 @@ test('creating a script gets added to the index pattern', () => {
 });
 
 test('throws when two scripts are defined for an index pattern', () => {
-  const defaultIndex = '.opensearch_dashboards';
+  const defaultIndex = '.kibana';
   const registry = createRegistry(
     {
       name: 'type1',
@@ -182,6 +182,6 @@ test('throws when two scripts are defined for an index pattern', () => {
       indexMap,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"convertToAliasScript has been defined more than once for index pattern \\".opensearch_dashboards\\""`
+    `"convertToAliasScript has been defined more than once for index pattern \\".kibana\\""`
   );
 });

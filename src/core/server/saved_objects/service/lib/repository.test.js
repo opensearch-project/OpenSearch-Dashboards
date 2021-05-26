@@ -2477,7 +2477,7 @@ describe('SavedObjectsRepository', () => {
           total: 4,
           hits: [
             {
-              _index: '.opensearch_dashboards',
+              _index: '.kibana',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
               _score: 1,
               ...mockVersionProps,
@@ -2494,7 +2494,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch_dashboards',
+              _index: '.kibana',
               _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
               _score: 2,
               ...mockVersionProps,
@@ -2509,7 +2509,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch_dashboards',
+              _index: '.kibana',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
               _score: 3,
               ...mockVersionProps,
@@ -2525,7 +2525,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.opensearch_dashboards',
+              _index: '.kibana',
               _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
               _score: 4,
               ...mockVersionProps,
@@ -3142,7 +3142,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({
           _id: params.id,
           ...mockVersionProps,
-          _index: '.opensearch_dashboards',
+          _index: '.kibana',
           get: {
             found: true,
             _source: {
@@ -3322,7 +3322,7 @@ describe('SavedObjectsRepository', () => {
           opensearchClientMock.createSuccessTransportRequestPromise({
             _id: params.id,
             ...mockVersionProps,
-            _index: '.opensearch_dashboards',
+            _index: '.kibana',
             get: {
               found: true,
               _source: {

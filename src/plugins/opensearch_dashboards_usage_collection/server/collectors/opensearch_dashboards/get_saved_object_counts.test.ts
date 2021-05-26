@@ -36,7 +36,7 @@ describe('getSavedObjectsCounts', () => {
   test('Get all the saved objects equal to 0 because no results were found', async () => {
     const callCluster = jest.fn(() => ({}));
 
-    const results = await getSavedObjectsCounts(callCluster as any, '.opensearch_dashboards');
+    const results = await getSavedObjectsCounts(callCluster as any, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -61,7 +61,7 @@ describe('getSavedObjectsCounts', () => {
       },
     }));
 
-    const results = await getSavedObjectsCounts(callCluster as any, '.opensearch_dashboards');
+    const results = await getSavedObjectsCounts(callCluster as any, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 1 },
       visualization: { total: 0 },
