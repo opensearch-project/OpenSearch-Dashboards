@@ -54,7 +54,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
       });
 
       it(
-        'includes only name, type, opensearchTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
+        'includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
           'and subType of each field',
         () => {
           const responseClone = cloneDeep(opensearchResponse);
@@ -68,7 +68,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
             expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
               'name',
               'type',
-              'opensearchTypes',
+              'esTypes',
               'searchable',
               'aggregatable',
               'readFromDocValues',
@@ -97,7 +97,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(opensearchResponse);
         fields.forEach((field) => {
           const fixtureTypes = Object.keys(opensearchResponse.fields[field.name]);
-          expect(field.opensearchTypes).toEqual(fixtureTypes);
+          expect(field.esTypes).toEqual(fixtureTypes);
         });
       });
 
@@ -108,7 +108,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
-            opensearchTypes: ['boolean', 'keyword'],
+            esTypes: ['boolean', 'keyword'],
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,

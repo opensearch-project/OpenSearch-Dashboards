@@ -342,7 +342,7 @@ export interface IFieldType {
     // (undocumented)
     displayName?: string;
     // (undocumented)
-    opensearchTypes?: string[];
+    esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
     // (undocumented)
@@ -415,7 +415,7 @@ export interface IndexPatternFieldDescriptor {
     // (undocumented)
     aggregatable: boolean;
     // (undocumented)
-    opensearchTypes: string[];
+    esTypes: string[];
     // (undocumented)
     name: string;
     // (undocumented)

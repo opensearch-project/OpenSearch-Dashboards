@@ -171,7 +171,7 @@ export const getHistogramBucketAgg = ({
             maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
             maxBucketsUserInput: aggConfig.params.maxBars,
             intervalBase: aggConfig.params.intervalBase,
-            opensearchTypes: aggConfig.params.field?.spec?.opensearchTypes || [],
+            esTypes: aggConfig.params.field?.spec?.esTypes || [],
           });
         },
       },

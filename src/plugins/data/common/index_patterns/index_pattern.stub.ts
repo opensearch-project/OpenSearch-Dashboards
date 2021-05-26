@@ -47,7 +47,7 @@ export const stubIndexPatternWithFields: IIndexPattern = {
     {
       name: 'response',
       type: 'number',
-      opensearchTypes: ['integer'],
+      esTypes: ['integer'],
       aggregatable: true,
       filterable: true,
       searchable: true,

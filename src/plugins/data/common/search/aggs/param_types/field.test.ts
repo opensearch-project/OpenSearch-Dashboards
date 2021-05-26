@@ -43,7 +43,7 @@ describe('Field', () => {
       {
         name: 'field1',
         type: OSD_FIELD_TYPES.NUMBER,
-        opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
+        esTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
         aggregatable: true,
         filterable: true,
         searchable: true,
@@ -51,7 +51,7 @@ describe('Field', () => {
       {
         name: 'field2',
         type: OSD_FIELD_TYPES.STRING,
-        opensearchTypes: [OPENSEARCH_FIELD_TYPES.TEXT],
+        esTypes: [OPENSEARCH_FIELD_TYPES.TEXT],
         aggregatable: false,
         filterable: false,
         searchable: true,

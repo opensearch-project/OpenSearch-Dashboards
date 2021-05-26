@@ -768,7 +768,7 @@ export interface IFieldType {
     // (undocumented)
     name: string;
     // (undocumented)
-    opensearchTypes?: string[];
+    esTypes?: string[];
     // (undocumented)
     readFromDocValues?: boolean;
     // (undocumented)
@@ -1011,7 +1011,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get name(): string;
     // (undocumented)
-    get opensearchTypes(): string[] | undefined;
+    get esTypes(): string[] | undefined;
     // (undocumented)
     get readFromDocValues(): boolean;
     get script(): string | undefined;
@@ -1034,7 +1034,7 @@ export class IndexPatternField implements IFieldType {
         conflictDescriptions: Record<string, string[]> | undefined;
         name: string;
         type: string;
-        opensearchTypes: string[] | undefined;
+        esTypes: string[] | undefined;
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;

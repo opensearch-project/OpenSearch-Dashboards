@@ -206,7 +206,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(
       spec.type as OSD_FIELD_TYPES,
-      spec.opensearchTypes as OPENSEARCH_FIELD_TYPES[]
+      spec.esTypes as OPENSEARCH_FIELD_TYPES[]
     );
 
     this.setState({

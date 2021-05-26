@@ -35,7 +35,7 @@ export const fields: IFieldType[] = [
   {
     name: 'bytes',
     type: 'number',
-    opensearchTypes: ['long'],
+    esTypes: ['long'],
     count: 10,
     scripted: false,
     searchable: true,
@@ -45,7 +45,7 @@ export const fields: IFieldType[] = [
   {
     name: 'ssl',
     type: 'boolean',
-    opensearchTypes: ['boolean'],
+    esTypes: ['boolean'],
     count: 20,
     scripted: false,
     searchable: true,
@@ -55,7 +55,7 @@ export const fields: IFieldType[] = [
   {
     name: '@timestamp',
     type: 'date',
-    opensearchTypes: ['date'],
+    esTypes: ['date'],
     count: 30,
     scripted: false,
     searchable: true,
@@ -65,7 +65,7 @@ export const fields: IFieldType[] = [
   {
     name: 'time',
     type: 'date',
-    opensearchTypes: ['date'],
+    esTypes: ['date'],
     count: 30,
     scripted: false,
     searchable: true,
@@ -75,7 +75,7 @@ export const fields: IFieldType[] = [
   {
     name: '@tags',
     type: 'string',
-    opensearchTypes: ['keyword'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -85,7 +85,7 @@ export const fields: IFieldType[] = [
   {
     name: 'utc_time',
     type: 'date',
-    opensearchTypes: ['date'],
+    esTypes: ['date'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -95,7 +95,7 @@ export const fields: IFieldType[] = [
   {
     name: 'phpmemory',
     type: 'number',
-    opensearchTypes: ['integer'],
+    esTypes: ['integer'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -105,7 +105,7 @@ export const fields: IFieldType[] = [
   {
     name: 'ip',
     type: 'ip',
-    opensearchTypes: ['ip'],
+    esTypes: ['ip'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -115,7 +115,7 @@ export const fields: IFieldType[] = [
   {
     name: 'request_body',
     type: 'attachment',
-    opensearchTypes: ['attachment'],
+    esTypes: ['attachment'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -125,7 +125,7 @@ export const fields: IFieldType[] = [
   {
     name: 'point',
     type: 'geo_point',
-    opensearchTypes: ['geo_point'],
+    esTypes: ['geo_point'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -135,7 +135,7 @@ export const fields: IFieldType[] = [
   {
     name: 'area',
     type: 'geo_shape',
-    opensearchTypes: ['geo_shape'],
+    esTypes: ['geo_shape'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -145,7 +145,7 @@ export const fields: IFieldType[] = [
   {
     name: 'hashed',
     type: 'murmur3',
-    opensearchTypes: ['murmur3'],
+    esTypes: ['murmur3'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -155,7 +155,7 @@ export const fields: IFieldType[] = [
   {
     name: 'geo.coordinates',
     type: 'geo_point',
-    opensearchTypes: ['geo_point'],
+    esTypes: ['geo_point'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -165,7 +165,7 @@ export const fields: IFieldType[] = [
   {
     name: 'extension',
     type: 'string',
-    opensearchTypes: ['keyword'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -175,7 +175,7 @@ export const fields: IFieldType[] = [
   {
     name: 'machine.os',
     type: 'string',
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -185,7 +185,7 @@ export const fields: IFieldType[] = [
   {
     name: 'machine.os.raw',
     type: 'string',
-    opensearchTypes: ['keyword'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -196,7 +196,7 @@ export const fields: IFieldType[] = [
   {
     name: 'geo.src',
     type: 'string',
-    opensearchTypes: ['keyword'],
+    esTypes: ['keyword'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -206,7 +206,7 @@ export const fields: IFieldType[] = [
   {
     name: '_id',
     type: 'string',
-    opensearchTypes: ['_id'],
+    esTypes: ['_id'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -216,7 +216,7 @@ export const fields: IFieldType[] = [
   {
     name: '_type',
     type: 'string',
-    opensearchTypes: ['_type'],
+    esTypes: ['_type'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -226,7 +226,7 @@ export const fields: IFieldType[] = [
   {
     name: '_source',
     type: '_source',
-    opensearchTypes: ['_source'],
+    esTypes: ['_source'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -236,7 +236,7 @@ export const fields: IFieldType[] = [
   {
     name: 'non-filterable',
     type: 'string',
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     count: 0,
     scripted: false,
     searchable: false,
@@ -246,7 +246,7 @@ export const fields: IFieldType[] = [
   {
     name: 'non-sortable',
     type: 'string',
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     count: 0,
     scripted: false,
     searchable: false,
@@ -256,7 +256,7 @@ export const fields: IFieldType[] = [
   {
     name: 'custom_user_field',
     type: 'conflict',
-    opensearchTypes: ['long', 'text'],
+    esTypes: ['long', 'text'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -310,7 +310,7 @@ export const fields: IFieldType[] = [
   {
     name: 'nestedField.child',
     type: 'string',
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     count: 0,
     scripted: false,
     searchable: true,
@@ -321,7 +321,7 @@ export const fields: IFieldType[] = [
   {
     name: 'nestedField.nestedChild.doublyNestedChild',
     type: 'string',
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     count: 0,
     scripted: false,
     searchable: true,

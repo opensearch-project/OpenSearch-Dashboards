@@ -73,7 +73,7 @@ describe('field_filter', function () {
       {
         name: 'bytes',
         type: 'number',
-        opensearchTypes: ['long'],
+        esTypes: ['long'],
         count: 10,
         scripted: false,
         searchable: false,
@@ -82,7 +82,7 @@ describe('field_filter', function () {
       {
         name: 'extension',
         type: 'string',
-        opensearchTypes: ['text'],
+        esTypes: ['text'],
         count: 10,
         scripted: true,
         searchable: true,

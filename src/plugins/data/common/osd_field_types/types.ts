@@ -35,7 +35,7 @@ export interface OsdFieldTypeOptions {
   sortable: boolean;
   filterable: boolean;
   name: string;
-  opensearchTypes: OPENSEARCH_FIELD_TYPES[];
+  esTypes: OPENSEARCH_FIELD_TYPES[];
 }
 
 /** @public **/

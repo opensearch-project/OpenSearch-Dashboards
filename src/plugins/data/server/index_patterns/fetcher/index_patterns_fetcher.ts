@@ -40,7 +40,7 @@ export interface FieldDescriptor {
   readFromDocValues: boolean;
   searchable: boolean;
   type: string;
-  opensearchTypes: string[];
+  esTypes: string[];
   subType?: FieldSubType;
 }
 

@@ -42,7 +42,7 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
     name: OSD_FIELD_TYPES.STRING,
     sortable: true,
     filterable: true,
-    opensearchTypes: [
+    esTypes: [
       OPENSEARCH_FIELD_TYPES.STRING,
       OPENSEARCH_FIELD_TYPES.TEXT,
       OPENSEARCH_FIELD_TYPES.KEYWORD,
@@ -54,7 +54,7 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
     name: OSD_FIELD_TYPES.NUMBER,
     sortable: true,
     filterable: true,
-    opensearchTypes: [
+    esTypes: [
       OPENSEARCH_FIELD_TYPES.FLOAT,
       OPENSEARCH_FIELD_TYPES.HALF_FLOAT,
       OPENSEARCH_FIELD_TYPES.SCALED_FLOAT,
@@ -71,52 +71,52 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
     name: OSD_FIELD_TYPES.DATE,
     sortable: true,
     filterable: true,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.DATE, OPENSEARCH_FIELD_TYPES.DATE_NANOS],
+    esTypes: [OPENSEARCH_FIELD_TYPES.DATE, OPENSEARCH_FIELD_TYPES.DATE_NANOS],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.IP,
     sortable: true,
     filterable: true,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.IP],
+    esTypes: [OPENSEARCH_FIELD_TYPES.IP],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.BOOLEAN,
     sortable: true,
     filterable: true,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.BOOLEAN],
+    esTypes: [OPENSEARCH_FIELD_TYPES.BOOLEAN],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.OBJECT,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.OBJECT],
+    esTypes: [OPENSEARCH_FIELD_TYPES.OBJECT],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.NESTED,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.NESTED],
+    esTypes: [OPENSEARCH_FIELD_TYPES.NESTED],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.GEO_POINT,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.GEO_POINT],
+    esTypes: [OPENSEARCH_FIELD_TYPES.GEO_POINT],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.GEO_SHAPE,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.GEO_SHAPE],
+    esTypes: [OPENSEARCH_FIELD_TYPES.GEO_SHAPE],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.ATTACHMENT,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.ATTACHMENT],
+    esTypes: [OPENSEARCH_FIELD_TYPES.ATTACHMENT],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.MURMUR3,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.MURMUR3],
+    esTypes: [OPENSEARCH_FIELD_TYPES.MURMUR3],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES._SOURCE,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES._SOURCE],
+    esTypes: [OPENSEARCH_FIELD_TYPES._SOURCE],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.HISTOGRAM,
     filterable: true,
-    opensearchTypes: [OPENSEARCH_FIELD_TYPES.HISTOGRAM],
+    esTypes: [OPENSEARCH_FIELD_TYPES.HISTOGRAM],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.CONFLICT,

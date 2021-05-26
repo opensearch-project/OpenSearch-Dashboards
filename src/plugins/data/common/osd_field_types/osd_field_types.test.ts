@@ -47,25 +47,25 @@ describe('utils/osd_field_types', () => {
       expect(osdFieldType).toHaveProperty('name', OSD_FIELD_TYPES.UNKNOWN);
       expect(osdFieldType).toHaveProperty('sortable', false);
       expect(osdFieldType).toHaveProperty('filterable', false);
-      expect(osdFieldType.opensearchTypes).toEqual([]);
+      expect(osdFieldType.esTypes).toEqual([]);
     });
 
-    test('assigns name, sortable, filterable, and opensearchTypes options to itself', () => {
+    test('assigns name, sortable, filterable, and esTypes options to itself', () => {
       const name = 'name';
       const sortable = true;
       const filterable = true;
-      const opensearchTypes = [
+      const esTypes = [
         OPENSEARCH_FIELD_TYPES.LONG,
         OPENSEARCH_FIELD_TYPES.BYTE,
         OPENSEARCH_FIELD_TYPES.DATE,
       ];
 
-      const osdFieldType = new OsdFieldType({ name, sortable, filterable, opensearchTypes });
+      const osdFieldType = new OsdFieldType({ name, sortable, filterable, esTypes });
 
       expect(osdFieldType).toHaveProperty('name', name);
       expect(osdFieldType).toHaveProperty('sortable', sortable);
       expect(osdFieldType).toHaveProperty('filterable', filterable);
-      expect(osdFieldType.opensearchTypes).toEqual(opensearchTypes);
+      expect(osdFieldType.esTypes).toEqual(esTypes);
     });
   });
 
