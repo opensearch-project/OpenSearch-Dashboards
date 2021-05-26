@@ -2920,7 +2920,7 @@ exports[`Header renders 1`] = `
                       aria-label="Go to home page"
                       data-test-subj="logo"
                       href="/"
-                      iconType="heatmap"
+                      iconType={[Function]}
                       onClick={[Function]}
                     >
                       <a
@@ -2935,20 +2935,15 @@ exports[`Header renders 1`] = `
                           aria-label="Elastic"
                           className="euiHeaderLogo__icon"
                           size="l"
-                          type="heatmap"
+                          type={[Function]}
                         >
                           <div
                             aria-label="Elastic"
                             className="euiHeaderLogo__icon"
-                            data-euiicon-type="heatmap"
+                            data-euiicon-type="OpenSearchDashboardsLogoDarkMode"
                             size="l"
                           />
                         </EuiIcon>
-                        <span
-                          className="euiHeaderLogo__text"
-                        >
-                          OpenSearch Dashboards
-                        </span>
                       </a>
                     </EuiHeaderLogo>
                   </HeaderLogo>

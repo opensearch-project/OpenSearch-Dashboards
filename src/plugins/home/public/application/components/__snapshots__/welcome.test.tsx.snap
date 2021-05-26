@@ -18,8 +18,8 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
           className="homWelcome__logo"
         >
           <EuiIcon
-            size="xxl"
-            type="heatmap"
+            size="original"
+            type="test-file-stub"
           />
         </span>
         <EuiTitle
@@ -79,8 +79,8 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           className="homWelcome__logo"
         >
           <EuiIcon
-            size="xxl"
-            type="heatmap"
+            size="original"
+            type="test-file-stub"
           />
         </span>
         <EuiTitle
@@ -177,8 +177,8 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           className="homWelcome__logo"
         >
           <EuiIcon
-            size="xxl"
-            type="heatmap"
+            size="original"
+            type="test-file-stub"
           />
         </span>
         <EuiTitle
