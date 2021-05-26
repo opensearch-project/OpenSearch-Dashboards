@@ -27,7 +27,7 @@
         ],
         "description": "A Saved Search Description",
         "hits": 0,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\n \"index\": \"date-nanos\",\n \"highlightAll\": true,\n \"filter\": [],\n \"query\": {\n \"query_string\": {\n \"query\": \"*\",\n \"analyze_wildcard\": true\n }\n }\n}"
         },
         "sort": [

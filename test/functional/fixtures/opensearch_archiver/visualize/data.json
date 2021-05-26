@@ -57,7 +57,7 @@
       "type": "visualization",
       "visualization": {
         "description": "AreaChart",
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
         },
         "title": "Shared-Item Visualization AreaChart",
@@ -78,7 +78,7 @@
       "type": "visualization",
       "visualization": {
         "description": "AreaChart",
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
         },
         "title": "Visualization AreaChart",
@@ -102,7 +102,7 @@
         "uiStateJSON" : "{}",
         "description" : "",
         "version" : 1,
-        "opensearchDashboardsSavedObjectMeta" : {
+        "kibanaSavedObjectMeta" : {
           "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
@@ -139,7 +139,7 @@
         "uiStateJSON" : "{}",
         "description" : "",
         "version" : 1,
-        "opensearchDashboardsSavedObjectMeta" : {
+        "kibanaSavedObjectMeta" : {
           "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
@@ -171,7 +171,7 @@
         "uiStateJSON" : "{}",
         "description" : "",
         "version" : 1,
-        "opensearchDashboardsSavedObjectMeta" : {
+        "kibanaSavedObjectMeta" : {
           "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         }
       },
@@ -220,7 +220,7 @@
       "type": "visualization",
       "visualization": {
         "description": "AreaChart",
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"test_index*\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "title": "AreaChart [no date field]",
@@ -257,7 +257,7 @@
       "type": "visualization",
       "visualization": {
         "description": "AreaChart",
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"log*\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "title": "AreaChart [no time filter]",

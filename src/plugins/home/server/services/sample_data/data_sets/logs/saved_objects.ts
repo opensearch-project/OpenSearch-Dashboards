@@ -50,7 +50,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{"vis":{"colors":{"Avg. Bytes":"#70DBED","Unique Visitors":"#0A437C"}}}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -72,7 +72,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -95,7 +95,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 4":"rgb(255,245,240)","4 - 8":"rgb(254,228,216)","8 - 12":"rgb(253,202,181)","12 - 16":"rgb(252,171,142)","16 - 20":"rgb(252,138,106)","20 - 24":"rgb(251,106,74)","24 - 28":"rgb(241,68,50)","28 - 32":"rgb(217,38,35)","32 - 36":"rgb(188,20,26)","36 - 40":"rgb(152,12,19)"}}}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -117,7 +117,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -139,7 +139,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 500":"rgb(165,0,38)","500 - 1000":"rgb(255,255,190)","1000 - 1500":"rgb(0,104,55)"},"colors":{"75 - 100":"#629E51","50 - 75":"#EAB839","0 - 50":"#E24D42","0 - 100":"#E24D42","200 - 300":"#7EB26D","500 - 1000":"#E5AC0E","0 - 500":"#E24D42","1000 - 1500":"#7EB26D"},"legendOpen":true}}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -161,7 +161,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -182,7 +182,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -203,7 +203,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -224,7 +224,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -245,7 +245,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -268,7 +268,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -373,7 +373,7 @@ export const getSavedObjects = (): SavedObject[] => [
         pause: false,
         value: 900000,
       },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         searchSourceJSON:
           '{"query":{"language":"kuery","query":""},"filter":[],"highlightAll":true,"version":true}',
       },

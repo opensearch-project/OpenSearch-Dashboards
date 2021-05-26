@@ -45,10 +45,8 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   }
 
   try {
-    const searchSource = JSON.parse(
-      doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
-    );
-    doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
+    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+    doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {

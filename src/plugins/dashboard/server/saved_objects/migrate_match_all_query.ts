@@ -41,10 +41,7 @@ import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
  * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(
-    doc,
-    'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON'
-  );
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -61,7 +58,7 @@ export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               ...searchSource,
               query: {

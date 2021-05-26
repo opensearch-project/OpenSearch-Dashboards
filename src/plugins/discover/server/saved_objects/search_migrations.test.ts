@@ -41,7 +41,7 @@ const testMigrateMatchAllQuery = (migrationFn: Function) => {
       {
         type: 'search',
         attributes: {
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               query: {
                 match_all: {},
@@ -53,7 +53,7 @@ const testMigrateMatchAllQuery = (migrationFn: Function) => {
       savedObjectMigrationContext
     );
     const migratedSearchSource = JSON.parse(
-      migratedDoc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
     );
 
     expect(migratedSearchSource).toEqual({
@@ -69,7 +69,7 @@ const testMigrateMatchAllQuery = (migrationFn: Function) => {
       {
         type: 'search',
         attributes: {
-          opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
+          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
         },
       },
       savedObjectMigrationContext
@@ -78,7 +78,7 @@ const testMigrateMatchAllQuery = (migrationFn: Function) => {
     expect(migratedDoc).toEqual({
       type: 'search',
       attributes: {
-        opensearchDashboardsSavedObjectMeta: 'opensearchDashboardsSavedObjectMeta',
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
       },
     });
   });
@@ -102,7 +102,7 @@ describe('migration search', () => {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: null,
           },
         },
@@ -113,7 +113,7 @@ describe('migration search', () => {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
+    "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": null,
     },
   },
@@ -130,7 +130,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: undefined,
           },
         },
@@ -141,7 +141,7 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
+    "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": undefined,
     },
   },
@@ -158,7 +158,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: 123,
           },
         },
@@ -169,7 +169,7 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
+    "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": 123,
     },
   },
@@ -186,7 +186,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: '{abc123}',
           },
         },
@@ -197,7 +197,7 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
+    "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{abc123}",
     },
   },
@@ -214,7 +214,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true }),
           },
         },
@@ -225,7 +225,7 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
+    "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{\\"bar\\":true}",
     },
   },
@@ -242,7 +242,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
           },
         },
@@ -253,15 +253,15 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\\"}",
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
     },
   },
   "id": "123",
   "references": Array [
     Object {
       "id": "pattern*",
-      "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
       "type": "index-pattern",
     },
   ],
@@ -276,7 +276,7 @@ Object {
         type: 'search',
         attributes: {
           foo: true,
-          opensearchDashboardsSavedObjectMeta: {
+          kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               bar: true,
               filter: [
@@ -297,15 +297,15 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "opensearchDashboardsSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
     },
   },
   "id": "123",
   "references": Array [
     Object {
       "id": "my-index",
-      "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
       "type": "index-pattern",
     },
   ],

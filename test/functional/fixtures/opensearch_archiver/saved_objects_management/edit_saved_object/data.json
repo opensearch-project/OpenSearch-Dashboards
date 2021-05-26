@@ -30,7 +30,7 @@
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       },
@@ -39,7 +39,7 @@
     },
     "references" : [
       {
-        "name" : "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
+        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
         "type" : "index-pattern",
         "id" : "logstash-*"
       }
@@ -61,7 +61,7 @@
         "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
         "version": 1,
         "timeRestore": false,
-        "opensearchDashboardsSavedObjectMeta": {
+        "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       },

@@ -41,7 +41,7 @@ export const extractReferences = (
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
     const indexId = searchSourceFields.index.id || ((searchSourceFields.index as any) as string);
-    const refName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
+    const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     references.push({
       name: refName,
       type: 'index-pattern',
@@ -61,7 +61,7 @@ export const extractReferences = (
         if (!filterRow.meta || !filterRow.meta.index) {
           return filterRow;
         }
-        const refName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+        const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
         references.push({
           name: refName,
           type: 'index-pattern',

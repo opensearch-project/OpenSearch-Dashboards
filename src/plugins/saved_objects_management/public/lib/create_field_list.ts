@@ -133,9 +133,9 @@ const addFieldsFromClass = function (
     });
   });
 
-  if (Class.searchSource && !fieldMap['opensearchDashboardsSavedObjectMeta.searchSourceJSON']) {
+  if (Class.searchSource && !fieldMap['kibanaSavedObjectMeta.searchSourceJSON']) {
     fields.push({
-      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON',
+      name: 'kibanaSavedObjectMeta.searchSourceJSON',
       type: 'json',
       value: '{}',
     });

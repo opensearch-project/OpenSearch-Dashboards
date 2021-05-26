@@ -40,7 +40,7 @@ export const timelineSheetSavedObjectType: SavedObjectsType = {
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer' },
-      opensearchDashboardsSavedObjectMeta: {
+      kibanaSavedObjectMeta: {
         properties: {
           searchSourceJSON: { type: 'text' },
         },
