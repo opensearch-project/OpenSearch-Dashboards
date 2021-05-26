@@ -32,7 +32,7 @@
 
 import _, { each, reject } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
-import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
+import { DuplicateField } from '../../../../opensearch-dashboards-utils/common';
 
 import {
   OPENSEARCH_FIELD_TYPES,
@@ -44,7 +44,7 @@ import {
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormatsStartCommon, FieldFormat } from '../../field-formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 

@@ -31,7 +31,7 @@
  */
 
 import { getFilterField, cleanFilter, Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 
 export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern) => {
   if (!indexPattern) return filter;

@@ -33,12 +33,12 @@ import React from 'react';
 import { OverlayStart } from 'opensearch-dashboards/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
-import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch-dashboards-react/public';
 import {
   ActionExecutionContext,
   createAction,
   UiActionsStart,
-} from '../../../../src/plugins/ui_actions/public';
+} from '../../../../src/plugins/ui-actions/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

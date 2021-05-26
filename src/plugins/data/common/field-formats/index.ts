@@ -56,7 +56,7 @@ export { getHighlightRequest } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content-types';
 
 export {
   FieldFormatsGetConfigFn,

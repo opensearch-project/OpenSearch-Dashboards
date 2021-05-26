@@ -41,8 +41,8 @@ import {
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
   OnSaveProps,
-} from '../../../../saved_objects/public';
-import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../saved-objects/public';
+import { unhashUrl } from '../../../../opensearch-dashboards-utils/public';
 
 import {
   VisualizeServices,

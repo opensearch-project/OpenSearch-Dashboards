@@ -44,7 +44,7 @@ import {
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { SerializableState } from '../../opensearch_dashboards_utils/common';
+import { SerializableState } from '../../opensearch-dashboards-utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export interface EmbeddableSetup {

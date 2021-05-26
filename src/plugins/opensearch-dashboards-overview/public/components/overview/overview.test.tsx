@@ -36,7 +36,7 @@ import { Overview } from './overview';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
-jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../../../src/plugins/opensearch-dashboards-react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: {
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },

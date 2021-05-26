@@ -35,17 +35,17 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'opensearch-dashboards/public';
-import { HitsCounter } from './hits_counter';
-import { TimechartHeader } from './timechart_header';
+import { HitsCounter } from './hits-counter';
+import { TimechartHeader } from './timechart-header';
 import { DiscoverSidebar } from './sidebar';
 import { getServices, IndexPattern } from '../../opensearch_dashboards_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
-import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
-import { SkipBottomButton } from './skip_bottom_button';
+import { LoadingSpinner } from './loading-spinner/loading_spinner';
+import { DocTableLegacy } from '../angular/doc-table/create_doc_table_react';
+import { SkipBottomButton } from './skip-bottom-button';
 import {
   IndexPatternField,
   search,
@@ -56,7 +56,7 @@ import {
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
-import { SavedSearch } from '../../saved_searches';
+import { SavedSearch } from '../../saved-searches';
 
 import { SavedObject } from '../../../../../core/types';
 import { Vis } from '../../../../visualizations/public';

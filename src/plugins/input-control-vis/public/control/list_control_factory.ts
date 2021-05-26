@@ -39,7 +39,7 @@ import {
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
-import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
+import { PhraseFilterManager } from './filter-manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlSettings, InputControlVisDependencies } from '../plugin';

@@ -66,7 +66,7 @@ export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorag
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
  *
- * Go {@link https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_sync | here} for a complete guide and examples.
+ * Go {@link https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state_sync | here} for a complete guide and examples.
  *
  * @example
  *

@@ -32,6 +32,6 @@
 
 export * from './fields';
 export * from './types';
-export { IndexPatternsService } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
+export { IndexPatternsService } from './index-patterns';
+export type { IndexPattern } from './index-patterns';
 export * from './errors';

@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { chartSplit } from '../splits/pie_chart/chart_split';
-import { chartTitleSplit } from '../splits/pie_chart/chart_title_split';
+import { chartSplit } from '../splits/pie-chart/chart_split';
+import { chartTitleSplit } from '../splits/pie-chart/chart_title_split';
 
 /**
  * Specifies the visualization layout for column charts.

@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { ExpressionFunctionDefinition } from '../../expression_functions';
-import { ExpressionValueNum } from '../../expression_types';
+import { ExpressionFunctionDefinition } from '../../expression-functions';
+import { ExpressionValueNum } from '../../expression-types';
 
 export const error: ExpressionFunctionDefinition<
   'error',

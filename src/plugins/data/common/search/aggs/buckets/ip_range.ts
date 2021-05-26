@@ -35,7 +35,7 @@ import { i18n } from '@osd/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
-import { createFilterIpRange } from './create_filter/ip_range';
+import { createFilterIpRange } from './create-filter/ip_range';
 import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
 import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';

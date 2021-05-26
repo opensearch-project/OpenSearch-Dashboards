@@ -49,7 +49,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
-import { FIELD_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/field_types';
+import { FIELD_TYPES } from '../../../../../../plugins/vis-type-timeseries/common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };

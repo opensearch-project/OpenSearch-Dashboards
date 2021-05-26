@@ -34,9 +34,9 @@ import { buildOpenSearchQuery } from './build_opensearch_query';
 import { fromKueryExpression, toOpenSearchQuery } from '../kuery';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { decorateQuery } from './decorate_query';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { MatchAllFilter } from '../filters';
-import { fields } from '../../index_patterns/mocks';
+import { fields } from '../../index-patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {

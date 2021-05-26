@@ -42,7 +42,7 @@ import {
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../api/context';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query-parameters/constants';
 
 export interface ActionBarProps {
   /**

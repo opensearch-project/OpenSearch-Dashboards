@@ -32,8 +32,8 @@
 
 import { i18n } from '@osd/i18n';
 // @ts-ignore
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
-import { IServiceSettings, FileLayer } from '../../../maps_legacy/public';
+import { bypassExternalUrlCheck } from '../vega-view/vega_base_view';
+import { IServiceSettings, FileLayer } from '../../../maps-legacy/public';
 import { Data, UrlObject, EmsQueryRequest } from './types';
 
 /**

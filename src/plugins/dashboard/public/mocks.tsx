@@ -33,7 +33,7 @@
 import { DashboardStart } from './plugin';
 
 export type Start = jest.Mocked<DashboardStart>;
-export { mockAttributeService } from './attribute_service/attribute_service.mock';
+export { mockAttributeService } from './attribute-service/attribute_service.mock';
 
 const createStartContract = (): DashboardStart => {
   // @ts-ignore

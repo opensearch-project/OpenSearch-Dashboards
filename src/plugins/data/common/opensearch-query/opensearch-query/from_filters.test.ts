@@ -31,9 +31,9 @@
  */
 
 import { buildQueryFromFilters } from './from_filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
-import { fields } from '../../index_patterns/mocks';
+import { fields } from '../../index-patterns/mocks';
 
 describe('build query', () => {
   const indexPattern: IIndexPattern = ({

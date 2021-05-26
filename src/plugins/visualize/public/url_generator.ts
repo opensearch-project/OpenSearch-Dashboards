@@ -38,7 +38,7 @@ import {
   QueryState,
   RefreshInterval,
 } from '../../data/public';
-import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
+import { setStateToOsdUrl } from '../../opensearch-dashboards-utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 
 const STATE_STORAGE_KEY = '_a';

@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 import { useCallback } from 'react';
-import { useEditorActionContext } from '../contexts/editor_context';
-import { instance as registry } from '../contexts/editor_context/editor_registry';
+import { useEditorActionContext } from '../contexts/editor-context';
+import { instance as registry } from '../contexts/editor-context/editor_registry';
 
 export const useSetInputEditor = () => {
   const dispatch = useEditorActionContext();

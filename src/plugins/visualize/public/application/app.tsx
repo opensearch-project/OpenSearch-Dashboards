@@ -36,7 +36,7 @@ import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { syncQueryStateWithUrl } from '../../../data/public';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch-dashboards-react/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,

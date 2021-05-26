@@ -31,7 +31,7 @@
  */
 
 import { fromKueryExpression, toOpenSearchQuery, nodeTypes, KueryNode } from '../kuery';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { Query } from '../../query/types';
 
 export function buildQueryFromKuery(

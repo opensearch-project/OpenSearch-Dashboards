@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { RangeValues, Schemas } from '../../vis-default-editor/public';
 import { AggGroupNames } from '../../data/public';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';

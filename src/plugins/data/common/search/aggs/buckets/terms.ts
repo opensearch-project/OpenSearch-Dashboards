@@ -35,7 +35,7 @@ import { i18n } from '@osd/i18n';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterTerms } from './create_filter/terms';
+import { createFilterTerms } from './create-filter/terms';
 import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,

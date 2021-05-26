@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export { getFieldFormatsRegistry } from './field_formats/field_formats_registry.stub';
-export { getStubIndexPattern, StubIndexPattern } from './index_patterns/index_pattern.stub';
+export { getFieldFormatsRegistry } from './field-formats/field_formats_registry.stub';
+export { getStubIndexPattern, StubIndexPattern } from './index-patterns/index_pattern.stub';

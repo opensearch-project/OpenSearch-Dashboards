@@ -37,7 +37,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { I18nProvider } from '@osd/i18n/react';
 import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput } from '../test_helpers';
+import { getSampleDashboardInput } from '../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -48,8 +48,8 @@ import {
 } from '../../embeddable_plugin_test_samples';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
+import { OpenSearchDashboardsContextProvider } from '../../../../opensearch-dashboards-react/public';
+import { uiActionsPluginMock } from '../../../../ui-actions/public/mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {

@@ -31,7 +31,7 @@
  */
 
 import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
-import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../../../../src/plugins/ui-actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';

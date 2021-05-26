@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-import { chartSplit } from '../splits/column_chart/chart_split';
-import { yAxisSplit } from '../splits/column_chart/y_axis_split';
-import { xAxisSplit } from '../splits/column_chart/x_axis_split';
-import { chartTitleSplit } from '../splits/column_chart/chart_title_split';
+import { chartSplit } from '../splits/column-chart/chart_split';
+import { yAxisSplit } from '../splits/column-chart/y_axis_split';
+import { xAxisSplit } from '../splits/column-chart/x_axis_split';
+import { chartTitleSplit } from '../splits/column-chart/chart_title_split';
 
 /**
  * Specifies the visualization layout for column charts.

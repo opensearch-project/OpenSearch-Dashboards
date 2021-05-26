@@ -33,7 +33,7 @@ import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../saved_objects/public';
+} from '../../../saved-objects/public';
 
 export function createSavedSearchClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);

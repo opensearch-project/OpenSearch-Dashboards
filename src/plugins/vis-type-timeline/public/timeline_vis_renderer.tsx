@@ -34,7 +34,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../opensearch-dashboards-react/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { TimelineVisDependencies } from './plugin';
 import { TimelineRenderValue } from './timeline_vis_fn';

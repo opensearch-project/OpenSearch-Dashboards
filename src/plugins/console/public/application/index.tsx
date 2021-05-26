@@ -36,9 +36,9 @@ import { HttpSetup, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
-import * as localStorageObjectClient from '../lib/local_storage_object_client';
+import * as localStorageObjectClient from '../lib/local-storage-object-client';
 import { createUsageTracker } from '../services/tracker';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 import { createApi, createOpenSearchHostService } from './lib';
 
 export interface BootDependencies {

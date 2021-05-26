@@ -36,7 +36,7 @@ import {
   saveObjects,
   saveObject,
 } from './resolve_saved_objects';
-import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObject, SavedObjectLoader } from '../../../saved-objects/public';
 import { IndexPatternsContract } from '../../../data/public';
 import { dataPluginMock } from '../../../data/public/mocks';
 

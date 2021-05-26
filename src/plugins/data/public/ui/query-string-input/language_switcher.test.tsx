@@ -32,7 +32,7 @@
 
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';

@@ -31,7 +31,7 @@
  */
 
 import { HttpStart, SavedObjectsImportError } from 'src/core/public';
-import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
+import { ImportMode } from '../management-section/objects-table/components/import_mode_control';
 
 interface ImportResponse {
   success: boolean;

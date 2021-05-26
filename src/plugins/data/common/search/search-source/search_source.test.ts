@@ -31,7 +31,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../index-patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';

@@ -31,7 +31,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter } from '../../opensearch_query';
+import { FilterMeta, Filter } from '../../opensearch-query';
 
 export interface FilterCompareOptions {
   index?: boolean;

@@ -56,7 +56,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../vis_type_timeline/common/chain.peg';
+import grammar from 'raw-loader!../../../vis-type-timeline/common/chain.peg';
 import timelineExpressionInputTemplate from './timeline_expression_input.html';
 import {
   SUGGESTION_TYPE,

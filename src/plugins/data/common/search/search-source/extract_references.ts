@@ -31,7 +31,7 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
-import { Filter } from '../../opensearch_query/filters';
+import { Filter } from '../../opensearch-query/filters';
 import { SearchSourceFields } from './types';
 
 export const extractReferences = (

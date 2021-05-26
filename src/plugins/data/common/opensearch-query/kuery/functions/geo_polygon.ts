@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-import { nodeTypes } from '../node_types';
+import { nodeTypes } from '../node-types';
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
-import { LiteralTypeBuildNode } from '../node_types/types';
+import { LiteralTypeBuildNode } from '../node-types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);

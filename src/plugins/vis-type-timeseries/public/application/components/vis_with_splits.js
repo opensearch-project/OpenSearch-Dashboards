@@ -33,7 +33,7 @@
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { last, findIndex, first } from 'lodash';
-import { calculateLabel } from '../../../../../plugins/vis_type_timeseries/common/calculate_label';
+import { calculateLabel } from '../../../../../plugins/vis-type-timeseries/common/calculate_label';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {

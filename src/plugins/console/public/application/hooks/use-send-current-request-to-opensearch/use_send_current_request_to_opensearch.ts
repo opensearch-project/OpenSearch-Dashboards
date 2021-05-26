@@ -31,7 +31,7 @@
  */
 import { i18n } from '@osd/i18n';
 import { useCallback } from 'react';
-import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { instance as registry } from '../../contexts/editor-context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToOpenSearch } from './send_request_to_opensearch';
 import { track } from './track';

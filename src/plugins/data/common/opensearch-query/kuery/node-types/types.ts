@@ -34,8 +34,8 @@
  * WARNING: these typings are incomplete
  */
 
-import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../opensearch_dashboards_utils/common';
+import { IIndexPattern } from '../../../index-patterns';
+import { JsonValue } from '../../../../../opensearch-dashboards-utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =

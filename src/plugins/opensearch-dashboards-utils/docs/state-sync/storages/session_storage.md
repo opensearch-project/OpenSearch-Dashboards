@@ -7,7 +7,7 @@ import {
   createStateContainer,
   syncState,
   createSessionStorageStateStorage,
-} from 'src/plugins/opensearch_dashboards_utils/public';
+} from 'src/plugins/opensearch-dashboards-utils/public';
 
 const stateContainer = createStateContainer({ count: 0 });
 const stateStorage = createSessionStorageStateStorage();

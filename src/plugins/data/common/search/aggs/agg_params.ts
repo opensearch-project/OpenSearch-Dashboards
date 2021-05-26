@@ -30,12 +30,12 @@
  * GitHub history for details.
  */
 
-import { AggParamType } from './param_types/agg';
-import { FieldParamType } from './param_types/field';
-import { OptionedParamType } from './param_types/optioned';
-import { StringParamType } from './param_types/string';
-import { JsonParamType } from './param_types/json';
-import { BaseParamType } from './param_types/base';
+import { AggParamType } from './param-types/agg';
+import { FieldParamType } from './param-types/field';
+import { OptionedParamType } from './param-types/optioned';
+import { StringParamType } from './param-types/string';
+import { JsonParamType } from './param-types/json';
+import { BaseParamType } from './param-types/base';
 
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { NodeTypes } from './node_types';
+import { NodeTypes } from './node-types';
 
 export interface KueryNode {
   type: keyof NodeTypes;
@@ -50,4 +50,4 @@ export interface KueryParseOptions {
   parseCursor?: boolean;
 }
 
-export { nodeTypes } from './node_types';
+export { nodeTypes } from './node-types';

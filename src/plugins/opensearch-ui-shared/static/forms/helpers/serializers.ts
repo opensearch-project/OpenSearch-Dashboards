@@ -50,7 +50,7 @@
  */
 
 import { EuiSelectableOption } from '@elastic/eui';
-import { SerializerFunc } from '../hook_form_lib';
+import { SerializerFunc } from '../hook-form-lib';
 
 export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
   /**

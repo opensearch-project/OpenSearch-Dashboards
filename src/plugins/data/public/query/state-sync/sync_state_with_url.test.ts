@@ -32,15 +32,15 @@
 
 import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
-import { FilterManager } from '../filter_manager';
-import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
+import { FilterManager } from '../filter-manager';
+import { getFilter } from '../filter-manager/test-helpers/get_stub_filter';
 import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createOsdUrlStateStorage,
   IOsdUrlStateStorage,
   Storage,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';

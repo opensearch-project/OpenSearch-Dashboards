@@ -30,9 +30,9 @@
  * GitHub history for details.
  */
 
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common/field_formats';
+import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common/field-formats';
 import { AggConfigs } from '../../agg_configs';
-import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
+import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test-helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { createFilterRange } from './range';

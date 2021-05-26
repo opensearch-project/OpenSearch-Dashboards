@@ -33,7 +33,7 @@
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { OptInBanner } from '../../components/opt_in_banner';
-import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../opensearch-dashboards-react/public';
 
 interface RenderBannerConfig {
   overlays: CoreStart['overlays'];

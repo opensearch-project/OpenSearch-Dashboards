@@ -32,13 +32,13 @@
 
 import { Filter, opensearchQuery, TimeRange, Query } from '../../data/public';
 
-import { SearchAPI } from './data_model/search_api';
-import { TimeCache } from './data_model/time_cache';
+import { SearchAPI } from './data-model/search_api';
+import { TimeCache } from './data-model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
 import { getData, getInjectedMetadata } from './services';
-import { VegaInspectorAdapters } from './vega_inspector';
+import { VegaInspectorAdapters } from './vega-inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -87,7 +87,7 @@ export function createVegaRequestHandler(
       filters,
       opensearchQueryConfigs
     );
-    const { VegaParser } = await import('./data_model/vega_parser');
+    const { VegaParser } = await import('./data-model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
 
     return await vp.parseAsync();

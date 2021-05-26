@@ -37,9 +37,9 @@ import { getServices } from '../../../../opensearch_dashboards_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
-import { getQueryParameterActions } from '../query_parameters';
+import { getQueryParameterActions } from '../query-parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
-import { MarkdownSimple } from '../../../../../../opensearch_dashboards_react/public';
+import { MarkdownSimple } from '../../../../../../opensearch-dashboards-react/public';
 
 export function QueryActionsProvider(Promise) {
   const { filterManager, indexPatterns, data } = getServices();

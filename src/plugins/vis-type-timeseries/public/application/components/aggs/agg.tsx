@@ -40,7 +40,7 @@ import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import { IFieldType } from '../../../../../data/common/index_patterns/fields';
+import { IFieldType } from '../../../../../data/common/index-patterns/fields';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;

@@ -36,8 +36,8 @@ import {
   analysePatternForFract,
   DateNanosFormat,
   formatWithNanos,
-} from '../../../common/field_formats/converters/date_nanos_shared';
-import { TextContextTypeConvert } from '../../../common/field_formats/types';
+} from '../../../common/field-formats/converters/date_nanos_shared';
+import { TextContextTypeConvert } from '../../../common/field-formats/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
   textConvert: TextContextTypeConvert = (val) => {

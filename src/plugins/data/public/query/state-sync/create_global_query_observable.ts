@@ -33,9 +33,9 @@
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { TimefilterSetup } from '../timefilter';
-import { FilterManager } from '../filter_manager';
+import { FilterManager } from '../filter-manager';
 import { QueryState, QueryStateChange } from './index';
-import { createStateContainer } from '../../../../opensearch_dashboards_utils/public';
+import { createStateContainer } from '../../../../opensearch-dashboards-utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
 

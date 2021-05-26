@@ -31,7 +31,7 @@
  */
 
 import { indices } from '../../../../public';
-import { ValidationFunc } from '../../hook_form_lib';
+import { ValidationFunc } from '../../hook-form-lib';
 import { startsWith, containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 

@@ -31,11 +31,11 @@
  */
 
 import { CoreStart, CoreSetup } from 'opensearch-dashboards/public';
-import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch-dashboards-legacy/public';
 import { Subscription } from 'rxjs';
 import { navigateToDefaultApp } from './navigate_to_default_app';
-import { createLegacyUrlForwardApp } from './forward_app';
-import { navigateToLegacyOpenSearchDashboardsUrl } from './forward_app/navigate_to_legacy_opensearch_dashboards_url';
+import { createLegacyUrlForwardApp } from './forward-app';
+import { navigateToLegacyOpenSearchDashboardsUrl } from './forward-app/navigate_to_legacy_opensearch_dashboards_url';
 
 export interface ForwardDefinition {
   legacyAppId: string;

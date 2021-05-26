@@ -29,8 +29,8 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { getSortArray } from '../angular/doc_table';
-import { SortPairArr } from '../angular/doc_table/lib/get_sort';
+import { getSortArray } from '../angular/doc-table';
+import { SortPairArr } from '../angular/doc-table/lib/get_sort';
 import { IndexPattern } from '../../opensearch_dashboards_services';
 
 /**

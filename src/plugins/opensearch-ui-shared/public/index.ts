@@ -36,14 +36,14 @@
  */
 import * as Forms from './forms';
 import * as ace from './ace';
-import * as GlobalFlyout from './global_flyout';
+import * as GlobalFlyout from './global-flyout';
 import * as XJson from './xjson';
 
-export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
+export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json-editor';
 
-export { SectionLoading } from './components/section_loading';
+export { SectionLoading } from './components/section-loading';
 
-export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
+export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron-editor';
 
 export {
   SendRequestConfig,

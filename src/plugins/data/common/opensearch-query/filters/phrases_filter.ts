@@ -33,7 +33,7 @@
 import { Filter, FilterMeta } from './meta_filter';
 import { getPhraseScript } from './phrase_filter';
 import { FILTERS } from './index';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IIndexPattern, IFieldType } from '../../index-patterns';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values

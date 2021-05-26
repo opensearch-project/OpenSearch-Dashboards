@@ -33,7 +33,7 @@
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
-import { OpenSearchDashboardsContext } from '../../../expression_types';
+import { OpenSearchDashboardsContext } from '../../../expression-types';
 
 describe('expression_functions', () => {
   describe('var_set', () => {

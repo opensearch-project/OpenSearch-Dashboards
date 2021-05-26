@@ -35,7 +35,7 @@ import { i18n } from '@osd/i18n';
 
 import { IFieldType, TimefilterContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
-import { RangeFilterManager } from './filter_manager/range_filter_manager';
+import { RangeFilterManager } from './filter-manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';

@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { RangeValues, Schemas } from '../../vis-default-editor/public';
 import { AggGroupNames } from '../../data/public';
 import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
 import { HeatmapOptions } from './components/options';

@@ -37,8 +37,8 @@ import { keyMap } from './key_map';
 import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
-} from '../../../opensearch_dashboards_legacy/public';
-import { PER_PAGE_SETTING } from '../../../saved_objects/public';
+} from '../../../opensearch-dashboards-legacy/public';
+import { PER_PAGE_SETTING } from '../../../saved-objects/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 
 export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings) {

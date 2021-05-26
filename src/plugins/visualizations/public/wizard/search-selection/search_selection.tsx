@@ -36,8 +36,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
 
-import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
-import { VisType } from '../../vis_types';
+import { SavedObjectFinderUi } from '../../../../../plugins/saved-objects/public';
+import { VisType } from '../../vis-types';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;

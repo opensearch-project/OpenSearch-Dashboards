@@ -15,7 +15,7 @@ your services or apps.
 ## Example
 
 ```ts
-import { createStateContainer } from 'src/plugins/opensearch_dashboards_utils';
+import { createStateContainer } from 'src/plugins/opensearch-dashboards-utils';
 
 const container = createStateContainer(
   { count: 0 },
@@ -36,13 +36,13 @@ console.log(container.selectors.count()); // 10
 
 ## Demos
 
-See demos [here](../../demos/state_containers/).
+See demos [here](../../demos/state-containers/).
 
 You can run them with
 
 ```
-npx -q ts-node src/plugins/opensearch_dashboards_utils/demos/state_containers/counter.ts
-npx -q ts-node src/plugins/opensearch_dashboards_utils/demos/state_containers/todomvc.ts
+npx -q ts-node src/plugins/opensearch-dashboards-utils/demos/state-containers/counter.ts
+npx -q ts-node src/plugins/opensearch-dashboards-utils/demos/state-containers/todomvc.ts
 ```
 
 ## Reference

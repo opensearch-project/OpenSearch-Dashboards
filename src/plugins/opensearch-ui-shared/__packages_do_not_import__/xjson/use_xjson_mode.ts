@@ -32,7 +32,7 @@
 
 import { useState, Dispatch } from 'react';
 
-import { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';
+import { collapseLiteralStrings, expandLiteralStrings } from './json-xjson-translation-tools';
 
 interface ReturnValue {
   xJson: string;

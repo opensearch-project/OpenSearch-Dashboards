@@ -41,7 +41,7 @@ import {
   CommonProps,
 } from '@elastic/eui';
 import { VegaAdapter } from '../vega_adapter';
-import { CodeEditor } from '../../../../opensearch_dashboards_react/public';
+import { CodeEditor } from '../../../../opensearch-dashboards-react/public';
 
 interface SpecViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;

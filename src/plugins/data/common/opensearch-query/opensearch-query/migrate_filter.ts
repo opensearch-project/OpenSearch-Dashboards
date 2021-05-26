@@ -33,7 +33,7 @@
 import { get, omit } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 
 export interface DeprecatedMatchPhraseFilter extends Filter {
   query: {

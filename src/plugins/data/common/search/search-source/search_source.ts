@@ -86,8 +86,8 @@ import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
-import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
-import { IIndexPattern } from '../../index_patterns';
+import { fieldWildcardFilter } from '../../../../opensearch-dashboards-utils/common';
+import { IIndexPattern } from '../../index-patterns';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
@@ -99,7 +99,7 @@ import {
   Filter,
   UI_SETTINGS,
 } from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+import { getHighlightRequest } from '../../../common/field-formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 

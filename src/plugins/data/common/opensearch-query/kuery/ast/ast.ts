@@ -30,14 +30,14 @@
  * GitHub history for details.
  */
 
-import { nodeTypes } from '../node_types/index';
+import { nodeTypes } from '../node-types/index';
 import { DQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
-import { IIndexPattern } from '../../../index_patterns/types';
+import { IIndexPattern } from '../../../index-patterns/types';
 
 // @ts-ignore
 import { parse as parseKuery } from './_generated_/kuery';
-import { JsonObject } from '../../../../../opensearch_dashboards_utils/common';
+import { JsonObject } from '../../../../../opensearch-dashboards-utils/common';
 
 const fromExpression = (
   expression: string | DslQuery,

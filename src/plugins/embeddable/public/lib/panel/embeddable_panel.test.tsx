@@ -37,7 +37,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@osd/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';
+import { Action, UiActionsStart, ActionType } from '../../../../ui-actions/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';

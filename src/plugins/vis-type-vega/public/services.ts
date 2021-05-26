@@ -33,8 +33,8 @@
 import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../data/public';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
-import { MapsLegacyConfig } from '../../maps_legacy/config';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
+import { MapsLegacyConfig } from '../../maps-legacy/config';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 

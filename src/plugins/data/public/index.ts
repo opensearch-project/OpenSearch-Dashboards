@@ -182,10 +182,10 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-} from '../common/field_formats';
+} from '../common/field-formats';
 
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
+import { DateNanosFormat, DateFormat } from './field-formats';
+export { baseFormattersPublic, FieldFormatsStart } from './field-formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
@@ -241,9 +241,9 @@ import {
   getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
-} from './index_patterns';
+} from './index-patterns';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './index-patterns';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -265,7 +265,7 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   IndexPatternField,
-} from './index_patterns';
+} from './index-patterns';
 
 export {
   IIndexPattern,
@@ -281,7 +281,7 @@ export {
   fieldList,
 } from '../common';
 
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export { DuplicateIndexPatternError } from '../common/index-patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -476,7 +476,7 @@ export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 
-export * from '../common/field_mapping';
+export * from '../common/field-mapping';
 
 /*
  * Plugin setup

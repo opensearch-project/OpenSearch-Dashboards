@@ -35,9 +35,9 @@ import { i18n } from '@osd/i18n';
 
 import { Filter } from 'src/plugins/data/public';
 import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
-import { RangeFilterManager } from './filter_manager/range_filter_manager';
-import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
-import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
+import { RangeFilterManager } from './filter-manager/range_filter_manager';
+import { PhraseFilterManager } from './filter-manager/phrase_filter_manager';
+import { FilterManager as BaseFilterManager } from './filter-manager/filter_manager';
 
 export function noValuesDisableMsg(fieldName: string, indexPatternName: string) {
   return i18n.translate('inputControl.control.noValuesDisableTooltip', {

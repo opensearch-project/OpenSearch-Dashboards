@@ -31,7 +31,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Markdown } from '../../opensearch_dashboards_react/public';
+import { Markdown } from '../../opensearch-dashboards-react/public';
 import { MarkdownVisParams } from './types';
 
 import './markdown_vis.scss';

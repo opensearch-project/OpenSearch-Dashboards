@@ -33,9 +33,9 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '../../../../../../opensearch_dashboards_react/public';
+import { RedirectAppLinks } from '../../../../../../opensearch-dashboards-react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
+import { calculateLabel } from '../../../../../../../plugins/vis-type-timeseries/common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -43,7 +43,7 @@ import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@osd/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 
-import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { METRIC_TYPES } from '../../../../../../../plugins/vis-type-timeseries/common/metric_types';
 
 function getColor(rules, colorKey, value) {
   let color;

@@ -33,7 +33,7 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
@@ -48,13 +48,13 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../filter_bar/filter_bar', () => {
+jest.mock('../filter-bar/filter_bar', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
   };
 });
 
-jest.mock('../query_string_input/query_bar_top_row', () => {
+jest.mock('../query-string-input/query_bar_top_row', () => {
   return () => <div className="queryBar" />;
 });
 

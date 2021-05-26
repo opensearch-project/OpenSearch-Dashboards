@@ -30,4 +30,4 @@
  * GitHub history for details.
  */
 
-export { DateNanosFormat } from '../../../common/field_formats/converters/date_nanos_shared';
+export { DateNanosFormat } from '../../../common/field-formats/converters/date_nanos_shared';

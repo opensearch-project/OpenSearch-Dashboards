@@ -40,7 +40,7 @@ import {
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
-import { ISearchOptions } from '../opensearch_search';
+import { ISearchOptions } from '../opensearch-search';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';

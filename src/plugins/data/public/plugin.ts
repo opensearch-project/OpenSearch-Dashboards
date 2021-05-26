@@ -38,7 +38,7 @@ import {
   Storage,
   IStorageWrapper,
   createStartServicesGetter,
-} from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -48,16 +48,16 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats';
+import { FieldFormatsService } from './field-formats';
 import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
+import { createIndexPatternSelect } from './ui/index-pattern-select';
 import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
   IndexPatternsApiClient,
   UiSettingsPublicToCommon,
-} from './index_patterns';
+} from './index-patterns';
 import {
   setFieldFormats,
   setIndexPatterns,
@@ -67,13 +67,13 @@ import {
   setSearchService,
   setUiSettings,
 } from './services';
-import { createSearchBar } from './ui/search_bar/create_search_bar';
+import { createSearchBar } from './ui/search-bar/create_search_bar';
 import { opensearchaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
+} from '../../ui-actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -88,10 +88,10 @@ import {
   createSelectRangeAction,
 } from './actions';
 
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { SavedObjectsClientPublicToCommon } from './index-patterns';
+import { indexPatternLoad } from './index-patterns/expressions/load_index_pattern';
 
-declare module '../../ui_actions/public' {
+declare module '../../ui-actions/public' {
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;

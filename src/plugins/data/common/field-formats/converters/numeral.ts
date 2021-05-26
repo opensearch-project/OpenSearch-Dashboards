@@ -34,7 +34,7 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd-field-types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { UI_SETTINGS } from '../../constants';

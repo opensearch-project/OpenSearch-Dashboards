@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-import { fields } from '../../../index_patterns/mocks';
+import { fields } from '../../../index-patterns/mocks';
 
 import { nodeTypes } from './index';
-import { IIndexPattern } from '../../../index_patterns';
+import { IIndexPattern } from '../../../index-patterns';
 
 import { buildNode, buildNodeWithArgumentNodes, toOpenSearchQuery } from './function';
 import { toOpenSearchQuery as isFunctionToOpenSearchQuery } from '../functions/is';

@@ -33,7 +33,7 @@
 import { CoreStart, Plugin } from 'src/core/public';
 
 import './index.scss';
-import { createSavedObjectClass } from './saved_object';
+import { createSavedObjectClass } from './saved-object';
 import { DataPublicPluginStart } from '../../data/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 

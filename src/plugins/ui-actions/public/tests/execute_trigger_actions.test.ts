@@ -31,13 +31,13 @@
  */
 
 import { Action, createAction } from '../actions';
-import { openContextMenu } from '../context_menu';
+import { openContextMenu } from '../context-menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
 import { TriggerId, ActionType } from '../types';
 import { waitFor } from '@testing-library/dom';
 
-jest.mock('../context_menu');
+jest.mock('../context-menu');
 
 const executeFn = jest.fn();
 const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;

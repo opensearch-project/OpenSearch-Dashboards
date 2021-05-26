@@ -40,7 +40,7 @@ import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { coreMock } from '../../../../core/public/mocks';
 
-jest.mock('../../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
+jest.mock('../../../opensearch-dashboards-legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 

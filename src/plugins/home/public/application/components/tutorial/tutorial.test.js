@@ -46,7 +46,7 @@ jest.mock('../../opensearch_dashboards_services', () => ({
     },
   }),
 }));
-jest.mock('../../../../../opensearch_dashboards_react/public', () => {
+jest.mock('../../../../../opensearch-dashboards-react/public', () => {
   return {
     Markdown: () => <div className="markdown" />,
   };

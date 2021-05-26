@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './index_patterns';
+import type { IndexPatternSavedObjectAttrs } from './index-patterns';
 import type { SavedObjectsClientCommon } from '../types';
 
 /**

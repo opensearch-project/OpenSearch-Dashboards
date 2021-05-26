@@ -37,7 +37,7 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../src/plugins/ui-actions/public';
 import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
 import {
   AppMountContext,

@@ -32,7 +32,7 @@
 
 import { OpenSearchDashboardsDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
 import { IAggConfig } from '../../../../common';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../../index-patterns';
 import { getSearchService } from '../../../../public/services';
 
 /** @internal */

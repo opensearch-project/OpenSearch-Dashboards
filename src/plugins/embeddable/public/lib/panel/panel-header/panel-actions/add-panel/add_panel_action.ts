@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { i18n } from '@osd/i18n';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from 'src/plugins/ui-actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { ViewMode } from '../../../../types';

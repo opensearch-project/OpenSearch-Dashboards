@@ -35,8 +35,8 @@ import {
   buildPhraseFilter,
   getPhraseFilterField,
 } from './phrase_filter';
-import { fields, getField } from '../../index_patterns/mocks';
-import { IIndexPattern } from '../../index_patterns';
+import { fields, getField } from '../../index-patterns/mocks';
+import { IIndexPattern } from '../../index-patterns';
 
 describe('Phrase filter builder', () => {
   let indexPattern: IIndexPattern;

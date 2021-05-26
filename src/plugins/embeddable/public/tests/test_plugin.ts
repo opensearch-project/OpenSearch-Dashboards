@@ -31,8 +31,8 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { UiActionsStart } from '../../../ui_actions/public';
-import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
+import { UiActionsStart } from '../../../ui-actions/public';
+import { uiActionsPluginMock } from '../../../ui-actions/public/mocks';
 import { inspectorPluginMock } from '../../../inspector/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';

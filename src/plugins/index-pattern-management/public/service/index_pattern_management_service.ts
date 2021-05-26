@@ -33,7 +33,7 @@
 import { HttpSetup } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
-import { FieldFormatEditors } from './field_format_editors';
+import { FieldFormatEditors } from './field-format-editors';
 import { EnvironmentService } from './environment';
 
 import {
@@ -48,7 +48,7 @@ import {
   StringFormatEditor,
   TruncateFormatEditor,
   UrlFormatEditor,
-} from '../components/field_editor/components/field_format_editor';
+} from '../components/field-editor/components/field-format-editor';
 
 interface SetupDependencies {
   httpClient: HttpSetup;

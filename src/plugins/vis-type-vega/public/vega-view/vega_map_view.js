@@ -35,7 +35,7 @@ import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
 import { getEmsTileLayerId, getUISettings } from '../services';
-import { lazyLoadMapsLegacyModules } from '../../../maps_legacy/public';
+import { lazyLoadMapsLegacyModules } from '../../../maps-legacy/public';
 
 export class VegaMapView extends VegaBaseView {
   constructor(opts) {

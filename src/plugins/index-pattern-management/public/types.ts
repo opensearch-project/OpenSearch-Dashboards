@@ -43,7 +43,7 @@ import {
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
-import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsReactContextValue } from '../../opensearch-dashboards-react/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;

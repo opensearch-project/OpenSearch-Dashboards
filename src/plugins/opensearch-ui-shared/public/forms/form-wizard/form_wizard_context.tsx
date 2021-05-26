@@ -32,7 +32,7 @@
 
 import React, { useState, createContext, useContext, useCallback } from 'react';
 
-import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
+import { WithMultiContent, useMultiContentContext, HookProps } from '../multi-content';
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;

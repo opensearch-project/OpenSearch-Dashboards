@@ -40,15 +40,15 @@ import { get, isEqual } from 'lodash';
 import {
   withOpenSearchDashboards,
   OpenSearchDashboardsReactContextValue,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import QueryBarTopRow from '../query-string-input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
-import { FilterBar } from '../filter_bar/filter_bar';
-import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { SavedQueryManagementComponent } from '../saved_query_management';
+import { FilterBar } from '../filter-bar/filter_bar';
+import { SavedQueryMeta, SaveQueryForm } from '../saved-query-form';
+import { SavedQueryManagementComponent } from '../saved-query-management';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;

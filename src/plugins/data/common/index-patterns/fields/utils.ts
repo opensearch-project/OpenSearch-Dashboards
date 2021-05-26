@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { getFilterableOsdTypeNames } from '../../osd_field_types';
+import { getFilterableOsdTypeNames } from '../../osd-field-types';
 import { IFieldType } from './types';
 
 const filterableTypes = getFilterableOsdTypeNames();

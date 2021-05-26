@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { OsdFieldType, getOsdFieldType } from '../../osd_field_types';
-import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { OsdFieldType, getOsdFieldType } from '../../osd-field-types';
+import { OSD_FIELD_TYPES } from '../../osd-field-types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
 

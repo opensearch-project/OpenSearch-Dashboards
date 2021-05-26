@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export { EditorOutput, Editor } from './console_editor';
+export { EditorOutput, Editor } from './console-editor';
 export { getDocumentation, autoIndent } from './console_menu_actions';

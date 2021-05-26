@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { OpenSearchDashboardsMapLayer } from '../../../maps_legacy/public';
+import { OpenSearchDashboardsMapLayer } from '../../../maps-legacy/public';
 
 export class VegaMapLayer extends OpenSearchDashboardsMapLayer {
   constructor(spec, options, leaflet) {

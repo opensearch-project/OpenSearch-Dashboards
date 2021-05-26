@@ -34,7 +34,7 @@ import { groupBy, has } from 'lodash';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { Filter } from '../filters';
 import { Query } from '../../query/types';
 

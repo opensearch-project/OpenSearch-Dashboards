@@ -29,6 +29,6 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-export * from './opensearch_query';
+export * from './opensearch-query';
 export * from './filters';
 export * from './kuery';

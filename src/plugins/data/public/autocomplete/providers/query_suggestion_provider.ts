@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import { IFieldType, IIndexPattern } from '../../../common/index-patterns';
 
 export enum QuerySuggestionTypes {
   Field = 'field',

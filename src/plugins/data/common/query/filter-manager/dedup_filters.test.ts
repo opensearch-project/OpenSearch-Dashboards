@@ -36,8 +36,8 @@ import {
   buildRangeFilter,
   buildQueryFilter,
   FilterStateStore,
-} from '../../opensearch_query';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+} from '../../opensearch-query';
+import { IIndexPattern, IFieldType } from '../../index-patterns';
 
 describe('filter manager utilities', () => {
   let indexPattern: IIndexPattern;

@@ -33,8 +33,8 @@
 import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
 import { SimpleSavedObject } from '../../../../core/public';
 import { castOpenSearchToOsdFieldTypeName } from '../../../data/public';
-import { ObjectField } from '../management_section/types';
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { ObjectField } from '../management-section/types';
+import { SavedObjectLoader } from '../../../saved-objects/public';
 
 const maxRecursiveIterations = 20;
 

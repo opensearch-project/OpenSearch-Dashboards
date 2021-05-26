@@ -41,7 +41,7 @@ import {
   tickFormatters,
   xaxisFormatterProvider,
   generateTicksProvider,
-} from '../../../../vis_type_timeline/public';
+} from '../../../../vis-type-timeline/public';
 import { TimelineVisualizationDependencies } from '../../application';
 
 const DEBOUNCE_DELAY = 50;

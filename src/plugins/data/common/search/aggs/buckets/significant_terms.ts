@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { BucketAggType } from './bucket_agg_type';
-import { createFilterTerms } from './create_filter/terms';
+import { createFilterTerms } from './create-filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { OSD_FIELD_TYPES } from '../../../../common';

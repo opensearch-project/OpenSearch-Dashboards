@@ -34,7 +34,7 @@ import { ExpressionAstFunction } from './types';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
-} from '../expression_functions/types';
+} from '../expression-functions/types';
 import {
   buildExpression,
   ExpressionAstExpressionBuilder,

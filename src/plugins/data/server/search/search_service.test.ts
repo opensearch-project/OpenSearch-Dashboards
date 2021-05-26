@@ -34,8 +34,8 @@ import { CoreSetup, CoreStart } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart } from '../plugin';
-import { createFieldFormatsStartMock } from '../field_formats/mocks';
-import { createIndexPatternsStartMock } from '../index_patterns/mocks';
+import { createFieldFormatsStartMock } from '../field-formats/mocks';
+import { createIndexPatternsStartMock } from '../index-patterns/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 

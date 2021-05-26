@@ -31,7 +31,7 @@
  */
 
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { IIndexPatternFieldList, IndexPattern } from '../../../../data/common/index_patterns';
+import { IIndexPatternFieldList, IndexPattern } from '../../../../data/common/index-patterns';
 
 const currentIndexPattern: IndexPattern = {
   id: 'prev',

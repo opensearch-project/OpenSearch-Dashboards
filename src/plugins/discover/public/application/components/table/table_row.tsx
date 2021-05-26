@@ -39,7 +39,7 @@ import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
-import { FieldName } from '../field_name/field_name';
+import { FieldName } from '../field-name/field_name';
 
 export interface Props {
   field: string;

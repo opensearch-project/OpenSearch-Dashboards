@@ -31,7 +31,7 @@
  */
 
 import { IndexPatternField } from './index_pattern_field';
-import { IndexPattern } from '../index_patterns';
+import { IndexPattern } from '../index-patterns';
 import { OSD_FIELD_TYPES, FieldFormat } from '../../../common';
 import { FieldSpec } from '../types';
 

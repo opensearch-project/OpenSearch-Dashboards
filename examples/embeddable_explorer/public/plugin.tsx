@@ -31,7 +31,7 @@
  */
 import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import { UiActionsService } from '../../../src/plugins/ui_actions/public';
+import { UiActionsService } from '../../../src/plugins/ui-actions/public';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';

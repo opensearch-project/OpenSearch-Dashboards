@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui-actions/public';
 import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';

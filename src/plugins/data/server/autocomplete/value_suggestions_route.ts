@@ -37,7 +37,7 @@ import { IRouter, SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { IFieldType, Filter } from '../index';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { findIndexPatternById, getFieldByName } from '../index-patterns';
 import { getRequestAbortedSignal } from '../lib';
 
 export function registerValueSuggestionsRoute(

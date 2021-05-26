@@ -17,7 +17,7 @@ const setUiMode: PureTransition = state => uiMode => ({ ...state, uiMode });
 You provide transitions as a second argument when you create your state container.
 
 ```ts
-import { createStateContainer } from 'src/plugins/opensearch_dashboards_utils';
+import { createStateContainer } from 'src/plugins/opensearch-dashboards-utils';
 
 const container = createStateContainer(0, {
   increment: (cnt: number) => (by: number) => cnt + by,

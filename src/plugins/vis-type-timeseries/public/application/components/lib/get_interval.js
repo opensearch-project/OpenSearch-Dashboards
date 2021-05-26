@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { search } from '../../../../../../plugins/data/public';
 const { parseOpenSearchInterval } = search.aggs;
-import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis_type_timeseries/common/interval_regexp';
+import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis-type-timeseries/common/interval_regexp';
 
 export const AUTO_INTERVAL = 'auto';
 

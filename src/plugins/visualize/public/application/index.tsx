@@ -35,7 +35,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch-dashboards-react/public';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';

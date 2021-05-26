@@ -33,7 +33,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@osd/i18n';
-import { OsdError } from '../../../opensearch_dashboards_utils/public';
+import { OsdError } from '../../../opensearch-dashboards-utils/public';
 
 export class VislibError extends OsdError {
   constructor(message: string) {

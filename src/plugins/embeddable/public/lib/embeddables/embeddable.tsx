@@ -33,7 +33,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../opensearch_dashboards_utils/public';
+import { RenderCompleteDispatcher } from '../../../../opensearch-dashboards-utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';

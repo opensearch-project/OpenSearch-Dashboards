@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
+import { EmptyIndexPatternPrompt } from '../empty-index-pattern-prompt';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 describe('EmptyIndexPatternPrompt', () => {

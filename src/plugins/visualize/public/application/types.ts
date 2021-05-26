@@ -53,11 +53,11 @@ import {
   Storage,
   IOsdUrlStateStorage,
   ReduxLikeStateContainer,
-} from 'src/plugins/opensearch_dashboards_utils/public';
+} from 'src/plugins/opensearch-dashboards-utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
-import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedObjectsStart, SavedObject } from 'src/plugins/saved-objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { UrlForwardingStart } from 'src/plugins/url-forwarding/public';
 import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;

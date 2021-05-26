@@ -31,7 +31,7 @@
  */
 
 import { Plugin, IndexPatternsContract } from '.';
-import { fieldFormatsServiceMock } from './field_formats/mocks';
+import { fieldFormatsServiceMock } from './field-formats/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';

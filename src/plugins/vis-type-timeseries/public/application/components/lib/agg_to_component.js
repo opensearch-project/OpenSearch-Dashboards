@@ -42,7 +42,7 @@ import { SeriesAgg } from '../aggs/series_agg';
 import { SerialDiffAgg } from '../aggs/serial_diff';
 import { PositiveOnlyAgg } from '../aggs/positive_only';
 import { FilterRatioAgg } from '../aggs/filter_ratio';
-import { PercentileRankAgg } from '../aggs/percentile_rank';
+import { PercentileRankAgg } from '../aggs/percentile-rank';
 import { Static } from '../aggs/static';
 import { MathAgg } from '../aggs/math';
 import { TopHitAgg } from '../aggs/top_hit';

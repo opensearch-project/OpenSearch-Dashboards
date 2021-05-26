@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression-functions';
 
 export const access: ExpressionFunctionDefinition<'access', any, { key: string }, any> = {
   name: 'access',

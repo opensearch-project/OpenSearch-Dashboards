@@ -36,12 +36,12 @@ import 'leaflet/dist/leaflet.js';
 import 'leaflet-vega';
 import { createVegaVisualization } from './vega_visualization';
 
-import vegaliteGraph from './test_utils/vegalite_graph.json';
-import vegaGraph from './test_utils/vega_graph.json';
-import vegaMapGraph from './test_utils/vega_map_test.json';
+import vegaliteGraph from './test-utils/vegalite_graph.json';
+import vegaGraph from './test-utils/vega_graph.json';
+import vegaMapGraph from './test-utils/vega_map_test.json';
 
-import { VegaParser } from './data_model/vega_parser';
-import { SearchAPI } from './data_model/search_api';
+import { VegaParser } from './data-model/vega_parser';
+import { SearchAPI } from './data-model/search_api';
 
 import { createVegaTypeDefinition } from './vega_type';
 
@@ -50,7 +50,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 
 jest.mock('./default_spec', () => ({
-  getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
+  getDefaultSpec: () => jest.requireActual('./test-utils/default.spec.json'),
 }));
 
 jest.mock('./lib/vega', () => ({

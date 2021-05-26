@@ -31,7 +31,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IIndexPattern, IFieldType } from '../../index-patterns';
 
 export type ExistsFilterMeta = FilterMeta;
 

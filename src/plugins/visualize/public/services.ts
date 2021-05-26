@@ -31,7 +31,7 @@
  */
 
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
-import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../../plugins/opensearch-dashboards-utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
 import { SharePluginStart } from '../../../plugins/share/public';
 

@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { FILTERS } from '../../../../../common/opensearch_query/filters';
+import { FILTERS } from '../../../../../common/opensearch-query/filters';
 
 export interface Operator {
   message: string;

@@ -31,7 +31,7 @@
  */
 
 jest.mock('./send_request_to_opensearch', () => ({ sendRequestToOpenSearch: jest.fn() }));
-jest.mock('../../contexts/editor_context/editor_registry', () => ({
+jest.mock('../../contexts/editor-context/editor_registry', () => ({
   instance: { getInputEditor: jest.fn() },
 }));
 jest.mock('./track', () => ({ track: jest.fn() }));
@@ -43,7 +43,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { ContextValue, ServicesContextProvider } from '../../contexts';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 import { useRequestActionContext } from '../../contexts/request_context';
-import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
+import { instance as editorRegistry } from '../../contexts/editor-context/editor_registry';
 
 import { sendRequestToOpenSearch } from './send_request_to_opensearch';
 import { useSendCurrentRequestToOpenSearch } from './use_send_current_request_to_opensearch';

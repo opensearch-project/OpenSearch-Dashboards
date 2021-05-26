@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 
 interface Props {
   language: string;

@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { FileLayer, VectorLayer } from '../../maps_legacy/public';
-import { ORIGIN } from '../../maps_legacy/public';
+import { FileLayer, VectorLayer } from '../../maps-legacy/public';
+import { ORIGIN } from '../../maps-legacy/public';
 
 export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
   ...layer,

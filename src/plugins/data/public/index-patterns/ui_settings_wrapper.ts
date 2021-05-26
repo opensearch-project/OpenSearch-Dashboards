@@ -31,7 +31,7 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { UiSettingsCommon } from '../../common/index_patterns';
+import { UiSettingsCommon } from '../../common/index-patterns';
 
 export class UiSettingsPublicToCommon implements UiSettingsCommon {
   private uiSettings: IUiSettingsClient;

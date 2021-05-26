@@ -31,7 +31,7 @@
  */
 
 import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
-import { buildEmptyFilter, buildQueryFilter, FilterStateStore } from '../../opensearch_query';
+import { buildEmptyFilter, buildQueryFilter, FilterStateStore } from '../../opensearch-query';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {

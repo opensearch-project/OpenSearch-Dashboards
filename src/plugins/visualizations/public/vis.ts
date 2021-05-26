@@ -43,9 +43,9 @@
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@osd/utility-types';
 import { i18n } from '@osd/i18n';
-import { PersistedState } from './persisted_state';
+import { PersistedState } from './persisted-state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import { VisType } from './vis_types';
+import { VisType } from './vis-types';
 import {
   IAggConfigs,
   IndexPattern,

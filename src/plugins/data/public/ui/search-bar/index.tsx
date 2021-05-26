@@ -32,7 +32,7 @@
 
 import React from 'react';
 import { injectI18n } from '@osd/i18n/react';
-import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { withOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;

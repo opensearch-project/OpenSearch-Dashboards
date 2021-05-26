@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { GTE_INTERVAL_RE } from '../../../../../plugins/vis_type_timeseries/common/interval_regexp';
+import { GTE_INTERVAL_RE } from '../../../../../plugins/vis-type-timeseries/common/interval_regexp';
 import { i18n } from '@osd/i18n';
 import { search } from '../../../../../plugins/data/public';
 const { parseInterval } = search.aggs;

@@ -38,6 +38,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved-searches';
 export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './application/embeddable';
 export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';

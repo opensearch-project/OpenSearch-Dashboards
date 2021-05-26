@@ -36,7 +36,7 @@ import { error } from './error';
 import { introspectContext } from './introspect_context';
 import { mult } from './mult';
 import { sleep } from './sleep';
-import { AnyExpressionFunctionDefinition } from '../../expression_functions';
+import { AnyExpressionFunctionDefinition } from '../../expression-functions';
 
 export const functionTestSpecs: AnyExpressionFunctionDefinition[] = [
   access,

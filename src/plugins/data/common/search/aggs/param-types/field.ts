@@ -32,11 +32,11 @@
 
 import { i18n } from '@osd/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/opensearch_dashboards_utils/common';
+import { SavedObjectNotFound } from '../../../../../../plugins/opensearch-dashboards-utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
-import { OSD_FIELD_TYPES } from '../../../osd_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
+import { OSD_FIELD_TYPES } from '../../../osd-field-types/types';
+import { isNestedField, IndexPatternField } from '../../../index-patterns/fields';
 
 const filterByType = propFilter('type');
 

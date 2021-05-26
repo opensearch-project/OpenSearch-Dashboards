@@ -38,21 +38,21 @@ export {
   validateIndexPattern,
   getFromSavedObject,
   isDefault,
-} from '../../common/index_patterns/lib';
+} from '../../common/index-patterns/lib';
 export {
   flattenHitWrapper,
   formatHitProvider,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
-} from './index_patterns';
+} from './index-patterns';
 
-export { IndexPatternField, IIndexPatternFieldList } from '../../common/index_patterns';
+export { IndexPatternField, IIndexPatternFieldList } from '../../common/index-patterns';
 
 export {
   IndexPatternsService,
   IndexPatternsContract,
   IndexPattern,
   IndexPatternsApiClient,
-} from './index_patterns';
+} from './index-patterns';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';

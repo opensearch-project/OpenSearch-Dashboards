@@ -52,9 +52,9 @@ import {
   FieldFormatMap,
   IndexPatternFieldMap,
 } from '../types';
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon } from '../../field-formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
-import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
+import { SavedObjectNotFound } from '../../../../opensearch-dashboards-utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';

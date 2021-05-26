@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ActionExecutionContext, createAction } from '../../../ui_actions/public';
+import { ActionExecutionContext, createAction } from '../../../ui-actions/public';
 import { ActionType } from '../types';
 import { defaultTrigger } from '../triggers';
 

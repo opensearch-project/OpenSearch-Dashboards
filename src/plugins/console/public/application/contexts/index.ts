@@ -42,4 +42,4 @@ export {
   useEditorActionContext,
   useEditorReadContext,
   EditorContextProvider,
-} from './editor_context';
+} from './editor-context';

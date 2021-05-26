@@ -38,7 +38,7 @@ import { useMount } from 'react-use';
 
 import { Query, DataPublicPluginStart } from '../../../../data/public';
 import { IUiSettingsClient } from '../../../../../core/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
 

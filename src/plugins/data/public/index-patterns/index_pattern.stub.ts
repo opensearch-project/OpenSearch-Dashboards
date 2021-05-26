@@ -33,9 +33,9 @@
 import sinon from 'sinon';
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormat as FieldFormatImpl } from '../../common/field_formats';
-import { IFieldType, FieldSpec } from '../../common/index_patterns';
-import { FieldFormatsStart } from '../field_formats';
+import { FieldFormat as FieldFormatImpl } from '../../common/field-formats';
+import { IFieldType, FieldSpec } from '../../common/index-patterns';
+import { FieldFormatsStart } from '../field-formats';
 import { IndexPattern, indexPatterns, OSD_FIELD_TYPES, fieldList } from '../';
 import { getFieldFormatsRegistry } from '../test_utils';
 import { setFieldFormats } from '../services';

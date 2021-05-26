@@ -32,8 +32,8 @@
 
 import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toOpenSearchQuery } from '../kuery';
-import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/mocks';
+import { IIndexPattern } from '../../index-patterns';
+import { fields } from '../../index-patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {

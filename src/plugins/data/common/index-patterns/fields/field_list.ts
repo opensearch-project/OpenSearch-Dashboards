@@ -34,7 +34,7 @@ import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
 import { FieldSpec, IndexPatternFieldMap } from '../types';
-import { IndexPattern } from '../index_patterns';
+import { IndexPattern } from '../index-patterns';
 import { shortenDottedString } from '../../utils';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;

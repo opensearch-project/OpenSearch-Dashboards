@@ -38,7 +38,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../../index-patterns/index-patterns/index_pattern';
 import { TimeRange } from '../../../common';
 
 function removeParentAggs(obj: any) {

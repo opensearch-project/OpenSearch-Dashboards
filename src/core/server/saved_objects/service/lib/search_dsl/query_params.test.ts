@@ -31,7 +31,7 @@
  */
 
 // @ts-expect-error no ts
-import { opensearchKuery } from '../../../opensearch_query';
+import { opensearchKuery } from '../../../opensearch-query';
 type KueryNode = any;
 
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';

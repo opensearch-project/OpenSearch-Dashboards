@@ -32,10 +32,10 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 
 import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../../../opensearch-dashboards-react/public';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';

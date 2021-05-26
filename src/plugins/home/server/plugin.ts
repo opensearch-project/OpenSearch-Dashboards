@@ -38,9 +38,9 @@ import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { UsageCollectionSetup } from '../../usage-collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { sampleDataTelemetry } from './saved_objects';
+import { sampleDataTelemetry } from './saved-objects';
 import { registerRoutes } from './routes';
 
 interface HomeServerPluginSetupDependencies {

@@ -33,7 +33,7 @@
 import React from 'react';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook-form-lib';
 
 interface Props {
   field: FieldHook;

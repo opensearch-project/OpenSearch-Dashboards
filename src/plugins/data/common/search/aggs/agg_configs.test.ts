@@ -34,9 +34,9 @@ import { keyBy } from 'lodash';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
-import { mockAggTypesRegistry } from './test_helpers';
-import type { IndexPatternField } from '../../index_patterns';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { mockAggTypesRegistry } from './test-helpers';
+import type { IndexPatternField } from '../../index-patterns';
+import { IndexPattern } from '../../index-patterns/index-patterns/index_pattern';
 import { stubIndexPattern, stubIndexPatternWithFields } from '../../../common/stubs';
 
 describe('AggConfigs', () => {

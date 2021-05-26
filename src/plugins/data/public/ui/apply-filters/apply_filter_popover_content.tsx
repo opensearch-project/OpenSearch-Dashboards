@@ -45,7 +45,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { Component } from 'react';
 import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, Filter } from '../../../common';
-import { FilterLabel } from '../filter_bar';
+import { FilterLabel } from '../filter-bar';
 import { mapAndFlattenFilters } from '../../query';
 
 interface Props {

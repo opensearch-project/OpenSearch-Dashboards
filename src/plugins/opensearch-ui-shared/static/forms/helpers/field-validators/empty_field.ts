@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ValidationFunc } from '../../hook_form_lib';
+import { ValidationFunc } from '../../hook-form-lib';
 import { isEmptyString } from '../../../validators/string';
 import { isEmptyArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';

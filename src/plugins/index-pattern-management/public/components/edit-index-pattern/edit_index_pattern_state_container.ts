@@ -35,7 +35,7 @@ import {
   createStateContainer,
   syncState,
   createOsdUrlStateStorage,
-} from '../../../../../plugins/opensearch_dashboards_utils/public';
+} from '../../../../../plugins/opensearch-dashboards-utils/public';
 
 interface IEditIndexPatternState {
   tab: string;

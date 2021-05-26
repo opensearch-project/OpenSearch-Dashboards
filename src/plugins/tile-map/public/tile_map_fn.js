@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { convertToGeoJson } from '../../maps_legacy/public';
+import { convertToGeoJson } from '../../maps-legacy/public';
 import { i18n } from '@osd/i18n';
 
 export const createTileMapFn = () => ({

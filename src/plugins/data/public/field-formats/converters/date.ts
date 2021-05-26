@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
 import { FieldFormat, OSD_FIELD_TYPES, FIELD_FORMAT_IDS } from '../../../common';
-import { TextContextTypeConvert } from '../../../common/field_formats/types';
+import { TextContextTypeConvert } from '../../../common/field-formats/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;

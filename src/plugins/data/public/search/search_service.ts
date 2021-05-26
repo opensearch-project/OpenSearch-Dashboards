@@ -47,10 +47,10 @@ import {
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../index-patterns/index-patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 import { opensearchdsl, opensearchRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ConfigSchema } from '../../config';

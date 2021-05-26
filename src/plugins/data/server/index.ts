@@ -109,7 +109,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-} from '../common/field_formats';
+} from '../common/field-formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
@@ -147,7 +147,7 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-} from './index_patterns';
+} from './index-patterns';
 
 export {
   IFieldType,
@@ -307,4 +307,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './index-patterns';

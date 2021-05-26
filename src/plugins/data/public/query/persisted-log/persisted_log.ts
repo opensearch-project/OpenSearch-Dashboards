@@ -33,7 +33,7 @@
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch-dashboards-utils/public';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {
   return _.isEqual(oldItem, newItem);

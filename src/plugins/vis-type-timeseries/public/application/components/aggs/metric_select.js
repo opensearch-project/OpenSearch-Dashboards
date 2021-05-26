@@ -36,10 +36,10 @@ import { includes } from 'lodash';
 import { injectI18n } from '@osd/i18n/react';
 import { EuiComboBox } from '@elastic/eui';
 import { calculateSiblings } from '../lib/calculate_siblings';
-import { calculateLabel } from '../../../../../../plugins/vis_type_timeseries/common/calculate_label';
-import { basicAggs } from '../../../../../../plugins/vis_type_timeseries/common/basic_aggs';
-import { toPercentileNumber } from '../../../../../../plugins/vis_type_timeseries/common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { calculateLabel } from '../../../../../../plugins/vis-type-timeseries/common/calculate_label';
+import { basicAggs } from '../../../../../../plugins/vis-type-timeseries/common/basic_aggs';
+import { toPercentileNumber } from '../../../../../../plugins/vis-type-timeseries/common/to_percentile_number';
+import { METRIC_TYPES } from '../../../../../../plugins/vis-type-timeseries/common/metric_types';
 
 function createTypeFilter(restrict, exclude) {
   return (metric) => {

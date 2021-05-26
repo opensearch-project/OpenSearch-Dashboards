@@ -37,7 +37,7 @@ import { Required } from '@osd/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
-import { getTitle } from '../../../common/index_patterns/lib';
+import { getTitle } from '../../../common/index-patterns/lib';
 
 export type IndexPatternSelectProps = Required<
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,

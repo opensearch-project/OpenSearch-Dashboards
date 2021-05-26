@@ -34,7 +34,7 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { AppMountParameters, OverlayRef } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import {
   VisualizeServices,
   VisualizeAppState,

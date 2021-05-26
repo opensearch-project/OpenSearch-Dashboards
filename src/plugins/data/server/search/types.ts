@@ -39,7 +39,7 @@ import {
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IOpenSearchSearchRequest, IOpenSearchSearchResponse } from './opensearch_search';
+import { IOpenSearchSearchRequest, IOpenSearchSearchResponse } from './opensearch-search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;

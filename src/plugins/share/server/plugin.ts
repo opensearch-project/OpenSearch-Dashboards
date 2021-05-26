@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { createRoutes } from './routes/create_routes';
-import { url } from './saved_objects';
+import { url } from './saved-objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 
 export class SharePlugin implements Plugin {

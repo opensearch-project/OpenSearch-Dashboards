@@ -32,7 +32,7 @@
 
 import { Reporter, METRIC_TYPE } from '@osd/analytics';
 import { Subject, merge } from 'rxjs';
-import { Storage } from '../../opensearch_dashboards_utils/public';
+import { Storage } from '../../opensearch-dashboards-utils/public';
 import { createReporter } from './services';
 import {
   PluginInitializerContext,

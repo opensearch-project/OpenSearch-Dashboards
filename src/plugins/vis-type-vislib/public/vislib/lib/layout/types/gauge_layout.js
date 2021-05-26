@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { chartSplit } from '../splits/gauge_chart/chart_split';
+import { chartSplit } from '../splits/gauge-chart/chart_split';
 
 /**
  * Specifies the visualization layout for column charts.

@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export { buildPointSeriesData } from './point_series';
+export { buildPointSeriesData } from './point-series';
 export { buildHierarchicalData } from './hierarchical/build_hierarchical_data';

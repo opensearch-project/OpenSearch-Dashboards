@@ -36,7 +36,7 @@ import { ExecutionContext } from '../../../execution/types';
 import {
   OpenSearchDashboardsContext,
   ExpressionValueSearchContext,
-} from '../../../expression_types';
+} from '../../../expression-types';
 
 describe('interpreter/functions#opensearch-dashboards', () => {
   const fn = functionWrapper(opensearchDashboards);

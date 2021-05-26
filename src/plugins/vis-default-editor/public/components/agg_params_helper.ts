@@ -40,7 +40,7 @@ import {
   IndexPattern,
   IndexPatternField,
 } from '../../../data/public';
-import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
+import { filterAggTypes, filterAggTypeFields } from '../agg-filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';

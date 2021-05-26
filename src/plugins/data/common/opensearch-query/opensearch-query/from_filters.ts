@@ -33,7 +33,7 @@ import { isUndefined } from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { handleNestedFilter } from './handle_nested_filter';
 
 /**

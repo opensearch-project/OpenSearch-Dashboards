@@ -42,7 +42,7 @@ import { coreMock } from '../../../../../../../core/public/mocks';
 import { initializeInnerAngularModule } from '../../../../get_inner_angular';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { initAngularBootstrap } from '../../../../../../opensearch_dashboards_legacy/public';
+import { initAngularBootstrap } from '../../../../../../opensearch-dashboards-legacy/public';
 
 describe('debounce service', function () {
   let debounce: (fn: () => void, timeout: number, options?: any) => any;

@@ -49,7 +49,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { PANEL_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { PANEL_TYPES } from '../../../../../../plugins/vis-type-timeseries/common/panel_types';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;

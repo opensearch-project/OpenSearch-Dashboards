@@ -5,7 +5,7 @@
   "server": false,
   "extraPublicDirs": [
     "common",
-    "demos/state_containers/todomvc",
-    "common/state_containers"
+    "demos/state-containers/todomvc",
+    "common/state-containers"
   ]
 }

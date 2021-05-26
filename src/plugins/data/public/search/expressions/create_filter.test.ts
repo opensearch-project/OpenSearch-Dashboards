@@ -38,7 +38,7 @@ import {
   BytesFormat,
   FieldFormatsGetConfigFn,
 } from '../../../common';
-import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test-helpers';
 
 import { createFilter } from './create_filter';
 

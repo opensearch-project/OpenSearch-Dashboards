@@ -95,10 +95,10 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
 
         if (vegaParser.useMap) {
           const services = { toastService: getNotifications().toasts };
-          const { VegaMapView } = await import('./vega_view/vega_map_view');
+          const { VegaMapView } = await import('./vega-view/vega_map_view');
           this._vegaView = new VegaMapView(vegaViewParams, services);
         } else {
-          const { VegaView } = await import('./vega_view/vega_view');
+          const { VegaView } = await import('./vega-view/vega_view');
           this._vegaView = new VegaView(vegaViewParams);
         }
         await this._vegaView.init();

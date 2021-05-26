@@ -33,8 +33,8 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { getSavedObjectFinder } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { getSavedObjectFinder } from '../../saved-objects/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui-actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import {
   PluginInitializerContext,
@@ -62,13 +62,13 @@ import {
   EmbeddablePanel,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { EmbeddableStateTransfer } from './lib/state_transfer';
+import { EmbeddableStateTransfer } from './lib/state-transfer';
 import {
   extractBaseEmbeddableInput,
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { PersistableState, SerializableState } from '../../opensearch_dashboards_utils/common';
+import { PersistableState, SerializableState } from '../../opensearch-dashboards-utils/common';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;

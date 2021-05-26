@@ -37,10 +37,10 @@ import { i18n } from '@osd/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
 import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
-import { SearchSelection } from './search_selection';
-import { TypeSelection } from './type_selection';
-import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
-import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { SearchSelection } from './search-selection';
+import { TypeSelection } from './type-selection';
+import { TypesStart, VisType, VisTypeAlias } from '../vis-types';
+import { UsageCollectionSetup } from '../../../../plugins/usage-collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 

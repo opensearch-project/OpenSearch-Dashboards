@@ -51,7 +51,7 @@ import type QueryStringInputUI from './query_string_input';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 
 const startMock = coreMock.createStart();
 

@@ -30,7 +30,7 @@ const defaultState: MyState = {
 Create your a state container.
 
 ```ts
-import { createStateContainer } from 'src/plugins/opensearch_dashboards_utils';
+import { createStateContainer } from 'src/plugins/opensearch-dashboards-utils';
 
 const container = createStateContainer<MyState>(defaultState);
 

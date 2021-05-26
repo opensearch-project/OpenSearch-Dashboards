@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { throttle } from 'lodash';
-import { SenseEditor } from '../../../../models/sense_editor';
+import { SenseEditor } from '../../../../models/sense-editor';
 
 interface Actions {
   senseEditor: SenseEditor;

@@ -34,7 +34,7 @@ import {
   createStateContainer,
   syncState,
   IOsdUrlStateStorage,
-} from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-utils/public';
 
 import { TimelineAppState, TimelineAppStateTransitions } from './types';
 

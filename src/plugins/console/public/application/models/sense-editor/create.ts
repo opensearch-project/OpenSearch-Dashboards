@@ -31,7 +31,7 @@
  */
 
 import { SenseEditor } from './sense_editor';
-import * as core from '../legacy_core_editor';
+import * as core from '../legacy-core-editor';
 
 export function create(element: HTMLElement) {
   const coreEditor = core.create(element);

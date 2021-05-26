@@ -48,7 +48,7 @@ import {
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@osd/i18n/react';
-import { PANEL_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { PANEL_TYPES } from '../../../../../../../plugins/vis-type-timeseries/common/panel_types';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {

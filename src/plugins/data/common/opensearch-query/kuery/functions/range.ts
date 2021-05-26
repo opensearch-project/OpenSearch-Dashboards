@@ -31,7 +31,7 @@
  */
 
 import _ from 'lodash';
-import { nodeTypes } from '../node_types';
+import { nodeTypes } from '../node-types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';

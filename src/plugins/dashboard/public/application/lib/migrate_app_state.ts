@@ -34,7 +34,7 @@ import semver from 'semver';
 import { i18n } from '@osd/i18n';
 import { METRIC_TYPE } from '@osd/analytics';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/public';
 import { DashboardAppState, SavedDashboardPanel } from '../../types';
 import {
   migratePanelsTo730,

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<

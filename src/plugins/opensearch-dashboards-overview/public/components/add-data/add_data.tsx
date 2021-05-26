@@ -38,7 +38,7 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import {
   RedirectAppLinks,
   useOpenSearchDashboards,
-} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+} from '../../../../../../src/plugins/opensearch-dashboards-react/public';
 import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';

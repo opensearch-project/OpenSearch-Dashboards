@@ -34,7 +34,7 @@ import React from 'react';
 import classNames from 'classnames';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import { Markdown } from '../../../../../../../plugins/opensearch_dashboards_react/public';
+import { Markdown } from '../../../../../../../plugins/opensearch-dashboards-react/public';
 
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';

@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
-import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObject, SavedObjectLoader } from '../../../saved-objects/public';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,

@@ -42,7 +42,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../opensearch_dashboards_utils/common';
+} from '../../opensearch-dashboards-utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;

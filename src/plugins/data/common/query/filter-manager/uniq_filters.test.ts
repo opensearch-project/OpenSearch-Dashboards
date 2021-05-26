@@ -31,7 +31,7 @@
  */
 
 import { uniqFilters } from './uniq_filters';
-import { buildQueryFilter, Filter, FilterStateStore } from '../../opensearch_query';
+import { buildQueryFilter, Filter, FilterStateStore } from '../../opensearch-query';
 
 describe('filter manager utilities', () => {
   describe('niqFilter', () => {

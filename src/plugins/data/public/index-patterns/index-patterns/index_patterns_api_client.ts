@@ -31,8 +31,8 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
+import { IndexPatternMissingIndices } from '../../../common/index-patterns/lib';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index-patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 

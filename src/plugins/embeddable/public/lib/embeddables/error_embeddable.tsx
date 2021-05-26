@@ -33,7 +33,7 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Markdown } from '../../../../opensearch_dashboards_react/public';
+import { Markdown } from '../../../../opensearch-dashboards-react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';

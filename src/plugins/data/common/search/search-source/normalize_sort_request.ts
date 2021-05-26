@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 import { OpenSearchQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(

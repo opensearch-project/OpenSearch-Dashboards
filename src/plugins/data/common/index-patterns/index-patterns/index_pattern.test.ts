@@ -34,13 +34,13 @@ import { map, last } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
-import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
+import { DuplicateField } from '../../../../opensearch-dashboards-utils/common';
 // @ts-expect-error
 import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
-import { fieldFormatsMock } from '../../field_formats/mocks';
+import { fieldFormatsMock } from '../../field-formats/mocks';
 import { FieldFormat } from '../..';
 
 class MockFieldFormatter {}

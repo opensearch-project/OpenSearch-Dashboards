@@ -33,9 +33,9 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { registerDqlTelemetryRoute } from './route';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
-import { makeDQLUsageCollector } from './usage_collector';
-import { dqlTelemetry } from '../saved_objects';
+import { UsageCollectionSetup } from '../../../usage-collection/server';
+import { makeDQLUsageCollector } from './usage-collector';
+import { dqlTelemetry } from '../saved-objects';
 
 export class DqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}

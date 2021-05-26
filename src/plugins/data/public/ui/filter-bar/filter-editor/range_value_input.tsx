@@ -35,7 +35,7 @@ import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch-dashboards-react/public';
 import { IFieldType } from '../../..';
 import { ValueInputType } from './value_input_type';
 

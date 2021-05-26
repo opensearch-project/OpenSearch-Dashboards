@@ -31,7 +31,7 @@
  */
 
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { HTML_CONTEXT_TYPE } from '../content-types';
 
 describe('Color Format', () => {
   describe('field is a number', () => {

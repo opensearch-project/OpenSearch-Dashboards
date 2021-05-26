@@ -33,7 +33,7 @@
 import React, { lazy } from 'react';
 import { i18n } from '@osd/i18n';
 
-import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { DefaultEditorSize } from '../../vis-default-editor/public';
 import { getTimelineRequestHandler } from './helpers/timeline_request_handler';
 import { TimelineOptionsProps } from './timeline_options';
 import { TimelineVisDependencies } from './plugin';

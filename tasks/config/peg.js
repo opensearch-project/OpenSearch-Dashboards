@@ -32,8 +32,8 @@
 
 module.exports = {
   kuery: {
-    src: 'src/plugins/data/common/opensearch_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/opensearch_query/kuery/ast/_generated_/kuery.js',
+    src: 'src/plugins/data/common/opensearch-query/kuery/ast/kuery.peg',
+    dest: 'src/plugins/data/common/opensearch-query/kuery/ast/_generated_/kuery.js',
     options: {
       allowedStartRules: ['start', 'Literal'],
     },

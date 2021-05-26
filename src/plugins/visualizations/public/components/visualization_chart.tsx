@@ -35,7 +35,7 @@ import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import { PersistedState } from '../../../../plugins/visualizations/public';
 import { VisualizationController } from '../types';
-import { ResizeChecker } from '../../../../plugins/opensearch_dashboards_utils/public';
+import { ResizeChecker } from '../../../../plugins/opensearch-dashboards-utils/public';
 import { ExprVis } from '../expressions/vis';
 
 interface VisualizationChartProps {

@@ -36,7 +36,7 @@ import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
   SavedObject,
-} from '../../common/index_patterns';
+} from '../../common/index-patterns';
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
 

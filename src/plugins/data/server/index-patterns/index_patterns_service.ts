@@ -38,10 +38,10 @@ import {
   Logger,
 } from 'opensearch-dashboards/server';
 import { registerRoutes } from './routes';
-import { indexPatternSavedObjectType } from '../saved_objects';
+import { indexPatternSavedObjectType } from '../saved-objects';
 import { capabilitiesProvider } from './capabilities_provider';
-import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns';
-import { FieldFormatsStart } from '../field_formats';
+import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index-patterns';
+import { FieldFormatsStart } from '../field-formats';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';

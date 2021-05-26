@@ -35,9 +35,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { RedirectAppLinks } from '../../app_links';
+import { RedirectAppLinks } from '../../app-links';
 import { useOpenSearchDashboards } from '../../context';
-import { useUiSetting$ } from '../../ui_settings';
+import { useUiSetting$ } from '../../ui-settings';
 
 interface Props {
   addBasePath: (path: string) => string;

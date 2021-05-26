@@ -34,12 +34,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 
-import { TimeseriesVisualization } from './vis_types/timeseries/vis';
-import { metric } from './vis_types/metric/vis';
-import { TopNVisualization as topN } from './vis_types/top_n/vis';
-import { TableVis as table } from './vis_types/table/vis';
-import { gauge } from './vis_types/gauge/vis';
-import { MarkdownVisualization as markdown } from './vis_types/markdown/vis';
+import { TimeseriesVisualization } from './vis-types/timeseries/vis';
+import { metric } from './vis-types/metric/vis';
+import { TopNVisualization as topN } from './vis-types/top-n/vis';
+import { TableVis as table } from './vis-types/table/vis';
+import { gauge } from './vis-types/gauge/vis';
+import { MarkdownVisualization as markdown } from './vis-types/markdown/vis';
 import { ErrorComponent } from './error';
 import { NoDataComponent } from './no_data';
 

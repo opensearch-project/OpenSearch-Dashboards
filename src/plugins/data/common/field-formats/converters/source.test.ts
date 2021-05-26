@@ -32,7 +32,7 @@
 
 import { SourceFormat } from './source';
 import { HtmlContextTypeConvert } from '../types';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { HTML_CONTEXT_TYPE } from '../content-types';
 
 describe('Source Format', () => {
   let convertHtml: Function;

@@ -31,7 +31,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
+import { FieldHook, FIELD_TYPES } from '../hook-form-lib';
 
 interface Props {
   field: FieldHook;

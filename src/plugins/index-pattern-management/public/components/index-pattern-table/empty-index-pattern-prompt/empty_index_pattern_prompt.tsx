@@ -40,7 +40,7 @@ import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui'
 import { EuiLink } from '@elastic/eui';
 import { getListBreadcrumbs } from '../../breadcrumbs';
 import { IndexPatternCreationOption } from '../../types';
-import { CreateButton } from '../../create_button';
+import { CreateButton } from '../../create-button';
 import { Illustration } from './assets/index_pattern_illustration';
 import { ManagementAppMountParams } from '../../../../../management/public';
 

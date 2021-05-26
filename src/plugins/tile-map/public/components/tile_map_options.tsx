@@ -34,9 +34,9 @@ import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { BasicOptions, RangeOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps_legacy/public';
+import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps-legacy/public';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { each, union } from 'lodash';
-import { Filter } from '../../opensearch_query';
+import { Filter } from '../../opensearch-query';
 import { dedupFilters } from './dedup_filters';
 
 /**

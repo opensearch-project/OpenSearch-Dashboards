@@ -33,7 +33,7 @@
 import { CoreSetup } from 'src/core/public';
 import { FieldFormatsRegistry, UI_SETTINGS } from '../../common';
 import { deserializeFieldFormat } from './utils/deserialize';
-import { FormatFactory } from '../../common/field_formats/utils';
+import { FormatFactory } from '../../common/field-formats/utils';
 import { baseFormattersPublic } from './constants';
 
 export class FieldFormatsService {

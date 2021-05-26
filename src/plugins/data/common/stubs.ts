@@ -30,6 +30,6 @@
  * GitHub history for details.
  */
 
-export { stubIndexPattern, stubIndexPatternWithFields } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
-export * from './opensearch_query/filters/stubs';
+export { stubIndexPattern, stubIndexPatternWithFields } from './index-patterns/index_pattern.stub';
+export { stubFields } from './index-patterns/field.stub';
+export * from './opensearch-query/filters/stubs';

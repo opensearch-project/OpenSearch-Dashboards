@@ -34,7 +34,7 @@ import {
   createStateContainer,
   syncState,
   createOsdUrlStateStorage,
-} from 'src/plugins/opensearch_dashboards_utils/public';
+} from 'src/plugins/opensearch-dashboards-utils/public';
 
 const stateContainer = createStateContainer({ count: 0 });
 const stateStorage = createOsdUrlStateStorage();

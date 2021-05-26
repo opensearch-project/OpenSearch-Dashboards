@@ -35,7 +35,7 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
+import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui-actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
   opensearchFilters,
@@ -47,11 +47,11 @@ import {
   IFieldType,
 } from '../../../../data/public';
 import { Container, Embeddable } from '../../../../embeddable/public';
-import * as columnActions from '../angular/doc_table/actions/columns';
+import * as columnActions from '../angular/doc-table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table';
+import { SortOrder } from '../angular/doc-table/components/table-header/helpers';
+import { getSortForSearchSource } from '../angular/doc-table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,

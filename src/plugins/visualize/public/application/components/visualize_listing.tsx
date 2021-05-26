@@ -40,7 +40,7 @@ import { useLocation } from 'react-router-dom';
 import {
   useOpenSearchDashboards,
   TableListView,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';

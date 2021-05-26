@@ -49,7 +49,7 @@ import { ManagementApp, ManagementSection } from '../../utils';
 import './management_sidebar_nav.scss';
 
 import { ManagementItem } from '../../utils/management_item';
-import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
+import { reactRouterNavigate } from '../../../../opensearch-dashboards-react/public';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];

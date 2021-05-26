@@ -31,9 +31,9 @@
  */
 
 import { handleNestedFilter } from './handle_nested_filter';
-import { fields } from '../../index_patterns/mocks';
+import { fields } from '../../index-patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IFieldType, IIndexPattern } from '../../index_patterns';
+import { IFieldType, IIndexPattern } from '../../index-patterns';
 
 describe('handleNestedFilter', function () {
   const indexPattern: IIndexPattern = ({

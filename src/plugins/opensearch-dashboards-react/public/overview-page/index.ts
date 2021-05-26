@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export * from './overview_page_footer';
-export * from './overview_page_header';
+export * from './overview-page-footer';
+export * from './overview-page-header';

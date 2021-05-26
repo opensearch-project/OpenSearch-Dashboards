@@ -31,7 +31,7 @@
  */
 
 import * as ast from '../ast';
-import * as literal from '../node_types/literal';
+import * as literal from '../node-types/literal';
 import { IIndexPattern, KueryNode } from '../../..';
 
 export function buildNodeParams(path: any, child: any) {

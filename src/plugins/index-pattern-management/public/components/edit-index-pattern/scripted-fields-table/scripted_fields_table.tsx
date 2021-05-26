@@ -35,7 +35,7 @@ import { EuiSpacer } from '@elastic/eui';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
-} from '../../../scripting_languages';
+} from '../../../scripting-languages';
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';

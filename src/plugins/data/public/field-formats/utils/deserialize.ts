@@ -35,7 +35,7 @@ import { identity } from 'lodash';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 
 import { FieldFormat } from '../../../common';
-import { FormatFactory } from '../../../common/field_formats/utils';
+import { FormatFactory } from '../../../common/field-formats/utils';
 import { getFormatWithAggs } from '../../../common/search/aggs';
 import { DataPublicPluginStart, IFieldFormat } from '../../../public';
 import { getUiSettings } from '../../../public/services';

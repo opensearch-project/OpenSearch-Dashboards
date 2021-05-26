@@ -36,7 +36,7 @@ import {
   geoContains,
   mapTooltipProvider,
   lazyLoadMapsLegacyModules,
-} from '../../maps_legacy/public';
+} from '../../maps-legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
 function scaleBounds(bounds) {

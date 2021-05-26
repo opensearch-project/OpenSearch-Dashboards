@@ -36,7 +36,7 @@ import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
 import { i18n } from '@osd/i18n';
 
-import { MarkdownSimple, toMountPoint } from '../../../../../opensearch_dashboards_react/public';
+import { MarkdownSimple, toMountPoint } from '../../../../../opensearch-dashboards-react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { opensearchFilters, connectToQueryState } from '../../../../../data/public';
 import {

@@ -78,7 +78,7 @@ export { ORIGIN } from './common/constants/origin';
 export { WmsOptions } from './components/wms_options';
 export { LegacyMapDeprecationMessage } from './components/legacy_map_deprecation_message';
 
-export { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
+export { lazyLoadMapsLegacyModules } from './lazy-load-bundle';
 
 export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;

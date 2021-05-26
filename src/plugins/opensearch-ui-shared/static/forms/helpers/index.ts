@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import * as fieldValidatorsImport from './field_validators';
+import * as fieldValidatorsImport from './field-validators';
 import * as fieldFormattersImport from './field_formatters';
 import * as serializersImport from './serializers';
 import * as deserializersImport from './de_serializers';

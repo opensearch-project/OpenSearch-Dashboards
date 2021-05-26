@@ -41,7 +41,7 @@ import { QueryBarTopRow } from './';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 import { I18nProvider } from '@osd/i18n/react';
 import { stubIndexPatternWithFields } from '../../stubs';
 import { UI_SETTINGS } from '../../../common';

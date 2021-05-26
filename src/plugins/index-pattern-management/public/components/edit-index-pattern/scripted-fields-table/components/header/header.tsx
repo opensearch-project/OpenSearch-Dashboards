@@ -37,7 +37,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elasti
 import { FormattedMessage } from '@osd/i18n/react';
 import { ScopedHistory } from 'opensearch-dashboards/public';
 
-import { reactRouterNavigate } from '../../../../../../../opensearch_dashboards_react/public';
+import { reactRouterNavigate } from '../../../../../../../opensearch-dashboards-react/public';
 
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;

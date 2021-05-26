@@ -37,7 +37,7 @@ import $ from 'jquery';
 import { Tooltip } from '../components/tooltip';
 import { Chart } from './_chart';
 import { TimeMarker } from './time_marker';
-import { seriesTypes } from './point_series/series_types';
+import { seriesTypes } from './point-series/series_types';
 import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 const seriTypes = seriesTypes;

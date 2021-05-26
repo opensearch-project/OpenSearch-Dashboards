@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { ExpressionValueSearchContext } from '../../expression_types';
+import { ExpressionValueSearchContext } from '../../expression-types';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];

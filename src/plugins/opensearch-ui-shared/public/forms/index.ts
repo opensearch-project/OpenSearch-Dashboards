@@ -30,6 +30,6 @@
  * GitHub history for details.
  */
 
-export * from './form_wizard';
+export * from './form-wizard';
 
-export * from './multi_content';
+export * from './multi-content';

@@ -36,12 +36,12 @@ import { History } from 'history';
 
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { IIndexPattern, TimeRange, Query, Filter, SavedQuery } from 'src/plugins/data/public';
-import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch-dashboards-utils/public';
 
 import { DashboardAppState, SavedDashboardPanel } from '../types';
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { SavedObjectDashboard } from '../saved-dashboards';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;

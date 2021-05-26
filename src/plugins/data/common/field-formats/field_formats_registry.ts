@@ -45,9 +45,9 @@ import {
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../osd_field_types/types';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../osd-field-types/types';
 import { UI_SETTINGS } from '../constants';
-import { FieldFormatNotFoundError } from '../field_formats';
+import { FieldFormatNotFoundError } from '../field-formats';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();

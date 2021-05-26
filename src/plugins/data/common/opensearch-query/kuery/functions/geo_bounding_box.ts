@@ -31,7 +31,7 @@
  */
 
 import _ from 'lodash';
-import { nodeTypes } from '../node_types';
+import { nodeTypes } from '../node-types';
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
 

@@ -46,12 +46,12 @@ import {
   canAppendWildcard,
   ensureMinimumTime,
 } from '../../lib';
-import { LoadingIndices } from './components/loading_indices';
-import { StatusMessage } from './components/status_message';
-import { IndicesList } from './components/indices_list';
+import { LoadingIndices } from './components/loading-indices';
+import { StatusMessage } from './components/status-message';
+import { IndicesList } from './components/indices-list';
 import { Header } from './components/header';
-import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
-import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
+import { context as contextType } from '../../../../../../opensearch-dashboards-react/public';
+import { IndexPatternCreationConfig } from '../../../../../../../plugins/index-pattern-management/public';
 import { MatchedItem } from '../../types';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 

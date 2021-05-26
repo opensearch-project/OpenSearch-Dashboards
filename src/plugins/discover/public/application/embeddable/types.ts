@@ -36,7 +36,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
+import { SortOrder } from '../angular/doc-table/components/table-header/helpers';
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
 import { SavedSearch } from '../..';
 

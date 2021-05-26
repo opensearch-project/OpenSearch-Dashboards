@@ -31,7 +31,7 @@
  */
 
 export * from './create';
-export * from '../legacy_core_editor/create_readonly';
+export * from '../legacy-core-editor/create_readonly';
 export { MODE } from '../../../lib/row_parser';
 export { SenseEditor } from './sense_editor';
 export { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';

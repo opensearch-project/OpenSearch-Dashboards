@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IIndexPattern, IFieldType } from '../../index-patterns';
 import { Filter } from '../filters';
 
 /*

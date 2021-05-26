@@ -42,7 +42,7 @@ import { handleAdd, handleDelete } from '../lib/collection_actions';
 import { newMetricAggFn } from '../lib/new_metric_agg_fn';
 import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import { IFieldType } from '../../../../../data/common/index_patterns/fields';
+import { IFieldType } from '../../../../../data/common/index-patterns/fields';
 
 const DROPPABLE_ID = 'aggs_dnd';
 

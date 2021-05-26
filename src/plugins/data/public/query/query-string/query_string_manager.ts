@@ -33,7 +33,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch-dashboards-utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
 
 export class QueryStringManager {

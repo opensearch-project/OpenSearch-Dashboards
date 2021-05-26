@@ -33,7 +33,7 @@
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
-import { VisTypeAlias } from '../../vis_types';
+import { VisTypeAlias } from '../../vis-types';
 
 interface Props {
   promotedTypes: VisTypeAlias[];

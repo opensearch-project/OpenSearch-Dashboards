@@ -46,8 +46,8 @@ import {
   ScopedHistory,
   AppMountParameters,
 } from 'opensearch-dashboards/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../opensearch_dashboards_utils/public';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/public';
+import { Storage } from '../../../opensearch-dashboards-utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { EmbeddableStart } from '../../../embeddable/public';
@@ -57,9 +57,9 @@ import { SharePluginStart } from '../../../share/public';
 import {
   OpenSearchDashboardsLegacyStart,
   configureAppAngularModule,
-} from '../../../opensearch_dashboards_legacy/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+} from '../../../opensearch-dashboards-legacy/public';
+import { UrlForwardingStart } from '../../../url-forwarding/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../saved-objects/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';

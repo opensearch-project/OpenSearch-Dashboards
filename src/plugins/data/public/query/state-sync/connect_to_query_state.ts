@@ -33,7 +33,7 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
-import { BaseStateContainer } from '../../../../opensearch_dashboards_utils/public';
+import { BaseStateContainer } from '../../../../opensearch-dashboards-utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';

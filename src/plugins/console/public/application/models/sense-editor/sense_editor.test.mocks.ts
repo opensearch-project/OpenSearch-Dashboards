@@ -31,7 +31,7 @@
  */
 /* eslint no-undef: 0 */
 
-import '../legacy_core_editor/legacy_core_editor.test.mocks';
+import '../legacy-core-editor/legacy_core_editor.test.mocks';
 
 import jQuery from 'jquery';
 jest.spyOn(jQuery, 'ajax').mockImplementation(

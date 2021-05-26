@@ -34,7 +34,7 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 import { UI_SETTINGS } from '../../../../data/public';
 

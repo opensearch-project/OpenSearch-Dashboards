@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression-functions';
 
 export const sleep: ExpressionFunctionDefinition<'sleep', any, { time: number }, any> = {
   name: 'sleep',

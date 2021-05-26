@@ -33,7 +33,7 @@
 import { mapValues, isString } from 'lodash';
 import { FieldMappingSpec, MappingObject } from './types';
 
-// import from ./common/types to prevent circular dependency of opensearch_dashboards_utils <-> data plugin
+// import from ./common/types to prevent circular dependency of opensearch-dashboards-utils <-> data plugin
 import { OPENSEARCH_FIELD_TYPES } from '../../../data/common/types';
 
 /** @private */

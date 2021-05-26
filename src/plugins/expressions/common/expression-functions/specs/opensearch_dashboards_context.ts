@@ -31,8 +31,8 @@
  */
 import { uniqBy } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { ExpressionFunctionDefinition } from '../../expression_functions';
-import { OpenSearchDashboardsContext } from '../../expression_types';
+import { ExpressionFunctionDefinition } from '../../expression-functions';
+import { OpenSearchDashboardsContext } from '../../expression-types';
 import { Query, uniqFilters } from '../../../../data/common';
 
 interface Arguments {

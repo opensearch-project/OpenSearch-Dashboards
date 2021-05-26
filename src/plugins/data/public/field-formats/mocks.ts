@@ -31,7 +31,7 @@
  */
 
 import { FieldFormatsStart, FieldFormatsSetup, FieldFormatsService } from '.';
-import { fieldFormatsMock } from '../../common/field_formats/mocks';
+import { fieldFormatsMock } from '../../common/field-formats/mocks';
 
 type FieldFormatsServiceClientContract = PublicMethodsOf<FieldFormatsService>;
 

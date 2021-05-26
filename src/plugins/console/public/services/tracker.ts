@@ -32,7 +32,7 @@
 
 import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
 import { MetricsTracker } from '../types';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 
 const APP_TRACKER_NAME = 'console';
 

@@ -33,7 +33,7 @@ import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@osd/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch-dashboards-utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
@@ -75,8 +75,8 @@ import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@osd/config-schema';
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui-actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UnwrapPromiseOrReturn } from '@osd/utility-types';
@@ -109,7 +109,7 @@ export class AggConfig {
     // (undocumented)
     fieldName(): any;
     // (undocumented)
-    getAggParams(): import("./param_types/agg").AggParamType<AggConfig>[];
+    getAggParams(): import("./param-types/agg").AggParamType<AggConfig>[];
     // (undocumented)
     getField(): any;
     // (undocumented)

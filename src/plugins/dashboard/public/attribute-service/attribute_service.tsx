@@ -43,7 +43,7 @@ import {
   EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
 import { I18nStart, NotificationsStart } from '../../../../core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved_objects/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../saved-objects/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality

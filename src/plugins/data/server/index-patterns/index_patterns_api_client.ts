@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index_patterns/types';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index-patterns/types';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   async getFieldsForTimePattern(options: GetFieldsOptions = {}) {

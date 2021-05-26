@@ -42,12 +42,12 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
-import { StepIndexPattern } from './components/step_index_pattern';
-import { StepTimeField } from './components/step_time_field';
+import { StepIndexPattern } from './components/step-index-pattern';
+import { StepTimeField } from './components/step-time-field';
 import { Header } from './components/header';
-import { LoadingState } from './components/loading_state';
+import { LoadingState } from './components/loading-state';
 
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
+import { context as contextType } from '../../../../opensearch-dashboards-react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';

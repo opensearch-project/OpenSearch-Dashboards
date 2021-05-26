@@ -38,12 +38,12 @@ import { I18nProvider } from '@osd/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
-import { getSampleDashboardInput } from '../../test_helpers';
+import { getSampleDashboardInput } from '../../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
-import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch-dashboards-react/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { applicationServiceMock } from '../../../../../../core/public/mocks';
 

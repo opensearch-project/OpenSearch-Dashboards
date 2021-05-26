@@ -33,7 +33,7 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook-form-lib';
 
 interface Props {
   field: FieldHook;

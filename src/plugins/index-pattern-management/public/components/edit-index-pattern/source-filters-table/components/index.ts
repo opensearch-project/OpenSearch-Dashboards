@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-export { AddFilter } from './add_filter';
-export { DeleteFilterConfirmationModal } from './confirmation_modal';
+export { AddFilter } from './add-filter';
+export { DeleteFilterConfirmationModal } from './confirmation-modal';
 export { Header } from './header';
 export { Table } from './table';

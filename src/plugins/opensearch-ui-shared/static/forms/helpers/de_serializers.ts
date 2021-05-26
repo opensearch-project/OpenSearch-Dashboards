@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { EuiSelectableOption } from '@elastic/eui';
-import { SerializerFunc } from '../hook_form_lib';
+import { SerializerFunc } from '../hook-form-lib';
 
 type FuncType = (selectOptions: EuiSelectableOption[]) => SerializerFunc;
 

@@ -36,9 +36,9 @@ import { AddPanelFlyout } from './add_panel_flyout';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
-import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../../../../test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../../../../test-samples/embeddables/hello_world_container';
+import { ContactCardEmbeddable } from '../../../../test-samples/embeddables/contact-card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';

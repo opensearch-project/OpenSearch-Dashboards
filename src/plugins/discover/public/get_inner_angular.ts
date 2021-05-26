@@ -41,17 +41,17 @@ import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { Storage } from '../../opensearch_dashboards_utils/public';
+import { Storage } from '../../opensearch-dashboards-utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { createDocTableDirective } from './application/angular/doc_table';
-import { createTableHeaderDirective } from './application/angular/doc_table/components/table_header';
+import { createDocTableDirective } from './application/angular/doc-table';
+import { createTableHeaderDirective } from './application/angular/doc-table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
-} from './application/angular/doc_table/components/pager';
-import { createTableRowDirective } from './application/angular/doc_table/components/table_row';
-import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
-import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
+} from './application/angular/doc-table/components/pager';
+import { createTableRowDirective } from './application/angular/doc-table/components/table_row';
+import { createPagerFactory } from './application/angular/doc-table/lib/pager/pager_factory';
+import { createInfiniteScrollDirective } from './application/angular/doc-table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
@@ -63,8 +63,8 @@ import {
   watchMultiDecorator,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../opensearch_dashboards_legacy/public';
-import { createContextErrorMessageDirective } from './application/components/context_error_message';
+} from '../../opensearch-dashboards-legacy/public';
+import { createContextErrorMessageDirective } from './application/components/context-error-message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './opensearch_dashboards_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';

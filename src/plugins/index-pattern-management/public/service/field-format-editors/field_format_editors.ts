@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { DefaultFormatEditor } from '../../components/field_editor/components/field_format_editor';
+import { DefaultFormatEditor } from '../../components/field-editor/components/field-format-editor';
 
 export class FieldFormatEditors {
   private editors: Array<typeof DefaultFormatEditor> = [];

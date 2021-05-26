@@ -35,7 +35,7 @@ import React from 'react';
 import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { getCoreService, getQueryService, getShareService } from './opensearch_dashboards_services';
 import { Vis } from '../../visualizations/public';
-import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
+import { LegacyMapDeprecationMessage } from '../../maps-legacy/public';
 
 function getEmsLayerId(id: string | number, layerId: string) {
   if (typeof id === 'string') {

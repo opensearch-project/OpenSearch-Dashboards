@@ -34,7 +34,7 @@ import {
   FieldFormatsRegistry,
   FieldFormatInstanceType,
   baseFormatters,
-} from '../../common/field_formats';
+} from '../../common/field-formats';
 import { IUiSettingsClient } from '../../../../core/server';
 import { DateFormat, DateNanosFormat } from './converters';
 

@@ -58,13 +58,13 @@ import {
   getSavedVisualizationsLoader,
 } from '../services';
 import { showNewVisModal } from '../wizard';
-import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import { convertToSerializedVis } from '../saved-visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public';
+import { StartServicesGetter } from '../../../opensearch-dashboards-utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { AttributeService } from '../../../dashboard/public';
-import { checkForDuplicateTitle } from '../../../saved_objects/public';
+import { checkForDuplicateTitle } from '../../../saved-objects/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

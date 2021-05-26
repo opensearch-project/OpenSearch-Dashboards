@@ -37,7 +37,7 @@ import { createFiltersFromRangeSelectAction } from './create_filters_from_range_
 import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
+import { TriggerContextMapping } from '../../../../ui-actions/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;

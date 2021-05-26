@@ -32,7 +32,7 @@
 
 import { min, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { OpenSearchDashboardsMapLayer, MapTypes } from '../../maps_legacy/public';
+import { OpenSearchDashboardsMapLayer, MapTypes } from '../../maps-legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';

@@ -36,15 +36,15 @@ import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
-} from '../../../../test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
-import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
+} from '../../../../test-samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../../../../test-samples/embeddables/filterable_embeddable_factory';
+import { FilterableContainer } from '../../../../test-samples/embeddables/filterable_container';
 import { coreMock } from '../../../../../../../../core/public/mocks';
-import { ContactCardEmbeddable } from '../../../../test_samples';
+import { ContactCardEmbeddable } from '../../../../test-samples';
 import { opensearchFilters, Filter } from '../../../../../../../../plugins/data/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
-import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';
+import { defaultTrigger } from '../../../../../../../ui-actions/public/triggers';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

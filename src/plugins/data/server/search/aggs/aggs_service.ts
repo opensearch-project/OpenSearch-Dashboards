@@ -42,7 +42,7 @@ import {
   calculateBounds,
   TimeRange,
 } from '../../../common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../field-formats';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */

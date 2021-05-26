@@ -31,12 +31,12 @@
  */
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
-import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
-import { MetricPanelConfig as metric } from './panel_config/metric';
-import { TopNPanelConfig as topN } from './panel_config/top_n';
-import { TablePanelConfig as table } from './panel_config/table';
-import { GaugePanelConfig as gauge } from './panel_config/gauge';
-import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
+import { TimeseriesPanelConfig as timeseries } from './panel-config/timeseries';
+import { MetricPanelConfig as metric } from './panel-config/metric';
+import { TopNPanelConfig as topN } from './panel-config/top_n';
+import { TablePanelConfig as table } from './panel-config/table';
+import { GaugePanelConfig as gauge } from './panel-config/gauge';
+import { MarkdownPanelConfig as markdown } from './panel-config/markdown';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { FormValidationContext } from '../contexts/form_validation_context';

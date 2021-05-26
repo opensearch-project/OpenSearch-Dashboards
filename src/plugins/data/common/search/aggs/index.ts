@@ -39,6 +39,6 @@ export * from './agg_types_registry';
 export * from './aggs_service';
 export * from './buckets';
 export * from './metrics';
-export * from './param_types';
+export * from './param-types';
 export * from './types';
 export * from './utils';

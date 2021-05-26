@@ -32,7 +32,7 @@
 
 import { template, escape, keys } from 'lodash';
 import { shortenDottedString } from '../../utils';
-import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd-field-types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { UI_SETTINGS } from '../../constants';

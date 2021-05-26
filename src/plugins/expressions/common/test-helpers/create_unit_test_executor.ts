@@ -31,7 +31,7 @@
  */
 
 import { Executor } from '../executor';
-import { functionTestSpecs } from './expression_functions';
+import { functionTestSpecs } from './expression-functions';
 
 export const createUnitTestExecutor = () => {
   const executor = Executor.createWithDefaults();

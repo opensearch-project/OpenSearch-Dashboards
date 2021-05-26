@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui-actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IEmbeddable } from '../../../embeddables';
 

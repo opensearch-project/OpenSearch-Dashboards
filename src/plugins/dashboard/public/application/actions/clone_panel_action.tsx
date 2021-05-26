@@ -36,7 +36,7 @@ import uuid from 'uuid';
 import _ from 'lodash';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
-import { SavedObject } from '../../../../saved_objects/public';
+import { SavedObject } from '../../../../saved-objects/public';
 import {
   PanelNotFoundError,
   EmbeddableInput,

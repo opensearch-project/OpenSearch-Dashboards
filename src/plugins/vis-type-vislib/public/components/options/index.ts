@@ -32,6 +32,6 @@
 
 export { GaugeOptions } from './gauge';
 export { PieOptions } from './pie';
-export { PointSeriesOptions } from './point_series';
+export { PointSeriesOptions } from './point-series';
 export { HeatmapOptions } from './heatmap';
-export { MetricsAxisOptions } from './metrics_axes';
+export { MetricsAxisOptions } from './metrics-axes';

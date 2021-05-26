@@ -7,7 +7,7 @@
 
 
 ```ts
-import { createStateContainer, createStateContainerReactHelpers } from 'src/plugins/opensearch_dashboards_utils';
+import { createStateContainer, createStateContainerReactHelpers } from 'src/plugins/opensearch-dashboards-utils';
 
 const container = createStateContainer({});
 export const {

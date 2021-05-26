@@ -44,7 +44,7 @@ import {
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
-import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../opensearch-dashboards-react/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];

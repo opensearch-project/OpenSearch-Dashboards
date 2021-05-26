@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ResizeChecker } from '../../../../../../opensearch_dashboards_utils/public';
+import { ResizeChecker } from '../../../../../../opensearch-dashboards-utils/public';
 
 export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
   const checker = new ResizeChecker(el);

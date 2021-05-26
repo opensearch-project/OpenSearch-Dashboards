@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader } from '../../../saved-objects/public';
 
 export interface SavedObjectsManagementServiceRegistryEntry {
   id: string;

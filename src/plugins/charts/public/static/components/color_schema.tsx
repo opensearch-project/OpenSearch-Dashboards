@@ -35,11 +35,11 @@ import { i18n } from '@osd/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 import { ColorSchemaParams } from './types';
-import { ColorSchema } from '../color_maps';
+import { ColorSchema } from '../color-maps';
 
 export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaParams>(
   paramName: T,

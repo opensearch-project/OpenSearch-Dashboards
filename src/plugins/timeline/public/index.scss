@@ -15,4 +15,4 @@
 // styles for timeline visualization are lazy loaded only while a vis is opened
 // this will duplicate styles only if both Timeline app and timeline visualization are loaded
 // could be left here as it is since the Timeline app is deprecated
-@import '../../vis_type_timeline/public/components/timeline_vis.scss';
+@import '../../vis-type-timeline/public/components/timeline_vis.scss';

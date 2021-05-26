@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Action, createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction, ActionType } from '../../../../../src/plugins/ui-actions/public';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.

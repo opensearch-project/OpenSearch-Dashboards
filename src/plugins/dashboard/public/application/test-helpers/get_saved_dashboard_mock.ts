@@ -31,7 +31,7 @@
  */
 
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import { SavedObjectDashboard } from '../../saved-dashboards';
 
 export function getSavedDashboardMock(
   config?: Partial<SavedObjectDashboard>

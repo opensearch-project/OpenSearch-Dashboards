@@ -31,7 +31,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../../index-patterns/index-patterns';
 import { SearchSourceService, SearchSourceDependencies } from './';
 
 describe('SearchSource service', () => {

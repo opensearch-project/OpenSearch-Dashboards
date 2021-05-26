@@ -35,7 +35,7 @@ import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { VisualizeInput } from 'src/plugins/visualizations/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import {
   useChromeVisibility,
   useVisByValue,

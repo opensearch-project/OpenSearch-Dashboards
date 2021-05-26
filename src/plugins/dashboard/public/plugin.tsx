@@ -46,8 +46,8 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url-forwarding/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
@@ -58,7 +58,7 @@ import {
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui-actions/public';
 
 import { Start as InspectorStartContract } from '../../inspector/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -67,17 +67,17 @@ import {
   SavedObjectLoader,
   SavedObjectsStart,
   showSaveModal,
-} from '../../saved_objects/public';
+} from '../../saved-objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
-} from '../../opensearch_dashboards_react/public';
-import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-react/public';
+import { createOsdUrlTracker, Storage } from '../../opensearch-dashboards-utils/public';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
@@ -111,16 +111,16 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGeneratorState,
 } from './url_generator';
-import { createSavedDashboardLoader } from './saved_dashboards';
+import { createSavedDashboardLoader } from './saved-dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
+import { addEmbeddableToDashboardUrl } from './url-utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
 import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
-} from './attribute_service/attribute_service';
+} from './attribute-service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -181,7 +181,7 @@ export interface DashboardStart {
   ) => AttributeService<A, V, R>;
 }
 
-declare module '../../../plugins/ui_actions/public' {
+declare module '../../../plugins/ui-actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;

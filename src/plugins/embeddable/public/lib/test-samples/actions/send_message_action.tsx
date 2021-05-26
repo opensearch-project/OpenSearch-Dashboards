@@ -33,7 +33,7 @@ import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { createAction, IncompatibleActionError, ActionType } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';
-import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../../opensearch-dashboards-react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';

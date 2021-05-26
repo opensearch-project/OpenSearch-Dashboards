@@ -42,8 +42,8 @@ import {
   OpenSearchDashboardsContextProvider,
   PanelsContainer,
   Panel,
-} from '../../opensearch_dashboards_react/public';
-import { Storage } from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-react/public';
+import { Storage } from '../../opensearch-dashboards-utils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';

@@ -35,8 +35,8 @@ import sinon from 'sinon';
 
 import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
-import { getFilter } from './test_helpers/get_stub_filter';
-import { getFiltersArray } from './test_helpers/get_filters_array';
+import { getFilter } from './test-helpers/get_stub_filter';
+import { getFiltersArray } from './test-helpers/get_filters_array';
 import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 
 import { coreMock } from '../../../../../core/public/mocks';

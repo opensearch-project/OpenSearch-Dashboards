@@ -55,6 +55,6 @@ export {
   IndexPatternListConfig,
 } from './service';
 
-export { DefaultFormatEditor } from './components/field_editor/components/field_format_editor';
+export { DefaultFormatEditor } from './components/field-editor/components/field-format-editor';
 
 export { MlCardState } from './types';

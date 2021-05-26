@@ -33,15 +33,15 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
+import { IndexPatternsService, IndexPatternsServiceStart } from './index-patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
-import { DqlTelemetryService } from './dql_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { DqlTelemetryService } from './dql-telemetry';
+import { UsageCollectionSetup } from '../../usage-collection/server';
 import { AutocompleteService } from './autocomplete';
-import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field-formats';
 import { getUiSettings } from './ui_settings';
 
 export interface DataEnhancements {

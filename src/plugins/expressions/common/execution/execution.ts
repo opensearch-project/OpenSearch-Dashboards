@@ -34,10 +34,10 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../opensearch_dashboards_utils/common';
+import { Defer, now } from '../../../opensearch-dashboards-utils/common';
 import { toPromise } from '../../../data/common/utils/abort_utils';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
-import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError, ExpressionValueError } from '../expression-types/specs/error';
 import {
   ExpressionAstExpression,
   ExpressionAstFunction,
@@ -47,8 +47,8 @@ import {
   ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, ExpressionValue } from '../expression_types';
-import { ArgumentType, ExpressionFunction } from '../expression_functions';
+import { getType, ExpressionValue } from '../expression-types';
+import { ArgumentType, ExpressionFunction } from '../expression-functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 

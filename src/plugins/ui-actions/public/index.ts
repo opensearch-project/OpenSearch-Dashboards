@@ -45,7 +45,7 @@ export {
   createAction,
   IncompatibleActionError,
 } from './actions';
-export { buildContextMenuForActions } from './context_menu';
+export { buildContextMenuForActions } from './context-menu';
 export {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,

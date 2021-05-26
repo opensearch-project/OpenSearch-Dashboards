@@ -32,9 +32,9 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import { NotificationsStart } from 'opensearch-dashboards/public';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');

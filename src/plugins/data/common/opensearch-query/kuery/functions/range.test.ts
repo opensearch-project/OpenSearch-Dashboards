@@ -31,9 +31,9 @@
  */
 
 import { get } from 'lodash';
-import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { nodeTypes } from '../node-types';
+import { fields } from '../../../index-patterns/mocks';
+import { IIndexPattern } from '../../../index-patterns';
 import { RangeFilterParams } from '../../filters';
 
 // @ts-ignore

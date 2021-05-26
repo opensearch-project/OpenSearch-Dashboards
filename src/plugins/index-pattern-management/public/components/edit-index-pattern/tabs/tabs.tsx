@@ -43,20 +43,20 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { fieldWildcardMatcher } from '../../../../../opensearch_dashboards_utils/public';
+import { fieldWildcardMatcher } from '../../../../../opensearch-dashboards-utils/public';
 import {
   IndexPattern,
   IndexPatternField,
   UI_SETTINGS,
   DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch-dashboards-react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
-import { SourceFiltersTable } from '../source_filters_table';
-import { IndexedFieldsTable } from '../indexed_fields_table';
-import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { SourceFiltersTable } from '../source-filters-table';
+import { IndexedFieldsTable } from '../indexed-fields-table';
+import { ScriptedFieldsTable } from '../scripted-fields-table';
 import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {

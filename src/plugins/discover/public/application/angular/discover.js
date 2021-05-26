@@ -46,13 +46,13 @@ import {
   connectToQueryState,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
-import { getSortArray, getSortForSearchSource } from './doc_table';
+import { SavedObjectSaveModal, showSaveModal } from '../../../../saved-objects/public';
+import { getSortArray, getSortForSearchSource } from './doc-table';
 import { createFixedScroll } from './directives/fixed_scroll';
-import * as columnActions from './doc_table/actions/columns';
+import * as columnActions from './doc-table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+import { showOpenSearchPanel } from '../components/top-nav/show_open_search_panel';
+import { addHelpMenuToAppChrome } from '../components/help-menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
@@ -86,7 +86,7 @@ import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { addFatalError } from '../../../../opensearch_dashboards_legacy/public';
+import { addFatalError } from '../../../../opensearch-dashboards-legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,

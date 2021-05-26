@@ -38,7 +38,7 @@ import {
   syncStates,
   BaseStateContainer,
   withNotifyOnErrors,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { opensearchFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
 export interface AppState {

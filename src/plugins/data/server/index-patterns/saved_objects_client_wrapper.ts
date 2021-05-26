@@ -34,7 +34,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-} from '../../common/index_patterns';
+} from '../../common/index-patterns';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;

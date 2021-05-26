@@ -55,10 +55,10 @@ export {
   createDashboardUrlGenerator,
   DashboardUrlGeneratorState,
 } from './url_generator';
-export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
-export { SavedObjectDashboard } from './saved_dashboards';
+export { addEmbeddableToDashboardUrl } from './url-utils/url_helper';
+export { SavedObjectDashboard } from './saved-dashboards';
 export { SavedDashboardPanel } from './types';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute-service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

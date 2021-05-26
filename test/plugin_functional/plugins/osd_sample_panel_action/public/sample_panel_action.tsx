@@ -34,8 +34,8 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { createAction, ActionType } from '../../../../../src/plugins/ui-actions/public';
+import { toMountPoint } from '../../../../../src/plugins/opensearch-dashboards-react/public';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.

@@ -43,7 +43,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'opensearch-dashboards/public';
-import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui-actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -52,19 +52,19 @@ import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizat
 import {
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
-} from 'src/plugins/opensearch_dashboards_legacy/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+} from 'src/plugins/opensearch-dashboards-legacy/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url-forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
+import { SavedObjectLoader } from '../../saved-objects/public';
+import { createOsdUrlTracker } from '../../opensearch-dashboards-utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
-import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './application/doc-views/doc_views_types';
+import { DocViewsRegistry } from './application/doc-views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
+import { JsonCodeBlock } from './application/components/json-code-block/json_code_block';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -77,7 +77,7 @@ import {
   syncHistoryLocations,
   getServices,
 } from './opensearch_dashboards_services';
-import { createSavedSearchesLoader } from './saved_searches';
+import { createSavedSearchesLoader } from './saved-searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {

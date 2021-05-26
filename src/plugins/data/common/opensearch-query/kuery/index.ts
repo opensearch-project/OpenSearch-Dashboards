@@ -31,7 +31,7 @@
  */
 
 export { DQLSyntaxError } from './kuery_syntax_error';
-export { nodeTypes } from './node_types';
+export { nodeTypes } from './node-types';
 export * from './ast';
 
 export * from './types';

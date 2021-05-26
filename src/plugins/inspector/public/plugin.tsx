@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../opensearch-dashboards-react/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';

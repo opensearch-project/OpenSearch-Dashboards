@@ -40,7 +40,7 @@ import {
   UrlGeneratorsService,
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
-} from './url_generators/url_generator_service';
+} from './url-generators/url_generator_service';
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();

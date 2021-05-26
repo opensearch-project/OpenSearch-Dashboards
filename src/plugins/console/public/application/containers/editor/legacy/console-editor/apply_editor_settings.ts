@@ -32,7 +32,7 @@
 
 import { DevToolsSettings } from '../../../../../services';
 import { CoreEditor } from '../../../../../types';
-import { CustomAceEditor } from '../../../../models/legacy_core_editor';
+import { CustomAceEditor } from '../../../../models/legacy-core-editor';
 
 export function applyCurrentSettings(
   editor: CoreEditor | CustomAceEditor,

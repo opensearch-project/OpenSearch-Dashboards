@@ -33,7 +33,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { OpenSearchDashboardsContextProvider } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../src/plugins/opensearch-dashboards-react/public';
 import { NewsfeedApiEndpoint } from '../../../../src/plugins/newsfeed/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';

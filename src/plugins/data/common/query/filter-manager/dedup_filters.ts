@@ -32,7 +32,7 @@
 
 import { filter, find } from 'lodash';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
-import { Filter } from '../../opensearch_query';
+import { Filter } from '../../opensearch-query';
 
 /**
  * Combine 2 filter collections, removing duplicates

@@ -38,12 +38,12 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
-import { getSampleDashboardInput } from '../../test_helpers';
+import { getSampleDashboardInput } from '../../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
-import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch-dashboards-react/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;

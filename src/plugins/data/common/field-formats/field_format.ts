@@ -42,7 +42,7 @@ import {
   TextContextTypeOptions,
   IFieldFormatMetaParams,
 } from './types';
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
+import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content-types';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;

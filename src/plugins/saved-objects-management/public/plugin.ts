@@ -117,7 +117,7 @@ export class SavedObjectsManagementPlugin
       }),
       order: 1,
       mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section');
+        const { mountManagementSection } = await import('./management-section');
         return mountManagementSection({
           core,
           serviceRegistry: this.serviceRegistry,

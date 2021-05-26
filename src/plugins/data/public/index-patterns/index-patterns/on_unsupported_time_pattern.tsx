@@ -35,7 +35,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../opensearch-dashboards-react/public';
 
 export const onUnsupportedTimePattern = (
   toasts: CoreStart['notifications']['toasts'],

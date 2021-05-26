@@ -31,10 +31,10 @@
  */
 
 import { createDashboardUrlGenerator } from './url_generator';
-import { hashedItemStore } from '../../opensearch_dashboards_utils/public';
-import { mockStorage } from '../../opensearch_dashboards_utils/public/storage/hashed_item_store/mock';
+import { hashedItemStore } from '../../opensearch-dashboards-utils/public';
+import { mockStorage } from '../../opensearch-dashboards-utils/public/storage/hashed-item-store/mock';
 import { opensearchFilters, Filter } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader } from '../../saved-objects/public';
 
 const APP_BASE_PATH: string = 'xyz/app/dashboards';
 

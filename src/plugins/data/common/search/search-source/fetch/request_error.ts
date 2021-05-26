@@ -31,7 +31,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { OsdError } from '../../../../../opensearch_dashboards_utils/common';
+import { OsdError } from '../../../../../opensearch-dashboards-utils/common';
 import { SearchError } from './types';
 
 /**

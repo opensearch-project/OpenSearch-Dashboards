@@ -35,7 +35,7 @@ import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorSchemas, colorSchemas, ColorModes } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../vis-default-editor/public';
 import { toExpressionAst } from './to_ast';
 
 export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({

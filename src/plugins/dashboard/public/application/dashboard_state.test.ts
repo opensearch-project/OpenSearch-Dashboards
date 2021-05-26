@@ -35,7 +35,7 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { createOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { createOsdUrlStateStorage } from 'src/plugins/opensearch-dashboards-utils/public';
 import { DashboardContainer, DashboardContainerInput } from '.';
 import { DashboardContainerOptions } from './embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';

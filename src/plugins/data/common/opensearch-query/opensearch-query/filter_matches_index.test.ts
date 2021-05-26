@@ -32,7 +32,7 @@
 
 import { Filter } from '../filters';
 import { filterMatchesIndex } from './filter_matches_index';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../../index-patterns';
 
 describe('filterMatchesIndex', () => {
   it('should return true if the filter has no meta', () => {

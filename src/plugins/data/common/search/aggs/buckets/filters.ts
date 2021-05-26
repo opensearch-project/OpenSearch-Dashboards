@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { size, transform, cloneDeep } from 'lodash';
 
-import { createFilterFilters } from './create_filter/filters';
+import { createFilterFilters } from './create-filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';

@@ -30,12 +30,12 @@
  * GitHub history for details.
  */
 
-import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
+import { nodeTypes } from '../node-types';
+import { fields } from '../../../index-patterns/mocks';
 
 // @ts-ignore
 import * as is from './is';
-import { IIndexPattern } from '../../../index_patterns';
+import { IIndexPattern } from '../../../index-patterns';
 
 describe('kuery functions', () => {
   describe('is', () => {

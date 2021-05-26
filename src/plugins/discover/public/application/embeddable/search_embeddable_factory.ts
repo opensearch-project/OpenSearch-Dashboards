@@ -32,7 +32,7 @@
 
 import { auto } from 'angular';
 import { i18n } from '@osd/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { getServices } from '../../opensearch_dashboards_services';
 import {
   EmbeddableFactoryDefinition,

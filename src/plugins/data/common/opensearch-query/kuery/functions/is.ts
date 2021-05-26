@@ -39,8 +39,8 @@ import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
 import * as ast from '../ast';
 
-import * as literal from '../node_types/literal';
-import * as wildcard from '../node_types/wildcard';
+import * as literal from '../node-types/literal';
+import * as wildcard from '../node-types/wildcard';
 
 export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean = false) {
   if (isUndefined(fieldName)) {

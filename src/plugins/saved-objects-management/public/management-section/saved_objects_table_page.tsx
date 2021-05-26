@@ -40,7 +40,7 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
-import { SavedObjectsTable } from './objects_table';
+import { SavedObjectsTable } from './objects-table';
 
 const SavedObjectsTablePage = ({
   coreStart,

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionFunctionDefinition } from '../../expression-functions';
 
 export const introspectContext: ExpressionFunctionDefinition<
   'introspectContext',

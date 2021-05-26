@@ -47,7 +47,7 @@ import {
   DefinedSections,
   ManagementSectionsStartPrivate,
 } from './types';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
 
 const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
   ManagementSectionsStartPrivate

@@ -38,7 +38,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import {
   useOpenSearchDashboards,
   toMountPoint,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { defer, Defer } from '../../../opensearch_dashboards_utils/public';
+import { defer, Defer } from '../../../opensearch-dashboards-utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,

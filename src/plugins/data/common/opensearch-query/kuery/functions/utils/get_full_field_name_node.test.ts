@@ -30,9 +30,9 @@
  * GitHub history for details.
  */
 
-import { nodeTypes } from '../../node_types';
-import { fields } from '../../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../../index_patterns';
+import { nodeTypes } from '../../node-types';
+import { fields } from '../../../../index-patterns/mocks';
+import { IIndexPattern } from '../../../../index-patterns';
 
 // @ts-ignore
 import { getFullFieldNameNode } from './get_full_field_name_node';

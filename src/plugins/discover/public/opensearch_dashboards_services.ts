@@ -33,11 +33,11 @@
 import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
 import { search } from '../../data/public';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewsRegistry } from './application/doc-views/doc_views_registry';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -106,12 +106,12 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 );
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';
+export { unhashUrl, redirectWhenMissing } from '../../opensearch-dashboards-utils/public';
 export {
   formatMsg,
   formatStack,
   subscribeWithScope,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 
 // EXPORT types
 export {

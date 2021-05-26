@@ -31,7 +31,7 @@
  */
 
 export * from './calculate_auto_time_expression';
-export * from './date_interval_utils';
+export * from './date-interval-utils';
 export * from './get_format_with_aggs';
 export * from './ipv4_address';
 export * from './prop_filter';

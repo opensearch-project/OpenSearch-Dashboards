@@ -32,7 +32,7 @@
 
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
-import { ExpressionValue } from '../expression_types/types';
+import { ExpressionValue } from '../expression-types/types';
 import { ExecutionContext } from '../execution';
 
 export class ExpressionFunction {

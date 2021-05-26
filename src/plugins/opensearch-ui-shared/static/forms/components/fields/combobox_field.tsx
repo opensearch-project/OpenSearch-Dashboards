@@ -34,7 +34,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
+import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook-form-lib';
 
 interface Props {
   field: FieldHook;

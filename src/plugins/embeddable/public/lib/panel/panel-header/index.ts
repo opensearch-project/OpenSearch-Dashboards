@@ -30,4 +30,4 @@
  * GitHub history for details.
  */
 
-export * from './panel_actions';
+export * from './panel-actions';

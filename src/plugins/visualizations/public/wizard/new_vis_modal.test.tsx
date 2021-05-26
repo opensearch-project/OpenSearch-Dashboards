@@ -32,7 +32,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../vis_types';
+import { TypesStart, VisType } from '../vis-types';
 import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';

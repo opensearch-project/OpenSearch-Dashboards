@@ -31,7 +31,7 @@
  */
 import React from 'react';
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
-import { useUiSetting } from '../ui_settings';
+import { useUiSetting } from '../ui-settings';
 import type { Props } from './code_editor';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));

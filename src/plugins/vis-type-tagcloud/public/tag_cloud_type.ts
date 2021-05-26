@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../vis-default-editor/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';

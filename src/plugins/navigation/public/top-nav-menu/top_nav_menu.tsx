@@ -35,7 +35,7 @@ import { EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
-import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
+import { MountPointPortal } from '../../../opensearch-dashboards-react/public';
 import {
   StatefulSearchBarProps,
   DataPublicPluginStart,

@@ -36,7 +36,7 @@ import { uniq } from 'lodash';
 import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
-import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { withOpenSearchDashboards } from '../../../../../opensearch-dashboards-react/public';
 
 interface Props extends PhraseSuggestorProps {
   values?: string[];

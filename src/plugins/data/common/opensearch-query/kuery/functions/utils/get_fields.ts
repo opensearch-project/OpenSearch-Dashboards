@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-import * as literal from '../../node_types/literal';
-import * as wildcard from '../../node_types/wildcard';
+import * as literal from '../../node-types/literal';
+import * as wildcard from '../../node-types/wildcard';
 import { KueryNode, IIndexPattern } from '../../../..';
-import { LiteralTypeBuildNode } from '../../node_types/types';
+import { LiteralTypeBuildNode } from '../../node-types/types';
 
 export function getFields(node: KueryNode, indexPattern?: IIndexPattern) {
   if (!indexPattern) return [];

@@ -31,7 +31,7 @@
  */
 
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { XJson } from '../../../../../opensearch_ui_shared/public';
+import { XJson } from '../../../../../opensearch-ui-shared/public';
 const { collapseLiteralStrings } = XJson;
 // @ts-ignore
 import * as opensearch from '../../../lib/opensearch/opensearch';

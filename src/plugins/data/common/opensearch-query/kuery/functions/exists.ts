@@ -31,7 +31,7 @@
  */
 
 import { get } from 'lodash';
-import * as literal from '../node_types/literal';
+import * as literal from '../node-types/literal';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
 export function buildNodeParams(fieldName: string) {

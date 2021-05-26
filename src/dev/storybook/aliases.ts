@@ -31,6 +31,6 @@
  */
 
 export const storybookAliases = {
-  codeeditor: 'src/plugins/opensearch_dashboards_react/public/code_editor/.storybook',
+  codeeditor: 'src/plugins/opensearch-dashboards-react/public/code_editor/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
 };

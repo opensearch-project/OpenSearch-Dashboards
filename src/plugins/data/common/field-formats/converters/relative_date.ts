@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd-field-types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 

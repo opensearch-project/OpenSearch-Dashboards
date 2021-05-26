@@ -49,16 +49,16 @@ import { i18n } from '@osd/i18n';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
-} from '../../../../../plugins/opensearch_dashboards_react/public';
+} from '../../../../../plugins/opensearch-dashboards-react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { CreateButton } from '../create_button';
+import { CreateButton } from '../create-button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from './empty_state';
-import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
-import { getIndices } from '../create_index_pattern_wizard/lib';
+import { EmptyState } from './empty-state';
+import { MatchedItem, ResolveIndexResponseItemAlias } from '../create-index-pattern-wizard/types';
+import { EmptyIndexPatternPrompt } from './empty-index-pattern-prompt';
+import { getIndices } from '../create-index-pattern-wizard/lib';
 
 const pagination = {
   initialPageSize: 10,

@@ -31,8 +31,8 @@
  */
 
 export * from './query/types';
-export * from './osd_field_types/types';
-export * from './index_patterns/types';
+export * from './osd-field-types/types';
+export * from './index-patterns/types';
 
 /**
  * If a service is being shared on both the client and the server, and

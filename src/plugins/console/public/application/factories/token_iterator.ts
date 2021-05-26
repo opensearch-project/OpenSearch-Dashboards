@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { CoreEditor, Position } from '../../types';
-import { TokenIterator } from '../../lib/token_iterator';
+import { TokenIterator } from '../../lib/token-iterator';
 
 interface Dependencies {
   position: Position;

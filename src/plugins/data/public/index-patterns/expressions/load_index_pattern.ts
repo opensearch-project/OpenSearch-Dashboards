@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../../../../../plugins/expressions/public';
 import { getIndexPatterns } from '../../services';
-import { IndexPatternSpec } from '../../../common/index_patterns';
+import { IndexPatternSpec } from '../../../common/index-patterns';
 
 const name = 'indexPatternLoad';
 

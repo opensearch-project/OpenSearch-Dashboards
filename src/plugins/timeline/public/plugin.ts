@@ -47,15 +47,15 @@ import { Panel } from './panels/panel';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacyStart,
-} from '../../opensearch_dashboards_legacy/public';
-import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-legacy/public';
+import { createOsdUrlTracker } from '../../opensearch-dashboards-utils/public';
 import { DataPublicPluginStart, opensearchFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import {
   VisTypeTimelinePluginStart,
   VisTypeTimelinePluginSetup,
-} from '../../vis_type_timeline/public';
+} from '../../vis-type-timeline/public';
 
 export interface TimelinePluginDependencies {
   data: DataPublicPluginStart;

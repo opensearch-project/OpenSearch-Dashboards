@@ -30,6 +30,6 @@
  * GitHub history for details.
  */
 
-export * from './feature_catalogue';
+export * from './feature-catalogue';
 export * from './environment';
 export * from './tutorials';

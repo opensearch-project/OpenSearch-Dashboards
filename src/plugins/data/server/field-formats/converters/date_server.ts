@@ -42,7 +42,7 @@ import {
 import {
   IFieldFormatMetaParams,
   TextContextTypeConvert,
-} from '../../../common/field_formats/types';
+} from '../../../common/field-formats/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;

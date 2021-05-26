@@ -30,11 +30,11 @@
  * GitHub history for details.
  */
 
-import { fieldFormatsMock } from '../../../field_formats/mocks';
+import { fieldFormatsMock } from '../../../field-formats/mocks';
 
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { AggTypesDependencies, getAggTypes } from '../agg_types';
-import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
+import { TimeBucketsConfig } from '../buckets/lib/time-buckets/time_buckets';
 
 // Mocked uiSettings shared among aggs unit tests
 const mockGetConfig = jest.fn().mockImplementation((key: string) => {

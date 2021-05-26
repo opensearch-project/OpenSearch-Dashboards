@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { ValidationFunc, ValidationError } from '../../hook-form-lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 

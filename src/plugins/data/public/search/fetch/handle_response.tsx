@@ -34,8 +34,8 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { SearchResponse } from 'elasticsearch';
-import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
-import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { ShardFailureOpenModalButton } from '../../ui/shard-failure-modal';
+import { toMountPoint } from '../../../../opensearch-dashboards-react/public';
 import { getNotifications } from '../../services';
 import { SearchRequest } from '..';
 

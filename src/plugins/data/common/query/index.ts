@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-export * from './filter_manager';
+export * from './filter-manager';
 export * from './timefilter';
 export * from './types';
 export * from './is_query';

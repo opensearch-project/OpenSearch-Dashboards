@@ -38,7 +38,7 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { dashboardSavedObjectType } from './saved_objects';
+import { dashboardSavedObjectType } from './saved-objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';

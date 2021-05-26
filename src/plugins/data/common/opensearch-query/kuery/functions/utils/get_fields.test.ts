@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-import { fields } from '../../../../index_patterns/mocks';
+import { fields } from '../../../../index-patterns/mocks';
 
 import { nodeTypes } from '../../index';
-import { IIndexPattern, IFieldType } from '../../../../index_patterns';
+import { IIndexPattern, IFieldType } from '../../../../index-patterns';
 
 // @ts-ignore
 import { getFields } from './get_fields';
