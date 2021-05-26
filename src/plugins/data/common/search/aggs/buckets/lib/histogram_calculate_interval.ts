@@ -42,7 +42,7 @@ export interface CalculateHistogramIntervalParams {
   interval: string;
   maxBucketsUiSettings: number;
   maxBucketsUserInput?: number | '';
-  opensearchTypes: OPENSEARCH_FIELD_TYPES[];
+  esTypes: OPENSEARCH_FIELD_TYPES[];
   intervalBase?: number;
   values?: IntervalValuesRange;
 }
@@ -95,7 +95,7 @@ const calculateForGivenInterval = (
 const calculateAutoInterval = (
   diff: number,
   maxBars: number,
-  opensearchTypes: OPENSEARCH_FIELD_TYPES[]
+  esTypes: OPENSEARCH_FIELD_TYPES[]
 ) => {
   const exactInterval = diff / maxBars;
 
@@ -104,7 +104,7 @@ const calculateAutoInterval = (
   // see: https://www.opensearch.org/guide/en/elasticsearch/reference/current/number.html
   if (
     diff < maxBars &&
-    opensearchTypes.every((opensearchType) =>
+    esTypes.every((opensearchType) =>
       [
         OPENSEARCH_FIELD_TYPES.INTEGER,
         OPENSEARCH_FIELD_TYPES.LONG,
@@ -138,7 +138,7 @@ export const calculateHistogramInterval = ({
   maxBucketsUserInput,
   intervalBase,
   values,
-  opensearchTypes,
+  esTypes,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
   let calculatedInterval = isAuto ? 0 : parseFloat(interval);
@@ -158,7 +158,7 @@ export const calculateHistogramInterval = ({
 
             // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
             Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
-            opensearchTypes
+            esTypes
           )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }

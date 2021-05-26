@@ -50,7 +50,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'lang',
     count: 1,
-    opensearchTypes: ['text'],
+    esTypes: ['text'],
     aggregatable: true,
     filterable: true,
     searchable: true,

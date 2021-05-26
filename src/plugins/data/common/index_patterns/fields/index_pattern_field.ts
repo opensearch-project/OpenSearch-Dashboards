@@ -102,8 +102,8 @@ export class IndexPatternField implements IFieldType {
     return this.spec.type;
   }
 
-  public get opensearchTypes() {
-    return this.spec.opensearchTypes;
+  public get esTypes() {
+    return this.spec.esTypes;
   }
 
   public get scripted() {
@@ -156,7 +156,7 @@ export class IndexPatternField implements IFieldType {
 
       name: this.name,
       type: this.type,
-      opensearchTypes: this.opensearchTypes,
+      esTypes: this.esTypes,
       scripted: this.scripted,
       searchable: this.searchable,
       aggregatable: this.aggregatable,
@@ -177,7 +177,7 @@ export class IndexPatternField implements IFieldType {
       conflictDescriptions: this.conflictDescriptions,
       name: this.name,
       type: this.type,
-      opensearchTypes: this.opensearchTypes,
+      esTypes: this.esTypes,
       scripted: this.scripted,
       searchable: this.searchable,
       aggregatable: this.aggregatable,

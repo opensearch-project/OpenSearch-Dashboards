@@ -36,12 +36,12 @@ export class OsdFieldType {
   public readonly name: string;
   public readonly sortable: boolean;
   public readonly filterable: boolean;
-  public readonly opensearchTypes: readonly OPENSEARCH_FIELD_TYPES[];
+  public readonly esTypes: readonly OPENSEARCH_FIELD_TYPES[];
 
   constructor(options: Partial<OsdFieldTypeOptions> = {}) {
     this.name = options.name || OSD_FIELD_TYPES.UNKNOWN;
     this.sortable = options.sortable || false;
     this.filterable = options.filterable || false;
-    this.opensearchTypes = Object.freeze((options.opensearchTypes || []).slice());
+    this.esTypes = Object.freeze((options.esTypes || []).slice());
   }
 }

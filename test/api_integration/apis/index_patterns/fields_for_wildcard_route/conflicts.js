@@ -51,7 +51,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                opensearchTypes: ['date'],
+                esTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -59,7 +59,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                opensearchTypes: ['integer', 'float'],
+                esTypes: ['integer', 'float'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -67,7 +67,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                opensearchTypes: ['text', 'keyword'],
+                esTypes: ['text', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -75,7 +75,7 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
-                opensearchTypes: ['boolean', 'keyword'],
+                esTypes: ['boolean', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,

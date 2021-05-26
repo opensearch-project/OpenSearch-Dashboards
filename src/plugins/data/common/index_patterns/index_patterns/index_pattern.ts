@@ -190,7 +190,7 @@ export class IndexPattern implements IIndexPattern {
         return {
           field: dateField.name,
           format:
-            dateField.opensearchTypes && dateField.opensearchTypes.indexOf('date_nanos') !== -1
+            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
               ? 'strict_date_time'
               : 'date_time',
         };
@@ -314,11 +314,7 @@ export class IndexPattern implements IIndexPattern {
 
   isTimeNanosBased(): boolean {
     const timeField: any = this.getTimeField();
-    return (
-      timeField &&
-      timeField.opensearchTypes &&
-      timeField.opensearchTypes.indexOf('date_nanos') !== -1
-    );
+    return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
   }
 
   getTimeField() {
@@ -374,7 +370,7 @@ export class IndexPattern implements IIndexPattern {
       this.fieldFormatMap[field.name] ||
       this.fieldFormats.getDefaultInstance(
         field.type as OSD_FIELD_TYPES,
-        field.opensearchTypes as OPENSEARCH_FIELD_TYPES[]
+        field.esTypes as OPENSEARCH_FIELD_TYPES[]
       )
     );
   }

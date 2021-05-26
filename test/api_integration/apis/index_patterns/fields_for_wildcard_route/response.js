@@ -53,7 +53,7 @@ export default function ({ getService }) {
           fields: [
             {
               type: 'boolean',
-              opensearchTypes: ['boolean'],
+              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -61,7 +61,7 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              opensearchTypes: ['text'],
+              esTypes: ['text'],
               searchable: true,
               aggregatable: false,
               name: 'baz',
@@ -69,7 +69,7 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              opensearchTypes: ['keyword'],
+              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
@@ -78,7 +78,7 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
-              opensearchTypes: ['long'],
+              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
@@ -86,7 +86,7 @@ export default function ({ getService }) {
             },
             {
               aggregatable: true,
-              opensearchTypes: ['keyword'],
+              esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
               searchable: true,
@@ -115,7 +115,7 @@ export default function ({ getService }) {
             {
               aggregatable: true,
               name: '_id',
-              opensearchTypes: ['_id'],
+              esTypes: ['_id'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
@@ -123,14 +123,14 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: '_source',
-              opensearchTypes: ['_source'],
+              esTypes: ['_source'],
               readFromDocValues: false,
               searchable: false,
               type: '_source',
             },
             {
               type: 'boolean',
-              opensearchTypes: ['boolean'],
+              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -139,14 +139,14 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: 'baz',
-              opensearchTypes: ['text'],
+              esTypes: ['text'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
             },
             {
               type: 'string',
-              opensearchTypes: ['keyword'],
+              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
@@ -162,7 +162,7 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
-              opensearchTypes: ['long'],
+              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
@@ -170,7 +170,7 @@ export default function ({ getService }) {
             },
             {
               aggregatable: true,
-              opensearchTypes: ['keyword'],
+              esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
               searchable: true,

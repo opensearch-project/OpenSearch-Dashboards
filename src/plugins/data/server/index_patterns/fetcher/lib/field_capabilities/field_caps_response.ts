@@ -139,7 +139,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         const field = {
           name: fieldName,
           type: 'conflict',
-          opensearchTypes: types,
+          esTypes: types,
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
@@ -161,7 +161,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
       const field = {
         name: fieldName,
         type: castOpenSearchToOsdFieldTypeName(opensearchType),
-        opensearchTypes: types,
+        esTypes: types,
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, opensearchType),

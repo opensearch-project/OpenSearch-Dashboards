@@ -39,7 +39,7 @@ describe('group_fields', function () {
       {
         name: 'category',
         type: 'string',
-        opensearchTypes: ['text'],
+        esTypes: ['text'],
         count: 1,
         scripted: false,
         searchable: true,
@@ -49,7 +49,7 @@ describe('group_fields', function () {
       {
         name: 'currency',
         type: 'string',
-        opensearchTypes: ['keyword'],
+        esTypes: ['keyword'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -59,7 +59,7 @@ describe('group_fields', function () {
       {
         name: 'customer_birth_date',
         type: 'date',
-        opensearchTypes: ['date'],
+        esTypes: ['date'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -83,10 +83,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 1,
-            "name": "category",
-            "opensearchTypes": Array [
+            "esTypes": Array [
               "text",
             ],
+            "name": "category",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -97,10 +97,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
-            "name": "currency",
-            "opensearchTypes": Array [
+            "esTypes": Array [
               "keyword",
             ],
+            "name": "currency",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -111,10 +111,10 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 0,
-            "name": "customer_birth_date",
-            "opensearchTypes": Array [
+            "esTypes": Array [
               "date",
             ],
+            "name": "customer_birth_date",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,

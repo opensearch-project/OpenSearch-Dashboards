@@ -13,11 +13,11 @@ Object {
     ],
   },
   "count": 1,
-  "lang": "lang",
-  "name": "name",
-  "opensearchTypes": Array [
+  "esTypes": Array [
     "text",
   ],
+  "lang": "lang",
+  "name": "name",
   "readFromDocValues": false,
   "script": "script",
   "scripted": true,
@@ -47,6 +47,9 @@ Object {
     ],
   },
   "count": 1,
+  "esTypes": Array [
+    "text",
+  ],
   "format": Object {
     "id": "number",
     "params": Object {
@@ -55,9 +58,6 @@ Object {
   },
   "lang": "lang",
   "name": "name",
-  "opensearchTypes": Array [
-    "text",
-  ],
   "readFromDocValues": false,
   "script": "script",
   "scripted": true,
