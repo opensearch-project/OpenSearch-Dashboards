@@ -32,7 +32,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
-import { ComponentRegistry } from './component_registry';
+import { ComponentRegistry } from './component-registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
 const component = new ComponentRegistry();
@@ -52,7 +52,7 @@ export class AdvancedSettingsPlugin
       order: 3,
       async mount(params) {
         const { mountManagementSection } = await import(
-          './management_app/mount_management_section'
+          './management-app/mount_management_section'
         );
         return mountManagementSection(core.getStartServices, params, component.start);
       },

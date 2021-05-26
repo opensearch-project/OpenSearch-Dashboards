@@ -49,17 +49,17 @@ export {
 } from '../common';
 export * from './core';
 export * from '../common/errors';
-export * from './render_complete';
-export * from './resize_checker';
-export * from '../common/state_containers';
+export * from './render-complete';
+export * from './resize-checker';
+export * from '../common/state-containers';
 export * from './storage';
-export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
+export { hashedItemStore, HashedItemStore } from './storage/hashed-item-store';
 export {
   createStateHash,
   persistState,
   retrieveState,
   isStateHash,
-} from './state_management/state_hash';
+} from './state-management/state-hash';
 export {
   hashQuery,
   hashUrl,
@@ -72,7 +72,7 @@ export {
   getStatesFromOsdUrl,
   setStateToOsdUrl,
   withNotifyOnErrors,
-} from './state_management/url';
+} from './state-management/url';
 export {
   syncState,
   syncStates,
@@ -85,10 +85,10 @@ export {
   ISessionStorageStateStorage,
   StartSyncStateFnType,
   StopSyncStateFnType,
-} from './state_sync';
+} from './state-sync';
 export { Configurable, CollectConfigProps } from './ui';
 export { removeQueryParam, redirectWhenMissing } from './history';
-export { applyDiff } from './state_management/utils/diff_object';
+export { applyDiff } from './state-management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 
 /** dummy plugin, we just want opensearchDashboardsUtils to have its own bundle */

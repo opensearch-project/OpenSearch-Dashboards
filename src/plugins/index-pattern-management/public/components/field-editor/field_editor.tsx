@@ -62,7 +62,7 @@ import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
-} from '../../scripting_languages';
+} from '../../scripting-languages';
 import {
   IndexPatternField,
   FieldFormatInstanceType,
@@ -72,14 +72,14 @@ import {
   OPENSEARCH_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
+import { context as contextType } from '../../../../opensearch-dashboards-react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
-} from './components/scripting_call_outs';
+} from './components/scripting-call-outs';
 
-import { ScriptingHelpFlyout } from './components/scripting_help';
-import { FieldFormatEditor } from './components/field_format_editor';
+import { ScriptingHelpFlyout } from './components/scripting-help';
+import { FieldFormatEditor } from './components/field-format-editor';
 import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';

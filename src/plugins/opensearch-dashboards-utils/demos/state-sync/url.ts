@@ -30,13 +30,13 @@
  * GitHub history for details.
  */
 
-import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
-import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
+import { defaultState, pureTransitions, TodoActions, TodoState } from '../state-containers/todomvc';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state-containers';
 import {
   createOsdUrlStateStorage,
   syncState,
   INullableBaseStateContainer,
-} from '../../public/state_sync';
+} from '../../public/state-sync';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve));
 

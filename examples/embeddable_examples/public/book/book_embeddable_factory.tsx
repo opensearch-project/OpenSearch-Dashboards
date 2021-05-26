@@ -52,7 +52,7 @@ import {
   SimpleSavedObject,
 } from '../../../../src/core/public';
 import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved-objects/public';
 
 interface StartServices {
   getAttributeService: DashboardStart['getAttributeService'];

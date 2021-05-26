@@ -30,22 +30,22 @@
  * GitHub history for details.
  */
 
-import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state-containers';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../demos/state_containers/todomvc';
+} from '../../demos/state-containers/todomvc';
 import { syncState, syncStates } from './state_sync';
-import { IStateStorage } from './state_sync_state_storage/types';
+import { IStateStorage } from './state-sync-state-storage/types';
 import { Observable, Subject } from 'rxjs';
 import {
   createSessionStorageStateStorage,
   createOsdUrlStateStorage,
   IOsdUrlStateStorage,
   ISessionStorageStateStorage,
-} from './state_sync_state_storage';
+} from './state-sync-state-storage';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';

@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { handleAnnotationResponse } from './response_processors/annotations';
+import { handleAnnotationResponse } from './response-processors/annotations';
 import { getAnnotationRequestParams } from './annotations/get_request_params';
 import { getLastSeriesTimestamp } from './helpers/timestamp';
 

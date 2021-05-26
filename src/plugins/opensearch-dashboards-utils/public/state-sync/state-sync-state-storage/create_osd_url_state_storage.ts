@@ -38,7 +38,7 @@ import {
   createOsdUrlControls,
   getStateFromOsdUrl,
   setStateToOsdUrl,
-} from '../../state_management/url';
+} from '../../state-management/url';
 
 /**
  * OsdUrlStateStorage is a state storage for {@link syncState} utility which:

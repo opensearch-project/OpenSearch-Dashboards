@@ -32,7 +32,7 @@
 
 import { buildProcessorFunction } from '../build_processor_function';
 // @ts-ignore
-import { processors } from '../request_processors/series/index';
+import { processors } from '../request-processors/series/index';
 
 /**
  * Builds series request body

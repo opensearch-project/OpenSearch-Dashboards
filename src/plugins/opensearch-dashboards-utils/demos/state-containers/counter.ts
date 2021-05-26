@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { createStateContainer } from '../../common/state_containers';
+import { createStateContainer } from '../../common/state-containers';
 
 interface State {
   count: number;

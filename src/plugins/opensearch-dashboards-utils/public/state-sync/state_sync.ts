@@ -34,10 +34,10 @@ import { EMPTY, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
-import { IStateStorage } from './state_sync_state_storage';
+import { IStateStorage } from './state-sync-state-storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
-import { BaseState } from '../../common/state_containers';
-import { applyDiff } from '../state_management/utils/diff_object';
+import { BaseState } from '../../common/state-containers';
+import { applyDiff } from '../state-management/utils/diff_object';
 
 /**
  * @public

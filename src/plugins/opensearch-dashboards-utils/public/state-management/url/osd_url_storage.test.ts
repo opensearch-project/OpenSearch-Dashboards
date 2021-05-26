@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import '../../storage/hashed_item_store/mock';
+import '../../storage/hashed-item-store/mock';
 import {
   History,
   createBrowserHistory,

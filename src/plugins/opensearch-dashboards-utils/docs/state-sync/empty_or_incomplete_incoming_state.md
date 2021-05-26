@@ -49,6 +49,6 @@ In this case, the corrupt value will not get into state, preventing misshaped st
 
 To help application developers remember such edge cases,
 `syncState` util sets a constraint,
-that setter to state container should be able to handle `null` value (see [IStateSyncConfig](../../public/state_sync/types.ts)).
+that setter to state container should be able to handle `null` value (see [IStateSyncConfig](../../public/state-sync/types.ts)).
 Incoming `null` value from state storage usually means that state is empty (e.g. URL without `storageKey` query param).
 So when using `syncState` util applications are required to at least handle incoming `null`.

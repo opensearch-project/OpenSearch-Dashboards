@@ -31,7 +31,7 @@
  */
 
 import rison, { RisonValue } from 'rison-node';
-import { isStateHash, retrieveState, persistState } from '../state_hash';
+import { isStateHash, retrieveState, persistState } from '../state-hash';
 
 // should be:
 // export function decodeState<State extends RisonValue>(expandedOrHashedState: string)

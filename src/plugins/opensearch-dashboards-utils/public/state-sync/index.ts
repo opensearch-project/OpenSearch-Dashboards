@@ -56,7 +56,7 @@ export {
   IOsdUrlStateStorage,
   ISessionStorageStateStorage,
   IStateStorage,
-} from './state_sync_state_storage';
+} from './state-sync-state-storage';
 export { IStateSyncConfig, INullableBaseStateContainer } from './types';
 export {
   syncState,

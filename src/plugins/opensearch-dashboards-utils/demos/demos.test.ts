@@ -30,9 +30,9 @@
  * GitHub history for details.
  */
 
-import { result as counterResult } from './state_containers/counter';
-import { result as todomvcResult } from './state_containers/todomvc';
-import { result as urlSyncResult } from './state_sync/url';
+import { result as counterResult } from './state-containers/counter';
+import { result as todomvcResult } from './state-containers/todomvc';
+import { result as urlSyncResult } from './state-sync/url';
 
 describe('demos', () => {
   describe('state containers', () => {

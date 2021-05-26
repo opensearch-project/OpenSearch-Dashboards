@@ -29,13 +29,13 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { mockStorage } from '../../storage/hashed_item_store/mock';
+import { mockStorage } from '../../storage/hashed-item-store/mock';
 import { createOsdUrlStateStorage, IOsdUrlStateStorage } from './create_osd_url_state_storage';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { ScopedHistory } from '../../../../../core/public';
-import { withNotifyOnErrors } from '../../state_management/url';
+import { withNotifyOnErrors } from '../../state-management/url';
 import { coreMock } from '../../../../../core/public/mocks';
 
 describe('OsdUrlStateStorage', () => {

@@ -101,7 +101,7 @@ export class IndexPatternManagementPlugin
       title: sectionsHeader,
       order: 0,
       mount: async (params) => {
-        const { mountManagementSection } = await import('./management_app');
+        const { mountManagementSection } = await import('./management-app');
 
         return mountManagementSection(core.getStartServices, params, () =>
           this.indexPatternManagementService.environmentService.getEnvironment().ml()

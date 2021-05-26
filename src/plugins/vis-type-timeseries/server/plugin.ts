@@ -44,13 +44,13 @@ import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
-import { ValidationTelemetryService } from './validation_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { ValidationTelemetryService } from './validation-telemetry';
+import { UsageCollectionSetup } from '../../usage-collection/server';
 import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
-import { SearchStrategyRegistry } from './lib/search_strategies';
+import { SearchStrategyRegistry } from './lib/search-strategies';
 import { uiSettings } from './ui_settings';
 
 export interface LegacySetup {

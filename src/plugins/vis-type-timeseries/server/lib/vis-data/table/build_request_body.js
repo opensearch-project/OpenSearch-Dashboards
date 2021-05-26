@@ -31,7 +31,7 @@
  */
 
 import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../request_processors/table';
+import { processors } from '../request-processors/table';
 
 export function buildRequestBody(...args) {
   const processor = buildProcessorFunction(processors, ...args);

@@ -30,4 +30,4 @@
  * GitHub history for details.
  */
 
-export { ManagementApp } from './management_app';
+export { ManagementApp } from './management-app';

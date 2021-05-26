@@ -31,9 +31,9 @@
  */
 
 import { ComponentType } from 'react';
-import { PageTitle } from './page_title';
-import { PageSubtitle } from './page_subtitle';
-import { PageFooter } from './page_footer';
+import { PageTitle } from './page-title';
+import { PageSubtitle } from './page-subtitle';
+import { PageFooter } from './page-footer';
 
 type Id =
   | 'advanced_settings_page_title'

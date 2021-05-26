@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { HashedItemStore } from '../../storage/hashed_item_store';
+import { mockStorage } from '../../storage/hashed-item-store/mock';
+import { HashedItemStore } from '../../storage/hashed-item-store';
 import { hashUrl, unhashUrl } from './hash_unhash_url';
 
 describe('hash unhash url', () => {

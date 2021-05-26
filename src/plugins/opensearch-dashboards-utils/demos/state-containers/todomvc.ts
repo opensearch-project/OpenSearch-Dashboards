@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { createStateContainer, PureTransition } from '../../common/state_containers';
+import { createStateContainer, PureTransition } from '../../common/state-containers';
 
 export interface TodoItem {
   text: string;

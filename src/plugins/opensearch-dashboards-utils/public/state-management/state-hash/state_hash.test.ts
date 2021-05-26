@@ -31,7 +31,7 @@
  */
 
 import { encode as encodeRison } from 'rison-node';
-import { mockStorage } from '../../storage/hashed_item_store/mock';
+import { mockStorage } from '../../storage/hashed-item-store/mock';
 import { createStateHash, isStateHash } from './state_hash';
 
 describe('stateHash', () => {

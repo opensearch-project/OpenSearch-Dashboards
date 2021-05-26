@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { expandedStateToHashedState, hashedStateToExpandedState } from '../state_encoder';
+import { expandedStateToHashedState, hashedStateToExpandedState } from '../state-encoder';
 import { replaceUrlHashQuery } from './format';
 
 export type IParsedUrlQuery = Record<string, any>;

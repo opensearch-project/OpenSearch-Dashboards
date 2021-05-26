@@ -51,7 +51,7 @@ jest.mock('@elastic/eui', () => ({
   },
 }));
 jest.mock('./components/header', () => ({ Header: 'header' }));
-jest.mock('./components/call_outs', () => ({ CallOuts: 'call-outs' }));
+jest.mock('./components/call-outs', () => ({ CallOuts: 'call-outs' }));
 jest.mock('./components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {

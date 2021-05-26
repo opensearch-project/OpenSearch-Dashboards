@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
+import { DefaultSearchCapabilities } from '../../../search-strategies/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 
 describe('dateHistogram(req, panel, series)', () => {

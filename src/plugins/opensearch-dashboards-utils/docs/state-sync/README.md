@@ -15,7 +15,7 @@ with URL or browser storage.
 
 - Adding a query param flag or simple key/value to URL
 
-They are designed to work together with [state containers](../state_containers). But state containers are not required.
+They are designed to work together with [state containers](../state-containers). But state containers are not required.
 
 State syncing utilities include:
 

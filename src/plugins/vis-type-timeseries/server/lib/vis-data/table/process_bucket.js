@@ -31,7 +31,7 @@
  */
 
 import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../response_processors/table';
+import { processors } from '../response-processors/table';
 import { getLastValue } from '../../../../common/get_last_value';
 import { first, get } from 'lodash';
 import { overwrite } from '../helpers';

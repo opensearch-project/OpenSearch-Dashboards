@@ -33,7 +33,7 @@
 import { format as formatUrl } from 'url';
 import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
-import { decodeState, encodeState } from '../state_encoder';
+import { decodeState, encodeState } from '../state-encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
 import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 import { url as urlUtils } from '../../../common';

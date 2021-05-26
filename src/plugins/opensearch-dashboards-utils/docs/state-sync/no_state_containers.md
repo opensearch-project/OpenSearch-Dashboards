@@ -1,6 +1,6 @@
 # Using state syncing utilities without state containers
 
-It is possible to use `syncState` utility even if your app is not using [state containers](../state_containers).
+It is possible to use `syncState` utility even if your app is not using [state containers](../state-containers).
 The `state` which is passed into `syncState` function should implement this simple interface:
 
 ```ts
@@ -38,7 +38,7 @@ export class MyStateManager {
 
 ```ts
 // app.ts
-import { syncState, createOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { syncState, createOsdUrlStateStorage } from 'src/plugins/opensearch-dashboards-utils/public';
 import { MyStateManager } from './my_state_manager';
 
 const myStateManager = new MyStateManager();

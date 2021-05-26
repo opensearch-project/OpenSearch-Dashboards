@@ -39,7 +39,7 @@ import {
   IndexPatternFieldDescriptor,
   IndexPatternsFetcher,
 } from '../../../data/server';
-import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { ReqFacade } from './search-strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
   requestContext: RequestHandlerContext,

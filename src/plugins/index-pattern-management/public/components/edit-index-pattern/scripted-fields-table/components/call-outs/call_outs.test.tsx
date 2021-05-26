@@ -33,7 +33,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { CallOuts } from '../call_outs';
+import { CallOuts } from '../call-outs';
 
 describe('CallOuts', () => {
   test('should render normally', () => {

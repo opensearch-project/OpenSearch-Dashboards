@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ComponentRegistry } from './component_registry';
+import { ComponentRegistry } from './component-registry';
 import { HomePublicPluginSetup } from '../../home/public';
 
 import { ManagementSetup } from '../../management/public';

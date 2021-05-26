@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { Sha256 } from '../../../../../core/public/utils';
-import { hashedItemStore } from '../../storage/hashed_item_store';
+import { hashedItemStore } from '../../storage/hashed-item-store';
 
 // This prefix is used to identify hash strings that have been encoded in the URL.
 const HASH_PREFIX = 'h@';

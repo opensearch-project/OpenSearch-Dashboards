@@ -52,4 +52,4 @@ npx -q ts-node src/plugins/opensearch_dashboards_utils/demos/state_containers/to
 - [Using with React](./react.md).
 - [Using without React](./no_react.md).
 - [Parallels with Redux](./redux.md).
-- [Syncing state with URL or SessionStorage](../state_sync)
+- [Syncing state with URL or SessionStorage](../state-sync)

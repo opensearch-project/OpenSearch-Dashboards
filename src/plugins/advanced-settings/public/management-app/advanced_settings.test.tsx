@@ -43,7 +43,7 @@ import {
 import { FieldSetting } from './types';
 import { AdvancedSettingsComponent } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
-import { ComponentRegistry } from '../component_registry';
+import { ComponentRegistry } from '../component-registry';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -51,7 +51,7 @@ jest.mock('./components/field', () => ({
   },
 }));
 
-jest.mock('./components/call_outs', () => ({
+jest.mock('./components/call-outs', () => ({
   CallOuts: () => {
     return 'callOuts';
   },

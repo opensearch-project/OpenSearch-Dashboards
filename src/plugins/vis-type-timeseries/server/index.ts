@@ -50,14 +50,14 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   schema: configSchema,
 };
 
-export { ValidationTelemetryServiceSetup } from './validation_telemetry';
+export { ValidationTelemetryServiceSetup } from './validation-telemetry';
 
 export {
   AbstractSearchStrategy,
   ReqFacade,
-} from './lib/search_strategies/strategies/abstract_search_strategy';
+} from './lib/search-strategies/strategies/abstract_search_strategy';
 // @ts-ignore
-export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
+export { DefaultSearchCapabilities } from './lib/search-strategies/default_search_capabilities';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);

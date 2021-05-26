@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { BaseState, BaseStateContainer } from '../../common/state_containers/types';
-import { IStateStorage } from './state_sync_state_storage';
+import { BaseState, BaseStateContainer } from '../../common/state-containers/types';
+import { IStateStorage } from './state-sync-state-storage';
 
 /**
  * Extension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../request_processors/annotations';
+import { processors } from '../request-processors/annotations';
 
 /**
  * Builds annotation request body

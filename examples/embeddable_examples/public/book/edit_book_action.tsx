@@ -34,7 +34,7 @@ import { OverlayStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch-dashboards-react/public';
 import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -44,7 +44,7 @@ import {
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { OnSaveProps } from '../../../../src/plugins/saved-objects/public';
 import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
 
 interface StartServices {
