@@ -91,7 +91,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         defaultMessage: 'Stack Management',
       }),
       order: 9040,
-      euiIconType: 'heatmap',
+      euiIconType: '/plugins/home/assets/logos/opensearch_mark_default.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
