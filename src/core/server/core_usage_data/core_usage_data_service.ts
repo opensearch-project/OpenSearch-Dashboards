@@ -60,7 +60,7 @@ export interface StartDeps {
  * we need to map customized index names back to a "standard" index name.
  *
  * e.g. If a user configures `opensearchDashboards.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.opensearch_dashboards` not ".my_saved_objects".
+ * collected data to be grouped under `.kibana` not ".my_saved_objects".
  *
  * This is rather brittle, but the option to configure index names might go
  * away completely anyway (see #60053).
@@ -73,9 +73,7 @@ const opensearchDashboardsOrTaskManagerIndex = (
   index: string,
   opensearchDashboardsConfigIndex: string
 ) => {
-  return index === opensearchDashboardsConfigIndex
-    ? '.opensearch_dashboards'
-    : '.opensearch_dashboards_task_manager';
+  return index === opensearchDashboardsConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {

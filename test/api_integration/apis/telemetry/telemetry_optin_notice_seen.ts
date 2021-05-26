@@ -43,7 +43,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
     it('should update telemetry setting field via PUT', async () => {
       try {
         await client.delete({
-          index: '.opensearch_dashboards',
+          index: '.kibana',
           id: 'telemetry:telemetry',
         } as DeleteDocumentParams);
       } catch (err) {
@@ -59,7 +59,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       }: GetResponse<{
         telemetry: TelemetrySavedObjectAttributes;
       }> = await client.get({
-        index: '.opensearch_dashboards',
+        index: '.kibana',
         id: 'telemetry:telemetry',
       } as GetParams);
 

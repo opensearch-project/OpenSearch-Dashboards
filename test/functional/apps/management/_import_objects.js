@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
+        // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('management');
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        // delete .opensearch_dashboards index and then wait for OpenSearch Dashboards to re-create it
+        // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('saved_objects_imports');

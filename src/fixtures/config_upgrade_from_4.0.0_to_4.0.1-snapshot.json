@@ -11,7 +11,7 @@
       "max_score": 1,
       "hits": [
          {
-            "_index": ".opensearch_dashboards",
+            "_index": ".kibana",
             "_type": "config",
             "_id": "4.0.1-SNAPSHOT",
             "_score": 1,
@@ -21,7 +21,7 @@
             }
          },
          {
-            "_index": ".opensearch_dashboards",
+            "_index": ".kibana",
             "_type": "config",
             "_id": "4.0.0",
             "_score": 1,

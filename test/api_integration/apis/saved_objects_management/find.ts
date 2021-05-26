@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         async () =>
           // just in case the opensearch-dashboards server has recreated it
           await opensearch.indices.delete({
-            index: '.opensearch_dashboards',
+            index: '.kibana',
             ignore: [404],
           })
       );

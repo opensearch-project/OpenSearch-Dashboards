@@ -64,7 +64,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
       value: index.id!,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
         defaultMessage: 'The ID in the {opensearchDashboardsIndexPattern} index.',
-        values: { opensearchDashboardsIndexPattern: '.opensearch_dashboards' },
+        values: { opensearchDashboardsIndexPattern: '.kibana' },
       }),
     };
   }

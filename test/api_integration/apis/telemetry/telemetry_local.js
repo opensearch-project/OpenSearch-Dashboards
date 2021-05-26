@@ -256,7 +256,7 @@ export default function ({ getService }) {
         after('clean them all', async () => {
           // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout
           await opensearch.deleteByQuery({
-            index: '.opensearch_dashboards',
+            index: '.kibana',
             body: { query: { term: { type: 'application_usage_transactional' } } },
           });
         });

@@ -44,18 +44,18 @@ const indices = [
   { name: 'logstash', tags },
   { name: 'packetbeat', tags },
   { name: 'metricbeat', tags },
-  { name: '.opensearch_dashboards', tags },
+  { name: '.kibana', tags },
 ] as MatchedItem[];
 
 const partialIndices = [
   { name: 'opensearch-dashboards', tags },
   { name: 'opensearch', tags },
-  { name: '.opensearch_dashboards', tags },
+  { name: '.kibana', tags },
 ] as MatchedItem[];
 
 const exactIndices = [
   { name: 'opensearch-dashboards', tags },
-  { name: '.opensearch_dashboards', tags },
+  { name: '.kibana', tags },
 ] as MatchedItem[];
 
 describe('getMatchedIndices', () => {
@@ -73,23 +73,23 @@ describe('getMatchedIndices', () => {
       { name: 'logstash', tags },
       { name: 'packetbeat', tags },
       { name: 'metricbeat', tags },
-      { name: '.opensearch_dashboards', tags },
+      { name: '.kibana', tags },
     ]);
 
     expect(exactMatchedIndices).toEqual([
       { name: 'opensearch-dashboards', tags },
-      { name: '.opensearch_dashboards', tags },
+      { name: '.kibana', tags },
     ]);
 
     expect(partialMatchedIndices).toEqual([
       { name: 'opensearch-dashboards', tags },
       { name: 'opensearch', tags },
-      { name: '.opensearch_dashboards', tags },
+      { name: '.kibana', tags },
     ]);
 
     expect(visibleIndices).toEqual([
       { name: 'opensearch-dashboards', tags },
-      { name: '.opensearch_dashboards', tags },
+      { name: '.kibana', tags },
     ]);
   });
 
@@ -125,7 +125,7 @@ describe('getMatchedIndices', () => {
     expect(visibleIndices).toEqual([
       { name: 'opensearch-dashboards', tags },
       { name: 'opensearch', tags },
-      { name: '.opensearch_dashboards', tags },
+      { name: '.kibana', tags },
     ]);
   });
 

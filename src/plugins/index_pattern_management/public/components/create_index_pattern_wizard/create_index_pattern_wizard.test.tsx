@@ -115,7 +115,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       isIncludingSystemIndices: true,
-      allIndices: [{ name: '.opensearch_dashboards ' }],
+      allIndices: [{ name: '.kibana ' }],
     });
 
     await component.update();

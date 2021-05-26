@@ -38,7 +38,7 @@ export const config = {
   path: 'opensearchDashboards',
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    index: schema.string({ defaultValue: '.opensearch_dashboards' }),
+    index: schema.string({ defaultValue: '.kibana' }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),

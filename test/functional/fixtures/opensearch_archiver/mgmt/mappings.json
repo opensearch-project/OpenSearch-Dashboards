@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": ".opensearch_dashboards",
+    "index": ".kibana",
     "mappings": {
       "dynamic": "strict",
       "properties": {
