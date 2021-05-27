@@ -1,6 +1,6 @@
-## Version 1.0.0.0-rc1 Release Notes
+## Version 1.0.0-rc1 Release Notes
 
-Compatible with OpenSearch 1.0.0.0-rc1
+Compatible with OpenSearch 1.0.0-rc1
 
 ### Branding
 
