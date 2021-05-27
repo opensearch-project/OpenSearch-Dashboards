@@ -33,7 +33,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterRatioAgg } from './filter_ratio';
-import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+import { FIELDS, METRIC, SERIES, PANEL } from '../../../test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { setDataStart } from '../../../services';

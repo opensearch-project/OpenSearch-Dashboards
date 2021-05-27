@@ -34,7 +34,7 @@
 import sinon from 'sinon';
 import { identity, shuffle, sortBy } from 'lodash';
 
-import { getFieldCapabilities } from '../field_capabilities';
+import { getFieldCapabilities } from '../field-capabilities';
 
 import { callFieldCapsApi } from '../opensearch_api';
 import * as callFieldCapsApiNS from '../opensearch_api';

@@ -38,7 +38,7 @@ import { TriggerId, TriggerContextMapping } from '../types';
  */
 export class TriggerContract<T extends TriggerId> {
   /**
-   * Unique name of the trigger as identified in `ui_actions` plugin trigger
+   * Unique name of the trigger as identified in `ui-actions` plugin trigger
    * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
    */
   public readonly id: T;

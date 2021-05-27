@@ -32,7 +32,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { JsonEditor } from '../../../../src/plugins/opensearch_ui_shared/public';
+import { JsonEditor } from '../../../../src/plugins/opensearch-ui-shared/public';
 
 export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
   const input = JSON.stringify(props.input, null, 4);

@@ -33,7 +33,7 @@
 import {
   StatsGetter,
   StatsCollectionContext,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 import { getClusterInfo, OpenSearchClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import {
@@ -42,7 +42,7 @@ import {
   OpenSearchDashboardsUsageStats,
 } from './get_opensearch_dashboards';
 import { getNodesUsage } from './get_nodes_usage';
-import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
+import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get-data-telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the

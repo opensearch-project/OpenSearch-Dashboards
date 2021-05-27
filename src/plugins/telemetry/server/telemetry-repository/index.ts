@@ -35,4 +35,4 @@ export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 export {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
-} from '../../common/telemetry_config/types';
+} from '../../common/telemetry-config/types';

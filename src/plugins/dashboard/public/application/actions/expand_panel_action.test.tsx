@@ -33,7 +33,7 @@
 import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,

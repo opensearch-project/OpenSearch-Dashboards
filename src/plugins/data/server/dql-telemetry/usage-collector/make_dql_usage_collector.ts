@@ -31,7 +31,7 @@
  */
 
 import { fetchProvider, Usage } from './fetch';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../../usage-collection/server';
 
 export async function makeDQLUsageCollector(
   usageCollection: UsageCollectionSetup,

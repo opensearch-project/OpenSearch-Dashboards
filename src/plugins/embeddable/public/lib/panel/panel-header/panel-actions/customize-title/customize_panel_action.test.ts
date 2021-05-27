@@ -37,12 +37,12 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../../../../test-samples/embeddables/contact-card/contact_card_embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
+} from '../../../../test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../../../../test-samples/embeddables/hello_world_container';
 import { embeddablePluginMock } from '../../../../../mocks';
 
 let container: Container;

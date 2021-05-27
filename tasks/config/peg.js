@@ -39,7 +39,7 @@ module.exports = {
     },
   },
   timeline_chain: {
-    src: 'src/plugins/vis_type_timeline/public/chain.peg',
-    dest: 'src/plugins/vis_type_timeline/public/_generated_/chain.js',
+    src: 'src/plugins/vis-type-timeline/public/chain.peg',
+    dest: 'src/plugins/vis-type-timeline/public/_generated_/chain.js',
   },
 };

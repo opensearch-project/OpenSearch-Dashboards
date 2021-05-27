@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import { AdvancedSettingsSetup } from 'src/plugins/advanced-settings/public';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
 

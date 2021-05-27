@@ -6,7 +6,7 @@ Telemetry allows OpenSearch Dashboards features to have usage tracked in the wil
 2. Sending a payload of usage data up to OpenSearch's telemetry cluster.
 3. Viewing usage data in the OpenSearchDashboards instance of the telemetry cluster (Viewing).
 
-This plugin is responsible for sending usage data to the telemetry cluster. For collecting usage data, use the [`usageCollection` plugin](../usage_collection/README.md)
+This plugin is responsible for sending usage data to the telemetry cluster. For collecting usage data, use the [`usageCollection` plugin](../usage-collection/README.md)
 
 ## Telemetry Plugin public API
 

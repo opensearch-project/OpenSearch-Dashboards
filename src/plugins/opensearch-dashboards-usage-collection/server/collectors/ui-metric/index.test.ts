@@ -34,7 +34,7 @@ import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage-collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
 

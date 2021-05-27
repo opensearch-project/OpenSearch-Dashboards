@@ -35,7 +35,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
 } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { uiMetricSchema } from './schema';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {

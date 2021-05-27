@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
+import { SenseEditor } from '../../models/sense-editor';
 
 export class EditorRegistry {
   private inputEditor: SenseEditor | undefined;

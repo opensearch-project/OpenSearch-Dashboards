@@ -33,7 +33,7 @@ import React, { useState } from 'react';
 import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
 import { arrayContainsObjects, trimAngularSpan } from './table_helper';
-import { DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocViewRenderProps } from '../../doc-views/doc_views_types';
 
 const COLLAPSE_LINE_LENGTH = 350;
 

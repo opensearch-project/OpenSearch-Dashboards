@@ -38,10 +38,10 @@ import {
 } from '../../../../../test_utils/public';
 
 // Data
-import series from '../../fixtures/mock_data/date_histogram/_series';
-import columns from '../../fixtures/mock_data/date_histogram/_columns';
-import rows from '../../fixtures/mock_data/date_histogram/_rows';
-import stackedSeries from '../../fixtures/mock_data/date_histogram/_stacked_series';
+import series from '../../fixtures/mock-data/date-histogram/_series';
+import columns from '../../fixtures/mock-data/date-histogram/_columns';
+import rows from '../../fixtures/mock-data/date-histogram/_rows';
+import stackedSeries from '../../fixtures/mock-data/date-histogram/_stacked_series';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from '../visualizations/_vis_fixture';
 

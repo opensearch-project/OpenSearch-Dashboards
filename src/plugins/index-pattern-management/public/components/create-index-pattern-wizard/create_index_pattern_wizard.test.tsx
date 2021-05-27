@@ -36,10 +36,10 @@ import { mockManagementPlugin } from '../../mocks';
 import { IndexPatternCreationConfig } from '../../';
 import { createComponentWithContext } from '../test_utils';
 
-jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
-jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
+jest.mock('./components/step-index-pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
+jest.mock('./components/step-time-field', () => ({ StepTimeField: 'StepTimeField' }));
 jest.mock('./components/header', () => ({ Header: 'Header' }));
-jest.mock('./components/loading_state', () => ({ LoadingState: 'LoadingState' }));
+jest.mock('./components/loading-state', () => ({ LoadingState: 'LoadingState' }));
 jest.mock('./lib/get_indices', () => ({
   getIndices: () => {
     return [{ name: 'opensearch-dashboards' }];

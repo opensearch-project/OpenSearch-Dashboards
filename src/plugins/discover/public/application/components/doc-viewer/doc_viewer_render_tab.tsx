@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc-views/doc_views_types';
 
 interface Props {
   render: DocViewRenderFn;

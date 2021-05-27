@@ -37,15 +37,15 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../lib/test-samples/embeddables/contact-card/contact_card_embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+} from '../lib/test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../lib/test-samples/embeddables/hello_world_container';
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
+import { CustomizePanelModal } from '../lib/panel/panel-header/panel-actions/customize-title/customize_panel_modal';
 import { EmbeddableStart } from '../plugin';
 import { createEmbeddablePanelMock } from '../mocks';
 import { mountWithIntl } from '../../../../test_utils/public/enzyme_helpers';

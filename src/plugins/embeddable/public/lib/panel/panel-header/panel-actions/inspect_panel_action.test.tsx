@@ -38,7 +38,7 @@ import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
   ContactCardEmbeddable,
-} from '../../../test_samples';
+} from '../../../test-samples';
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';

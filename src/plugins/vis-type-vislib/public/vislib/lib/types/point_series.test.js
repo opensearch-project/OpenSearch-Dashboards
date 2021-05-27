@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
+import stackedSeries from '../../../fixtures/mock-data/date-histogram/_stacked_series';
 import { vislibPointSeriesTypes } from './point_series';
 import percentileTestdata from './testdata_linechart_percentile.json';
 import percentileTestdataResult from './testdata_linechart_percentile_result.json';

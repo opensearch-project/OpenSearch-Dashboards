@@ -31,7 +31,7 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { stackManagementSchema } from './schema';
 
 export interface UsageStats extends Record<string, boolean | number | string> {

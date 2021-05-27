@@ -34,7 +34,7 @@ import React from 'react';
 import { OverviewPageHeader } from './overview_page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../app_links', () => ({
+jest.mock('../../app-links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 

@@ -32,7 +32,7 @@
 
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
-import { createHelloWorldAction } from '../tests/test_samples';
+import { createHelloWorldAction } from '../tests/test-samples';
 import { TriggerRegistry, TriggerId, ActionType, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
 

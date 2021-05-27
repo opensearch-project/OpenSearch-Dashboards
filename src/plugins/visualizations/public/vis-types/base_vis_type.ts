@@ -31,7 +31,7 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+import { ISchemas } from 'src/plugins/vis-default-editor/public';
 import { VisParams } from '../types';
 import { VisType, VisTypeOptions } from './types';
 

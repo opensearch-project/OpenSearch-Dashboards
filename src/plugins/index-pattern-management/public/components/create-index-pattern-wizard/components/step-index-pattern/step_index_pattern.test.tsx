@@ -34,7 +34,7 @@ import React from 'react';
 import { SavedObjectsFindResponsePublic } from 'opensearch-dashboards/public';
 import { StepIndexPattern, canPreselectTimeField } from './step_index_pattern';
 import { Header } from './components/header';
-import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../plugins/index-pattern-management/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { createComponentWithContext } from '../../../test_utils';
 

@@ -37,7 +37,7 @@ import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
  * Internal representation of a trigger kept for consumption only internally
- * within `ui_actions` plugin.
+ * within `ui-actions` plugin.
  */
 export class TriggerInternal<T extends TriggerId> {
   public readonly contract = new TriggerContract<T>(this);

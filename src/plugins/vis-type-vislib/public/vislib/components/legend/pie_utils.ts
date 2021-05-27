@@ -38,7 +38,7 @@ import _ from 'lodash';
  *
  * > Duplicated utilty method from vislib Data class to decouple `vislib_vis_legend` from `vislib`
  *
- * @see src/plugins/vis_type_vislib/public/vislib/lib/data.js
+ * @see src/plugins/vis-type-vislib/public/vislib/lib/data.js
  *
  * @returns {Array} Array of unique names (strings)
  */

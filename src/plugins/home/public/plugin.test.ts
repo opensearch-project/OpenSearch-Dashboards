@@ -33,7 +33,7 @@
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { urlForwardingPluginMock } from '../../url-forwarding/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 

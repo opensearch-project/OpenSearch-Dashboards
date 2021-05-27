@@ -40,16 +40,16 @@ import {
 } from '../../../../../../test_utils/public';
 
 // Data
-import series from '../../../fixtures/mock_data/date_histogram/_series';
-import seriesPosNeg from '../../../fixtures/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
-import termsColumns from '../../../fixtures/mock_data/terms/_columns';
-import histogramRows from '../../../fixtures/mock_data/histogram/_rows';
-import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
+import series from '../../../fixtures/mock-data/date-histogram/_series';
+import seriesPosNeg from '../../../fixtures/mock-data/date-histogram/_series_pos_neg';
+import seriesNeg from '../../../fixtures/mock-data/date-histogram/_series_neg';
+import termsColumns from '../../../fixtures/mock-data/terms/_columns';
+import histogramRows from '../../../fixtures/mock-data/histogram/_rows';
+import stackedSeries from '../../../fixtures/mock-data/date-histogram/_stacked_series';
 
-import { seriesMonthlyInterval } from '../../../fixtures/mock_data/date_histogram/_series_monthly_interval';
-import { rowsSeriesWithHoles } from '../../../fixtures/mock_data/date_histogram/_rows_series_with_holes';
-import rowsWithZeros from '../../../fixtures/mock_data/date_histogram/_rows';
+import { seriesMonthlyInterval } from '../../../fixtures/mock-data/date-histogram/_series_monthly_interval';
+import { rowsSeriesWithHoles } from '../../../fixtures/mock-data/date-histogram/_rows_series_with_holes';
+import rowsWithZeros from '../../../fixtures/mock-data/date-histogram/_rows';
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-export * from './contact_card';
+export * from './contact-card';
 export * from './empty_embeddable';
 export * from './filterable_container';
 export * from './filterable_container_factory';

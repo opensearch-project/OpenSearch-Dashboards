@@ -36,9 +36,9 @@ import { OpenSearchLegacyConfigService, SpecDefinitionsService } from '../servic
 import { OpenSearchConfigForProxy } from '../types';
 import { ProxyConfigCollection } from '../lib';
 
-import { registerOpenSearchConfigRoute } from './api/console/opensearch_config';
+import { registerOpenSearchConfigRoute } from './api/console/opensearch-config';
 import { registerProxyRoute } from './api/console/proxy';
-import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
+import { registerSpecDefinitionsRoute } from './api/console/spec-definitions';
 
 export interface ProxyDependencies {
   readLegacyOpenSearchConfig: () => Promise<OpenSearchConfigForProxy>;

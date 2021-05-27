@@ -37,7 +37,7 @@ import {
   Logger,
   SavedObjectsServiceSetup,
 } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,

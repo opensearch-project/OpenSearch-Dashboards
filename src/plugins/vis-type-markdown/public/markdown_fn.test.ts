@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression-functions/specs/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {

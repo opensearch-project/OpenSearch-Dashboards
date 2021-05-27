@@ -33,7 +33,7 @@
 import moment from 'moment';
 import { createFilterDateRange } from './date_range';
 import { AggConfigs } from '../../agg_configs';
-import { mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test-helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
+import { SenseEditor } from '../../models/sense-editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { MetricsTracker } from '../../../types';
 

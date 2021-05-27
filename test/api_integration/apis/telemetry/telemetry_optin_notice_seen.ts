@@ -32,7 +32,7 @@
 
 import expect from '@osd/expect';
 import { Client, DeleteDocumentParams, GetParams, GetResponse } from 'elasticsearch';
-import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
+import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry-repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {

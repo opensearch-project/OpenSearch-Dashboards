@@ -32,7 +32,7 @@
 
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
-import { createUnitTestExecutor } from '../test_helpers';
+import { createUnitTestExecutor } from '../test-helpers';
 import { ExpressionFunctionDefinition } from '../../common';
 import { ExecutionContract } from './execution_contract';
 

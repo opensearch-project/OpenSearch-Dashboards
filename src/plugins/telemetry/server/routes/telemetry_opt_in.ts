@@ -38,16 +38,16 @@ import { IRouter, Logger } from 'opensearch-dashboards/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
-import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
+import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry-config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
 import {
   TelemetrySavedObjectAttributes,
   updateTelemetrySavedObject,
   getTelemetrySavedObject,
-} from '../telemetry_repository';
+} from '../telemetry-repository';
 import { TelemetryConfigType } from '../config';
 
 interface RegisterOptInRoutesParams {

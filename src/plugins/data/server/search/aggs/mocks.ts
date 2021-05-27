@@ -39,7 +39,7 @@ import {
 } from '../../../common';
 import { AggsSetup, AggsStart } from './types';
 
-import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test-helpers';
 
 const getConfig = jest.fn();
 

@@ -34,7 +34,7 @@ import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
 import { IndexPattern } from 'src/plugins/data/public';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+import { ISchemas } from 'src/plugins/vis-default-editor/public';
 import { TriggerContextMapping } from '../../../ui-actions/public';
 import { Vis, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 

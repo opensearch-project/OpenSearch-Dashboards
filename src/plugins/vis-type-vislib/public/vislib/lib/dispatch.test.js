@@ -39,7 +39,7 @@ import {
 } from '../../../../../test_utils/public';
 
 // Data
-import data from '../../fixtures/mock_data/date_histogram/_series';
+import data from '../../fixtures/mock-data/date-histogram/_series';
 
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from '../visualizations/_vis_fixture';

@@ -35,7 +35,7 @@ import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import loadFunctions from '../lib/load_functions.js';
-const fitFunctions = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit-functions');
 
 export default new Chainable('fit', {
   args: [

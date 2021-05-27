@@ -40,12 +40,12 @@ import {
 } from '../../../../../../test_utils/public';
 
 // Data
-import seriesPos from '../../../fixtures/mock_data/date_histogram/_series';
-import seriesPosNeg from '../../../fixtures/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
-import histogramColumns from '../../../fixtures/mock_data/histogram/_columns';
-import rangeRows from '../../../fixtures/mock_data/range/_rows';
-import termSeries from '../../../fixtures/mock_data/terms/_series';
+import seriesPos from '../../../fixtures/mock-data/date-histogram/_series';
+import seriesPosNeg from '../../../fixtures/mock-data/date-histogram/_series_pos_neg';
+import seriesNeg from '../../../fixtures/mock-data/date-histogram/_series_neg';
+import histogramColumns from '../../../fixtures/mock-data/histogram/_columns';
+import rangeRows from '../../../fixtures/mock-data/range/_rows';
+import termSeries from '../../../fixtures/mock-data/terms/_series';
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

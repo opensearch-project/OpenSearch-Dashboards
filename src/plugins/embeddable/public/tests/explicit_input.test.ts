@@ -35,17 +35,17 @@ import { testPlugin } from './test_plugin';
 import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddableInput,
-} from '../lib/test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
-import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+} from '../lib/test-samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../lib/test-samples/embeddables/filterable_embeddable_factory';
+import { CONTACT_CARD_EMBEDDABLE } from '../lib/test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../lib/test-samples/embeddables/contact-card/slow_contact_card_embeddable_factory';
 import {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactoryDefinition,
 } from '../../../../../examples/embeddable_examples/public';
-import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
+import { FilterableContainer } from '../lib/test-samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
-import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { HelloWorldContainer } from '../lib/test-samples/embeddables/hello_world_container';
 import { coreMock } from '../../../../core/public/mocks';
 import { opensearchFilters, Filter } from '../../../../plugins/data/public';
 import { createEmbeddablePanelMock } from '../mocks';

@@ -33,7 +33,7 @@
 import { merge, omit } from 'lodash';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
-import { usageCollectionPluginMock } from '../../../usage_collection/server/mocks';
+import { usageCollectionPluginMock } from '../../../usage-collection/server/mocks';
 import { opensearchServiceMock } from '../../../../../src/core/server/mocks';
 
 function mockUsageCollection(opensearchDashboardsUsage = {}) {

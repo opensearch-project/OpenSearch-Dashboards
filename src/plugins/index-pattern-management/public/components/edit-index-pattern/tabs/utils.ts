@@ -33,7 +33,7 @@
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
-import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
+import { IndexPatternManagementStart } from '../../../../../../plugins/index-pattern-management/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 
 function filterByName(items: IndexPatternField[], filter: string) {

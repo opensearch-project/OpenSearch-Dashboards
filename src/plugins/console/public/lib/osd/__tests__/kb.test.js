@@ -33,7 +33,7 @@
 import _ from 'lodash';
 import { populateContext } from '../../autocomplete/engine';
 
-import '../../../application/models/sense_editor/sense_editor.test.mocks';
+import '../../../application/models/sense-editor/sense_editor.test.mocks';
 import * as osd from '../../osd';
 import * as mappings from '../../mappings/mappings';
 

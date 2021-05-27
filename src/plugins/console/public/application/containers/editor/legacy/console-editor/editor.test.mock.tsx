@@ -64,7 +64,7 @@ jest.mock('../../../../models/sense-editor', () => {
 });
 
 jest.mock(
-  '../../../../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch',
+  '../../../../hooks/use-send-current-request-to-opensearch/send_request_to_opensearch',
   () => ({
     sendRequestToOpenSearch: jest.fn(),
   })

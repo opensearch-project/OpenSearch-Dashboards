@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { LoadingState } from '../loading_state';
+import { LoadingState } from '../loading-state';
 import { shallow } from 'enzyme';
 
 describe('LoadingState', () => {

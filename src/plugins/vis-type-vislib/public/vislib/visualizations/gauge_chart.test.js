@@ -34,7 +34,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { setHTMLElementClientSizes, setSVGElementGetBBox } from '../../../../../test_utils/public';
 
-import data from '../../fixtures/mock_data/terms/_series_multiple';
+import data from '../../fixtures/mock-data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 

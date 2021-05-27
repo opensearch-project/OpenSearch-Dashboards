@@ -31,4 +31,4 @@
  */
 
 export { registerTelemetryUsageCollector } from './usage';
-export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';
+export { registerTelemetryPluginUsageCollector } from './telemetry-plugin';

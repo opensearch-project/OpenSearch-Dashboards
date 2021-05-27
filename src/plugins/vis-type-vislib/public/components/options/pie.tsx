@@ -35,7 +35,7 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { TruncateLabelsOption } from '../common';
 import { BasicOptions, SwitchOption } from '../../../../charts/public';
 import { PieVisParams } from '../../pie';

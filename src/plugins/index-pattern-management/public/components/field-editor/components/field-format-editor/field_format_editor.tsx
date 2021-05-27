@@ -31,7 +31,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import { DefaultFormatEditor } from '../../components/field_format_editor/editors/default';
+import { DefaultFormatEditor } from '../../components/field-format-editor/editors/default';
 
 export interface FieldFormatEditorProps {
   fieldType: string;

@@ -32,7 +32,7 @@
 
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
-import { mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test-helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
 
 describe('AggConfig Filters', () => {

@@ -32,7 +32,7 @@
 
 import _ from 'lodash';
 import loadFunctions from '../load_functions.js';
-const fitFunctions = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit-functions');
 
 export default class TimelineFunction {
   constructor(name, config) {

@@ -31,8 +31,8 @@
  */
 
 import { testPlugin } from './test_plugin';
-import { FilterableContainerFactory } from '../lib/test_samples/embeddables/filterable_container_factory';
-import { ContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { FilterableContainerFactory } from '../lib/test-samples/embeddables/filterable_container_factory';
+import { ContactCardEmbeddableFactory } from '../lib/test-samples/embeddables/contact-card/contact_card_embeddable_factory';
 
 test('exports getEmbeddableFactories() function', () => {
   const { doStart } = testPlugin();

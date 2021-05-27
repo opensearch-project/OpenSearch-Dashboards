@@ -37,7 +37,7 @@ import { readFileSync } from 'fs';
 
 import { jsSpecLoaders } from '../lib';
 
-const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
+const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec-definitions/json');
 
 export class SpecDefinitionsService {
   private readonly name = 'opensearch';

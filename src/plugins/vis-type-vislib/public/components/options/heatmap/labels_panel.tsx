@@ -36,7 +36,7 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { ValueAxis } from '../../../types';
 import { HeatmapVisParams } from '../../../heatmap';
 import { SwitchOption } from '../../../../../charts/public';

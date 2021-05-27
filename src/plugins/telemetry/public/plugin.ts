@@ -45,13 +45,13 @@ import { TelemetrySender, TelemetryService, TelemetryNotifications } from './ser
 import {
   TelemetrySavedObjectAttributes,
   TelemetrySavedObject,
-} from '../common/telemetry_config/types';
+} from '../common/telemetry-config/types';
 import {
   getTelemetryAllowChangingOptInStatus,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
-} from '../common/telemetry_config';
-import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+} from '../common/telemetry-config';
+import { getNotifyUserAboutOptInDefault } from '../common/telemetry-config/get_telemetry_notify_user_about_optin_default';
 import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 export interface TelemetryPluginSetup {

@@ -74,7 +74,7 @@ export class Plugin {
 
     const configManager = new ConfigManager(this.initializerContext.config);
 
-    const functions = loadFunctions('series_functions');
+    const functions = loadFunctions('series-functions');
 
     const getFunction = (name: string) => {
       if (functions[name]) {

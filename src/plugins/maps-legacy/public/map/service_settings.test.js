@@ -38,11 +38,11 @@ jest.mock('../opensearch_dashboards_services', () => ({
 
 import url from 'url';
 
-import EMS_FILES from '../__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
+import EMS_FILES from '../__tests__/map/ems-mocks/sample_files.json';
+import EMS_TILES from '../__tests__/map/ems-mocks/sample_tiles.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems-mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../__tests__/map/ems-mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from '../__tests__/map/ems-mocks/sample_style_dark';
 import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings } from './service_settings';
 

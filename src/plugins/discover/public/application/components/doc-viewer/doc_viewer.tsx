@@ -34,7 +34,7 @@ import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewerTab } from './doc_viewer_tab';
-import { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocView, DocViewRenderProps } from '../../doc-views/doc_views_types';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.

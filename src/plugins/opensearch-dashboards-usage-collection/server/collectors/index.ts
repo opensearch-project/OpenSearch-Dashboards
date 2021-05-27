@@ -30,10 +30,10 @@
  * GitHub history for details.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
+export { registerUiMetricUsageCollector } from './ui-metric';
 export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerOpenSearchDashboardsUsageCollector } from './opensearch_dashboards';
-export { registerOpsStatsCollector } from './ops_stats';
+export { registerApplicationUsageCollector } from './application-usage';
+export { registerOpenSearchDashboardsUsageCollector } from './opensearch-dashboards';
+export { registerOpsStatsCollector } from './ops-stats';
 export { registerCspCollector } from './csp';
 export { registerCoreUsageCollector } from './core';

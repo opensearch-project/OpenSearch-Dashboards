@@ -37,11 +37,11 @@ import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
-} from '../../../test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
-import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
+} from '../../../test-samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../../../test-samples/embeddables/filterable_embeddable_factory';
+import { FilterableContainer } from '../../../test-samples/embeddables/filterable_container';
 import { ViewMode } from '../../../types';
-import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
+import { ContactCardEmbeddable } from '../../../test-samples/embeddables/contact-card/contact_card_embeddable';
 import { opensearchFilters, Filter } from '../../../../../../../plugins/data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 

@@ -44,7 +44,7 @@ export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([stubIndexPatternWithFields]));
 
-jest.mock('../../query/persisted_log', () => ({
+jest.mock('../../query/persisted-log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 

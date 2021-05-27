@@ -31,7 +31,7 @@
  */
 
 import RowParser from '../../../lib/row_parser';
-import { SenseEditor } from '../../models/sense_editor';
+import { SenseEditor } from '../../models/sense-editor';
 /**
  * This function is considered legacy and should not be changed or updated before we have editor
  * interfaces in place (it's using a customized version of Ace directly).

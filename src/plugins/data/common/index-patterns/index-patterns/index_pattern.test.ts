@@ -47,8 +47,8 @@ class MockFieldFormatter {}
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
+jest.mock('../../field-mapping', () => {
+  const originalModule = jest.requireActual('../../field-mapping');
 
   return {
     ...originalModule,

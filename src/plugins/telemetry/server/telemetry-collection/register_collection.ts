@@ -63,7 +63,7 @@
  */
 
 import { ILegacyClusterClient } from 'opensearch-dashboards/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry-collection-manager/server';
 import { IClusterClient } from '../../../../../src/core/server';
 import { getLocalStats } from './get_local_stats';
 import { getClusterUuids } from './get_cluster_stats';

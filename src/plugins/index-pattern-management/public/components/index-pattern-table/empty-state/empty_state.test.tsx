@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { EmptyState } from '../empty_state';
+import { EmptyState } from '../empty-state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';

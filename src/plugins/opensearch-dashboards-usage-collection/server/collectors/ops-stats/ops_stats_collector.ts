@@ -34,7 +34,7 @@ import { Observable } from 'rxjs';
 import { cloneDeep, omit } from 'lodash';
 import moment from 'moment';
 import { OpsMetrics } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { OPENSEARCH_DASHBOARDS_STATS_TYPE } from '../../../common/constants';
 
 interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {

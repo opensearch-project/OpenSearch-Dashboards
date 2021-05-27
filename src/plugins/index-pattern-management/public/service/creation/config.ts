@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { MatchedItem } from '../../components/create_index_pattern_wizard/types';
+import { MatchedItem } from '../../components/create-index-pattern-wizard/types';
 
 const indexPatternTypeName = i18n.translate(
   'indexPatternManagement.editIndexPattern.createIndex.defaultTypeName',

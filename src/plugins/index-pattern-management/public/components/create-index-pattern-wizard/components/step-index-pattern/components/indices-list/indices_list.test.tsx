@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { IndicesList } from '../indices_list';
+import { IndicesList } from '../indices-list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';
 

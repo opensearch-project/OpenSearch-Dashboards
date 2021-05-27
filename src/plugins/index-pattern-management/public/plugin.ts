@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
+import { UrlForwardingSetup } from '../../url-forwarding/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,

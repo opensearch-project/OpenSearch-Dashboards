@@ -31,7 +31,7 @@
  */
 
 import loadFunctions from './load_functions.js';
-const functions = loadFunctions('series_functions/');
+const functions = loadFunctions('series-functions/');
 import _ from 'lodash';
 
 export default (function () {

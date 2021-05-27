@@ -42,7 +42,7 @@ import {
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedObject } from 'src/plugins/saved-objects/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';

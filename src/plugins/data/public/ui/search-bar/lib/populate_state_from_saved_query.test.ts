@@ -36,7 +36,7 @@ import { dataPluginMock } from '../../../mocks';
 import { DataPublicPluginStart } from '../../../types';
 import { SavedQuery } from '../../..';
 import { FilterStateStore } from '../../../../common';
-import { getFilter } from '../../../query/filter_manager/test_helpers/get_stub_filter';
+import { getFilter } from '../../../query/filter-manager/test-helpers/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {
   let dataMock: jest.Mocked<DataPublicPluginStart>;

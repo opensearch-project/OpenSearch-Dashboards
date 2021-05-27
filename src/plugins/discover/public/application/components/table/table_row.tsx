@@ -31,7 +31,7 @@
  */
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
-import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { FieldMapping, DocViewFilterFn } from '../../doc-views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';

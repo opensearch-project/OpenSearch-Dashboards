@@ -93,7 +93,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state_containers/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state-containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -112,7 +112,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state_containers/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state-containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -130,7 +130,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/data/public/query/state_sync/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/data/public/query/state-sync/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

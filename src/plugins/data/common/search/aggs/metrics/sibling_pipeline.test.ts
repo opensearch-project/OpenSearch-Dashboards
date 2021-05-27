@@ -37,7 +37,7 @@ import { getBucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test-helpers';
 
 describe('sibling pipeline aggs', () => {
   const typesRegistry = mockAggTypesRegistry();

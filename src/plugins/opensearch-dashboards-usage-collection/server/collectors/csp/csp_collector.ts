@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UsageCollectionSetup, CollectorOptions } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, CollectorOptions } from 'src/plugins/usage-collection/server';
 import { HttpServiceSetup, CspConfig } from '../../../../../core/server';
 
 interface Usage {

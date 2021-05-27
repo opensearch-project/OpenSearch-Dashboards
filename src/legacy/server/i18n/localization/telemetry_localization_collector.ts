@@ -32,7 +32,7 @@
 
 import { i18nLoader } from '@osd/i18n';
 import { size } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
 import { OPENSEARCH_DASHBOARDS_LOCALIZATION_STATS_TYPE } from '../constants';
 

@@ -35,7 +35,7 @@ import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
-import { opensearchKuery } from '../../opensearch-query';
+import { opensearchKuery } from '../../opensearch_query';
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];

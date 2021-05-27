@@ -82,11 +82,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Flaky: https://github.com/elastic/kibana/issues/68400
   describe.skip('saved objects edition page', () => {
     beforeEach(async () => {
-      await opensearchArchiver.load('saved_objects_management/edit_saved_object');
+      await opensearchArchiver.load('saved-objects-management/edit_saved_object');
     });
 
     afterEach(async () => {
-      await opensearchArchiver.unload('saved_objects_management/edit_saved_object');
+      await opensearchArchiver.unload('saved-objects-management/edit_saved_object');
     });
 
     it('allows to update the saved object when submitting', async () => {

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { getUsageCollector } from './get_usage_collector';
 import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 

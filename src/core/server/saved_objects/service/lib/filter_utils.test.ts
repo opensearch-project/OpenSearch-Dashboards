@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 // @ts-expect-error no ts
-import { opensearchKuery } from '../../opensearch-query';
+import { opensearchKuery } from '../../opensearch_query';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 

@@ -33,8 +33,8 @@
 import d3 from 'd3';
 import $ from 'jquery';
 
-import series from '../../fixtures/mock_data/date_histogram/_series';
-import terms from '../../fixtures/mock_data/terms/_columns';
+import series from '../../fixtures/mock-data/date-histogram/_series';
+import terms from '../../fixtures/mock-data/terms/_columns';
 import { TimeMarker } from './time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {

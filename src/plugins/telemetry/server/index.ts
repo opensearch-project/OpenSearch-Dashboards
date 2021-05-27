@@ -36,7 +36,7 @@ import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';
 
 export { FetcherTask } from './fetcher';
-export { handleOldSettings } from './handle_old_settings';
+export { handleOldSettings } from './handle-old-settings';
 export { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
@@ -64,4 +64,4 @@ export {
   DataTelemetryIndex,
   DataTelemetryPayload,
   buildDataTelemetryPayload,
-} from './telemetry_collection';
+} from './telemetry-collection';

@@ -33,7 +33,7 @@ import {
   convertIntervalToUnit,
   parseInterval,
   getSuitableUnit,
-} from '../vis_data/helpers/unit_to_seconds';
+} from '../vis-data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 
 const getTimezoneFromRequest = (request) => {

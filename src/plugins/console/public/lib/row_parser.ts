@@ -31,7 +31,7 @@
  */
 
 import { CoreEditor, Token } from '../types';
-import { TokenIterator } from './token_iterator';
+import { TokenIterator } from './token-iterator';
 
 export const MODE = {
   REQUEST_START: 2,

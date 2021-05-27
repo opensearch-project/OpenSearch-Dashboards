@@ -33,7 +33,7 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { urlForwardingPluginMock } from '../../url-forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import {
   IndexPatternManagementSetup,

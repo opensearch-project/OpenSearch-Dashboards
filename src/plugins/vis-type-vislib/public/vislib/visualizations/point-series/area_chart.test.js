@@ -43,12 +43,12 @@ import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
 const dataTypesArray = {
-  'series pos': import('../../../fixtures/mock_data/date_histogram/_series'),
-  'series pos neg': import('../../../fixtures/mock_data/date_histogram/_series_pos_neg'),
-  'series neg': import('../../../fixtures/mock_data/date_histogram/_series_neg'),
-  'term columns': import('../../../fixtures/mock_data/terms/_columns'),
-  'range rows': import('../../../fixtures/mock_data/range/_rows'),
-  stackedSeries: import('../../../fixtures/mock_data/date_histogram/_stacked_series'),
+  'series pos': import('../../../fixtures/mock-data/date-histogram/_series'),
+  'series pos neg': import('../../../fixtures/mock-data/date-histogram/_series_pos_neg'),
+  'series neg': import('../../../fixtures/mock-data/date-histogram/_series_neg'),
+  'term columns': import('../../../fixtures/mock-data/terms/_columns'),
+  'range rows': import('../../../fixtures/mock-data/range/_rows'),
+  stackedSeries: import('../../../fixtures/mock-data/date-histogram/_stacked_series'),
 };
 
 const visLibParams = {

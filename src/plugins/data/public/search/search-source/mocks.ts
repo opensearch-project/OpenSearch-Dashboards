@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
+import { searchSourceCommonMock } from '../../../common/search/search-source/mocks';
 import { ISearchStart } from '../types';
 
 function createStartContract(): jest.Mocked<ISearchStart['searchSource']> {

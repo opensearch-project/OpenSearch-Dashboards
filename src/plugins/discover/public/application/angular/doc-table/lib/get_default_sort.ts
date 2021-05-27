@@ -32,7 +32,7 @@
 import { IndexPattern } from '../../../../opensearch_dashboards_services';
 // @ts-ignore
 import { isSortable } from './get_sort';
-import { SortOrder } from '../components/table_header/helpers';
+import { SortOrder } from '../components/table-header/helpers';
 
 /**
  * use in case the user didn't manually sort.

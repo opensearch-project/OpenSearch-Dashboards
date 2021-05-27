@@ -39,7 +39,7 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
-import { opensearchKuery } from '../../opensearch-query';
+import { opensearchKuery } from '../../opensearch_query';
 const { nodeTypes } = opensearchKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));

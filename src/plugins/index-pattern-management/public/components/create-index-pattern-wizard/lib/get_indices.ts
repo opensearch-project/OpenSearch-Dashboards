@@ -34,7 +34,7 @@ import { sortBy } from 'lodash';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { map, scan } from 'rxjs/operators';
-import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
+import { IndexPatternCreationConfig } from '../../../../../index-pattern-management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 import { DataPublicPluginStart, IOpenSearchSearchResponse } from '../../../../../data/public';
 import { MAX_SEARCH_SIZE } from '../constants';

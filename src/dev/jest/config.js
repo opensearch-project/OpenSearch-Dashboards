@@ -89,8 +89,8 @@ export default {
   modulePathIgnorePatterns: [
     '__fixtures__/',
     'target/',
-    '<rootDir>/src/plugins/maps_legacy',
-    '<rootDir>/src/plugins/region_map',
+    '<rootDir>/src/plugins/maps-legacy',
+    '<rootDir>/src/plugins/region-map',
   ],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
@@ -111,7 +111,7 @@ export default {
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
-    '<rootDir>/src/plugins/opensearch-dashboards-react/public/util/test_helpers/react_mount_serializer.ts',
+    '<rootDir>/src/plugins/opensearch-dashboards-react/public/util/test-helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],

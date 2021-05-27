@@ -31,7 +31,7 @@
  */
 
 import { uiActionsPluginMock } from '../mocks';
-import { createHelloWorldAction } from '../tests/test_samples';
+import { createHelloWorldAction } from '../tests/test-samples';
 import { Action, createAction } from '../actions';
 import { Trigger } from '../triggers';
 import { TriggerId, ActionType } from '../types';

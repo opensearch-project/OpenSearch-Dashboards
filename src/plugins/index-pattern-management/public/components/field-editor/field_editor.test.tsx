@@ -63,19 +63,19 @@ jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: () => ['red'],
 }));
 
-jest.mock('../../scripting_languages', () => ({
+jest.mock('../../scripting-languages', () => ({
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
 
-jest.mock('./components/scripting_call_outs', () => ({
+jest.mock('./components/scripting-call-outs', () => ({
   ScriptingDisabledCallOut: 'scripting-disabled-callOut',
   ScriptingWarningCallOut: 'scripting-warning-callOut',
   ScriptingHelpFlyout: 'scripting-help-flyout',
 }));
 
-jest.mock('./components/field_format_editor', () => ({
+jest.mock('./components/field-format-editor', () => ({
   FieldFormatEditor: 'field-format-editor',
 }));
 

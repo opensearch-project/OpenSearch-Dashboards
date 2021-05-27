@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression-functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';

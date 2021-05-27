@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from 'src/plugins/usage-collection/server';
 import { UsageStats } from './telemetry_management_collector';
 
 // Retrieved by changing all the current settings in OpenSearch Dashboards (we'll need to revisit it in the future).

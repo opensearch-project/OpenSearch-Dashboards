@@ -32,7 +32,7 @@
 
 import { LegacyAPICaller } from 'opensearch-dashboards/server';
 import { convertOpenSearchError } from './errors';
-import { FieldCapsResponse } from './field_capabilities';
+import { FieldCapsResponse } from './field-capabilities';
 
 export interface IndicesAliasResponse {
   [index: string]: IndexAliasResponse;

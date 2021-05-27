@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
+import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved-objects/public';
 import { first } from 'rxjs/operators';
 import { SavedObjectAttributes } from '../../../../core/public';
 import {

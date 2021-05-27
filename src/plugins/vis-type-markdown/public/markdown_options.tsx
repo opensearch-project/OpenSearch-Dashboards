@@ -43,7 +43,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {

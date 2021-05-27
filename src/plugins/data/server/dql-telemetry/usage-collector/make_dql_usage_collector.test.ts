@@ -31,7 +31,7 @@
  */
 
 import { makeDQLUsageCollector } from './make_dql_usage_collector';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../../usage-collection/server';
 
 describe('makeDQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;

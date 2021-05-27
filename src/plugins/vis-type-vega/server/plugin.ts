@@ -31,7 +31,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-import { registerVegaUsageCollector } from './usage_collector';
+import { registerVegaUsageCollector } from './usage-collector';
 import {
   ConfigObservable,
   VisTypeVegaPluginSetupDependencies,

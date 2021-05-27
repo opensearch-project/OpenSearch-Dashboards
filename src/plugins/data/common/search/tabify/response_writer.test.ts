@@ -32,7 +32,7 @@
 
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
+import { mockAggTypesRegistry } from '../aggs/test-helpers';
 import { TabbedResponseWriterOptions } from './types';
 
 describe('TabbedAggResponseWriter class', () => {

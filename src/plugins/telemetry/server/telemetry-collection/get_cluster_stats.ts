@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
+import { ClusterDetailsGetter } from 'src/plugins/telemetry-collection-manager/server';
 import { OpenSearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 /**

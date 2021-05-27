@@ -31,17 +31,17 @@
  */
 
 import React from 'react';
-import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../plugins/index-pattern-management/public';
 import { IFieldType } from '../../../../../../../plugins/data/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { createComponentWithContext } from '../../../test_utils';
 
-import { StepTimeField } from '../step_time_field';
+import { StepTimeField } from '../step-time-field';
 
 jest.mock('./components/header', () => ({ Header: 'Header' }));
-jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
-jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
-jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
+jest.mock('./components/time-field', () => ({ TimeField: 'TimeField' }));
+jest.mock('./components/advanced-options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
+jest.mock('./components/action-buttons', () => ({ ActionButtons: 'ActionButtons' }));
 jest.mock('./../../lib', () => ({
   extractTimeFields: jest.requireActual('./../../lib').extractTimeFields,
   ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),

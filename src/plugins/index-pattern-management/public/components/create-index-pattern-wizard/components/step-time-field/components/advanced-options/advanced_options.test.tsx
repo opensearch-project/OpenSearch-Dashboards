@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { AdvancedOptions } from '../advanced_options';
+import { AdvancedOptions } from '../advanced-options';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 describe('AdvancedOptions', () => {

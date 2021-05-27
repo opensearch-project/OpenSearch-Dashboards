@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { TimeField } from '../time_field';
+import { TimeField } from '../time-field';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 describe('TimeField', () => {

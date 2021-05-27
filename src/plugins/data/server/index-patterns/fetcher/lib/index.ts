@@ -30,6 +30,6 @@
  * GitHub history for details.
  */
 
-export { getFieldCapabilities, shouldReadFieldFromDocValues } from './field_capabilities';
+export { getFieldCapabilities, shouldReadFieldFromDocValues } from './field-capabilities';
 export { resolveTimePattern } from './resolve_time_pattern';
 export { createNoMatchingIndicesError } from './errors';

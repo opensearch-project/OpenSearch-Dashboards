@@ -31,7 +31,7 @@
  */
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { TableVisParams } from '../types';
 
 const TableOptionsComponent = lazy(() => import('./table_vis_options'));

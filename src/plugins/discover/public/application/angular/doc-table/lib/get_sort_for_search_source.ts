@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { OpenSearchQuerySortValue, IndexPattern } from '../../../../opensearch_dashboards_services';
-import { SortOrder } from '../components/table_header/helpers';
+import { SortOrder } from '../components/table-header/helpers';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
 

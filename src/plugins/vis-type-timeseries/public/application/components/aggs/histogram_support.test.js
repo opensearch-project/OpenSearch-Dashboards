@@ -34,7 +34,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
-import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+import { FIELDS, METRIC, SERIES, PANEL } from '../../../test-utils';
 import { setDataStart } from '../../../services';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 

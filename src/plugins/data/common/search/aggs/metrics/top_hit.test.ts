@@ -33,7 +33,7 @@
 import { dropRight, last } from 'lodash';
 import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test-helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { OSD_FIELD_TYPES } from '../../../../common';
 

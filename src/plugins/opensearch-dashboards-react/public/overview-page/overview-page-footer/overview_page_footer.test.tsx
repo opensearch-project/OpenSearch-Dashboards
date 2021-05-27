@@ -34,7 +34,7 @@ import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../app_links', () => ({
+jest.mock('../../app-links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 
@@ -47,7 +47,7 @@ jest.mock('../../context', () => ({
   }),
 }));
 
-jest.mock('../../ui_settings', () => ({
+jest.mock('../../ui-settings', () => ({
   useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
 }));
 

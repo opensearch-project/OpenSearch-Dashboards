@@ -37,7 +37,7 @@ import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
+import { UrlForwardingSetup } from '../../url-forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';

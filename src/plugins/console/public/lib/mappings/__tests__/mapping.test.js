@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import '../../../application/models/sense_editor/sense_editor.test.mocks';
+import '../../../application/models/sense-editor/sense_editor.test.mocks';
 import * as mappings from '../mappings';
 
 describe('Mappings', () => {
