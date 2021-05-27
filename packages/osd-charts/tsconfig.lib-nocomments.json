@@ -1,9 +1,9 @@
 {
+  "extends": "./tsconfig.lib",
   "compilerOptions": {
     "removeComments": true,
     "declaration": false,
     "declarationMap": false
   },
-  "files": [],
-  "extends": "./tsconfig.lib"
+  "files": []
 }

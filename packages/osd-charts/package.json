@@ -27,7 +27,7 @@
     "build:compile": "echo 'Compiling...' && tsc -p ./tsconfig.lib.json && tsc -p ./tsconfig.lib-nocomments.json",
     "build:sass": "echo 'Building sass...' && node-sass src/theme_light.scss dist/theme_light.css --output-style compressed && node-sass src/theme_dark.scss dist/theme_dark.css --output-style compressed && node-sass src/theme_only_light.scss dist/theme_only_light.css --output-style compressed && node-sass src/theme_only_dark.scss dist/theme_only_dark.css --output-style compressed",
     "build:check": "echo 'Type checking dist...' && tsc -p ./tsconfig.lib-check.json",
-    "build:watch": "echo 'Watching build...' && yarn build:clean && yarn build:css && yarn build:compile -w ",
+    "build:watch": "echo 'Watching build...' && yarn build:clean && yarn build:css && tsc -p ./tsconfig.lib.json -w",
     "concat:sass": "echo 'Concat SASS...' && node scripts/concat_sass.js",
     "cz": "git-cz",
     "lint": "NODE_ENV=production eslint --quiet --ext .tsx,.ts,.js .",
@@ -59,8 +59,7 @@
     "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
     "ts:prune": "ts-prune",
     "watch": "yarn test --watch",
-    "index:check": "ts-node scripts/index_check.ts",
-    "tsdocs:check": "ts-node scripts/tsdoc_check.ts"
+    "link:kibana": "node ./packages/link_kibana"
   },
   "dependencies": {
     "@popperjs/core": "^2.4.0",
@@ -157,7 +156,7 @@
     "eslint": "^7.17.0",
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-elastic-charts": "file:./packages/eslint-plugin-elastic-charts",
+    "eslint-plugin-elastic-charts": "link:./packages/eslint-plugin-elastic-charts",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-file-header": "^0.0.1",
     "eslint-plugin-header": "^3.1.0",
@@ -177,6 +176,7 @@
     "jest-matcher-utils": "^26.6.2",
     "jest-puppeteer": "^4.4.0",
     "jest-puppeteer-docker": "^1.4.2",
+    "link-kibana": "link:./packages/link_kibana",
     "lint-staged": "^10.5.3",
     "lodash": "^4.17.15",
     "lorem-ipsum": "^2.0.3",
