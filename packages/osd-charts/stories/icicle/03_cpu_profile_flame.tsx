@@ -31,7 +31,7 @@ const color = palette.slice().reverse();
 const getLayerSpec = (maxDepth: number = 30) =>
   [...new Array(maxDepth + 1)].map((_, depth) => ({
     groupByRollup: (d: Datum) => data.dictionary[d.layers[depth]],
-    nodeLabel: (d: PrimitiveValue) => String(d),
+    nodeLabel: (d: PrimitiveValue) => `${String(d)}/`,
     showAccessor: (d: PrimitiveValue) => d !== undefined,
     shape: {
       fillColor: () => discreteColor(color, 0.8)(depth),

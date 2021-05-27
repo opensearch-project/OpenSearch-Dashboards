@@ -38,6 +38,7 @@ export function renderLinearPartitionCanvas2d(
     diskCenter,
     width: panelWidth,
     height: panelHeight,
+    layers,
   }: ShapeViewModel,
   { currentFocusX0, currentFocusX1, prevFocusX0, prevFocusX1 }: ContinuousDomainFocus,
   chartId: ChartId,
@@ -88,7 +89,7 @@ export function renderLinearPartitionCanvas2d(
     ctx.translate(diskCenter.x, diskCenter.y);
     ctx.clearRect(0, 0, width, height);
 
-    quadViewModel.forEach(({ fillColor, x0, x1, y0px: y0, y1px: y1, dataName: label, textColor }) => {
+    quadViewModel.forEach(({ fillColor, x0, x1, y0px: y0, y1px: y1, dataName, textColor, depth }) => {
       if (y1 - y0 <= padding) return;
 
       const fx0 = Math.max((x0 - focusX0) * scale, 0);
@@ -96,6 +97,8 @@ export function renderLinearPartitionCanvas2d(
 
       if (fx1 < 0 || fx0 > width) return;
 
+      const formatter = layers[depth]?.nodeLabel ?? String;
+      const label = formatter(dataName);
       const fWidth = fx1 - fx0;
       const fPadding = Math.min(padding, MAX_PADDING_RATIO * fWidth);
 
