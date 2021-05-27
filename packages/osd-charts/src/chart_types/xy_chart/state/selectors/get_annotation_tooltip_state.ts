@@ -133,9 +133,7 @@ function getTooltipStateForDOMElements(
   }
   const dimension = (annotationDimensions.get(hoveredDOMElement.createdBySpecId) ?? [])
     .filter(isAnnotationLineProps)
-    .find((d) => {
-      return d.id === hoveredDOMElement.id && d.datum === hoveredDOMElement.datum;
-    });
+    .find(({ id }) => id === hoveredDOMElement.id);
 
   if (!dimension) {
     return null;
