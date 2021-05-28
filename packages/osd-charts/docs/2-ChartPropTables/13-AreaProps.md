@@ -1,5 +1,5 @@
-### Area component props table 
-Default props are set in the area_series.tsx file 
+### Area component props table
+Default props are set in the area_series.tsx file
 
 | Prop | Type | Default | Note |
 |:------|:------:|:---------:|:------|
@@ -11,11 +11,10 @@ Default props are set in the area_series.tsx file
 | yAccessors `(required)`| Accessor[] |  | An array of field names one per y metric value |
 | data `(required)` | datum[] |  | An array of data |
 | chartType | `typeof ChartType.XYAxis` | ChartType.XYAxis  |  |
-| specType | `typeof SpecType.Series` | SpecType.Series | | 
+| specType | `typeof SpecType.Series` | SpecType.Series | |
 | seriesType| `typeof SeriesType.Area` | SeriesType.Area | |
-| groupId | string | DEFAULT_GLOBAL_ID | | 
-| yScaleToDataExtent | boolean | false | | 
-| hideInLegend | boolean | false | hide the series in the legend | 
+| groupId | string | DEFAULT_GLOBAL_ID | |
+| hideInLegend | boolean | false | hide the series in the legend |
 | histogramModeAlignment | `Start or Center or End` | histogramModeAlignment.Center | Determines how points in the series will align to bands in histogram mode |
 
 ***

@@ -409,7 +409,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 'a', y: 0 },
@@ -427,7 +426,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },

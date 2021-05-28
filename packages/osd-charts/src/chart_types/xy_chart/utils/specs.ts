@@ -489,12 +489,6 @@ export interface SeriesScales {
    * @defaultValue `false`
    */
   yNice?: boolean;
-  /**
-   * if true, the min y value is set to the minimum domain value, 0 otherwise
-   * @deprecated use `domain.fit` instead
-   * @defaultValue `false`
-   */
-  yScaleToDataExtent?: boolean;
 }
 
 /** @public */

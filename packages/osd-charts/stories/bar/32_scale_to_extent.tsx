@@ -36,7 +36,6 @@ const logDomains = (data: any[], customDomain: any) => {
 };
 
 export const Example = () => {
-  const yScaleToDataExtent = boolean('yScaleDataToExtent', false);
   const fit = boolean('fit Y domain to data', true);
   const constrainPadding = boolean('constrain padding', true);
   const padding = text('domain padding', '0');
@@ -97,7 +96,6 @@ export const Example = () => {
         yAccessors={['y']}
         stackAccessors={['x']}
         data={data}
-        yScaleToDataExtent={yScaleToDataExtent}
       />
     </Chart>
   );
@@ -106,9 +104,5 @@ export const Example = () => {
 Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
-    info: {
-      text:
-        '`yScaleToDataExtent` has been **depricated** in favor of `domain.fit`. The functionality is identical between the two.',
-    },
   },
 };

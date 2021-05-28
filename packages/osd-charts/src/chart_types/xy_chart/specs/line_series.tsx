@@ -34,7 +34,6 @@ const defaultProps = {
   yScaleType: ScaleType.Linear,
   xAccessor: 'x',
   yAccessors: ['y'],
-  yScaleToDataExtent: false,
   hideInLegend: false,
   histogramModeAlignment: HistogramModeAlignments.Center,
 };
@@ -51,7 +50,6 @@ export const LineSeries: React.FunctionComponent<SpecRequiredProps & SpecOptiona
     | 'yScaleType'
     | 'xAccessor'
     | 'yAccessors'
-    | 'yScaleToDataExtent'
     | 'hideInLegend'
     | 'histogramModeAlignment'
   >(defaultProps),

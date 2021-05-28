@@ -35,7 +35,6 @@ const defaultProps = {
   xAccessor: 'x',
   yAccessors: ['y'],
   hideInLegend: false,
-  yScaleToDataExtent: false,
 };
 type SpecRequiredProps = Pick<BubbleSeriesSpec, 'id' | 'data'>;
 type SpecOptionalProps = Partial<Omit<BubbleSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
@@ -53,13 +52,6 @@ type SpecOptionalProps = Partial<Omit<BubbleSeriesSpec, 'chartType' | 'specType'
 export const BubbleSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     BubbleSeriesSpec,
-    | 'seriesType'
-    | 'groupId'
-    | 'xScaleType'
-    | 'yScaleType'
-    | 'xAccessor'
-    | 'yAccessors'
-    | 'hideInLegend'
-    | 'yScaleToDataExtent'
+    'seriesType' | 'groupId' | 'xScaleType' | 'yScaleType' | 'xAccessor' | 'yAccessors' | 'hideInLegend'
   >(defaultProps),
 );

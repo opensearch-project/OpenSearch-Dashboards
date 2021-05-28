@@ -34,7 +34,6 @@ const defaultProps = {
   yScaleType: ScaleType.Linear,
   xAccessor: 'x',
   yAccessors: ['y'],
-  yScaleToDataExtent: false,
   hideInLegend: false,
   enableHistogramMode: false,
 };
@@ -52,7 +51,6 @@ export const BarSeries: React.FunctionComponent<SpecRequiredProps & SpecOptional
     | 'yScaleType'
     | 'xAccessor'
     | 'yAccessors'
-    | 'yScaleToDataExtent'
     | 'hideInLegend'
     | 'enableHistogramMode'
   >(defaultProps),

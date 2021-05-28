@@ -19,13 +19,13 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 
 <Meta title="Types of charts/Stacked Charts" />
 
-# Stacked charts 
-### Stacked line/bar/area charts include a stackAccessors prop within their seriesSpec. 
+# Stacked charts
+### Stacked line/bar/area charts include a stackAccessors prop within their seriesSpec.
 The stackAccessors prop is an array of fields that indicates the stack membership.
 ***
 
 
-## Stacked bar chart examples 
+## Stacked bar chart examples
 <Chart className={'story-chart'}>
   <Settings showLegend={true} legendPosition={Position.Right} />
   <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
@@ -56,7 +56,7 @@ The stackAccessors prop is an array of fields that indicates the stack membershi
   />
 </Chart>
 
-The code for the chart above can be found below. 
+The code for the chart above can be found below.
 <details>
 
 ```js
@@ -109,7 +109,7 @@ The code for the chart above can be found below.
   title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
   position={Position.Left}
   tickFormat={(d) => Number(d).toFixed(2)}
-  /> 
+  />
   <AreaSeries
   id={'1'}
   name={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
@@ -159,7 +159,7 @@ The code for the chart above can be found below.
     title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
     position={Position.Left}
     tickFormat={(d) => Number(d).toFixed(2)}
-  /> 
+  />
   <AreaSeries
     id={'1'}
     name={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
@@ -199,6 +199,7 @@ The code for the chart above can be found below.
   <Axis id={'bottom'} title={'timestamp per 1 minute'} position={Position.Bottom} showOverlappingTicks={true} tickFormat={timeFormatter('HH:mm')}/>
   <Axis
   id={'left'}
+  domain={{ fit: boolean('scale to extent', false) }}
   title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
   position={Position.Left}
   tickFormat={(d) => Number(d).toFixed(2)}
@@ -212,7 +213,6 @@ The code for the chart above can be found below.
   y0Accessors={[2]}
   data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
   stackAccessors={[0]}
-  yScaleToDataExtent={boolean('scale to extent', false)}
   />
   <AreaSeries
   id={'fixed band'}
@@ -223,7 +223,6 @@ The code for the chart above can be found below.
   y0Accessors={[2]}
   data={KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10])}
   stackAccessors={[0]}
-  yScaleToDataExtent={boolean('scale to extent', false)}
   />
 </Chart>
 
@@ -235,6 +234,7 @@ The code for the chart above can be found below.
   <Axis
     id={'left'}
     title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    domain={{ fit: boolean('scale to extent', false) }}
     position={Position.Left}
     tickFormat={(d) => Number(d).toFixed(2)}
   />
@@ -247,7 +247,6 @@ The code for the chart above can be found below.
     y0Accessors={[2]}
     data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
     stackAccessors={[0]}
-    yScaleToDataExtent={boolean('scale to extent', false)}
   />
   <AreaSeries
     id={'fixed band'}
@@ -258,7 +257,6 @@ The code for the chart above can be found below.
     y0Accessors={[2]}
     data={KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10])}
     stackAccessors={[0]}
-    yScaleToDataExtent={boolean('scale to extent', false)}
   />
 </Chart>
 ```
@@ -290,7 +288,6 @@ The code for the chart above can be found below.
       [8, 2],
       [9, 1],
     ]}
-    yScaleToDataExtent={false}
   />
   <AreaSeries
     id={'stacked area 2'}
@@ -310,7 +307,6 @@ The code for the chart above can be found below.
       [8, 2],
       [9, 4],
     ]}
-    yScaleToDataExtent={false}
   />
   <AreaSeries
     id={'non stacked area'}
@@ -329,7 +325,6 @@ The code for the chart above can be found below.
       [8, 6],
       [9, 7],
     ]}
-    yScaleToDataExtent={false}
   />
 </Chart>
 
@@ -362,7 +357,6 @@ The code for the chart above can be found below.
       [8, 2],
       [9, 1],
     ]}
-    yScaleToDataExtent={false}
   />
   <AreaSeries
     id={'stacked area 2'}
@@ -382,7 +376,6 @@ The code for the chart above can be found below.
       [8, 2],
       [9, 4],
     ]}
-    yScaleToDataExtent={false}
   />
   <AreaSeries
     id={'non stacked area'}
@@ -401,7 +394,6 @@ The code for the chart above can be found below.
       [8, 6],
       [9, 7],
     ]}
-    yScaleToDataExtent={false}
   />
 </Chart>
 ```
@@ -409,9 +401,9 @@ The code for the chart above can be found below.
 
 ***
 
-## Stacked line charts 
+## Stacked line charts
 
-This chart shows multiple line series with an axis and legend. 
+This chart shows multiple line series with an axis and legend.
 
 <Chart className={'story-chart'}>
   <Settings showLegend={true} legendPosition={Position.Right} />
@@ -456,7 +448,7 @@ This chart shows multiple line series with an axis and legend.
   />
 </Chart>
 
-Compare the above chart with the following below. The difference between the two charts is the addition of `stackAccessors={[0]}` in the `<LineSeries />` components. 
+Compare the above chart with the following below. The difference between the two charts is the addition of `stackAccessors={[0]}` in the `<LineSeries />` components.
 
 <Chart className={'story-chart'}>
     <Settings showLegend={true} legendPosition={Position.Right} />
