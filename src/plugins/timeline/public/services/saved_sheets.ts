@@ -48,9 +48,9 @@ export function initSavedSheetService(app: angular.IModule, deps: RenderDeps) {
 
   const savedSheetLoader = new SavedObjectLoader(SavedSheet, savedObjectsClient);
   savedSheetLoader.urlFor = (id) => `#/${encodeURIComponent(id)}`;
-  // Customize loader properties since adding an 's' on type doesn't work for type 'timeline-sheet'.
+  // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
   savedSheetLoader.loaderProperties = {
-    name: 'timeline-sheet',
+    name: 'timelion-sheet',
     noun: 'Saved Sheets',
     nouns: 'saved sheets',
   };

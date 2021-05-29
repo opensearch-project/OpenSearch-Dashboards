@@ -61,7 +61,7 @@ export function getOpenSearchDashboardsUsageCollector(
       search: { total: { type: 'long' } },
       index_pattern: { total: { type: 'long' } },
       graph_workspace: { total: { type: 'long' } },
-      timeline_sheet: { total: { type: 'long' } },
+      timelion_sheet: { total: { type: 'long' } },
     },
     async fetch(callCluster) {
       const {

@@ -152,7 +152,7 @@
             }
           }
         },
-        "timeline-sheet": {
+        "timelion-sheet": {
           "dynamic": "strict",
           "properties": {
             "description": {
@@ -168,22 +168,22 @@
                 }
               }
             },
-            "timeline_chart_height": {
+            "timelion_chart_height": {
               "type": "integer"
             },
-            "timeline_columns": {
+            "timelion_columns": {
               "type": "integer"
             },
-            "timeline_interval": {
+            "timelion_interval": {
               "type": "keyword"
             },
-            "timeline_other_interval": {
+            "timelion_other_interval": {
               "type": "keyword"
             },
-            "timeline_rows": {
+            "timelion_rows": {
               "type": "integer"
             },
-            "timeline_sheet": {
+            "timelion_sheet": {
               "type": "text"
             },
             "title": {
