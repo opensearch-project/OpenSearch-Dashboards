@@ -37,10 +37,15 @@ import { configSchema } from '../../config';
 export class ConfigManager {
   private opensearchShardTimeout: number = 0;
   private graphiteUrls: string[] = [];
+  private blockedUrls: string[] = [];
 
   constructor(config: PluginInitializerContext['config']) {
     config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
       this.graphiteUrls = configUpdate.graphiteUrls || [];
+    });
+
+    config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
+      this.blockedUrls = configUpdate.blocklist || [];
     });
 
     config.legacy.globalConfig$.subscribe((configUpdate) => {
@@ -54,5 +59,9 @@ export class ConfigManager {
 
   getGraphiteUrls() {
     return this.graphiteUrls;
+  }
+
+  getBlockedUrls() {
+    return this.blockedUrls;
   }
 }

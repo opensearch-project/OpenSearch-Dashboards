@@ -37,6 +37,7 @@ export const configSchema = schema.object(
     enabled: schema.boolean({ defaultValue: true }),
     ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
+    blocklist: schema.maybe(schema.arrayOf(schema.string())),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Timeline plugin.
   { unknowns: 'allow' }

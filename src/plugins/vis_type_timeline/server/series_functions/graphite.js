@@ -35,6 +35,86 @@ import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
+import dns from 'dns-sync';
+import IPCIDR from 'ip-cidr';
+
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
+You can always enable the default allowlist configuration.`;
+
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
+Please update your config from OpenSearch Dashboards's Advanced Setting.`;
+
+/**
+ * Resolve hostname to IP address
+ * @param {object} urlObject
+ * @returns {string} configuredIP
+ * or null if it cannot be resolve
+ * According to RFC, all IPv6 IP address needs to be in []
+ * such as [::1]
+ * So if we detect a IPv6 address, we remove brackets
+ */
+function getIpAddress(urlObject) {
+  const hostname = urlObject.hostname;
+  const configuredIP = dns.resolve(hostname);
+  if (configuredIP) {
+    return configuredIP;
+  }
+  if (hostname.startsWith('[') && hostname.endsWith(']')) {
+    return hostname.substr(1).slice(0, -1);
+  }
+  return null;
+}
+
+function isValidURL(configuredUrl, blockedUrls) {
+  // Check the format of URL, URL has be in the format as
+  // scheme://server/path/resource otherwise an TypeError
+  // would be thrown
+  let configuredUrlObject;
+  try {
+    configuredUrlObject = new URL(configuredUrl);
+  } catch (err) {
+    return false;
+  }
+
+  const ip = getIpAddress(configuredUrlObject);
+  if (!ip) {
+    return false;
+  }
+
+  // IPCIDR check if a specific IP address fall in the
+  // range of an IP address block
+  // @param {string} bl
+  // @returns {object} cidr
+  for (const bl of blockedUrls) {
+    const cidr = new IPCIDR(bl);
+    if (cidr.contains(ip)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Check configured url using blocklist and allowlist
+ * If allowlist is used, return false if allowlist does not contain configured url
+ * If blocklist is used, return false if blocklist contains configured url
+ * If both allowlist and blocklist are used, return false if allowlist does not contain or if blocklist contains configured url
+ * @param {Array|string} blockedUrls
+ * @param {Array|string} allowedUrls
+ * @param {string} configuredUrls
+ * @returns {boolean} true if the configuredUrl is valid
+ */
+function checkConfigUrls(blockedUrls, allowedUrls, configuredUrl) {
+  if (blockedUrls.length === 0) {
+    if (!allowedUrls.includes(configuredUrl)) return false;
+  } else if (allowedUrls.length === 0) {
+    if (!isValidURL(configuredUrl, blockedUrls)) return false;
+  } else {
+    if (!allowedUrls.includes(configuredUrl) || !isValidURL(configuredUrl, blockedUrls))
+      return false;
+  }
+  return true;
+}
 
 export default new Datasource('graphite', {
   args: [
@@ -60,18 +140,25 @@ export default new Datasource('graphite', {
       max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD'),
     };
     const allowedUrls = tlConfig.allowedGraphiteUrls;
+    const blockedUrls = tlConfig.blockedGraphiteUrls;
     const configuredUrl = tlConfig.settings['timeline:graphite.url'];
-    if (!allowedUrls.includes(configuredUrl)) {
+    if (allowedUrls.length === 0 && blockedUrls.length === 0) {
       throw new Error(
-        i18n.translate('timeline.help.functions.notAllowedGraphiteUrl', {
-          defaultMessage: `This graphite URL is not configured on the opensearch_dashbpards.yml file.
-          Please configure your graphite server list in the opensearch_dashbpards.yml file under 'timeline.graphiteUrls' and
-          select one from OpenSearch Dashboards's Advanced Settings`,
+        i18n.translate('timeline.help.functions.missCheckGraphiteUrl', {
+          defaultMessage: MISS_CHECKLIST_MESSAGE,
         })
       );
     }
 
-    const URL =
+    if (!checkConfigUrls(blockedUrls, allowedUrls, configuredUrl)) {
+      throw new Error(
+        i18n.translate('timeline.help.functions.invalidGraphiteUrl', {
+          defaultMessage: INVALID_URL_MESSAGE,
+        })
+      );
+    }
+
+    const GRAPHITE_URL =
       tlConfig.settings['timeline:graphite.url'] +
       '/render/' +
       '?format=json' +
@@ -82,7 +169,7 @@ export default new Datasource('graphite', {
       '&target=' +
       config.metric;
 
-    return fetch(URL)
+    return fetch(GRAPHITE_URL, { redirect: 'error' })
       .then(function (resp) {
         return resp.json();
       })

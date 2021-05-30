@@ -102,6 +102,7 @@ export function runRoute(
           getFunction,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
+          blockedGraphiteUrls: configManager.getBlockedUrls(),
           opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
         });

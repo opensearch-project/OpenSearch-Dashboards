@@ -34,6 +34,12 @@ const expect = require('chai').expect;
 
 import fn from './graphite';
 
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
+You can always enable the default allowlist configuration. `;
+
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
+Please update your config from OpenSearch Dashboards's Advanced Setting.`;
+
 jest.mock('node-fetch', () => () => {
   return Promise.resolve({
     json: function () {
@@ -71,6 +77,94 @@ describe('graphite', function () {
   it('should set the label to that of the graphite target', function () {
     return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].label).to.eql('__beer__');
+    });
+  });
+
+  it('should return error message if both allowlist and blocklist are disabled', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+    }).catch((e) => {
+      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+    });
+  });
+
+  it('setting with matched allowlist url should return result ', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timelion:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+      },
+    }).then((result) => {
+      console.log(result);
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with unmatched allowlist url should return error message ', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'http://127.0.0.1' },
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with matched blocklist url should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteUrls: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with matched blocklist localhost should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'http://localhost' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteUrls: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with unmatched blocklist https url should return result', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'https://www.amazon.com' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteUrls: ['127.0.0.0/8'],
+    }).then((result) => {
+      console.log(result);
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with unmatched blocklist ftp url should return result', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'ftp://www.amazon.com' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteUrls: ['127.0.0.0/8'],
+    }).then((result) => {
+      console.log(result);
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with invalid url should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'www.amazon.com' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteUrls: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with redirection error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timelion:graphite.url': 'https://amazon.com/redirect' },
+    }).catch((e) => {
+      expect(e.message).to.includes('maximum redirect reached');
     });
   });
 });

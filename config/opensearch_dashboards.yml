@@ -105,3 +105,9 @@
 # Specifies locale to be used for all localizable strings, dates and number formats.
 # Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"
+
+# Set the allowlist to check input graphite url. 
+vis_type_timeline.graphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite']
+
+# Set the blocklist to check input graphite url. 
+#vis_type_timeline.blocklist: []
