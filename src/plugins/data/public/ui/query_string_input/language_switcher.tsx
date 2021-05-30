@@ -104,8 +104,8 @@ export function QueryLanguageSwitcher(props: Props) {
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
               defaultMessage="The {docsLink} (DQL) offers a simplified query
-              syntax and support for scripted fields. DQL also provides autocomplete if you have
-              a Basic license or above. If you turn off DQL, OpenSearch Dashboards uses Lucene."
+              syntax and support for scripted fields. If you turn off DQL,
+              OpenSearch Dashboards uses Lucene."
               values={{
                 docsLink: (
                   <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
