@@ -30,20 +30,17 @@
  * GitHub history for details.
  */
 
-import React from 'react';
-import { PluginInitializerContext } from 'opensearch-dashboards/public';
-import { AdvancedSettingsPlugin } from './plugin';
-export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
-export { ComponentRegistry } from './component_registry';
+import { ComponentRegistry } from './component-registry';
 
-/**
- * Exports the field component as a React.lazy component. We're explicitly naming it lazy here
- * so any plugin that would import that can clearly see it's lazy loaded and can only be used
- * inside a suspense context.
- */
-const LazyField = React.lazy(() => import('./management_app/components/field'));
-export { LazyField };
+const register = jest.fn();
+const get = jest.fn();
+const componentType = ComponentRegistry.componentType;
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new AdvancedSettingsPlugin();
-}
+export const advancedSettingsMock = {
+  createSetupContract() {
+    return { component: { register, componentType } };
+  },
+  createStartContract() {
+    return { component: { get, componentType } };
+  },
+};

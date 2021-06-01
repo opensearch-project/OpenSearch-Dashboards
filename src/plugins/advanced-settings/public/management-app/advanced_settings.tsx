@@ -35,10 +35,10 @@ import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
-import { CallOuts } from './components/call_outs';
+import { CallOuts } from './components/call-outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
-import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced-settings-voice-announcement';
 import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
