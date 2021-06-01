@@ -31,7 +31,7 @@
  */
 
 import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
-import { querySavedObjectType } from '../saved_objects';
+import { querySavedObjectType } from '../saved-objects';
 
 export class QueryService implements Plugin<void> {
   public setup(core: CoreSetup) {

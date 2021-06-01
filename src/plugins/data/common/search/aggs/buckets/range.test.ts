@@ -31,9 +31,9 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test-helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common/field_formats';
+import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common/field-formats';
 
 describe('Range Agg', () => {
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;

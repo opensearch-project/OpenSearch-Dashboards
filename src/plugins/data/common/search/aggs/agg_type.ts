@@ -40,8 +40,8 @@ import type { RequestAdapter } from 'src/plugins/inspector/common';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
-import { BaseParamType } from './param_types/base';
-import { AggParamType } from './param_types/agg';
+import { BaseParamType } from './param-types/base';
+import { AggParamType } from './param-types/agg';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,

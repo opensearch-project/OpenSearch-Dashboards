@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
+import { applyFiltersPopover } from '../ui/apply-filters';
 import type { IEmbeddable } from '../../../embeddable/public';
 import { Filter, FilterManager, TimefilterContract, opensearchFilters } from '..';
 

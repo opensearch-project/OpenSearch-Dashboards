@@ -33,7 +33,7 @@ import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
 import { getServices, IIndexPattern } from '../../../opensearch_dashboards_services';
-import { IndexPatternField } from '../../../../../data/common/index_patterns';
+import { IndexPatternField } from '../../../../../data/common/index-patterns';
 export type AngularScope = IScope;
 
 export interface AngularDirective {

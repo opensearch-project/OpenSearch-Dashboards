@@ -33,12 +33,12 @@
 import { share } from 'rxjs/operators';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { FilterManager } from './filter_manager';
+import { FilterManager } from './filter-manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
-import { createSavedQueryService } from './saved_query/saved_query_service';
-import { createQueryStateObservable } from './state_sync/create_global_query_observable';
-import { QueryStringManager, QueryStringContract } from './query_string';
+import { createSavedQueryService } from './saved-query/saved_query_service';
+import { createQueryStateObservable } from './state-sync/create_global_query_observable';
+import { QueryStringManager, QueryStringContract } from './query-string';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';

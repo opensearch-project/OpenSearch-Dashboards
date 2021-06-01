@@ -111,16 +111,16 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGeneratorState,
 } from './url_generator';
-import { createSavedDashboardLoader } from './saved_dashboards';
+import { createSavedDashboardLoader } from './saved-dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
+import { addEmbeddableToDashboardUrl } from './url-utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
 import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
-} from './attribute_service/attribute_service';
+} from './attribute-service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {

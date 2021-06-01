@@ -37,7 +37,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { I18nProvider } from '@osd/i18n/react';
 import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput } from '../test_helpers';
+import { getSampleDashboardInput } from '../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,

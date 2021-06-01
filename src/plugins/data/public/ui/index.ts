@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-export { IndexPatternSelectProps } from './index_pattern_select';
-export { FilterLabel } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
+export { IndexPatternSelectProps } from './index-pattern-select';
+export { FilterLabel } from './filter-bar';
+export { QueryStringInput, QueryStringInputProps } from './query-string-input';
+export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search-bar';
 export { SuggestionsComponent } from './typeahead';

@@ -31,7 +31,7 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test-helpers';
 import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';

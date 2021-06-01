@@ -33,7 +33,7 @@
 import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
+import { mockAggTypesRegistry } from '../aggs/test-helpers';
 
 describe('get columns', () => {
   const typesRegistry = mockAggTypesRegistry();

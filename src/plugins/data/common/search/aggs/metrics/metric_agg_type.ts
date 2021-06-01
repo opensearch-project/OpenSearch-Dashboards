@@ -32,10 +32,10 @@
 
 import { i18n } from '@osd/i18n';
 import { AggType, AggTypeConfig } from '../agg_type';
-import { AggParamType } from '../param_types/agg';
+import { AggParamType } from '../param-types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FieldTypes } from '../param_types';
+import { FieldTypes } from '../param-types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;

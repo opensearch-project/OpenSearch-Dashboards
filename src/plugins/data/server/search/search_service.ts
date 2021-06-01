@@ -48,15 +48,15 @@ import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from 
 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
-import { FieldFormatsStart } from '../field_formats';
-import { IndexPatternsServiceStart } from '../index_patterns';
+import { FieldFormatsStart } from '../field-formats';
+import { IndexPatternsServiceStart } from '../index-patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
-import { OPENSEARCH_SEARCH_STRATEGY, opensearchSearchStrategyProvider } from './opensearch_search';
+import { OPENSEARCH_SEARCH_STRATEGY, opensearchSearchStrategyProvider } from './opensearch-search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
-import { searchTelemetry } from '../saved_objects';
+import { searchTelemetry } from '../saved-objects';
 import {
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,

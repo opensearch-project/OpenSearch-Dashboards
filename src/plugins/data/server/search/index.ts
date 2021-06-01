@@ -32,7 +32,7 @@
 
 export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-export * from './opensearch_search';
+export * from './opensearch-search';
 
 export { usageProvider, SearchUsage } from './collectors';
 

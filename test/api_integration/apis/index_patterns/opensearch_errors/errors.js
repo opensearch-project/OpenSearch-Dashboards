@@ -39,7 +39,7 @@ import {
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
   convertOpenSearchError,
-} from '../../../../../src/plugins/data/server/index_patterns/fetcher/lib/errors';
+} from '../../../../../src/plugins/data/server/index-patterns/fetcher/lib/errors';
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 

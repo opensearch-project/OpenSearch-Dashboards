@@ -32,7 +32,7 @@
 
 import { ISearchSetup, ISearchStart } from './types';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { searchSourceMock } from './search_source/mocks';
+import { searchSourceMock } from './search-source/mocks';
 
 export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
   return {

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../test_helpers';
+import { functionWrapper } from '../test-helpers';
 import { aggSignificantTerms } from './significant_terms_fn';
 
 describe('agg_expression_functions', () => {

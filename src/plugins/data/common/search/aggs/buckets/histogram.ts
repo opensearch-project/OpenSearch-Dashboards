@@ -38,7 +38,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
-import { createFilterHistogram } from './create_filter/histogram';
+import { createFilterHistogram } from './create-filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { ExtendedBounds } from './lib/extended_bounds';
 import { isAutoInterval, autoInterval } from './_interval_options';

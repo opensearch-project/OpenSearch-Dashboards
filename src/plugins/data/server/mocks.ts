@@ -31,8 +31,8 @@
  */
 
 import { createSearchSetupMock, createSearchStartMock } from './search/mocks';
-import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
-import { createIndexPatternsStartMock } from './index_patterns/mocks';
+import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field-formats/mocks';
+import { createIndexPatternsStartMock } from './index-patterns/mocks';
 
 function createSetupContract() {
   return {

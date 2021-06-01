@@ -33,8 +33,8 @@
 export * from './lib';
 
 export * from './query_service';
-export * from './filter_manager';
+export * from './filter-manager';
 export * from './timefilter';
-export * from './saved_query';
-export * from './persisted_log';
-export * from './state_sync';
+export * from './saved-query';
+export * from './persisted-log';
+export * from './state-sync';

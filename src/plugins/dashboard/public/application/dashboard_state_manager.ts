@@ -58,7 +58,7 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../../../opensearch_dashboards_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { SavedObjectDashboard } from '../saved-dashboards';
 import { DashboardContainer } from './embeddable';
 
 /**

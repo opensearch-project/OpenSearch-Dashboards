@@ -31,11 +31,11 @@
  */
 
 export * from './constants';
-export * from './opensearch_query';
-export * from './field_formats';
-export * from './field_mapping';
-export * from './index_patterns';
-export * from './osd_field_types';
+export * from './opensearch-query';
+export * from './field-formats';
+export * from './field-mapping';
+export * from './index-patterns';
+export * from './osd-field-types';
 export * from './query';
 export * from './search';
 export * from './types';

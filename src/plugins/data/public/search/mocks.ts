@@ -31,7 +31,7 @@
  */
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { searchSourceMock } from './search_source/mocks';
+import { searchSourceMock } from './search-source/mocks';
 import { ISearchSetup, ISearchStart } from './types';
 
 function createSetupContract(): jest.Mocked<ISearchSetup> {

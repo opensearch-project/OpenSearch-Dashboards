@@ -83,14 +83,14 @@ import {
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
-import { showOptionsPopover } from './top_nav/show_options_popover';
-import { DashboardSaveModal } from './top_nav/save_modal';
-import { showCloneModal } from './top_nav/show_clone_modal';
+import { showOptionsPopover } from './top-nav/show_options_popover';
+import { DashboardSaveModal } from './top-nav/save_modal';
+import { showCloneModal } from './top-nav/show_clone_modal';
 import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
-import { getTopNavConfig } from './top_nav/get_top_nav_config';
-import { TopNavIds } from './top_nav/top_nav_ids';
+import { getTopNavConfig } from './top-nav/get_top_nav_config';
+import { TopNavIds } from './top-nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';

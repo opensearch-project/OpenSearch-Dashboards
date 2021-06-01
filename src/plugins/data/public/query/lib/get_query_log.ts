@@ -32,7 +32,7 @@
 
 import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { PersistedLog } from '../persisted_log';
+import { PersistedLog } from '../persisted-log';
 import { UI_SETTINGS } from '../../../common';
 
 /** @internal */

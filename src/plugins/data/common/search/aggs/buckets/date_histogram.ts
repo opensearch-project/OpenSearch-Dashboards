@@ -37,11 +37,11 @@ import { i18n } from '@osd/i18n';
 import { OSD_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
 
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
-import { createFilterDateHistogram } from './create_filter/date_histogram';
+import { createFilterDateHistogram } from './create-filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { ExtendedBounds } from './lib/extended_bounds';
-import { TimeBuckets } from './lib/time_buckets';
+import { TimeBuckets } from './lib/time-buckets';
 
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';

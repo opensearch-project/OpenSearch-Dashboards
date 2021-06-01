@@ -34,7 +34,7 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../field-formats';
 import { getForceNow } from '../../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../../common';
 import {

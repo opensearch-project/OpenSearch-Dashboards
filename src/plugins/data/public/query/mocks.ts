@@ -33,8 +33,8 @@
 import { Observable } from 'rxjs';
 import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
-import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
-import { queryStringManagerMock } from './query_string/query_string_manager.mock';
+import { createFilterManagerMock } from './filter-manager/filter_manager.mock';
+import { queryStringManagerMock } from './query-string/query_string_manager.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 

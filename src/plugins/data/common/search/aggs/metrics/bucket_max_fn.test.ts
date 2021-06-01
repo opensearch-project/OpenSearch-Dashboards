@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../test_helpers';
+import { functionWrapper } from '../test-helpers';
 import { aggBucketMax } from './bucket_max_fn';
 
 describe('agg_expression_functions', () => {

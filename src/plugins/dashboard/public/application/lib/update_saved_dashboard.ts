@@ -33,7 +33,7 @@
 import _ from 'lodash';
 import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
-import { SavedObjectDashboard } from '../../saved_dashboards';
+import { SavedObjectDashboard } from '../../saved-dashboards';
 import { DashboardAppState } from '../../types';
 import { opensearchFilters } from '../../../../data/public';
 

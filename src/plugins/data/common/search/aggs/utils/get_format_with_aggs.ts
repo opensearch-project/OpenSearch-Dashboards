@@ -37,7 +37,7 @@ import {
   FieldFormat,
   FieldFormatsContentType,
   IFieldFormat,
-} from '../../../../common/field_formats';
+} from '../../../../common/field-formats';
 import { convertDateRangeToString, DateRangeKey } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 

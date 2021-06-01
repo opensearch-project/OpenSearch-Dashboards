@@ -38,7 +38,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
-import { getSampleDashboardInput } from '../../test_helpers';
+import { getSampleDashboardInput } from '../../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,

@@ -32,7 +32,7 @@
 
 import { getGeoHashBucketAgg } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test-helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 

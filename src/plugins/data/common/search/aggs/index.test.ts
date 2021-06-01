@@ -31,7 +31,7 @@
  */
 
 import { getAggTypes } from './index';
-import { mockGetFieldFormatsStart } from './test_helpers';
+import { mockGetFieldFormatsStart } from './test-helpers';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../test_helpers';
+import { functionWrapper } from '../test-helpers';
 import { IP_RANGE_TYPES } from './ip_range';
 import { aggIpRange } from './ip_range_fn';
 

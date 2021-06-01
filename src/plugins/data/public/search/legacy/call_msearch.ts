@@ -31,7 +31,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { LegacyFetchHandlers } from '../../../common/search/search_source';
+import { LegacyFetchHandlers } from '../../../common/search/search-source';
 
 /**
  * Wrapper for calling the internal msearch endpoint from the client.

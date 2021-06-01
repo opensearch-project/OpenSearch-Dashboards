@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../test_helpers';
+import { functionWrapper } from '../test-helpers';
 import { aggBucketAvg } from './bucket_avg_fn';
 
 describe('agg_expression_functions', () => {

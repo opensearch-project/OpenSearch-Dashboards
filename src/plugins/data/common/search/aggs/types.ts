@@ -31,7 +31,7 @@
  */
 
 import { Assign } from '@osd/utility-types';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../../index-patterns/index-patterns/index_pattern';
 import {
   AggConfigSerialized,
   AggConfigs,
@@ -79,11 +79,11 @@ export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
+export { IFieldParamType } from './param-types';
 export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp } from './param_types/optioned';
+export { OptionedValueProp } from './param-types/optioned';
 
 /** @internal */
 export interface AggsCommonSetup {

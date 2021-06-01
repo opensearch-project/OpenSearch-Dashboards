@@ -41,7 +41,7 @@ import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/pub
 import { DashboardAppState, SavedDashboardPanel } from '../types';
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { SavedObjectDashboard } from '../saved-dashboards';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;

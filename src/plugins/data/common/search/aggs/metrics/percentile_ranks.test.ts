@@ -36,7 +36,7 @@ import {
   PercentileRanksMetricAggDependencies,
 } from './percentile_ranks';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';
+import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test-helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function () {

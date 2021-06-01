@@ -46,7 +46,7 @@ import {
   withNotifyOnErrors,
 } from '../../../opensearch_dashboards_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
-import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { addHelpMenuToAppChrome } from './help-menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
 
 export function initDashboardApp(app, deps) {

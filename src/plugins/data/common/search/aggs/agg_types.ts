@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon } from '../../field-formats';
 import { BUCKET_TYPES } from './buckets';
 import { METRIC_TYPES } from './metrics';
 

@@ -38,7 +38,7 @@ import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { calculateBounds, getTime, RefreshInterval, TimeRange } from '../../../common';
 import { TimeHistoryContract } from './time_history';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../index-patterns';
 
 // TODO: remove!
 

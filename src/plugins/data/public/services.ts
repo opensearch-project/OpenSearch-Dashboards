@@ -31,9 +31,9 @@
  */
 
 import { NotificationsStart, CoreStart } from 'src/core/public';
-import { FieldFormatsStart } from './field_formats';
+import { FieldFormatsStart } from './field-formats';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
-import { IndexPatternsContract } from './index_patterns';
+import { IndexPatternsContract } from './index-patterns';
 import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(

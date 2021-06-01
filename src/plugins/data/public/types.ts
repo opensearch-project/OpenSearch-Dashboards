@@ -36,11 +36,11 @@ import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public'
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { FieldFormatsSetup, FieldFormatsStart } from './field-formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { IndexPatternsContract } from './index_patterns';
+import { IndexPatternsContract } from './index-patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 

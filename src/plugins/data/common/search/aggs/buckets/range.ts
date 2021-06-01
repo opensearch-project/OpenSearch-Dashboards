@@ -38,7 +38,7 @@ import { BaseAggParams } from '../types';
 
 import { BucketAggType } from './bucket_agg_type';
 import { RangeKey } from './range_key';
-import { createFilterRange } from './create_filter/range';
+import { createFilterRange } from './create-filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {

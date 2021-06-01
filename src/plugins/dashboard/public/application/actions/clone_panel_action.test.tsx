@@ -31,7 +31,7 @@
  */
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardPanelState } from '../embeddable';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,

@@ -33,7 +33,7 @@
 import { IAggConfig } from '../agg_config';
 import { OSD_FIELD_TYPES } from '../../../../common';
 import { AggType, AggTypeConfig } from '../agg_type';
-import { AggParamType } from '../param_types/agg';
+import { AggParamType } from '../param-types/agg';
 
 export interface IBucketAggConfig extends IAggConfig {
   type: InstanceType<typeof BucketAggType>;

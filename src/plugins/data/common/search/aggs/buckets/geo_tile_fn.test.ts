@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { functionWrapper } from '../test_helpers';
+import { functionWrapper } from '../test-helpers';
 import { aggGeoTile } from './geo_tile_fn';
 
 describe('agg_expression_functions', () => {

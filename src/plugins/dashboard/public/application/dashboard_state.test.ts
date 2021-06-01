@@ -32,7 +32,7 @@
 
 import { createBrowserHistory } from 'history';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { getSavedDashboardMock } from './test_helpers';
+import { getSavedDashboardMock } from './test-helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';

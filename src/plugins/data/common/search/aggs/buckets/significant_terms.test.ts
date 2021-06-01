@@ -31,7 +31,7 @@
  */
 
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test-helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('Significant Terms Agg', () => {

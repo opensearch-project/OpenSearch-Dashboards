@@ -32,7 +32,7 @@
 
 import moment from 'moment';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { PersistedLog } from '../persisted_log';
+import { PersistedLog } from '../persisted-log';
 import { TimeRange } from '../../../common';
 
 export class TimeHistory {

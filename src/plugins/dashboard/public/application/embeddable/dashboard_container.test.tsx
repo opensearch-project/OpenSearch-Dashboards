@@ -33,7 +33,7 @@
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test-helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,

@@ -33,7 +33,7 @@
 import { Query } from '../../../../common';
 import { AggConfigs } from '../agg_configs';
 import { AggTypesDependencies } from '../agg_types';
-import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test-helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('Filters Agg', () => {

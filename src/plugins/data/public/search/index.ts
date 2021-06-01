@@ -56,7 +56,7 @@ export {
   SortDirection,
 } from '../../common/search';
 
-export { getOpenSearchPreference } from './opensearch_search';
+export { getOpenSearchPreference } from './opensearch-search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
 export * from './errors';
