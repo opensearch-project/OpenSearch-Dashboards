@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export * from './color_maps';
+export * from './color-maps';
 export * from './components';

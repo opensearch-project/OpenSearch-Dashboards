@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ColorSchemas } from '../color_maps';
+import { ColorSchemas } from '../color-maps';
 import { Rotates } from './collections';
 
 export interface ColorSchemaParams {

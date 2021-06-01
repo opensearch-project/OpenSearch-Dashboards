@@ -34,7 +34,7 @@ import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { BaseResponseType } from '../../types/common';
-import { OpenSearchRequestResult } from '../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch';
+import { OpenSearchRequestResult } from '../hooks/use-send-current-request-to-opensearch/send_request_to_opensearch';
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }

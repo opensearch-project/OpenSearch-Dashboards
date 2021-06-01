@@ -47,7 +47,7 @@ const createStartContract = (): Start => ({
   theme: themeServiceMock,
 });
 
-export { colorMapsMock } from './static/color_maps/mock';
+export { colorMapsMock } from './static/color-maps/mock';
 
 export const chartPluginMock = {
   createSetupContract,

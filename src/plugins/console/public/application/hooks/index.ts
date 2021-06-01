@@ -31,7 +31,7 @@
  */
 
 export { useSetInputEditor } from './use_set_input_editor';
-export { useRestoreRequestFromHistory } from './use_restore_request_from_history';
-export { useSendCurrentRequestToOpenSearch } from './use_send_current_request_to_opensearch';
+export { useRestoreRequestFromHistory } from './use-restore-request-from-history';
+export { useSendCurrentRequestToOpenSearch } from './use-send-current-request-to-opensearch';
 export { useSaveCurrentTextObject } from './use_save_current_text_object';
-export { useDataInit } from './use_data_init';
+export { useDataInit } from './use-data-init';

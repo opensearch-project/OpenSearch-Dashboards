@@ -30,8 +30,21 @@
  * GitHub history for details.
  */
 
-export * from './create';
-export * from '../legacy_core_editor/create_readonly';
-export { MODE } from '../../../lib/row_parser';
-export { SenseEditor } from './sense_editor';
-export { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
+import { DevToolsSettings } from '../../../../../services';
+import { CoreEditor } from '../../../../../types';
+import { CustomAceEditor } from '../../../../models/legacy-core-editor';
+
+export function applyCurrentSettings(
+  editor: CoreEditor | CustomAceEditor,
+  settings: DevToolsSettings
+) {
+  if ((editor as any).setStyles) {
+    (editor as CoreEditor).setStyles({
+      wrapLines: settings.wrapMode,
+      fontSize: settings.fontSize + 'px',
+    });
+  } else {
+    (editor as CustomAceEditor).getSession().setUseWrapMode(settings.wrapMode);
+    (editor as CustomAceEditor).container.style.fontSize = settings.fontSize + 'px';
+  }
+}

@@ -45,7 +45,7 @@ import {
   useSendCurrentRequestToOpenSearch,
   useSetInputEditor,
 } from '../../../../hooks';
-import * as senseEditor from '../../../../models/sense_editor';
+import * as senseEditor from '../../../../models/sense-editor';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';

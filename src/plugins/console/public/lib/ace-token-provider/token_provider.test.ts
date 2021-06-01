@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import '../../application/models/sense_editor/sense_editor.test.mocks';
+import '../../application/models/sense-editor/sense_editor.test.mocks';
 
 import $ from 'jquery';
 
@@ -38,7 +38,7 @@ import $ from 'jquery';
 // this lib. We also need to import application specific mocks which is not ideal.
 // In this situation, the token provider lib knows about app models in tests, which it really shouldn't. Should create
 // a better sandbox in future.
-import { create, SenseEditor } from '../../application/models/sense_editor';
+import { create, SenseEditor } from '../../application/models/sense-editor';
 
 import { Position, Token, TokensProvider } from '../../types';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
+jest.mock('../../../../contexts/editor-context/editor_registry.ts', () => ({
   instance: {
     setInputEditor: () => {},
     getInputEditor: () => ({
@@ -44,7 +44,7 @@ jest.mock('../../../../../lib/mappings/mappings', () => ({
   retrieveAutoCompleteInfo: () => {},
   clearSubscriptions: () => {},
 }));
-jest.mock('../../../../models/sense_editor', () => {
+jest.mock('../../../../models/sense-editor', () => {
   return {
     create: () => ({
       getCoreEditor: () => ({
@@ -64,7 +64,7 @@ jest.mock('../../../../models/sense_editor', () => {
 });
 
 jest.mock(
-  '../../../../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch',
+  '../../../../hooks/use-send-current-request-to-opensearch/send_request_to_opensearch',
   () => ({
     sendRequestToOpenSearch: jest.fn(),
   })

@@ -39,7 +39,7 @@ import {
   useRequestReadContext,
   useServicesContext,
 } from '../../../../contexts';
-import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy-core-editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 

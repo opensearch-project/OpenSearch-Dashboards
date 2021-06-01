@@ -29,20 +29,14 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+/* eslint no-undef: 0 */
 
-import { SenseEditor } from '../../models/sense_editor';
+import '../legacy-core-editor/legacy_core_editor.test.mocks';
 
-export class EditorRegistry {
-  private inputEditor: SenseEditor | undefined;
-
-  setInputEditor(inputEditor: SenseEditor) {
-    this.inputEditor = inputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor!;
-  }
-}
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
+import jQuery from 'jquery';
+jest.spyOn(jQuery, 'ajax').mockImplementation(
+  () =>
+    new Promise(() => {
+      // never resolve
+    }) as any
+);

@@ -36,7 +36,7 @@ import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../../../../opensearch_dashboards_react/public';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
+import { Editor as EditorUI, EditorOutput } from './legacy/console-editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 

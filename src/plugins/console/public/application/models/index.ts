@@ -30,5 +30,5 @@
  * GitHub history for details.
  */
 
-export * from './legacy_core_editor/legacy_core_editor';
-export * from './sense_editor';
+export * from './legacy-core-editor/legacy_core_editor';
+export * from './sense-editor';

@@ -42,8 +42,8 @@ import {
   EditorEvent,
   AutoCompleterFunction,
 } from '../../../types';
-import { AceTokensProvider } from '../../../lib/ace_token_provider';
-import * as curl from '../sense_editor/curl';
+import { AceTokensProvider } from '../../../lib/ace-token-provider';
+import * as curl from '../sense-editor/curl';
 import smartResize from './smart_resize';
 
 // @ts-ignore

@@ -30,21 +30,16 @@
  * GitHub history for details.
  */
 
-import { DevToolsSettings } from '../../../../../services';
-import { CoreEditor } from '../../../../../types';
-import { CustomAceEditor } from '../../../../models/legacy_core_editor';
+import { SenseEditor } from './sense_editor';
+import * as core from '../legacy-core-editor';
 
-export function applyCurrentSettings(
-  editor: CoreEditor | CustomAceEditor,
-  settings: DevToolsSettings
-) {
-  if ((editor as any).setStyles) {
-    (editor as CoreEditor).setStyles({
-      wrapLines: settings.wrapMode,
-      fontSize: settings.fontSize + 'px',
-    });
-  } else {
-    (editor as CustomAceEditor).getSession().setUseWrapMode(settings.wrapMode);
-    (editor as CustomAceEditor).container.style.fontSize = settings.fontSize + 'px';
-  }
+export function create(element: HTMLElement) {
+  const coreEditor = core.create(element);
+  const senseEditor = new SenseEditor(coreEditor);
+
+  /**
+   * Init the editor
+   */
+  senseEditor.highlightCurrentRequestsAndUpdateActionBar();
+  return senseEditor;
 }

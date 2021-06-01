@@ -49,7 +49,7 @@ import {
 } from '../../../../contexts';
 
 // Mocked functions
-import { sendRequestToOpenSearch } from '../../../../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch';
+import { sendRequestToOpenSearch } from '../../../../hooks/use-send-current-request-to-opensearch/send_request_to_opensearch';
 import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
 
 import * as consoleMenuActions from '../console_menu_actions';

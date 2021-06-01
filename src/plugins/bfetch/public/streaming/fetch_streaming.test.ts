@@ -31,7 +31,7 @@
  */
 
 import { fetchStreaming } from './fetch_streaming';
-import { mockXMLHttpRequest } from '../test_helpers/xhr';
+import { mockXMLHttpRequest } from '../test-helpers/xhr';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 

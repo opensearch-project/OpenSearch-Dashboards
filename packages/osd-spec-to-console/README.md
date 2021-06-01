@@ -22,7 +22,7 @@ At the root of the OpenSearch Dashboards repository, run the following commands:
 
 ```sh
 # OSS
-yarn spec_to_console -g "<OPENSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" -d "src/plugins/console/server/lib/spec_definitions/json/generated"
+yarn spec_to_console -g "<OPENSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" -d "src/plugins/console/server/lib/spec-definitions/json/generated"
 
 ```
 

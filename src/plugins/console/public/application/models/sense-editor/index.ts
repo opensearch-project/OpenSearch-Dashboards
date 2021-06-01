@@ -29,14 +29,9 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-/* eslint no-undef: 0 */
 
-import '../legacy_core_editor/legacy_core_editor.test.mocks';
-
-import jQuery from 'jquery';
-jest.spyOn(jQuery, 'ajax').mockImplementation(
-  () =>
-    new Promise(() => {
-      // never resolve
-    }) as any
-);
+export * from './create';
+export * from '../legacy-core-editor/create_readonly';
+export { MODE } from '../../../lib/row_parser';
+export { SenseEditor } from './sense_editor';
+export { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';

@@ -30,16 +30,24 @@
  * GitHub history for details.
  */
 
-import { SenseEditor } from './sense_editor';
-import * as core from '../legacy_core_editor';
+import { SenseEditor } from '../../models/sense-editor';
+import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
+import { MetricsTracker } from '../../../types';
 
-export function create(element: HTMLElement) {
-  const coreEditor = core.create(element);
-  const senseEditor = new SenseEditor(coreEditor);
+export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
+  const coreEditor = editor.getCoreEditor();
+  // `getEndpointFromPosition` gets values from the server-side generated JSON files which
+  // are a combination of JS, automatically generated JSON and manual overrides. That means
+  // the metrics reported from here will be tied to the definitions in those files.
+  // See src/legacy/core_plugins/console/server/api_server/spec
+  const endpointDescription = getEndpointFromPosition(
+    coreEditor,
+    coreEditor.getCurrentPosition(),
+    editor.parser
+  );
 
-  /**
-   * Init the editor
-   */
-  senseEditor.highlightCurrentRequestsAndUpdateActionBar();
-  return senseEditor;
-}
+  if (requests[0] && endpointDescription) {
+    const eventName = `${requests[0].method}_${endpointDescription.id ?? 'unknown'}`;
+    trackUiMetric.count(eventName);
+  }
+};

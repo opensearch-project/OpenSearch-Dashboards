@@ -39,7 +39,7 @@ import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 import { ColorSchemaParams } from './types';
-import { ColorSchema } from '../color_maps';
+import { ColorSchema } from '../color-maps';
 
 export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaParams>(
   paramName: T,

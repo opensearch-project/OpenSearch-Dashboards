@@ -47,7 +47,7 @@ import {
 
 import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
-import { useEditorReadContext } from '../../contexts/editor_context';
+import { useEditorReadContext } from '../../contexts/editor-context';
 import { useRestoreRequestFromHistory } from '../../hooks';
 
 interface Props {

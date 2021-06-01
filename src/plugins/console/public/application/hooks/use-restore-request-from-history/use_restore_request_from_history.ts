@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { useCallback } from 'react';
-import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { instance as registry } from '../../contexts/editor-context/editor_registry';
 import { restoreRequestFromHistory } from './restore_request_from_history';
 
 export const useRestoreRequestFromHistory = () => {

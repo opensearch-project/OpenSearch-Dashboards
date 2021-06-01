@@ -30,24 +30,19 @@
  * GitHub history for details.
  */
 
-import { SenseEditor } from '../../models/sense_editor';
-import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
-import { MetricsTracker } from '../../../types';
+import { SenseEditor } from '../../models/sense-editor';
 
-export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
-  const coreEditor = editor.getCoreEditor();
-  // `getEndpointFromPosition` gets values from the server-side generated JSON files which
-  // are a combination of JS, automatically generated JSON and manual overrides. That means
-  // the metrics reported from here will be tied to the definitions in those files.
-  // See src/legacy/core_plugins/console/server/api_server/spec
-  const endpointDescription = getEndpointFromPosition(
-    coreEditor,
-    coreEditor.getCurrentPosition(),
-    editor.parser
-  );
+export class EditorRegistry {
+  private inputEditor: SenseEditor | undefined;
 
-  if (requests[0] && endpointDescription) {
-    const eventName = `${requests[0].method}_${endpointDescription.id ?? 'unknown'}`;
-    trackUiMetric.count(eventName);
+  setInputEditor(inputEditor: SenseEditor) {
+    this.inputEditor = inputEditor;
   }
-};
+
+  getInputEditor() {
+    return this.inputEditor!;
+  }
+}
+
+// Create a single instance of this and use as private state.
+export const instance = new EditorRegistry();

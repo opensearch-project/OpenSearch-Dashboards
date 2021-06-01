@@ -35,4 +35,4 @@ export { ProxyConfigCollection } from './proxy_config_collection';
 export { proxyRequest } from './proxy_request';
 export { getOpenSearchProxyConfig } from './opensearch_proxy_config';
 export { setHeaders } from './set_headers';
-export { jsSpecLoaders } from './spec_definitions';
+export { jsSpecLoaders } from './spec-definitions';
