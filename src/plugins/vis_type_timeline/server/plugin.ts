@@ -171,7 +171,10 @@ export class Plugin {
           description:
             'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
         }),
-        value: config.graphiteUrls && config.graphiteUrls.length ? config.graphiteUrls[0] : null,
+        value:
+          config.graphiteAllowedUrls && config.graphiteAllowedUrls.length
+            ? config.graphiteAllowedUrls[0]
+            : null,
         description: i18n.translate('timeline.uiSettings.graphiteURLDescription', {
           defaultMessage: '{experimentalLabel} The URL of your graphite host',
           values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },

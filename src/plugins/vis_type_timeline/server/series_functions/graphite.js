@@ -41,7 +41,7 @@ import IPCIDR from 'ip-cidr';
 const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
 You can always enable the default allowlist configuration.`;
 
-const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
+const INVALID_URL_MESSAGE = `The Graphite URL/IP provided by you is invalid. 
 Please update your config from OpenSearch Dashboards's Advanced Setting.`;
 
 /**
@@ -65,7 +65,7 @@ function getIpAddress(urlObject) {
   return null;
 }
 
-function isValidURL(configuredUrl, blockedUrls) {
+function isValidURL(configuredUrl, blockedIPs) {
   // Check the format of URL, URL has be in the format as
   // scheme://server/path/resource otherwise an TypeError
   // would be thrown
@@ -85,32 +85,27 @@ function isValidURL(configuredUrl, blockedUrls) {
   // range of an IP address block
   // @param {string} bl
   // @returns {object} cidr
-  for (const bl of blockedUrls) {
-    const cidr = new IPCIDR(bl);
-    if (cidr.contains(ip)) {
-      return false;
-    }
-  }
-  return true;
+  const isBlocked = blockedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
+  return !isBlocked;
 }
 
 /**
  * Check configured url using blocklist and allowlist
  * If allowlist is used, return false if allowlist does not contain configured url
  * If blocklist is used, return false if blocklist contains configured url
- * If both allowlist and blocklist are used, return false if allowlist does not contain or if blocklist contains configured url
- * @param {Array|string} blockedUrls
+ * If both allowlist and blocklist are used, check blocklist first then allowlist
+ * @param {Array|string} blockedIPs
  * @param {Array|string} allowedUrls
  * @param {string} configuredUrls
  * @returns {boolean} true if the configuredUrl is valid
  */
-function checkConfigUrls(blockedUrls, allowedUrls, configuredUrl) {
-  if (blockedUrls.length === 0) {
+function isValidConfig(blockedIPs, allowedUrls, configuredUrl) {
+  if (blockedIPs.length === 0) {
     if (!allowedUrls.includes(configuredUrl)) return false;
   } else if (allowedUrls.length === 0) {
-    if (!isValidURL(configuredUrl, blockedUrls)) return false;
+    if (!isValidURL(configuredUrl, blockedIPs)) return false;
   } else {
-    if (!allowedUrls.includes(configuredUrl) || !isValidURL(configuredUrl, blockedUrls))
+    if (!isValidURL(configuredUrl, blockedIPs) || !allowedUrls.includes(configuredUrl))
       return false;
   }
   return true;
@@ -139,20 +134,22 @@ export default new Datasource('graphite', {
       min: moment(tlConfig.time.from).format('HH:mm[_]YYYYMMDD'),
       max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD'),
     };
+
     const allowedUrls = tlConfig.allowedGraphiteUrls;
-    const blockedUrls = tlConfig.blockedGraphiteUrls;
+    const blockedIPs = tlConfig.blockedGraphiteIPs;
     const configuredUrl = tlConfig.settings['timeline:graphite.url'];
-    if (allowedUrls.length === 0 && blockedUrls.length === 0) {
+
+    if (allowedUrls.length === 0 && blockedIPs.length === 0) {
       throw new Error(
-        i18n.translate('timeline.help.functions.missCheckGraphiteUrl', {
+        i18n.translate('timeline.help.functions.missCheckGraphiteConfig', {
           defaultMessage: MISS_CHECKLIST_MESSAGE,
         })
       );
     }
 
-    if (!checkConfigUrls(blockedUrls, allowedUrls, configuredUrl)) {
+    if (!isValidConfig(blockedIPs, allowedUrls, configuredUrl)) {
       throw new Error(
-        i18n.translate('timeline.help.functions.invalidGraphiteUrl', {
+        i18n.translate('timeline.help.functions.invalidGraphiteConfig', {
           defaultMessage: INVALID_URL_MESSAGE,
         })
       );
