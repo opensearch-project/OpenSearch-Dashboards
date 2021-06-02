@@ -35,7 +35,7 @@ import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@osd/i18n';
 
-import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
+import { redirectWhenMissing } from '../../../../../opensearch-dashboards-utils/public';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';

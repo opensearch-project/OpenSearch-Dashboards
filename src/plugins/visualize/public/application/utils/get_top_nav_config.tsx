@@ -42,7 +42,7 @@ import {
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
-import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
+import { unhashUrl } from '../../../../opensearch-dashboards-utils/public';
 
 import {
   VisualizeServices,

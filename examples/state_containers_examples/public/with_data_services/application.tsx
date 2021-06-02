@@ -35,7 +35,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginDependencies } from './types';
 import { StateDemoApp } from './components/app';
-import { createOsdUrlStateStorage } from '../../../../src/plugins/opensearch_dashboards_utils/public/';
+import { createOsdUrlStateStorage } from '../../../../src/plugins/opensearch-dashboards-utils/public/';
 
 export const renderApp = (
   { notifications, http }: CoreStart,

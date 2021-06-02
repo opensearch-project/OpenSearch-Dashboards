@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
+import { UiComponent } from 'src/plugins/opensearch-dashboards-utils/public';
 
 /**
  * Represents something that can be displayed to user in UI.

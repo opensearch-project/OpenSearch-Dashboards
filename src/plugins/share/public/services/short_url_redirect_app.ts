@@ -47,7 +47,7 @@ export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) =
 
     const response = await core.http.get<{ url: string }>(getUrlPath(urlId));
     const redirectUrl = response.url;
-    const { hashUrl } = await import('../../../opensearch_dashboards_utils/public');
+    const { hashUrl } = await import('../../../opensearch-dashboards-utils/public');
     const hashedUrl = hashUrl(redirectUrl);
     const url = core.http.basePath.prepend(hashedUrl);
 

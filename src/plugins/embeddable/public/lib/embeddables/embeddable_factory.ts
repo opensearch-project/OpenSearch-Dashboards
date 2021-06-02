@@ -36,7 +36,7 @@ import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { PersistableState } from '../../../../opensearch_dashboards_utils/common';
+import { PersistableState } from '../../../../opensearch-dashboards-utils/common';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;

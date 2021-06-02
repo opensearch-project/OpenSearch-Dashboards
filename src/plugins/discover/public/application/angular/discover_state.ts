@@ -39,7 +39,7 @@ import {
   ReduxLikeStateContainer,
   IOsdUrlStateStorage,
   withNotifyOnErrors,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { opensearchFilters, Filter, Query } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 

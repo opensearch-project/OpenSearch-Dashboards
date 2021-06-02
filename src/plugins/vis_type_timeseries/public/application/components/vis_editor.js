@@ -46,7 +46,7 @@ import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { Storage } from '../../../../../plugins/opensearch_dashboards_utils/public';
+import { Storage } from '../../../../../plugins/opensearch-dashboards-utils/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';

@@ -246,8 +246,8 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   const plugins = [
     'plugins/data/server',
     'plugins/data/public',
-    'plugins/opensearch_dashboards_utils/common/state_containers',
-    'plugins/opensearch_dashboards_utils/public/state_sync',
+    'plugins/opensearch-dashboards-utils/common/state-containers',
+    'plugins/opensearch-dashboards-utils/public/state-sync',
   ];
   const folders = [...core, ...plugins];
 

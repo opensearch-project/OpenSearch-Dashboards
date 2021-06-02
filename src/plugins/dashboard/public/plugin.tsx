@@ -72,7 +72,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../opensearch_dashboards_react/public';
-import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
+import { createOsdUrlTracker, Storage } from '../../opensearch-dashboards-utils/public';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,

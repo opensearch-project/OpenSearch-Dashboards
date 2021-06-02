@@ -34,7 +34,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
-import { OsdError } from '../../../../opensearch_dashboards_utils/common';
+import { OsdError } from '../../../../opensearch-dashboards-utils/common';
 
 export enum TimeoutErrorMode {
   UPGRADE,

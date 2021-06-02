@@ -32,7 +32,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { UiComponent } from '../../../opensearch_dashboards_utils/public';
+import { UiComponent } from '../../../opensearch-dashboards-utils/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
 

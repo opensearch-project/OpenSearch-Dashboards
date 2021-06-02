@@ -44,7 +44,7 @@ import {
   redirectWhenMissing,
   SavedObjectNotFound,
   withNotifyOnErrors,
-} from '../../../opensearch_dashboards_utils/public';
+} from '../../../opensearch-dashboards-utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';

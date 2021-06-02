@@ -37,7 +37,7 @@ import {
   createStateContainer,
   syncState,
   IOsdUrlStateStorage,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../types';
 
 const STATE_STORAGE_KEY = '_a';

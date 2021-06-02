@@ -31,7 +31,7 @@
  */
 
 import html from './doc_table.html';
-import { dispatchRenderComplete } from '../../../../../opensearch_dashboards_utils/public';
+import { dispatchRenderComplete } from '../../../../../opensearch-dashboards-utils/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch-dashboards-utils/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { visualizeAppStateStub } from './stubs';
@@ -38,7 +38,7 @@ import { visualizeAppStateStub } from './stubs';
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
 
-jest.mock('../../../../opensearch_dashboards_utils/public', () => ({
+jest.mock('../../../../opensearch-dashboards-utils/public', () => ({
   createStateContainer: jest.fn(() => 'stateContainer'),
   syncState: jest.fn(() => ({
     start: mockStartStateSync,
@@ -50,7 +50,7 @@ jest.mock('./migrate_app_state', () => ({
 }));
 
 const { createStateContainer, syncState } = jest.requireMock(
-  '../../../../opensearch_dashboards_utils/public'
+  '../../../../opensearch-dashboards-utils/public'
 );
 
 describe('createVisualizeAppState', () => {

@@ -47,7 +47,7 @@ import {
   AppMountParameters,
 } from 'opensearch-dashboards/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../opensearch_dashboards_utils/public';
+import { Storage } from '../../../opensearch-dashboards-utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { EmbeddableStart } from '../../../embeddable/public';

@@ -40,7 +40,7 @@ import {
   createOsdUrlStateStorage,
   IOsdUrlStateStorage,
   Storage,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';

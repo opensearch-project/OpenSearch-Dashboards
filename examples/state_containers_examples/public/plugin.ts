@@ -93,7 +93,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state-containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -112,7 +112,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch-dashboards-utils/docs/state-containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -123,7 +123,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     developerExamples.register({
       appId: PLUGIN_ID,
       title: 'Sync state from a query bar with the url',
-      description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from opensearch_dashboards_utils to
+      description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from opensearchopensearch-dashboards-utils_dashboards_utils to
       show a query bar that stores state in the url and is kept in  sync. 
       `,
       links: [

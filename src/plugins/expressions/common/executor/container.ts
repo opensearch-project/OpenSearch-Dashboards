@@ -33,7 +33,7 @@
 import {
   StateContainer,
   createStateContainer,
-} from '../../../opensearch_dashboards_utils/common/state_containers';
+} from '../../../opensearch-dashboards-utils/common/state-containers';
 import { ExpressionFunction } from '../expression_functions';
 import { ExpressionType } from '../expression_types';
 

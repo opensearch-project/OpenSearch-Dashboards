@@ -31,7 +31,7 @@
  */
 
 import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
-import { UiComponent, UiComponentInstance } from '../../../opensearch_dashboards_utils/public';
+import { UiComponent, UiComponentInstance } from '../../../opensearch-dashboards-utils/public';
 
 /**
  * Transforms `UiComponent` into a React component.

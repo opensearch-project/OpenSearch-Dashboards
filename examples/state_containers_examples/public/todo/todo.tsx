@@ -55,14 +55,14 @@ import {
   syncStates,
   getStateFromOsdUrl,
   BaseState,
-} from '../../../../src/plugins/opensearch_dashboards_utils/public';
+} from '../../../../src/plugins/opensearch-dashboards-utils/public';
 import { useUrlTracker } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../../src/plugins/opensearch_dashboards_utils/demos/state_containers/todomvc';
+} from '../../../../src/plugins/opensearch-dashboards-utils/demos/state-containers/todomvc';
 
 interface GlobalState {
   text: string;

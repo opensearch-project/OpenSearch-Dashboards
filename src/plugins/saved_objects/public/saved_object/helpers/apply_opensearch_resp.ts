@@ -36,7 +36,7 @@ import {
   SavedObjectConfig,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../types';
-import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/public';
+import { SavedObjectNotFound } from '../../../../opensearch-dashboards-utils/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,

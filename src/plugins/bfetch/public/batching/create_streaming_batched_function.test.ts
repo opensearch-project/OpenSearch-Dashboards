@@ -32,7 +32,7 @@
 
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { defer, of } from '../../../opensearch_dashboards_utils/public';
+import { defer, of } from '../../../opensearch-dashboards-utils/public';
 import { Subject } from 'rxjs';
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>

@@ -35,7 +35,7 @@ import { EventEmitter } from 'events';
 
 import { coreMock } from '../../../../../../core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
-import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
+import { redirectWhenMissing } from '../../../../../opensearch-dashboards-utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
@@ -70,7 +70,7 @@ jest.mock('../breadcrumbs', () => ({
 jest.mock('../../../../../vis_default_editor/public', () => ({
   DefaultEditorController: jest.fn(() => ({ destroy: mockDefaultEditorControllerDestroy })),
 }));
-jest.mock('../../../../../opensearch_dashboards_utils/public');
+jest.mock('../../../../../opensearch-dashboards-utils/public');
 
 const mockGetVisualizationInstance = jest.requireMock('../get_visualization_instance')
   .getVisualizationInstance;

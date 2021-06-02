@@ -34,7 +34,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../opensearch_dashboards_utils/common';
+} from '../../opensearch-dashboards-utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;

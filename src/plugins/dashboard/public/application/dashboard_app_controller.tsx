@@ -95,7 +95,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IOsdUrlStateStorage, unhashUrl } from '../../../opensearch_dashboards_utils/public';
+import { IOsdUrlStateStorage, unhashUrl } from '../../../opensearch-dashboards-utils/public';
 import {
   addFatalError,
   AngularHttpError,

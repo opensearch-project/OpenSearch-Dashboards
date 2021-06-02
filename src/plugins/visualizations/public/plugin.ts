@@ -83,7 +83,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   createStartServicesGetter,
   StartServicesGetter,
-} from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';

@@ -32,7 +32,7 @@
 
 import _, { each, reject } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
-import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
+import { DuplicateField } from '../../../../opensearch-dashboards-utils/common';
 
 import {
   OPENSEARCH_FIELD_TYPES,

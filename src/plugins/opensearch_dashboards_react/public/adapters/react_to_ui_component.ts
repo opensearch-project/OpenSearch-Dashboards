@@ -32,7 +32,7 @@
 
 import { ComponentType, createElement as h } from 'react';
 import { render as renderReact, unmountComponentAtNode } from 'react-dom';
-import { UiComponent, UiComponentInstance } from '../../../opensearch_dashboards_utils/public';
+import { UiComponent, UiComponentInstance } from '../../../opensearch-dashboards-utils/public';
 
 /**
  * Transform a React component into a `UiComponent`.

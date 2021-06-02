@@ -64,7 +64,7 @@ import {
   IOsdUrlStateStorage,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../../../src/plugins/opensearch_dashboards_utils/public';
+} from '../../../../../src/plugins/opensearch-dashboards-utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
 
 interface StateDemoAppDeps {

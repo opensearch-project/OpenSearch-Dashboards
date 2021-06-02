@@ -41,7 +41,7 @@ import {
   SavedObjectsStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../../plugins/opensearch-dashboards-utils/public';
 import {
   DataPublicPluginStart,
   FilterManager,

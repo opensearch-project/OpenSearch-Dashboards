@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { IScope } from 'angular';
-import { RenderCompleteListener } from '../../../../../opensearch_dashboards_utils/public';
+import { RenderCompleteListener } from '../../../../../opensearch-dashboards-utils/public';
 
 export function createRenderCompleteDirective() {
   return {

@@ -5,7 +5,7 @@
     "exclude": [
       "src/plugins/opensearch_dashboards_react/",
       "src/plugins/testbed/",
-      "src/plugins/opensearch_dashboards_utils/"
+      "src/plugins/opensearch-dashboards-utils/"
     ]
   }
 ]

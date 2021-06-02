@@ -38,7 +38,7 @@ import {
   Storage,
   IStorageWrapper,
   createStartServicesGetter,
-} from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,

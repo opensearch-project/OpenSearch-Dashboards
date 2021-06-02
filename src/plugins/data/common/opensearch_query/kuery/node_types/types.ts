@@ -35,7 +35,7 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../opensearch_dashboards_utils/common';
+import { JsonValue } from '../../../../../opensearch-dashboards-utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =

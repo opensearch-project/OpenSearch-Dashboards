@@ -33,7 +33,7 @@
 import { uniqBy } from 'lodash';
 import { Action } from '../actions';
 import { BaseContext } from '../types';
-import { defer as createDefer, Defer } from '../../../opensearch_dashboards_utils/public';
+import { defer as createDefer, Defer } from '../../../opensearch-dashboards-utils/public';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { Trigger } from '../triggers';
 

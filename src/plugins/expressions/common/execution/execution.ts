@@ -34,7 +34,7 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../opensearch_dashboards_utils/common';
+import { Defer, now } from '../../../opensearch-dashboards-utils/common';
 import { toPromise } from '../../../data/common/utils/abort_utils';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';

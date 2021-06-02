@@ -43,7 +43,7 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { fieldWildcardMatcher } from '../../../../../opensearch_dashboards_utils/public';
+import { fieldWildcardMatcher } from '../../../../../opensearch-dashboards-utils/public';
 import {
   IndexPattern,
   IndexPatternField,

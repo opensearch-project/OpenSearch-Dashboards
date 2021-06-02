@@ -39,7 +39,7 @@ import '../../doc_viewer';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 
-import { dispatchRenderComplete, url } from '../../../../../../opensearch_dashboards_utils/public';
+import { dispatchRenderComplete, url } from '../../../../../../opensearch-dashboards-utils/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';

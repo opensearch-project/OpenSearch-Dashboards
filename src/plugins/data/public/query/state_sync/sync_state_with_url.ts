@@ -34,7 +34,7 @@ import {
   createStateContainer,
   IOsdUrlStateStorage,
   syncState,
-} from '../../../../opensearch_dashboards_utils/public';
+} from '../../../../opensearch-dashboards-utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';

@@ -32,7 +32,7 @@
 
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch-dashboards-utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';

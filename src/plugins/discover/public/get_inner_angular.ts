@@ -41,7 +41,7 @@ import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { Storage } from '../../opensearch_dashboards_utils/public';
+import { Storage } from '../../opensearch-dashboards-utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { createDocTableDirective } from './application/angular/doc_table';
 import { createTableHeaderDirective } from './application/angular/doc_table/components/table_header';

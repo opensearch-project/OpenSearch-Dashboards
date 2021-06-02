@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { createGetterSetter } from '../../../../../src/plugins/opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../../../../src/plugins/opensearch-dashboards-utils/public';
 import { ExpressionsStart } from './types';
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');

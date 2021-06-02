@@ -32,7 +32,7 @@
 
 import { History } from 'history';
 import { useLayoutEffect } from 'react';
-import { createUrlTracker } from '../../../opensearch_dashboards_utils/public/';
+import { createUrlTracker } from '../../../opensearch-dashboards-utils/public/';
 
 /**
  * State management url_tracker in react hook form

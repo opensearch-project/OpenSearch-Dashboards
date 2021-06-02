@@ -49,7 +49,7 @@ import {
   createOsdUrlTracker,
   createOsdUrlStateStorage,
   withNotifyOnErrors,
-} from '../../opensearch_dashboards_utils/public';
+} from '../../opensearch-dashboards-utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';

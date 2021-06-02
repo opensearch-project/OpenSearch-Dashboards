@@ -12,6 +12,6 @@
     "../../../typings/**/*"
   ],
   "references": [
-    { "path": "../opensearch_dashboards_utils/tsconfig.json" }
+    { "path": "../opensearch-dashboards-utils/tsconfig.json" }
   ]
 }

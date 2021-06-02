@@ -32,7 +32,7 @@
 
 /* eslint-disable */
 
-import { OsdError } from '../../../../opensearch_dashboards_utils/common/';
+import { OsdError } from '../../../../opensearch-dashboards-utils/common/';
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned

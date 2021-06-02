@@ -31,7 +31,7 @@
  */
 
 import { SearchSourceFields } from './types';
-import { InvalidJSONProperty } from '../../../../opensearch_dashboards_utils/common';
+import { InvalidJSONProperty } from '../../../../opensearch-dashboards-utils/common';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field

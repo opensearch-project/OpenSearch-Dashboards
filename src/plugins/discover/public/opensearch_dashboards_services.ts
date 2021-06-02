@@ -35,7 +35,7 @@ import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch-dashboards-utils/public';
 import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
@@ -106,7 +106,7 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 );
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';
+export { unhashUrl, redirectWhenMissing } from '../../opensearch-dashboards-utils/public';
 export {
   formatMsg,
   formatStack,

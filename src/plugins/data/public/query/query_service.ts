@@ -32,7 +32,7 @@
 
 import { share } from 'rxjs/operators';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch-dashboards-utils/public';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';

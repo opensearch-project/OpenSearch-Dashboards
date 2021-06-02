@@ -34,7 +34,7 @@ import _ from 'lodash';
 import * as ast from '../ast';
 import { nodeTypes } from '.';
 import { NamedArgTypeBuildNode } from './types';
-import { JsonObject } from '../../../../../opensearch_dashboards_utils/common';
+import { JsonObject } from '../../../../../opensearch-dashboards-utils/common';
 
 export function buildNode(name: string, value: any): NamedArgTypeBuildNode {
   const argumentNode =

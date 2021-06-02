@@ -42,7 +42,7 @@ import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { Binder } from './binder';
-import { dispatchRenderComplete } from '../../../../opensearch_dashboards_utils/public';
+import { dispatchRenderComplete } from '../../../../opensearch-dashboards-utils/public';
 
 const markdownIt = new MarkdownIt({
   html: false,

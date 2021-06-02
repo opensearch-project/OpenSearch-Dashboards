@@ -48,7 +48,7 @@ import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacyStart,
 } from '../../opensearch_dashboards_legacy/public';
-import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
+import { createOsdUrlTracker } from '../../opensearch-dashboards-utils/public';
 import { DataPublicPluginStart, opensearchFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
