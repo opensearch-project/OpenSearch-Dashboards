@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { HomePublicPluginSetup } from '../../../home/public';
-import { DevToolsSetup } from '../../../dev_tools/public';
+import { DevToolsSetup } from '../../../dev-tools/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 export interface AppSetupUIPluginDependencies {

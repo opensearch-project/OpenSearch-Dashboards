@@ -47,11 +47,11 @@ import {
   IFieldType,
 } from '../../../../data/public';
 import { Container, Embeddable } from '../../../../embeddable/public';
-import * as columnActions from '../angular/doc_table/actions/columns';
+import * as columnActions from '../angular/doc-table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table';
+import { SortOrder } from '../angular/doc-table/components/table-header/helpers';
+import { getSortForSearchSource } from '../angular/doc-table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,

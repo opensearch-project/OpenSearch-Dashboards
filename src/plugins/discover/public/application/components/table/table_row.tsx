@@ -31,7 +31,7 @@
  */
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
-import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { FieldMapping, DocViewFilterFn } from '../../doc-views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
@@ -39,7 +39,7 @@ import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
-import { FieldName } from '../field_name/field_name';
+import { FieldName } from '../field-name/field_name';
 
 export interface Props {
   field: string;

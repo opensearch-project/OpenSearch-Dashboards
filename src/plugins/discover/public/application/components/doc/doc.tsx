@@ -35,7 +35,7 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { OpenSearchRequestState, useOpenSearchDocSearch } from './use_opensearch_doc_search';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../doc-viewer/doc_viewer';
 
 export interface DocProps {
   /**

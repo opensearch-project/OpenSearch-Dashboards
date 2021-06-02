@@ -32,7 +32,7 @@
 import { useEffect, useState } from 'react';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { DocProps } from './doc';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../doc-views/doc_views_types';
 
 export enum OpenSearchRequestState {
   Loading,

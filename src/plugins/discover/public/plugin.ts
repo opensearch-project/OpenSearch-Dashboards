@@ -61,10 +61,10 @@ import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
-import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './application/doc-views/doc_views_types';
+import { DocViewsRegistry } from './application/doc-views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
+import { JsonCodeBlock } from './application/components/json-code-block/json_code_block';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -77,7 +77,7 @@ import {
   syncHistoryLocations,
   getServices,
 } from './opensearch_dashboards_services';
-import { createSavedSearchesLoader } from './saved_searches';
+import { createSavedSearchesLoader } from './saved-searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {

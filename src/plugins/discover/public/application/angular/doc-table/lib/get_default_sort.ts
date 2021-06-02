@@ -29,18 +29,22 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import React from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import { DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../../opensearch_dashboards_services';
+// @ts-ignore
+import { isSortable } from './get_sort';
+import { SortOrder } from '../components/table-header/helpers';
 
-export function JsonCodeBlock({ hit }: DocViewRenderProps) {
-  const label = i18n.translate('discover.docViews.json.codeEditorAriaLabel', {
-    defaultMessage: 'Read only JSON view of an opensearch document',
-  });
-  return (
-    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
-      {JSON.stringify(hit, null, 2)}
-    </EuiCodeBlock>
-  );
+/**
+ * use in case the user didn't manually sort.
+ * the default sort is returned depending of the index pattern
+ */
+export function getDefaultSort(
+  indexPattern: IndexPattern,
+  defaultSortOrder: string = 'desc'
+): SortOrder[] {
+  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+    return [[indexPattern.timeFieldName, defaultSortOrder]];
+  } else {
+    return [['_score', defaultSortOrder]];
+  }
 }

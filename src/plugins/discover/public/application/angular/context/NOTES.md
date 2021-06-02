@@ -78,10 +78,10 @@ application. Creates the store, reducer and bound actions/selectors.
 **query**: Exports the actions, reducers and selectors related to the
 query status and results.
 
-**query_parameters**: Exports the actions, reducers and selectors related to
+**query-parameters**: Exports the actions, reducers and selectors related to
 the parameters used to construct the query.
 
-**components/action_bar**: Defines the `<context-action-bar>`
+**components/action-bar**: Defines the `<context-action-bar>`
 directive including its respective styles.
 
 

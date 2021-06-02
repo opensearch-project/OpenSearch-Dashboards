@@ -47,12 +47,12 @@ import {
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
-import { getSortArray, getSortForSearchSource } from './doc_table';
+import { getSortArray, getSortForSearchSource } from './doc-table';
 import { createFixedScroll } from './directives/fixed_scroll';
-import * as columnActions from './doc_table/actions/columns';
+import * as columnActions from './doc-table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+import { showOpenSearchPanel } from '../components/top-nav/show_open_search_panel';
+import { addHelpMenuToAppChrome } from '../components/help-menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,

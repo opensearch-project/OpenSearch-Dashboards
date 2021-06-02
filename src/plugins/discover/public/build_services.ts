@@ -53,7 +53,7 @@ import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { createSavedSearchesLoader, SavedSearch } from './saved-searches';
 import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
