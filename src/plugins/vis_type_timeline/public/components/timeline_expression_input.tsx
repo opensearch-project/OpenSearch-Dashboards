@@ -35,7 +35,7 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { monaco } from '@osd/monaco';
 
-import { CodeEditor, useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CodeEditor, useOpenSearchDashboards } from '../../../opensearch-dashboards-react/public';
 import { suggest, getSuggestion } from './timeline_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelineFunction, TimelineFunctionArgs } from '../../common/types';

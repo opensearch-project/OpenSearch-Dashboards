@@ -34,7 +34,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
 import { createAction, ActionByType } from '../../actions';
-import { toMountPoint, reactToUiComponent } from '../../../../opensearch_dashboards_react/public';
+import { toMountPoint, reactToUiComponent } from '../../../../opensearch-dashboards-react/public';
 import { ActionType } from '../../types';
 
 const ReactMenuItem: React.FC = () => {

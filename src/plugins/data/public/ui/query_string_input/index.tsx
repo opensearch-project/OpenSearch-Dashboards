@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { withOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 

@@ -68,7 +68,7 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
-import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
+import { RedirectAppLinks } from '../../../../opensearch-dashboards-react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,

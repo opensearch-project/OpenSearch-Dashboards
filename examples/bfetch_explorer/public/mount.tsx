@@ -33,7 +33,7 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, AppMountParameters } from 'opensearch-dashboards/public';
-import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch-dashboards-react/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
 import { App } from './containers/app';
 

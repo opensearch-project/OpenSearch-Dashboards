@@ -35,7 +35,7 @@ import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
 import { SearchResponse } from 'elasticsearch';
 import { getOverlays } from '../../services';
-import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../opensearch-dashboards-react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
 

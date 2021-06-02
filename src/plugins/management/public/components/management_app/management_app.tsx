@@ -37,7 +37,7 @@ import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
+import { reactRouterNavigate } from '../../../../opensearch-dashboards-react/public';
 import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';

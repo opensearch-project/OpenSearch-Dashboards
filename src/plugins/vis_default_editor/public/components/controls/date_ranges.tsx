@@ -52,7 +52,7 @@ import { isEqual, omit } from 'lodash';
 import { useMount } from 'react-use';
 import { DocLinksStart } from 'src/core/public';
 
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';

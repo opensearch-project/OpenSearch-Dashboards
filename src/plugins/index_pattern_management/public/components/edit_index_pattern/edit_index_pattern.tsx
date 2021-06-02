@@ -46,7 +46,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../plugins/opensearch-dashboards-react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';

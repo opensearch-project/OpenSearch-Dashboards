@@ -35,7 +35,7 @@ import { shallow } from 'enzyme';
 
 import { Content } from './content';
 
-jest.mock('../../../../../opensearch_dashboards_react/public', () => {
+jest.mock('../../../../../opensearch-dashboards-react/public', () => {
   return {
     Markdown: () => <div className="markdown" />,
   };

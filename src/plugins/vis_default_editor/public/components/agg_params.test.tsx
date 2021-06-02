@@ -38,7 +38,7 @@ import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
 } from './agg_params';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch-dashboards-react/public';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 

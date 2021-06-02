@@ -111,7 +111,7 @@ export default {
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
-    '<rootDir>/src/plugins/opensearch_dashboards_react/public/util/test_helpers/react_mount_serializer.ts',
+    '<rootDir>/src/plugins/opensearch-dashboards-react/public/util/test-helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],

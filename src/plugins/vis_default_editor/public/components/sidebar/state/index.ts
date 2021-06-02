@@ -37,7 +37,7 @@ import { Vis } from 'src/plugins/visualizations/public';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch-dashboards-react/public';
 import { VisDefaultEditorOpenSearchDashboardsServices } from '../../../types';
 
 export * from './editor_form_state';

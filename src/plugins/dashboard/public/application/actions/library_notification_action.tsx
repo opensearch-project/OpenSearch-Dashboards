@@ -40,7 +40,7 @@ import {
   isErrorEmbeddable,
 } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { reactToUiComponent } from '../../../../opensearch_dashboards_react/public';
+import { reactToUiComponent } from '../../../../opensearch-dashboards-react/public';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

@@ -32,14 +32,14 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   RedirectAppLinks,
   useOpenSearchDashboards,
-} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
-import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
+} from '../../../../opensearch-dashboards-react/public';
+import { FeatureCatalogueEntry } from '../../../../home/public';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 
@@ -48,54 +48,69 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ addBasePath, features }) => {
+export const AddData: FC<Props> = ({ addBasePath, features }) => {
   const {
     services: { application },
   } = useOpenSearchDashboards<CoreStart>();
-  return (
-    <>
-      {features.length > 1 ? <EuiHorizontalRule margin="xl" aria-hidden="true" /> : null}
 
-      {features.length > 0 ? (
-        <section
-          className="osdOverviewDataManage"
-          aria-labelledby="osdOverviewDataManage__title"
-          data-test-subj="osdOverviewDataManage"
-        >
+  return (
+    <section className="osdOverviewDataAdd" aria-labelledby="osdOverviewDataAdd__title">
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={1}>
           <EuiTitle size="s">
-            <h2 id="osdOverviewDataManage__title">
+            <h2 id="osdOverviewDataAdd__title">
               <FormattedMessage
-                id="opensearchDashboardsOverview.manageData.sectionTitle"
-                defaultMessage="Manage your data"
+                id="opensearchDashboardsOverview.addData.sectionTitle"
+                defaultMessage="Ingest your data"
               />
             </h2>
           </EuiTitle>
+        </EuiFlexItem>
 
-          <EuiSpacer size="m" />
+        <EuiFlexItem className="osdOverviewDataAdd__actions" grow={false}>
+          <RedirectAppLinks application={application}>
+            <div>
+              <EuiButtonEmpty
+                className="osdOverviewDataAdd__actionButton"
+                flush="left"
+                href={addBasePath('/app/home#/tutorial_directory/sampleData')}
+                iconType="visTable"
+                size="xs"
+              >
+                <FormattedMessage
+                  id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
+                  defaultMessage="Try our sample data"
+                />
+              </EuiButtonEmpty>
+            </div>
+          </RedirectAppLinks>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-          <EuiFlexGroup className="osdOverviewDataManage__content" wrap>
-            {features.map((feature) => (
-              <EuiFlexItem className="osdOverviewDataManage__item" key={feature.id}>
-                <RedirectAppLinks application={application}>
-                  <Synopsis
-                    id={feature.id}
-                    description={feature.description}
-                    iconType={feature.icon}
-                    title={feature.title}
-                    url={addBasePath(feature.path)}
-                    wrapInPanel
-                  />
-                </RedirectAppLinks>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </section>
-      ) : null}
-    </>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup className="osdOverviewDataAdd__content">
+        {features.map((feature) => (
+          <EuiFlexItem key={feature.id}>
+            <RedirectAppLinks application={application}>
+              <Synopsis
+                id={feature.id}
+                description={feature.description}
+                iconType={feature.icon}
+                title={feature.title}
+                url={addBasePath(feature.path)}
+                wrapInPanel
+              />
+            </RedirectAppLinks>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </section>
   );
 };
 
-ManageData.propTypes = {
+AddData.propTypes = {
+  addBasePath: PropTypes.func.isRequired,
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

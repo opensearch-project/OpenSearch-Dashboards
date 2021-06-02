@@ -33,7 +33,7 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '../../../../../../opensearch_dashboards_react/public';
+import { RedirectAppLinks } from '../../../../../../opensearch-dashboards-react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
 import { isSortable } from './is_sortable';

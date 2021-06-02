@@ -34,7 +34,7 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../opensearch-dashboards-react/public';
 
 import { TimelineVisParams } from './timeline_vis_fn';
 import { TimelineInterval, TimelineExpressionInput } from './components';

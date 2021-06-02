@@ -55,7 +55,7 @@ import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import {
   OpenSearchDashboardsReactContextValue,
   toMountPoint,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';

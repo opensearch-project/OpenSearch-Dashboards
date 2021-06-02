@@ -33,7 +33,7 @@
 import React from 'react';
 import { Header } from '../header';
 import { mount } from 'enzyme';
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 

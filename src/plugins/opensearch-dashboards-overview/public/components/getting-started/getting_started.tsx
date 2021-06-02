@@ -48,8 +48,8 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import {
   RedirectAppLinks,
   useOpenSearchDashboards,
-} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
-import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
+} from '../../../../opensearch-dashboards-react/public';
+import { FeatureCatalogueEntry } from '../../../../home/public';
 import { PLUGIN_ID } from '../../../common';
 
 interface Props {

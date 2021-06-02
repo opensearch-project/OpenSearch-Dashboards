@@ -31,31 +31,34 @@
  */
 
 import React from 'react';
-import { OverviewPageHeader } from './overview_page_header';
+import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../app_links', () => ({
+jest.mock('../../app-links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 
 jest.mock('../../context', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: {
-      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
+      application: { capabilities: { advancedSettings: { show: true } } },
       notifications: { toast: { addSuccess: jest.fn() } },
     },
   }),
 }));
 
-afterAll(() => jest.clearAllMocks());
+jest.mock('../../ui-settings', () => ({
+  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
+}));
 
-const mockTitle = 'Page Title';
+afterEach(() => jest.clearAllMocks());
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
-describe('OverviewPageHeader', () => {
+describe('OverviewPageFooter', () => {
   test('render', () => {
     const component = shallowWithIntl(
-      <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} />
+      <OverviewPageFooter addBasePath={addBasePathMock} path="new-default-route" />
     );
     expect(component).toMatchSnapshot();
   });

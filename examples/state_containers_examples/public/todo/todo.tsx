@@ -56,7 +56,7 @@ import {
   getStateFromOsdUrl,
   BaseState,
 } from '../../../../src/plugins/opensearch_dashboards_utils/public';
-import { useUrlTracker } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { useUrlTracker } from '../../../../src/plugins/opensearch-dashboards-react/public';
 import {
   defaultState,
   pureTransitions,

@@ -38,7 +38,7 @@ import React, { useState } from 'react';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import { IIndexPattern } from '../..';
 import {
   buildEmptyFilter,

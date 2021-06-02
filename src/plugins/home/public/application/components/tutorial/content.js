@@ -32,7 +32,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Markdown } from '../../../../../opensearch_dashboards_react/public';
+import { Markdown } from '../../../../../opensearch-dashboards-react/public';
 
 const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
 

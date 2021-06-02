@@ -51,7 +51,7 @@ import { i18n } from '@osd/i18n';
 import { Vis } from 'src/plugins/visualizations/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { ApplicationStart } from '../../../../../core/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedObject;

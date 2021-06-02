@@ -51,7 +51,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { reactRouterNavigate } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { reactRouterNavigate } from '../../../../../../plugins/opensearch-dashboards-react/public';
 import { MlCardState } from '../../../types';
 
 export const EmptyState = ({

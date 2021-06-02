@@ -33,7 +33,7 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch-dashboards-react/public';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { coreMock } from '../../../../../core/public/mocks';

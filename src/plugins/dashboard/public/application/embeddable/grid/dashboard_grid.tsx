@@ -46,7 +46,7 @@ import { GridData } from '../../../../common';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
-import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { withOpenSearchDashboards } from '../../../../../opensearch-dashboards-react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 

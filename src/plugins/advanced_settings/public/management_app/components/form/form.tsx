@@ -49,7 +49,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
+import { toMountPoint } from '../../../../../opensearch-dashboards-react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';

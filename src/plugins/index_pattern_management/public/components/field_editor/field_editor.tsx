@@ -72,7 +72,7 @@ import {
   OPENSEARCH_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
+import { context as contextType } from '../../../../opensearch-dashboards-react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,

@@ -53,7 +53,7 @@ import {
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch-dashboards-react/public';
 import { VisDefaultEditorOpenSearchDashboardsServices } from '../types';
 
 const FIXED_VALUE_PROP = 'fixedValue';

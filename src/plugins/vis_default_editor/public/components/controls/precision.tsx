@@ -36,7 +36,7 @@ import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../../../../core/public';
 
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {

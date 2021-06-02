@@ -41,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { RedirectAppLinks } from '../../app_links';
+import { RedirectAppLinks } from '../../app-links';
 import { useOpenSearchDashboards } from '../../context';
 
 import './index.scss';

@@ -45,7 +45,7 @@ import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
-import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch-dashboards-react/public';
 import { Storage } from '../../../../../plugins/opensearch_dashboards_utils/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;

@@ -37,7 +37,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch-dashboards-react/public';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import {

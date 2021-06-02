@@ -53,7 +53,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
   withOpenSearchDashboards,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';

@@ -34,7 +34,7 @@ import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../opensearch-dashboards-react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';

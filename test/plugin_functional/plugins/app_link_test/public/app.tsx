@@ -33,7 +33,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, IBasePath, ApplicationStart } from 'opensearch-dashboards/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { RedirectAppLinks } from '../../../../../src/plugins/opensearch-dashboards-react/public';
 
 const FooApp = ({
   appId,

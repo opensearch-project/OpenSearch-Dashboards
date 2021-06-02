@@ -36,7 +36,7 @@ import { debounce } from 'lodash';
 import {
   withOpenSearchDashboards,
   OpenSearchDashboardsReactContextValue,
-} from '../../../../../opensearch_dashboards_react/public';
+} from '../../../../../opensearch-dashboards-react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
 import { UI_SETTINGS } from '../../../../common';
 

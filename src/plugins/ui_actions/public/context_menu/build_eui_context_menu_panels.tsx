@@ -34,7 +34,7 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
-import { uiToReactComponent } from '../../../opensearch_dashboards_react/public';
+import { uiToReactComponent } from '../../../opensearch-dashboards-react/public';
 import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
 import { BaseContext } from '../types';

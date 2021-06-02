@@ -48,7 +48,7 @@ import {
 } from '../../embeddable_plugin_test_samples';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../opensearch-dashboards-react/public';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch-dashboards-react/public';
 import { BfetchDeps } from '../mount';
 
 export const useDeps = () => useOpenSearchDashboards().services as BfetchDeps;

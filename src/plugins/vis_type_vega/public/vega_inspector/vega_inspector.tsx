@@ -35,7 +35,7 @@ import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch-dashboards-react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
 export interface VegaInspectorAdapters extends Adapters {

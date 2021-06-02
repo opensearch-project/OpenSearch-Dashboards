@@ -38,7 +38,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { IAggType, IndexPattern } from 'src/plugins/data/public';
 
 import { DocLinksStart } from '../../../../core/public';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch-dashboards-react/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 

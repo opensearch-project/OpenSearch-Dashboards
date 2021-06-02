@@ -44,7 +44,7 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../opensearch_dashboards_react/public';
+import { uiToReactComponent } from '../../../../../opensearch-dashboards-react/public';
 
 export interface PanelHeaderProps {
   title?: string;

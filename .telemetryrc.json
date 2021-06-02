@@ -3,7 +3,7 @@
     "output": "src/plugins/telemetry/schema/oss_plugins.json",
     "root": "src/plugins/",
     "exclude": [
-      "src/plugins/opensearch_dashboards_react/",
+      "src/plugins/opensearch-dashboards-react/",
       "src/plugins/testbed/",
       "src/plugins/opensearch_dashboards_utils/"
     ]

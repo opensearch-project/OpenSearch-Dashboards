@@ -32,7 +32,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
-import { FieldIcon, FieldIconProps } from '../../../../../opensearch_dashboards_react/public';
+import { FieldIcon, FieldIconProps } from '../../../../../opensearch-dashboards-react/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './field_type_name';
 

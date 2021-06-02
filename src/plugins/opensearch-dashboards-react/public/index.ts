@@ -30,5 +30,29 @@
  * GitHub history for details.
  */
 
-export * from './overview_page_footer';
-export * from './overview_page_header';
+export * from './code-editor';
+export * from './exit-full-screen-button';
+export * from './context';
+export * from './overview-page';
+export * from './overlays';
+export * from './ui-settings';
+export * from './field-icon';
+export * from './field-button';
+export * from './table-list-view';
+export * from './split-panel';
+export * from './react-router-navigate';
+export { ValidatedDualRange, Value } from './validated-range';
+export * from './notifications';
+export { Markdown, MarkdownSimple } from './markdown';
+export { reactToUiComponent, uiToReactComponent } from './adapters';
+export { useUrlTracker } from './use-url-tracker';
+export { toMountPoint, MountPointPortal } from './util';
+export { RedirectAppLinks } from './app-links';
+
+/** dummy plugin, we just want opensearchDashboardsReact to have its own bundle */
+export function plugin() {
+  return new (class OpenSearchDashboardsReactPlugin {
+    setup() {}
+    start() {}
+  })();
+}

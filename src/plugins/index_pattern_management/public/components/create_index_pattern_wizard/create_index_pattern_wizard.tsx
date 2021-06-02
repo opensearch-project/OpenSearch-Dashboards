@@ -47,7 +47,7 @@ import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
 
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
+import { context as contextType } from '../../../../opensearch-dashboards-react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';

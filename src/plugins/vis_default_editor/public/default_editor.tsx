@@ -42,7 +42,7 @@ import {
   OpenSearchDashboardsContextProvider,
   PanelsContainer,
   Panel,
-} from '../../opensearch_dashboards_react/public';
+} from '../../opensearch-dashboards-react/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';

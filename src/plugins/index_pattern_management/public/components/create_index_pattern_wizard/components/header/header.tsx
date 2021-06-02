@@ -37,7 +37,7 @@ import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@e
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch-dashboards-react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const Header = ({

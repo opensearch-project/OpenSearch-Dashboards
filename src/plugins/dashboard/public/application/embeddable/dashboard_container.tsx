@@ -56,7 +56,7 @@ import {
   OpenSearchDashboardsContextProvider,
   OpenSearchDashboardsReactContext,
   OpenSearchDashboardsReactContextValue,
-} from '../../../../opensearch_dashboards_react/public';
+} from '../../../../opensearch-dashboards-react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';

@@ -128,7 +128,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/opensearch_dashboards_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/opensearch-dashboards-react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',

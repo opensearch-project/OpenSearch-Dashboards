@@ -40,7 +40,7 @@ import {
   QueryStringInput,
   DataPublicPluginStart,
 } from '../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch-dashboards-react/public';
 
 interface FilterRowProps {
   id: string;

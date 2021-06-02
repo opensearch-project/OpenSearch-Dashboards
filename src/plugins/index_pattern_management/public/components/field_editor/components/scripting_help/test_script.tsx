@@ -49,7 +49,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
 import { opensearchQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
-import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
+import { context as contextType } from '../../../../../../opensearch-dashboards-react/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
