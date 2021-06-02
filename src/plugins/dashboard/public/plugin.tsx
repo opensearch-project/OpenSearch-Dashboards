@@ -77,7 +77,7 @@ import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 

@@ -4,7 +4,7 @@ import { once } from 'lodash';
 import angular from 'angular';
 
 // @ts-ignore
-import { initBindHtml } from './bind_html/bind_html';
+import { initBindHtml } from './bind-html/bind_html';
 // @ts-ignore
 import { initBootstrapTooltip } from './tooltip/tooltip';
 

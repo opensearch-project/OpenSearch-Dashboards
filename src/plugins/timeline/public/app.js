@@ -47,7 +47,7 @@ import {
   addFatalError,
   registerListenEventListener,
   watchMultiDecorator,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { getTimezone } from '../../vis_type_timeline/public';
 import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';

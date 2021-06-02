@@ -29,7 +29,7 @@
     "maps_legacy": "src/plugins/maps_legacy",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
-    "opensearch_dashboards_legacy": "src/plugins/opensearch_dashboards_legacy",
+    "opensearch_dashboards_legacy": "src/plugins/opensearch-dashboards-legacy",
     "opensearchDashboardsOverview": "src/plugins/opensearch_dashboards_overview",
     "opensearch_dashboards_react": "src/legacy/core_plugins/opensearch_dashboards_react",
     "opensearch-dashboards-react": "src/plugins/opensearch_dashboards_react",

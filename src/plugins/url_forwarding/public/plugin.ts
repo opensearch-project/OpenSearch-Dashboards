@@ -31,7 +31,7 @@
  */
 
 import { CoreStart, CoreSetup } from 'opensearch-dashboards/public';
-import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch-dashboards_legacy/public';
 import { Subscription } from 'rxjs';
 import { navigateToDefaultApp } from './navigate_to_default_app';
 import { createLegacyUrlForwardApp } from './forward_app';

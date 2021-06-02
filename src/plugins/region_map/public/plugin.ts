@@ -55,7 +55,7 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 /** @private */

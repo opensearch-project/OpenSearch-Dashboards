@@ -86,7 +86,7 @@ import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { addFatalError } from '../../../../opensearch_dashboards_legacy/public';
+import { addFatalError } from '../../../../opensearch-dashboards-legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,

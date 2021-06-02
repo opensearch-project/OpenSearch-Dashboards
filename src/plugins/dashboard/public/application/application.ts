@@ -57,7 +57,7 @@ import { SharePluginStart } from '../../../share/public';
 import {
   OpenSearchDashboardsLegacyStart,
   configureAppAngularModule,
-} from '../../../opensearch_dashboards_legacy/public';
+} from '../../../opensearch-dashboards-legacy/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 

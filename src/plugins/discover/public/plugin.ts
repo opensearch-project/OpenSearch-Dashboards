@@ -52,7 +52,7 @@ import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizat
 import {
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
-} from 'src/plugins/opensearch_dashboards_legacy/public';
+} from 'src/plugins/opensearch-dashboards_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';

@@ -36,7 +36,7 @@ import {
   NavigationPublicPluginStart,
   NavigationPluginStartDependencies,
 } from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { TopNavMenuExtensionsRegistry, createTopNav } from './top-nav-menu';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {

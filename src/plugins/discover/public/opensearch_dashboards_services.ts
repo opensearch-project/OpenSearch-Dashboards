@@ -111,7 +111,7 @@ export {
   formatMsg,
   formatStack,
   subscribeWithScope,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 
 // EXPORT types
 export {

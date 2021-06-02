@@ -54,7 +54,7 @@ import {
   setOpenSearchDashboardsLegacy,
   setShareService,
 } from './services';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 export interface TileMapConfigType {

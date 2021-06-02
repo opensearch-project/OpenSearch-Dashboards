@@ -55,7 +55,7 @@ export class OpenSearchDashboardsLegacyPlugin {
        * @deprecated
        */
       loadFontAwesome: async () => {
-        await import('./font_awesome');
+        await import('./font-awesome');
       },
       /**
        * @deprecated

@@ -47,7 +47,7 @@ import { Panel } from './panels/panel';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacyStart,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart, opensearchFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';

@@ -58,7 +58,7 @@ import {
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService, setDataActions, setOpenSearchDashboardsLegacy } from './services';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;

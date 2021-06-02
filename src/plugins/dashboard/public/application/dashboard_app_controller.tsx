@@ -101,7 +101,7 @@ import {
   AngularHttpError,
   OpenSearchDashboardsLegacyStart,
   subscribeWithScope,
-} from '../../../opensearch_dashboards_legacy/public';
+} from '../../../opensearch-dashboards-legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {

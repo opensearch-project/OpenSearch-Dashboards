@@ -42,7 +42,7 @@ import { createTableVisFn } from './table_vis_fn';
 import { getTableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService, setOpenSearchDashboardsLegacy } from './services';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 
 /** @internal */
 export interface TablePluginSetupDependencies {

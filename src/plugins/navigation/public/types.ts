@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
+import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top-nav-menu';
 import { DataPublicPluginStart } from '../../data/public';
 
 export interface NavigationPublicPluginSetup {

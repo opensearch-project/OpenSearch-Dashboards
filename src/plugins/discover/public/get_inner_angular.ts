@@ -63,7 +63,7 @@ import {
   watchMultiDecorator,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './opensearch_dashboards_services';

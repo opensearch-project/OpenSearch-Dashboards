@@ -32,7 +32,7 @@
 
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch-dashboards-legacy/public';
 
 export const [getDataActions, setDataActions] = createGetterSetter<
   DataPublicPluginStart['actions']

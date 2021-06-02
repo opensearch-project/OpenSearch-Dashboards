@@ -53,7 +53,7 @@ import {
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 import { TimelinePluginDependencies } from './plugin';
 import { DataPublicPluginStart } from '../../data/public';
 // @ts-ignore

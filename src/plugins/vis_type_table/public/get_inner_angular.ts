@@ -50,7 +50,7 @@ import {
   PrivateProvider,
   watchMultiDecorator,
   OsdAccessibleClickProvider,
-} from '../../opensearch_dashboards_legacy/public';
+} from '../../opensearch-dashboards-legacy/public';
 
 initAngularBootstrap();
 
