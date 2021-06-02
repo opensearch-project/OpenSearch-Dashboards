@@ -46,7 +46,7 @@ Sample data sets typically provide data that spans 5 weeks from the past and 5 w
 
 ### Adding new sample data sets
 
-Use [existing sample data sets](/src/plugins/home/server/services/sample_data/data_sets) as examples.
+Use [existing sample data sets](/src/plugins/home/server/services/sample_data/data-sets) as examples.
 To avoid bloating the OpenSearch Dashboards distribution, keep data set size to a minimum.
 
 Follow the steps below to add new Sample data sets to OpenSearch Dashboards.

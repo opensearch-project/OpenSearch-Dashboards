@@ -51,6 +51,6 @@ export {
   SampleDataRegistry,
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
-} from './sample_data';
+} from './sample-data';
 
-export { SampleDatasetSchema, SampleDatasetProvider } from './sample_data';
+export { SampleDatasetSchema, SampleDatasetProvider } from './sample-data';

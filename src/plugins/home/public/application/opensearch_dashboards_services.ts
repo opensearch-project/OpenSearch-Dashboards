@@ -44,7 +44,7 @@ import { UiStatsMetricType } from '@osd/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
-import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import { FeatureCatalogueRegistry } from '../services/feature-catalogue';
 import { EnvironmentService } from '../services/environment';
 import { ConfigSchema } from '../../config';
 

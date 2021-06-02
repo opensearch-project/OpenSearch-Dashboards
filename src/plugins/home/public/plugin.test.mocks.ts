@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
+import { featureCatalogueRegistryMock } from './services/feature-catalogue/feature_catalogue_registry.mock';
 import { environmentServiceMock } from './services/environment/environment.mock';
 import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
 

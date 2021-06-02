@@ -52,7 +52,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { getServices } from '../opensearch_dashboards_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
 
-import { SampleDataCard } from './sample_data';
+import { SampleDataCard } from './sample-data';
 import OpenSearchMarkCentered from '../../assets/logos/opensearch_mark_centered.svg';
 interface Props {
   urlBasePath: string;

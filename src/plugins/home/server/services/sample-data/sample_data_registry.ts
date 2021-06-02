@@ -41,7 +41,7 @@ import {
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
-import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
+import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data-sets';
 import { createListRoute, createInstallRoute } from './routes';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { makeSampleDataUsageCollector, usage } from './usage';
