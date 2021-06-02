@@ -51,7 +51,7 @@ import {
   catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { SavedObjectSaveOpts } from 'src/plugins/saved-objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
@@ -64,7 +64,7 @@ import {
   SavedQuery,
   syncQueryStateWithUrl,
 } from '../../../data/public';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved_objects/public';
+import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved-objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,

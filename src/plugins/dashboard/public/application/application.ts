@@ -59,7 +59,7 @@ import {
   configureAppAngularModule,
 } from '../../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../saved-objects/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';

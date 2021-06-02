@@ -33,7 +33,7 @@
 import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../saved_objects/public';
+} from '../../../saved-objects/public';
 import { createSavedSearchClass } from './_saved_search';
 
 export function createSavedSearchesLoader(services: SavedObjectOpenSearchDashboardsServices) {

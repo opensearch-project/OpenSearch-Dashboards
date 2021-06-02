@@ -33,7 +33,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { getSavedObjectFinder } from '../../saved_objects/public';
+import { getSavedObjectFinder } from '../../saved-objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import {

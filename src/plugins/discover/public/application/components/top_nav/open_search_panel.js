@@ -45,7 +45,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectFinderUi } from '../../../../../saved_objects/public';
+import { SavedObjectFinderUi } from '../../../../../saved-objects/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 
 const SEARCH_OBJECT_TYPE = 'search';

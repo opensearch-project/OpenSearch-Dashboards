@@ -38,7 +38,7 @@ import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
 } from '../../../opensearch_dashboards_legacy/public';
-import { PER_PAGE_SETTING } from '../../../saved_objects/public';
+import { PER_PAGE_SETTING } from '../../../saved-objects/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 
 export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings) {

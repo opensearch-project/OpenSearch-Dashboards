@@ -71,7 +71,7 @@ export class SavedObjectLoader {
    */
   async get(opts?: Record<string, unknown> | string) {
     // can accept object as argument in accordance to SavedVis class
-    // see src/plugins/saved_objects/public/saved_object/saved_object_loader.ts
+    // see src/plugins/saved-objects/public/saved-object/saved_object_loader.ts
     // @ts-ignore
     const obj = new this.Class(opts);
     return obj.init();

@@ -44,7 +44,7 @@ import {
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { OnSaveProps } from '../../../../src/plugins/saved-objects/public';
 import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
 
 interface StartServices {

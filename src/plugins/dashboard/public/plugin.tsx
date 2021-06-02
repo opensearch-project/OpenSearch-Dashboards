@@ -67,7 +67,7 @@ import {
   SavedObjectLoader,
   SavedObjectsStart,
   showSaveModal,
-} from '../../saved_objects/public';
+} from '../../saved-objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,

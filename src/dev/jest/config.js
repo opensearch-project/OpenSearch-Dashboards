@@ -90,7 +90,7 @@ export default {
     '__fixtures__/',
     'target/',
     '<rootDir>/src/plugins/maps_legacy',
-    '<rootDir>/src/plugins/region_map',
+    '<rootDir>/src/plugins/region-map',
   ],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],

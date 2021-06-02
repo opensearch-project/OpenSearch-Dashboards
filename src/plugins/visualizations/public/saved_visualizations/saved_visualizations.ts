@@ -32,7 +32,7 @@
 import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../../plugins/saved_objects/public';
+} from '../../../../plugins/saved-objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../vis_types';

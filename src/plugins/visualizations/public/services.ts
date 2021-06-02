@@ -52,7 +52,7 @@ import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader } from '../../saved-objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');

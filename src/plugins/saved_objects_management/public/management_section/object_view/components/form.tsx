@@ -44,7 +44,7 @@ import { cloneDeep } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { SimpleSavedObject, SavedObjectsClientContract } from '../../../../../../core/public';
-import { SavedObjectLoader } from '../../../../../saved_objects/public';
+import { SavedObjectLoader } from '../../../../../saved-objects/public';
 import { Field } from './field';
 import { ObjectField, FieldState, SubmittedFormData } from '../../types';
 import { createFieldList } from '../../../lib';

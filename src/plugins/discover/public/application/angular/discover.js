@@ -46,7 +46,7 @@ import {
   connectToQueryState,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
+import { SavedObjectSaveModal, showSaveModal } from '../../../../saved-objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';

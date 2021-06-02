@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
+import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved-objects/public';
 import { first } from 'rxjs/operators';
 import { SavedObjectAttributes } from '../../../../core/public';
 import {
@@ -64,7 +64,7 @@ import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { AttributeService } from '../../../dashboard/public';
-import { checkForDuplicateTitle } from '../../../saved_objects/public';
+import { checkForDuplicateTitle } from '../../../saved-objects/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

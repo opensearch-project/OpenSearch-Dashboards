@@ -31,7 +31,7 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../../../../saved_objects/public';
+import { SavedObjectMetaData } from '../../../../saved-objects/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';

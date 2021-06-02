@@ -50,7 +50,7 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
-import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
+import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved-objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';

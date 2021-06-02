@@ -33,7 +33,7 @@ import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../../plugins/saved_objects/public';
+} from '../../../../plugins/saved-objects/public';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';

@@ -32,7 +32,7 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 import { configSchema as tilemapSchema } from '../tile_map/config';
-import { configSchema as regionmapSchema } from '../region_map/config';
+import { configSchema as regionmapSchema } from '../region-map/config';
 
 export const configSchema = schema.object({
   includeOpenSearchMapsService: schema.boolean({ defaultValue: true }),
