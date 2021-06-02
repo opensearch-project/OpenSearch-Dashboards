@@ -39,8 +39,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { getDepsMock } from '../../test_utils/get_deps_mock';
-import { getIndexPatternMock, updateComponent } from '../../test_utils';
+import { getDepsMock } from '../../test-utils/get_deps_mock';
+import { getIndexPatternMock, updateComponent } from '../../test-utils';
 
 const controlParams: ControlParams = {
   id: '1',

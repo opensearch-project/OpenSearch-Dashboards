@@ -33,7 +33,7 @@
 import expect from '@osd/expect';
 import { Control } from './control';
 import { ControlParams } from '../editor_utils';
-import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
+import { FilterManager as BaseFilterManager } from './filter-manager/filter_manager';
 
 function createControlParams(id: string, label: string): ControlParams {
   return {

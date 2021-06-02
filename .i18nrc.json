@@ -16,7 +16,7 @@
     "opensearchUi": "src/plugins/opensearch_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
-    "inputControl": "src/plugins/input_control_vis",
+    "inputControl": "src/plugins/input-control-vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interpreter": "src/legacy/core_plugins/interpreter",

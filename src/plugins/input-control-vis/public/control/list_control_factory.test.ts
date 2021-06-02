@@ -32,7 +32,7 @@
 
 import { listControlFactory, ListControl } from './list_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
-import { getDepsMock, getSearchSourceMock } from '../test_utils';
+import { getDepsMock, getSearchSourceMock } from '../test-utils';
 
 describe('listControlFactory', () => {
   const searchSourceMock = getSearchSourceMock();

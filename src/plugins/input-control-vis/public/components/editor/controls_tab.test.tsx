@@ -33,7 +33,7 @@
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getDepsMock, getIndexPatternMock } from '../../test_utils';
+import { getDepsMock, getIndexPatternMock } from '../../test-utils';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';
 import { Vis } from '../../../../visualizations/public';
 

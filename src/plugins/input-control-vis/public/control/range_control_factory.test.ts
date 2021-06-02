@@ -32,7 +32,7 @@
 
 import { rangeControlFactory } from './range_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
-import { getDepsMock, getSearchSourceMock } from '../test_utils';
+import { getDepsMock, getSearchSourceMock } from '../test-utils';
 
 describe('rangeControlFactory', () => {
   describe('fetch', () => {

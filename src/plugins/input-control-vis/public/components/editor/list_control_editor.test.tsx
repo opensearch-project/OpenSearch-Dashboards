@@ -37,10 +37,10 @@ import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
+import { getIndexPatternMock } from '../../test-utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { getDepsMock, updateComponent } from '../../test_utils';
+import { getDepsMock, updateComponent } from '../../test-utils';
 
 const controlParamsBase: ControlParams = {
   id: '1',
