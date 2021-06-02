@@ -46,7 +46,7 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings } from '../../maps_legacy/public';
+import { IServiceSettings } from '../../maps-legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
 

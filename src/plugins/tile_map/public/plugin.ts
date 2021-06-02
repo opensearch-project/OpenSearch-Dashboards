@@ -45,7 +45,7 @@ import 'angular-sanitize';
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps-legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
 import {
   setCoreService,

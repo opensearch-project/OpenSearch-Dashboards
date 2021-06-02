@@ -26,7 +26,7 @@
       "src/legacy/core_plugins/management",
       "src/plugins/management"
     ],
-    "maps_legacy": "src/plugins/maps_legacy",
+    "maps_legacy": "src/plugins/maps-legacy",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
     "opensearch_dashboards_legacy": "src/plugins/opensearch_dashboards_legacy",

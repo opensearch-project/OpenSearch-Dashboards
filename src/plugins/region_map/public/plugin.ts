@@ -43,7 +43,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps-legacy/public';
 import {
   setCoreService,
   setFormatService,
@@ -54,7 +54,7 @@ import {
 } from './opensearch_dashboards_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
-import { MapsLegacyConfig } from '../../maps_legacy/config';
+import { MapsLegacyConfig } from '../../maps-legacy/config';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { SharePluginStart } from '../../share/public';
 

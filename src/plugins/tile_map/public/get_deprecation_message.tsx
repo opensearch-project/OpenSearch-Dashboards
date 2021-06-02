@@ -36,7 +36,7 @@ import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { getCoreService, getQueryService, getShareService } from './services';
 import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';
-import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
+import { LegacyMapDeprecationMessage } from '../../maps-legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
   let mapsTileMapUrlGenerator: UrlGeneratorContract<'MAPS_APP_TILE_MAP_URL_GENERATOR'> | undefined;

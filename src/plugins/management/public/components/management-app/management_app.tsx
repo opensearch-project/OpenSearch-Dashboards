@@ -36,7 +36,7 @@ import { EuiPage } from '@elastic/eui';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
-import { ManagementSidebarNav } from '../management_sidebar_nav';
+import { ManagementSidebarNav } from '../management-sidebar-nav';
 import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
 import { SectionsServiceStart } from '../../types';
 

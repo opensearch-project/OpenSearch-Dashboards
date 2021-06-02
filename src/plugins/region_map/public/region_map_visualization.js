@@ -38,7 +38,7 @@ import {
 } from './opensearch_dashboards_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
+import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps-legacy/public';
 
 export function createRegionMapVisualization({
   regionmapsConfig,

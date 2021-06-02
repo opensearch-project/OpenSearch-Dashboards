@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
+import { lazyLoadMapsLegacyModules } from './lazy-load-bundle';
 // @ts-expect-error
 import { getMapsLegacyConfig } from './opensearch_dashboards_services';
 import { IServiceSettings } from './map/service_settings_types';

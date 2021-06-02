@@ -35,9 +35,9 @@ import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elast
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
+import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps-legacy/public';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
+import { RegionMapVisParams, WmsOptions } from '../../../maps-legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,

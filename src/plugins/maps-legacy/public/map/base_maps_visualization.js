@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../opensearch_dashboards_services';
-import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
+import { lazyLoadMapsLegacyModules } from '../lazy-load-bundle';
 import { getServiceSettings } from '../get_service_settings';
 
 const WMS_MINZOOM = 0;

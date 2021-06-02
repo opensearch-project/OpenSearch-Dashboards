@@ -89,7 +89,7 @@ export default {
   modulePathIgnorePatterns: [
     '__fixtures__/',
     'target/',
-    '<rootDir>/src/plugins/maps_legacy',
+    '<rootDir>/src/plugins/maps-legacy',
     '<rootDir>/src/plugins/region_map',
   ],
   testEnvironment: 'jest-environment-jsdom-thirteen',

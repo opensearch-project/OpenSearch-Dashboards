@@ -34,7 +34,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { ManagementApp, ManagementAppDependencies } from './components/management_app';
+import { ManagementApp, ManagementAppDependencies } from './components/management-app';
 
 export const renderApp = async (
   { history, appBasePath, element }: AppMountParameters,

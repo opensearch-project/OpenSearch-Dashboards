@@ -36,7 +36,7 @@ import d3 from 'd3';
 import { i18n } from '@osd/i18n';
 import * as topojson from 'topojson-client';
 import { getNotifications } from './opensearch_dashboards_services';
-import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps_legacy/public';
+import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps-legacy/public';
 import { truncatedColorMaps } from '../../charts/public';
 
 const EMPTY_STYLE = {
