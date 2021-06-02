@@ -29,41 +29,25 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+import { EuiSelectableOption } from '@elastic/eui';
+import { SerializerFunc } from '../hook-form-lib';
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { JsonEditor } from '../../../../src/plugins/opensearch-ui-shared/public';
+type FuncType = (selectOptions: EuiSelectableOption[]) => SerializerFunc;
 
-export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
-  const input = JSON.stringify(props.input, null, 4);
-  const [value, setValue] = React.useState(input);
-  const isValid = (() => {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-  React.useEffect(() => {
-    setValue(input);
-  }, [input]);
-  return (
-    <>
-      <JsonEditor
-        value={value}
-        onUpdate={(v) => setValue(v.data.raw)}
-        euiCodeEditorProps={{
-          'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
-        }}
-      />
-      <EuiButton
-        onClick={() => props.onSubmit(JSON.parse(value))}
-        disabled={!isValid}
-        data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
-      >
-        Update Input
-      </EuiButton>
-    </>
-  );
+export const multiSelectComponent: Record<string, FuncType> = {
+  // This deSerializer takes the previously selected options and map them
+  // against the default select options values.
+  selectedValueToOptions(selectOptions) {
+    return (defaultFormValue) => {
+      // If there are no default form value, it means that no previous value has been selected.
+      if (!defaultFormValue) {
+        return selectOptions;
+      }
+
+      return (selectOptions as EuiSelectableOption[]).map((option) => ({
+        ...option,
+        checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
+      }));
+    };
+  },
 };

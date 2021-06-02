@@ -31,39 +31,39 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { JsonEditor } from '../../../../src/plugins/opensearch-ui-shared/public';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
-export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
-  const input = JSON.stringify(props.input, null, 4);
-  const [value, setValue] = React.useState(input);
-  const isValid = (() => {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-  React.useEffect(() => {
-    setValue(input);
-  }, [input]);
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook-form-lib';
+
+interface Props {
+  field: FieldHook;
+  euiFieldProps?: Record<string, any>;
+  idAria?: string;
+  [key: string]: any;
+}
+
+export const TextField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
   return (
-    <>
-      <JsonEditor
-        value={value}
-        onUpdate={(v) => setValue(v.data.raw)}
-        euiCodeEditorProps={{
-          'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
-        }}
+    <EuiFormRow
+      label={field.label}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+      data-test-subj={rest['data-test-subj']}
+      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+    >
+      <EuiFieldText
+        isInvalid={isInvalid}
+        value={field.value as string}
+        onChange={field.onChange}
+        isLoading={field.isValidating}
+        fullWidth
+        data-test-subj="input"
+        {...euiFieldProps}
       />
-      <EuiButton
-        onClick={() => props.onSubmit(JSON.parse(value))}
-        disabled={!isValid}
-        data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
-      >
-        Update Input
-      </EuiButton>
-    </>
+    </EuiFormRow>
   );
 };

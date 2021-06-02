@@ -1,0 +1,14 @@
+{
+  "id": "opensearchUiShared",
+  "version": "opensearchDashboards",
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": [
+    "static/forms/components",
+    "static/forms/helpers",
+    "static/forms/hook-form-lib",
+    "static/validators/string",
+    "static/forms/helpers/field-validators/types"
+  ],
+  "requiredBundles": ["data"]
+}

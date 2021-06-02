@@ -30,40 +30,37 @@
  * GitHub history for details.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { JsonEditor } from '../../../../src/plugins/opensearch-ui-shared/public';
+import { ValidationFunc, ValidationError } from '../../hook-form-lib';
+import { hasMinLengthString } from '../../../validators/string';
+import { hasMinLengthArray } from '../../../validators/array';
+import { ERROR_CODE } from './types';
 
-export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
-  const input = JSON.stringify(props.input, null, 4);
-  const [value, setValue] = React.useState(input);
-  const isValid = (() => {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-  React.useEffect(() => {
-    setValue(input);
-  }, [input]);
-  return (
-    <>
-      <JsonEditor
-        value={value}
-        onUpdate={(v) => setValue(v.data.raw)}
-        euiCodeEditorProps={{
-          'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
-        }}
-      />
-      <EuiButton
-        onClick={() => props.onSubmit(JSON.parse(value))}
-        disabled={!isValid}
-        data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
-      >
-        Update Input
-      </EuiButton>
-    </>
-  );
+export const minLengthField = ({
+  length = 0,
+  message,
+}: {
+  length: number;
+  message: string | ((err: Partial<ValidationError>) => string);
+}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+  const [{ value }] = args;
+
+  // Validate for Arrays
+  if (Array.isArray(value)) {
+    return hasMinLengthArray(length)(value)
+      ? undefined
+      : {
+          code: 'ERR_MIN_LENGTH',
+          length,
+          message: typeof message === 'function' ? message({ length }) : message,
+        };
+  }
+
+  // Validate for Strings
+  return hasMinLengthString(length)((value as string).trim())
+    ? undefined
+    : {
+        code: 'ERR_MIN_LENGTH',
+        length,
+        message: typeof message === 'function' ? message({ length }) : message,
+      };
 };

@@ -32,7 +32,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { XJson } from '../../../../../opensearch_ui_shared/public';
+import { XJson } from '../../../../../opensearch-ui-shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore

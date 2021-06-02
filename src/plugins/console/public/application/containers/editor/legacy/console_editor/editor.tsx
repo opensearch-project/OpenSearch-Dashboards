@@ -35,7 +35,7 @@ import { i18n } from '@osd/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../opensearch_ui_shared/public';
+import { ace } from '../../../../../../../opensearch-ui-shared/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';

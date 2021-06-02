@@ -35,7 +35,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
-import { XJson } from '../../../../../../opensearch_ui_shared/public';
+import { XJson } from '../../../../../../opensearch-ui-shared/public';
 import editorInput1 from './editor_input1.txt';
 
 const { collapseLiteralStrings } = XJson;

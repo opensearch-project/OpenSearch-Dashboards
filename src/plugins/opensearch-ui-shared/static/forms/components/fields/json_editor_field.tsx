@@ -30,40 +30,37 @@
  * GitHub history for details.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
-import { JsonEditor } from '../../../../src/plugins/opensearch-ui-shared/public';
+import React, { useCallback } from 'react';
 
-export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
-  const input = JSON.stringify(props.input, null, 4);
-  const [value, setValue] = React.useState(input);
-  const isValid = (() => {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-  React.useEffect(() => {
-    setValue(input);
-  }, [input]);
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../public';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook-form-lib';
+
+interface Props {
+  field: FieldHook<any, string>;
+  euiCodeEditorProps?: { [key: string]: any };
+  [key: string]: any;
+}
+
+export const JsonEditorField = ({ field, ...rest }: Props) => {
+  const { errorMessage } = getFieldValidityAndErrorMessage(field);
+
+  const { label, helpText, value, setValue } = field;
+
+  const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback<OnJsonEditorUpdateHandler>(
+    (updatedJson) => {
+      setValue(updatedJson.data.raw);
+    },
+    [setValue]
+  );
+
   return (
-    <>
-      <JsonEditor
-        value={value}
-        onUpdate={(v) => setValue(v.data.raw)}
-        euiCodeEditorProps={{
-          'data-test-subj': 'dashboardEmbeddableByValueInputEditor',
-        }}
-      />
-      <EuiButton
-        onClick={() => props.onSubmit(JSON.parse(value))}
-        disabled={!isValid}
-        data-test-subj={'dashboardEmbeddableByValueInputSubmit'}
-      >
-        Update Input
-      </EuiButton>
-    </>
+    <JsonEditor
+      label={label}
+      helpText={helpText}
+      value={value}
+      onUpdate={onJsonUpdate}
+      error={errorMessage}
+      {...rest}
+    />
   );
 };

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { sendRequest, XJson } from '../../opensearch_ui_shared/public';
+import { sendRequest, XJson } from '../../opensearch-ui-shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
