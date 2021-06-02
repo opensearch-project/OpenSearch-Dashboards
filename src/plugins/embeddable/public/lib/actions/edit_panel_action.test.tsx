@@ -33,7 +33,7 @@
 import { EditPanelAction } from './edit_panel_action';
 import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddables';
 import { ViewMode } from '../types';
-import { ContactCardEmbeddable } from '../test_samples';
+import { ContactCardEmbeddable } from '../test-samples';
 import { embeddablePluginMock } from '../../mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
 import { of } from 'rxjs';

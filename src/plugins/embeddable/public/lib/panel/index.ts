@@ -31,4 +31,4 @@
  */
 
 export * from './embeddable_panel';
-export * from './panel_header';
+export * from './panel-header';

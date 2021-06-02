@@ -31,7 +31,7 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression-functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('../../maps_legacy/public', () => ({

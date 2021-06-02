@@ -34,7 +34,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+import { ExpressionRenderDefinition } from '../../expressions/common/expression-renderers';
 import { MetricVisRenderValue } from './metric_vis_fn';
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('./components/metric_vis_component'));

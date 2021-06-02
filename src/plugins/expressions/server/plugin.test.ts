@@ -31,7 +31,7 @@
  */
 
 import { expressionsPluginMock } from './mocks';
-import { add } from '../common/test_helpers/expression_functions/add';
+import { add } from '../common/test-helpers/expression-functions/add';
 
 describe('ExpressionsServerPlugin', () => {
   test('can instantiate from mocks', async () => {

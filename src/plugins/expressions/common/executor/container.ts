@@ -34,8 +34,8 @@ import {
   StateContainer,
   createStateContainer,
 } from '../../../opensearch_dashboards_utils/common/state_containers';
-import { ExpressionFunction } from '../expression_functions';
-import { ExpressionType } from '../expression_types';
+import { ExpressionFunction } from '../expression-functions';
+import { ExpressionType } from '../expression-types';
 
 export interface ExecutorState<Context extends Record<string, unknown> = Record<string, unknown>> {
   functions: Record<string, ExpressionFunction>;

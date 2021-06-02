@@ -33,14 +33,14 @@
 import React from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
-import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+import { CONTACT_CARD_EMBEDDABLE } from '../test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../test-samples/embeddables/contact-card/slow_contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../test-samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../test-samples/embeddables/contact-card/contact_card_embeddable';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
 import { embeddablePluginMock, createEmbeddablePanelMock } from '../../mocks';

@@ -30,4 +30,4 @@
  * GitHub history for details.
  */
 
-export * from '../../../plugins/embeddable/public/lib/test_samples';
+export * from '../../../plugins/embeddable/public/lib/test-samples';

@@ -62,7 +62,7 @@ import {
   EmbeddablePanel,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { EmbeddableStateTransfer } from './lib/state_transfer';
+import { EmbeddableStateTransfer } from './lib/state-transfer';
 import {
   extractBaseEmbeddableInput,
   injectBaseEmbeddableInput,

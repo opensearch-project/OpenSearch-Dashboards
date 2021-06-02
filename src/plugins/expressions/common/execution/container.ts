@@ -36,7 +36,7 @@ import {
 } from '../../../opensearch_dashboards_utils/common/state_containers';
 import { ExecutorState, defaultState as executorDefaultState } from '../executor';
 import { ExpressionAstExpression } from '../ast';
-import { ExpressionValue } from '../expression_types';
+import { ExpressionValue } from '../expression-types';
 
 export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {
   ast: ExpressionAstExpression;

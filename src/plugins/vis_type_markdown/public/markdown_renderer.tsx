@@ -33,7 +33,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+import { ExpressionRenderDefinition } from '../../expressions/common/expression-renderers';
 import { MarkdownVisRenderValue } from './markdown_fn';
 
 // @ts-ignore

@@ -31,7 +31,7 @@
  */
 
 import { Executor } from '../executor';
-import { ExpressionRendererRegistry } from '../expression_renderers';
+import { ExpressionRendererRegistry } from '../expression-renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 

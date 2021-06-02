@@ -41,17 +41,17 @@ import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/publi
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
-import { createEditModeAction } from '../test_samples/actions';
+import { createEditModeAction } from '../test-samples/actions';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+} from '../test-samples/embeddables/contact-card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../test-samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../test-samples/embeddables/contact-card/contact_card_embeddable';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';

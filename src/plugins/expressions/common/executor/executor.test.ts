@@ -31,8 +31,8 @@
  */
 
 import { Executor } from './executor';
-import * as expressionTypes from '../expression_types';
-import * as expressionFunctions from '../expression_functions';
+import * as expressionTypes from '../expression-types';
+import * as expressionFunctions from '../expression-functions';
 import { Execution } from '../execution';
 import { parseExpression } from '../ast';
 

@@ -36,8 +36,8 @@ import { skip } from 'rxjs/operators';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
-import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { FilterableEmbeddable } from '../test_samples/embeddables/filterable_embeddable';
+import { ContactCardEmbeddable } from '../test-samples/embeddables/contact-card/contact_card_embeddable';
+import { FilterableEmbeddable } from '../test-samples/embeddables/filterable_embeddable';
 
 class TestClass {
   constructor() {}

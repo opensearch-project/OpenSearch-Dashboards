@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { AnyExpressionFunctionDefinition } from '../expression_functions/types';
+import { AnyExpressionFunctionDefinition } from '../expression-functions/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
   buildExpressionFunction,

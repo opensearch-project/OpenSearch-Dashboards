@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ExpressionType } from '../expression_types';
+import { ExpressionType } from '../expression-types';
 import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
 import { TimeRange, Query, Filter } from '../../../data/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';

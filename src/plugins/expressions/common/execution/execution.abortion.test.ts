@@ -32,7 +32,7 @@
 
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
-import { createUnitTestExecutor } from '../test_helpers';
+import { createUnitTestExecutor } from '../test-helpers';
 
 jest.useFakeTimers();
 

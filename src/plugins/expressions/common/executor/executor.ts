@@ -34,14 +34,14 @@
 
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
-import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
+import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression-functions';
 import { Execution, ExecutionParams } from '../execution/execution';
 import { IRegistry } from '../types';
-import { ExpressionType } from '../expression_types/expression_type';
-import { AnyExpressionTypeDefinition } from '../expression_types/types';
+import { ExpressionType } from '../expression-types/expression_type';
+import { AnyExpressionTypeDefinition } from '../expression-types/types';
 import { ExpressionAstExpression } from '../ast';
-import { typeSpecs } from '../expression_types/specs';
-import { functionSpecs } from '../expression_functions/specs';
+import { typeSpecs } from '../expression-types/specs';
+import { functionSpecs } from '../expression-functions/specs';
 
 export interface ExpressionExecOptions {
   /**

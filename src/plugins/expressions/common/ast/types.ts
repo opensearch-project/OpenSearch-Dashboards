@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ExpressionValue, ExpressionValueError } from '../expression_types';
+import { ExpressionValue, ExpressionValueError } from '../expression-types';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression

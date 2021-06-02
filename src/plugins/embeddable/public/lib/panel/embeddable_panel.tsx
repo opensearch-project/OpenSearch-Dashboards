@@ -53,13 +53,13 @@ import {
 } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
-import { RemovePanelAction } from './panel_header/panel_actions';
-import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
-import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
-import { PanelHeader } from './panel_header/panel_header';
-import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
+import { RemovePanelAction } from './panel-header/panel-actions';
+import { AddPanelAction } from './panel-header/panel-actions/add-panel/add_panel_action';
+import { CustomizePanelTitleAction } from './panel-header/panel-actions/customize-title/customize_panel_action';
+import { PanelHeader } from './panel-header/panel_header';
+import { InspectPanelAction } from './panel-header/panel-actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
-import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { CustomizePanelModal } from './panel-header/panel-actions/customize-title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
 import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
