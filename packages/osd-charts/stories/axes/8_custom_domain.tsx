@@ -39,7 +39,7 @@ export const Example = () => {
 
   const lineDomain = {
     min: number('Line min', 0, options, 'Line'),
-    max: number('Line max', 10, options, 'Line'),
+    max: number('Line max', 8, options, 'Line'),
   };
 
   const ticksOptions = {

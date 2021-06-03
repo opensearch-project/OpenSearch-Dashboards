@@ -184,8 +184,7 @@ export function isYValueDefinedFn(yScale: Scale, xScale: Scale): YDefinedFn {
     return (
       yValue !== null &&
       !((isLogScale && domainPolarity >= 0 && yValue <= 0) || (domainPolarity < 0 && yValue >= 0)) &&
-      xScale.isValueInDomain(datum.x) &&
-      yScale.isValueInDomain(yValue)
+      xScale.isValueInDomain(datum.x)
     );
   };
 }

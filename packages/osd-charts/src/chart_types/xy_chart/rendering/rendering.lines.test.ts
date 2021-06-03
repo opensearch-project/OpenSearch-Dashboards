@@ -680,7 +680,7 @@ describe('Rendering points - line', () => {
       geometriesIndex,
     } = computeSeriesGeometriesSelector(store.getState());
 
-    test('Can render a split line', () => {
+    test('should render a split line', () => {
       const [{ value: renderedLine }] = lines;
       expect(renderedLine.line.split('M').length - 1).toBe(3);
       expect(renderedLine.color).toBe('red');
@@ -688,7 +688,7 @@ describe('Rendering points - line', () => {
       expect(renderedLine.seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(renderedLine.transform).toEqual({ x: 0, y: 0 });
     });
-    test('Can render points', () => {
+    test('should render points', () => {
       const [
         {
           value: { points },
@@ -709,7 +709,7 @@ describe('Rendering points - line', () => {
       expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(LIGHT_THEME.lineSeriesStyle.point.radius);
     });
   });
-  describe('Remove points datum is not in domain', () => {
+  describe('Removing out-of-domain points', () => {
     const pointSeriesSpec = MockSeriesSpec.line({
       id: SPEC_ID,
       // groupId: GROUP_ID,
@@ -736,14 +736,14 @@ describe('Rendering points - line', () => {
       geometries: { lines },
       geometriesIndex,
     } = computeSeriesGeometriesSelector(store.getState());
-    test('Can render two points', () => {
+    test('should render 3 points', () => {
       const [
         {
           value: { points },
         },
       ] = lines;
-      // will not render the 3rd point that is out of y domain
-      expect(points.length).toBe(2);
+      // will not render the 4th point is out of the x domain
+      expect(points.length).toBe(3);
       // will keep the 3rd point as an indexedGeometry
       expect(geometriesIndex.size).toEqual(3);
       expect(points[0]).toEqual(
