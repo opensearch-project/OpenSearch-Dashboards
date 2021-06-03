@@ -146,7 +146,7 @@ describe('graphite', function () {
 
   it('setting with unmatched blocklist https url should return result', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'https://www.amazon.com' },
+      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
@@ -156,7 +156,7 @@ describe('graphite', function () {
 
   it('setting with unmatched blocklist ftp url should return result', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'ftp://www.amazon.com' },
+      settings: { 'timeline:graphite.url': 'ftp://www.opensearch.org' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
@@ -166,7 +166,7 @@ describe('graphite', function () {
 
   it('setting with invalid url should return error message', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'www.amazon.com' },
+      settings: { 'timeline:graphite.url': 'www.opensearch.org' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
@@ -176,7 +176,7 @@ describe('graphite', function () {
 
   it('setting with redirection error message', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'https://amazon.com/redirect' },
+      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/redirect' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {

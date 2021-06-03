@@ -107,9 +107,9 @@
 #i18n.locale: "en"
 
 # Set the allowlist to check input graphite Url. Allowlist is the default check list.
-vis_type_timeline.graphiteAllowedUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite']
+#vis_type_timeline.graphiteAllowedUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite']
 
-# Set the blocklist to check input graphite Url/IP. Blocklist is an IP list. 
+# Set the blocklist to check input graphite Url. Blocklist is an IP list. 
 # Below is an example for reference 
 # vis_type_timeline.graphiteBlockedIPs: [
 #  //Loopback

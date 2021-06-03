@@ -65,10 +65,17 @@ function getIpAddress(urlObject) {
   return null;
 }
 
-function isValidURL(configuredUrl, blockedIPs) {
-  // Check the format of URL, URL has be in the format as
-  // scheme://server/path/resource otherwise an TypeError
-  // would be thrown
+/**
+ * Check whether customer input URL is blocked
+ * This function first check the format of URL, URL has be in the format as
+ * scheme://server/path/resource otherwise an TypeError would be thrown
+ * Then IPCIDR check if a specific IP address fall in the
+ * range of an IP address block
+ * @param {string} configuredUrls
+ * @param {Array|string} blockedIPs
+ * @returns {boolean} true if the configuredUrl is blocked
+ */
+function isBlockedURL(configuredUrl, blockedIPs) {
   let configuredUrlObject;
   try {
     configuredUrlObject = new URL(configuredUrl);
@@ -80,13 +87,9 @@ function isValidURL(configuredUrl, blockedIPs) {
   if (!ip) {
     return false;
   }
-
-  // IPCIDR check if a specific IP address fall in the
-  // range of an IP address block
-  // @param {string} bl
-  // @returns {object} cidr
+  
   const isBlocked = blockedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
-  return !isBlocked;
+  return isBlocked;
 }
 
 /**
@@ -103,9 +106,9 @@ function isValidConfig(blockedIPs, allowedUrls, configuredUrl) {
   if (blockedIPs.length === 0) {
     if (!allowedUrls.includes(configuredUrl)) return false;
   } else if (allowedUrls.length === 0) {
-    if (!isValidURL(configuredUrl, blockedIPs)) return false;
+    if (isBlockedURL(configuredUrl, blockedIPs)) return false;
   } else {
-    if (!isValidURL(configuredUrl, blockedIPs) || !allowedUrls.includes(configuredUrl))
+    if (isBlockedURL(configuredUrl, blockedIPs) || !allowedUrls.includes(configuredUrl))
       return false;
   }
   return true;
