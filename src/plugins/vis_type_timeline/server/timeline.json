@@ -2,7 +2,7 @@
   "quandl": {
     "key": "someKeyHere"
   },
-  "opensearch": {
+  "es": {
     "timefield": "@timestamp",
     "default_index": "_all"
   },

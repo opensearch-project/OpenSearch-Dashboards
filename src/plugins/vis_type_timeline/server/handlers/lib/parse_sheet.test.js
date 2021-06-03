@@ -36,7 +36,7 @@ const expect = require('chai').expect;
 
 describe('timeline parse_sheet function', function () {
   it(`doesn't split expressions on whitespace`, async function () {
-    const data = ['.opensearch() .opensearch(404)'];
+    const data = ['.es() .es(404)'];
     const ast = parseSheet(data);
 
     const expressions = ast[0];
@@ -45,7 +45,7 @@ describe('timeline parse_sheet function', function () {
   });
 
   it('splits expressions on commas', function () {
-    const data = ['.opensearch(), .opensearch(404)'];
+    const data = ['.es(), .es(404)'];
     const ast = parseSheet(data);
 
     const expressions = ast[0];
@@ -55,7 +55,7 @@ describe('timeline parse_sheet function', function () {
   });
 
   it('splits expressions on newlines', function () {
-    const data = [`.opensearch()\n\r ,\n\r .opensearch(404)`];
+    const data = [`.es()\n\r ,\n\r .es(404)`];
     const ast = parseSheet(data);
 
     const expressions = ast[0];

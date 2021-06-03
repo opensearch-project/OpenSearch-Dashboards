@@ -54,7 +54,7 @@ interface Arguments {
 
 export interface TimelineRenderValue {
   visData: TimelineSuccessResponse;
-  visType: 'timeline';
+  visType: 'timelion';
   visParams: TimelineVisParams;
 }
 
@@ -80,7 +80,7 @@ export const getTimelineVisualizationConfig = (
     expression: {
       types: ['string'],
       aliases: ['_'],
-      default: '".opensearch(*)"',
+      default: '".es(*)"',
       help: '',
     },
     interval: {

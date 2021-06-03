@@ -151,11 +151,11 @@ export function initTimelineApp(app, deps) {
 
     function getStateDefaults() {
       return {
-        sheet: savedSheet.timeline_sheet,
+        sheet: savedSheet.timelion_sheet,
         selected: 0,
-        columns: savedSheet.timeline_columns,
-        rows: savedSheet.timeline_rows,
-        interval: savedSheet.timeline_interval,
+        columns: savedSheet.timelion_columns,
+        rows: savedSheet.timelion_rows,
+        interval: savedSheet.timelion_interval,
       };
     }
 
@@ -171,7 +171,7 @@ export function initTimelineApp(app, deps) {
     const savedVisualizations = deps.plugins.visualizations.savedVisualizationsLoader;
     const timezone = getTimezone(deps.core.uiSettings);
 
-    const defaultExpression = '.opensearch(*)';
+    const defaultExpression = '.es(*)';
 
     $scope.topNavMenu = getTopNavMenu();
 
@@ -328,7 +328,7 @@ export function initTimelineApp(app, deps) {
         testId: 'timelineDocsButton',
       };
 
-      if (deps.core.application.capabilities.timeline.save) {
+      if (deps.core.application.capabilities.timelion.save) {
         return [
           newSheetAction,
           addSheetAction,
@@ -609,7 +609,7 @@ export function initTimelineApp(app, deps) {
     }
 
     async function saveExpression(title) {
-      const vis = await deps.plugins.visualizations.createVis('timeline', {
+      const vis = await deps.plugins.visualizations.createVis('timelion', {
         title,
         params: {
           expression: $scope.state.sheet[$scope.state.selected],
@@ -643,7 +643,7 @@ export function initTimelineApp(app, deps) {
             $route.current.params.id ? getSavedSheetBreadcrumbs : getCreateBreadcrumbs
           ),
         badge: () => {
-          if (deps.core.application.capabilities.timeline.save) {
+          if (deps.core.application.capabilities.timelion.save) {
             return undefined;
           }
 

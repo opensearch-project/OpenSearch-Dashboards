@@ -40,7 +40,7 @@ describe('timeline vis toExpressionAst function', () => {
   beforeEach(() => {
     vis = {
       params: {
-        expression: '.opensearch(*)',
+        expression: '.es(*)',
         interval: 'auto',
       },
     } as any;
@@ -52,7 +52,7 @@ describe('timeline vis toExpressionAst function', () => {
   });
 
   it('should not escape single quotes', () => {
-    vis.params.expression = `.opensearch(index=my*,timefield="date",split='test field:3',metric='avg:value')`;
+    vis.params.expression = `.es(index=my*,timefield="date",split='test field:3',metric='avg:value')`;
     const actual = toExpressionAst(vis);
     expect(actual).toMatchSnapshot();
   });
