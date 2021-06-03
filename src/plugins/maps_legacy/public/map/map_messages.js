@@ -54,8 +54,8 @@ export const createRegionBlockedWarning = (function () {
           body={
             <Fragment>
               <p>
-                You can configure OpenSearch Dash to use a different map server for coordinate maps
-                by modifying the default WMS properties.
+                You can configure OpenSearch Dashboards to use a different map server for coordinate
+                maps by modifying the default WMS properties.
               </p>
             </Fragment>
           }
@@ -110,37 +110,16 @@ export const createZoomWarningMsg = (function () {
             <FormattedMessage
               id="maps_legacy.opensearchDashboardsMap.zoomWarning"
               defaultMessage="You've reached the maximum number of zoom
-              levels. To zoom all the way in, upgrade to the
-              {defaultDistribution} of OpenSearch and OpenSearch Dashboards. You'll get
-              access to additional zoom levels for free through the {ems}.
-              Or, you can configure your own map server. Please go to
-              { wms } or { configSettings} for more information."
-              // TODO: [RENAMEME] Need valid URLs
+              levels. To zoom all the way in, you can configure your own map server.
+              Please go to { wms } for more information."
+              // TODO: [RENAMEME] Need prod urls.
               values={{
-                defaultDistribution: (
-                  <a target="_blank" href="https://www.opensearch.org/downloads/kibana">
-                    {`default distribution `}
-                  </a>
-                ),
-                ems: (
-                  <a target="_blank" href="https://www.opensearch.org/elastic-maps-service">
-                    {`OpenSearch Maps Service`}
-                  </a>
-                ),
                 wms: (
                   <a
                     target="_blank"
-                    href="https://www.opensearch.org/guide/en/kibana/current/tilemap.html"
+                    href="https://docs-beta.opensearch.org/docs/opensearch-dashboards/maptiles"
                   >
                     {`Custom WMS Configuration`}
-                  </a>
-                ),
-                configSettings: (
-                  <a
-                    target="_blank"
-                    href="https://www.opensearch.org/guide/en/kibana/current/settings.html"
-                  >
-                    {`Custom TMS Using Config Settings`}
                   </a>
                 ),
               }}

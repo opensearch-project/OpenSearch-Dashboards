@@ -68,42 +68,47 @@ export const EmptyState = ({
   canSave: boolean;
 }) => {
   const mlCard = (
-    <EuiFlexItem>
-      <EuiCard
-        onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
-        className="inpEmptyState__card"
-        betaBadgeLabel={
-          getMlCardState() === MlCardState.ENABLED
-            ? undefined
-            : i18n.translate(
-                'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
-                {
-                  defaultMessage: 'Basic',
-                }
-              )
-        }
-        betaBadgeTooltipContent={i18n.translate(
-          'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
-          {
-            defaultMessage: 'This feature requires a Basic license.',
-          }
-        )}
-        isDisabled={getMlCardState() === MlCardState.DISABLED}
-        icon={<EuiIcon size="xl" type="document" color="subdued" />}
-        title={
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
-            defaultMessage="Upload a file"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
-            defaultMessage="Import a CSV, NDJSON, or log file."
-          />
-        }
-      />
-    </EuiFlexItem>
+    <></>
+    // TODO: [RENAMEME] if have a replacement for this view we can re-enable this without
+    // upsell. Users can should be able to do everything within the application this card does
+    // but without the ML file visualizer.
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/384
+    // <EuiFlexItem>
+    //   <EuiCard
+    //     onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
+    //     className="inpEmptyState__card"
+    //     betaBadgeLabel={
+    //       getMlCardState() === MlCardState.ENABLED
+    //         ? undefined
+    //         : i18n.translate(
+    //             'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
+    //             {
+    //               defaultMessage: 'Basic',
+    //             }
+    //           )
+    //     }
+    //     betaBadgeTooltipContent={i18n.translate(
+    //       'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
+    //       {
+    //         defaultMessage: 'This feature requires a Basic license.',
+    //       }
+    //     )}
+    //     isDisabled={getMlCardState() === MlCardState.DISABLED}
+    //     icon={<EuiIcon size="xl" type="document" color="subdued" />}
+    //     title={
+    //       <FormattedMessage
+    //         id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+    //         defaultMessage="Upload a file"
+    //       />
+    //     }
+    //     description={
+    //       <FormattedMessage
+    //         id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+    //         defaultMessage="Import a CSV, NDJSON, or log file."
+    //       />
+    //     }
+    //   />
+    // </EuiFlexItem>
   );
 
   const createAnyway = (
