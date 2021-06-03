@@ -10,7 +10,7 @@
     "osd:bootstrap": "yarn build"
   },
   "dependencies": {
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@osd/utility-types": "1.0.0",

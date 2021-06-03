@@ -173,7 +173,7 @@
     "js-yaml": "^3.14.0",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-safe": "5.0.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
     "minimatch": "^3.0.4",
     "moment": "^2.24.0",
