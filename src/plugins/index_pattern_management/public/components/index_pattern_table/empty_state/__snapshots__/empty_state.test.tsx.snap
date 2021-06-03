@@ -59,35 +59,6 @@ exports[`EmptyState should render normally 1`] = `
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            betaBadgeTooltipContent="This feature requires a Basic license."
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
-                defaultMessage="Import a CSV, NDJSON, or log file."
-                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="document"
-              />
-            }
-            isDisabled={false}
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Upload a file"
-                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
             className="inpEmptyState__card"
             description={
               <FormattedMessage

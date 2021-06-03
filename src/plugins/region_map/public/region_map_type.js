@@ -37,7 +37,6 @@ import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
-import { getDeprecationMessage } from './get_deprecation_message';
 
 export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
@@ -45,7 +44,6 @@ export function createRegionMapTypeDefinition(dependencies) {
 
   return {
     name: 'region_map',
-    getInfoMessage: getDeprecationMessage,
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
     description: i18n.translate('regionMap.mapVis.regionMapDescription', {
       defaultMessage:
