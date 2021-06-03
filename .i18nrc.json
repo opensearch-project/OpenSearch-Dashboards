@@ -38,7 +38,7 @@
     "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
-    "savedObjectsManagement": "src/plugins/saved_objects_management",
+    "savedObjectsManagement": "src/plugins/saved-objects-management",
     "security": "src/plugins/security_oss",
     "server": "src/legacy/server",
     "statusPage": "src/legacy/core_plugins/status_page",

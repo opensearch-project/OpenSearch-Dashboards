@@ -723,7 +723,7 @@ module.exports = {
         'src/core/**',
         'packages/osd-config-schema',
         'src/plugins/status_page/**',
-        'src/plugins/saved_objects_management/**',
+        'src/plugins/saved-objects-management/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
