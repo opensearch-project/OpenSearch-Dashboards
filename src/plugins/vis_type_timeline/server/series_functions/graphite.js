@@ -35,84 +35,13 @@ import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
-import dns from 'dns-sync';
-import IPCIDR from 'ip-cidr';
+import { isValidConfig } from './graphite_helper';
 
 const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
 You can always enable the default allowlist configuration.`;
 
-const INVALID_URL_MESSAGE = `The Graphite URL/IP provided by you is invalid. 
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
 Please update your config from OpenSearch Dashboards's Advanced Setting.`;
-
-/**
- * Resolve hostname to IP address
- * @param {object} urlObject
- * @returns {string} configuredIP
- * or null if it cannot be resolve
- * According to RFC, all IPv6 IP address needs to be in []
- * such as [::1]
- * So if we detect a IPv6 address, we remove brackets
- */
-function getIpAddress(urlObject) {
-  const hostname = urlObject.hostname;
-  const configuredIP = dns.resolve(hostname);
-  if (configuredIP) {
-    return configuredIP;
-  }
-  if (hostname.startsWith('[') && hostname.endsWith(']')) {
-    return hostname.substr(1).slice(0, -1);
-  }
-  return null;
-}
-
-/**
- * Check whether customer input URL is blocked
- * This function first check the format of URL, URL has be in the format as
- * scheme://server/path/resource otherwise an TypeError would be thrown
- * Then IPCIDR check if a specific IP address fall in the
- * range of an IP address block
- * @param {string} configuredUrls
- * @param {Array|string} blockedIPs
- * @returns {boolean} true if the configuredUrl is blocked
- */
-function isBlockedURL(configuredUrl, blockedIPs) {
-  let configuredUrlObject;
-  try {
-    configuredUrlObject = new URL(configuredUrl);
-  } catch (err) {
-    return false;
-  }
-
-  const ip = getIpAddress(configuredUrlObject);
-  if (!ip) {
-    return false;
-  }
-
-  const isBlocked = blockedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
-  return isBlocked;
-}
-
-/**
- * Check configured url using blocklist and allowlist
- * If allowlist is used, return false if allowlist does not contain configured url
- * If blocklist is used, return false if blocklist contains configured url
- * If both allowlist and blocklist are used, check blocklist first then allowlist
- * @param {Array|string} blockedIPs
- * @param {Array|string} allowedUrls
- * @param {string} configuredUrls
- * @returns {boolean} true if the configuredUrl is valid
- */
-function isValidConfig(blockedIPs, allowedUrls, configuredUrl) {
-  if (blockedIPs.length === 0) {
-    if (!allowedUrls.includes(configuredUrl)) return false;
-  } else if (allowedUrls.length === 0) {
-    if (isBlockedURL(configuredUrl, blockedIPs)) return false;
-  } else {
-    if (isBlockedURL(configuredUrl, blockedIPs) || !allowedUrls.includes(configuredUrl))
-      return false;
-  }
-  return true;
-}
 
 export default new Datasource('graphite', {
   args: [

@@ -37,7 +37,7 @@ import fn from './graphite';
 const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
 You can always enable the default allowlist configuration.`;
 
-const INVALID_URL_MESSAGE = `The Graphite URL/IP provided by you is invalid. 
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
 Please update your config from OpenSearch Dashboards's Advanced Setting.`;
 
 jest.mock('node-fetch', () => (url) => {
@@ -102,7 +102,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with matched allowlist url should return result ', function () {
+  it('setting with matched allowlist url should return result', function () {
     return invoke(fn, [], {
       settings: {
         'timeline:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
@@ -114,7 +114,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with unmatched allowlist url should return error message ', function () {
+  it('setting with unmatched allowlist url should return error message', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
@@ -181,6 +181,30 @@ describe('graphite', function () {
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
       expect(e.message).to.includes('maximum redirect reached');
+    });
+  });
+
+  it('with both allowlist and blocklist, setting not in blocklist but in allowlist should return result', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timeline:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+      },
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).then((result) => {
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('with conflict allowlist and blocklist, setting in blocklist and in allowlist should return error message', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timeline:graphite.url': 'http://127.0.0.1',
+      },
+      allowedGraphiteUrls: ['http://127.0.0.1'],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
     });
   });
 });

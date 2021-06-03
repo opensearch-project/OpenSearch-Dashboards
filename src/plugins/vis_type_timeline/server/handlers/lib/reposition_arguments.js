@@ -36,6 +36,7 @@ import { i18n } from '@osd/i18n';
 // Applies to unresolved arguments in the AST
 export default function repositionArguments(functionDef, unorderedArgs) {
   const args = [];
+  console.log('functionDef', functionDef);
 
   _.each(unorderedArgs, function (unorderedArg, i) {
     let argDef;
@@ -65,7 +66,9 @@ export default function repositionArguments(functionDef, unorderedArgs) {
       }
       value = unorderedArg.value;
     } else {
+      console.log('functionDef', functionDef);
       argDef = functionDef.args[i];
+      console.log('functionDef', functionDef);
       storeAsArray = argDef.multi;
       targetIndex = i;
       value = unorderedArg;
