@@ -38,7 +38,7 @@ const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
 );
 export default () =>
   Joi.object({
-    elastic: Joi.object({
+    opensearch: Joi.object({
       apm: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
