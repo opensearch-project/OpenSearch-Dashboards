@@ -56,13 +56,12 @@ export function renderText(
       }
       ctx.translate(origin.x, origin.y);
       ctx.scale(scale, scale);
-      if (font.shadow) {
+      const shadowSize = font.shadowSize ?? 0;
+      if (font.shadow && shadowSize > 0) {
         ctx.lineJoin = 'round';
-        const prevLineWidth = ctx.lineWidth;
-        ctx.lineWidth = font.shadowSize || 1.5;
+        ctx.lineWidth = shadowSize;
         ctx.strokeStyle = font.shadow;
         ctx.strokeText(text, 0, 0);
-        ctx.lineWidth = prevLineWidth;
       }
       ctx.fillText(text, 0, 0);
     });

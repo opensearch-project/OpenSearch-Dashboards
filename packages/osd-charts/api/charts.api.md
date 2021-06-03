@@ -666,7 +666,7 @@ export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
     } | {
         textInvertible: boolean;
         textContrast?: number | boolean;
-        textBorder?: number | boolean;
+        textBorder?: number;
     };
     alignment?: {
         horizontal: Exclude<HorizontalAlignment, 'far' | 'near'>;

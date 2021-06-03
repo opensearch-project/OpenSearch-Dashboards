@@ -414,7 +414,7 @@ function getTextBorderSize(fill: ValueFillDefinition): number {
     return DEFAULT_BORDER_WIDTH;
   }
   if ('borderWidth' in fill) {
-    return Math.min(fill.borderWidth || DEFAULT_BORDER_WIDTH, MAX_BORDER_WIDTH);
+    return Math.min(fill.borderWidth ?? DEFAULT_BORDER_WIDTH, MAX_BORDER_WIDTH);
   }
   const borderWidth =
     'textBorder' in fill && typeof fill.textBorder === 'number' ? fill.textBorder : DEFAULT_BORDER_WIDTH;
