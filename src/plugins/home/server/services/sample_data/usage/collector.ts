@@ -33,7 +33,7 @@
 import { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { first } from 'rxjs/operators';
 import { fetchProvider, TelemetryResponse } from './collector_fetch';
-import { UsageCollectionSetup } from '../../../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../../../usage-collection/server';
 
 export async function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,

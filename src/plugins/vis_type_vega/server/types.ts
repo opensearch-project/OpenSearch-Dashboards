@@ -31,7 +31,7 @@
  */
 import { Observable } from 'rxjs';
 import { HomeServerPluginSetup } from '../../home/server';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { UsageCollectionSetup } from '../../usage-collection/server';
 
 export type ConfigObservable = Observable<{ opensearchDashboards: { index: string } }>;
 

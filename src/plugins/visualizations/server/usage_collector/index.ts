@@ -32,7 +32,7 @@
 
 import { Observable } from 'rxjs';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(

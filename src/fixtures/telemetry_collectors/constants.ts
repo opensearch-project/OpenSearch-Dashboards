@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../plugins/usage_collection/server';
+import { MakeSchemaFrom } from '../../plugins/usage-collection/server';
 
 export interface Usage {
   locale: string;

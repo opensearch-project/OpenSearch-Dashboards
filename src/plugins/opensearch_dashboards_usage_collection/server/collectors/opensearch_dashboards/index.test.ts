@@ -34,7 +34,7 @@ import { pluginInitializerContextConfigMock } from '../../../../../core/server/m
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage-collection/server/usage_collection.mock';
 
 import { registerOpenSearchDashboardsUsageCollector } from './';
 

@@ -40,7 +40,7 @@ import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../..
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
-import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage-collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 

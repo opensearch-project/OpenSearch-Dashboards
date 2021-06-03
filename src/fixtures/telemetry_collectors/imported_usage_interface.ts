@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { CollectorSet } from '../../plugins/usage-collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 import { Usage } from './constants';
 

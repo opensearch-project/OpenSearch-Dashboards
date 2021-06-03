@@ -24,7 +24,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 
     ```ts
     // server/plugin.ts
-    import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
     import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
     class Plugin {
@@ -40,7 +40,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 
     ```ts
     // server/collectors/register.ts
-    import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
     import { APICluster } from 'opensearch-dashboards/server';
 
     interface Usage {
@@ -92,7 +92,7 @@ Note: there will be many cases where you won't need to use the `callCluster` (or
 
 ```ts
 // server/plugin.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
 class Plugin {
@@ -110,7 +110,7 @@ class Plugin {
 
 ```ts
 // server/collectors/register.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 
 export function registerMyPluginUsageCollector(
   usageCollection?: UsageCollectionSetup

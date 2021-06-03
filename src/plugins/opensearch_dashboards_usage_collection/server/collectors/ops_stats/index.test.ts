@@ -34,7 +34,7 @@ import { Subject } from 'rxjs';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage-collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
 import { OpsMetrics } from '../../../../../core/server';

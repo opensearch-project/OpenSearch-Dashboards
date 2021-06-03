@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import {
   PluginInitializerContext,
   CoreSetup,

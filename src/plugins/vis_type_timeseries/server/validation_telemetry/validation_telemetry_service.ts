@@ -36,7 +36,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../usage-collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
 export interface ValidationTelemetryServiceSetup {

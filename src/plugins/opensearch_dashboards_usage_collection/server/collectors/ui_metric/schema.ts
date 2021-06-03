@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from 'src/plugins/usage-collection/server';
 import { UIMetricUsage } from './telemetry_ui_metric_collector';
 
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {

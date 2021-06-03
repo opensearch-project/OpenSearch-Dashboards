@@ -47,7 +47,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,

@@ -38,7 +38,7 @@ import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 import { createApi, createOpenSearchHostService } from './lib';
 
 export interface BootDependencies {

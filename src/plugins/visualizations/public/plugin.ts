@@ -79,7 +79,7 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../plugins/inspector/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 import {
   createStartServicesGetter,
   StartServicesGetter,

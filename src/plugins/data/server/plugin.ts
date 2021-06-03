@@ -39,7 +39,7 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { DqlTelemetryService } from './dql_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { UsageCollectionSetup } from '../../usage-collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';

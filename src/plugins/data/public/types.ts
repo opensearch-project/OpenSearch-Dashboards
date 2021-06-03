@@ -42,7 +42,7 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;

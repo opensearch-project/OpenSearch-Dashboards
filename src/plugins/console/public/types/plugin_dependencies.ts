@@ -31,7 +31,7 @@
  */
 import { HomePublicPluginSetup } from '../../../home/public';
 import { DevToolsSetup } from '../../../dev_tools/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;

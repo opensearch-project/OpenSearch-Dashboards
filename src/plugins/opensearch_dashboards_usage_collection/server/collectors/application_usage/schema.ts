@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from 'src/plugins/usage-collection/server';
 import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_collector';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {

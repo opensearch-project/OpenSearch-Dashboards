@@ -36,7 +36,7 @@ import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../usage-collection/public';
 
 export { ISearchStartSearchSource };
 

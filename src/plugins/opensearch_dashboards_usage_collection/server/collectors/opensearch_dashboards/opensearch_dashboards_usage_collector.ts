@@ -33,7 +33,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { OPENSEARCH_DASHBOARDS_STATS_TYPE } from '../../../common/constants';
 import {
   getSavedObjectsCounts,

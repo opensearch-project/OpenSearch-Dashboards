@@ -37,7 +37,7 @@ import {
   ILegacyClusterClient,
   IClusterClient,
 } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { OpenSearchClient } from '../../../../src/core/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 

@@ -53,7 +53,7 @@ import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { OPENSEARCH_SEARCH_STRATEGY, opensearchSearchStrategyProvider } from './opensearch_search';
 import { DataPluginStart } from '../plugin';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../usage-collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';

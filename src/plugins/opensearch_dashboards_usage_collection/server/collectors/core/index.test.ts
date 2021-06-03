@@ -33,7 +33,7 @@
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage-collection/server/usage_collection.mock';
 
 import { registerCoreUsageCollector } from '.';
 import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';

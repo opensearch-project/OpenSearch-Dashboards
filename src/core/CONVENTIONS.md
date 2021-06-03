@@ -283,11 +283,11 @@ export class Plugin {
 
 #### Usage Collection
 
-For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage-collection/README.md`.
 
 ```ts
 // server/collectors/register.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/opensearch';
 
 export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {

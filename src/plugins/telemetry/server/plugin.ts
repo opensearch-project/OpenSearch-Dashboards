@@ -32,7 +32,7 @@
 
 import { URL } from 'url';
 import { AsyncSubject, Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,

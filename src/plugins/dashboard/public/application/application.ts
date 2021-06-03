@@ -46,7 +46,7 @@ import {
   ScopedHistory,
   AppMountParameters,
 } from 'opensearch-dashboards/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/public';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';

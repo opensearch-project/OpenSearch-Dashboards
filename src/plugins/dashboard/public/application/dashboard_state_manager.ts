@@ -37,7 +37,7 @@ import { Moment } from 'moment';
 import { History } from 'history';
 
 import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 import { ViewMode } from '../embeddable_plugin';

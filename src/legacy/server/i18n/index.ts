@@ -34,7 +34,7 @@ import { i18n, i18nLoader } from '@osd/i18n';
 import { basename } from 'path';
 import { Server } from 'hapi';
 import { fromRoot } from '../../../core/server/utils';
-import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '../../../plugins/usage-collection/server';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
 import OsdServer, { OpenSearchDashboardsConfig } from '../osd_server';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 import { Subject, Observable } from 'rxjs';
 import {
   PluginInitializerContext,

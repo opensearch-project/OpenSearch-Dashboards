@@ -53,7 +53,7 @@ import { ConfigSchema } from '../config';
 import { setServices } from './application/opensearch_dashboards_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';

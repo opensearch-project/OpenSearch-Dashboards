@@ -10,9 +10,9 @@ This document outlines best practices and patterns for testing OpenSearch Dashbo
       - [Example](#example)
   - [Strategies for specific Core APIs](#strategies-for-specific-core-apis)
     - [HTTP Routes](#http-routes)
-      - [Preconditions](#preconditions)
+        - [Preconditions](#preconditions)
       - [Unit testing](#unit-testing)
-        - [Example](#example-1)
+          - [Example](#example-1)
       - [Integration tests](#integration-tests)
         - [Functional Test Runner](#functional-test-runner)
           - [Example](#example-2)
@@ -349,10 +349,10 @@ Cons:
 
 ###### Example
 
-To have access to OpenSearch Dashboards TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
+To have access to OpenSearch Dashboards TestUtils, you should create `integration-tests` folder and import `test-utils` within a test file:
 
 ```typescript
-// src/plugins/my_plugin/server/integration_tests/formatter.test.ts
+// src/plugins/my-plugin/server/integration-tests/formatter.test.ts
 import * as osdTestServer from 'src/core/test_helpers/osd_server';
 
 describe('myPlugin', () => {
@@ -853,7 +853,7 @@ data.
 // src/plugins/myplugin/public/plugin.ts
 import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UsageCollectionSetup } from '../../usage-collection/public';
 import { SuggestionsService } from './suggestions';
 
 interface MyPluginSetupDeps {
@@ -1094,7 +1094,7 @@ Then we should test that when optional dependency is properly used when present:
 // src/plugins/myplugin/public/plugin.test.ts
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+import { usageCollectionPluginMock } from '../../usage-collection/public/mocks';
 
 import { MyPlugin } from './plugin';
 

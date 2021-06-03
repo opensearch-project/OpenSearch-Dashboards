@@ -31,7 +31,7 @@
  */
 
 import { PluginInitializerContext } from 'opensearch-dashboards/server';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { UsageCollectionSetup } from '../../../../usage-collection/server';
 import { fetchProvider } from './fetch';
 
 export interface Usage {

@@ -35,7 +35,7 @@ import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
 import { Observable } from 'rxjs';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage-collection/server';
 
 import { take } from 'rxjs/operators';
 import { TelemetryConfigType } from '../../config';
