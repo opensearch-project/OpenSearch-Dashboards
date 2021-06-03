@@ -44,19 +44,19 @@ export function createSavedSheetClass(
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSheet extends SavedObjectClass {
-    static type = 'timeline-sheet';
+    static type = 'timelion-sheet';
 
     // if type:sheet has no mapping, we push this mapping into OpenSearch
     static mapping = {
       title: 'text',
       hits: 'integer',
       description: 'text',
-      timeline_sheet: 'text',
-      timeline_interval: 'keyword',
-      timeline_other_interval: 'keyword',
-      timeline_chart_height: 'integer',
-      timeline_columns: 'integer',
-      timeline_rows: 'integer',
+      timelion_sheet: 'text',
+      timelion_interval: 'keyword',
+      timelion_other_interval: 'keyword',
+      timelion_chart_height: 'integer',
+      timelion_columns: 'integer',
+      timelion_rows: 'integer',
       version: 'integer',
     };
 
@@ -77,11 +77,11 @@ export function createSavedSheetClass(
           title: 'New Timeline Sheet',
           hits: 0,
           description: '',
-          timeline_sheet: ['.opensearch(*)'],
-          timeline_interval: 'auto',
-          timeline_chart_height: 275,
-          timeline_columns: config.get('timeline:default_columns') || 2,
-          timeline_rows: config.get('timeline:default_rows') || 2,
+          timelion_sheet: ['.es(*)'],
+          timelion_interval: 'auto',
+          timelion_chart_height: 275,
+          timelion_columns: config.get('timeline:default_columns') || 2,
+          timelion_rows: config.get('timeline:default_rows') || 2,
           version: 1,
         },
       });

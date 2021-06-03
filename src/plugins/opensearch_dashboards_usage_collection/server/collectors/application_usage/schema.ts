@@ -71,6 +71,6 @@ export const applicationUsageSchema = {
   opensearch_dashboards: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  timeline: commonSchema,
+  timelion: commonSchema,
   visualize: commonSchema,
 };

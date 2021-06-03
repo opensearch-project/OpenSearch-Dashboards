@@ -43,7 +43,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 const TimelineOptions = lazy(() => import('./timeline_options'));
 
-export const TIMELINE_VIS_NAME = 'timeline';
+export const TIMELINE_VIS_NAME = 'timelion';
 
 export function getTimelineVisDefinition(dependencies: TimelineVisDependencies) {
   const timelineRequestHandler = getTimelineRequestHandler(dependencies);
@@ -59,7 +59,7 @@ export function getTimelineVisDefinition(dependencies: TimelineVisDependencies) 
     }),
     visConfig: {
       defaults: {
-        expression: '.opensearch(*)',
+        expression: '.es(*)',
         interval: 'auto',
       },
     },

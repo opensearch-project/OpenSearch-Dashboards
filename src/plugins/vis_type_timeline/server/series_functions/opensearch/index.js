@@ -37,7 +37,7 @@ import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
-export default new Datasource('opensearch', {
+export default new Datasource('es', {
   args: [
     {
       name: 'q',
@@ -110,13 +110,13 @@ export default new Datasource('opensearch', {
   help: i18n.translate('timeline.help.functions.opensearchHelpText', {
     defaultMessage: 'Pull data from an opensearch instance',
   }),
-  aliases: ['opensearch'],
+  aliases: ['es'],
   fn: async function opensearchFn(args, tlConfig) {
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
       metric: ['count'],
-      index: tlConfig.settings['timeline:opensearch.default_index'],
-      timefield: tlConfig.settings['timeline:opensearch.timefield'],
+      index: tlConfig.settings['timeline:es.default_index'],
+      timefield: tlConfig.settings['timeline:es.timefield'],
       interval: tlConfig.time.interval,
       opensearchDashboards: true,
       fit: 'nearest',

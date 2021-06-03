@@ -48,7 +48,7 @@ const TYPES = [
   'search',
   'index-pattern',
   'graph-workspace',
-  'timeline-sheet',
+  'timelion-sheet',
 ];
 
 export interface OpenSearchDashboardsSavedObjectCounts {
@@ -57,7 +57,7 @@ export interface OpenSearchDashboardsSavedObjectCounts {
   search: { total: number };
   index_pattern: { total: number };
   graph_workspace: { total: number };
-  timeline_sheet: { total: number };
+  timelion_sheet: { total: number };
 }
 
 export async function getSavedObjectsCounts(

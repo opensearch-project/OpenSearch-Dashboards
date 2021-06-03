@@ -66,7 +66,7 @@ export function runRoute(
           sheet: schema.arrayOf(schema.string()),
           extended: schema.maybe(
             schema.object({
-              opensearch: schema.object({
+              es: schema.object({
                 filter: schema.object({
                   bool: schema.object({
                     filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),

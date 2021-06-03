@@ -66,7 +66,7 @@ describe('telemetry_opensearch_dashboards', () => {
       search: { total: 0 },
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
-      timeline_sheet: { total: 0 },
+      timelion_sheet: { total: 0 },
     });
   });
 
@@ -78,7 +78,7 @@ describe('telemetry_opensearch_dashboards', () => {
       search: { total: 0 },
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
-      timeline_sheet: { total: 0 },
+      timelion_sheet: { total: 0 },
     };
 
     expect(collector.formatForBulkUpload!(resultFromFetch)).toStrictEqual({
