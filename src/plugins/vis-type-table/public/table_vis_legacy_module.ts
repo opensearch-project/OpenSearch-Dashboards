@@ -35,13 +35,13 @@ import { IModule } from 'angular';
 // @ts-ignore
 import { TableVisController } from './table_vis_controller.js';
 // @ts-ignore
-import { OsdAggTable } from './agg_table/agg_table';
+import { OsdAggTable } from './agg-table/agg_table';
 // @ts-ignore
-import { OsdAggTableGroup } from './agg_table/agg_table_group';
+import { OsdAggTableGroup } from './agg-table/agg_table_group';
 // @ts-ignore
-import { OsdRows } from './paginated_table/rows';
+import { OsdRows } from './paginated-table/rows';
 // @ts-ignore
-import { PaginatedTable } from './paginated_table/paginated_table';
+import { PaginatedTable } from './paginated-table/paginated_table';
 
 /** @internal */
 export const initTableVisLegacyModule = (angularIns: IModule): void => {
