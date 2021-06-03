@@ -20,6 +20,7 @@
 import { $Values } from 'utility-types';
 
 import { ChartType } from '../chart_types';
+import { BOTTOM, CENTER, LEFT, MIDDLE, RIGHT, TOP } from '../common/constants';
 import { Position } from '../utils/common';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { SettingsSpec } from './settings';
@@ -107,6 +108,21 @@ export const BrushAxis = Object.freeze({
 /** @public */
 export type BrushAxis = $Values<typeof BrushAxis>;
 
+/**
+ * The position to stick the tooltip to
+ * @public
+ */
+export const TooltipStickTo = Object.freeze({
+  Top: TOP,
+  Bottom: BOTTOM,
+  Middle: MIDDLE,
+  Left: LEFT,
+  Right: RIGHT,
+  Center: CENTER,
+  MousePosition: 'MousePosition' as const,
+});
+/** @public */
+export type TooltipStickTo = $Values<typeof TooltipStickTo>;
 /**
  * Default value for the tooltip type
  * @defaultValue `vertical` {@link (TooltipType:type) | TooltipType.VerticalCursor}

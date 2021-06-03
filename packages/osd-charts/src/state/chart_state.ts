@@ -28,7 +28,8 @@ import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
 import { CategoryKey } from '../common/category';
 import { LegendItem, LegendItemExtraValues } from '../common/legend';
 import { SeriesIdentifier, SeriesKey } from '../common/series_id';
-import { TooltipAnchorPosition, TooltipInfo } from '../components/tooltip/types';
+import { AnchorPosition } from '../components/portal/types';
+import { TooltipInfo } from '../components/tooltip/types';
 import { DEFAULT_SETTINGS_SPEC, PointerEvent, Spec } from '../specs';
 import { Color, keepDistinct } from '../utils/common';
 import { Dimensions } from '../utils/dimensions';
@@ -122,7 +123,7 @@ export interface InternalChartState {
    * Get the tooltip anchor position
    * @param globalState
    */
-  getTooltipAnchor(globalState: GlobalChartState): TooltipAnchorPosition | null;
+  getTooltipAnchor(globalState: GlobalChartState): AnchorPosition | null;
 
   /**
    * Called on every state change to activate any event callback

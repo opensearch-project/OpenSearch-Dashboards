@@ -76,8 +76,10 @@ export interface AnnotationTooltipState {
   annotationType: AnnotationType;
   datum: LineAnnotationDatum | RectAnnotationDatum;
   anchor: {
-    top: number;
-    left: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
   };
   customTooltipDetails?: AnnotationTooltipFormatter;
   customTooltip?: CustomAnnotationTooltip;

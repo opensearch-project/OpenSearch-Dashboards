@@ -312,10 +312,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -330,10 +330,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -348,10 +348,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 40,
-          x2: 40,
-          y1: 0,
-          y2: 100,
+          x: 40,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -366,10 +366,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 90,
-          x2: 90,
-          y1: 0,
-          y2: 100,
+          x: 90,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -401,10 +401,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -419,10 +419,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -437,10 +437,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -455,10 +455,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 60,
-          x2: 60,
-          y1: 0,
-          y2: 100,
+          x: 60,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -473,10 +473,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -510,10 +510,10 @@ describe('Crosshair utils linear scale', () => {
         );
 
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -528,10 +528,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -546,10 +546,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 80,
-          x2: 80,
-          y1: 0,
-          y2: 100,
+          x: 80,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -564,10 +564,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 30,
-          x2: 30,
-          y1: 0,
-          y2: 100,
+          x: 30,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -600,10 +600,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -618,10 +618,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -636,10 +636,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 120,
-          x2: 120,
-          y1: 0,
-          y2: 100,
+          x: 120,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -654,10 +654,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 60,
-          x2: 60,
-          y1: 0,
-          y2: 100,
+          x: 60,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -672,10 +672,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 0,
-          y1: 0,
-          y2: 100,
+          x: 0,
+          width: 0,
+          y: 0,
+          height: 100,
         });
       });
 
@@ -708,10 +708,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -726,10 +726,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 45,
-          y2: 45,
+          x: 0,
+          width: 120,
+          y: 45,
+          height: 0,
         });
       });
 
@@ -744,10 +744,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -762,10 +762,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -798,10 +798,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -816,10 +816,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 60,
-          y2: 60,
+          x: 0,
+          width: 120,
+          y: 60,
+          height: 0,
         });
       });
 
@@ -834,10 +834,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -852,10 +852,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -870,10 +870,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 0,
-          y2: 0,
+          x: 0,
+          width: 120,
+          y: 0,
+          height: 0,
         });
       });
 
@@ -906,10 +906,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -924,10 +924,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 55,
-          y2: 55,
+          x: 0,
+          width: 120,
+          y: 55,
+          height: 0,
         });
       });
 
@@ -942,10 +942,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -960,10 +960,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -996,10 +996,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -1014,10 +1014,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 40,
-          y2: 40,
+          x: 0,
+          width: 120,
+          y: 40,
+          height: 0,
         });
       });
 
@@ -1032,10 +1032,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -1050,10 +1050,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 
@@ -1068,10 +1068,10 @@ describe('Crosshair utils linear scale', () => {
           0,
         );
         expect(bandPosition).toEqual({
-          x1: 0,
-          x2: 120,
-          y1: 100,
-          y2: 100,
+          x: 0,
+          width: 120,
+          y: 100,
+          height: 0,
         });
       });
 

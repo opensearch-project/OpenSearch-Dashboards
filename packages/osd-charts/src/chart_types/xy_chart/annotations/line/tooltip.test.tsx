@@ -173,8 +173,10 @@ describe('Annotation tooltips', () => {
       isVisible: true,
       annotationType: AnnotationType.Rectangle,
       anchor: {
-        left: 18,
-        top: 9,
+        x: 18,
+        y: 9,
+        width: 0,
+        height: 0,
       },
     });
     annotationRectangle.hideTooltips = true;

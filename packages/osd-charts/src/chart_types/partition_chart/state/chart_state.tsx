@@ -106,8 +106,10 @@ export class PartitionState implements InternalChartState {
     const { position } = state.interactions.pointer.current;
     return {
       isRotated: false,
-      x1: position.x,
-      y1: position.y,
+      x: position.x,
+      width: 0,
+      y: position.y,
+      height: 0,
     };
   }
 

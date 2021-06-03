@@ -89,7 +89,7 @@ interface ReactiveChartDispatchProps {
   onChartRendered: typeof onChartRendered;
 }
 interface ReactiveChartOwnProps {
-  forwardStageRef: RefObject<HTMLCanvasElement>;
+  forwardCanvasRef: RefObject<HTMLCanvasElement>;
 }
 const CLIPPING_MARGINS = 0.5;
 
@@ -148,14 +148,14 @@ class XYChartComponent extends React.Component<XYChartProps> {
   }
 
   private tryCanvasContext() {
-    const canvas = this.props.forwardStageRef.current;
+    const canvas = this.props.forwardCanvasRef.current;
     this.ctx = canvas && canvas.getContext('2d');
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   render() {
     const {
-      forwardStageRef,
+      forwardCanvasRef,
       initialized,
       isChartEmpty,
       chartContainerDimensions: { width, height },
@@ -170,7 +170,7 @@ class XYChartComponent extends React.Component<XYChartProps> {
     return (
       <figure aria-labelledby={a11ySettings.labelId} aria-describedby={a11ySettings.descriptionId}>
         <canvas
-          ref={forwardStageRef}
+          ref={forwardCanvasRef}
           className="echCanvasRenderer"
           width={width * this.devicePixelRatio}
           height={height * this.devicePixelRatio}

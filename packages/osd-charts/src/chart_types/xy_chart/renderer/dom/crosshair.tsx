@@ -37,7 +37,7 @@ import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_
 interface CrosshairProps {
   theme: Theme;
   chartRotation: Rotation;
-  cursorPosition?: (Line | Rect) & { isLine?: boolean };
+  cursorPosition?: Rect;
   cursorCrossLinePosition?: Line;
   tooltipType: TooltipType;
   fromExternalEvent?: boolean;
@@ -69,31 +69,20 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
     if (!cursorPosition || !canRenderBand(tooltipType, band.visible, fromExternalEvent)) {
       return null;
     }
-    if ('x1' in cursorPosition) {
-      const { x1, x2, y1, y2 } = cursorPosition;
-      const { strokeWidth, stroke, dash } = line;
-      const strokeDasharray = (dash ?? []).join(' ');
-      return (
-        <svg
-          className="echCrosshair__cursor"
-          width="100%"
-          height="100%"
-          style={{ zIndex: cursorPosition && 'x1' in cursorPosition ? zIndex : undefined }}
-        >
-          <line {...{ x1, x2, y1, y2, strokeWidth, stroke, strokeDasharray }} />
-        </svg>
-      );
-    }
     const { x, y, width, height } = cursorPosition;
+    const isLine = width === 0 || height === 0;
+    const { strokeWidth, stroke, dash } = line;
     const { fill } = band;
+    const strokeDasharray = (dash ?? []).join(' ');
     return (
       <svg
         className="echCrosshair__cursor"
         width="100%"
         height="100%"
-        style={{ zIndex: cursorPosition && 'x1' in cursorPosition ? zIndex : undefined }}
+        style={{ zIndex: cursorPosition && isLine ? zIndex : undefined }}
       >
-        <rect {...{ x, y, width, height, fill }} />;
+        {isLine && <line {...{ x1: x, x2: x + width, y1: y, y2: y + height, strokeWidth, stroke, strokeDasharray }} />}
+        {!isLine && <rect {...{ x, y, width, height, fill }} />}
       </svg>
     );
   }

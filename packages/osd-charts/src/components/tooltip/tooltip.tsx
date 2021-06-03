@@ -38,7 +38,7 @@ import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_too
 import { Rotation, isDefined } from '../../utils/common';
 import { TooltipPortal, TooltipPortalSettings, AnchorPosition, Placement } from '../portal';
 import { getTooltipSettings } from './get_tooltip_settings';
-import { TooltipInfo, TooltipAnchorPosition } from './types';
+import { TooltipInfo } from './types';
 
 interface TooltipDispatchProps {
   onPointerMove: typeof onPointerMoveAction;
@@ -47,7 +47,7 @@ interface TooltipDispatchProps {
 interface TooltipStateProps {
   zIndex: number;
   visible: boolean;
-  position: TooltipAnchorPosition | null;
+  position: AnchorPosition | null;
   info?: TooltipInfo;
   headerFormatter?: TooltipValueFormatter;
   settings?: TooltipSettings;
@@ -169,22 +169,6 @@ const TooltipComponent = ({
     );
   };
 
-  const anchorPosition = useMemo((): AnchorPosition | null => {
-    if (!position || !visible) {
-      return null;
-    }
-
-    const { x0, x1, y0, y1 } = position;
-    const width = x0 !== undefined ? x1 - x0 : 0;
-    const height = y0 !== undefined ? y1 - y0 : 0;
-    return {
-      left: x1 - width,
-      width,
-      top: y1 - height,
-      height,
-    };
-  }, [visible, position?.x0, position?.x1, position?.y0, position?.y1]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const popperSettings = useMemo((): TooltipPortalSettings | undefined => {
     if (!settings || typeof settings === 'string') {
       return;
@@ -213,7 +197,7 @@ const TooltipComponent = ({
       // increasing by 100 the tooltip portal zIndex to avoid conflicts with highlighters and other elements in the DOM
       zIndex={zIndex + 100}
       anchor={{
-        position: anchorPosition,
+        position,
         ref: chartRef.current,
       }}
       settings={popperSettings}

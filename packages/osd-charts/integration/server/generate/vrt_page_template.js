@@ -48,7 +48,7 @@ ReactDOM.render(<VRTPage />, document.getElementById('story-root') as HTMLElemen
 `.trim();
 }
 
-function pageTemplate(imports, routes) {
+function pageTemplate(imports, routes, urls) {
   return `
 import React, { Suspense } from 'react';
 
@@ -57,7 +57,16 @@ ${imports.join('\n')}
 export function VRTPage() {
   const path = new URL(window.location.toString()).searchParams.get('path');
   if(!path) {
-    return <h1>missing url path</h1>;
+    return (<>
+    <h1>missing url path</h1>
+      <ul>
+      ${urls
+        .map((url) => {
+          return `<li><a href="?path=${url}">${url.slice(7)}</a></li>`;
+        })
+        .join('\n')}
+      </ul>
+    </>);
   }
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -74,16 +83,17 @@ function compileVRTPage(examples) {
     acc.push(...exampleFiles);
     return acc;
   }, []);
-  const { imports, routes } = flatExamples.reduce(
+  const { imports, routes, urls } = flatExamples.reduce(
     (acc, { filePath, url }, index) => {
       acc.imports.push(compileImportTemplate(index, filePath));
       acc.routes.push(compileRouteTemplate(index, url));
+      acc.urls.push(url);
       return acc;
     },
-    { imports: [], routes: [] },
+    { imports: [], routes: [], urls: [] },
   );
 
-  fs.writeFileSync(path.join('integration', 'tmp', 'vrt_page.tsx'), pageTemplate(imports, routes));
+  fs.writeFileSync(path.join('integration', 'tmp', 'vrt_page.tsx'), pageTemplate(imports, routes, urls));
   fs.writeFileSync(path.join('integration', 'tmp', 'index.tsx'), indexTemplate());
 }
 

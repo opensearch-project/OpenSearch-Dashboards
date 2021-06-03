@@ -21,7 +21,7 @@ import { MockGlobalSpec } from '../../../mocks/specs';
 import { Position, Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationDomainType } from '../utils/specs';
-import { getAnnotationAxis, getTransformedCursor, invertTranformedCursor } from './utils';
+import { getAnnotationAxis, getTransformedCursor, invertTransformedCursor } from './utils';
 
 describe('Annotation utils', () => {
   const groupId = 'foo-group';
@@ -74,7 +74,7 @@ describe('Annotation utils', () => {
     };
     it.each<Rotation>([0, 90, -90, 180])('Should invert rotated cursor - rotation %d', (rotation) => {
       expect(
-        invertTranformedCursor(
+        invertTransformedCursor(
           getTransformedCursor(cursorPosition, chartDimensions, rotation),
           chartDimensions,
           rotation,
@@ -84,7 +84,7 @@ describe('Annotation utils', () => {
 
     it.each<Rotation>([0, 90, -90, 180])('Should invert rotated projected cursor - rotation %d', (rotation) => {
       expect(
-        invertTranformedCursor(
+        invertTransformedCursor(
           getTransformedCursor(cursorPosition, chartDimensions, rotation, true),
           chartDimensions,
           rotation,

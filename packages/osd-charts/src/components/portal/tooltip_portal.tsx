@@ -199,9 +199,8 @@ const TooltipPortalComponent = ({
       return;
     }
 
-    const { left, top, width, height } = position;
-    anchorNode.current.style.left = `${left}px`;
-    anchorNode.current.style.top = `${top}px`;
+    const { x, y, width, height } = position;
+    anchorNode.current.style.transform = `translate(${x}px, ${y}px)`;
 
     if (isDefined(width)) {
       anchorNode.current.style.width = `${width}px`;
@@ -211,7 +210,7 @@ const TooltipPortalComponent = ({
       anchorNode.current.style.height = `${height}px`;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, anchorNode, position?.left, position?.top, position?.width, position?.height]);
+  }, [visible, anchorNode, position?.x, position?.y, position?.width, position?.height]);
 
   useEffect(() => {
     if (!position) {

@@ -22,7 +22,7 @@ import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
-import { getChartRotationKnob } from '../utils/knobs';
+import { getChartRotationKnob, getPositionKnob } from '../utils/knobs';
 
 const dataGen = new SeededDataGenerator();
 function generateDataWithAdditional(num: number) {
@@ -85,7 +85,14 @@ export const Example = () => {
   const stackAccessors = isStackedSeries ? ['x'] : undefined;
   return (
     <Chart renderer="canvas" className="story-chart">
-      <Settings theme={theme} debug={debug} rotation={getChartRotationKnob()} showLegend showLegendExtra />
+      <Settings
+        theme={theme}
+        debug={debug}
+        rotation={getChartRotationKnob()}
+        showLegend
+        showLegendExtra
+        legendPosition={getPositionKnob('legend')}
+      />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
       <BarSeries

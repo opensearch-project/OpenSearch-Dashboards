@@ -2020,11 +2020,25 @@ export type TooltipProps = TooltipPortalSettings<'chart'> & {
     headerFormatter?: TooltipValueFormatter;
     unit?: string;
     customTooltip?: CustomTooltip;
-    stickTo?: Position;
+    stickTo?: TooltipStickTo;
 };
 
 // @public
 export type TooltipSettings = TooltipType | TooltipProps;
+
+// @public
+export const TooltipStickTo: Readonly<{
+    Top: "top";
+    Bottom: "bottom";
+    Middle: "middle";
+    Left: "left";
+    Right: "right";
+    Center: "center";
+    MousePosition: "MousePosition";
+}>;
+
+// @public (undocumented)
+export type TooltipStickTo = $Values<typeof TooltipStickTo>;
 
 // @public
 export const TooltipType: Readonly<{

@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { TooltipAnchorPosition } from '../../../components/tooltip/types';
+import { AnchorPosition } from '../../../components/portal/types';
 import { Line, Rect } from '../../../geoms/types';
 import { Scale } from '../../../scales';
 import { isContinuousScale } from '../../../scales/types';
-import { TooltipProps } from '../../../specs/settings';
-import { Position, Rotation } from '../../../utils/common';
+import { TooltipStickTo } from '../../../specs/constants';
+import { Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';
-import { ChartDimensions } from '../utils/dimensions';
 
 /** @internal */
 export const DEFAULT_SNAP_POSITION_BAND = 1;
@@ -100,7 +99,7 @@ export function getCursorBandPosition(
   snapEnabled: boolean,
   xScale: Scale,
   totalBarsInCluster?: number,
-): Line | Rect | undefined {
+): Rect | undefined {
   const { top, left, width, height } = panel;
   const { x, y } = cursorPosition;
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
@@ -133,10 +132,10 @@ export function getCursorBandPosition(
     }
     if (isLineOrAreaOnly && isContinuousScale(xScale)) {
       return {
-        x1: leftPosition,
-        x2: leftPosition,
-        y1: top,
-        y2: top + height,
+        x: leftPosition,
+        width: 0,
+        y: top,
+        height,
       };
     }
     return {
@@ -157,10 +156,10 @@ export function getCursorBandPosition(
   }
   if (isLineOrAreaOnly && isContinuousScale(xScale)) {
     return {
-      x1: left,
-      x2: left + width,
-      y1: topPosition,
-      y2: topPosition,
+      x: left,
+      width,
+      y: topPosition,
+      height: 0,
     };
   }
   return {
@@ -173,84 +172,43 @@ export function getCursorBandPosition(
 
 /** @internal */
 export function getTooltipAnchorPosition(
-  { offset }: ChartDimensions,
   chartRotation: Rotation,
-  cursorBandPosition: Line | Rect,
+  cursorBandPosition: Rect,
   cursorPosition: { x: number; y: number },
   panel: Dimensions,
-  stickTo?: TooltipProps['stickTo'],
-): TooltipAnchorPosition {
+  stickTo: TooltipStickTo = TooltipStickTo.MousePosition,
+): AnchorPosition {
+  const { x, y, width, height } = cursorBandPosition;
   const isRotated = isVerticalRotation(chartRotation);
-  const hPosition = getHorizontalTooltipPosition(
-    cursorPosition.x,
-    cursorBandPosition,
-    panel,
-    offset.left,
-    isRotated,
-    stickTo,
-  );
-  const vPosition = getVerticalTooltipPosition(
-    cursorPosition.y,
-    cursorBandPosition,
-    panel,
-    offset.top,
-    isRotated,
-    stickTo,
-  );
-  return {
-    isRotated,
-    ...vPosition,
-    ...hPosition,
-  };
-}
-
-function getHorizontalTooltipPosition(
-  cursorXPosition: number,
-  cursorBandPosition: Line | Rect,
-  panel: Dimensions,
-  globalOffset: number,
-  isRotated: boolean,
-  stickTo?: TooltipProps['stickTo'],
-): { x0?: number; x1: number } {
+  // horizontal movement of cursor
   if (!isRotated) {
-    const left = 'x1' in cursorBandPosition ? cursorBandPosition.x1 : cursorBandPosition.x;
-    const width = 'width' in cursorBandPosition ? cursorBandPosition.width : 0;
+    const stickY =
+      stickTo === TooltipStickTo.MousePosition
+        ? cursorPosition.y + panel.top
+        : stickTo === TooltipStickTo.Middle
+        ? y + height / 2
+        : stickTo === TooltipStickTo.Bottom
+        ? y + height
+        : y; // TooltipStickTo.Top is also ok with that value
     return {
-      x0: left + globalOffset,
-      x1: left + width + globalOffset,
+      x,
+      width,
+      y: stickY,
+      height: 0,
     };
   }
-  const x = stickTo === Position.Left ? 0 : stickTo === Position.Right ? panel.width : cursorXPosition;
+  const stickX =
+    stickTo === TooltipStickTo.MousePosition
+      ? cursorPosition.x + panel.left
+      : stickTo === TooltipStickTo.Right
+      ? x + width
+      : stickTo === TooltipStickTo.Center
+      ? x + width / 2
+      : x; // TooltipStickTo.Left
   return {
-    // NOTE: x0 set to zero blocks tooltip placement on left when rotated 90 deg
-    // Delete this comment before merging and verifying this doesn't break anything.
-    x1: panel.left + x + globalOffset,
-  };
-}
-
-function getVerticalTooltipPosition(
-  cursorYPosition: number,
-  cursorBandPosition: Line | Rect,
-  panel: Dimensions,
-  globalOffset: number,
-  isRotated: boolean,
-  stickTo?: TooltipProps['stickTo'],
-): {
-  y0: number;
-  y1: number;
-} {
-  const y = stickTo === Position.Top ? 0 : stickTo === Position.Bottom ? panel.height : cursorYPosition;
-  if (!isRotated) {
-    const yPos = y + panel.top + globalOffset;
-    return {
-      y0: yPos,
-      y1: yPos,
-    };
-  }
-  const top = 'y1' in cursorBandPosition ? cursorBandPosition.y1 : cursorBandPosition.y;
-  const height = 'height' in cursorBandPosition ? cursorBandPosition.height : 0;
-  return {
-    y0: top + globalOffset,
-    y1: height + top + globalOffset,
+    x: stickX,
+    width: 0,
+    y,
+    height,
   };
 }

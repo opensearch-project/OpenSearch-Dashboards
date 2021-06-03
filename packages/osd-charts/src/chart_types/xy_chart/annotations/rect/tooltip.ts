@@ -53,8 +53,10 @@ export function getRectAnnotationTooltipState(
         isVisible: true,
         annotationType: AnnotationType.Rectangle,
         anchor: {
-          left: cursorPosition.x,
-          top: cursorPosition.y,
+          x: cursorPosition.x,
+          y: cursorPosition.y,
+          width: 0,
+          height: 0,
         },
         datum,
       };

@@ -86,7 +86,7 @@ export function getTransformedCursor(
 }
 
 /** @internal */
-export function invertTranformedCursor(
+export function invertTransformedCursor(
   cursorPosition: Point,
   chartDimensions: Dimensions,
   chartRotation: Rotation | null,

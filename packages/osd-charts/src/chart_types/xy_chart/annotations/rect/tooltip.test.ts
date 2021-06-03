@@ -46,8 +46,10 @@ describe('Rect annotation tooltip', () => {
       isVisible: true,
       annotationType: AnnotationType.Rectangle,
       anchor: {
-        top: cursorPosition.y,
-        left: cursorPosition.x,
+        x: cursorPosition.x,
+        y: cursorPosition.y,
+        width: 0,
+        height: 0,
       },
       datum: { coordinates: { x0: 0, x1: 10, y0: 0, y1: 10 } },
     };

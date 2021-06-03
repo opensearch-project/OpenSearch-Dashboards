@@ -50,12 +50,24 @@ export const Placement = Object.freeze({
 export type Placement = $Values<typeof Placement>;
 
 /** @internal */
-export interface AnchorPosition {
-  left: number;
-  top: number;
-  width?: number;
-  height?: number;
-}
+export type AnchorPosition = {
+  /**
+   * the right position of anchor
+   */
+  x: number;
+  /**
+   * the top position of the anchor
+   */
+  y: number;
+  /**
+   * the width of the anchor
+   */
+  width: number;
+  /**
+   * the height of the anchor
+   */
+  height: number;
+};
 
 /**
  * Used to position tooltip relative to invisible anchor via ref element
@@ -111,6 +123,7 @@ export interface TooltipPortalSettings<B = never> {
   boundaryPadding?: Partial<Padding> | number;
   /**
    * Custom tooltip offset
+   * @defaultValue 10
    */
   offset?: number;
 }

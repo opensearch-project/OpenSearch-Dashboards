@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
@@ -27,6 +27,7 @@ import {
   getChartRotationKnob,
   getFallbackPlacementsKnob,
   getPlacementKnob,
+  getStickToKnob,
   getTooltipTypeKnob,
 } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
@@ -47,11 +48,13 @@ const CustomTooltip = () => (
 export const Example = () => {
   const rotation = getChartRotationKnob();
   const tooltipOptions = {
+    stickTo: getStickToKnob('stickTo'),
     placement: getPlacementKnob('Tooltip placement'),
     fallbackPlacements: getFallbackPlacementsKnob(),
     type: getTooltipTypeKnob(),
     boundary: getBoundaryKnob(),
     customTooltip: boolean('Custom Tooltip', false) ? CustomTooltip : undefined,
+    offset: number('Tooltip offset', 10, { min: 0, max: 20, range: true, step: 1 }),
   };
   const showAxes = boolean('Show axes', false);
   const showLegend = boolean('Show Legend', false);

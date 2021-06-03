@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { Line, Rect } from '../../../../geoms/types';
+import { Rect } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
 import { GlobalChartState } from '../../../../state/chart_state';
@@ -93,7 +93,7 @@ function getCursorBand(
   isTooltipSnapEnabled: boolean,
   geometriesIndexKeys: (string | number)[],
   smallMultipleScales: SmallMultipleScales,
-): ((Line | Rect) & { fromExternalEvent: boolean }) | undefined {
+): (Rect & { fromExternalEvent: boolean }) | undefined {
   if (!xScale) {
     return;
   }

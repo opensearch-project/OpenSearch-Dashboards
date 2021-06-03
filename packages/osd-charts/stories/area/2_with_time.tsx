@@ -23,7 +23,7 @@ import React from 'react';
 import { AreaSeries, Axis, Chart, Placement, Position, ScaleType, Settings, timeFormatter } from '../../src';
 import { isDefined } from '../../src/utils/common';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
-import { getPlacementKnob, getPositionKnob } from '../utils/knobs';
+import { getChartRotationKnob, getPlacementKnob, getStickToKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dateFormatter = timeFormatter('HH:mm');
@@ -32,12 +32,12 @@ export const Example = () => (
   <Chart className="story-chart">
     <Settings
       tooltip={{
-        stickTo: getPositionKnob('stickTo', Position.Top),
-        placement: getPlacementKnob('placement', Placement.RightEnd),
+        stickTo: getStickToKnob('stickTo'),
+        placement: getPlacementKnob('placement', undefined),
         fallbackPlacements: [getPlacementKnob('fallback placement', Placement.LeftStart)].filter(isDefined),
         offset: number('placement offset', 5),
       }}
-      rotation={0}
+      rotation={getChartRotationKnob()}
     />
     <Axis
       id="bottom"
@@ -53,7 +53,7 @@ export const Example = () => (
       tickFormat={(d) => Number(d).toFixed(2)}
     />
     <AreaSeries
-      id="area"
+      id="area1"
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={0}

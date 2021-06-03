@@ -172,7 +172,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
     return (
       <Provider store={this.chartStore}>
-        <div className={chartClassNames} style={containerSizeStyle} ref={this.chartContainerRef}>
+        <div className={chartClassNames} style={containerSizeStyle}>
           <ChartBackground />
           <ChartStatus />
           <ChartResizer />
@@ -180,7 +180,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
           {/* TODO: Add renderFn to error boundary */}
           <ErrorBoundary>
             <SpecsParser>{this.props.children}</SpecsParser>
-            <div className="echContainer">
+            <div className="echContainer" ref={this.chartContainerRef}>
               <ChartContainer getChartContainerRef={this.getChartContainerRef} forwardStageRef={this.chartStageRef} />
             </div>
           </ErrorBoundary>

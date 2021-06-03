@@ -120,13 +120,13 @@ export class XYAxisChartState implements InternalChartState {
     return getHighlightedValuesSelector(globalState);
   }
 
-  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
+  chartRenderer(containerRef: BackwardRef, forwardCanvasRef: RefObject<HTMLCanvasElement>) {
     return (
       <>
         <Crosshair />
-        <XYChart forwardStageRef={forwardStageRef} />
+        <XYChart forwardCanvasRef={forwardCanvasRef} />
         <Tooltip getChartContainerRef={containerRef} />
-        <Annotations getChartContainerRef={containerRef} chartAreaRef={forwardStageRef} />
+        <Annotations getChartContainerRef={containerRef} chartAreaRef={forwardCanvasRef} />
         <Highlighter />
         <BrushTool />
       </>
