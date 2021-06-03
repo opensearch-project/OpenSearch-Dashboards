@@ -37,7 +37,7 @@ import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
 import { TelemetryService } from './services/telemetry_service';
-import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
+import { TelemetryNotifications } from './services/telemetry-notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
 
 // The following is to be able to access private methods

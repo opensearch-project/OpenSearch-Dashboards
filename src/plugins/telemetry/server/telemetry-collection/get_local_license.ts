@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { OpenSearchLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
+import { OpenSearchLicense, LicenseGetter } from 'src/plugins/telemetry-collection-manager/server';
 import { OpenSearchClient } from 'src/core/server';
 
 let cachedLicense: OpenSearchLicense | undefined;

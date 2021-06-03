@@ -33,8 +33,8 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
-import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
+import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry-repository';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry-config';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { TelemetryConfigType } from '../../config';
 

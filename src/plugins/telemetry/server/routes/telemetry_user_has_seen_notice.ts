@@ -36,7 +36,7 @@ import {
   TelemetrySavedObjectAttributes,
   getTelemetrySavedObject,
   updateTelemetrySavedObject,
-} from '../telemetry_repository';
+} from '../telemetry-repository';
 
 export function registerTelemetryUserHasSeenNotice(router: IRouter) {
   router.put(

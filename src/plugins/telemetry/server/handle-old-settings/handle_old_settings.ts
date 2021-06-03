@@ -41,7 +41,7 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashboards/server';
 import { CONFIG_TELEMETRY } from '../../common/constants';
-import { updateTelemetrySavedObject } from '../telemetry_repository';
+import { updateTelemetrySavedObject } from '../telemetry-repository';
 
 const CONFIG_ALLOW_REPORT = 'xPackMonitoring:allowReport';
 

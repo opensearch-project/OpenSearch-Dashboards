@@ -30,9 +30,13 @@
  * GitHub history for details.
  */
 
-export { getTelemetrySavedObject } from './get_telemetry_saved_object';
-export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 export {
-  TelemetrySavedObject,
-  TelemetrySavedObjectAttributes,
-} from '../../common/telemetry_config/types';
+  DATA_TELEMETRY_ID,
+  DataTelemetryIndex,
+  DataTelemetryPayload,
+  buildDataTelemetryPayload,
+} from './get-data-telemetry';
+export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
+export { getLocalLicense } from './get_local_license';
+export { getClusterUuids } from './get_cluster_stats';
+export { registerCollection } from './register_collection';

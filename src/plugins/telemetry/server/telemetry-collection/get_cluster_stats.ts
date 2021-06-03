@@ -30,13 +30,24 @@
  * GitHub history for details.
  */
 
-export {
-  DATA_TELEMETRY_ID,
-  DataTelemetryIndex,
-  DataTelemetryPayload,
-  buildDataTelemetryPayload,
-} from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getLocalLicense } from './get_local_license';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
+import { ClusterDetailsGetter } from 'src/plugins/telemetry-collection-manager/server';
+import { OpenSearchClient } from 'src/core/server';
+import { TIMEOUT } from './constants';
+/**
+ * Get the cluster stats from the connected cluster.
+ *
+ * This is the equivalent to GET /_cluster/stats?timeout=30s.
+ */
+export async function getClusterStats(opensearchClient: OpenSearchClient) {
+  const { body } = await opensearchClient.cluster.stats({ timeout: TIMEOUT });
+  return body;
+}
+
+/**
+ * Get the cluster uuids from the connected cluster.
+ */
+export const getClusterUuids: ClusterDetailsGetter = async ({ opensearchClient }) => {
+  const { body } = await opensearchClient.cluster.stats({ timeout: TIMEOUT });
+
+  return [{ clusterUuid: body.cluster_uuid }];
+};

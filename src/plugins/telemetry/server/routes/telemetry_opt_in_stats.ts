@@ -39,7 +39,7 @@ import { schema } from '@osd/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 
 interface SendTelemetryOptInStatusConfig {
   optInStatusUrl: string;

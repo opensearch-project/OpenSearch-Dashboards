@@ -36,7 +36,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 import { take } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -50,16 +50,16 @@ import {
   UiSettingsServiceStart,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
-import { registerCollection } from './telemetry_collection';
+import { registerCollection } from './telemetry-collection';
 import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
 import { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
-import { handleOldSettings } from './handle_old_settings';
-import { getTelemetrySavedObject } from './telemetry_repository';
-import { getTelemetryOptIn } from '../common/telemetry_config';
+import { handleOldSettings } from './handle-old-settings';
+import { getTelemetrySavedObject } from './telemetry-repository';
+import { getTelemetryOptIn } from '../common/telemetry-config';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;

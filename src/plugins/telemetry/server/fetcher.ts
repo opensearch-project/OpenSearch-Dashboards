@@ -38,7 +38,7 @@ import fetch from 'node-fetch';
 import {
   TelemetryCollectionManagerPluginStart,
   UsageStatsPayload,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -51,8 +51,8 @@ import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
-} from '../common/telemetry_config';
-import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
+} from '../common/telemetry-config';
+import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry-repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
 import { TelemetryConfigType } from './config';
 

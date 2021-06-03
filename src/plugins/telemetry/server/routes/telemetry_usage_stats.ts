@@ -37,7 +37,7 @@ import { IRouter } from 'opensearch-dashboards/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from 'src/plugins/telemetry-collection-manager/server';
 
 const validate: TypeOptions<string | number>['validate'] = (value) => {
   if (!moment(value).isValid()) {
