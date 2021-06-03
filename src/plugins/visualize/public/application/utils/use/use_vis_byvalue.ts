@@ -36,7 +36,7 @@ import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getBreadcrumbsPrefixedWithApp, getEditBreadcrumbs } from '../breadcrumbs';
-import { DefaultEditorController } from '../../../../../vis_default_editor/public';
+import { DefaultEditorController } from '../../../../../vis-default-editor/public';
 
 export const useVisByValue = (
   services: VisualizeServices,

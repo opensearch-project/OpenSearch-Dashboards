@@ -33,7 +33,7 @@
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 
 import { TimelineVisParams } from './timeline_vis_fn';

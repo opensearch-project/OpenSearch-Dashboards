@@ -34,8 +34,8 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import { isArray } from 'lodash';
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EMPTY_STRING, getInitModelList, getRange, parse } from './number_list/utils';
-import { NumberRow, NumberRowModel } from './number_list/number_row';
+import { EMPTY_STRING, getInitModelList, getRange, parse } from './number-list/utils';
+import { NumberRow, NumberRowModel } from './number-list/number_row';
 import { AggParamEditorProps } from '../../agg_param_props';
 
 const generateId = htmlIdGenerator();

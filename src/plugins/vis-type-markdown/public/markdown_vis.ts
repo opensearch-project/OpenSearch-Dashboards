@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
-import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { DefaultEditorSize } from '../../vis-default-editor/public';
 import { toExpressionAst } from './to_ast';
 
 export const markdownVisDefinition = {

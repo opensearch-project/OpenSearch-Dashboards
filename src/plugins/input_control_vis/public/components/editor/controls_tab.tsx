@@ -42,7 +42,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { ControlEditor } from './control_editor';
 import {

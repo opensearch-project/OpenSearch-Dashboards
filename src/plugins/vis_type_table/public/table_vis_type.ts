@@ -32,7 +32,7 @@
 import { CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../vis-default-editor/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore

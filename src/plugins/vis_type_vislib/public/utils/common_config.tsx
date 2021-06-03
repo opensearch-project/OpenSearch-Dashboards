@@ -33,7 +33,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { PointSeriesOptions, MetricsAxisOptions } from '../components/options';
 import { ValidationWrapper } from '../components/common';
 import { BasicVislibParams } from '../types';

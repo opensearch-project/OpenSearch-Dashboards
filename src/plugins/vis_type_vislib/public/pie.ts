@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../vis-default-editor/public';
 import { PieOptions } from './components/options';
 import { getPositions, Positions } from './utils/collections';
 import { createVislibVisController } from './vis_controller';

@@ -67,7 +67,7 @@ jest.mock('../breadcrumbs', () => ({
   getEditBreadcrumbs: jest.fn((text) => text),
   getCreateBreadcrumbs: jest.fn((text) => text),
 }));
-jest.mock('../../../../../vis_default_editor/public', () => ({
+jest.mock('../../../../../vis-default-editor/public', () => ({
   DefaultEditorController: jest.fn(() => ({ destroy: mockDefaultEditorControllerDestroy })),
 }));
 jest.mock('../../../../../opensearch_dashboards_utils/public');

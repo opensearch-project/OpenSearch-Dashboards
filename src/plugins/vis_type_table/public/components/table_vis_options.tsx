@@ -36,7 +36,7 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisOptionsProps } from 'src/plugins/vis-default-editor/public';
 import { search } from '../../../data/public';
 import { SwitchOption, SelectOption, NumberInputOption } from '../../../charts/public';
 import { TableVisParams } from '../types';

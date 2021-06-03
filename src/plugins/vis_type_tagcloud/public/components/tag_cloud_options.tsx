@@ -33,7 +33,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { VisOptionsProps } from '../../../vis_default_editor/public';
+import { VisOptionsProps } from '../../../vis-default-editor/public';
 import { ValidatedDualRange } from '../../../opensearch_dashboards_react/public';
 import { SelectOption, SwitchOption } from '../../../charts/public';
 import { TagCloudVisParams } from '../types';

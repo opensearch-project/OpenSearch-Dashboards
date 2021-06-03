@@ -33,7 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { parse } from 'hjson';
 import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
-import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { DefaultEditorSize } from '../../vis-default-editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 

@@ -36,7 +36,7 @@ import { i18n } from '@osd/i18n';
 
 import { search } from '../../../data/public';
 const { isValidOpenSearchInterval } = search.aggs;
-import { useValidation } from '../../../vis_default_editor/public';
+import { useValidation } from '../../../vis-default-editor/public';
 
 const intervalOptions = [
   {
