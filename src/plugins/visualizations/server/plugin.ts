@@ -44,10 +44,10 @@ import {
 
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 
-import { visualizationSavedObjectType } from './saved_objects';
+import { visualizationSavedObjectType } from './saved-objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
-import { registerVisualizationsCollector } from './usage_collector';
+import { registerVisualizationsCollector } from './usage-collector';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {

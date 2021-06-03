@@ -58,7 +58,7 @@ import {
   getSavedVisualizationsLoader,
 } from '../services';
 import { showNewVisModal } from '../wizard';
-import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import { convertToSerializedVis } from '../saved-visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public';
 import { VisualizationsStartDeps } from '../plugin';

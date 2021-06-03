@@ -40,7 +40,7 @@ import {
   OverlayStart,
   SavedObjectsStart,
 } from '../../../core/public';
-import { TypesStart } from './vis_types';
+import { TypesStart } from './vis-types';
 import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
 import {
   DataPublicPluginStart,
@@ -51,7 +51,7 @@ import {
 import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { SavedVisualizationsLoader } from './saved_visualizations';
+import { SavedVisualizationsLoader } from './saved-visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 

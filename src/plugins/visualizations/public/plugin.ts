@@ -40,7 +40,7 @@ import {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '../../../core/public';
-import { TypesService, TypesSetup, TypesStart } from './vis_types';
+import { TypesService, TypesSetup, TypesStart } from './vis-types';
 import {
   setUISettings,
   setTypes,
@@ -72,8 +72,8 @@ import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
-import { range as rangeExpressionFunction } from './expression_functions/range';
-import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
+import { range as rangeExpressionFunction } from './expression-functions/range';
+import { visDimension as visDimensionExpressionFunction } from './expression-functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import {
   Setup as InspectorSetup,
@@ -84,14 +84,14 @@ import {
   createStartServicesGetter,
   StartServicesGetter,
 } from '../../opensearch_dashboards_utils/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
+import { createSavedVisLoader, SavedVisualizationsLoader } from './saved-visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../ui_actions/public';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
-} from './saved_visualizations/_saved_vis';
+} from './saved-visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
 

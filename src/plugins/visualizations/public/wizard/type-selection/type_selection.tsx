@@ -49,11 +49,11 @@ import {
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
+import { VisTypeAlias } from '../../vis-types/vis_type_alias_registry';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { VisType, TypesStart } from '../../vis_types';
+import { VisType, TypesStart } from '../../vis-types';
 
 interface VisTypeListEntry {
   type: VisType | VisTypeAlias;

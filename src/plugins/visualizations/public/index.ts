@@ -42,14 +42,14 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { Vis } from './vis';
-export { TypesService } from './vis_types/types_service';
+export { TypesService } from './vis-types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
 export { VisualizationContainer, VisualizationNoResults } from './components';
 export { getSchemas as getVisSchemas } from './legacy/build_pipeline';
 
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
-export { VisTypeAlias, VisType, BaseVisTypeOptions, ReactVisTypeOptions } from './vis_types';
+export { VisTypeAlias, VisType, BaseVisTypeOptions, ReactVisTypeOptions } from './vis-types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
@@ -58,7 +58,7 @@ export type ExprVis = ExprVisClass;
 export { SchemaConfig, BuildPipelineParams } from './legacy/build_pipeline';
 // @ts-ignore
 export { updateOldState } from './legacy/vis_update_state';
-export { PersistedState } from './persisted_state';
+export { PersistedState } from './persisted-state';
 export {
   VisualizationController,
   SavedVisState,
@@ -67,5 +67,5 @@ export {
   VisResponseValue,
 } from './types';
 export { ExprVisAPIEvents } from './expressions/vis';
-export { VisualizationListItem } from './vis_types/vis_type_alias_registry';
+export { VisualizationListItem } from './vis-types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

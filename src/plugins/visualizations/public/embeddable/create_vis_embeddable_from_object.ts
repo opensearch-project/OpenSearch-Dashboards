@@ -49,7 +49,7 @@ import {
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { SavedVisualizationsLoader } from '../saved-visualizations';
 import { AttributeService } from '../../../dashboard/public';
 import { IndexPattern } from '../../../data/public';
 

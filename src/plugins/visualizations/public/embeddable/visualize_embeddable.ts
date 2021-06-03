@@ -65,7 +65,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { SavedVisualizationsLoader } from '../saved-visualizations';
 import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;

@@ -45,7 +45,7 @@ import _ from 'lodash';
 import { VisParams, PersistedState } from '../../../../plugins/visualizations/public';
 
 import { getTypes } from '../services';
-import { VisType } from '../vis_types';
+import { VisType } from '../vis-types';
 
 export interface ExprVisState {
   title?: string;
