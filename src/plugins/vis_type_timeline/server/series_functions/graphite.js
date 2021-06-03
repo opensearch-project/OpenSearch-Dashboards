@@ -87,7 +87,7 @@ function isBlockedURL(configuredUrl, blockedIPs) {
   if (!ip) {
     return false;
   }
-  
+
   const isBlocked = blockedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
   return isBlocked;
 }
