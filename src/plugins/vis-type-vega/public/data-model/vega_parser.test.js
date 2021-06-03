@@ -33,7 +33,7 @@
 import { cloneDeep } from 'lodash';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+import { bypassExternalUrlCheck } from '../vega-view/vega_base_view';
 
 jest.mock('../services');
 

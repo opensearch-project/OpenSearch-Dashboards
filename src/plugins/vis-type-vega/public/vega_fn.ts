@@ -40,9 +40,9 @@ import {
 } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
-import { VegaInspectorAdapters } from './vega_inspector/index';
+import { VegaInspectorAdapters } from './vega-inspector/index';
 import { TimeRange, Query } from '../../data/public';
-import { VegaParser } from './data_model/vega_parser';
+import { VegaParser } from './data-model/vega_parser';
 
 type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;

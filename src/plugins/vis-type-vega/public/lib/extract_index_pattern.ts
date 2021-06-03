@@ -33,7 +33,7 @@
 import { flatten } from 'lodash';
 import { getData } from '../services';
 
-import type { Data, VegaSpec } from '../data_model/types';
+import type { Data, VegaSpec } from '../data-model/types';
 import type { IndexPattern } from '../../../data/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {

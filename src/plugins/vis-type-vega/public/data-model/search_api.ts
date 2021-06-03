@@ -40,7 +40,7 @@ import {
   IOpenSearchSearchResponse,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
-import { VegaInspectorAdapters } from '../vega_inspector';
+import { VegaInspectorAdapters } from '../vega-inspector';
 import { RequestResponder } from '../../../inspector/public';
 
 export interface SearchAPIDependencies {

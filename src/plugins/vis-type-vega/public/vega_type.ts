@@ -37,14 +37,14 @@ import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
-import type { VegaSpec } from './data_model/types';
+import type { VegaSpec } from './data-model/types';
 
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
-import { createInspectorAdapters } from './vega_inspector';
+import { createInspectorAdapters } from './vega-inspector';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { getInfoMessage } from './components/experimental_map_vis_info';

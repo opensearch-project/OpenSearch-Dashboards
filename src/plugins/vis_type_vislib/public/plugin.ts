@@ -40,7 +40,7 @@ import {
   PluginInitializerContext,
 } from 'opensearch-dashboards/public';
 
-import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis-type-xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';

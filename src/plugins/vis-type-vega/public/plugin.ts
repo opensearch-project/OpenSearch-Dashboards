@@ -50,7 +50,7 @@ import { IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
 
-import { getVegaInspectorView } from './vega_inspector';
+import { getVegaInspectorView } from './vega-inspector';
 
 /** @internal */
 export interface VegaVisualizationDependencies {

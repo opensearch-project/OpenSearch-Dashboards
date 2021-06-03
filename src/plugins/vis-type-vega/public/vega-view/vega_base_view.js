@@ -34,7 +34,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
-import { Utils } from '../data_model/utils';
+import { Utils } from '../data-model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
