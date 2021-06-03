@@ -101,7 +101,7 @@ export function runRoute(
           settings: _.defaults(uiSettings, timelineDefaults), // Just in case they delete some setting.
           getFunction,
           getStartServices: core.getStartServices,
-          allowedGraphiteUrls: configManager.getGraphiteUrls(),
+          allowedGraphiteUrls: configManager.getGraphiteAllowedUrls(),
           blockedGraphiteIPs: configManager.getGraphiteBlockedIPs(),
           opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,

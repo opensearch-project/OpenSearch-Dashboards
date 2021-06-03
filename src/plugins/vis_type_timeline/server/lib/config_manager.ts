@@ -57,7 +57,7 @@ export class ConfigManager {
     return this.opensearchShardTimeout;
   }
 
-  getGraphiteUrls() {
+  getGraphiteAllowedUrls() {
     return this.graphiteAllowedUrls;
   }
 
