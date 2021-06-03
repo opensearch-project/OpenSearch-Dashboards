@@ -31,7 +31,7 @@
  */
 
 import loadFunctions from './load_functions.js';
-const functions = loadFunctions('series_functions/');
+const functions = loadFunctions('series-functions/');
 import _ from 'lodash';
 
 export default (function () {
@@ -75,7 +75,7 @@ export default (function () {
     help +=
       'This document is auto generated from the timeline code. ' +
       'Do not submit pulls against this document. You want to submit a pull against something in the ' +
-      '`series_functions/` directory.\n\n';
+      '`series-functions/` directory.\n\n';
 
     help += '### Data sources\n';
     help +=

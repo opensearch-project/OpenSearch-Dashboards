@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import loadFunctions from '../load_functions.js';
-const fitFunctions = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit-functions');
 import TimelineFunction from './timeline_function';
 import { offsetTime, preprocessOffset } from '../offset_time';
 import _ from 'lodash';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-const fn = require(`src/plugins/vis_type_timeline/server/series_functions/fit`);
+const fn = require(`src/plugins/vis-type-timeline/server/series-functions/fit`);
 import moment from 'moment';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';

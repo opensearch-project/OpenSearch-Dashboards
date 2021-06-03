@@ -48,7 +48,7 @@ import {
   registerListenEventListener,
   watchMultiDecorator,
 } from '../../opensearch_dashboards_legacy/public';
-import { getTimezone } from '../../vis_type_timeline/public';
+import { getTimezone } from '../../vis-type-timeline/public';
 import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';
 import { initFixedElementDirective } from './directives/fixed_element';

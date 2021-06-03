@@ -55,7 +55,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import {
   VisTypeTimelinePluginStart,
   VisTypeTimelinePluginSetup,
-} from '../../vis_type_timeline/public';
+} from '../../vis-type-timeline/public';
 
 export interface TimelinePluginDependencies {
   data: DataPublicPluginStart;

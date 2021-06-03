@@ -36,7 +36,7 @@ import timelineDefaults from '../../lib/get_namespaced_settings';
 import opensearchResponse from './opensearch_response';
 
 export default function () {
-  const functions = require('../../lib/load_functions')('series_functions');
+  const functions = require('../../lib/load_functions')('series-functions');
 
   const tlConfig = require('../../handlers/lib/tl_config.js')({
     getFunction: (name) => {
