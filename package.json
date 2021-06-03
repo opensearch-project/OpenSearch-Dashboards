@@ -404,7 +404,7 @@
     "has-ansi": "^3.0.0",
     "history": "^4.9.0",
     "iedriver": "^3.14.2",
-    "immer": "^1.5.0",
+    "immer": "^8.0.1",
     "intl-messageformat-parser": "^1.4.0",
     "jest": "^26.4.2",
     "jest-canvas-mock": "^2.2.0",
