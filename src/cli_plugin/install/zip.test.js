@@ -63,6 +63,7 @@ describe('opensearchDashboards cli', function () {
         expect(packages).toMatchInlineSnapshot(`
           Array [
             Object {
+              "folderName": undefined,
               "id": "testPlugin",
               "opensearchDashboardsVersion": "1.0.0",
               "stripPrefix": "opensearch-dashboards/test-plugin",

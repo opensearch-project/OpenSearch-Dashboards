@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { statSync, readdirSync, readFileSync } from 'fs';
+import { statSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 export function list(pluginDir, logger) {
@@ -38,13 +38,7 @@ export function list(pluginDir, logger) {
     const stat = statSync(join(pluginDir, name));
 
     if (stat.isDirectory() && name[0] !== '.') {
-      try {
-        const packagePath = join(pluginDir, name, 'opensearch_dashboards.json');
-        const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
-        logger.log(pkg.id + '@' + pkg.version);
-      } catch (e) {
-        throw new Error('Unable to read opensearch_dashboards.json file for plugin ' + name);
-      }
+      logger.log(name);
     }
   });
 

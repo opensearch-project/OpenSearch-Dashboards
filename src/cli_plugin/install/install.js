@@ -40,8 +40,7 @@ import { download } from './download';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
-import { existingInstall, assertVersion } from './opensearch_dashboards';
-import { kebabCase } from 'lodash';
+import { existingInstall, assertVersion, getTargetFolderName } from './opensearch_dashboards';
 
 const mkdir = promisify(Fs.mkdir);
 
@@ -63,7 +62,7 @@ export async function install(settings, logger) {
 
     assertVersion(settings);
 
-    const targetDir = path.join(settings.pluginDir, kebabCase(settings.plugins[0].id));
+    const targetDir = path.join(settings.pluginDir, getTargetFolderName(settings));
     await renamePlugin(settings.workingPath, targetDir);
 
     logger.log('Plugin installation complete');

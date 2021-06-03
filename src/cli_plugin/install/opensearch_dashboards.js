@@ -37,15 +37,18 @@ import { kebabCase } from 'lodash';
 import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
-  try {
-    statSync(path.join(settings.pluginDir, kebabCase(settings.plugins[0].id)));
+  const folderNames = [kebabCase(settings.plugins[0].id), getTargetFolderName(settings)];
+  for (const folderName of folderNames) {
+    try {
+      statSync(path.join(settings.pluginDir, folderName));
 
-    logger.error(
-      `Plugin ${settings.plugins[0].id} already exists, please remove before installing a new version`
-    );
-    process.exit(70);
-  } catch (e) {
-    if (e.code !== 'ENOENT') throw e;
+      logger.error(
+        `Plugin ${settings.plugins[0].id} already exists with folder name ${folderName}, please remove before installing a new version`
+      );
+      process.exit(70);
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+    }
   }
 }
 
@@ -63,4 +66,10 @@ export function assertVersion(settings) {
       `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]`
     );
   }
+}
+
+export function getTargetFolderName(settings) {
+  return typeof settings.plugins[0].folderName === 'string' && settings.plugins[0].folderName
+    ? settings.plugins[0].folderName
+    : kebabCase(settings.plugins[0].id);
 }

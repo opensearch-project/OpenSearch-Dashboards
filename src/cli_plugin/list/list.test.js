@@ -85,36 +85,12 @@ describe('opensearchDashboards cli', function () {
 
       expect(logger.messages).toMatchInlineSnapshot(`
         Array [
-          "log: plugin1@5.0.0-alpha2",
-          "log: plugin2@3.2.1",
-          "log: plugin3@1.2.3",
+          "log: plugin1",
+          "log: plugin2",
+          "log: plugin3",
           "log: ",
         ]
       `);
-    });
-
-    it('list should throw an exception if a plugin does not have a package.json', function () {
-      createPlugin('plugin1', '1.0.0', pluginDir);
-      mkdirSync(join(pluginDir, 'empty-plugin'), { recursive: true });
-
-      expect(function () {
-        list(pluginDir, logger);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read opensearch_dashboards.json file for plugin empty-plugin"`
-      );
-    });
-
-    it('list should throw an exception if a plugin have an empty package.json', function () {
-      createPlugin('plugin1', '1.0.0', pluginDir);
-      const invalidPluginDir = join(pluginDir, 'invalid-plugin');
-      mkdirSync(invalidPluginDir, { recursive: true });
-      writeFileSync(join(invalidPluginDir, 'package.json'), '');
-
-      expect(function () {
-        list(pluginDir, logger);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read opensearch_dashboards.json file for plugin invalid-plugin"`
-      );
     });
   });
 });

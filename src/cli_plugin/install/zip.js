@@ -82,6 +82,7 @@ export function analyzeArchive(archive) {
             plugins.push({
               id: manifest.id,
               stripPrefix: match[1],
+              folderName: manifest.folderName,
 
               // Plugins must specify their version, and by default that version in the plugin
               // manifest should match the version of opensearch-dashboards down to the patch level. If these

@@ -120,6 +120,7 @@ describe('opensearchDashboards cli', function () {
         expect(settings.plugins).toMatchInlineSnapshot(`
           Array [
             Object {
+              "folderName": undefined,
               "id": "testPlugin",
               "opensearchDashboardsVersion": "1.0.0",
               "stripPrefix": "opensearch-dashboards/test-plugin",
@@ -134,6 +135,7 @@ describe('opensearchDashboards cli', function () {
         expect(settings.plugins).toMatchInlineSnapshot(`
           Array [
             Object {
+              "folderName": undefined,
               "id": "testPlugin",
               "opensearchDashboardsVersion": "5.0.1",
               "stripPrefix": "opensearch-dashboards/test-plugin",
@@ -148,19 +150,37 @@ describe('opensearchDashboards cli', function () {
         expect(settings.plugins).toMatchInlineSnapshot(`
           Array [
             Object {
+              "folderName": undefined,
               "id": "fungerPlugin",
               "opensearchDashboardsVersion": "1.0.0",
               "stripPrefix": "opensearch-dashboards/funger-plugin",
             },
             Object {
+              "folderName": undefined,
               "id": "pdf",
               "opensearchDashboardsVersion": "1.0.0",
               "stripPrefix": "opensearch-dashboards/pdf",
             },
             Object {
+              "folderName": undefined,
               "id": "testPlugin",
               "opensearchDashboardsVersion": "1.0.0",
               "stripPrefix": "opensearch-dashboards/test-plugin",
+            },
+          ]
+        `);
+      });
+
+      it('populate settings.plugin.folderName', async () => {
+        await copyReplyFile('test_plugin_custom_folder.zip');
+        await getPackData(settings, logger);
+        expect(settings.plugins).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "folderName": "custom-plugin-name",
+              "id": "testPlugin",
+              "opensearchDashboardsVersion": "1.0.0",
+              "stripPrefix": "opensearch-dashboards/test-plugin-custom-folder",
             },
           ]
         `);

@@ -36,7 +36,7 @@ import fs from 'fs';
 import sinon from 'sinon';
 import del from 'del';
 
-import { existingInstall, assertVersion } from './opensearch_dashboards';
+import { existingInstall, assertVersion, getTargetFolderName } from './opensearch_dashboards';
 import { Logger } from '../lib/logger';
 
 jest.spyOn(fs, 'statSync');
@@ -157,6 +157,45 @@ describe('opensearchDashboards cli', function () {
           });
           existingInstall(settings, logger);
           expect(logger.error.called).toBe(false);
+        });
+      });
+
+      describe('getTargetFolderName', function () {
+        beforeEach(function () {
+          del.sync(testWorkingPath);
+          fs.mkdirSync(testWorkingPath, { recursive: true });
+          sinon.stub(logger, 'log');
+          sinon.stub(logger, 'error');
+        });
+
+        afterEach(function () {
+          logger.log.restore();
+          logger.error.restore();
+          del.sync(testWorkingPath);
+        });
+
+        it('should return the id for target folder name', function () {
+          const targetFolderName = settings.plugins[0].id;
+
+          expect(getTargetFolderName(settings)).toEqual(targetFolderName);
+        });
+
+        it('should return the custom folder name for target folder name', function () {
+          const settingsWithCustomFolderName = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '1.0.0',
+            plugins: [
+              {
+                id: 'foo',
+                folderName: 'custom-folder',
+              },
+            ],
+            pluginDir,
+          };
+
+          expect(getTargetFolderName(settingsWithCustomFolderName)).toEqual('custom-folder');
         });
       });
     });
