@@ -48,7 +48,7 @@ const showWarningMessageIfTimelineSheetWasFound = (core: CoreStart, logger: Logg
 
   savedObjectsClient
     .find({
-      type: 'timeline-sheet',
+      type: 'timelion-sheet',
       perPage: 1,
     })
     .then(
@@ -69,7 +69,7 @@ export class TimelinePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     core.capabilities.registerProvider(() => ({
-      timeline: {
+      timelion: {
         save: true,
       },
     }));

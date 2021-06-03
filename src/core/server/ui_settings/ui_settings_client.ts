@@ -200,6 +200,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
   }) {
+    changes = this.translateChanges(changes, 'timeline', 'timelion');
     try {
       await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {
@@ -228,7 +229,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
-      return resp.attributes;
+      return this.translateChanges(resp.attributes, 'timelion', 'timeline');
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
@@ -269,5 +270,14 @@ export class UiSettingsClient implements IUiSettingsClient {
       isOpenSearchUnavailableError(error) ||
       (ignore401Errors && isNotAuthorizedError(error))
     );
+  }
+
+  // TODO: [RENAMEME] Temporary code for backwards compatibility.
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/334
+  private translateChanges(changes: Record<string, any>, source: string, dest: string) {
+    return Object.keys(changes).reduce((translatedChanges: Record<string, any>, key: string) => {
+      translatedChanges[key.replace(source, dest)] = changes[key];
+      return translatedChanges;
+    }, {});
   }
 }

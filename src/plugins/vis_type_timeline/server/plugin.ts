@@ -106,26 +106,26 @@ export class Plugin {
     validateOpenSearchRoute(router, core);
 
     core.uiSettings.register({
-      'timeline:opensearch.timefield': {
+      'timeline:es.timefield': {
         name: i18n.translate('timeline.uiSettings.timeFieldLabel', {
           defaultMessage: 'Time field',
         }),
         value: '@timestamp',
         description: i18n.translate('timeline.uiSettings.timeFieldDescription', {
           defaultMessage: 'Default field containing a timestamp when using {opensearchParam}',
-          values: { opensearchParam: '.opensearch()' },
+          values: { opensearchParam: '.es()' },
         }),
         category: ['timeline'],
         schema: schema.string(),
       },
-      'timeline:opensearch.default_index': {
+      'timeline:es.default_index': {
         name: i18n.translate('timeline.uiSettings.defaultIndexLabel', {
           defaultMessage: 'Default index',
         }),
         value: '_all',
         description: i18n.translate('timeline.uiSettings.defaultIndexDescription', {
           defaultMessage: 'Default opensearch index to search with {opensearchParam}',
-          values: { opensearchParam: '.opensearch()' },
+          values: { opensearchParam: '.es()' },
         }),
         category: ['timeline'],
         schema: schema.string(),

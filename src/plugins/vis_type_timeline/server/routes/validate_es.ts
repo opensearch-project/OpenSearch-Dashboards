@@ -45,11 +45,11 @@ export function validateOpenSearchRoute(router: IRouter, core: CoreSetup) {
       const uiSettings = await context.core.uiSettings.client.getAll();
       const deps = (await core.getStartServices())[1] as TimelinePluginStartDeps;
 
-      const timefield = uiSettings['timeline:opensearch.timefield'];
+      const timefield = uiSettings['timeline:es.timefield'];
 
       const body = {
         params: {
-          index: uiSettings['opensearch.default_index'],
+          index: uiSettings['es.default_index'],
           body: {
             aggs: {
               maxAgg: {

@@ -113,7 +113,7 @@ export class TimelinePlugin implements Plugin<void, void> {
 
     initAngularBootstrap();
     core.application.register({
-      id: 'timeline',
+      id: 'timelion',
       title: 'Timeline',
       order: 8000,
       defaultPath: '#/',

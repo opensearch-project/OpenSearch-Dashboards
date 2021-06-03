@@ -33,7 +33,7 @@
 import { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const timelineSheetSavedObjectType: SavedObjectsType = {
-  name: 'timeline-sheet',
+  name: 'timelion-sheet',
   hidden: false,
   namespaceType: 'single',
   mappings: {
@@ -45,12 +45,12 @@ export const timelineSheetSavedObjectType: SavedObjectsType = {
           searchSourceJSON: { type: 'text' },
         },
       },
-      timeline_chart_height: { type: 'integer' },
-      timeline_columns: { type: 'integer' },
-      timeline_interval: { type: 'keyword' },
-      timeline_other_interval: { type: 'keyword' },
-      timeline_rows: { type: 'integer' },
-      timeline_sheet: { type: 'text' },
+      timelion_chart_height: { type: 'integer' },
+      timelion_columns: { type: 'integer' },
+      timelion_interval: { type: 'keyword' },
+      timelion_other_interval: { type: 'keyword' },
+      timelion_rows: { type: 'integer' },
+      timelion_sheet: { type: 'text' },
       title: { type: 'text' },
       version: { type: 'integer' },
     },

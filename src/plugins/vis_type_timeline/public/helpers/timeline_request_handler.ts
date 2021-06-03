@@ -112,7 +112,7 @@ export function getTimelineRequestHandler({
         body: JSON.stringify({
           sheet: [expression],
           extended: {
-            opensearch: {
+            es: {
               filter: opensearchQuery.buildOpenSearchQuery(
                 undefined,
                 query,

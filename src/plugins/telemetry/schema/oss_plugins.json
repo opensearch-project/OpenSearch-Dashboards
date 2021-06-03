@@ -1387,7 +1387,7 @@
         "timeline:max_buckets": {
           "type": "long"
         },
-        "timeline:opensearch.timefield": {
+        "timeline:es.timefield": {
           "type": "keyword"
         },
         "timeline:min_interval": {
@@ -1402,7 +1402,7 @@
         "timeline:quandl.key": {
           "type": "keyword"
         },
-        "timeline:opensearch.default_index": {
+        "timeline:es.default_index": {
           "type": "keyword"
         },
         "timeline:showTutorial": {

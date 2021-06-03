@@ -48,7 +48,7 @@ export function TimelinePageProvider({ getService, getPageObjects }: FtrProvider
       log.debug('load opensearch-dashboards index');
       await opensearchArchiver.load('timeline');
 
-      await PageObjects.common.navigateToApp('timeline');
+      await PageObjects.common.navigateToApp('timelion');
     }
 
     public async setExpression(expression: string) {

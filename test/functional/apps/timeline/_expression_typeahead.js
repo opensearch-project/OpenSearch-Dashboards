@@ -42,14 +42,14 @@ export default function ({ getPageObjects }) {
     });
 
     it('should display function suggestions filtered by function name', async () => {
-      await PageObjects.timeline.setExpression('.o');
+      await PageObjects.timeline.setExpression('.es');
       const suggestions = await PageObjects.timeline.getSuggestionItemsText();
       expect(suggestions.length).to.eql(1);
-      expect(suggestions[0].includes('.opensearch()')).to.eql(true);
+      expect(suggestions[0].includes('.es()')).to.eql(true);
     });
 
     it('should show argument suggestions when function suggestion is selected', async () => {
-      await PageObjects.timeline.setExpression('.opensearch');
+      await PageObjects.timeline.setExpression('.es');
       await PageObjects.timeline.clickSuggestion();
       const suggestions = await PageObjects.timeline.getSuggestionItemsText();
       expect(suggestions.length).to.eql(9);
@@ -73,9 +73,9 @@ export default function ({ getPageObjects }) {
     // While navigating creating an index pattern this would works.
     // Need to fix why it's not loading prior to text run.
     xdescribe('dynamic suggestions for argument values', () => {
-      describe('.opensearch()', () => {
+      describe('.es()', () => {
         before(async () => {
-          await PageObjects.timeline.setExpression('.opensearch');
+          await PageObjects.timeline.setExpression('.es');
           await PageObjects.timeline.clickSuggestion();
         });
 
