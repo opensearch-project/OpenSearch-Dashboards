@@ -23,6 +23,7 @@ import { CustomXDomain, GroupByAccessor, Spec } from '.';
 import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { LegendStrategy } from '../chart_types/partition_chart/layout/utils/highlighted_geoms';
+import { WordModel } from '../chart_types/wordcloud/layout/types/viewmodel_types';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { SeriesIdentifier } from '../common/series_id';
 import { TooltipPortalSettings } from '../components';
@@ -96,6 +97,8 @@ export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
 export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
 /** @public */
 export type HeatmapElementEvent = [Cell, SeriesIdentifier];
+/** @public */
+export type WordCloudElementEvent = [WordModel, SeriesIdentifier];
 
 /**
  * An object that contains the scaled mouse position based on
@@ -131,11 +134,11 @@ export type ProjectionClickListener = (values: ProjectedValues) => void;
 
 /** @public */
 export type ElementClickListener = (
-  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
+  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent>,
 ) => void;
 /** @public */
 export type ElementOverListener = (
-  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
+  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent>,
 ) => void;
 /** @public */
 export type BrushEndListener = (brushArea: XYBrushArea) => void;

@@ -21,7 +21,7 @@ import { mergePartial, RecursivePartial } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { config as defaultConfig } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';
-import { ShapeViewModel, nullShapeViewModel } from '../../layout/types/viewmodel_types';
+import { ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { WordcloudSpec } from '../../specs';
 
@@ -29,12 +29,7 @@ import { WordcloudSpec } from '../../specs';
 export function render(spec: WordcloudSpec, parentDimensions: Dimensions): ShapeViewModel {
   const { width, height } = parentDimensions;
   const { config } = spec;
-  const textMeasurer = document.createElement('canvas');
-  const textMeasurerCtx = textMeasurer.getContext('2d');
   const partialConfig: RecursivePartial<Config> = { ...config, width, height };
   const cfg: Config = mergePartial(defaultConfig, partialConfig);
-  if (!textMeasurerCtx) {
-    return nullShapeViewModel(cfg, { x: width / 2, y: height / 2 });
-  }
   return shapeViewModel(spec, cfg);
 }

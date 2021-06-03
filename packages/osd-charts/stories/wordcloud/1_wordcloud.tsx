@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { action } from '@storybook/addon-actions';
 import { color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
@@ -278,12 +279,15 @@ export const Example = () => {
 
   return (
     <Chart className="story-chart">
-      {/* eslint-disable-next-line no-console */}
       <Settings
         theme={{ background: { color: backgroundColor } }}
         onElementClick={(d) => {
-          // eslint-disable-next-line no-console
-          console.log('onElementClick', d);
+          const datum = d[0][0] as WordModel;
+          action('onElementClick')(`${datum.text}: ${datum.weight}`);
+        }}
+        onElementOver={(d) => {
+          const datum = d[0][0] as WordModel;
+          action('onElementOver')(`${datum.text}: ${datum.weight}`);
         }}
       />
       <Wordcloud
@@ -302,8 +306,7 @@ export const Example = () => {
         data={sampleData(text, palette as keyof typeof palettes)}
         weightFn={weightFn}
         outOfRoomCallback={(wordCount: number, renderedWordCount: number, renderedWords: string[]) => {
-          // eslint-disable-next-line no-console
-          console.log(
+          action('outOfRoomCallback')(
             `Managed to render ${renderedWordCount} words out of ${wordCount} words: ${renderedWords.join(', ')}`,
           );
         }}

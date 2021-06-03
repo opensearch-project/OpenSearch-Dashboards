@@ -29,9 +29,6 @@ import { DebugState } from '../../../state/types';
 import { Dimensions } from '../../../utils/dimensions';
 import { EMPTY_TOOLTIP } from '../../partition_chart/layout/viewmodel/tooltip_info';
 import { Wordcloud } from '../renderer/svg/connected_component';
-import { createOnElementClickCaller } from './selectors/on_element_click_caller';
-import { createOnElementOutCaller } from './selectors/on_element_out_caller';
-import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { getSpecOrNull } from './selectors/wordcloud_spec';
 
 const EMPTY_MAP = new Map();
@@ -41,18 +38,6 @@ const EMPTY_LEGEND_ITEM_LIST: LegendItemLabel[] = [];
 /** @internal */
 export class WordcloudState implements InternalChartState {
   chartType = ChartType.Wordcloud;
-
-  onElementClickCaller: (state: GlobalChartState) => void;
-
-  onElementOverCaller: (state: GlobalChartState) => void;
-
-  onElementOutCaller: (state: GlobalChartState) => void;
-
-  constructor() {
-    this.onElementClickCaller = createOnElementClickCaller();
-    this.onElementOverCaller = createOnElementOverCaller();
-    this.onElementOutCaller = createOnElementOutCaller();
-  }
 
   isInitialized(globalState: GlobalChartState) {
     return getSpecOrNull(globalState) !== null ? InitStatus.Initialized : InitStatus.ChartNotInitialized;
@@ -107,11 +92,7 @@ export class WordcloudState implements InternalChartState {
     };
   }
 
-  eventCallbacks(globalState: GlobalChartState) {
-    this.onElementOverCaller(globalState);
-    this.onElementOutCaller(globalState);
-    this.onElementClickCaller(globalState);
-  }
+  eventCallbacks() {}
 
   getChartTypeDescription() {
     return 'Word cloud chart';

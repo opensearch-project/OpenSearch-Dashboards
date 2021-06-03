@@ -678,10 +678,10 @@ export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
 export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain | UnboundedDomainWithInterval;
 
 // @public (undocumented)
-export type ElementClickListener = (elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>) => void;
+export type ElementClickListener = (elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent>) => void;
 
 // @public (undocumented)
-export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>) => void;
+export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent>) => void;
 
 // @public (undocumented)
 export const entryKey: ([key]: ArrayEntry) => string;
@@ -1329,6 +1329,9 @@ export interface OrderBy {
 
 // @public (undocumented)
 export type OrdinalDomain = (number | string)[];
+
+// @public (undocumented)
+export type OutOfRoomCallback = (wordCount: number, renderedWordCount: number, renderedWords: string[]) => void;
 
 // Warning: (ae-forgotten-export) The symbol "PerSideDistance" needs to be exported by the entry point index.d.ts
 //
@@ -2114,11 +2117,57 @@ export interface Visible {
     visible: boolean;
 }
 
+// @public (undocumented)
+export const WeightFn: Readonly<{
+    log: "log";
+    linear: "linear";
+    exponential: "exponential";
+    squareRoot: "squareRoot";
+}>;
+
+// @public (undocumented)
+export type WeightFn = $Values<typeof WeightFn>;
+
 // Warning: (ae-forgotten-export) The symbol "SpecRequiredProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
 //
 // @alpha (undocumented)
 export const Wordcloud: React_2.FunctionComponent<SpecRequiredProps_9 & SpecOptionalProps_9>;
+
+// @public (undocumented)
+export interface WordcloudConfigs {
+    // (undocumented)
+    count: number;
+    // (undocumented)
+    endAngle: number;
+    // (undocumented)
+    exponent: number;
+    // (undocumented)
+    fontFamily: string;
+    // (undocumented)
+    fontStyle: string;
+    // (undocumented)
+    fontWeight: number;
+    // (undocumented)
+    height: number;
+    // (undocumented)
+    maxFontSize: number;
+    // (undocumented)
+    minFontSize: number;
+    // (undocumented)
+    padding: number;
+    // (undocumented)
+    spiral: string;
+    // (undocumented)
+    startAngle: number;
+    // (undocumented)
+    weightFn: WeightFn;
+    // (undocumented)
+    width: number;
+}
+
+// @public (undocumented)
+export type WordCloudElementEvent = [WordModel, SeriesIdentifier];
 
 // @alpha (undocumented)
 export interface WordcloudSpec extends Spec {
@@ -2127,9 +2176,7 @@ export interface WordcloudSpec extends Spec {
     // (undocumented)
     chartType: typeof ChartType.Wordcloud;
     // (undocumented)
-    config: RecursivePartial<PartitionConfig>;
-    // Warning: (ae-forgotten-export) The symbol "WordModel" needs to be exported by the entry point index.d.ts
-    //
+    config: RecursivePartial<WordcloudConfigs>;
     // (undocumented)
     data: WordModel[];
     // (undocumented)
@@ -2146,8 +2193,6 @@ export interface WordcloudSpec extends Spec {
     maxFontSize: number;
     // (undocumented)
     minFontSize: number;
-    // Warning: (ae-forgotten-export) The symbol "OutOfRoomCallback" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     outOfRoomCallback: OutOfRoomCallback;
     // (undocumented)
@@ -2158,10 +2203,18 @@ export interface WordcloudSpec extends Spec {
     spiral: string;
     // (undocumented)
     startAngle: number;
-    // Warning: (ae-forgotten-export) The symbol "WeightFn" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     weightFn: WeightFn;
+}
+
+// @public (undocumented)
+export interface WordModel {
+    // (undocumented)
+    color: Color;
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    weight: number;
 }
 
 // @public (undocumented)

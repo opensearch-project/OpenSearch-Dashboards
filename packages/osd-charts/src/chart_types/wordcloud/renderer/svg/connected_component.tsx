@@ -24,6 +24,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { ScreenReaderSummary } from '../../../../components/accessibility';
+import { SettingsSpec, WordCloudElementEvent } from '../../../../specs/settings';
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
 import {
@@ -32,6 +33,7 @@ import {
   getA11ySettingsSelector,
 } from '../../../../state/selectors/get_accessibility_config';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Configs, Datum, nullShapeViewModel, ShapeViewModel, Word } from '../../layout/types/viewmodel_types';
 import { geometries } from '../../state/selectors/geometries';
@@ -104,6 +106,7 @@ function layoutMaker(config: Configs, data: Datum[]) {
   const words = data.map((d) => {
     const weightFn = weightFnLookup[config.weightFn];
     return {
+      datum: d,
       text: d.text,
       color: d.color,
       fontFamily: config.fontFamily,
@@ -125,36 +128,74 @@ function layoutMaker(config: Configs, data: Datum[]) {
     .fontSize((d: Word) => getFontSize(d));
 }
 
-const View = ({ words, conf }: { words: Word[]; conf: Configs }) => (
-  <svg width={getWidth(conf)} height={getHeight(conf)} role="presentation">
-    <g transform={`translate(${getWidth(conf) / 2}, ${getHeight(conf) / 2})`}>
-      {words.map((d, i) => {
-        return (
-          <text
-            key={String(i)}
-            style={{
-              fontSize: getFontSize(d),
-              fontStyle: getFontStyle(d),
-              fontFamily: getFont(d),
-              fontWeight: getFontWeight(d),
-              fill: d.color,
-            }}
-            textAnchor="middle"
-            transform={`translate(${d.x}, ${d.y}) rotate(${d.rotate})`}
-          >
-            {d.text}
-          </text>
-        );
-      })}
-    </g>
-  </svg>
-);
+const View = ({
+  words,
+  conf,
+  actions: { onElementClick, onElementOver, onElementOut },
+  specId,
+}: {
+  words: Word[];
+  conf: Configs;
+  actions: {
+    onElementClick?: SettingsSpec['onElementClick'];
+    onElementOver?: SettingsSpec['onElementOver'];
+    onElementOut?: SettingsSpec['onElementOut'];
+  };
+  specId: string;
+}) => {
+  return (
+    <svg width={getWidth(conf)} height={getHeight(conf)} role="presentation">
+      <g transform={`translate(${getWidth(conf) / 2}, ${getHeight(conf) / 2})`}>
+        {words.map((d, i) => {
+          const elements: WordCloudElementEvent[] = [[d.datum, { specId, key: specId }]];
+          const actions = {
+            ...(onElementClick && {
+              onClick: () => {
+                onElementClick(elements);
+              },
+            }),
+            ...(onElementOver && {
+              onMouseOver: () => {
+                onElementOver(elements);
+              },
+            }),
+            ...(onElementOut && {
+              onMouseOut: () => {
+                onElementOut();
+              },
+            }),
+          };
+          return (
+            <text
+              key={String(i)}
+              style={{
+                fontSize: getFontSize(d),
+                fontStyle: getFontStyle(d),
+                fontFamily: getFont(d),
+                fontWeight: getFontWeight(d),
+                fill: d.color,
+              }}
+              textAnchor="middle"
+              transform={`translate(${d.x}, ${d.y}) rotate(${d.rotate})`}
+              {...actions}
+            >
+              {d.text}
+            </text>
+          );
+        })}
+      </g>
+    </svg>
+  );
+};
 
 interface ReactiveChartStateProps {
   initialized: boolean;
   geometries: ShapeViewModel;
   chartContainerDimensions: Dimensions;
   a11ySettings: A11ySettings;
+  onElementClick?: SettingsSpec['onElementClick'];
+  onElementOver?: SettingsSpec['onElementOver'];
+  onElementOut?: SettingsSpec['onElementOut'];
 }
 
 interface ReactiveChartDispatchProps {
@@ -182,8 +223,11 @@ class Component extends React.Component<Props> {
     const {
       initialized,
       chartContainerDimensions: { width, height },
-      geometries: { wordcloudViewModel },
+      geometries: { wordcloudViewModel, specId },
       a11ySettings,
+      onElementClick,
+      onElementOver,
+      onElementOut,
     } = this.props;
     if (!initialized || width === 0 || height === 0) {
       return null;
@@ -224,7 +268,12 @@ class Component extends React.Component<Props> {
 
     return (
       <figure aria-labelledby={a11ySettings.labelId} aria-describedby={a11ySettings.descriptionId}>
-        <View words={renderedWordObjects} conf={conf1} />
+        <View
+          words={renderedWordObjects}
+          conf={conf1}
+          actions={{ onElementClick, onElementOut, onElementOver }}
+          specId={specId}
+        />
         <ScreenReaderSummary />
       </figure>
     );
@@ -260,6 +309,9 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     geometries: geometries(state),
     chartContainerDimensions: state.parentDimensions,
     a11ySettings: getA11ySettingsSelector(state),
+    onElementClick: getSettingsSpecSelector(state).onElementClick,
+    onElementOver: getSettingsSpecSelector(state).onElementOver,
+    onElementOut: getSettingsSpecSelector(state).onElementOut,
   };
 };
 

@@ -64,9 +64,10 @@ export interface Word {
   y0: number;
   y1: number;
   yoff: number;
+  datum: WordModel;
 }
 
-/** @internal */
+/** @public */
 export interface Configs {
   count: number;
   endAngle: number;
@@ -122,6 +123,7 @@ export type ShapeViewModel = {
   wordcloudViewModel: WordcloudViewModel;
   chartCenter: PointObject;
   pickQuads: PickFunction;
+  specId: string;
 };
 
 const commonDefaults: WordcloudViewModel = {
@@ -158,4 +160,5 @@ export const nullShapeViewModel = (specifiedConfig?: Config, chartCenter?: Point
   wordcloudViewModel: nullWordcloudViewModel,
   chartCenter: chartCenter || { x: 0, y: 0 },
   pickQuads: () => [],
+  specId: 'empty',
 });

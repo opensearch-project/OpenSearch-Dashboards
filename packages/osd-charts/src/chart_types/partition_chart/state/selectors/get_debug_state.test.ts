@@ -25,6 +25,7 @@ import {
   HeatmapElementEvent,
   LayerValue,
   PartitionElementEvent,
+  WordCloudElementEvent,
   XYChartElementEvent,
 } from '../../../../specs/settings';
 import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
@@ -68,7 +69,7 @@ describe.each([
   let store: Store<GlobalChartState>;
   let onClickListener: jest.Mock<
     undefined,
-    Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent)[]>
+    Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent)[]>
   >;
   let debugState: DebugState;
 
@@ -113,7 +114,10 @@ describe.each([
 
 function expectCorrectClickInfo(
   store: Store<GlobalChartState>,
-  onClickListener: jest.Mock<undefined, Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent)[]>>,
+  onClickListener: jest.Mock<
+    undefined,
+    Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent | WordCloudElementEvent)[]>
+  >,
   partition: SinglePartitionDebugState,
   index: number,
 ) {

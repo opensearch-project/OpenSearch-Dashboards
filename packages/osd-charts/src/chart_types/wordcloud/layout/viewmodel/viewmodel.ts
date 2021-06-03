@@ -34,6 +34,7 @@ export function shapeViewModel(spec: WordcloudSpec, config: Config): ShapeViewMo
   };
 
   const {
+    id,
     startAngle,
     endAngle,
     angleCount,
@@ -78,5 +79,6 @@ export function shapeViewModel(spec: WordcloudSpec, config: Config): ShapeViewMo
     chartCenter,
     wordcloudViewModel,
     pickQuads,
+    specId: id,
   };
 }
