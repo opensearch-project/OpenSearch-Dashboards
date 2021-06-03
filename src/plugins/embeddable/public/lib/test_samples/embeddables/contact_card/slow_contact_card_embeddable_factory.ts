@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { Container, EmbeddableFactoryDefinition } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';

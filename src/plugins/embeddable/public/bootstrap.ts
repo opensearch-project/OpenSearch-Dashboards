@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { UiActionsSetup } from '../../ui_actions/public';
+import { UiActionsSetup } from '../../ui-actions/public';
 import {
   contextMenuTrigger,
   panelBadgeTrigger,
@@ -45,7 +45,7 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
 
-declare module '../../ui_actions/public' {
+declare module '../../ui-actions/public' {
   export interface TriggerContextMapping {
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;

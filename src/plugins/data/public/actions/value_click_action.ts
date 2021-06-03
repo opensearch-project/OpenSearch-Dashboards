@@ -35,7 +35,7 @@ import {
   APPLY_FILTER_TRIGGER,
   createAction,
   UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+} from '../../../../plugins/ui-actions/public';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/opensearch_query/filters';
 import type { ValueClickContext } from '../../../embeddable/public';

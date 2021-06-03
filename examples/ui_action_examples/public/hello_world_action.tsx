@@ -32,7 +32,7 @@
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { OverlayStart } from '../../../src/core/public';
-import { createAction } from '../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../src/plugins/ui-actions/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { IncompatibleActionError } from 'src/plugins/ui-actions/public';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from './errors';
 
 describe('IncompatibleActionError', () => {

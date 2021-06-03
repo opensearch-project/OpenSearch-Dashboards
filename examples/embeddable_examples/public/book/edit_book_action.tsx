@@ -33,7 +33,7 @@ import React from 'react';
 import { OverlayStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
-import { createAction } from '../../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../../src/plugins/ui-actions/public';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
 import {

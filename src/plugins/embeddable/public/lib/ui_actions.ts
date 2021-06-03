@@ -30,4 +30,4 @@
  * GitHub history for details.
  */
 
-export * from '../../../ui_actions/public';
+export * from '../../../ui-actions/public';

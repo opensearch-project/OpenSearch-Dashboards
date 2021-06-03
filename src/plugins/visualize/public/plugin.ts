@@ -53,7 +53,7 @@ import {
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '../../url-forwarding/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
@@ -62,7 +62,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui-actions/public';
 import {
   setUISettings,
   setApplication,

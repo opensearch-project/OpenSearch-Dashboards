@@ -46,7 +46,7 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url-forwarding/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -58,7 +58,7 @@ import {
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui-actions/public';
 
 import { Start as InspectorStartContract } from '../../inspector/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -181,7 +181,7 @@ export interface DashboardStart {
   ) => AttributeService<A, V, R>;
 }
 
-declare module '../../../plugins/ui_actions/public' {
+declare module '../../../plugins/ui-actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;

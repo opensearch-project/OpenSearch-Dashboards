@@ -34,7 +34,7 @@ import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui-actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';

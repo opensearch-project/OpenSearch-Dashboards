@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Trigger } from '../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../src/plugins/ui-actions/public';
 
 export const HELLO_WORLD_TRIGGER_ID = 'HELLO_WORLD_TRIGGER_ID';
 

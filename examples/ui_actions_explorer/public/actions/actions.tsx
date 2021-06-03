@@ -38,7 +38,7 @@ import {
   ActionExecutionContext,
   createAction,
   UiActionsStart,
-} from '../../../../src/plugins/ui_actions/public';
+} from '../../../../src/plugins/ui-actions/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

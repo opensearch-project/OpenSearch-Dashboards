@@ -42,7 +42,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { UiStatsMetricType } from '@osd/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { UrlForwardingStart } from '../../../url-forwarding/public';
 import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';

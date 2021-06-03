@@ -33,7 +33,7 @@
 import * as React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
+import { buildContextMenuForActions } from '../../../../src/plugins/ui-actions/public';
 import { sampleAction } from './util';
 
 export const PanelEdit: React.FC = () => {

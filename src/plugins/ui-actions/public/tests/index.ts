@@ -30,30 +30,4 @@
  * GitHub history for details.
  */
 
-import { ActionExecutionContext, createAction } from '../../../ui_actions/public';
-import { ActionType } from '../types';
-import { defaultTrigger } from '../triggers';
-
-const sayHelloAction = createAction({
-  // Casting to ActionType is a hack - in a real situation use
-  // declare module and add this id to ActionContextMapping.
-  type: 'test' as ActionType,
-  isCompatible: ({ amICompatible }: { amICompatible: boolean }) => Promise.resolve(amICompatible),
-  execute: () => Promise.resolve(),
-});
-
-test('action is not compatible based on context', async () => {
-  const isCompatible = await sayHelloAction.isCompatible({
-    amICompatible: false,
-    trigger: defaultTrigger,
-  } as ActionExecutionContext);
-  expect(isCompatible).toBe(false);
-});
-
-test('action is compatible based on context', async () => {
-  const isCompatible = await sayHelloAction.isCompatible({
-    amICompatible: true,
-    trigger: defaultTrigger,
-  } as ActionExecutionContext);
-  expect(isCompatible).toBe(true);
-});
+export * from './test-samples';

@@ -57,7 +57,7 @@ import {
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { UrlForwardingStart } from 'src/plugins/url-forwarding/public';
 import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;

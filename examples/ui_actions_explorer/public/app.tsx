@@ -46,7 +46,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiModalBody } from '@elastic/eui';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/public';
+import { UiActionsStart, createAction } from '../../../src/plugins/ui-actions/public';
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
 import { TriggerContextExample } from './trigger_context_example';

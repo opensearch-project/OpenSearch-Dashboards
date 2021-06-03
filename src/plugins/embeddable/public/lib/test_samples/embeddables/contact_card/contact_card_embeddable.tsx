@@ -32,7 +32,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { Container } from '../../../containers';
 import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';

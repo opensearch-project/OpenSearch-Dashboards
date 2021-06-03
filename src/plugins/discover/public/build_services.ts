@@ -56,7 +56,7 @@ import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
-import { UrlForwardingStart } from '../../url_forwarding/public';
+import { UrlForwardingStart } from '../../url-forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface DiscoverServices {

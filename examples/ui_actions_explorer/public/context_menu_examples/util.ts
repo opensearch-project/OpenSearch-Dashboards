@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Action } from '../../../../src/plugins/ui_actions/public';
+import { Action } from '../../../../src/plugins/ui-actions/public';
 
 export const sampleAction = (
   id: string,

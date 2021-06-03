@@ -50,7 +50,7 @@ import { Start as InspectorStart } from '../../inspector/public';
 import { dataPluginMock } from '../../data/public/mocks';
 
 import { inspectorPluginMock } from '../../inspector/public/mocks';
-import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
+import { uiActionsPluginMock } from '../../ui-actions/public/mocks';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;

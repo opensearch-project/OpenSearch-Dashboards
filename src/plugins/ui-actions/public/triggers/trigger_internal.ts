@@ -30,35 +30,32 @@
  * GitHub history for details.
  */
 
-import { TriggerContextMapping, TriggerId } from '../types';
+import { Trigger } from './trigger';
+import { TriggerContract } from './trigger_contract';
+import { UiActionsService } from '../service';
+import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
- * This is a convenience interface used to register a *trigger*.
- *
- * `Trigger` specifies a named anchor to which `Action` can be attached. When
- * `Trigger` is being *called* it creates a `Context` object and passes it to
- * the `execute` method of an `Action`.
- *
- * More than one action can be attached to a single trigger, in which case when
- * trigger is *called* it first displays a context menu for user to pick a
- * single action to execute.
+ * Internal representation of a trigger kept for consumption only internally
+ * within `ui-actions` plugin.
  */
-export interface Trigger<ID extends TriggerId = TriggerId> {
-  /**
-   * Unique name of the trigger as identified in `ui_actions` plugin trigger
-   * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
-   */
-  id: ID;
+export class TriggerInternal<T extends TriggerId> {
+  public readonly contract = new TriggerContract<T>(this);
 
-  /**
-   * User friendly name of the trigger.
-   */
-  title?: string;
+  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
 
-  /**
-   * A longer user friendly description of the trigger.
-   */
-  description?: string;
+  public async execute(context: TriggerContextMapping[T]) {
+    const triggerId = this.trigger.id;
+    const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
+
+    await Promise.all([
+      actions.map((action) =>
+        this.service.executionService.execute({
+          action,
+          context,
+          trigger: this.trigger,
+        })
+      ),
+    ]);
+  }
 }
-
-export type TriggerContext<T> = T extends TriggerId ? TriggerContextMapping[T] : never;

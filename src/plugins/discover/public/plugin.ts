@@ -43,7 +43,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'opensearch-dashboards/public';
-import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui-actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -53,7 +53,7 @@ import {
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
 } from 'src/plugins/opensearch_dashboards_legacy/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url-forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';

@@ -34,7 +34,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '../../../../../../ui_actions/public';
+} from '../../../../../../ui-actions/public';
 import { getUiActions } from '../../../../opensearch_dashboards_services';
 import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../../data/public';
 

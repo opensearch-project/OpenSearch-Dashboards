@@ -87,7 +87,7 @@ import {
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../ui_actions/public';
+import { UiActionsStart } from '../../ui-actions/public';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,

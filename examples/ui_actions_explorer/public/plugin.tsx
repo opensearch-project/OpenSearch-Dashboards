@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { UiActionsStart, UiActionsSetup } from '../../../src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from '../../../src/plugins/ui-actions/public';
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import {
   PHONE_TRIGGER,
@@ -64,7 +64,7 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-declare module '../../../src/plugins/ui_actions/public' {
+declare module '../../../src/plugins/ui-actions/public' {
   export interface TriggerContextMapping {
     [USER_TRIGGER]: UserContext;
     [COUNTRY_TRIGGER]: CountryContext;
@@ -136,7 +136,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/ui_actions/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/ui-actions/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

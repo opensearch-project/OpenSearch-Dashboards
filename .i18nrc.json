@@ -48,7 +48,7 @@
     ],
     "tileMap": "src/plugins/tile_map",
     "timeline": ["src/plugins/timeline", "src/plugins/vis_type_timeline"],
-    "uiActions": "src/plugins/ui_actions",
+    "uiActions": "src/plugins/ui-actions",
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_type_metric",

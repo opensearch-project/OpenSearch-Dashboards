@@ -31,7 +31,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { CoreStart, ScopedHistory } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EmbeddableFactory, EmbeddableStart } from '../../../../embeddable/public';

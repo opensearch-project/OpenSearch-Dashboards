@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { TriggerContextMapping } from '../../../ui_actions/public';
+import { TriggerContextMapping } from '../../../ui-actions/public';
 
 export interface VisualizationListItem {
   editUrl: string;

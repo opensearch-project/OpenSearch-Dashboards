@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
-import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { ActionByType, createAction, IncompatibleActionError } from '../../../ui-actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import type { IEmbeddable } from '../../../embeddable/public';

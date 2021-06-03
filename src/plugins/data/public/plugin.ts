@@ -73,7 +73,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
+} from '../../ui-actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -91,7 +91,7 @@ import {
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
-declare module '../../ui_actions/public' {
+declare module '../../ui-actions/public' {
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;

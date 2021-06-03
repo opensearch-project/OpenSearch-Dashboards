@@ -35,7 +35,7 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
+import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui-actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
   opensearchFilters,

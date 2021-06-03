@@ -35,7 +35,7 @@ import {
   APPLY_FILTER_TRIGGER,
   createAction,
   UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+} from '../../../../plugins/ui-actions/public';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 import type { RangeSelectContext } from '../../../embeddable/public';
 

@@ -31,7 +31,7 @@
  */
 
 import { OpenSearchDashboardsDatatable } from '../../../../expressions';
-import { Trigger } from '../../../../ui_actions/public';
+import { Trigger } from '../../../../ui-actions/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {

@@ -33,7 +33,7 @@
 import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui-actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { search } from '../../data/public';

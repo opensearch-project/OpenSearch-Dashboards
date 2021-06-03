@@ -35,11 +35,11 @@ import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { UiActionsStart } from '../../../../../../ui_actions/public';
+import { UiActionsStart } from '../../../../../../ui-actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
 import { EmbeddableContext } from '../../../triggers';
 
-declare module '../../../../../../ui_actions/public' {
+declare module '../../../../../../ui-actions/public' {
   export interface TriggerContextMapping {
     [CONTACT_USER_TRIGGER]: EmbeddableContext;
   }

@@ -34,7 +34,7 @@ import {
   createAction,
   ACTION_VISUALIZE_FIELD,
   VisualizeFieldContext,
-} from '../../../ui_actions/public';
+} from '../../../ui-actions/public';
 import {
   getApplication,
   getUISettings,

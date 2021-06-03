@@ -58,7 +58,7 @@ import {
   OpenSearchDashboardsLegacyStart,
   configureAppAngularModule,
 } from '../../../opensearch_dashboards_legacy/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { UrlForwardingStart } from '../../../url-forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 
 // required for i18nIdDirective

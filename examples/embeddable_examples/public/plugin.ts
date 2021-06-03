@@ -70,7 +70,7 @@ import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../src/plugins/ui-actions/public';
 import {
   ACTION_ADD_BOOK_TO_LIBRARY,
   createAddBookToLibraryAction,
@@ -107,7 +107,7 @@ export interface EmbeddableExamplesStart {
   factories: ExampleEmbeddableFactories;
 }
 
-declare module '../../../src/plugins/ui_actions/public' {
+declare module '../../../src/plugins/ui-actions/public' {
   export interface ActionContextMapping {
     [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
     [ACTION_ADD_BOOK_TO_LIBRARY]: { embeddable: BookEmbeddable };

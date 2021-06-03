@@ -44,7 +44,7 @@ import { ContactCardEmbeddable } from '../../../../test_samples';
 import { opensearchFilters, Filter } from '../../../../../../../../plugins/data/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
-import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';
+import { defaultTrigger } from '../../../../../../../ui-actions/public/triggers';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
