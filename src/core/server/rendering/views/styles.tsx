@@ -117,7 +117,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             text-align: center;
             line-height: 1;
             text-align: center;
-            font-faimily: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
             letter-spacing: -.005em;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;

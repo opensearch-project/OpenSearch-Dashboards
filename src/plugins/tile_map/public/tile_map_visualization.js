@@ -108,7 +108,7 @@ export const createTileMapVisualization = (dependencies) => {
       await super.render(opensearchResponse, visParams);
     }
 
-    async _makeOpenSearchDasbhoardsMap() {
+    async _makeOpenSearchDashboardsMap() {
       await super._makeOpenSearchDashboardsMap();
 
       let previousPrecision = this._opensearchDashboardsMap.getGeohashPrecision();
