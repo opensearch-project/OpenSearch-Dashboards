@@ -34,7 +34,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from '
 import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 import { TimelineConfigType } from './config';
-import { timelineSheetSavedObjectType } from './saved_objects';
+import { timelineSheetSavedObjectType } from './saved-objects';
 
 /**
  * Deprecated since 7.0, the Timeline app will be removed in 8.0.

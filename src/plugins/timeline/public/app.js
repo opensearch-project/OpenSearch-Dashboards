@@ -53,7 +53,7 @@ import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';
 import { initFixedElementDirective } from './directives/fixed_element';
 import { initTimelineLoadSheetDirective } from './directives/timeline_load_sheet';
-import { initTimelineHelpDirective } from './directives/timeline_help/timeline_help';
+import { initTimelineHelpDirective } from './directives/timeline-help/timeline_help';
 import { initTimelineSaveSheetDirective } from './directives/timeline_save_sheet';
 import { initTimelineOptionsSheetDirective } from './directives/timeline_options_sheet';
 import { initSavedObjectSaveAsCheckBoxDirective } from './directives/saved_object_save_as_checkbox';
@@ -62,9 +62,9 @@ import { initTimelineTabsDirective } from './components/timelinehelp_tabs_direct
 import { initTimelineTDeprecationDirective } from './components/timeline_deprecation_directive';
 import { initInputFocusDirective } from './directives/input_focus';
 import { Chart } from './directives/chart/chart';
-import { TimelineInterval } from './directives/timeline_interval/timeline_interval';
+import { TimelineInterval } from './directives/timeline-interval/timeline_interval';
 import { timelineExpInput } from './directives/timeline_expression_input';
-import { TimelineExpressionSuggestions } from './directives/timeline_expression_suggestions/timeline_expression_suggestions';
+import { TimelineExpressionSuggestions } from './directives/timeline-expression-suggestions/timeline_expression_suggestions';
 import { initSavedSheetService } from './services/saved_sheets';
 import { initTimelineAppState } from './timeline_app_state';
 

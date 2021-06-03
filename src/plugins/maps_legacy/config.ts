@@ -31,7 +31,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
-import { configSchema as tilemapSchema } from '../tile_map/config';
+import { configSchema as tilemapSchema } from '../tile-map/config';
 import { configSchema as regionmapSchema } from '../region_map/config';
 
 export const configSchema = schema.object({
