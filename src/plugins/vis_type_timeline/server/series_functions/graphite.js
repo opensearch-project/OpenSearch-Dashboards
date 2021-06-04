@@ -37,7 +37,7 @@ import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 import { isValidConfig } from './graphite_helper';
 
-const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
 You can always enable the default allowlist configuration.`;
 
 const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 

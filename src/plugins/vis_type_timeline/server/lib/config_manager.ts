@@ -42,9 +42,6 @@ export class ConfigManager {
   constructor(config: PluginInitializerContext['config']) {
     config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
       this.graphiteAllowedUrls = configUpdate.graphiteAllowedUrls || [];
-    });
-
-    config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
       this.graphiteBlockedIPs = configUpdate.graphiteBlockedIPs || [];
     });
 

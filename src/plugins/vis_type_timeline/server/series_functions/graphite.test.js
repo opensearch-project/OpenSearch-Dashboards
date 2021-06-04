@@ -34,7 +34,7 @@ const expect = require('chai').expect;
 
 import fn from './graphite';
 
-const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashbpards.yml file. 
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
 You can always enable the default allowlist configuration.`;
 
 const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 

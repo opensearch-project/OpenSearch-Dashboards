@@ -115,7 +115,7 @@
 #  //Loopback
 #  '127.0.0.0/8',
 #  '::1/128',
-#  // Link-local Address for IPv6
+#  //Link-local Address for IPv6
 #  'fe80::/10',
 #  //Private IP address for IPv4
 #  '10.0.0.0/8',
