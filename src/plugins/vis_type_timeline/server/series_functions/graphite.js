@@ -35,7 +35,7 @@ import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
-import { isValidConfig } from './graphite_helper';
+import { isValidConfig } from './helpers/graphite_helper';
 
 const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
 You can always enable the default allowlist configuration.`;
