@@ -20,9 +20,8 @@
 import { extent } from 'd3-array';
 
 import { ScaleType } from '../scales/constants';
-import { YDomainRange } from '../specs';
+import { DomainPaddingUnit, YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
-import { getPercentageValue } from './common';
 
 /** @public */
 export type OrdinalDomain = (number | string)[];
@@ -30,6 +29,27 @@ export type OrdinalDomain = (number | string)[];
 export type ContinuousDomain = [min: number, max: number];
 /** @public */
 export type Range = [min: number, max: number];
+
+/**
+ * Returns padded domain given constrain
+ * @internal */
+export function constrainPadding(
+  start: number,
+  end: number,
+  newStart: number,
+  newEnd: number,
+  constrain: boolean = true,
+): [number, number] {
+  if (constrain) {
+    if (start < end) {
+      return [start >= 0 && newStart < 0 ? 0 : newStart, end <= 0 && newEnd > 0 ? 0 : newEnd];
+    }
+
+    return [end >= 0 && newEnd < 0 ? 0 : newEnd, start <= 0 && newStart > 0 ? 0 : newStart];
+  }
+
+  return [newStart, newEnd];
+}
 
 /** @internal */
 export function computeOrdinalDataDomain(
@@ -48,15 +68,14 @@ export function computeOrdinalDataDomain(
   return sorted ? uniqueValues.sort((a, b) => `${a}`.localeCompare(`${b}`)) : uniqueValues;
 }
 
-function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange): [number, number] {
-  if (!domainOptions?.padding) {
+function getPaddedDomain(start: number, end: number, domainOptions?: YDomainRange): [number, number] {
+  if (!domainOptions || !domainOptions.padding || domainOptions.paddingUnit === DomainPaddingUnit.Pixel) {
     return [start, end];
   }
 
-  let computedPadding = 0;
-
-  const delta = Math.abs(end - start);
-  computedPadding = getPercentageValue(domainOptions.padding, delta, 0);
+  const { padding, paddingUnit = DomainPaddingUnit.Domain } = domainOptions;
+  const absPadding = Math.abs(padding);
+  const computedPadding = paddingUnit === DomainPaddingUnit.Domain ? absPadding : absPadding * Math.abs(end - start);
 
   if (computedPadding === 0) {
     return [start, end];
@@ -65,20 +84,19 @@ function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange
   const newStart = start - computedPadding;
   const newEnd = end + computedPadding;
 
-  if (domainOptions.constrainPadding ?? true) {
-    return [start >= 0 && newStart < 0 ? 0 : newStart, end <= 0 && newEnd > 0 ? 0 : newEnd];
-  }
-
-  return [newStart, newEnd];
+  return constrainPadding(start, end, newStart, newEnd, domainOptions.constrainPadding);
 }
 
 /** @internal */
 export function computeDomainExtent(
-  [start, end]: [number, number] | [undefined, undefined],
+  domain: [number, number] | [undefined, undefined],
   domainOptions?: YDomainRange,
 ): [number, number] {
-  if (start != null && end != null) {
-    const [paddedStart, paddedEnd] = getPaddedRange(start, end, domainOptions);
+  if (domain[0] == null || domain[1] == null) return [0, 0];
+
+  const inverted = domain[0] > domain[1];
+  const paddedDomain = (([start, end]: Range): Range => {
+    const [paddedStart, paddedEnd] = getPaddedDomain(start, end, domainOptions);
 
     if (paddedStart >= 0 && paddedEnd >= 0) {
       return domainOptions?.fit ? [paddedStart, paddedEnd] : [0, paddedEnd];
@@ -88,10 +106,9 @@ export function computeDomainExtent(
     }
 
     return [paddedStart, paddedEnd];
-  }
+  })(inverted ? (domain.slice().reverse() as Range) : domain);
 
-  // if either start or end are null
-  return [0, 0];
+  return inverted ? (paddedDomain.slice().reverse() as Range) : paddedDomain;
 }
 
 /**

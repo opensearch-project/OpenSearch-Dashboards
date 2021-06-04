@@ -28,7 +28,7 @@ import { getSpecDomainGroupId } from '../state/utils/spec';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { groupBy } from '../utils/group_data_series';
 import { DataSeries } from '../utils/series';
-import { BasicSeriesSpec, YDomainRange, SeriesType, StackMode } from '../utils/specs';
+import { BasicSeriesSpec, YDomainRange, SeriesType, StackMode, DomainPaddingUnit } from '../utils/specs';
 import { areAllNiceDomain } from './nice';
 import { YDomain } from './types';
 
@@ -70,13 +70,12 @@ function mergeYDomainForGroup(
   const [{ stackMode, spec }] = dataSeries;
   const groupId = getSpecDomainGroupId(spec);
   const { customDomain, type, nice, desiredTickCount } = yScaleConfig[groupId];
+  const newCustomDomain = customDomain ? { ...customDomain } : {};
 
   let domain: ContinuousDomain;
   if (stackMode === StackMode.Percentage) {
     domain = computeContinuousDataDomain([0, 1], identity, type, customDomain);
   } else {
-    const newCustomDomain = customDomain ? { ...customDomain } : {};
-
     // compute stacked domain
     const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs, type, newCustomDomain);
 
@@ -116,6 +115,8 @@ function mergeYDomainForGroup(
     logBase: customDomain?.logBase,
     logMinLimit: customDomain?.logMinLimit,
     desiredTickCount,
+    domainPixelPadding: newCustomDomain.paddingUnit === DomainPaddingUnit.Pixel ? newCustomDomain.padding : 0,
+    constrainDomainPadding: newCustomDomain.constrainPadding,
   };
 }
 

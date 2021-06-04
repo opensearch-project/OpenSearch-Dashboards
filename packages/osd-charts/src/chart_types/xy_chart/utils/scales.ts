@@ -123,22 +123,40 @@ interface YScaleOptions {
  */
 export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
   const { yDomains, range, integersOnly } = options;
-  return yDomains.reduce((yScales, { type, nice, desiredTickCount, domain, groupId, logBase, logMinLimit }) => {
-    const yScale = new ScaleContinuous(
+  return yDomains.reduce(
+    (
+      yScales,
       {
         type,
-        domain,
-        range,
         nice,
-      },
-      {
         desiredTickCount,
-        integersOnly,
+        domain,
+        groupId,
         logBase,
         logMinLimit,
+        domainPixelPadding,
+        constrainDomainPadding,
       },
-    );
-    yScales.set(groupId, yScale);
-    return yScales;
-  }, new Map<GroupId, Scale>());
+    ) => {
+      const yScale = new ScaleContinuous(
+        {
+          type,
+          domain,
+          range,
+          nice,
+        },
+        {
+          desiredTickCount,
+          integersOnly,
+          logBase,
+          logMinLimit,
+          domainPixelPadding,
+          constrainDomainPadding,
+        },
+      );
+      yScales.set(groupId, yScale);
+      return yScales;
+    },
+    new Map<GroupId, Scale>(),
+  );
 }

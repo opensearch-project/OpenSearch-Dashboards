@@ -45,4 +45,6 @@ export type YDomain = LogScaleOptions & {
   groupId: GroupId;
   domain: ContinuousDomain;
   desiredTickCount: number;
+  domainPixelPadding?: number;
+  constrainDomainPadding?: boolean;
 };

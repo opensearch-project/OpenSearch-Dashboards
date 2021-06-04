@@ -674,6 +674,16 @@ export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
     };
 };
 
+// @public
+export const DomainPaddingUnit: Readonly<{
+    Domain: "domain";
+    Pixel: "pixel";
+    DomainRatio: "domainRatio";
+}>;
+
+// @public
+export type DomainPaddingUnit = $Values<typeof DomainPaddingUnit>;
+
 // @public (undocumented)
 export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain | UnboundedDomainWithInterval;
 
@@ -2263,7 +2273,8 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
 export interface YDomainBase {
     constrainPadding?: boolean;
     fit?: boolean;
-    padding?: number | string;
+    padding?: number;
+    paddingUnit?: DomainPaddingUnit;
 }
 
 // @public (undocumented)

@@ -281,6 +281,43 @@ interface DomainBase {
 }
 
 /**
+ * Padding unit for domain
+ * @public
+ */
+export const DomainPaddingUnit = Object.freeze({
+  /**
+   * Raw value in the domain space.
+   *
+   * Example:
+   *
+   * If your domain is `[20, 40]` and your padding value is `10`.
+   * The resulting domain would be `[10, 50]`
+   */
+  Domain: 'domain' as const,
+  /**
+   * Spatial pixel value (aka screenspace) not dependent on domain.
+   *
+   * @alpha
+   */
+  Pixel: 'pixel' as const,
+  /**
+   * Ratio of total domain relative to domain space
+   *
+   * Example:
+   *
+   * If your domain is `[20, 40]` and your padding value is `0.1`.
+   * The resulting padding would be 2 (i.e. `0.1 * (40 - 20)`)
+   * resulting in a domain of `[18, 42]`
+   */
+  DomainRatio: 'domainRatio' as const,
+});
+/**
+ * Padding unit
+ * @public
+ */
+export type DomainPaddingUnit = $Values<typeof DomainPaddingUnit>;
+
+/**
  * Domain option that **only** apply to `yDomains`.
  * @public
  */
@@ -293,11 +330,18 @@ export interface YDomainBase {
    */
   fit?: boolean;
   /**
-   * Padding for computed domain. Positive pixel number or percent string.
+   * Padding for computed domain as positive number.
+   * Applied to domain __before__ nicing
    *
    * Setting `max` or `min` will override this functionality.
    */
-  padding?: number | string;
+  padding?: number;
+  /**
+   * Unit of padding dimension
+   *
+   * @defaultValue 'domain'
+   */
+  paddingUnit?: DomainPaddingUnit;
   /**
    * Constrains padded domain to the zero baseline.
    *

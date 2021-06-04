@@ -22,7 +22,18 @@ import { select, array, number, optionsKnob } from '@storybook/addon-knobs';
 import { SelectTypeKnobValue } from '@storybook/addon-knobs/dist/components/types';
 import { startCase, kebabCase } from 'lodash';
 
-import { Rotation, Position, Placement, TooltipProps, TooltipStickTo } from '../../src';
+import {
+  Rotation,
+  Position,
+  Placement,
+  TooltipProps,
+  SeriesType,
+  BarSeries,
+  LineSeries,
+  AreaSeries,
+  BubbleSeries,
+  TooltipStickTo,
+} from '../../src';
 import { TooltipType } from '../../src/specs/constants';
 import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/common';
 
@@ -271,3 +282,20 @@ export const getHorizontalTextAlignmentKnob = (group?: string) =>
     undefined,
     group,
   ) || undefined;
+
+const seriesTypeMap = {
+  [SeriesType.Bar]: BarSeries,
+  [SeriesType.Line]: LineSeries,
+  [SeriesType.Area]: AreaSeries,
+  [SeriesType.Bubble]: BubbleSeries,
+};
+export const getXYSeriesTypeKnob = (group?: string, ignore: SeriesType[] = []) => {
+  const spectType = select<SeriesType>(
+    'SeriesType',
+    Object.fromEntries(Object.entries(SeriesType).filter(([, type]) => !ignore.includes(type))),
+    SeriesType.Bar,
+    group,
+  );
+
+  return seriesTypeMap[spectType];
+};

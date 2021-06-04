@@ -18,6 +18,7 @@
  */
 
 import { ScaleType } from '../scales/constants';
+import { DomainPaddingUnit } from '../specs';
 import { AccessorFn } from './accessor';
 import { identity } from './common';
 import { computeContinuousDataDomain, computeDomainExtent, computeOrdinalDataDomain } from './domain';
@@ -212,6 +213,31 @@ describe('utils/domain', () => {
             10,
           ]);
         });
+      });
+    });
+
+    describe('padding units', () => {
+      // Note: domain pixel padding computed in continuous scale
+      it('should not change domain when using Pixel padding unit', () => {
+        expect(computeDomainExtent([5, 65], { fit: true, padding: 15, paddingUnit: DomainPaddingUnit.Pixel })).toEqual([
+          5,
+          65,
+        ]);
+      });
+      it('should handle DomainRatio padding unit', () => {
+        expect(
+          computeDomainExtent([50, 60], { fit: true, padding: 0.5, paddingUnit: DomainPaddingUnit.DomainRatio }),
+        ).toEqual([45, 65]);
+      });
+      it('should handle negative inverted DomainRatio padding unit', () => {
+        expect(
+          computeDomainExtent([-50, -60], { fit: true, padding: 0.5, paddingUnit: DomainPaddingUnit.DomainRatio }),
+        ).toEqual([-45, -65]);
+      });
+      it('should handle negative inverted Domain padding unit', () => {
+        expect(
+          computeDomainExtent([-50, -60], { fit: true, padding: 10, paddingUnit: DomainPaddingUnit.Domain }),
+        ).toEqual([-40, -70]);
       });
     });
   });

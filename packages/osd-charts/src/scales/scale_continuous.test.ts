@@ -431,6 +431,59 @@ describe('Scale Continuous', () => {
       });
     });
   });
+
+  describe('Domain pixel padding', () => {
+    const scaleOptions = Object.freeze({
+      type: ScaleType.Linear,
+      range: [0, 100] as Range,
+      domain: [10, 60],
+    });
+
+    it('should add pixel padding to domain', () => {
+      const scale = new ScaleContinuous(scaleOptions, { domainPixelPadding: 10 });
+      expect(scale.domain).toEqual([3.75, 66.25]);
+    });
+
+    it('should handle inverted domain pixel padding', () => {
+      const scale = new ScaleContinuous({ ...scaleOptions, domain: [60, 10] }, { domainPixelPadding: 10 });
+      expect(scale.domain).toEqual([66.25, 3.75]);
+    });
+
+    it('should handle negative domain pixel padding', () => {
+      const scale = new ScaleContinuous({ ...scaleOptions, domain: [-60, -20] }, { domainPixelPadding: 10 });
+      expect(scale.domain).toEqual([-65, -15]);
+    });
+
+    it('should handle negative inverted domain pixel padding', () => {
+      const scale = new ScaleContinuous({ ...scaleOptions, domain: [-20, -60] }, { domainPixelPadding: 10 });
+      expect(scale.domain).toEqual([-15, -65]);
+    });
+
+    it('should constrain pixel padding to zero', () => {
+      const scale = new ScaleContinuous(scaleOptions, { domainPixelPadding: 20 });
+      expect(scale.domain).toEqual([0, 75]);
+    });
+
+    it('should not constrain pixel padding to zero', () => {
+      const scale = new ScaleContinuous(scaleOptions, { domainPixelPadding: 18, constrainDomainPadding: false });
+      expect(scale.domain).toEqual([-4.0625, 74.0625]);
+    });
+
+    it('should nice domain after pixel padding is applied', () => {
+      const scale = new ScaleContinuous(
+        { ...scaleOptions, nice: true },
+        { domainPixelPadding: 18, constrainDomainPadding: false },
+      );
+      expect(scale.domain).toEqual([-10, 80]);
+    });
+
+    it('should not handle pixel padding when pixel is greater than half the total range', () => {
+      const criticalPadding = Math.abs(scaleOptions.range[0] - scaleOptions.range[1]) / 2;
+      const scale = new ScaleContinuous(scaleOptions, { domainPixelPadding: criticalPadding });
+      expect(scale.domain).toEqual(scaleOptions.domain);
+    });
+  });
+
   describe('ticks as integers or floats', () => {
     const domain: ContinuousDomain = [0, 7];
     const minRange = 0;

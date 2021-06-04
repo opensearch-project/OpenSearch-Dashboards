@@ -31,4 +31,8 @@ export const Y_SCALE_DEFAULT = {
   type: ScaleType.Linear,
   nice: false,
   desiredTickCount: 10,
+  constrainDomainPadding: undefined,
+  domainPixelPadding: 0,
+  logBase: undefined,
+  logMinLimit: undefined,
 };

@@ -50,7 +50,7 @@
     "test:integration:local": "LOCAL_VRT_SERVER=true PORT=9001 yarn test:integration",
     "test:integration:debug": "DEBUG=true yarn test:integration:local",
     "test:integration:legacy": "LEGACY_VRT_SERVER=true yarn test:integration",
-    "test:integration:local:legacy": "LOCAL_VRT_SERVER=true PORT=9002 test:integration:legacy",
+    "test:integration:local:legacy": "LOCAL_VRT_SERVER=true PORT=9002 yarn test:integration:legacy",
     "test:integration:generate": "yarn test:integration:generate:examples && yarn test:integration:generate:page",
     "test:integration:generate:examples": "./scripts/extract_examples.sh",
     "test:integration:generate:page": "./scripts/compile_vrt_page.sh",

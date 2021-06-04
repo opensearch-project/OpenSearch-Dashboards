@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { boolean, select, text } from '@storybook/addon-knobs';
+import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
+import { Axis, Chart, DomainPaddingUnit, LineSeries, Position, ScaleType } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { getKnobsFromEnum } from '../utils/knobs';
 
 export const Example = () => {
   const dg = new SeededDataGenerator();
@@ -48,13 +49,18 @@ export const Example = () => {
   const dataset = dataTypes[dataKey];
   const fit = boolean('fit Y domain to data', true);
   const constrainPadding = boolean('constrain padding', true);
-  const padding = text('domain padding', '10%');
+  const padding = number('domain padding', 0.1);
+  const paddingUnit = getKnobsFromEnum(
+    'Domain padding unit',
+    DomainPaddingUnit,
+    DomainPaddingUnit.DomainRatio as DomainPaddingUnit,
+  );
 
   return (
     <Chart className="story-chart">
       <Axis id="bottom" title="index" position={Position.Bottom} />
       <Axis
-        domain={{ fit, padding, constrainPadding }}
+        domain={{ fit, padding, paddingUnit, constrainPadding }}
         id="left"
         title="Value"
         position={Position.Left}

@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { boolean, select, text } from '@storybook/addon-knobs';
+import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType } from '../../src';
+import { Axis, Chart, DomainPaddingUnit, Position, ScaleType } from '../../src';
 import { computeContinuousDataDomain } from '../../src/utils/domain';
+import { getKnobsFromEnum, getXYSeriesTypeKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const logDomains = (data: any[], customDomain: any) => {
@@ -38,7 +39,13 @@ const logDomains = (data: any[], customDomain: any) => {
 export const Example = () => {
   const fit = boolean('fit Y domain to data', true);
   const constrainPadding = boolean('constrain padding', true);
-  const padding = text('domain padding', '0');
+  const nice = boolean('nice ticks', false);
+  const padding = number('domain padding', 0);
+  const paddingUnit = getKnobsFromEnum(
+    'Domain padding unit',
+    DomainPaddingUnit,
+    DomainPaddingUnit.Domain as DomainPaddingUnit,
+  );
   const mixed = [
     { x: 0, y: -4 },
     { x: 1, y: -3 },
@@ -58,6 +65,7 @@ export const Example = () => {
     },
     'all negative',
   );
+  const SeriesType = getXYSeriesTypeKnob();
   const shouldLogDomains = boolean('console log domains', true);
 
   let data;
@@ -71,7 +79,7 @@ export const Example = () => {
     default:
       data = mixed;
   }
-  const customDomain = { fit, padding, constrainPadding };
+  const customDomain = { fit, padding, paddingUnit, constrainPadding, nice };
 
   if (shouldLogDomains) {
     logDomains(data, customDomain);
@@ -81,15 +89,16 @@ export const Example = () => {
     <Chart className="story-chart">
       <Axis id="top" position={Position.Top} title="Top axis" />
       <Axis
-        id="left2"
+        id="left"
         domain={customDomain}
         title="Left axis"
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
 
-      <BarSeries
-        id="bars"
+      <SeriesType
+        id="series"
+        yNice={nice}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"

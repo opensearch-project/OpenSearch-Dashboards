@@ -178,4 +178,52 @@ describe('Bar series stories', () => {
       );
     });
   });
+
+  describe('domain padding', () => {
+    it('should allow domain space padding', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-yScaleDataToExtent=&knob-fit Y domain to data=true&knob-constrain padding=true&knob-domain padding=5&knob-Domain padding unit=domain&knob-data=all negative&knob-console log domains=true&knob-nice ticks=',
+      );
+    });
+    it('should allow pixel space padding', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-yScaleDataToExtent=&knob-fit Y domain to data=true&knob-constrain padding=true&knob-domain padding=100&knob-Domain padding unit=pixel&knob-data=all negative&knob-console log domains=true&knob-nice ticks=',
+      );
+    });
+    it('should apply padding with positive and negative values', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-fit Y domain to data=true&knob-constrain padding=true&knob-nice ticks=&knob-domain padding=50&knob-Domain padding unit=pixel&knob-data=mixed&knob-SeriesType=bar&knob-console log domains=true',
+      );
+    });
+    it('should apply padding within intersept - positive values', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-fit Y domain to data=true&knob-constrain padding=true&knob-nice ticks=&knob-domain padding=50&knob-Domain padding unit=pixel&knob-data=all positive&knob-SeriesType=line&knob-console log domains=true',
+      );
+    });
+    it('should constrain padding to intersept - positive values', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-fit Y domain to data=true&knob-constrain padding=true&knob-nice ticks=&knob-domain padding=100&knob-Domain padding unit=pixel&knob-data=all positive&knob-SeriesType=line&knob-console log domains=true',
+      );
+    });
+    it('should apply padding within intersept - negative values', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-fit Y domain to data=true&knob-constrain padding=true&knob-nice ticks=&knob-domain padding=50&knob-Domain padding unit=pixel&knob-data=all negative&knob-SeriesType=line&knob-console log domains=true',
+      );
+    });
+    it('should constrain padding to intersept - negative values', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-fit Y domain to data=true&knob-constrain padding=true&knob-nice ticks=&knob-domain padding=100&knob-Domain padding unit=pixel&knob-data=all negative&knob-SeriesType=line&knob-console log domains=true',
+      );
+    });
+    it('should allow domain ratio padding', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-yScaleDataToExtent=&knob-fit Y domain to data=true&knob-constrain padding=true&knob-domain padding=0.5&knob-Domain padding unit=domainRatio&knob-data=all negative&knob-console log domains=true&knob-nice ticks=',
+      );
+    });
+    it('should nice ticks after domain padding is applied', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--scale-to-extent&knob-yScaleDataToExtent=&knob-fit Y domain to data=true&knob-constrain padding=&knob-domain padding=100&knob-Domain padding unit=pixel&knob-data=all negative&knob-console log domains=true&knob-nice ticks=true',
+      );
+    });
+  });
 });
