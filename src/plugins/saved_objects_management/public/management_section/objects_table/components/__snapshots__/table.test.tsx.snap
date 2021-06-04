@@ -157,7 +157,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               Object {
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
-                "icon": "dqlSelector",
+                "icon": "kqlSelector",
                 "name": "Relationships",
                 "onClick": [Function],
                 "type": "icon",
@@ -373,7 +373,7 @@ exports[`Table should render normally 1`] = `
               Object {
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
-                "icon": "dqlSelector",
+                "icon": "kqlSelector",
                 "name": "Relationships",
                 "onClick": [Function],
                 "type": "icon",
