@@ -17,7 +17,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
       className="osdSuggestionItem__type"
     >
       <EuiIcon
-        type="dqlValue"
+        type="kqlValue"
       />
     </div>
     <div
@@ -52,7 +52,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
       className="osdSuggestionItem__type"
     >
       <EuiIcon
-        type="dqlValue"
+        type="kqlValue"
       />
     </div>
     <div
