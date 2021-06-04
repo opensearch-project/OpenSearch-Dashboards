@@ -38,15 +38,15 @@ import { QuerySuggestion } from '../../autocomplete';
 function getEuiIconType(type: string) {
   switch (type) {
     case 'field':
-      return 'dqlField';
+      return 'kqlField';
     case 'value':
-      return 'dqlValue';
+      return 'kqlValue';
     case 'recentSearch':
       return 'search';
     case 'conjunction':
-      return 'dqlSelector';
+      return 'kqlSelector';
     case 'operator':
-      return 'dqlOperand';
+      return 'kqlOperand';
     default:
       throw new Error(`Unknown type: ${type}`);
   }
