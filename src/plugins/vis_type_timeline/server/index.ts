@@ -45,6 +45,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('timeline_vis.enabled', 'vis_type_timeline.enabled'),
     renameFromRoot('timeline.enabled', 'vis_type_timeline.enabled'),
     renameFromRoot('timeline.graphiteUrls', 'vis_type_timeline.graphiteUrls'),
+    renameFromRoot('vis_type_timeline.graphiteUrls', 'vis_type_timeline.graphiteAllowedUrls'),
     renameFromRoot('timeline.ui.enabled', 'vis_type_timeline.ui.enabled', true),
   ],
 };

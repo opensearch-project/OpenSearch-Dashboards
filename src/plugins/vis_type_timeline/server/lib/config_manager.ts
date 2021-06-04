@@ -36,11 +36,13 @@ import { configSchema } from '../../config';
 
 export class ConfigManager {
   private opensearchShardTimeout: number = 0;
-  private graphiteUrls: string[] = [];
+  private graphiteAllowedUrls: string[] = [];
+  private graphiteBlockedIPs: string[] = [];
 
   constructor(config: PluginInitializerContext['config']) {
     config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
-      this.graphiteUrls = configUpdate.graphiteUrls || [];
+      this.graphiteAllowedUrls = configUpdate.graphiteAllowedUrls || [];
+      this.graphiteBlockedIPs = configUpdate.graphiteBlockedIPs || [];
     });
 
     config.legacy.globalConfig$.subscribe((configUpdate) => {
@@ -52,7 +54,11 @@ export class ConfigManager {
     return this.opensearchShardTimeout;
   }
 
-  getGraphiteUrls() {
-    return this.graphiteUrls;
+  getGraphiteAllowedUrls() {
+    return this.graphiteAllowedUrls;
+  }
+
+  getGraphiteBlockedIPs() {
+    return this.graphiteBlockedIPs;
   }
 }
