@@ -1,3 +1,26 @@
+# [30.0.0](https://github.com/elastic/elastic-charts/compare/v29.2.0...v30.0.0) (2021-06-04)
+
+
+### Bug Fixes
+
+* **domain:** custom domain should not filter data ([#1181](https://github.com/elastic/elastic-charts/issues/1181)) ([76e8dca](https://github.com/elastic/elastic-charts/commit/76e8dcafd11452359ff54c8e05eeafa45c380c6a)), closes [#1129](https://github.com/elastic/elastic-charts/issues/1129)
+* **value_labels:** zero as a valid value for textBorder and borderWidth ([#1182](https://github.com/elastic/elastic-charts/issues/1182)) ([a64f333](https://github.com/elastic/elastic-charts/commit/a64f33321d80ea70d3010da50e6c8f9f9bf23620))
+* annotation tooltip display when remounting specs ([#1167](https://github.com/elastic/elastic-charts/issues/1167)) ([8408600](https://github.com/elastic/elastic-charts/commit/840860019a78896dbde91372b2445da9b6e8403e))
+* render nodeLabel formatted text into the nodes ([#1173](https://github.com/elastic/elastic-charts/issues/1173)) ([b44bdff](https://github.com/elastic/elastic-charts/commit/b44bdff9049802968d095d440a874daa904d6f1e))
+
+
+### Features
+
+* **axis:** allow pixel domain padding for y axes  ([#1145](https://github.com/elastic/elastic-charts/issues/1145)) ([7c1fa8e](https://github.com/elastic/elastic-charts/commit/7c1fa8e817c997eaa0c232db3b15ce92baf35a59))
+* apply value formatter to the default legend item label ([#1190](https://github.com/elastic/elastic-charts/issues/1190)) ([71474a5](https://github.com/elastic/elastic-charts/commit/71474a5b7a12d522196ea71d866a572caa2fbf1f))
+* **tooltip:** stickTo vertical middle of the cursor ([#1163](https://github.com/elastic/elastic-charts/issues/1163)) ([380363b](https://github.com/elastic/elastic-charts/commit/380363bfb8fc02a3eb22d5832edddba76438314d)), closes [#1108](https://github.com/elastic/elastic-charts/issues/1108)
+* **wordcloud:** click and over events on text ([#1180](https://github.com/elastic/elastic-charts/issues/1180)) ([196fb6a](https://github.com/elastic/elastic-charts/commit/196fb6a644333ff16ccf1729b1aaa7d0a92fe21d)), closes [#1156](https://github.com/elastic/elastic-charts/issues/1156)
+
+
+### BREAKING CHANGES
+
+* **value_labels:** the `textBorder` of `ValueFillDefinition` is now optional or a number only
+
 # [29.2.0](https://github.com/elastic/elastic-charts/compare/v29.1.0...v29.2.0) (2021-05-25)
 
 
