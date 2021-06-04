@@ -34,7 +34,16 @@ const expect = require('chai').expect;
 
 import fn from './graphite';
 
-jest.mock('node-fetch', () => () => {
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
+You can always enable the default allowlist configuration.`;
+
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
+Please update your config from OpenSearch Dashboards's Advanced Setting.`;
+
+jest.mock('node-fetch', () => (url) => {
+  if (url.includes('redirect')) {
+    return Promise.reject(new Error('maximum redirect reached at: ' + url));
+  }
   return Promise.resolve({
     json: function () {
       return [
@@ -56,21 +65,146 @@ import invoke from './helpers/invoke_series_fn.js';
 
 describe('graphite', function () {
   it('should wrap the graphite response up in a seriesList', function () {
-    return invoke(fn, []).then(function (result) {
+    return invoke(fn, [], {
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: [],
+    }).then(function (result) {
       expect(result.output.list[0].data[0][1]).to.eql(3);
       expect(result.output.list[0].data[1][1]).to.eql(14);
     });
   });
 
   it('should convert the seconds to milliseconds', function () {
-    return invoke(fn, []).then(function (result) {
+    return invoke(fn, [], {
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: [],
+    }).then(function (result) {
       expect(result.output.list[0].data[1][0]).to.eql(2000 * 1000);
     });
   });
 
   it('should set the label to that of the graphite target', function () {
-    return invoke(fn, []).then(function (result) {
+    return invoke(fn, [], {
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: [],
+    }).then(function (result) {
       expect(result.output.list[0].label).to.eql('__beer__');
+    });
+  });
+
+  it('should return error message if both allowlist and blocklist are disabled', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: [],
+    }).catch((e) => {
+      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+    });
+  });
+
+  it('setting with matched allowlist url should return result', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timeline:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+      },
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: [],
+    }).then((result) => {
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with unmatched allowlist url should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: [],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with matched blocklist url should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with matched blocklist localhost should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://localhost' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with unmatched blocklist https url should return result', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).then((result) => {
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with unmatched blocklist ftp url should return result', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'ftp://www.opensearch.org' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).then((result) => {
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('setting with invalid url should return error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'www.opensearch.org' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+    });
+  });
+
+  it('setting with redirection error message', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/redirect' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.includes('maximum redirect reached');
+    });
+  });
+
+  it('with both allowlist and blocklist, setting not in blocklist but in allowlist should return result', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timeline:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+      },
+      allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).then((result) => {
+      expect(result.output.list.length).to.eql(1);
+    });
+  });
+
+  it('with conflict allowlist and blocklist, setting in blocklist and in allowlist should return error message', function () {
+    return invoke(fn, [], {
+      settings: {
+        'timeline:graphite.url': 'http://127.0.0.1',
+      },
+      allowedGraphiteUrls: ['http://127.0.0.1'],
+      blockedGraphiteIPs: ['127.0.0.0/8'],
+    }).catch((e) => {
+      expect(e.message).to.eql(INVALID_URL_MESSAGE);
     });
   });
 });
