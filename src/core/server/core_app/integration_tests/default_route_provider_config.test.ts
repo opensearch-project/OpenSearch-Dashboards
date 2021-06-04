@@ -32,16 +32,15 @@
 import * as osdTestServer from '../../../test_helpers/osd_server';
 import { Root } from '../../root';
 
-const { startOpenSearch } = osdTestServer.createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
 let opensearchServer: osdTestServer.TestOpenSearchUtils;
 
-// FLAKY: https://github.com/elastic/kibana/issues/81072
-describe.skip('default route provider', () => {
+describe('default route provider', () => {
   let root: Root;
 
   beforeAll(async () => {
+    const { startOpenSearch } = osdTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
     opensearchServer = await startOpenSearch();
     root = osdTestServer.createRootWithCorePlugins({
       server: {
@@ -54,8 +53,20 @@ describe.skip('default route provider', () => {
   });
 
   afterAll(async () => {
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
+      .send({ value: '/app/home' });
     await opensearchServer.stop();
     await root.shutdown();
+  });
+
+  // TODO: [RENAMEME] Temporary code for backwards compatibility.
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/334
+  beforeEach(async () => {
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
+      .send({ value: '/app/home' })
+      .expect(200);
   });
 
   it('redirects to the configured default route respecting basePath', async function () {
@@ -99,6 +110,47 @@ describe.skip('default route provider', () => {
     expect(status).toEqual(302);
     expect(header).toMatchObject({
       location: '/hello/valid',
+    });
+  });
+
+  // TODO: [RENAMEME] Temporary code for backwards compatibility.
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/334
+  it('replaces kibana_overview', async function () {
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
+      .send({ value: '/kibana_overview' })
+      .expect(200);
+
+    const { status, header } = await osdTestServer.request.get(root, '/');
+    expect(status).toEqual(302);
+    expect(header).toMatchObject({
+      location: '/hello/opensearch_dashboards_overview',
+    });
+  });
+
+  it('replaces kibana_overview#', async function () {
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
+      .send({ value: '/kibana_overview#' })
+      .expect(200);
+
+    const { status, header } = await osdTestServer.request.get(root, '/');
+    expect(status).toEqual(302);
+    expect(header).toMatchObject({
+      location: '/hello/opensearch_dashboards_overview#',
+    });
+  });
+
+  it('does not replace kibana', async function () {
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
+      .send({ value: '/kibana' })
+      .expect(200);
+
+    const { status, header } = await osdTestServer.request.get(root, '/');
+    expect(status).toEqual(302);
+    expect(header).toMatchObject({
+      location: '/hello/kibana',
     });
   });
 });
