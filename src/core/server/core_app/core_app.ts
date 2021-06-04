@@ -52,7 +52,10 @@ export class CoreApp {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter('/');
     router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+      let defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+      // TODO: [RENAMEME] Temporary code for backwards compatibility.
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/334
+      defaultRoute = defaultRoute.replace('kibana_overview', 'opensearch_dashboards_overview');
       const basePath = httpSetup.basePath.get(req);
       const url = `${basePath}${defaultRoute}`;
 
