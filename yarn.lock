@@ -9918,9 +9918,9 @@ es6-promise-pool@^2.5.0:
   integrity sha1-FHxhKza0fxBQJ/nSv1SlmKmdnMs=
 
 es6-promise@^4.0.3, es6-promise@^4.2.5:
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.6.tgz#b685edd8258886365ea62b57d30de28fadcd974f"
-  integrity sha512-aRVgGdnmW2OiySVPUC9e6m+plolMAJKjZnQlCwNSuK5yQ0JN61DZSO1X1Ufd1foqWRAlig0rhduTCHe7sVtK5Q==
+  version "4.2.8"
+  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
+  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
 
 es6-promisify@^5.0.0:
   version "5.0.0"
@@ -15997,9 +15997,11 @@ locate-path@^5.0.0:
     p-locate "^4.1.0"
 
 locutus@^2.0.5:
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/locutus/-/locutus-2.0.10.tgz#f903619466a98a4ab76e8b87a5854b55a743b917"
-  integrity sha512-AZg2kCqrquMJ5FehDsBidV0qHl98NrsYtseUClzjAQ3HFnsDBJTCwGVplSQ82t9/QfgahqvTjaKcZqZkHmS0wQ==
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/locutus/-/locutus-2.0.14.tgz#53d259ac7200b0621ed4e5604b6c49993415a455"
+  integrity sha512-0H1o1iHNEp3kJ5rW57bT/CAP5g6Qm0Zd817Wcx2+rOMTYyIJoc482Ja1v9dB6IUjwvWKcBNdYi7x2lRXtlJ3bA==
+  dependencies:
+    es6-promise "^4.2.5"
 
 lodash-es@^4.17.11:
   version "4.17.15"
