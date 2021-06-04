@@ -44,7 +44,7 @@ export const computeLegendSelector = createCachedSelector(
 
       return {
         color,
-        label: `> ${tick}`,
+        label: `> ${spec.valueFormatter ? spec.valueFormatter(tick) : tick}`,
         seriesIdentifiers: [seriesIdentifier],
         isSeriesHidden: deselectedDataSeries.some((dataSeries) => dataSeries.key === seriesIdentifier.key),
         isToggleable: true,
