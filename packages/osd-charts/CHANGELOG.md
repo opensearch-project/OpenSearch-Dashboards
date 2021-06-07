@@ -20,6 +20,9 @@
 ### BREAKING CHANGES
 
 * **value_labels:** the `textBorder` of `ValueFillDefinition` is now optional or a number only
+* **axis:** `domain.padding` now only takes a `number` value. If you are using a percent-based padding such as `'10%'` please set `domain.padding` to `0.1` and `domain.paddingUnit` to `DomainPaddingUnit.DomainRatio`.
+* **axis:** `yScaleToDataExtent` is removed in favor of `domain.fit`. The functionality is the
+same.
 
 # [29.2.0](https://github.com/elastic/elastic-charts/compare/v29.1.0...v29.2.0) (2021-05-25)
 
