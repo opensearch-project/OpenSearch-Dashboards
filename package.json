@@ -79,6 +79,7 @@
     "**/fast-deep-equal": "^3.1.1",
     "**/graphql-toolkit/lodash": "^4.17.15",
     "**/hoist-non-react-statics": "^3.3.2",
+    "**/immer": "^8.0.1",
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-instrumenter-loader/schema-utils": "^1.0.0",
     "**/load-grunt-config/lodash": "^4.17.20",
