@@ -180,6 +180,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
+      optimizedHealthcheck: false,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -203,6 +204,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
+      optimizedHealthcheck: false,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -231,6 +233,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
+      optimizedHealthcheck: false,
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -244,7 +247,11 @@ describe('pollOpenSearchNodesVersion', () => {
       });
   });
 
-  it('starts polling immediately and then every opensearchVersionCheckInterval', () => {
+  /*
+   * Disable TestScheduler test due to OOM issue,
+   * refer to https://rxjs.dev/guide/testing/marble-testing#known-issues
+   */
+  it.skip('starts polling immediately and then every opensearchVersionCheckInterval', () => {
     expect.assertions(1);
 
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
@@ -261,6 +268,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
       const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
+        optimizedHealthcheck: false,
         opensearchVersionCheckInterval: 100,
         ignoreVersionMismatch: false,
         opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -282,7 +290,7 @@ describe('pollOpenSearchNodesVersion', () => {
     });
   });
 
-  it('waits for opensearch version check requests to complete before scheduling the next one', () => {
+  it.skip('waits for opensearch version check requests to complete before scheduling the next one', () => {
     expect.assertions(2);
 
     getTestScheduler().run(({ expectObservable }) => {
@@ -299,6 +307,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
       const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
+        optimizedHealthcheck: false,
         opensearchVersionCheckInterval: 10,
         ignoreVersionMismatch: false,
         opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,

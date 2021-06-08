@@ -72,6 +72,7 @@ test('set correct defaults', () => {
       ],
       "ignoreVersionMismatch": false,
       "logQueries": false,
+      "optimizedHealthcheck": false,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [

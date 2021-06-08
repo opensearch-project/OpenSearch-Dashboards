@@ -34,6 +34,10 @@
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
+# Setting for an optimized healthcheck that only uses the local opensearch node to do dashboards healthcheck. 
+# It requires the user to create an opensearch node attribute called 'cluster_id' that assigns all nodes of the same cluster an integer value that increments with each new cluster that is spun up
+#opensearch.optimizedHealthcheck: false
+
 # If your OpenSearch is protected with basic authentication, these settings provide
 # the username and password that the OpenSearch Dashboards server uses to perform maintenance on the OpenSearch Dashboards
 # index at startup. Your OpenSearch Dashboards users still need to authenticate with OpenSearch, which
