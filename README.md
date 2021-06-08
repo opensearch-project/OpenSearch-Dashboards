@@ -23,7 +23,7 @@ Here are the principles we use to guide our development.  From [opensearch.org](
 >
 >**5. Made with your input**. We will ask for public input on direction, requirements, and implementation for any feature we build.
 >
->**6. Open to contributions**. Great open source software is built together, with a diverse community of contributors. If you want to get involved at any level big, small, or huge we will find a way to make that happen. We don’t know what that looks like yet, and we look forward to figuring it out together.
+>**6. Open to contributions**. Great open source software is built together, with a diverse community of contributors. If you want to get involved at any level—big, small, or huge—we will find a way to make that happen. We don’t know what that looks like yet, and we look forward to figuring it out together.
 >
 >**7. Respectful, approachable, and friendly**. This will be a community where you will be heard, accepted, and valued, whether you are a new or experienced user or contributor.
 >
