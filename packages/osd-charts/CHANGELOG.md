@@ -1,3 +1,10 @@
+# [30.1.0](https://github.com/elastic/elastic-charts/compare/v30.0.0...v30.1.0) (2021-06-08)
+
+
+### Features
+
+* **a11y:** add textures to fill options ([#1138](https://github.com/elastic/elastic-charts/issues/1138)) ([fd0479f](https://github.com/elastic/elastic-charts/commit/fd0479fa5d0e84d842fa40d77db815325d39fa31))
+
 # [30.0.0](https://github.com/elastic/elastic-charts/compare/v29.2.0...v30.0.0) (2021-06-04)
 
 
