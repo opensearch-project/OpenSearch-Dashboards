@@ -19,8 +19,8 @@
 
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { Axis, BarSeries, Chart, Position, ScaleType } from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 // for testing purposes only

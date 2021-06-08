@@ -20,7 +20,16 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import { AreaSeries, Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../packages/charts/src';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),

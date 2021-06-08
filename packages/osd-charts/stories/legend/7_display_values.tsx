@@ -20,8 +20,8 @@
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings } from '../../src';
-import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings } from '../../packages/charts/src';
+import { TSVB_DATASET } from '../../packages/charts/src/utils/data_samples/test_dataset_tsvb';
 import { arrayKnobs } from '../utils/knobs';
 
 export const Example = () => {

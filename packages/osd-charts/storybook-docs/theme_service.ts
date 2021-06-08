@@ -18,9 +18,9 @@
  */
 
 // @ts-ignore
-import themeDark from '../src/theme_dark.scss?lazy';
+import themeDark from '../packages/charts/src/theme_dark.scss?lazy';
 // @ts-ignore
-import themeLight from '../src/theme_light.scss?lazy';
+import themeLight from '../packages/charts/src/theme_light.scss?lazy';
 
 export function switchTheme(theme: string) {
   switch (theme) {

@@ -31,8 +31,8 @@ import {
   Settings,
   HistogramBarSeries,
   BrushEndListener,
-} from '../../src';
-import { isVerticalRotation } from '../../src/chart_types/xy_chart/state/utils/common';
+} from '../../packages/charts/src';
+import { isVerticalRotation } from '../../packages/charts/src/chart_types/xy_chart/state/utils/common';
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {

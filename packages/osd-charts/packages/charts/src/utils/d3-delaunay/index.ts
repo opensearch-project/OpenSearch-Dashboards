@@ -1,5 +1,3 @@
-/* eslint-disable file-header/file-header */
-
 /**
  * @notice
  * This product includes code that is adapted d3-delaunay@5.2.1,

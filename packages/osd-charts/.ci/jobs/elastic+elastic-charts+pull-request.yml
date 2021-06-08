@@ -13,7 +13,7 @@
           allow-whitelist-orgs-as-admins: true
           trigger-phrase: '(.*(?:jenkins\W+)?test\W+(?:this|it)(?:\W+please)?.*)|^retest$'
           github-hooks: true
-          status-context: "@elastic/charts CI"
+          status-context: '@elastic/charts CI'
           cancel-builds-on-update: true
     builders:
       - multijob:

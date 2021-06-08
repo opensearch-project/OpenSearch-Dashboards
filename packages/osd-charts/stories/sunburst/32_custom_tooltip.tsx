@@ -20,9 +20,9 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, Settings, CustomTooltip } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
-import { mocks } from '../../src/mocks/hierarchical';
+import { Chart, Datum, Partition, PartitionLayout, Settings, CustomTooltip } from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { getPlacementKnob, getFallbackPlacementsKnob, getBoundaryKnob } from '../utils/knobs';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s, regionLookup } from '../utils/utils';

@@ -20,8 +20,8 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, DomainPaddingUnit, LineSeries, Position, ScaleType } from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+import { Axis, Chart, DomainPaddingUnit, LineSeries, Position, ScaleType } from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { getKnobsFromEnum } from '../utils/knobs';
 
 export const Example = () => {

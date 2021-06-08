@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PartitionLayout, Position } from '../../src';
+import { PartitionLayout, Position } from '../../packages/charts/src';
 import { common } from '../page_objects';
 
 describe('Legend stories', () => {

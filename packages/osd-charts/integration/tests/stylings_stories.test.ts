@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SeriesType } from '../../src';
+import { SeriesType } from '../../packages/charts/src';
 import { common } from '../page_objects';
 
 describe('Stylings stories', () => {

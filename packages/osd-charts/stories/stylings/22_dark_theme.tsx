@@ -33,8 +33,8 @@ import {
   LIGHT_THEME,
   DARK_THEME,
   TooltipType,
-} from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+} from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { switchTheme } from '../../storybook/theme_service';
 
 const dg = new SeededDataGenerator();

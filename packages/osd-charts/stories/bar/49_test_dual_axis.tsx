@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../packages/charts/src';
 
 export const Example = () => {
   const stack13 = boolean('Stack bars1 and bars3', true);

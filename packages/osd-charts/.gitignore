@@ -1,14 +1,14 @@
 .idea
-node_modules/
+**/node_modules/
 test/spec/screenshots/baseline/**/*.png
 test/spec/screenshots/diff/**/*.png
 test/spec/screenshots/screen/**/*.png
 test/failure-screenshots/**/*.png
 
 reports/
-tmp/
+**/tmp/
 .temp/
-dist/
+**/dist/
 coverage/
 .out/
 .idea
@@ -18,6 +18,6 @@ coverage/
 .yo-rc.json
 npm-debug.log
 yarn-error.log
-./playground/playground.tsx
+playground/playground.tsx
 
 **/__diff_output__/

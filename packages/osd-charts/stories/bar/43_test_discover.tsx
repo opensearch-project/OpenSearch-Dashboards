@@ -29,7 +29,7 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
-} from '../../src';
+} from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const TEST_DATASET_DISCOVER = {

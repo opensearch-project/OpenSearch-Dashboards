@@ -20,9 +20,18 @@
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Placement, Position, ScaleType, Settings, timeFormatter } from '../../src';
-import { isDefined } from '../../src/utils/common';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Placement,
+  Position,
+  ScaleType,
+  Settings,
+  timeFormatter,
+} from '../../packages/charts/src';
+import { isDefined } from '../../packages/charts/src/utils/common';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 import { getChartRotationKnob, getPlacementKnob, getStickToKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 

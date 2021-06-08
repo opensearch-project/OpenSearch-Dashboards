@@ -22,8 +22,16 @@ import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter, TickFormatter } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import {
+  Axis,
+  Chart,
+  LineSeries,
+  Position,
+  ScaleType,
+  niceTimeFormatter,
+  TickFormatter,
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();

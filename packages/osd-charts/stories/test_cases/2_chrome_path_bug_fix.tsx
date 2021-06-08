@@ -20,7 +20,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { AreaSeries, Chart, ScaleType, Settings } from '../../src';
+import { AreaSeries, Chart, ScaleType, Settings } from '../../packages/charts/src';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const Example = () => {

@@ -21,7 +21,7 @@ import { action } from '@storybook/addon-actions';
 import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Position, Settings, Partition, PartitionLayout } from '../../src';
+import { Chart, Position, Settings, Partition, PartitionLayout } from '../../packages/charts/src';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import {
   indexInterpolatedFillColor,

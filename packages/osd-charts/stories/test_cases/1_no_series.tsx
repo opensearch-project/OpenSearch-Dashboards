@@ -21,7 +21,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { boolean, text } from '@storybook/addon-knobs';
 import React, { FC } from 'react';
 
-import { Chart, Settings, Axis, Position } from '../../src';
+import { Chart, Settings, Axis, Position } from '../../packages/charts/src';
 
 const NoResults: FC<{ msg: string }> = ({ msg }) => (
   <EuiFlexItem>

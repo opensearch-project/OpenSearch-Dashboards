@@ -133,9 +133,10 @@ const restorePackage = async (appDir, packageName, debug) => {
   }
 };
 
-const linkPackage = async (target, linkPath, packageName) => {
+const linkPackage = async (cwd, target, linkPath, packageName) => {
   const linkPackagePath = path.join(linkPath, 'node_modules', packageName);
-  const relativeLinkPath = path.relative(target, linkPackagePath);
+  const relativeLinkPath = path.relative(cwd, linkPackagePath);
+
   if (await exists(linkPackagePath)) {
     await fs.promises.rm(linkPackagePath, { recursive: true, force: true });
   }

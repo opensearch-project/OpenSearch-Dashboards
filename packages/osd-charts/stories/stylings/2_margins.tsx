@@ -20,7 +20,7 @@
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../packages/charts/src';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
   return number(

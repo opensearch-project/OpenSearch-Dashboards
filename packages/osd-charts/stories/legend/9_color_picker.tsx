@@ -32,8 +32,8 @@ import {
   Color,
   SeriesKey,
   toEntries,
-} from '../../src';
-import { BARCHART_1Y1G } from '../../src/utils/data_samples/test_dataset';
+} from '../../packages/charts/src';
+import { BARCHART_1Y1G } from '../../packages/charts/src/utils/data_samples/test_dataset';
 
 const onChangeAction = action('onChange');
 const onCloseAction = action('onClose');

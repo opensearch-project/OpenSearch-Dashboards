@@ -20,7 +20,7 @@
 import { DateTime } from 'luxon';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
+import { Axis, Chart, LineSeries, Position, ScaleType } from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => (

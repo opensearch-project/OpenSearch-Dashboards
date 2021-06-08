@@ -20,8 +20,8 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import React, { useRef } from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipProps } from '../../src';
-import { getRandomNumberGenerator, SeededDataGenerator } from '../../src/mocks/utils';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipProps } from '../../packages/charts/src';
+import { getRandomNumberGenerator, SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();

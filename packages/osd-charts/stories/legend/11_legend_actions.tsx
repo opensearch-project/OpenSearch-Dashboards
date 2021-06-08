@@ -41,8 +41,8 @@ import {
   LegendAction,
   XYChartSeriesIdentifier,
   LegendColorPicker,
-} from '../../src';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+} from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
 import { getPositionKnob, getEuiPopoverPositionKnob } from '../utils/knobs';
 
 const getAction = (anchorPosition: PopoverAnchorPosition): LegendAction => ({ series, label }) => {

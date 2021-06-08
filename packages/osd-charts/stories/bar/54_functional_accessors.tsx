@@ -21,8 +21,17 @@ import { action } from '@storybook/addon-actions';
 import { text } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, AccessorFn, ElementClickListener } from '../../src';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  AccessorFn,
+  ElementClickListener,
+} from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

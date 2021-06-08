@@ -34,9 +34,9 @@ import {
   AreaSeries,
   BubbleSeries,
   TooltipStickTo,
-} from '../../src';
-import { TooltipType } from '../../src/specs/constants';
-import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/common';
+} from '../../packages/charts/src';
+import { TooltipType } from '../../packages/charts/src/specs/constants';
+import { VerticalAlignment, HorizontalAlignment } from '../../packages/charts/src/utils/common';
 
 export const getPositiveNumberKnob = (name: string, value: number, groupId?: string) =>
   number(name, value, { min: 0 }, groupId);

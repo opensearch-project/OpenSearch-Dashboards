@@ -9,9 +9,9 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
-} from '../../src/';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
-import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
+import { TSVB_DATASET } from '../../packages/charts/src/utils/data_samples/test_dataset_tsvb';
 
 <Meta title="Types of charts/Line Charts/Basic and with axes" />
 
@@ -53,7 +53,7 @@ The data is generated from kibana metrics data
 ```
 </details>
 
-Here is a `linear x axis` line chart 
+Here is a `linear x axis` line chart
 
 <Chart className={'story-chart'}>
     <Axis
@@ -82,9 +82,9 @@ Here is a `linear x axis` line chart
 
 ***
 
-## The code sample of this chart can be found below 
+## The code sample of this chart can be found below
 
-Notice how the `<Axis position={Position.Left}/>` includes a tickFormat prop to achieve the percentages. 
+Notice how the `<Axis position={Position.Left}/>` includes a tickFormat prop to achieve the percentages.
 
 <details>
 
@@ -121,5 +121,5 @@ Notice how the `<Axis position={Position.Left}/>` includes a tickFormat prop to 
 
 ***
 
-The props table for line charts can be found in the `Chart References > Prop Tables` section 
+The props table for line charts can be found in the `Chart References > Prop Tables` section
 Also, check out the `Stacked Charts` section for an example of stacked line charts.

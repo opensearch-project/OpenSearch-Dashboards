@@ -19,7 +19,7 @@
 
 import numeral from 'numeral';
 
-import { LogBase } from '../../src/scales/scale_continuous';
+import { LogBase } from '../../packages/charts/src/scales/scale_continuous';
 
 const superStringMap: Record<string, string> = {
   0: '⁰',

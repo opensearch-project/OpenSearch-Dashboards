@@ -20,8 +20,8 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, DomainPaddingUnit, Position, ScaleType } from '../../src';
-import { computeContinuousDataDomain } from '../../src/utils/domain';
+import { Axis, Chart, DomainPaddingUnit, Position, ScaleType } from '../../packages/charts/src';
+import { computeContinuousDataDomain } from '../../packages/charts/src/utils/domain';
 import { getKnobsFromEnum, getXYSeriesKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 

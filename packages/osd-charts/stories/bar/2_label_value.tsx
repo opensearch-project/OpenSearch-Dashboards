@@ -20,8 +20,8 @@
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { getChartRotationKnob, getPositionKnob } from '../utils/knobs';
 
 const dataGen = new SeededDataGenerator();

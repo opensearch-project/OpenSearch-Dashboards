@@ -10,9 +10,9 @@ import {
   ScaleType,
   Settings,
   PartialTheme,
-} from '../../src/';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+} from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../../packages/charts/src/utils/data_samples/test_dataset_tsvb';
 
 <Meta title="Types of charts/Bar Charts/Legends with Bar Charts" />
 
@@ -49,7 +49,7 @@ What you should pay attention to:
 * Legend specific props are included in the `<Settings/>` component
     * `showLegend={true}`
     * `legendPosition={Position.Right}`
-* The tick tickFormat prop within the `<Axis/>` component 
+* The tick tickFormat prop within the `<Axis/>` component
 
 <details>
 

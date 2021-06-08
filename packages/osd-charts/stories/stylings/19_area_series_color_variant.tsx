@@ -19,9 +19,9 @@
 
 import React from 'react';
 
-import { Axis, AreaSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src';
-import { ColorVariant } from '../../src/utils/common';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { Axis, AreaSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../packages/charts/src';
+import { ColorVariant } from '../../packages/charts/src/utils/common';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

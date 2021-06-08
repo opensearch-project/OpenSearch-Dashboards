@@ -29,9 +29,9 @@ import {
   LineAnnotationDatum,
   ScaleType,
   Settings,
-} from '../../../src';
-import { Icon } from '../../../src/components/icons/icon';
-import { Position } from '../../../src/utils/common';
+} from '../../../packages/charts/src';
+import { Icon } from '../../../packages/charts/src/components/icons/icon';
+import { Position } from '../../../packages/charts/src/utils/common';
 import { getChartRotationKnob, arrayKnobs } from '../../utils/knobs';
 
 function generateAnnotationData(values: any[]): LineAnnotationDatum[] {

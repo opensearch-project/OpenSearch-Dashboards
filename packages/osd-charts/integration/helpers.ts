@@ -24,7 +24,7 @@ import path from 'path';
 
 import { getStorybook, configure } from '@storybook/react';
 
-import { Rotation } from '../src';
+import { Rotation } from '../packages/charts/src';
 // @ts-ignore
 import { isLegacyVRTServer } from './config';
 

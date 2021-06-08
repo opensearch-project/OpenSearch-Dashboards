@@ -10,13 +10,13 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 <Meta title="Types of charts/Area Charts/Basic and with axes" />
 
 # Basic Area Chart
-Below is a very basic area chart from Elastic Charts. An Area Chart (or area graph) is basically a line graph with the area below the lined filled with colors or textures. 
+Below is a very basic area chart from Elastic Charts. An Area Chart (or area graph) is basically a line graph with the area below the lined filled with colors or textures.
 Like line graphs area charts are used to represent the development of quantitative values over a time period. It can also be used to compare two or more categories and is similar to the Stacked Area Chart.
 
 Area charts often used to show overall trends over time rather than specific values.
@@ -34,11 +34,11 @@ Area charts often used to show overall trends over time rather than specific val
   />
 </Chart>
 
-*** 
+***
 
-The code snippet for the area chart above is found in the details section below.  
+The code snippet for the area chart above is found in the details section below.
 
-<details> 
+<details>
 
 ```js
 <Chart className={'story-chart'}>
@@ -118,5 +118,5 @@ To only have an area chart without axes, do not include the `<Axis/>` components
 </details>
 
 ***
-There is a stacked area chart in the `Stacked Charts` section if you are interested. 
+There is a stacked area chart in the `Stacked Charts` section if you are interested.
 Prop tables can be found in `Chart References > Prop Tables`

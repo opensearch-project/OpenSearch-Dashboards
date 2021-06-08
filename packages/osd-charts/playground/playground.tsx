@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Chart, AreaSeries, LineSeries, BarSeries, ScaleType, Settings } from '../src';
+import { Chart, AreaSeries, LineSeries, BarSeries, ScaleType, Settings } from '../packages/charts/src';
 
 export class Playground extends React.Component {
   render() {

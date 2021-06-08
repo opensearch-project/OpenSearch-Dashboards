@@ -31,7 +31,7 @@ import {
   RecursivePartial,
   DEFAULT_CHART_MARGINS,
   DEFAULT_CHART_PADDING,
-} from '../../src';
+} from '../../packages/charts/src';
 import { getVerticalTextAlignmentKnob, getHorizontalTextAlignmentKnob, getPositiveNumberKnob } from '../utils/knobs';
 
 const getAxisKnobs = (group?: string, gridLines = false): RecursivePartial<AxisStyle> => ({

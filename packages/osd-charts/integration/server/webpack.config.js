@@ -29,7 +29,7 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     chunkFilename: '[name].chunk.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'packages/charts/dist'),
   },
   devServer: {
     host: '0.0.0.0',

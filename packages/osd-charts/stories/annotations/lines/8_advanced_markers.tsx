@@ -32,8 +32,8 @@ import {
   LineAnnotation,
   AnnotationDomainType,
   LineAnnotationSpec,
-} from '../../../src';
-import { isVerticalAxis } from '../../../src/chart_types/xy_chart/utils/axis_type_utils';
+} from '../../../packages/charts/src';
+import { isVerticalAxis } from '../../../packages/charts/src/chart_types/xy_chart/utils/axis_type_utils';
 import { getChartRotationKnob, getPositionKnob } from '../../utils/knobs';
 import { SB_KNOBS_PANEL } from '../../utils/storybook';
 

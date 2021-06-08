@@ -11,8 +11,8 @@ import {
   Position,
   timeFormatter,
   niceTimeFormatByDay,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 import BarSeriesPropsTable from '../2-ChartPropTables/9-BarProps.md';
 import BarWAxisPropsTable from '../2-ChartPropTables/10-BarWAxisProps.md';
 
@@ -71,9 +71,9 @@ Bar charts provide a visual presentation of categorical data. Categorical data i
 Additonal prop tables for the following bar charts can be found in `Chart References > Prop Tables`
 ***
 
-# Bar Chart with Axes 
+# Bar Chart with Axes
 
-This chart now includes x and y axes. These axes can be `linear`, `ordinal` or `time`. 
+This chart now includes x and y axes. These axes can be `linear`, `ordinal` or `time`.
 
 <Chart className={'story-chart'}>
     <Settings theme={LIGHT_THEME} />
@@ -158,7 +158,7 @@ And below is an example of an `ordinal` x axis bar chart
     />
 </Chart>
 
-<details> 
+<details>
 
 ```js
 

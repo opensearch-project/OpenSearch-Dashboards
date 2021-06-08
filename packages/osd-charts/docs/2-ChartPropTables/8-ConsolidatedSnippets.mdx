@@ -10,9 +10,9 @@ import {
   ScaleType,
   Settings,
   PartialTheme,
-} from '../../src/';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+} from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../../packages/charts/src/utils/data_samples/test_dataset_tsvb';
 
 <Meta title="Chart Reference/Code Samples" />
 
@@ -63,7 +63,7 @@ Bar with axes
 </Chart>
 ```
 
-Stacked bar chart 
+Stacked bar chart
 ```js
 <Chart className={'story-chart'}>
   <Settings showLegend={true} legendPosition={Position.Right} />
@@ -96,7 +96,7 @@ Stacked bar chart
 </Chart>
 ```
 
-Basic area chart 
+Basic area chart
 ```js
 <Chart className={'story-chart'}>
   <AreaSeries
@@ -110,7 +110,7 @@ Basic area chart
 </Chart>
 ```
 
-Area chart with axes components 
+Area chart with axes components
 ```js
 <Chart className={'story-chart'}>
   <Axis
@@ -137,7 +137,7 @@ Area chart with axes components
 </Chart>
 ```
 
-Stacked area chart 
+Stacked area chart
 ```js
 <Chart className={'story-chart'}>
   <Settings showLegend={true} legendPosition={Position.Right}/>
@@ -153,7 +153,7 @@ Stacked area chart
     title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
     position={Position.Left}
     tickFormat={(d) => Number(d).toFixed(2)}
-  /> 
+  />
   <AreaSeries
     id={'1'}
     name={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
@@ -201,7 +201,7 @@ Basic line chart
 </Chart>
 ```
 
-Linear x axis line chart 
+Linear x axis line chart
 ```js
 <Chart className={'story-chart'}>
     <Axis
@@ -228,7 +228,7 @@ Linear x axis line chart
 </Chart>
 ```
 
-Stacked line chart 
+Stacked line chart
 ```js
 <Chart className={'story-chart'}>
     <Settings showLegend={true} legendPosition={Position.Right} />

@@ -1,0 +1,6 @@
+# Copied files to include in final package
+# remove when bundled other than tsc
+LICENSE.txt
+CHANGELOG.md
+NOTICE.txt
+README.md

@@ -20,7 +20,17 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings, Fit, AreaSeries } from '../../src';
+import {
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  Fit,
+  AreaSeries,
+} from '../../packages/charts/src';
 
 export const Example = () => {
   const fitEnabled = boolean('enable fit function', false);

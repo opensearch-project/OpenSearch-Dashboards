@@ -20,8 +20,8 @@
 import { boolean, color, number, button } from '@storybook/addon-knobs';
 import React, { useState } from 'react';
 
-import { Axis, Chart, CurveType, Position, TexturedStyles, Settings, TextureShape } from '../../src';
-import { getRandomNumberGenerator, SeededDataGenerator, getRandomEntryFn } from '../../src/mocks/utils';
+import { Axis, Chart, CurveType, Position, TexturedStyles, Settings, TextureShape } from '../../packages/charts/src';
+import { getRandomNumberGenerator, SeededDataGenerator, getRandomEntryFn } from '../../packages/charts/src/mocks/utils';
 import { getKnobsFromEnum, getXYSeriesKnob } from '../utils/knobs';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 

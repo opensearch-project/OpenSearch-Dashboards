@@ -19,7 +19,16 @@
 
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter, StackMode } from '../../src';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  niceTimeFormatter,
+  StackMode,
+} from '../../packages/charts/src';
 
 export const Example = () => (
   <Chart className="story-chart">

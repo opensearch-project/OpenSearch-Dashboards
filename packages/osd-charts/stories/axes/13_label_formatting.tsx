@@ -21,8 +21,8 @@ import { text } from '@storybook/addon-knobs';
 import numeral from 'numeral';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType } from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

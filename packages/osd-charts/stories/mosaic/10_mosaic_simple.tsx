@@ -29,10 +29,10 @@ import {
   PartitionLayout,
   Settings,
   ShapeTreeNode,
-} from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
-import { mocks } from '../../src/mocks/hierarchical';
-import { keepDistinct } from '../../src/utils/common';
+} from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical';
+import { keepDistinct } from '../../packages/charts/src/utils/common';
 import { countryLookup, colorBrewerCategoricalPastel12B, regionLookup } from '../utils/utils';
 
 const productLookup: Record<string, { label: string; position: number }> = {

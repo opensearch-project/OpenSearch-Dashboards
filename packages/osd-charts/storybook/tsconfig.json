@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig",
   "include": [
-    "../src/**/*",
+    "../packages/charts/src/**/*",
     "../stories/**/*",
     "./**/*",
     "../storybook-docs/config.docs.ts",

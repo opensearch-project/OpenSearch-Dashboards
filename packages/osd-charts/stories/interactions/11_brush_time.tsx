@@ -33,7 +33,7 @@ import {
   Position,
   ScaleType,
   Settings,
-} from '../../src';
+} from '../../packages/charts/src';
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {

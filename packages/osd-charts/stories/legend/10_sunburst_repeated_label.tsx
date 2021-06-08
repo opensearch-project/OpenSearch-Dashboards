@@ -20,7 +20,7 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, LegendStrategy, Partition, Settings } from '../../src';
+import { Chart, LegendStrategy, Partition, Settings } from '../../packages/charts/src';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 export const Example = () => {

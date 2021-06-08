@@ -19,10 +19,10 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
-import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
-import { mocks } from '../../src/mocks/hierarchical';
+import { Chart, Datum, Partition } from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+import { ShapeTreeNode } from '../../packages/charts/src/chart_types/partition_chart/layout/types/viewmodel_types';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical';
 import { discreteColor, colorBrewerCategoricalPastel12, productLookup } from '../utils/utils';
 
 export const Example = () => (

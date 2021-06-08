@@ -20,8 +20,17 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, niceTimeFormatByDay, Position, ScaleType, Settings, timeFormatter } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  niceTimeFormatByDay,
+  Position,
+  ScaleType,
+  Settings,
+  timeFormatter,
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const formatter = timeFormatter(niceTimeFormatByDay(1));

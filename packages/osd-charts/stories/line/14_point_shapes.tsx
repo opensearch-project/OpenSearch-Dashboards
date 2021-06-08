@@ -30,8 +30,8 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20);

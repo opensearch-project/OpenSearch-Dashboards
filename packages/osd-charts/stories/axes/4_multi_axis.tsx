@@ -30,7 +30,7 @@ import {
   Position,
   ScaleType,
   Settings,
-} from '../../src';
+} from '../../packages/charts/src';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(

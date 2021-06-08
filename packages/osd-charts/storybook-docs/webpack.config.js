@@ -45,7 +45,7 @@ module.exports = async ({ config }) => {
       {
         loader: 'style-loader',
         options: {
-          attrs: {
+          attributes: {
             nonce,
           },
         },
@@ -64,7 +64,7 @@ module.exports = async ({ config }) => {
       {
         loader: 'style-loader',
         options: {
-          attrs: {
+          attributes: {
             nonce,
           },
         },
@@ -79,9 +79,10 @@ module.exports = async ({ config }) => {
     resourceQuery: /^\?lazy$/,
     use: [
       {
-        loader: 'style-loader/useable',
+        loader: 'style-loader',
         options: {
-          attrs: {
+          injectType: 'lazyStyleTag',
+          attributes: {
             nonce,
           },
         },

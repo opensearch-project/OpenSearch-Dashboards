@@ -47,7 +47,7 @@
 - [ ] The proper chart type label was added (e.g. :xy, :partition) if the PR involves a specific chart type
 - [ ] The proper feature label was added (e.g. :interactions, :axis) if the PR involves a specific chart feature
 - [ ] Whenever possible, please check if the closing issue is connected to a running GH project
-- [ ] Any consumer-facing exports were added to `src/index.ts` (and stories only import from `../src` except for test data & storybook)
+- [ ] Any consumer-facing exports were added to `packages/charts/src/index.ts` (and stories only import from `../src` except for test data & storybook)
 - [ ] This was checked for cross-browser compatibility
 - [ ] Proper documentation or storybook story was added for features that require explanation or tutorials
 - [ ] Unit tests were updated or added to match the most common scenarios

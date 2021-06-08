@@ -21,8 +21,18 @@ import { select, number, boolean } from '@storybook/addon-knobs';
 import numeral from 'numeral';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings, Fit, StackMode } from '../../src';
-import { getRandomNumberGenerator, getRNGSeed } from '../../src/mocks/utils';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  CurveType,
+  Position,
+  ScaleType,
+  Settings,
+  Fit,
+  StackMode,
+} from '../../packages/charts/src';
+import { getRandomNumberGenerator, getRNGSeed } from '../../packages/charts/src/mocks/utils';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const Example = () => {

@@ -20,7 +20,7 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../packages/charts/src';
 
 const onRenderChange = action('onRenderChange');
 

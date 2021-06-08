@@ -22,7 +22,7 @@ import Url from 'url';
 import { JSDOM } from 'jsdom';
 import { AXNode } from 'puppeteer';
 
-import { DRAG_DETECTION_TIMEOUT } from '../../src/state/reducers/interactions';
+import { DRAG_DETECTION_TIMEOUT } from '../../packages/charts/src/state/reducers/interactions';
 // @ts-ignore
 import { port, hostname, debug, isLegacyVRTServer } from '../config';
 import { toMatchImageSnapshot } from '../jest_env_setup';

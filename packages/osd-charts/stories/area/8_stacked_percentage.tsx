@@ -20,8 +20,17 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, niceTimeFormatter, Position, ScaleType, Settings, StackMode } from '../../src';
-import DATA from '../../src/utils/data_samples/4_time_series.json';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  StackMode,
+} from '../../packages/charts/src';
+import DATA from '../../packages/charts/src/utils/data_samples/4_time_series.json';
 
 const dataNames = Object.keys(DATA);
 export const Example = () => {

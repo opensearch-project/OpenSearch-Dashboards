@@ -19,8 +19,8 @@
 
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, FilterPredicate } from '../../src';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, FilterPredicate } from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

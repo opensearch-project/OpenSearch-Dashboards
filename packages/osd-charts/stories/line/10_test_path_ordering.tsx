@@ -21,7 +21,7 @@ import { boolean } from '@storybook/addon-knobs';
 import { shuffle } from 'lodash';
 import React from 'react';
 
-import { Axis, LineSeries, Chart, Position, ScaleType, Settings, Direction } from '../../src';
+import { Axis, LineSeries, Chart, Position, ScaleType, Settings, Direction } from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 /**

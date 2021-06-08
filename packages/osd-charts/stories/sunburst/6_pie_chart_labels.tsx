@@ -19,8 +19,8 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
+import { Chart, Datum, Partition, PartitionLayout } from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
 import { indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 
 export const Example = () => (

@@ -19,8 +19,16 @@
 
 import React from 'react';
 
-import { Axis, Chart, LineSeries, niceTimeFormatByDay, Position, ScaleType, timeFormatter } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import {
+  Axis,
+  Chart,
+  LineSeries,
+  niceTimeFormatByDay,
+  Position,
+  ScaleType,
+  timeFormatter,
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 

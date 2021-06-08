@@ -30,8 +30,8 @@ import {
   niceTimeFormatter,
   RecursivePartial,
   AxisStyle,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const customStyle: RecursivePartial<AxisStyle> = {

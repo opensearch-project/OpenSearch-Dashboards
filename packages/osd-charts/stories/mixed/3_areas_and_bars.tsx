@@ -19,7 +19,16 @@
 
 import React from 'react';
 
-import { AreaSeries, Axis, BarSeries, Chart, CurveType, Position, ScaleType, Settings } from '../../src';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../packages/charts/src';
 
 export const Example = () => (
   <Chart renderer="canvas" className="story-chart">

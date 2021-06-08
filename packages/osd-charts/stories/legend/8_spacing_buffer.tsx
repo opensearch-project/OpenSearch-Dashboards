@@ -20,7 +20,7 @@
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../packages/charts/src';
 
 export const Example = () => {
   const theme: PartialTheme = {

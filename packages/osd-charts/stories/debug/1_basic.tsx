@@ -20,7 +20,16 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, ScaleType, Settings, Position, Axis, BarSeries, AreaSeries, CurveType } from '../../src';
+import {
+  Chart,
+  ScaleType,
+  Settings,
+  Position,
+  Axis,
+  BarSeries,
+  AreaSeries,
+  CurveType,
+} from '../../packages/charts/src';
 
 export const Example = () => {
   const debug = boolean('debug', true);

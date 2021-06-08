@@ -20,8 +20,8 @@
 import { color } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 
 const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);

@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../packages/charts/src';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { config, getFlatData, getLayerSpec, maxDepth } from '../utils/hierarchical_input_utils';
 import { viridis18 as palette } from '../utils/utils';

@@ -20,8 +20,8 @@
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../../../src';
-import { Position } from '../../../src/utils/common';
+import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../../../packages/charts/src';
+import { Position } from '../../../packages/charts/src/utils/common';
 import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {

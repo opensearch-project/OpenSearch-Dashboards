@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Chart, Axis, Position, BarSeries, ScaleType, Settings } from '../../src';
+import { Chart, Axis, Position, BarSeries, ScaleType, Settings } from '../../packages/charts/src';
 
 const data = [
   { g: 'AE', x: '2021-04-06 00:00', y: 1 },

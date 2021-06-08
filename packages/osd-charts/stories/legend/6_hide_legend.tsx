@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
 
 export const Example = () => {
   const hideBarSeriesInLegend = boolean('hide bar series in legend', false);

@@ -4,6 +4,6 @@
 .idea/
 .vscode/
 .temp/
-dist/
+**/dist/
 coverage/
-tmp/
+**/tmp/

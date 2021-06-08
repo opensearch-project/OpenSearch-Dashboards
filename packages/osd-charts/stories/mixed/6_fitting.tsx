@@ -31,7 +31,7 @@ import {
   Settings,
   Fit,
   SeriesType,
-} from '../../src';
+} from '../../packages/charts/src';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const Example = () => {

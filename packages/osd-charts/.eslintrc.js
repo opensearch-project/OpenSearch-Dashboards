@@ -319,7 +319,7 @@ module.exports = {
     'import/resolver': {
       node: {
         extensions: ['.mjs', '.js', '.json', '.ts', '.d.ts', '.tsx'],
-        moduleDirectory: ['node_modules', 'src/'],
+        moduleDirectory: ['node_modules', 'packages/charts/src/'],
       },
     },
     react: {
@@ -328,7 +328,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['src/**/*.{ts?(x),js}'],
+      files: ['packages/charts/src/**/*.{ts?(x),js}'],
       rules: {
         /*
          * Custom elastic-charts rules
@@ -349,27 +349,20 @@ module.exports = {
                 'error',
                 {
                   zones: [
-                    { target: './src', from: './src/index.ts' },
-                    { target: './src', from: './', except: ['./src', './node_modules/'] },
+                    { target: './packages/charts/src', from: './packages/charts/src/index.ts' },
+                    {
+                      target: './packages/charts/src',
+                      from: './',
+                      except: ['./packages/charts/src', 'node_modules'],
+                    },
                   ],
                 },
               ]
             : 0,
 
-        'import/no-internal-modules': [
-          'error',
-          {
-            allow: ['**/src/**'],
-          },
-        ],
         'no-underscore-dangle': 2,
         'import/no-unresolved': 'error',
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: ['**/*.test.ts?(x)', 'src/mocks/**/*.ts?(x)'],
-          },
-        ],
+        'import/no-extraneous-dependencies': 2,
         'prefer-destructuring': [
           'warn',
           {
@@ -431,12 +424,15 @@ module.exports = {
       },
     },
     {
-      files: ['*.test.ts?(x)', '**/__mocks__/**/*.ts?(x)'],
+      files: ['*.test.ts?(x)', '**/__mocks__/**/*.ts?(x)', 'packages/charts/src/mocks/**'],
       rules: {
         'elastic-charts/require-release-tag': 0,
         'elastic-charts/require-tsdocs': 0,
         'elastic-charts/require-documentation': 0,
         'unicorn/error-message': 0,
+        // Cannot check extraneous deps in test files with this mono setup
+        // see https://github.com/benmosher/eslint-plugin-import/issues/1174
+        'import/no-extraneous-dependencies': 0,
       },
     },
     {

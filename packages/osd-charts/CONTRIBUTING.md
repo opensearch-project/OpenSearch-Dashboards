@@ -62,7 +62,7 @@ This is an example that cover all cases:
 ```
 feat(brush): add multi axis brushing (#625)
 
-This commit allows the consumer to configure the direction used for the brush tool. The direction is, by default, along the X-axis, but can be changed to be along the Y-axis or have a rectangular selection along both axes. 
+This commit allows the consumer to configure the direction used for the brush tool. The direction is, by default, along the X-axis, but can be changed to be along the Y-axis or have a rectangular selection along both axes.
 For each Y-axis defined (usually determined by an associated `groupId`) we return a scaled set of `[min, max]` values.
 
 BREAKING CHANGE: The type used by the `BrushEndListener` is now in the following form `{ x?: [number, number]; }` where `x` contains an array of `[min, max]` values, and the  `y` property is an optional array of objects, containing the `GroupId` and the values of the brush for that specific axis.
@@ -116,39 +116,40 @@ This will automatically generate a pr to merge into the target branch. Once the 
 
 > Note: The version will __ONLY__ be published from branches following the [maintenance branch convention](https://github.com/semantic-release/semantic-release/blob/0785a844fa8ac1320383452ce531898be3b01f92/docs/recipes/maintenance-releases.md#publishing-maintenance-releases)
 
-## Linking to Application
+## Linking to Kibana
 
-There are two ways to "link" a local version of `@elastic/charts` to your application. The following examples have steps that are kibana-specific denoted with ☈.
+To link `@elastic/charts` to kibana we need to perform a few workarounds. Fortunately, this is done automatically by a custom built linking scripts.
 
-### Package library and install in app
+### Linking
 
-Easy but time-consuming in terms of repeated runs.
-1. Run `npm pack` from `@elastic/charts` root to package the library into a gzip file
-1. Locate the full path the the gzip file, typically at the same level of the target library `package.json`
-1. Run `yarn add <PATH_TO_GZIP>` from Kibana. This will install `@elastic/charts` using that version not the one from the package.json.
+In order to create link run...
 
-Notice that you would need to repeat all these steps for any changes in charts to be reflected in Kibana.
+```
+yarn link:kibana
+```
 
-> If running repeated runs and you notice changes not being updated after a new install you _may_ need to increment the `@elastic/charts` version for kibana/npm/??? to pick up the changes. This should NOT be commited.
+This will prompt you for the following inputs:
 
-#### Uninstalling
-1. Reset changes to `package.json`.
-1. Run `yarn kbn bootstrap` ☈. Or `yarn install --force`
+- Select the `Link` action
+- Select the path to kibana (default: `../kibana`)
+- Confirm kibana is running
 
-### Symlink the library and build in watch mode
+The reset is handled automatically! If any errors occur in the build method, they will be surfaced in the terminal and pause the build process until corrected.
 
-The second is a little trickier but the preferred option, especially for debugging.
+If you encounter and issue or close the watch mode following the linking process, you can run the script is watch mode. Do so by running...
 
-1. Run `yarn build:watch` from `@elastic/charts`. This builds the scss and other files and then will _watch_ for changes in typescript files and recompile. If you don't run watch and try to rebuild after each change the link _may_ break.
-1. ☈ In Kibana there is a package called [`@kbn/ui-shared-deps`](https://github.com/elastic/kibana/tree/master/packages/kbn-ui-shared-deps) that optimizes importing shared modules. This causes a _lot_ of complications when linking. The easiest way to fix this is to just remove any and all references of `@elastic/charts` in this directory and then run `yarn kbn bootstrap`.
-1. Run `yarn link @elastic/charts` in Kibana.
-1. If you application uses react hooks, you must link your application react module to `@elastic/charts`. The issue with react hooks is that react requires there only be a single instance of react. This should be solved in your app at build time using yarn [resolutions](https://classic.yarnpkg.com/en/docs/selective-version-resolutions/) to resolve any differing version in the dependency tree to a single version of react. But when symlinking the local `@elastic/charts`, `@elastic/charts` is still using `@elastic/charts/node_modules/react` and not `<PATH_TO_APP>/node_modules/react`. To fix this you need to run `npm link <PATH_TO_APP>/node_modules/react` from `@elastic/charts`. Now elastic-charts and kibana will be using the same instance of react.
-1. At this point you can make changes to `@elastic/charts` wait for the new hash to complete and refresh the application to see the changes, it does _not_ hot reload.
+```
+yarn link:kibana
+```
 
-#### Unlinking
+- Select the `Watch mode` action
 
-1. Remove react symlink by running `npm unlink <PATH_TO_APP>/node_modules/react` from `@elastic/charts`.
-1. Run `yarn unlink @elastic/charts` in Kibana.
-1. ☈ Restore changes to [`@kbn/ui-shared-deps`](https://github.com/elastic/kibana/tree/master/packages/kbn-ui-shared-deps)
-1. For good measure, delete `@elastic/charts` in kibana `node_modules`. Run `rm -fr <PATH_TO_APP>/node_modules/@elastic/charts`.
-1. Run `yarn kbn bootstrap` ☈. Or `yarn install --force`
+### Unlinking
+
+In order to remove the link and restore kibana to state prior to linking, run...
+
+```
+yarn link:kibana
+```
+
+- Select the `Unlink` action

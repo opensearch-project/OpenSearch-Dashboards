@@ -31,9 +31,9 @@ import {
   RecursivePartial,
   ScaleType,
   Settings,
-} from '../../src';
-import { Config } from '../../src/chart_types/heatmap/layout/types/config_types';
-import { SWIM_LANE_DATA } from '../../src/utils/data_samples/test_anomaly_swim_lane';
+} from '../../packages/charts/src';
+import { Config } from '../../packages/charts/src/chart_types/heatmap/layout/types/config_types';
+import { SWIM_LANE_DATA } from '../../packages/charts/src/utils/data_samples/test_anomaly_swim_lane';
 
 export const Example = () => {
   const [selection, setSelection] = useState<{ x: (string | number)[]; y: (string | number)[] } | undefined>();

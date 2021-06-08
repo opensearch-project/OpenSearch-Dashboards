@@ -20,8 +20,8 @@
 import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Chart, ScaleType, StackMode, Axis, Position, CurveType } from '../../src';
-import { BABYNAME_DATA } from '../../src/utils/data_samples/babynames';
+import { AreaSeries, Chart, ScaleType, StackMode, Axis, Position, CurveType } from '../../packages/charts/src';
+import { BABYNAME_DATA } from '../../packages/charts/src/utils/data_samples/babynames';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

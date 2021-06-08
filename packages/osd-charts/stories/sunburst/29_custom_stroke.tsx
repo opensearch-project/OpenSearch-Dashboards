@@ -20,9 +20,9 @@
 import { color } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, Settings, DARK_THEME } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
-import { mocks } from '../../src/mocks/hierarchical';
+import { Chart, Datum, Partition, PartitionLayout, Settings, DARK_THEME } from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 
 export const Example = () => {

@@ -1,9 +1,10 @@
 # Force include
 !.*.js
+!packages/charts/.*.js
 
 # Ignore
 wiki
-node_modules
+**/node_modules
 coverage
 license_header.js
 
@@ -14,8 +15,8 @@ license_header.js
 .git
 
 # Compiled source
-src/utils/d3-delaunay/*
+packages/charts/src/utils/d3-delaunay
 **/dist
 
 # auto generated directories
-integration/tmp
+**/tmp

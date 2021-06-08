@@ -20,7 +20,16 @@
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LIGHT_THEME, LineSeries, Position, ScaleType, Settings } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  LIGHT_THEME,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../packages/charts/src';
 
 export const Example = () => {
   const customXDomain = boolean('customize X domain', true, 'X axis');

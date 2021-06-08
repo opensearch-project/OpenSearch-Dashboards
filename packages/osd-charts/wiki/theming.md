@@ -1,6 +1,6 @@
 ## How Elastic Charts theming works
 
-Elastic Charts can be easily themed by creating a JSON object with the same shape of the existing [Theme](../src/utils/themes/theme.ts) interface. Currently we maintain the following themes:
+Elastic Charts can be easily themed by creating a JSON object with the same shape of the existing [Theme](../packages/charts/src/utils/themes/theme.ts) interface. Currently we maintain the following themes:
 
 - LIGHT_THEME (the default Elastic Chart theme)
 - DARK_THEME (the same theme in dark)
@@ -11,7 +11,7 @@ Each of these themes simply include a series of variables that adjust colors, si
 
 ### Create a new theme
 
-1. Copy one theme from `src/lib/themes/` directory and tweak it variables.
+1. Copy one theme from `packages/charts/src/themes/` directory and tweak it variables.
 2. Pass it to the `Setting` component:
 
    ```

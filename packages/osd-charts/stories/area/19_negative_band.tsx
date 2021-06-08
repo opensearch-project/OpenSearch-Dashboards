@@ -20,7 +20,7 @@
 import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Fit, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { AreaSeries, Axis, Chart, Fit, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

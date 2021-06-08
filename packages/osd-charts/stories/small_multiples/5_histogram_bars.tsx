@@ -20,7 +20,16 @@
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { ScaleType, Position, Chart, Axis, GroupBy, SmallMultiples, Settings, BarSeries } from '../../src';
+import {
+  ScaleType,
+  Position,
+  Chart,
+  Axis,
+  GroupBy,
+  SmallMultiples,
+  Settings,
+  BarSeries,
+} from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const data = [

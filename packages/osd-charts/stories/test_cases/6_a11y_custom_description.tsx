@@ -20,8 +20,8 @@
 import { boolean, text, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Chart, ScaleType, Settings } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { AreaSeries, Chart, ScaleType, Settings } from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const automatedSeries = boolean('Use the default generated series types of charts for screen readers', true);

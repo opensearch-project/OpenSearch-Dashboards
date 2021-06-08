@@ -50,18 +50,29 @@ console.log(
   }
 };
 
-const replaceModules = async (libDir, appDir, linkedPackages) => {
+/**
+ * Replaces module `require` statements with relative paths.
+ * This will use the local node_modules wherever the pacakge
+ * is linked to for all `linkedPackages` defined.
+ *
+ * example:
+ *
+ * ```js
+ * // kibana/node_modules/lib/file.js
+ * require('react');
+ * // replaced with...
+ * require('../react'); // points at kibana/node_modules/react
+ * ```
+ */
+const replaceModules = async (libDir, linkedPackages, packageName) => {
   if (linkedPackages.length === 0) return;
 
   const spinner = ora(`Replacing package links ${chalk.dim(`(${linkedPackages.join(',')})`)}`).start();
+  const cwd = path.join(libDir, 'dist');
+  const nodeModulesDir = path.join(libDir, 'node_modules');
+  const re = new RegExp(`require\\("(?:.*?\\/)*(${linkedPackages.join('|')})"\\)`, 'g');
 
   await new Promise((resolve, reject) => {
-    const cwd = path.join(libDir, 'dist');
-    // TODO find out why this path doesn't work with the linked lib
-    // const moduleDir = path.join(appDir, 'node_modules');
-    const moduleDir = path.join(path.dirname(appDir), '../../', path.basename(appDir), 'node_modules');
-    const re = new RegExp(`require\\("(?:.*?\\/)*(${linkedPackages.join('|')})"\\)`, 'g');
-
     glob('**/*.js', { ignore: ['**/*.map.js'], cwd }, (error, files) => {
       if (error) {
         spinner.fail(error);
@@ -69,14 +80,15 @@ const replaceModules = async (libDir, appDir, linkedPackages) => {
       }
 
       files.forEach((file) => {
-        const fullPath = path.join(cwd, file);
-        const fileContent = fs.readFileSync(fullPath, { encoding: 'utf8' });
-        const relativeModulesPath = path.relative(fullPath, moduleDir);
+        const filePath = path.join(cwd, file);
+        const fileModulePath = path.join(nodeModulesDir, packageName, file);
+        const fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
+        const relativeModulesPath = path.relative(fileModulePath, nodeModulesDir);
 
         if (re.test(fileContent)) {
           const newFileContent = fileContent.replace(re, `require("${relativeModulesPath}/$1")`);
 
-          fs.writeFileSync(fullPath, newFileContent);
+          fs.writeFileSync(filePath, newFileContent);
         }
       });
       addConsoleFlag(libDir);

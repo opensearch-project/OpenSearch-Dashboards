@@ -20,8 +20,8 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, LineSeries, ScaleType } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { Chart, LineSeries, ScaleType } from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const toggleSpec = boolean('toggle line spec', true);

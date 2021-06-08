@@ -20,9 +20,17 @@
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings, RectAnnotationDatum } from '../../../src';
-import { Position } from '../../../src/utils/common';
-import { BandedAccessorType } from '../../../src/utils/geometry';
+import {
+  Axis,
+  Chart,
+  LineSeries,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  RectAnnotationDatum,
+} from '../../../packages/charts/src';
+import { Position } from '../../../packages/charts/src/utils/common';
+import { BandedAccessorType } from '../../../packages/charts/src/utils/geometry';
 import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {

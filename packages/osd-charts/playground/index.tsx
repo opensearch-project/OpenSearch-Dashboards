@@ -21,7 +21,7 @@ import 'core-js';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import '../src/theme_light.scss';
+import '../packages/charts/src/theme_light.scss';
 import '../node_modules/@elastic/eui/dist/eui_theme_light.css';
 import { Playground } from './playground';
 

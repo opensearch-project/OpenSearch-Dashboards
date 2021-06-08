@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { arrayToLookup, hueInterpolator } from '../../src/common/color_calcs';
-import { countryDimension, productDimension, regionDimension } from '../../src/mocks/hierarchical/dimension_codes';
-import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { arrayToLookup, hueInterpolator } from '../../packages/charts/src/common/color_calcs';
+import {
+  countryDimension,
+  productDimension,
+  regionDimension,
+} from '../../packages/charts/src/mocks/hierarchical/dimension_codes';
+import { palettes } from '../../packages/charts/src/mocks/hierarchical/palettes';
 
 export const productLookup = arrayToLookup((d: any) => d.sitc1, productDimension);
 export const regionLookup = arrayToLookup((d: any) => d.region, regionDimension);

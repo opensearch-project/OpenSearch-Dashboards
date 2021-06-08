@@ -33,8 +33,8 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
 import { switchTheme } from '../../storybook/theme_service';
 import { getChartRotationKnob } from '../utils/knobs';
 import { SB_KNOBS_PANEL } from '../utils/storybook';

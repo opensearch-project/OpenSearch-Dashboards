@@ -20,8 +20,8 @@
 import { DateTime } from 'luxon';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
-import { timeFormatter } from '../../src/utils/data/formatters';
+import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
+import { timeFormatter } from '../../packages/charts/src/utils/data/formatters';
 
 export const Example = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });

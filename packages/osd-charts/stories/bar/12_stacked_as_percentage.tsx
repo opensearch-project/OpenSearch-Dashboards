@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, StackMode } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, StackMode } from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

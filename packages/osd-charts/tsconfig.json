@@ -2,7 +2,6 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist/",
     "noImplicitAny": true,
     "noUnusedLocals": false,
     "sourceMap": true,
@@ -21,5 +20,5 @@
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types", "./**/*.d.ts", "./scripts/custom_matchers.ts"]
   },
-  "exclude": ["**/tmp"]
+  "exclude": ["**/tmp", "**/dist"]
 }

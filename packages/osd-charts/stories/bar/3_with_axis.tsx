@@ -20,7 +20,16 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, DARK_THEME, LIGHT_THEME, Position, ScaleType, Settings } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  DARK_THEME,
+  LIGHT_THEME,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../packages/charts/src';
 
 export const Example = () => {
   const darkmode = boolean('darkmode', false);

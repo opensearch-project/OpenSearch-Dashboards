@@ -20,7 +20,7 @@
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
 import { arrayKnobs } from '../utils/knobs';
 
 export const Example = () => {

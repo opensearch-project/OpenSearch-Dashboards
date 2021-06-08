@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Datum, RecursivePartial } from '../../src';
-import { Config } from '../../src/chart_types/partition_chart/layout/types/config_types';
-import { PrimitiveValue } from '../../src/chart_types/partition_chart/layout/utils/group_by_rollup';
-import { mocks } from '../../src/mocks/hierarchical';
+import { Datum, RecursivePartial } from '../../packages/charts/src';
+import { Config } from '../../packages/charts/src/chart_types/partition_chart/layout/types/config_types';
+import { PrimitiveValue } from '../../packages/charts/src/chart_types/partition_chart/layout/utils/group_by_rollup';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical';
 import { discreteColor } from './utils';
 
 const raw = mocks.observabilityTree;

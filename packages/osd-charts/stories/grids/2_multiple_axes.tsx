@@ -20,7 +20,16 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, GridLineStyle, LineSeries, Position, ScaleType, Settings } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  GridLineStyle,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../packages/charts/src';
 
 function generateGridLineStyle(group: string, gridColor = 'purple'): GridLineStyle {
   const groupId = `${group} axis`;

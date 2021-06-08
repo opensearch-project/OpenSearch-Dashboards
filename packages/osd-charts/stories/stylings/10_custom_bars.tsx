@@ -20,8 +20,8 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src';
-import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../packages/charts/src';
+import * as TestDatasets from '../../packages/charts/src/utils/data_samples/test_dataset';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
   return number(

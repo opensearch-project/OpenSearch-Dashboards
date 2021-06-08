@@ -35,9 +35,9 @@ import {
   AnnotationDomainType,
   LIGHT_THEME,
   LineSeries,
-} from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
-import { ColorVariant } from '../../src/utils/common';
+} from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
+import { ColorVariant } from '../../packages/charts/src/utils/common';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();

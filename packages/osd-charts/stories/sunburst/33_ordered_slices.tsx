@@ -20,8 +20,16 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AdditiveNumber, ArrayEntry, Chart, Datum, MODEL_KEY, Partition, ShapeTreeNode } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config';
+import {
+  AdditiveNumber,
+  ArrayEntry,
+  Chart,
+  Datum,
+  MODEL_KEY,
+  Partition,
+  ShapeTreeNode,
+} from '../../packages/charts/src';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
 import { discreteColor, countryLookup, colorBrewerCategoricalPastel12B } from '../utils/utils';
 
 const categoricalColors = colorBrewerCategoricalPastel12B.slice(3);

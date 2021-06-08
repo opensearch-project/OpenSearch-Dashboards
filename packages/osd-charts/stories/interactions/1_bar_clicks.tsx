@@ -21,7 +21,16 @@ import { action } from '@storybook/addon-actions';
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipValue, TooltipValueFormatter } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipValue,
+  TooltipValueFormatter,
+} from '../../packages/charts/src';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),

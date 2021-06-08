@@ -21,8 +21,17 @@ import { action } from '@storybook/addon-actions';
 import { number, boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType, PointShape } from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+import {
+  Axis,
+  Chart,
+  BubbleSeries,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipType,
+  PointShape,
+} from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();

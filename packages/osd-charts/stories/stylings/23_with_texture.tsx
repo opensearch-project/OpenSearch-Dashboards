@@ -30,8 +30,8 @@ import {
   Settings,
   TextureShape,
   LIGHT_THEME,
-} from '../../src';
-import { SeededDataGenerator } from '../../src/mocks/utils';
+} from '../../packages/charts/src';
+import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
 import { getKnobsFromEnum, getXYSeriesKnob } from '../utils/knobs';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 

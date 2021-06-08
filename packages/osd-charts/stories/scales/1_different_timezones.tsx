@@ -21,7 +21,7 @@ import { select } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
+import { Axis, Chart, LineSeries, Position, ScaleType } from '../../packages/charts/src';
 
 const today = Date.now();
 const UTC_DATE = DateTime.fromISO('2019-01-01T00:00:00.000Z').toMillis();

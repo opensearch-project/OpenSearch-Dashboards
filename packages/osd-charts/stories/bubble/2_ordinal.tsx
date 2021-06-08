@@ -21,8 +21,8 @@ import { action } from '@storybook/addon-actions';
 import { number, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType } from '../../src';
-import { getRandomNumberGenerator } from '../../src/mocks/utils';
+import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType } from '../../packages/charts/src';
+import { getRandomNumberGenerator } from '../../packages/charts/src/mocks/utils';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const rng = getRandomNumberGenerator();

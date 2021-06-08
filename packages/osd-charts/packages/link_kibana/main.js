@@ -53,7 +53,8 @@ module.exports = async () => {
   process.on('SIGTERM', cleanExit); // catch kill
 
   const debug = process.argv.includes('--debug');
-  const echDir = process.cwd();
+  const cwd = process.cwd();
+  const echDir = path.resolve(cwd, 'packages/charts');
   const echPackageContent = await getPackageInfo(echDir);
   const packageName = echPackageContent.name;
 
@@ -62,7 +63,7 @@ module.exports = async () => {
     throw new Error('No name defined in package.json');
   }
 
-  const tempDir = await getTempDir(echDir, packageName);
+  const tempDir = await getTempDir(cwd, packageName);
   const linkInfo = await getLinkInfo(tempDir);
   const linkedPackages = ['react', 'react-dom', 'redux', 'react-redux'];
 
@@ -80,8 +81,10 @@ module.exports = async () => {
       message: 'Enter path to application directory to link',
       default: '../kibana',
     });
-    const kibanaPath = path.resolve(echDir, appLinkRelativePath);
+    const kibanaPath = path.resolve(cwd, appLinkRelativePath);
     const kibanaPackageInfo = await getPackageInfo(kibanaPath);
+
+    if (debug) console.debug({ cwd, echDir, kibanaPath });
 
     if (kibanaPackageInfo.name !== 'kibana') {
       console.log(`
@@ -149,13 +152,13 @@ to link charts with another application use ${chalk.cyan(
           errorStr: 'error TS',
           stopStr: 'Found 0 errors. Watching for file changes',
           startStr: 'File change detected. Starting incremental compilation',
-          onUpdate: () => replaceModules(echDir, kibanaPath, linkedPackages),
+          onUpdate: () => replaceModules(echDir, linkedPackages, packageName),
         },
       ),
     );
 
     // must be run after first build so all assests are visibile to kibana
-    await linkPackage(echDir, kibanaPath, packageName);
+    await linkPackage(cwd, echDir, kibanaPath, packageName);
 
     const kbnSharedPackage = path.join(kibanaPath, 'packages/kbn-ui-shared-deps');
     cps.push(
@@ -188,6 +191,8 @@ to link charts with another application use ${chalk.cyan(
       return;
     }
 
+    if (debug) console.debug({ cwd, echDir, kibanaPath });
+
     if (action === 'Watch mode') {
       cps.push(
         await spawnWatch(
@@ -199,7 +204,7 @@ to link charts with another application use ${chalk.cyan(
             errorStr: ': error TS',
             stopStr: 'Found 0 errors. Watching for file changes',
             startStr: 'File change detected. Starting incremental compilation',
-            onUpdate: () => replaceModules(echDir, kibanaPath, linkedPackages),
+            onUpdate: () => replaceModules(echDir, linkedPackages, packageName),
           },
         ),
       );

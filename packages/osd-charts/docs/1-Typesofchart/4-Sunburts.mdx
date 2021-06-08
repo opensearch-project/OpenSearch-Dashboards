@@ -1,7 +1,7 @@
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { mocks } from '../../src/mocks/hierarchical/index';
-import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import { Chart, Datum, Partition, PartitionLayout } from '../../packages/charts/src';
+import { mocks } from '../../packages/charts/src/mocks/hierarchical/index';
+import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+import { ShapeTreeNode } from '../../packages/charts/src/chart_types/partition_chart/layout/types/viewmodel_types';
 import {
   categoricalFillColor,
   colorBrewerCategoricalPastel12,
@@ -16,7 +16,7 @@ import {
 
 <Meta title="Types of charts/Sunburts/Basic pie chart" />
 
-# A very simple pie chart 
+# A very simple pie chart
 
 <Chart className={'story-chart'}>
     <Partition
@@ -37,7 +37,7 @@ import {
     />
 </Chart>
 
-The code sample can be found within the details below. 
+The code sample can be found within the details below.
 
 <details>
 
@@ -63,9 +63,9 @@ The code sample can be found within the details below.
 ```
 </details>
 
-## Props table for a basic sunburst chart 
+## Props table for a basic sunburst chart
 
-These props are for the `<Partition/>` component as seen in the code snippet above 
+These props are for the `<Partition/>` component as seen in the code snippet above
 
 | Prop | Type | Default | Note |
 |:------|:------:|:---------:|:------|

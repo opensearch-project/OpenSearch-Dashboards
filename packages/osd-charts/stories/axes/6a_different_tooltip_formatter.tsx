@@ -21,7 +21,7 @@ import { text, boolean } from '@storybook/addon-knobs';
 import numeral from 'numeral';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

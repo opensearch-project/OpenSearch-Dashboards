@@ -34,9 +34,9 @@ import {
   TooltipType,
   LineSeries,
   AreaSeries,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
-import { palettes } from '../../src/utils/themes/colors';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
+import { palettes } from '../../packages/charts/src/utils/themes/colors';
 import { getTooltipTypeKnob, getPlacementKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 

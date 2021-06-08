@@ -20,8 +20,8 @@
 import { number, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, Position, ScaleType, Settings, LineSeries } from '../../src';
-import { getRandomNumberGenerator } from '../../src/mocks/utils';
+import { Axis, Chart, Position, ScaleType, Settings, LineSeries } from '../../packages/charts/src';
+import { getRandomNumberGenerator } from '../../packages/charts/src/mocks/utils';
 
 const rng = getRandomNumberGenerator();
 const bubbleData = new Array(30).fill(0).map((_, i) => ({

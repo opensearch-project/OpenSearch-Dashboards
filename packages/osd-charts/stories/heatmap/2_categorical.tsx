@@ -21,8 +21,8 @@ import { action } from '@storybook/addon-actions';
 import { extent } from 'd3-array';
 import React from 'react';
 
-import { Chart, Heatmap, ScaleType, Settings } from '../../src';
-import { BABYNAME_DATA } from '../../src/utils/data_samples/babynames';
+import { Chart, Heatmap, ScaleType, Settings } from '../../packages/charts/src';
+import { BABYNAME_DATA } from '../../packages/charts/src/utils/data_samples/babynames';
 
 export const Example = () => {
   const data = BABYNAME_DATA.filter(([year]) => year > 1950);

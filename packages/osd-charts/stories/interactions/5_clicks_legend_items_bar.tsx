@@ -21,8 +21,8 @@ import { action } from '@storybook/addon-actions';
 import { array, boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
-import { BARCHART_2Y2G } from '../../src/utils/data_samples/test_dataset';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../packages/charts/src';
+import { BARCHART_2Y2G } from '../../packages/charts/src/utils/data_samples/test_dataset';
 
 const onLegendItemListeners = {
   onLegendItemOver: action('onLegendItemOver'),

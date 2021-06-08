@@ -29,9 +29,9 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
-} from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
-import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+} from '../../packages/charts/src';
+import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
+import { TSVB_DATASET } from '../../packages/charts/src/utils/data_samples/test_dataset_tsvb';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 

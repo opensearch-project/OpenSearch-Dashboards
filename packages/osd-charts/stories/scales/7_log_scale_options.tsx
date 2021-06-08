@@ -21,8 +21,18 @@ import { boolean, number, select } from '@storybook/addon-knobs';
 import { range } from 'lodash';
 import React from 'react';
 
-import { Chart, Axis, LineSeries, Position, ScaleType, Settings, AreaSeries, CurveType, YDomainBase } from '../../src';
-import { LogBase, LogScaleOptions } from '../../src/scales/scale_continuous';
+import {
+  Chart,
+  Axis,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  AreaSeries,
+  CurveType,
+  YDomainBase,
+} from '../../packages/charts/src';
+import { LogBase, LogScaleOptions } from '../../packages/charts/src/scales/scale_continuous';
 import { logBaseMap, logFormatter } from '../utils/formatters';
 import { getKnobsFromEnum } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';

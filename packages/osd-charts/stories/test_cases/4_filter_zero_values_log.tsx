@@ -20,7 +20,7 @@
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Axis, Position, AreaSeries, ScaleType, LogBase } from '../../src';
+import { Chart, Axis, Position, AreaSeries, ScaleType, LogBase } from '../../packages/charts/src';
 import { logFormatter } from '../utils/formatters';
 
 /**

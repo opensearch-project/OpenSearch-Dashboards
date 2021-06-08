@@ -30,7 +30,7 @@ import {
   Settings,
   RecursivePartial,
   AxisStyle,
-} from '../../src';
+} from '../../packages/charts/src';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
   return number(

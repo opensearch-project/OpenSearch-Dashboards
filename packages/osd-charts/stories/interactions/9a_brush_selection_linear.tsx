@@ -21,7 +21,7 @@ import { action } from '@storybook/addon-actions';
 import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } from '../../packages/charts/src';
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {

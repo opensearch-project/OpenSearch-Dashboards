@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig",
+  "extends": "../../tsconfig",
   "compilerOptions": {
     "noUnusedLocals": true,
     "removeComments": true,
