@@ -38,7 +38,7 @@ import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 const mockFeatures = [
   {
     category: FeatureCatalogueCategory.DATA,
-    description: 'Ingest data from popular apps and services.',
+    description: 'Try our sample data.',
     showOnHomePage: true,
     icon: 'indexOpen',
     id: 'home_tutorial_directory',

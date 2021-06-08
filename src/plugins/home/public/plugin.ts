@@ -134,10 +134,10 @@ export class HomePublicPlugin
     featureCatalogue.register({
       id: 'home_tutorial_directory',
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
-        defaultMessage: 'Add data',
+        defaultMessage: 'Add sample data',
       }),
       description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
-        defaultMessage: 'Ingest data from popular apps and services.',
+        defaultMessage: 'Try our sample data.',
       }),
       icon: 'indexOpen',
       showOnHomePage: true,

@@ -66,45 +66,48 @@ class TutorialDirectoryUi extends React.Component {
   constructor(props) {
     super(props);
 
+    // temporarily set tabs to empty due to no available data instructions
+    // to users. this part will be added back once we have instructions
+    // and sample code snippets that can instruct users to add data
     this.tabs = [
-      {
-        id: ALL_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.allTitle',
-          defaultMessage: 'All',
-        }),
-      },
-      {
-        id: 'logging',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logs',
-        }),
-      },
-      {
-        id: 'metrics',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.metricsTitle',
-          defaultMessage: 'Metrics',
-        }),
-      },
-      {
-        id: 'security',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.securitySolutionTitle',
-          defaultMessage: 'Security',
-        }),
-      },
-      {
-        id: SAMPLE_DATA_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.sampleDataTitle',
-          defaultMessage: 'Sample data',
-        }),
-      },
+      //{
+      //  id: ALL_TAB_ID,
+      //  name: this.props.intl.formatMessage({
+      //    id: 'home.tutorial.tabs.allTitle',
+      //    defaultMessage: 'All',
+      //  }),
+      //},
+      //{
+      //  id: 'logging',
+      //  name: this.props.intl.formatMessage({
+      //    id: 'home.tutorial.tabs.loggingTitle',
+      //    defaultMessage: 'Logs',
+      //  }),
+      //},
+      //{
+      //  id: 'metrics',
+      //  name: this.props.intl.formatMessage({
+      //    id: 'home.tutorial.tabs.metricsTitle',
+      //    defaultMessage: 'Metrics',
+      //  }),
+      //},
+      //{
+      //  id: 'security',
+      //  name: this.props.intl.formatMessage({
+      //    id: 'home.tutorial.tabs.securitySolutionTitle',
+      //    defaultMessage: 'Security',
+      //  }),
+      //},
+      //{
+      //  id: SAMPLE_DATA_TAB_ID,
+      //  name: this.props.intl.formatMessage({
+      //    id: 'home.tutorial.tabs.sampleDataTitle',
+      //    defaultMessage: 'Sample data',
+      // }),
+      //},
     ];
 
-    let openTab = ALL_TAB_ID;
+    let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
       this.tabs.some((tab) => {
@@ -284,7 +287,7 @@ class TutorialDirectoryUi extends React.Component {
               <h1>
                 <FormattedMessage
                   id="home.tutorial.addDataToOpenSearchDashboardsTitle"
-                  defaultMessage="Add data"
+                  defaultMessage="Add sample data"
                 />
               </h1>
             </EuiTitle>
