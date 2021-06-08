@@ -20,6 +20,7 @@
 import { RGBtoString } from '../../../../../common/color_library_wrappers';
 import { Rect, Stroke, Fill } from '../../../../../geoms/types';
 import { withContext, withClipRanges } from '../../../../../renderers/canvas';
+import { getRadians } from '../../../../../utils/common';
 import { ClippedRanges } from '../../../../../utils/geometry';
 import { Point } from '../../../../../utils/point';
 import { renderMultiLine } from './line';
@@ -93,6 +94,23 @@ export function renderAreaPath(
 function renderPathFill(ctx: CanvasRenderingContext2D, path: string, fill: Fill) {
   const path2d = new Path2D(path);
   ctx.fillStyle = RGBtoString(fill.color);
-  ctx.beginPath();
   ctx.fill(path2d);
+
+  if (fill.texture) {
+    ctx.clip(path2d);
+
+    const rotation = getRadians(fill.texture.rotation ?? 0);
+    const { offset } = fill.texture;
+
+    if (offset && offset.global) ctx.translate(offset?.x ?? 0, offset?.y ?? 0);
+    if (rotation) ctx.rotate(rotation);
+    if (offset && !offset.global) ctx.translate(offset?.x ?? 0, offset?.y ?? 0);
+
+    ctx.fillStyle = fill.texture.pattern;
+
+    // Use oversized rect to fill rotation/offset beyond path
+    const rotationRectFillSize = ctx.canvas.clientWidth * ctx.canvas.clientHeight;
+    ctx.translate(-rotationRectFillSize / 2, -rotationRectFillSize / 2);
+    ctx.fillRect(0, 0, rotationRectFillSize, rotationRectFillSize);
+  }
 }

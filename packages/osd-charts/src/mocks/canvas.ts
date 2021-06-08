@@ -17,13 +17,15 @@
  * under the License.
  */
 
-/** @public */
-export interface Point {
-  x: number;
-  y: number;
-}
+/** @internal */
+export const getMockCanvasContext2D = (): CanvasRenderingContext2D => {
+  const ctx = document.createElement('canvas').getContext('2d');
+  if (ctx) return ctx;
 
-/** @internal * */
-export function getDelta(start: Point, end: Point) {
-  return Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
-}
+  throw new Error('Unable to create mock context');
+};
+
+/** @internal */
+export const getMockCanvas = (): HTMLCanvasElement => {
+  return document.createElement('canvas');
+};

@@ -39,6 +39,8 @@ export function renderXYChartCanvas2d(
   clippings: Rect,
   props: ReactiveChartStateProps,
 ) {
+  const imgCanvas = document.createElement('canvas');
+
   withContext(ctx, (ctx) => {
     // let's set the devicePixelRatio once and for all; then we'll never worry about it again
     ctx.scale(dpr, dpr);
@@ -114,13 +116,22 @@ export function renderXYChartCanvas2d(
       // rendering bars
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          renderBars(ctx, geometries.bars, sharedStyle, clippings, renderingArea, highlightedLegendItem, rotation);
+          renderBars(
+            ctx,
+            imgCanvas,
+            geometries.bars,
+            sharedStyle,
+            clippings,
+            renderingArea,
+            highlightedLegendItem,
+            rotation,
+          );
         });
       },
       // rendering areas
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          renderAreas(ctx, {
+          renderAreas(ctx, imgCanvas, {
             areas: geometries.areas,
             clippings,
             renderingArea,

@@ -190,6 +190,13 @@ export function getColorFromVariant(seriesColor: Color, color?: Color | ColorVar
 }
 
 /**
+ * Converts degree to radians
+ * @param angle - in degrees
+ * @public
+ */
+export const getRadians = (angle: number) => (angle * Math.PI) / 180;
+
+/**
  * This function returns a function to generate ids.
  * This can be used to generate unique, but predictable ids to pair labels
  * with their inputs. It takes an optional prefix as a parameter. If you don't

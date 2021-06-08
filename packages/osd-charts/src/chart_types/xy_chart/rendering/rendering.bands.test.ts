@@ -353,7 +353,7 @@ describe('Rendering bands - areas', () => {
               opacity: 1,
             },
             rectBorder: {
-              strokeWidth: 0,
+              strokeWidth: 1,
               visible: false,
             },
           },
@@ -389,7 +389,7 @@ describe('Rendering bands - areas', () => {
               opacity: 1,
             },
             rectBorder: {
-              strokeWidth: 0,
+              strokeWidth: 1,
               visible: false,
             },
           },
@@ -425,7 +425,7 @@ describe('Rendering bands - areas', () => {
               opacity: 1,
             },
             rectBorder: {
-              strokeWidth: 0,
+              strokeWidth: 1,
               visible: false,
             },
           },

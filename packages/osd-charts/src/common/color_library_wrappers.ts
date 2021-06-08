@@ -40,7 +40,7 @@ export const transparentColor: RgbObject = { r: 0, g: 0, b: 0, opacity: 0 };
 export const defaultD3Color: D3RGBColor = d3Rgb(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.opacity);
 
 /** @internal */
-export type OpacityFn = (colorOpacity: number) => number;
+export type OpacityFn = (opacity: number, seriesOpacity?: number) => number;
 
 /** @internal */
 export function stringToRGB(cssColorSpecifier?: string, opacity?: number | OpacityFn): RgbObject {

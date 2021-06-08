@@ -21,6 +21,7 @@ import { stringToRGB, OpacityFn } from '../../../../../common/color_library_wrap
 import { Stroke, Fill } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, RectStyle, RectBorderStyle } from '../../../../../utils/themes/theme';
+import { getTextureStyles } from '../../../utils/texture';
 
 /**
  * Return the rendering styles (stroke and fill) for a bar.
@@ -35,15 +36,20 @@ import { GeometryStateStyle, RectStyle, RectBorderStyle } from '../../../../../u
  * @internal
  */
 export function buildBarStyles(
+  ctx: CanvasRenderingContext2D,
+  imgCanvas: HTMLCanvasElement,
   baseColor: string,
   themeRectStyle: RectStyle,
   themeRectBorderStyle: RectBorderStyle,
   geometryStateStyle: GeometryStateStyle,
 ): { fill: Fill; stroke: Stroke } {
-  const fillOpacity: OpacityFn = (opacity) => opacity * themeRectStyle.opacity * geometryStateStyle.opacity;
+  const fillOpacity: OpacityFn = (opacity, seriesOpacity = themeRectStyle.opacity) =>
+    opacity * seriesOpacity * geometryStateStyle.opacity;
+  const texture = getTextureStyles(ctx, imgCanvas, baseColor, fillOpacity, themeRectStyle.texture);
   const fillColor = stringToRGB(getColorFromVariant(baseColor, themeRectStyle.fill), fillOpacity);
   const fill: Fill = {
     color: fillColor,
+    texture,
   };
   const defaultStrokeOpacity =
     themeRectBorderStyle.strokeOpacity === undefined ? themeRectStyle.opacity : themeRectBorderStyle.strokeOpacity;

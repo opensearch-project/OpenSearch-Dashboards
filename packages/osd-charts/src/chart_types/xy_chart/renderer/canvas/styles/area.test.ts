@@ -19,16 +19,28 @@
 
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill } from '../../../../../geoms/types';
-import { MockStyles } from '../../../../../mocks';
+import { getMockCanvas, getMockCanvasContext2D, MockStyles } from '../../../../../mocks';
 import * as common from '../../../../../utils/common';
+import { getTextureStyles } from '../../../utils/texture';
 import { buildAreaStyles } from './area';
 
+import 'jest-canvas-mock';
+
 jest.mock('../../../../../common/color_library_wrappers');
+jest.mock('../../../utils/texture');
 jest.spyOn(common, 'getColorFromVariant');
 
 const COLOR = 'aquamarine';
 
 describe('Area styles', () => {
+  let ctx: CanvasRenderingContext2D;
+  let imgCanvas: HTMLCanvasElement;
+
+  beforeEach(() => {
+    ctx = getMockCanvasContext2D();
+    imgCanvas = getMockCanvas();
+  });
+
   describe('#buildAreaStyles', () => {
     let result: Fill;
     let baseColor = COLOR;
@@ -42,7 +54,7 @@ describe('Area styles', () => {
     }
 
     beforeEach(() => {
-      result = buildAreaStyles(baseColor, themeAreaStyle, geometryStateStyle);
+      result = buildAreaStyles(ctx, imgCanvas, baseColor, themeAreaStyle, geometryStateStyle);
     });
 
     it('should call getColorFromVariant with correct args for fill', () => {
@@ -82,6 +94,26 @@ describe('Area styles', () => {
       it('should return correct fill opacity', () => {
         const expected = fillColorOpacity * fillOpacity * geoOpacity;
         expect(result.color.opacity).toEqual(expected);
+      });
+    });
+
+    describe('Texture', () => {
+      const texture = {};
+      const mockTexture = {};
+
+      beforeAll(() => {
+        setDefaults();
+        themeAreaStyle = MockStyles.area({ texture });
+        (getTextureStyles as jest.Mock).mockReturnValue(mockTexture);
+      });
+
+      it('should return correct texture', () => {
+        expect(result.texture).toEqual(mockTexture);
+      });
+
+      it('should call getTextureStyles with params', () => {
+        expect(getTextureStyles).toBeCalledTimes(1);
+        expect(getTextureStyles).toBeCalledWith(ctx, imgCanvas, baseColor, expect.anything(), texture);
       });
     });
   });

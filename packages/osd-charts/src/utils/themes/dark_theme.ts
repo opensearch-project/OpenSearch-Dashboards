@@ -80,7 +80,7 @@ export const DARK_THEME: Theme = {
     },
     rectBorder: {
       visible: false,
-      strokeWidth: 0,
+      strokeWidth: 1,
     },
     displayValue: {
       fontSize: 8,

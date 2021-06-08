@@ -403,6 +403,7 @@ module.exports = {
       files: ['stories/**/*.ts?(x)', 'docs/**/*.ts?(x)'],
       rules: {
         '@typescript-eslint/no-unsafe-call': 0,
+        '@typescript-eslint/no-unnecessary-type-assertion': 0,
       },
     },
     {

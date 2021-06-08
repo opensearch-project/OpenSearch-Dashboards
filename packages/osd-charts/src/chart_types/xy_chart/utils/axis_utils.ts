@@ -27,6 +27,7 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   getPercentageValue,
+  getRadians,
 } from '../../../utils/common';
 import { Dimensions, Margins, getSimplePadding, Size } from '../../../utils/dimensions';
 import { Range } from '../../../utils/domain';
@@ -197,9 +198,7 @@ export function getScaleForAxisSpec(
 /** @internal */
 export function computeRotatedLabelDimensions(unrotatedDims: BBox, degreesRotation: number): BBox {
   const { width, height } = unrotatedDims;
-
-  const radians = (degreesRotation * Math.PI) / 180;
-
+  const radians = getRadians(degreesRotation);
   const rotatedHeight = Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians));
   const rotatedWidth = Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians));
 

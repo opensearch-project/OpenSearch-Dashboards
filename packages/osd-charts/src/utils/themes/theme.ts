@@ -22,6 +22,7 @@ import { $Values } from 'utility-types';
 import { Pixels, Ratio } from '../../common/geometry';
 import { Color, ColorVariant, HorizontalAlignment, RecursivePartial, VerticalAlignment } from '../common';
 import { Margins, SimplePadding } from '../dimensions';
+import { Point } from '../point';
 
 /** @public */
 export interface Visible {
@@ -370,7 +371,69 @@ export interface LineStyle {
 }
 
 /** @public */
+export const TextureShape = Object.freeze({
+  ...PointShape,
+  Line: 'line' as const,
+});
+/** @public */
+export type TextureShape = $Values<typeof TextureShape>;
+
+/** @public */
+export interface TexturedStylesBase {
+  /** polygon fill color for texture */
+  fill?: Color | ColorVariant;
+  /** polygon stroke color for texture */
+  stroke?: Color | ColorVariant;
+  /** polygon stroke width for texture  */
+  strokeWidth?: number;
+  /** polygon opacity for texture  */
+  opacity?: number;
+  /** polygon opacity for texture  */
+  dash?: number[];
+  /** polygon opacity for texture  */
+  size?: number;
+  /**
+   * The angle of rotation for entire texture
+   * in degrees
+   */
+  rotation?: number;
+  /**
+   * The angle of rotation for polygons
+   * in degrees
+   */
+  shapeRotation?: number;
+  /** texture spacing between polygons */
+  spacing?: Partial<Point> | number;
+  /** overall origin offset of pattern */
+  offset?: Partial<Point> & {
+    /** apply offset along global coordinate axes */
+    global?: boolean;
+  };
+}
+
+/** @public */
+export interface TexturedShapeStyles extends TexturedStylesBase {
+  /** typed of texture designs currently supported */
+  shape: TextureShape;
+}
+
+/** @public */
+export interface TexturedPathStyles extends TexturedStylesBase {
+  /** path for polygon texture */
+  path: string | Path2D;
+}
+
+/**
+ * @public
+ *
+ * Texture style config for area spec
+ */
+export type TexturedStyles = TexturedPathStyles | TexturedShapeStyles;
+
+/** @public */
 export interface AreaStyle {
+  /** applying textures to the area on the theme/series */
+  texture?: TexturedStyles;
   /** is the area is visible or hidden ? */
   visible: boolean;
   /** a static fill color if defined, if not it will use the color of the series */
@@ -405,6 +468,8 @@ export interface RectStyle {
   /** The ratio of the width limited to [0,1]. If expressed together with `widthPixel` then the `widthRatio`
    * will express the max available size, where the `widthPixel` express the derived/min width. */
   widthRatio?: Ratio;
+  /** applying textures to the bar on the theme/series */
+  texture?: TexturedStyles;
 }
 
 /** @public */

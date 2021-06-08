@@ -55,6 +55,7 @@ export class MockStyles {
         opacity: 1,
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 
@@ -67,6 +68,7 @@ export class MockStyles {
         strokeOpacity: 1,
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 
@@ -78,6 +80,7 @@ export class MockStyles {
         opacity: 1,
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 
@@ -91,6 +94,7 @@ export class MockStyles {
         dash: [1, 2, 1],
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 
@@ -105,6 +109,7 @@ export class MockStyles {
         radius: 10,
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 
@@ -114,6 +119,7 @@ export class MockStyles {
         opacity: 1,
       },
       partial,
+      { mergeOptionalPartialValues: true },
     );
   }
 }

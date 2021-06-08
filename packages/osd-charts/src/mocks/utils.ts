@@ -71,3 +71,25 @@ export class SeededDataGenerator extends DataGenerator {
     super(frequency, getRandomNumberGenerator());
   }
 }
+
+/**
+ * Returns random array or object value
+ * @internal
+ */
+export const getRandomEntryFn = (seed = getRNGSeed()) => {
+  const rng = seedrandom(seed);
+
+  return function getRandomEntryClosure<T>(entries: T[] | Record<string, T>) {
+    if (Array.isArray(entries)) {
+      const index = Math.floor(rng() * entries.length);
+
+      return entries[index];
+    }
+
+    const keys = Object.keys(entries);
+    const index = Math.floor(rng() * keys.length);
+    const key = keys[index];
+
+    return entries[key];
+  };
+};

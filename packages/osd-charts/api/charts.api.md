@@ -120,6 +120,7 @@ export interface AreaSeriesStyle {
 export interface AreaStyle {
     fill?: Color | ColorVariant;
     opacity: number;
+    texture?: TexturedStyles;
     visible: boolean;
 }
 
@@ -1585,6 +1586,7 @@ export interface RectBorderStyle {
 export interface RectStyle {
     fill?: Color | ColorVariant;
     opacity: number;
+    texture?: TexturedStyles;
     widthPixel?: Pixels;
     widthRatio?: Ratio;
 }
@@ -1961,6 +1963,50 @@ export interface TextStyle {
     // (undocumented)
     padding: number | SimplePadding;
 }
+
+// @public (undocumented)
+export interface TexturedPathStyles extends TexturedStylesBase {
+    path: string | Path2D;
+}
+
+// @public (undocumented)
+export interface TexturedShapeStyles extends TexturedStylesBase {
+    shape: TextureShape;
+}
+
+// @public
+export type TexturedStyles = TexturedPathStyles | TexturedShapeStyles;
+
+// @public (undocumented)
+export interface TexturedStylesBase {
+    dash?: number[];
+    fill?: Color | ColorVariant;
+    offset?: Partial<Point> & {
+        global?: boolean;
+    };
+    opacity?: number;
+    rotation?: number;
+    shapeRotation?: number;
+    size?: number;
+    // Warning: (ae-forgotten-export) The symbol "Point" needs to be exported by the entry point index.d.ts
+    spacing?: Partial<Point> | number;
+    stroke?: Color | ColorVariant;
+    strokeWidth?: number;
+}
+
+// @public (undocumented)
+export const TextureShape: Readonly<{
+    Line: "line";
+    Circle: "circle";
+    Square: "square";
+    Diamond: "diamond";
+    Plus: "plus";
+    X: "x";
+    Triangle: "triangle";
+}>;
+
+// @public (undocumented)
+export type TextureShape = $Values<typeof TextureShape>;
 
 // @public (undocumented)
 export interface Theme {

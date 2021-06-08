@@ -19,10 +19,9 @@
 
 import { RgbObject } from '../common/color_library_wrappers';
 import { Radian } from '../common/geometry';
+import { TexturedStyles } from '../utils/themes/theme';
 
-/**
- * @internal
- */
+/** @internal */
 export interface Text {
   text: string;
   x: number;
@@ -61,6 +60,17 @@ export interface Circle {
 }
 
 /**
+ * render options for texture
+ * @public
+ */
+export interface Texture extends Pick<TexturedStyles, 'rotation' | 'offset'> {
+  /**
+   * patern to apply to canvas fill
+   */
+  pattern: CanvasPattern;
+}
+
+/**
  * Fill style for every geometry
  * @public
  */
@@ -69,6 +79,7 @@ export interface Fill {
    * fill color in rgba
    */
   color: RgbObject;
+  texture?: Texture;
 }
 
 /**

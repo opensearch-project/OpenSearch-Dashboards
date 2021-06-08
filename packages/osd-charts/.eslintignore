@@ -16,3 +16,6 @@ license_header.js
 # Compiled source
 src/utils/d3-delaunay/*
 **/dist
+
+# auto generated directories
+integration/tmp

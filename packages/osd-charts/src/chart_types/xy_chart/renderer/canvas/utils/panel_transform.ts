@@ -19,7 +19,7 @@
 
 import { Rect } from '../../../../../geoms/types';
 import { withContext } from '../../../../../renderers/canvas';
-import { Rotation } from '../../../../../utils/common';
+import { getRadians, Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { computeChartTransform } from '../../../state/utils/utils';
 
@@ -40,7 +40,7 @@ export function withPanelTransform(
   const top = renderingArea.top + panel.top + transform.y;
   withContext(context, (ctx) => {
     ctx.translate(left, top);
-    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.rotate(getRadians(rotation));
 
     if (clippings?.shouldClip) {
       const { x, y, width, height } = clippings.area;

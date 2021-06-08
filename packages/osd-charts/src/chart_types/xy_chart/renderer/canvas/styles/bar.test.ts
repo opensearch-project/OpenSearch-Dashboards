@@ -19,16 +19,28 @@
 
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill, Stroke } from '../../../../../geoms/types';
-import { MockStyles } from '../../../../../mocks';
+import { getMockCanvas, getMockCanvasContext2D, MockStyles } from '../../../../../mocks';
 import * as common from '../../../../../utils/common';
+import { getTextureStyles } from '../../../utils/texture';
 import { buildBarStyles } from './bar';
 
+import 'jest-canvas-mock';
+
 jest.mock('../../../../../common/color_library_wrappers');
+jest.mock('../../../utils/texture');
 jest.spyOn(common, 'getColorFromVariant');
 
 const COLOR = 'aquamarine';
 
 describe('Bar styles', () => {
+  let ctx: CanvasRenderingContext2D;
+  let imgCanvas: HTMLCanvasElement;
+
+  beforeEach(() => {
+    ctx = getMockCanvasContext2D();
+    imgCanvas = getMockCanvas();
+  });
+
   describe('#buildBarStyles', () => {
     let result: { fill: Fill; stroke: Stroke };
     let baseColor = COLOR;
@@ -44,7 +56,7 @@ describe('Bar styles', () => {
     }
 
     beforeEach(() => {
-      result = buildBarStyles(baseColor, themeRectStyle, themeRectBorderStyle, geometryStateStyle);
+      result = buildBarStyles(ctx, imgCanvas, baseColor, themeRectStyle, themeRectBorderStyle, geometryStateStyle);
     });
 
     it('should call getColorFromVariant with correct args for fill', () => {
@@ -147,6 +159,26 @@ describe('Bar styles', () => {
         it('should set stroke width to strokeWidth', () => {
           expect(result.stroke.width).toEqual(strokeWidth);
         });
+      });
+    });
+
+    describe('Texture', () => {
+      const texture = {};
+      const mockTexture = {};
+
+      beforeAll(() => {
+        setDefaults();
+        themeRectStyle = MockStyles.rect({ texture });
+        (getTextureStyles as jest.Mock).mockReturnValue(mockTexture);
+      });
+
+      it('should return correct texture', () => {
+        expect(result.fill.texture).toEqual(mockTexture);
+      });
+
+      it('should call getTextureStyles with params', () => {
+        expect(getTextureStyles).toBeCalledTimes(1);
+        expect(getTextureStyles).toBeCalledWith(ctx, imgCanvas, baseColor, expect.anything(), texture);
       });
     });
   });

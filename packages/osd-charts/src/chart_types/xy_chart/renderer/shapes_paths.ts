@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PointShape } from '../../../utils/themes/theme';
+import { PointShape, TextureShape } from '../../../utils/themes/theme';
 
 /** @internal */
 export type SVGPath = string;
@@ -44,7 +44,12 @@ export const square: SVGPathFn = (r: number) => {
 
 /** @internal */
 export const circle: SVGPathFn = (r: number) => {
-  return `M ${-r} ${0} a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 ${-r * 2},0`;
+  return `M ${-r} 0 a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 ${-r * 2},0`;
+};
+
+/** @internal */
+export const line: SVGPathFn = (r: number) => {
+  return `M 0 ${-r} l 0 ${r * 2}`;
 };
 
 /** @internal */
@@ -55,4 +60,10 @@ export const ShapeRendererFn: Record<PointShape, [SVGPathFn, number]> = {
   [PointShape.Diamond]: [square, 45],
   [PointShape.Square]: [square, 0],
   [PointShape.Triangle]: [triangle, 0],
+};
+
+/** @internal */
+export const TextureRendererFn: Record<TextureShape, [SVGPathFn, number]> = {
+  ...ShapeRendererFn,
+  [TextureShape.Line]: [line, 0],
 };

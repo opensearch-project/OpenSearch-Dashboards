@@ -49,3 +49,5 @@ export { Example as areaSeriesColorVariant } from './19_area_series_color_varian
 export { Example as partitionBackground } from './20_partition_background';
 export { Example as partitionLabels } from './21_partition_labels';
 export { Example as darkTheme } from './22_dark_theme';
+export { Example as withTexture } from './23_with_texture';
+export { Example as textureMultipleSeries } from './24_texture_multiple_series';
