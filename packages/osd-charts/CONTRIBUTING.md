@@ -120,6 +120,11 @@ This will automatically generate a pr to merge into the target branch. Once the 
 
 To link `@elastic/charts` to kibana we need to perform a few workarounds. Fortunately, this is done automatically by a custom built linking scripts.
 
+## Before linking
+Before you link kibana be sure to have a kibana instance up and running locally and pointing at whatever elasticsearch cluster you want.
+
+> Note: ⚠️ Make sure that there is no `@elastic/charts` directory within the kibana `kbn-ui-shared-deps` directory (i.e. `<path_to_kibana>/packages/kbn-ui-shared-deps/node_modules/@elastic/charts` should not exist). If this does exist please delete it and run `yarn kbn bootstrap --no-cache` then restart kibana. The issue is that this package should be hoisted to the top-level `node_modules`, if it is not at the top-level the linking will update the wrong package and not work properly.
+
 ### Linking
 
 In order to create link run...
