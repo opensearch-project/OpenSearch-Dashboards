@@ -45,10 +45,24 @@ import {
 import { Logger } from '../../logging';
 import type { OpenSearchClient } from '../client';
 
-export const getNodeId = async (internalClient: OpenSearchClient): Promise<string | null> => {
+/**
+ * Checks if all nodes in the cluster have the same cluster id node attribute
+ * that is supplied through the healthcheck param. This node attribute is configurable
+ * in opensearch_dashboards.yml.
+ * If all nodes have the same cluster id then we do not fan out the healthcheck and use '_local' node
+ * If there are multiple cluster ids then we use the default fan out behavior
+ * If the supplied node attribute is missing then we use a default cluster id and increment on healthcheck
+ * @param {OpenSearchClient} internalClient
+ * @param {string} healthcheck
+ * @returns {string|null} '_local' if all nodes have the same cluster_id, otherwise null
+ */
+export const getNodeId = async (
+  internalClient: OpenSearchClient,
+  healthcheck: string
+): Promise<string | null> => {
   try {
     const state = await internalClient.cluster.state({
-      filter_path: ['nodes.*.attributes.cluster_id'],
+      filter_path: [`nodes.*.attributes.${healthcheck}`],
     });
     // Aggregate different cluster_ids from the OpenSearch nodes
     const clusterIdSet = new Set();
@@ -56,7 +70,7 @@ export const getNodeId = async (internalClient: OpenSearchClient): Promise<strin
 
     // if attributes.cluster_id is missing, assign the monotonically increasing default cluster_id for each node
     forEach(state.body.nodes, (node: any) => {
-      clusterIdSet.add(get(node, 'attributes.cluster_id', defaultClusterId++));
+      clusterIdSet.add(get(node, `attributes.${healthcheck}`, defaultClusterId++));
     });
 
     /* if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
@@ -64,8 +78,7 @@ export const getNodeId = async (internalClient: OpenSearchClient): Promise<strin
      * else if the nodes have different cluster_ids then fan out the request to all nodes
      * else there are no nodes in the cluster
      */
-    const nodeId = clusterIdSet.size === 1 ? '_local' : null;
-    return nodeId;
+    return clusterIdSet.size === 1 ? '_local' : null;
   } catch (e) {
     return null;
   }
@@ -73,7 +86,7 @@ export const getNodeId = async (internalClient: OpenSearchClient): Promise<strin
 
 export interface PollOpenSearchNodesVersionOptions {
   internalClient: OpenSearchClient;
-  optimizedHealthcheck: boolean;
+  optimizedHealthcheck?: string;
   log: Logger;
   opensearchDashboardsVersion: string;
   ignoreVersionMismatch: boolean;
@@ -202,7 +215,7 @@ export const pollOpenSearchNodesVersion = ({
        * Using _cluster/state/nodes to retrieve the cluster_id of each node from the master node
        */
       if (optimizedHealthcheck) {
-        return from(getNodeId(internalClient)).pipe(
+        return from(getNodeId(internalClient, optimizedHealthcheck)).pipe(
           mergeMap((nodeId: any) =>
             from(
               internalClient.nodes.info<NodesInfo>({

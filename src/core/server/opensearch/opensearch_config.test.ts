@@ -72,7 +72,7 @@ test('set correct defaults', () => {
       ],
       "ignoreVersionMismatch": false,
       "logQueries": false,
-      "optimizedHealthcheck": false,
+      "optimizedHealthcheck": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
@@ -325,7 +325,7 @@ describe('deprecations', () => {
     const { messages } = applyOpenSearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"opensearch_dashboards_system\\" user instead.",
+        "Setting [opensearch.username] to \\"elastic\\" is deprecated. You should use the \\"opensearch_dashboards_system\\" user instead.",
       ]
     `);
   });
@@ -334,7 +334,7 @@ describe('deprecations', () => {
     const { messages } = applyOpenSearchDeprecations({ username: 'opensearchDashboards' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"opensearchDashboards\\" is deprecated. You should use the \\"opensearch_dashboards_system\\" user instead.",
+        "Setting [opensearch.username] to \\"opensearchDashboards\\" is deprecated. You should use the \\"opensearch_dashboards_system\\" user instead.",
       ]
     `);
   });
@@ -353,7 +353,7 @@ describe('deprecations', () => {
     const { messages } = applyOpenSearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to OpenSearch.",
+        "Setting [opensearch.ssl.key] without [opensearch.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to OpenSearch.",
       ]
     `);
   });
@@ -362,7 +362,7 @@ describe('deprecations', () => {
     const { messages } = applyOpenSearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to OpenSearch.",
+        "Setting [opensearch.ssl.certificate] without [opensearch.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to OpenSearch.",
       ]
     `);
   });

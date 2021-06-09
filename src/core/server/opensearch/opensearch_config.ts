@@ -84,7 +84,7 @@ export const configSchema = schema.object({
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
-  optimizedHealthcheck: schema.boolean({ defaultValue: false }),
+  optimizedHealthcheck: schema.maybe(schema.string()),
   ssl: schema.object(
     {
       verificationMode: schema.oneOf(
@@ -197,9 +197,9 @@ export class OpenSearchConfig {
 
   /**
    * Specifies whether Dashboards should only query the local OpenSearch node when
-   * all nodes in the cluster have the same cluster_id
+   * all nodes in the cluster have the same node attribute value
    */
-  public readonly optimizedHealthcheck: boolean;
+  public readonly optimizedHealthcheck?: string;
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
