@@ -66,9 +66,8 @@ class TutorialDirectoryUi extends React.Component {
   constructor(props) {
     super(props);
 
-    // temporarily set tabs to empty due to no available data instructions
-    // to users. this part will be added back once we have instructions
-    // and sample code snippets that can instruct users to add data
+    // TODO: Enable the tabs once we have instructions
+    // and sample code snippets to instruct users to add data
     this.tabs = [
       //{
       //  id: ALL_TAB_ID,

@@ -37,7 +37,7 @@ exports[`AddData render 1`] = `
     >
       <RedirectAppLinks>
         <Synopsis
-          description="Try our sample data."
+          description="Get started with sample data, visualizations, and dashboards."
           iconType="indexOpen"
           id="home_tutorial_directory"
           isBeta={false}

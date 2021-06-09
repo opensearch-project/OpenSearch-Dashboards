@@ -137,7 +137,7 @@ export class HomePublicPlugin
         defaultMessage: 'Add sample data',
       }),
       description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
-        defaultMessage: 'Try our sample data.',
+        defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
       }),
       icon: 'indexOpen',
       showOnHomePage: true,
