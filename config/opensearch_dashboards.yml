@@ -40,6 +40,7 @@
 #  
 # It requires the user to create an OpenSearch node attribute with the same name as the value used in the setting
 # This node attribute should assign all nodes of the same cluster an integer value that increments with each new cluster that is spun up
+# e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id: 
 # Should only be enabled if there is a corresponding node attribute created in your OpenSearch config that matches the value here
 #opensearch.optimizedHealthcheck: "cluster_id"
 
