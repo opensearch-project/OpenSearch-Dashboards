@@ -32,7 +32,7 @@ const groupByRollupAccessors = [() => null, (d: any) => d.sitc1];
 
 describe('Test', () => {
   test('getHierarchyOfArrays should omit zero and negative values', () => {
-    const outerResult = getHierarchyOfArrays(rawFacts, valueAccessor, groupByRollupAccessors, []);
+    const outerResult = getHierarchyOfArrays(rawFacts, valueAccessor, groupByRollupAccessors, [], []);
     expect(outerResult.length).toBe(1);
 
     const results = outerResult[0];

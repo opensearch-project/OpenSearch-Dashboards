@@ -20,7 +20,7 @@ jobs:
         if: ${{ failure() }}
         uses: LouisBrunner/diff-action@v0.1.0
         with:
-          old: api/charts.api.md
-          new: tmp/charts.api.md
+          old: packages/charts/api/charts.api.md
+          new: packages/charts/tmp/charts.api.md
           mode: deletion
           tolerance: better

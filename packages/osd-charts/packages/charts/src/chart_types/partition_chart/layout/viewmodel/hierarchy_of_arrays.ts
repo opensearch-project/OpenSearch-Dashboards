@@ -20,6 +20,7 @@
 import { LegendItemExtraValues } from '../../../../common/legend';
 import { SeriesKey } from '../../../../common/series_id';
 import { Relation } from '../../../../common/text_utils';
+import { LegendPath } from '../../../../state/actions/legend';
 import { IndexedAccessorFn } from '../../../../utils/accessor';
 import { Datum, ValueAccessor, ValueFormatter } from '../../../../utils/common';
 import { Layer } from '../../specs';
@@ -60,6 +61,7 @@ export function getHierarchyOfArrays(
   valueAccessor: ValueAccessor,
   groupByRollupAccessors: IndexedAccessorFn[],
   sortSpecs: (NodeSorter | null)[],
+  innerGroups: LegendPath,
 ): HierarchyOfArrays {
   const aggregator = aggregators.sum;
 
@@ -76,7 +78,7 @@ export function getHierarchyOfArrays(
   // We can precompute things invariant of how the rectangle is divvied up.
   // By introducing `scale`, we no longer need to deal with the dichotomy of
   // size as data value vs size as number of pixels in the rectangle
-  return mapsToArrays(groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts), sortSpecs);
+  return mapsToArrays(groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts), sortSpecs, innerGroups);
 }
 
 const sorter = (layout: PartitionLayout) => ({ sortPredicate }: Layer, i: number) =>
@@ -96,6 +98,7 @@ export function partitionTree(
   layers: Layer[],
   defaultLayout: PartitionLayout,
   partitionLayout: PartitionLayout = defaultLayout,
+  innerGroups: LegendPath,
 ) {
   return getHierarchyOfArrays(
     data,
@@ -103,6 +106,7 @@ export function partitionTree(
     // eslint-disable-next-line no-shadow
     [() => HIERARCHY_ROOT_KEY, ...layers.map(({ groupByRollup }) => groupByRollup)],
     [null, ...layers.map(sorter(partitionLayout))],
+    innerGroups,
   );
 }
 

@@ -35,7 +35,7 @@ import { getSmallMultiplesSpecs } from '../../../../state/selectors/get_small_mu
 import { getSpecsFromStore } from '../../../../state/utils';
 import { Datum } from '../../../../utils/common';
 import { configMetadata } from '../../layout/config';
-import { HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
+import { HierarchyOfArrays, NULL_SMALL_MULTIPLES_KEY } from '../../layout/utils/group_by_rollup';
 import { partitionTree } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { PartitionSpec } from '../../specs';
 import { getPartitionSpecs } from './get_partition_specs';
@@ -84,7 +84,7 @@ function getTreesForSpec(
     }, new Map<string, HierarchyOfArrays>());
     return Array.from(groups)
       .sort(getPredicateFn(sort))
-      .map(([groupKey, subData]) => ({
+      .map(([groupKey, subData], innerIndex) => ({
         name: format(groupKey),
         smAccessorValue: groupKey,
         style: smStyle,
@@ -94,6 +94,7 @@ function getTreesForSpec(
           layers,
           configMetadata.partitionLayout.dflt,
           config.partitionLayout,
+          [{ index: innerIndex, value: String(groupKey) }],
         ),
       }));
   } else {
@@ -102,7 +103,12 @@ function getTreesForSpec(
         name: '',
         smAccessorValue: '',
         style: smStyle,
-        tree: partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout),
+        tree: partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout, [
+          {
+            index: 0,
+            value: NULL_SMALL_MULTIPLES_KEY,
+          },
+        ]),
       },
     ];
   }

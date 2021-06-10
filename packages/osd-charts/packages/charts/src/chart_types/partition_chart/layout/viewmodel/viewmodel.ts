@@ -262,7 +262,7 @@ const rawChildNodes = (
       const icicleLayout = isIcicle(partitionLayout);
       const icicleValueToAreaScale = width / totalValue;
       const icicleAreaAccessor = (e: ArrayEntry) => icicleValueToAreaScale * mapEntryValue(e);
-      const icicleRowHeight = height / maxDepth;
+      const icicleRowHeight = height / (maxDepth - 1);
       const result = sunburst(tree, icicleAreaAccessor, { x0: 0, y0: -icicleRowHeight }, true, false, icicleRowHeight);
       return icicleLayout
         ? result

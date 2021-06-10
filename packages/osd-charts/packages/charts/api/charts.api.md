@@ -1027,6 +1027,9 @@ export interface HeatmapSpec extends Spec {
     ySortPredicate: Predicate;
 }
 
+// @public
+export const HIERARCHY_ROOT_KEY: Key;
+
 // @public (undocumented)
 export type HierarchyOfArrays = Array<ArrayEntry>;
 
@@ -1132,7 +1135,7 @@ export interface LegendColorPickerProps {
 // @public (undocumented)
 export type LegendItemListener = (series: SeriesIdentifier[]) => void;
 
-// @public (undocumented)
+// @public
 export type LegendPath = LegendPathElement[];
 
 // @public (undocumented)
@@ -1324,6 +1327,9 @@ export type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 
 // @public (undocumented)
 export type NonAny = number | boolean | string | symbol | null;
+
+// @public
+export const NULL_SMALL_MULTIPLES_KEY: Key;
 
 // @public (undocumented)
 export interface Opacity {
@@ -1528,7 +1534,7 @@ export interface Postfixes {
     y1AccessorFormat?: string;
 }
 
-// @public (undocumented)
+// @public
 export type PrimitiveValue = string | number | null;
 
 // @public

@@ -69,25 +69,25 @@ describe('Partition - Legend item extra values', () => {
 
     const extraValues = getLegendItemsExtra(store.getState());
     expect([...extraValues.keys()]).toEqual([
-      '0',
       '0__0',
       '0__0__0',
       '0__0__0__0',
+      '0__0__0__0__0',
+      '0__0__0__0__1',
       '0__0__0__1',
+      '0__0__0__1__0',
+      '0__0__0__1__1',
+      '0__0__0__1__2',
       '0__0__1',
       '0__0__1__0',
+      '0__0__1__0__0',
+      '0__0__1__0__1',
       '0__0__1__1',
+      '0__0__1__1__0',
+      '0__0__1__1__1',
       '0__0__1__2',
-      '0__1',
-      '0__1__0',
-      '0__1__0__0',
-      '0__1__0__1',
-      '0__1__1',
-      '0__1__1__0',
-      '0__1__1__1',
-      '0__1__2',
-      '0__1__2__0',
-      '0__1__2__1',
+      '0__0__1__2__0',
+      '0__0__1__2__1',
     ]);
     expect(extraValues.values()).toMatchSnapshot();
   });
@@ -97,7 +97,7 @@ describe('Partition - Legend item extra values', () => {
     MockStore.addSpecs([settings, spec], store);
 
     const extraValues = getLegendItemsExtra(store.getState());
-    expect([...extraValues.keys()]).toEqual(['0', '0__0', '0__1']);
+    expect([...extraValues.keys()]).toEqual(['0__0', '0__0__0', '0__0__1']);
     expect(extraValues.values()).toMatchSnapshot();
   });
 
@@ -107,14 +107,14 @@ describe('Partition - Legend item extra values', () => {
 
     const extraValues = getLegendItemsExtra(store.getState());
     expect([...extraValues.keys()]).toEqual([
-      '0',
       '0__0',
       '0__0__0',
+      '0__0__0__0',
+      '0__0__0__1',
       '0__0__1',
-      '0__1',
-      '0__1__0',
-      '0__1__1',
-      '0__1__2',
+      '0__0__1__0',
+      '0__0__1__1',
+      '0__0__1__2',
     ]);
     expect(extraValues.values()).toMatchSnapshot();
   });

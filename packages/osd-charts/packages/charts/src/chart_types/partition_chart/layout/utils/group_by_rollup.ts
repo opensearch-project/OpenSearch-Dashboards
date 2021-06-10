@@ -56,6 +56,7 @@ export interface NodeDescriptor {
 export type ArrayEntry = [Key, ArrayNode];
 /** @public */
 export type HierarchyOfArrays = Array<ArrayEntry>;
+
 /** @public */
 export interface ArrayNode extends NodeDescriptor {
   [CHILDREN_KEY]: HierarchyOfArrays;
@@ -65,15 +66,30 @@ export interface ArrayNode extends NodeDescriptor {
 }
 
 type HierarchyOfMaps = Map<Key, MapNode>;
+
 interface MapNode extends NodeDescriptor {
   [CHILDREN_KEY]?: HierarchyOfMaps;
   [PARENT_KEY]?: ArrayNode;
 }
 
-/** @internal */
+/**
+ * Used in the first position of a `LegendPath` array, which indicates the stringified value of the `groupBy` value
+ * in case of small multiples, but has no applicable `groupBy` for singleton (non-small-multiples) charts
+ * @public
+ */
+export const NULL_SMALL_MULTIPLES_KEY: Key = '__null_small_multiples_key__';
+
+/**
+ * Indicates that a node is the root of a specific partition chart, eg. the root of a single pie chart, or one pie
+ * chart in a small multiples setting. Used in the second position of a `LegendPath` array
+ * @public
+ */
 export const HIERARCHY_ROOT_KEY: Key = '__root_key__';
 
-/** @public */
+/**
+ * A primitive JavaScript value, possibly further restricted
+ * @public
+ */
 export type PrimitiveValue = string | number | null; // there could be more but sufficient for now
 /** @public */
 export type Key = CategoryKey;
@@ -90,26 +106,32 @@ export type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 export const entryKey = ([key]: ArrayEntry) => key;
 /** @public */
 export const entryValue = ([, value]: ArrayEntry) => value;
+
 /** @public */
 export function depthAccessor(n: ArrayEntry) {
   return entryValue(n)[DEPTH_KEY];
 }
+
 /** @public */
 export function aggregateAccessor(n: ArrayEntry): number {
   return entryValue(n)[AGGREGATE_KEY];
 }
+
 /** @public */
 export function parentAccessor(n: ArrayEntry): ArrayNode {
   return entryValue(n)[PARENT_KEY];
 }
+
 /** @public */
 export function childrenAccessor(n: ArrayEntry) {
   return entryValue(n)[CHILDREN_KEY];
 }
+
 /** @public */
 export function sortIndexAccessor(n: ArrayEntry) {
   return entryValue(n)[SORT_INDEX_KEY];
 }
+
 /** @public */
 export function pathAccessor(n: ArrayEntry) {
   return entryValue(n)[PATH_KEY];
@@ -185,7 +207,11 @@ function getRootArrayNode(): ArrayNode {
 }
 
 /** @internal */
-export function mapsToArrays(root: HierarchyOfMaps, sortSpecs: (NodeSorter | null)[]): HierarchyOfArrays {
+export function mapsToArrays(
+  root: HierarchyOfMaps,
+  sortSpecs: (NodeSorter | null)[],
+  innerGroups: LegendPath,
+): HierarchyOfArrays {
   const groupByMap = (node: HierarchyOfMaps, parent: ArrayNode) => {
     const items = Array.from(
       node,
@@ -230,7 +256,7 @@ export function mapsToArrays(root: HierarchyOfMaps, sortSpecs: (NodeSorter | nul
     mapNode[PATH_KEY] = newPath; // in-place mutation, so disabled `no-param-reassign`
     mapNode.children.forEach((entry) => buildPaths(entry, newPath));
   };
-  buildPaths(tree[0], []);
+  buildPaths(tree[0], innerGroups);
   return tree;
 }
 
