@@ -1,3 +1,10 @@
+# [30.2.0](https://github.com/elastic/elastic-charts/compare/v30.1.0...v30.2.0) (2021-06-10)
+
+
+### Features
+
+* **a11y:** add data table for screen readers (sunburst,  treemap, icicle, flame) ([#1155](https://github.com/elastic/elastic-charts/issues/1155)) ([87fd75f](https://github.com/elastic/elastic-charts/commit/87fd75facf96845629307ef3d2f5d67a4f9029d1)), closes [#1154](https://github.com/elastic/elastic-charts/issues/1154)
+
 # [30.1.0](https://github.com/elastic/elastic-charts/compare/v30.0.0...v30.1.0) (2021-06-08)
 
 
