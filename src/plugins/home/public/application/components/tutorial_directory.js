@@ -68,43 +68,7 @@ class TutorialDirectoryUi extends React.Component {
 
     // TODO: Enable the tabs once we have instructions
     // and sample code snippets to instruct users to add data
-    this.tabs = [
-      //{
-      //  id: ALL_TAB_ID,
-      //  name: this.props.intl.formatMessage({
-      //    id: 'home.tutorial.tabs.allTitle',
-      //    defaultMessage: 'All',
-      //  }),
-      //},
-      //{
-      //  id: 'logging',
-      //  name: this.props.intl.formatMessage({
-      //    id: 'home.tutorial.tabs.loggingTitle',
-      //    defaultMessage: 'Logs',
-      //  }),
-      //},
-      //{
-      //  id: 'metrics',
-      //  name: this.props.intl.formatMessage({
-      //    id: 'home.tutorial.tabs.metricsTitle',
-      //    defaultMessage: 'Metrics',
-      //  }),
-      //},
-      //{
-      //  id: 'security',
-      //  name: this.props.intl.formatMessage({
-      //    id: 'home.tutorial.tabs.securitySolutionTitle',
-      //    defaultMessage: 'Security',
-      //  }),
-      //},
-      //{
-      //  id: SAMPLE_DATA_TAB_ID,
-      //  name: this.props.intl.formatMessage({
-      //    id: 'home.tutorial.tabs.sampleDataTitle',
-      //    defaultMessage: 'Sample data',
-      // }),
-      //},
-    ];
+    this.tabs = [];
 
     let openTab = SAMPLE_DATA_TAB_ID;
     if (
