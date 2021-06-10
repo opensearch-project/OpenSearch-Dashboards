@@ -251,6 +251,7 @@ describe('pollOpenSearchNodesVersion', () => {
    * Disable TestScheduler test due to OOM issue,
    * refer to https://rxjs.dev/guide/testing/marble-testing#known-issues
    */
+  // TODO: investigate removing or rewriting this unit test
   it.skip('starts polling immediately and then every opensearchVersionCheckInterval', () => {
     expect.assertions(1);
 
@@ -290,6 +291,7 @@ describe('pollOpenSearchNodesVersion', () => {
     });
   });
 
+  // TODO: investigate removing or rewriting this unit test
   it.skip('waits for opensearch version check requests to complete before scheduling the next one', () => {
     expect.assertions(2);
 

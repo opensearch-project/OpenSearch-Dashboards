@@ -37,7 +37,7 @@
 
 import { timer, of, from, Observable } from 'rxjs';
 import { map, distinctUntilChanged, catchError, exhaustMap, mergeMap } from 'rxjs/operators';
-import { get, forEach } from 'lodash';
+import { get } from 'lodash';
 import {
   opensearchVersionCompatibleWithOpenSearchDashboards,
   opensearchVersionEqualsOpenSearchDashboards,
@@ -47,38 +47,39 @@ import type { OpenSearchClient } from '../client';
 
 /**
  * Checks if all nodes in the cluster have the same cluster id node attribute
- * that is supplied through the healthcheck param. This node attribute is configurable
+ * that is supplied through the healthcheckAttributeName param. This node attribute is configurable
  * in opensearch_dashboards.yml.
  * If all nodes have the same cluster id then we do not fan out the healthcheck and use '_local' node
  * If there are multiple cluster ids then we use the default fan out behavior
- * If the supplied node attribute is missing then we use a default cluster id and increment on healthcheck
+ * If the supplied node attribute is missing then we return null and use default fan out behavior
  * @param {OpenSearchClient} internalClient
- * @param {string} healthcheck
+ * @param {string} healthcheckAttributeName
  * @returns {string|null} '_local' if all nodes have the same cluster_id, otherwise null
  */
 export const getNodeId = async (
   internalClient: OpenSearchClient,
-  healthcheck: string
+  healthcheckAttributeName: string
 ): Promise<string | null> => {
   try {
     const state = await internalClient.cluster.state({
-      filter_path: [`nodes.*.attributes.${healthcheck}`],
+      filter_path: [`nodes.*.attributes.${healthcheckAttributeName}`],
     });
-    // Aggregate different cluster_ids from the OpenSearch nodes
-    const clusterIdSet = new Set();
-    let defaultClusterId = 0;
-
-    // if attributes.cluster_id is missing, assign the monotonically increasing default cluster_id for each node
-    forEach(state.body.nodes, (node: any) => {
-      clusterIdSet.add(get(node, `attributes.${healthcheck}`, defaultClusterId++));
-    });
-
-    /* if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
+    /* Aggregate different cluster_ids from the OpenSearch nodes
+     * if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
      * Using _cluster/state/nodes to retrieve the cluster_id of each node from master node which is considered to be a lightweight operation
      * else if the nodes have different cluster_ids then fan out the request to all nodes
      * else there are no nodes in the cluster
      */
-    return clusterIdSet.size === 1 ? '_local' : null;
+    const sharedClusterId =
+      state.body.nodes.length > 0
+        ? get(state.body.nodes[0], `attributes.${healthcheckAttributeName}`, null)
+        : null;
+    return sharedClusterId === null ||
+      state.body.nodes.find(
+        (node: any) => sharedClusterId !== get(node, `attributes.${healthcheckAttributeName}`, null)
+      )
+      ? null
+      : '_local';
   } catch (e) {
     return null;
   }
