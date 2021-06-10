@@ -83,7 +83,10 @@ describe('Retain hierarchy even with arbitrary names', () => {
       MockStore.addSpecs(
         [
           MockGlobalSpec.settings({ showLegend: true }),
-          MockSeriesSpec.sunburst({ ...specJSON, data: [{ cat1: 'A', cat2: 'A', val: 1 }] }),
+          MockSeriesSpec.sunburst({
+            ...specJSON,
+            data: [{ cat1: 'A', cat2: 'A', val: 1, percentage: '100%', valueText: 1 }],
+          }),
         ],
         store,
       );
@@ -94,7 +97,10 @@ describe('Retain hierarchy even with arbitrary names', () => {
       MockStore.addSpecs(
         [
           MockGlobalSpec.settings({ showLegend: true }),
-          MockSeriesSpec.sunburst({ ...specJSON, data: [{ cat1: 'C', cat2: 'B', val: 1 }] }),
+          MockSeriesSpec.sunburst({
+            ...specJSON,
+            data: [{ cat1: 'C', cat2: 'B', val: 1, parentName: 'A', percentage: '100%', valueText: '1' }],
+          }),
         ],
         store,
       );

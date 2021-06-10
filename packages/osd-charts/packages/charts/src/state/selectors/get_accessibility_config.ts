@@ -37,6 +37,7 @@ export type A11ySettings = {
   description?: string;
   descriptionId?: string;
   defaultSummaryId?: string;
+  tableCaption?: string;
 };
 
 /** @internal */
@@ -48,7 +49,15 @@ export const DEFAULT_A11Y_SETTINGS: A11ySettings = {
 export const getA11ySettingsSelector = createCachedSelector(
   [getSettingsSpecSelector, getChartIdSelector],
   (
-    { ariaDescription, ariaDescribedBy, ariaLabel, ariaLabelledBy, ariaUseDefaultSummary, ariaLabelHeadingLevel },
+    {
+      ariaDescription,
+      ariaDescribedBy,
+      ariaLabel,
+      ariaLabelledBy,
+      ariaUseDefaultSummary,
+      ariaLabelHeadingLevel,
+      ariaTableCaption,
+    },
     chartId,
   ) => {
     const defaultSummaryId = ariaUseDefaultSummary ? `${chartId}--defaultSummary` : undefined;
@@ -69,6 +78,7 @@ export const getA11ySettingsSelector = createCachedSelector(
       // concat all the ids
       descriptionId: describeBy.length > 0 ? describeBy.join(' ') : undefined,
       defaultSummaryId,
+      tableCaption: ariaTableCaption,
     };
   },
 )(getChartIdSelector);

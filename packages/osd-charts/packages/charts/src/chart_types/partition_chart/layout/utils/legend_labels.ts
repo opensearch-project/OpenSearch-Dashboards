@@ -36,11 +36,7 @@ function flatSlicesNames(
     return [];
   }
 
-  for (let i = 0; i < tree.length; i++) {
-    const branch = tree[i];
-    const arrayNode = branch[1];
-    const key = branch[0];
-
+  for (const [key, arrayNode] of tree) {
     // format the key with the layer formatter
     const layer = layers[depth - 1];
     const formatter = layer?.nodeLabel;

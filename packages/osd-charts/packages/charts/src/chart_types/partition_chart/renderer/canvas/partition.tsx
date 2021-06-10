@@ -22,7 +22,9 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { ScreenReaderSummary } from '../../../../components/accessibility';
+import { ScreenReaderPartitionTable } from '../../../../components/accessibility/partitions_data_table';
 import { clearCanvas } from '../../../../renderers/canvas';
+import { SettingsSpec } from '../../../../specs/settings';
 import { onChartRendered } from '../../../../state/actions/chart';
 import { ChartId, GlobalChartState } from '../../../../state/chart_state';
 import {
@@ -33,6 +35,7 @@ import {
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Dimensions } from '../../../../utils/dimensions';
 import { MODEL_KEY } from '../../layout/config';
 import {
@@ -66,6 +69,7 @@ interface ReactiveChartStateProps {
   chartContainerDimensions: Dimensions;
   chartId: ChartId;
   a11ySettings: A11ySettings;
+  debug: SettingsSpec['debug'];
 }
 
 interface ReactiveChartDispatchProps {
@@ -149,6 +153,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
       initialized,
       chartContainerDimensions: { width, height },
       a11ySettings,
+      debug,
     } = this.props;
     if (!initialized || width === 0 || height === 0) {
       return null;
@@ -169,7 +174,9 @@ class PartitionComponent extends React.Component<PartitionProps> {
           role="presentation"
         >
           <ScreenReaderSummary />
+          {!debug && <ScreenReaderPartitionTable />}
         </canvas>
+        {debug && <ScreenReaderPartitionTable />}
       </figure>
     );
   }
@@ -219,6 +226,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
     top: 0,
   },
   a11ySettings: DEFAULT_A11Y_SETTINGS,
+  debug: false,
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
@@ -234,6 +242,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     geometriesFoci: partitionDrilldownFocus(state),
     chartId: getChartIdSelector(state),
     a11ySettings: getA11ySettingsSelector(state),
+    debug: getSettingsSpecSelector(state).debug,
   };
 };
 

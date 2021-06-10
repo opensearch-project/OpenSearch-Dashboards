@@ -6,3 +6,25 @@
   height: 1px;
   overflow: hidden;
 }
+
+.echScreenReaderOnlyDebug {
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto !important;
+  background: rgba(255, 255, 255, 0.8);
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    font-size: 12px;
+  }
+}
+
+.echScreenReaderTable {
+  overflow-x: auto;
+  text-align: left;
+}

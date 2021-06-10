@@ -69,6 +69,7 @@ export function ratioValueGetter(node: ShapeTreeNode): number {
 
 /** @public */
 export const VALUE_GETTERS = Object.freeze({ percent: percentValueGetter, ratio: ratioValueGetter } as const);
+
 /** @public */
 export type ValueGetterName = keyof typeof VALUE_GETTERS;
 

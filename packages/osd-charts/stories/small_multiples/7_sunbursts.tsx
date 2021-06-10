@@ -84,6 +84,7 @@ export const Example = () => {
         flatLegend={boolean('Flat legend', true)}
         theme={STORYBOOK_LIGHT_THEME}
         {...onElementListeners}
+        debug={boolean('Debug', false)}
       />
       <GroupBy
         id="split"

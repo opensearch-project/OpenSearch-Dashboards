@@ -30,5 +30,7 @@ import { getTrees } from './tree';
 export const getLegendItemsLabels = createCachedSelector(
   [getPartitionSpecs, getSettingsSpecSelector, getTrees],
   (specs, { legendMaxDepth, showLegend }, trees): LegendItemLabel[] =>
-    specs.flatMap((spec) => (showLegend ? getLegendLabels(spec.layers, trees[0].tree, legendMaxDepth) : [])), // singleton! wrt inner small multiples
+    specs.flatMap((spec) =>
+      showLegend ? trees.flatMap(({ tree }) => getLegendLabels(spec.layers, tree, legendMaxDepth)) : [],
+    ),
 )(getChartIdSelector);

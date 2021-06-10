@@ -71,27 +71,26 @@ exports[`Chart should render the legend name test 1`] = `
                 <Connect(XYChart) forwardCanvasRef={{...}}>
                   <XYChart forwardCanvasRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} a11ySettings={{...}} onChartRendered={[Function (anonymous)]}>
                     <figure aria-labelledby={[undefined]} aria-describedby=\\"chart1--defaultSummary\\">
-                      <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} role=\\"presentation\\">
-                        <Connect(ScreenReaderSummaryComponent)>
-                          <ScreenReaderSummaryComponent chartTypeDescription=\\"bar chart\\" a11ySettings={{...}} dispatch={[Function: dispatch]}>
-                            <div className=\\"echScreenReaderOnly\\">
-                              <ScreenReaderLabel label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
-                              <ScreenReaderDescription label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" />
-                              <ScreenReaderTypes label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" chartTypeDescription=\\"bar chart\\">
-                                <dl>
-                                  <dt>
-                                    Chart type:
-                                  </dt>
-                                  <dd id=\\"chart1--defaultSummary\\">
-                                    bar chart
-                                  </dd>
-                                </dl>
-                              </ScreenReaderTypes>
-                            </div>
-                          </ScreenReaderSummaryComponent>
-                        </Connect(ScreenReaderSummaryComponent)>
-                      </canvas>
+                      <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} role=\\"presentation\\" />
                     </figure>
+                    <Connect(ScreenReaderSummaryComponent)>
+                      <ScreenReaderSummaryComponent chartTypeDescription=\\"bar chart\\" a11ySettings={{...}} dispatch={[Function: dispatch]}>
+                        <div className=\\"echScreenReaderOnly\\">
+                          <ScreenReaderLabel label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} />
+                          <ScreenReaderDescription label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} />
+                          <ScreenReaderTypes label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} chartTypeDescription=\\"bar chart\\">
+                            <dl>
+                              <dt>
+                                Chart type:
+                              </dt>
+                              <dd id=\\"chart1--defaultSummary\\">
+                                bar chart
+                              </dd>
+                            </dl>
+                          </ScreenReaderTypes>
+                        </div>
+                      </ScreenReaderSummaryComponent>
+                    </Connect(ScreenReaderSummaryComponent)>
                   </XYChart>
                 </Connect(XYChart)>
                 <Connect(Tooltip) getChartContainerRef={[Function (anonymous)]}>

@@ -233,15 +233,3 @@ export const partitionDrilldownFocus = createCachedSelector(
       return { currentFocusX0, currentFocusX1, prevFocusX0, prevFocusX1, smAccessorValue, index, innerIndex };
     }),
 )((state) => state.chartId);
-
-/** @internal */
-export const partitionGeometries = createCachedSelector(
-  [partitionMultiGeometries],
-  (multiGeometries: ShapeViewModel[]) => {
-    return [
-      multiGeometries.length > 0 // singleton!
-        ? multiGeometries[0]
-        : nullShapeViewModel(),
-    ];
-  },
-)(getChartIdSelector);

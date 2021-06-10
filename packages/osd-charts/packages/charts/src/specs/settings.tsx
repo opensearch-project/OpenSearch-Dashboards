@@ -586,6 +586,10 @@ export interface SettingsSpec extends Spec, LegendSpec {
    * @defaultValue true
    */
   ariaUseDefaultSummary: boolean;
+  /**
+   * User can provide a table description of the data
+   */
+  ariaTableCaption?: string;
 }
 
 /**
@@ -648,7 +652,8 @@ export type DefaultSettingsProps =
   | 'legendPosition'
   | 'legendMaxDepth'
   | 'ariaUseDefaultSummary'
-  | 'ariaLabelHeadingLevel';
+  | 'ariaLabelHeadingLevel'
+  | 'ariaTableCaption';
 
 /** @public */
 export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
