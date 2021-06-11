@@ -104,7 +104,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         await delay(200);
         return {
           _scroll_id: 'index1ScrollId',
-          hits: { total: 2, hits: [{ _id: 1, _index: '.opensearch_dashboards_foo' }] },
+          hits: { total: 2, hits: [{ _id: 1, _index: '.opensearch_dashboards_1' }] },
         };
       },
       async (name, params) => {
