@@ -49,7 +49,7 @@ const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 const mockFeatures = [
   {
     category: 'data',
-    description: 'Ingest data from popular apps and services.',
+    description: 'Get started with sample data, visualizations, and dashboards.',
     showOnHomePage: true,
     icon: 'indexOpen',
     id: 'home_tutorial_directory',

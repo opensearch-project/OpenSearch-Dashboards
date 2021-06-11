@@ -32,7 +32,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
@@ -65,25 +65,6 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
               />
             </h2>
           </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem className="osdOverviewDataAdd__actions" grow={false}>
-          <RedirectAppLinks application={application}>
-            <div>
-              <EuiButtonEmpty
-                className="osdOverviewDataAdd__actionButton"
-                flush="left"
-                href={addBasePath('/app/home#/tutorial_directory/sampleData')}
-                iconType="visTable"
-                size="xs"
-              >
-                <FormattedMessage
-                  id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
-                  defaultMessage="Try our sample data"
-                />
-              </EuiButtonEmpty>
-            </div>
-          </RedirectAppLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
 
