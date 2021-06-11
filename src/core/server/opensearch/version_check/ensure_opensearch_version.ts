@@ -36,7 +36,8 @@
  */
 
 import { timer, of, from, Observable } from 'rxjs';
-import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
+import { map, distinctUntilChanged, catchError, exhaustMap, mergeMap } from 'rxjs/operators';
+import { get } from 'lodash';
 import {
   opensearchVersionCompatibleWithOpenSearchDashboards,
   opensearchVersionEqualsOpenSearchDashboards,
@@ -44,8 +45,49 @@ import {
 import { Logger } from '../../logging';
 import type { OpenSearchClient } from '../client';
 
+/**
+ * Checks if all nodes in the cluster have the same cluster id node attribute
+ * that is supplied through the healthcheckAttributeName param. This node attribute is configurable
+ * in opensearch_dashboards.yml.
+ * If all nodes have the same cluster id then we do not fan out the healthcheck and use '_local' node
+ * If there are multiple cluster ids then we use the default fan out behavior
+ * If the supplied node attribute is missing then we return null and use default fan out behavior
+ * @param {OpenSearchClient} internalClient
+ * @param {string} healthcheckAttributeName
+ * @returns {string|null} '_local' if all nodes have the same cluster_id, otherwise null
+ */
+export const getNodeId = async (
+  internalClient: OpenSearchClient,
+  healthcheckAttributeName: string
+): Promise<string | null> => {
+  try {
+    const state = await internalClient.cluster.state({
+      filter_path: [`nodes.*.attributes.${healthcheckAttributeName}`],
+    });
+    /* Aggregate different cluster_ids from the OpenSearch nodes
+     * if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
+     * Using _cluster/state/nodes to retrieve the cluster_id of each node from master node which is considered to be a lightweight operation
+     * else if the nodes have different cluster_ids then fan out the request to all nodes
+     * else there are no nodes in the cluster
+     */
+    const sharedClusterId =
+      state.body.nodes.length > 0
+        ? get(state.body.nodes[0], `attributes.${healthcheckAttributeName}`, null)
+        : null;
+    return sharedClusterId === null ||
+      state.body.nodes.find(
+        (node: any) => sharedClusterId !== get(node, `attributes.${healthcheckAttributeName}`, null)
+      )
+      ? null
+      : '_local';
+  } catch (e) {
+    return null;
+  }
+};
+
 export interface PollOpenSearchNodesVersionOptions {
   internalClient: OpenSearchClient;
+  optimizedHealthcheckId?: string;
   log: Logger;
   opensearchDashboardsVersion: string;
   ignoreVersionMismatch: boolean;
@@ -158,6 +200,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 
 export const pollOpenSearchNodesVersion = ({
   internalClient,
+  optimizedHealthcheckId,
   log,
   opensearchDashboardsVersion,
   ignoreVersionMismatch,
@@ -166,16 +209,40 @@ export const pollOpenSearchNodesVersion = ({
   log.debug('Checking OpenSearch version');
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
-      return from(
-        internalClient.nodes.info<NodesInfo>({
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-        })
-      ).pipe(
-        map(({ body }) => body),
-        catchError((_err) => {
-          return of({ nodes: {} });
-        })
-      );
+      /*
+       * Originally, Dashboards queries OpenSearch cluster to get the version info of each node and check the version compatibility with each node.
+       * The /nodes request could fail even one node in cluster fail to response
+       * For better dashboards resilience, the behaviour is changed to only query the local node when all the nodes have the same cluster_id
+       * Using _cluster/state/nodes to retrieve the cluster_id of each node from the master node
+       */
+      if (optimizedHealthcheckId) {
+        return from(getNodeId(internalClient, optimizedHealthcheckId)).pipe(
+          mergeMap((nodeId: any) =>
+            from(
+              internalClient.nodes.info<NodesInfo>({
+                node_id: nodeId,
+                filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+              })
+            ).pipe(
+              map(({ body }) => body),
+              catchError((_err: any) => {
+                return of({ nodes: {} });
+              })
+            )
+          )
+        );
+      } else {
+        return from(
+          internalClient.nodes.info<NodesInfo>({
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          })
+        ).pipe(
+          map(({ body }) => body),
+          catchError((_err) => {
+            return of({ nodes: {} });
+          })
+        );
+      }
     }),
     map((nodesInfo: NodesInfo) =>
       mapNodesVersionCompatibility(nodesInfo, opensearchDashboardsVersion, ignoreVersionMismatch)

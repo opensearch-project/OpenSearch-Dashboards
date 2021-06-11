@@ -34,6 +34,16 @@
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
+# Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
+# This settings should be used for large clusters or for clusters with ingest heavy nodes.
+# It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
+#  
+# It requires the user to create an OpenSearch node attribute with the same name as the value used in the setting
+# This node attribute should assign all nodes of the same cluster an integer value that increments with each new cluster that is spun up
+# e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id: 
+# Should only be enabled if there is a corresponding node attribute created in your OpenSearch config that matches the value here
+#opensearch.optimizedHealthcheckId: "cluster_id"
+
 # If your OpenSearch is protected with basic authentication, these settings provide
 # the username and password that the OpenSearch Dashboards server uses to perform maintenance on the OpenSearch Dashboards
 # index at startup. Your OpenSearch Dashboards users still need to authenticate with OpenSearch, which
