@@ -29,7 +29,6 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 const fetch = require('node-fetch');
 const AbortController = require('abort-controller');
 const fs = require('fs');
@@ -40,8 +39,12 @@ const { createHash } = require('crypto');
 const path = require('path');
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = '';
+const DAILY_SNAPSHOTS_BASE_URL = 'https://artifacts.opensearch.org/snapshots/core/opensearch';
+// TODO: [RENAMEME] currently do not have an existing replacement
+// issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
 const PERMANENT_SNAPSHOTS_BASE_URL = '';
+// Since we do not have a manifest URL, limiting how many RC checks to 5 should be more than enough
+const MAX_RC_CHECK = 5;
 
 const { cache } = require('./utils');
 const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
@@ -96,6 +99,21 @@ async function fetchSnapshotManifest(url, log) {
   return { abc, resp, json };
 }
 
+async function verifySnapshotUrl(url, log) {
+  log.info('Verifying snapshot URL at %s', chalk.bold(url));
+
+  const abc = new AbortController();
+  const resp = await retry(
+    log,
+    async () => await fetch(url, { signal: abc.signal }, { method: 'HEAD' })
+  );
+
+  return { abc, resp };
+}
+
+/**
+ * @deprecated This method should not be used, uses logic for resources we do not have access to.
+ */
 async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
   const desiredLicense = license === 'oss' ? 'oss' : 'default';
@@ -153,10 +171,87 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   };
 }
 
+async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
+  const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
+
+  if (process.env.OPENSEARCH_SNAPSHOT_MANIFEST) {
+    return await getArtifactSpecForSnapshot(urlVersion, 'oss', log);
+  }
+
+  // [RENAMEME] Need replacement for other platforms.
+  // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
+  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  if (platform !== 'linux' || arch !== 'x64') {
+    throw createCliError(`Snapshots are only available for Linux x64`);
+  }
+
+  const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}`;
+  const latestFile = `opensearch-${desiredVersion}-SNAPSHOT-${platform}-${arch}-latest.tar.gz`;
+  const completeLatestUrl = `${latestUrl}/${latestFile}`;
+
+  let { abc, resp } = await verifySnapshotUrl(completeLatestUrl, log);
+
+  if (resp.ok) {
+    return {
+      url: completeLatestUrl,
+      checksumUrl: completeLatestUrl + '.sha512',
+      checksumType: 'sha512',
+      filename: latestFile,
+    };
+  }
+
+  log.info(
+    'Daily general-availability snapshot URL not found for current version, falling back to release-candidate snapshot URL.'
+  );
+
+  let completeUrl = null;
+  let snapshotFile = null;
+
+  // This checks and uses an RC if a RC exists at a higher increment than RC1 or it tries to use RC1
+  // This is in replacement of having a manifest URL, so the exact RC number is unknown but expect it not to be a large number
+  let rcCheck = MAX_RC_CHECK;
+  do {
+    const secondaryLatestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-rc${rcCheck}`;
+    const secondaryLatestFile = `opensearch-${desiredVersion}-rc${rcCheck}-SNAPSHOT-${platform}-${arch}-latest.tar.gz`;
+    const completeSecondaryLatestUrl = `${secondaryLatestUrl}/${secondaryLatestFile}`;
+    ({ abc, resp } = await verifySnapshotUrl(completeSecondaryLatestUrl, log));
+
+    if (resp.ok) {
+      completeUrl = completeSecondaryLatestUrl;
+      snapshotFile = secondaryLatestFile;
+      break;
+    }
+  } while (rcCheck-- >= 1);
+
+  if (resp.status === 404 || !completeUrl || !snapshotFile) {
+    abc.abort();
+    throw createCliError(`Snapshots for ${desiredVersion} are not available`);
+  }
+
+  if (!resp.ok) {
+    abc.abort();
+    throw new Error(`Unable to read snapshot url: ${resp.statusText}`);
+  }
+
+  return {
+    url: completeUrl,
+    checksumUrl: completeUrl + '.sha512',
+    checksumType: 'sha512',
+    filename: snapshotFile,
+  };
+}
+
 exports.Artifact = class Artifact {
   /**
-   * Fetch an Artifact from the Artifact API for a license level and version
-   * @param {('oss'|'basic'|'trial')} license
+   * Fetch an Artifact from the Artifact API for a license level and version.
+   * Only OSS license should be used but the param was left to mitigate impact
+   * until a later iteration.
+   *
+   * TODO: [RENAMEME] remove license param
+   * issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
+   *
+   * @param {('oss')} license
    * @param {string} version
    * @param {ToolingLog} log
    */
@@ -168,7 +263,7 @@ exports.Artifact = class Artifact {
       return new Artifact(customSnapshotArtifactSpec, log);
     }
 
-    const artifactSpec = await getArtifactSpecForSnapshot(urlVersion, license, log);
+    const artifactSpec = await getArtifactSpecForSnapshotFromUrl(urlVersion, log);
     return new Artifact(artifactSpec, log);
   }
 

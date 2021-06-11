@@ -40,26 +40,32 @@ import { Artifact } from './artifact';
 const log = new ToolingLog();
 let MOCKS;
 
+const DAILY_SNAPSHOT_BASE_URL = 'https://artifacts.opensearch.org/snapshots/core/opensearch';
+
+const ORIGINAL_PLATFROM = process.platform;
+const ORIGINAL_ARCHITECTURE = process.arch;
 const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
 const ARCHITECTURE = process.arch === 'arm64' ? 'arm64' : 'x64';
 const MOCK_VERSION = 'test-version';
-const MOCK_URL = 'http://127.0.0.1:12345';
-const MOCK_FILENAME = 'test-filename';
+const MOCK_RC_VERSION = `test-version-rc4`;
+const MOCK_FILENAME = 'opensearch-test-version-SNAPSHOT-linux-x64-latest.tar.gz';
+const MOCK_RC_FILENAME = `opensearch-test-version-rc4-SNAPSHOT-linux-x64-latest.tar.gz`;
+const MOCK_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/${MOCK_FILENAME}`;
+const MOCK_RC_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_RC_VERSION}/${MOCK_RC_FILENAME}`;
 
-const DAILY_SNAPSHOT_BASE_URL = '';
-const PERMANENT_SNAPSHOT_BASE_URL = '';
+const itif = process.platform === 'linux' && process.arch === 'x64' ? it : it.skip;
 
 const createArchive = (params = {}) => {
-  const license = params.license || 'default';
   const architecture = params.architecture || ARCHITECTURE;
+  const useRCVersion = params.useRCVersion || false;
 
   return {
-    license: 'default',
+    license: 'oss',
     architecture,
-    version: MOCK_VERSION,
-    url: MOCK_URL + `/${license}`,
+    version: !useRCVersion ? MOCK_VERSION : MOCK_RC_VERSION,
+    url: !useRCVersion ? MOCK_URL : MOCK_RC_URL,
     platform: PLATFORM,
-    filename: MOCK_FILENAME + `-${architecture}.${license}`,
+    filename: !useRCVersion ? MOCK_FILENAME : MOCK_RC_FILENAME,
     ...params,
   };
 };
@@ -92,99 +98,87 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   MOCKS = {
-    valid: {
-      archives: [createArchive({ license: 'oss' }), createArchive({ license: 'default' })],
+    GA: {
+      archives: [createArchive({ useRCVersion: false })],
+    },
+    RC: {
+      archives: [createArchive({ useRCVersion: true })],
     },
     multipleArch: {
       archives: [
-        createArchive({ architecture: 'fake_arch', license: 'oss' }),
-        createArchive({ architecture: ARCHITECTURE, license: 'oss' }),
+        createArchive({ architecture: 'fake_arch', useRCVersion: false }),
+        createArchive({ architecture: ARCHITECTURE, useRCVersion: false }),
       ],
     },
   };
 });
 
-const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) => {
+const artifactTest = (fetchTimesCalled = 1) => {
   return async () => {
-    const artifact = await Artifact.getSnapshot(requestedLicense, MOCK_VERSION, log);
+    const artifact = await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+    const expectedUrl = fetchTimesCalled === 1 ? MOCK_URL : MOCK_RC_URL;
+    const expectedFilename = fetchTimesCalled === 1 ? MOCK_FILENAME : MOCK_RC_FILENAME;
     expect(fetch).toHaveBeenCalledTimes(fetchTimesCalled);
-    expect(fetch.mock.calls[0][0]).toEqual(
-      `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest-verified.json`
-    );
-    if (fetchTimesCalled === 2) {
-      expect(fetch.mock.calls[1][0]).toEqual(
-        `${PERMANENT_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest.json`
-      );
+    expect(fetch.mock.calls[0][0]).toEqual(MOCK_URL);
+    if (fetchTimesCalled !== 1) {
+      expect(fetch.mock.calls[fetchTimesCalled - 1][0]).toEqual(MOCK_RC_URL);
     }
-    expect(artifact.getUrl()).toEqual(MOCK_URL + `/${expectedLicense}`);
-    expect(artifact.getChecksumUrl()).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
+    expect(artifact.getUrl()).toEqual(expectedUrl);
+    expect(artifact.getChecksumUrl()).toEqual(expectedUrl + '.sha512');
     expect(artifact.getChecksumType()).toEqual('sha512');
-    expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.${expectedLicense}`);
+    expect(artifact.getFilename()).toEqual(expectedFilename);
   };
 };
 
 describe('Artifact', () => {
   describe('getSnapshot()', () => {
-    describe('with default snapshot', () => {
-      beforeEach(() => {
-        mockFetch(MOCKS.valid);
-      });
-
-      it('should return artifact metadata for a daily oss artifact', artifactTest('oss', 'oss'));
-
-      it(
-        'should return artifact metadata for a daily default artifact',
-        artifactTest('default', 'default')
-      );
-
-      it(
-        'should default to default license with anything other than "oss"',
-        artifactTest('INVALID_LICENSE', 'default')
-      );
-
-      it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
-          "couldn't find an artifact"
-        );
-      });
+    itif('should return artifact metadata for a daily GA artifact', () => {
+      mockFetch(MOCKS.GA);
+      artifactTest();
     });
 
-    describe('with missing default snapshot', () => {
-      beforeEach(() => {
-        fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
-        mockFetch(MOCKS.valid);
-      });
+    itif('should return artifact metadata for a RC artifact', () => {
+      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      mockFetch(MOCKS.RC);
+      artifactTest(3);
+    });
 
-      it(
-        'should return artifact metadata for a permanent oss artifact',
-        artifactTest('oss', 'oss', 2)
+    itif('should throw when an artifact cannot be found for the specified parameters', async () => {
+      fetch.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
+      await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+        'Snapshots for INVALID_VERSION are not available'
       );
-
-      it(
-        'should return artifact metadata for a permanent default artifact',
-        artifactTest('default', 'default', 2)
-      );
-
-      it(
-        'should default to default license with anything other than "oss"',
-        artifactTest('INVALID_LICENSE', 'default', 2)
-      );
-
-      it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
-          "couldn't find an artifact"
-        );
-      });
     });
 
     describe('with snapshots for multiple architectures', () => {
-      beforeEach(() => {
-        mockFetch(MOCKS.multipleArch);
+      afterAll(() => {
+        Object.defineProperties(process, {
+          platform: {
+            value: ORIGINAL_PLATFROM,
+          },
+          arch: {
+            value: ORIGINAL_ARCHITECTURE,
+          },
+        });
       });
 
-      it('should return artifact metadata for the correct architecture', async () => {
-        const artifact = await Artifact.getSnapshot('oss', MOCK_VERSION, log);
-        expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.oss`);
+      it('should throw when on a non-Linux platform', async () => {
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        });
+        await expect(Artifact.getSnapshot('default', 'INVALID_PLATFORM', log)).rejects.toThrow(
+          'Snapshots are only available for Linux x64'
+        );
+      });
+
+      it('should throw when on a non-x64 arch', async () => {
+        Object.defineProperty(process, 'arch', {
+          value: 'arm64',
+        });
+        await expect(Artifact.getSnapshot('default', 'INVALID_ARCH', log)).rejects.toThrow(
+          'Snapshots are only available for Linux x64'
+        );
       });
     });
 
@@ -193,7 +187,7 @@ describe('Artifact', () => {
 
       beforeEach(() => {
         process.env.OPENSEARCH_SNAPSHOT_MANIFEST = CUSTOM_URL;
-        mockFetch(MOCKS.valid);
+        mockFetch(MOCKS.GA);
       });
 
       it('should use the custom URL when looking for a snapshot', async () => {
@@ -203,24 +197,6 @@ describe('Artifact', () => {
 
       afterEach(() => {
         delete process.env.OPENSEARCH_SNAPSHOT_MANIFEST;
-      });
-    });
-
-    describe('with latest unverified snapshot', () => {
-      beforeEach(() => {
-        process.env.OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED = 1;
-        mockFetch(MOCKS.valid);
-      });
-
-      it('should use the daily unverified URL when looking for a snapshot', async () => {
-        await Artifact.getSnapshot('oss', MOCK_VERSION, log);
-        expect(fetch.mock.calls[0][0]).toEqual(
-          `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest.json`
-        );
-      });
-
-      afterEach(() => {
-        delete process.env.OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED;
       });
     });
   });
