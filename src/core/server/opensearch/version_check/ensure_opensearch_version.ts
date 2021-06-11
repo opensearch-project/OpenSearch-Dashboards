@@ -87,7 +87,7 @@ export const getNodeId = async (
 
 export interface PollOpenSearchNodesVersionOptions {
   internalClient: OpenSearchClient;
-  optimizedHealthcheck?: string;
+  optimizedHealthcheckId?: string;
   log: Logger;
   opensearchDashboardsVersion: string;
   ignoreVersionMismatch: boolean;
@@ -200,7 +200,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 
 export const pollOpenSearchNodesVersion = ({
   internalClient,
-  optimizedHealthcheck,
+  optimizedHealthcheckId,
   log,
   opensearchDashboardsVersion,
   ignoreVersionMismatch,
@@ -215,8 +215,8 @@ export const pollOpenSearchNodesVersion = ({
        * For better dashboards resilience, the behaviour is changed to only query the local node when all the nodes have the same cluster_id
        * Using _cluster/state/nodes to retrieve the cluster_id of each node from the master node
        */
-      if (optimizedHealthcheck) {
-        return from(getNodeId(internalClient, optimizedHealthcheck)).pipe(
+      if (optimizedHealthcheckId) {
+        return from(getNodeId(internalClient, optimizedHealthcheckId)).pipe(
           mergeMap((nodeId: any) =>
             from(
               internalClient.nodes.info<NodesInfo>({
