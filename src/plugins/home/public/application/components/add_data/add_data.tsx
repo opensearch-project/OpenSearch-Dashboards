@@ -32,7 +32,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 // @ts-expect-error untyped service
 import { FeatureCatalogueEntry } from '../../services';
@@ -54,23 +54,6 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
             <FormattedMessage id="home.addData.sectionTitle" defaultMessage="Ingest your data" />
           </h2>
         </EuiTitle>
-      </EuiFlexItem>
-
-      <EuiFlexItem className="homDataAdd__actions" grow={false}>
-        <div>
-          <EuiButtonEmpty
-            className="homDataAdd__actionButton"
-            flush="left"
-            href="#/tutorial_directory/sampleData"
-            iconType="visTable"
-            size="xs"
-          >
-            <FormattedMessage
-              id="home.addData.sampleDataButtonLabel"
-              defaultMessage="Try our sample data"
-            />
-          </EuiButtonEmpty>
-        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
 

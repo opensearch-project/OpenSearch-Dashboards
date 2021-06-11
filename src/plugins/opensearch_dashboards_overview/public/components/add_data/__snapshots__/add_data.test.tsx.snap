@@ -25,28 +25,6 @@ exports[`AddData render 1`] = `
         </h2>
       </EuiTitle>
     </EuiFlexItem>
-    <EuiFlexItem
-      className="osdOverviewDataAdd__actions"
-      grow={false}
-    >
-      <RedirectAppLinks>
-        <div>
-          <EuiButtonEmpty
-            className="osdOverviewDataAdd__actionButton"
-            flush="left"
-            href="/app/home#/tutorial_directory/sampleData"
-            iconType="visTable"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="Try our sample data"
-              id="opensearchDashboardsOverview.addData.sampleDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </div>
-      </RedirectAppLinks>
-    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
@@ -59,7 +37,7 @@ exports[`AddData render 1`] = `
     >
       <RedirectAppLinks>
         <Synopsis
-          description="Ingest data from popular apps and services."
+          description="Get started with sample data, visualizations, and dashboards."
           iconType="indexOpen"
           id="home_tutorial_directory"
           isBeta={false}
