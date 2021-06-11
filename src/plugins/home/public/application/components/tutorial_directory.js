@@ -66,45 +66,11 @@ class TutorialDirectoryUi extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tabs = [
-      {
-        id: ALL_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.allTitle',
-          defaultMessage: 'All',
-        }),
-      },
-      {
-        id: 'logging',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logs',
-        }),
-      },
-      {
-        id: 'metrics',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.metricsTitle',
-          defaultMessage: 'Metrics',
-        }),
-      },
-      {
-        id: 'security',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.securitySolutionTitle',
-          defaultMessage: 'Security',
-        }),
-      },
-      {
-        id: SAMPLE_DATA_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.sampleDataTitle',
-          defaultMessage: 'Sample data',
-        }),
-      },
-    ];
+    // TODO: Enable the tabs once we have instructions
+    // and sample code snippets to instruct users to add data
+    this.tabs = [];
 
-    let openTab = ALL_TAB_ID;
+    let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
       this.tabs.some((tab) => {
@@ -284,7 +250,7 @@ class TutorialDirectoryUi extends React.Component {
               <h1>
                 <FormattedMessage
                   id="home.tutorial.addDataToOpenSearchDashboardsTitle"
-                  defaultMessage="Add data"
+                  defaultMessage="Add sample data"
                 />
               </h1>
             </EuiTitle>
