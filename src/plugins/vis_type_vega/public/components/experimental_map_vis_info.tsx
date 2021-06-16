@@ -72,7 +72,7 @@ export const getInfoMessage = (vis: Vis) => {
     try {
       const spec = parse(vis.params.spec, { legacyRoot: false, keepWsc: true });
 
-      if (spec.config?.opensearchDashboards?.type === 'map') {
+      if (spec.config?.kibana?.type === 'map') {
         return <ExperimentalMapLayerInfo />;
       }
     } catch (e) {
