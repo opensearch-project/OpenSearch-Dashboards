@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItem } from '../../../../common/legend';
 import { Line } from '../../../../geoms/types';
 import { AxisSpec } from '../../../../specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import {
   DebugState,
   DebugStateValue,
@@ -47,7 +45,7 @@ import { getAxisSpecsSelector } from './get_specs';
  * Returns a stringified version of the `debugState`
  * @internal
  */
-export const getDebugStateSelector = createCachedSelector(
+export const getDebugStateSelector = createCustomCachedSelector(
   [
     computeSeriesGeometriesSelector,
     computeLegendSelector,
@@ -66,7 +64,7 @@ export const getDebugStateSelector = createCachedSelector(
       bars: getBarsState(seriesNameMap, geometries.bars),
     };
   },
-)(getChartIdSelector);
+);
 
 function getAxes(axesGeoms: AxisGeometry[], axesSpecs: AxisSpec[], gridLines: LinesGrid[]): DebugStateAxes | undefined {
   if (axesSpecs.length === 0) {

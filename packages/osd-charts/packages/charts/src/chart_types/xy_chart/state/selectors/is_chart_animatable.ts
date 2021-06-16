@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 // import { isChartAnimatable } from '../utils';
 
 /** @internal */
-export const isChartAnimatableSelector = createCachedSelector(
+export const isChartAnimatableSelector = createCustomCachedSelector(
   [computeSeriesGeometriesSelector, getSettingsSpecSelector],
   // eslint-disable-next-line arrow-body-style
   () => {
@@ -35,4 +33,4 @@ export const isChartAnimatableSelector = createCachedSelector(
     // return isChartAnimatable(geometriesCounts, settingsSpec.animateData);
     return false;
   },
-)(getChartIdSelector);
+);

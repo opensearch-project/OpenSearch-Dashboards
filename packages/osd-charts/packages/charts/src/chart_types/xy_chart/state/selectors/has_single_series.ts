@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 
 /** @internal */
-export const hasSingleSeriesSelector = createCachedSelector(
+export const hasSingleSeriesSelector = createCustomCachedSelector(
   [computeSeriesDomainsSelector],
   (seriesDomainsAndData): boolean =>
     Boolean(seriesDomainsAndData) && seriesDomainsAndData.formattedDataSeries.length > 1,
-)(getChartIdSelector);
+);

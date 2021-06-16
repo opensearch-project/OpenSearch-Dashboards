@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { SettingsSpec, TooltipValueFormatter, isTooltipProps } from '../../specs/settings';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
-export const getTooltipHeaderFormatterSelector = createCachedSelector(
+export const getTooltipHeaderFormatterSelector = createCustomCachedSelector(
   [getSettingsSpecSelector],
   getTooltipHeaderFormatter,
-)(getChartIdSelector);
+);
 
 function getTooltipHeaderFormatter(settings: SettingsSpec): TooltipValueFormatter | undefined {
   const { tooltip } = settings;

@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../chart_types';
 import { SpecType, DEFAULT_SETTINGS_SPEC } from '../../specs/constants';
 import { SettingsSpec } from '../../specs/settings';
 import { GlobalChartState } from '../chart_state';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSpecsFromStore } from '../utils';
-import { getChartIdSelector } from './get_chart_id';
 
 /** @internal */
 export const getSpecs = (state: GlobalChartState) => state.specs;
 
-/** @internal */
-export const getSettingsSpecSelector = createCachedSelector(
+/**
+ * @internal
+ */
+export const getSettingsSpecSelector = createCustomCachedSelector(
   [getSpecs],
   (specs): SettingsSpec => {
     const settingsSpecs = getSpecsFromStore<SettingsSpec>(specs, ChartType.Global, SpecType.Settings);
@@ -39,4 +39,4 @@ export const getSettingsSpecSelector = createCachedSelector(
     }
     return DEFAULT_SETTINGS_SPEC;
   },
-)(getChartIdSelector);
+);

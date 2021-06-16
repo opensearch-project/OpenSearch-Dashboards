@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { geometries } from './geometries';
 import { getHeatmapSpecSelector } from './get_heatmap_spec';
 import { isBrushingSelector } from './is_brushing';
@@ -27,7 +25,7 @@ import { isBrushingSelector } from './is_brushing';
 /**
  * @internal
  */
-export const getHighlightedDataSelector = createCachedSelector(
+export const getHighlightedDataSelector = createCustomCachedSelector(
   [getHeatmapSpecSelector, isBrushingSelector],
   (spec, isBrushing) => {
     if (!spec.highlightedData || isBrushing) {
@@ -35,13 +33,13 @@ export const getHighlightedDataSelector = createCachedSelector(
     }
     return spec.highlightedData;
   },
-)(getChartIdSelector);
+);
 
 /**
  * Returns rect position of the highlighted selection.
  * @internal
  */
-export const getHighlightedAreaSelector = createCachedSelector(
+export const getHighlightedAreaSelector = createCustomCachedSelector(
   [geometries, getHeatmapSpecSelector, isBrushingSelector],
   (geoms, spec, isBrushing) => {
     if (!spec.highlightedData || isBrushing) {
@@ -49,4 +47,4 @@ export const getHighlightedAreaSelector = createCachedSelector(
     }
     return geoms.pickHighlightedArea(spec.highlightedData.x, spec.highlightedData.y);
   },
-)(getChartIdSelector);
+);

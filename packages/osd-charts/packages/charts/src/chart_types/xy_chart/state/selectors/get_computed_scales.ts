@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { ComputedScales } from '../utils/types';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 
 /** @internal */
-export const getComputedScalesSelector = createCachedSelector(
+export const getComputedScalesSelector = createCustomCachedSelector(
   [computeSeriesGeometriesSelector],
   ({ scales }): ComputedScales => scales,
-)(getChartIdSelector);
+);

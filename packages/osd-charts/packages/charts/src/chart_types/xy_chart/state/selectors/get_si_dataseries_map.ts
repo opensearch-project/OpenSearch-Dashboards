@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { DataSeries, getSeriesKey } from '../../utils/series';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 
 /** @internal */
-export const getSiDataSeriesMapSelector = createCachedSelector(
+export const getSiDataSeriesMapSelector = createCustomCachedSelector(
   [computeSeriesDomainsSelector],
   ({ formattedDataSeries }) => {
     return formattedDataSeries.reduce<Record<string, DataSeries>>((acc, dataSeries) => {
@@ -33,4 +31,4 @@ export const getSiDataSeriesMapSelector = createCachedSelector(
       return acc;
     }, {});
   },
-)(getChartIdSelector);
+);

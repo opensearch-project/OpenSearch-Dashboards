@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ScaleContinuousType } from '../../../../scales';
 import { ScaleType } from '../../../../scales/constants';
 import { SettingsSpec } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { GroupId } from '../../../../utils/ids';
 import { convertXScaleTypes } from '../../domains/x_domain';
@@ -57,10 +55,10 @@ export interface ScaleConfigs {
 }
 
 /** @internal */
-export const getScaleConfigsFromSpecsSelector = createCachedSelector(
+export const getScaleConfigsFromSpecsSelector = createCustomCachedSelector(
   [getAxisSpecsSelector, getSeriesSpecsSelector, getSettingsSpecSelector],
   getScaleConfigsFromSpecs,
-)(getChartIdSelector);
+);
 
 /** @internal */
 export function getScaleConfigsFromSpecs(

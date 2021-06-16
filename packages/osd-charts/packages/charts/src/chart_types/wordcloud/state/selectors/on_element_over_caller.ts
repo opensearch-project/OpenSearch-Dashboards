@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
 import { ChartType } from '../../..';
 import { getOnElementOverSelector } from '../../../../common/event_handler_selectors';
 import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
 import { getSpecOrNull } from './wordcloud_spec';
@@ -40,12 +39,10 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.Wordcloud) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getSpecOrNull, getPickedShapesLayerValues, getSettingsSpecSelector],
         getOnElementOverSelector(prev),
-      )({
-        keySelector: getChartIdSelector,
-      });
+      );
     }
     if (selector) {
       selector(state);

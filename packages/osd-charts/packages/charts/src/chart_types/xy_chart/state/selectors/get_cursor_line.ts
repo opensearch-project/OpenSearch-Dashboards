@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { Line } from '../../../../geoms/types';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getCursorLinePosition } from '../../crosshair/crosshair_utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 
 /** @internal */
-export const getCursorLinePositionSelector = createCachedSelector(
+export const getCursorLinePositionSelector = createCustomCachedSelector(
   [computeChartDimensionsSelector, getSettingsSpecSelector, getProjectedPointerPositionSelector],
   (chartDimensions, settingsSpec, projectedPointerPosition): Line | undefined =>
     getCursorLinePosition(settingsSpec.rotation, chartDimensions.chartDimensions, projectedPointerPosition),
-)(getChartIdSelector);
+);

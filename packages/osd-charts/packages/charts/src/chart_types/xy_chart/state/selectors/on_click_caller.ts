@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
 import { ProjectedValues, SettingsSpec } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isClicking } from '../../../../state/utils';
@@ -49,7 +48,7 @@ export function createOnClickCaller(): (state: GlobalChartState) => void {
     if (state.chartType !== ChartType.XYAxis) {
       return;
     }
-    selector = createCachedSelector(
+    selector = createCustomCachedSelector(
       [getLastClickSelector, getSettingsSpecSelector, getHighlightedGeomsSelector, getProjectedScaledValues],
       (
         lastClick: PointerState | null,
@@ -66,9 +65,7 @@ export function createOnClickCaller(): (state: GlobalChartState) => void {
         }
         prevClick = lastClick;
       },
-    )({
-      keySelector: getChartIdSelector,
-    });
+    );
   };
 }
 

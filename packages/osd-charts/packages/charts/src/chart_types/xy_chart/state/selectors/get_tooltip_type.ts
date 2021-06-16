@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { getTooltipType } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 
 /** @internal */
-export const getTooltipTypeSelector = createCachedSelector(
-  [getSettingsSpecSelector],
-  getTooltipType,
-)(getChartIdSelector);
+export const getTooltipTypeSelector = createCustomCachedSelector([getSettingsSpecSelector], getTooltipType);

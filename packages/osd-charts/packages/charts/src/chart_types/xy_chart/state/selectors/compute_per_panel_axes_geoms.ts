@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { Position, safeFormat } from '../../../../utils/common';
 import { isHorizontalAxis, isVerticalAxis } from '../../utils/axis_type_utils';
 import { AxisGeometry } from '../../utils/axis_utils';
@@ -55,7 +53,7 @@ const isPrimaryRowFn = ({ vertical: { domain } }: SmallMultipleScales) => (posit
   isHorizontalAxis(position) && domain[0] === verticalValue;
 
 /** @internal */
-export const computePerPanelAxesGeomsSelector = createCachedSelector(
+export const computePerPanelAxesGeomsSelector = createCustomCachedSelector(
   [computeAxesGeometriesSelector, computeSmallMultipleScalesSelector, getSmallMultiplesIndexOrderSelector],
   (axesGeoms, scales, groupBySpec): Array<PerPanelAxisGeoms> => {
     const { horizontal, vertical } = scales;
@@ -83,4 +81,4 @@ export const computePerPanelAxesGeomsSelector = createCachedSelector(
       }),
     }));
   },
-)(getChartIdSelector);
+);

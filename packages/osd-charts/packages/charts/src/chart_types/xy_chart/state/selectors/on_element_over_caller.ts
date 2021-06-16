@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
 import { ChartType } from '../../..';
 import { SettingsSpec } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
 import { XYChartSeriesIdentifier } from '../../utils/series';
@@ -70,7 +69,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.XYAxis) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getTooltipInfoAndGeometriesSelector, getSettingsSpecSelector],
         ({ highlightedGeometries }: TooltipAndHighlightedGeoms, settings: SettingsSpec): void => {
           const nextProps = {
@@ -86,9 +85,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
           }
           prevProps = nextProps;
         },
-      )({
-        keySelector: getChartIdSelector,
-      });
+      );
     }
     if (selector) {
       selector(state);

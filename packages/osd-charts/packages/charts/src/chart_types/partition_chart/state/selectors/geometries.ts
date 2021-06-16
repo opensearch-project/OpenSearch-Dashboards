@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../..';
 import { CategoryKey } from '../../../../common/category';
 import { Pixels, Ratio } from '../../../../common/geometry';
 import { RelativeBandsPadding, SmallMultiplesSpec, SpecType } from '../../../../specs';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSpecs } from '../../../../state/selectors/get_settings_specs';
 import { getSpecsFromStore } from '../../../../state/utils';
@@ -49,7 +47,7 @@ function bandwidth(range: Pixels, bandCount: number, { outer, inner }: RelativeB
 }
 
 /** @internal */
-export const partitionMultiGeometries = createCachedSelector(
+export const partitionMultiGeometries = createCustomCachedSelector(
   [getSpecs, getPartitionSpecs, getChartContainerDimensionsSelector, getTrees, getChartThemeSelector],
   (specs, partitionSpecs, parentDimensions, trees, { background }): ShapeViewModel[] => {
     const smallMultiplesSpecs = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartType.Global, SpecType.SmallMultiples);
@@ -208,7 +206,7 @@ export const partitionMultiGeometries = createCachedSelector(
 
     return result.length === 0 ? [nullShapeViewModel(config, { x: outerWidthRatio, y: outerHeightRatio })] : result;
   },
-)(getChartIdSelector);
+);
 
 function focusRect(quadViewModel: QuadViewModel[], { left, width }: Dimensions, drilldown: CategoryKey[]) {
   return drilldown.length === 0
@@ -219,7 +217,7 @@ function focusRect(quadViewModel: QuadViewModel[], { left, width }: Dimensions, 
 }
 
 /** @internal */
-export const partitionDrilldownFocus = createCachedSelector(
+export const partitionDrilldownFocus = createCustomCachedSelector(
   [
     partitionMultiGeometries,
     getChartContainerDimensionsSelector,
@@ -232,4 +230,4 @@ export const partitionDrilldownFocus = createCachedSelector(
       const { x0: prevFocusX0, x1: prevFocusX1 } = focusRect(quadViewModel, chartDimensions, prevDrilldown);
       return { currentFocusX0, currentFocusX1, prevFocusX0, prevFocusX1, smAccessorValue, index, innerIndex };
     }),
-)((state) => state.chartId);
+);

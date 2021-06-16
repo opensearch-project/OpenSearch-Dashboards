@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
 import { ChartType } from '../../..';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isPickedCells } from '../../layout/types/viewmodel_types';
 import { getSpecOrNull } from './heatmap_spec';
@@ -39,7 +38,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.Heatmap) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getSpecOrNull, getPickedShapes, getSettingsSpecSelector],
         (spec, pickedShapes, settings): void => {
           if (!spec) {
@@ -55,9 +54,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
           }
           prevPickedShapes = nextPickedShapes;
         },
-      )({
-        keySelector: getChartIdSelector,
-      });
+      );
     }
     if (selector) {
       selector(state);

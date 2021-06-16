@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../..';
 import { SpecType } from '../../../../specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSpecs } from '../../../../state/selectors/get_settings_specs';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { PartitionSpec } from '../../specs';
 
 /** @internal */
-export const getPartitionSpecs = createCachedSelector([getSpecs], (specs) => {
+export const getPartitionSpecs = createCustomCachedSelector([getSpecs], (specs) => {
   return getSpecsFromStore<PartitionSpec>(specs, ChartType.Partition, SpecType.Series);
-})(getChartIdSelector);
+});

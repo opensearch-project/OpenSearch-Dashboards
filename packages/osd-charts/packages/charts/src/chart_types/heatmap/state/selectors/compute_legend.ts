@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItem } from '../../../../common/legend';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getDeselectedSeriesSelector } from '../../../../state/selectors/get_deselected_data_series';
 import { getColorScale } from './get_color_scale';
 import { getSpecOrNull } from './heatmap_spec';
 
 /** @internal */
-export const computeLegendSelector = createCachedSelector(
+export const computeLegendSelector = createCustomCachedSelector(
   [getSpecOrNull, getColorScale, getDeselectedSeriesSelector],
   (spec, colorScale, deselectedDataSeries): LegendItem[] => {
     const legendItems: LegendItem[] = [];
@@ -53,4 +51,4 @@ export const computeLegendSelector = createCachedSelector(
       };
     });
   },
-)(getChartIdSelector);
+);

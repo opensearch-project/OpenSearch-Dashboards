@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { CanvasTextBBoxCalculator } from '../../../../utils/bbox/canvas_text_bbox_calculator';
@@ -38,7 +36,7 @@ import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const computeAxisTicksDimensionsSelector = createCachedSelector(
+export const computeAxisTicksDimensionsSelector = createCustomCachedSelector(
   [
     getBarPaddingsSelector,
     isHistogramModeEnabledSelector,
@@ -90,4 +88,4 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     bboxCalculator.destroy();
     return axesTicksDimensions;
   },
-)(getChartIdSelector);
+);

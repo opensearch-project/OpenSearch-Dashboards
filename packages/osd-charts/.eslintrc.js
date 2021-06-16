@@ -75,7 +75,7 @@ module.exports = {
     'import/no-cycle': [0, { maxDepth: 3, ignoreExternal: true }], // TODO: should error when this is fixed https://github.com/benmosher/eslint-plugin-import/issues/1453
     'no-use-before-define': 0,
     'no-restricted-properties': 0, // need to find and filter desired options
-    'class-methods-use-this': 1,
+    'class-methods-use-this': 0,
     'unicorn/prefer-number-properties': 0,
     'global-require': 1,
     'import/no-dynamic-require': 1,
@@ -360,6 +360,14 @@ module.exports = {
               ]
             : 0,
 
+        'no-restricted-imports': [
+          'error',
+          {
+            name: 're-reselect',
+            importNames: ['default'],
+            message: 'Please use `createCustomCachedSelector` instead.',
+          },
+        ],
         'no-underscore-dangle': 2,
         'import/no-unresolved': 'error',
         'import/no-extraneous-dependencies': 2,

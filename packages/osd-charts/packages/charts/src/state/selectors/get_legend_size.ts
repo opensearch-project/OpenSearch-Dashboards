@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LEGEND_HIERARCHY_MARGIN } from '../../components/legend/legend_item';
 import { LEGEND_TO_FULL_CONFIG } from '../../components/legend/position_style';
 import { LegendPositionConfig } from '../../specs/settings';
@@ -26,7 +24,7 @@ import { BBox } from '../../utils/bbox/bbox_calculator';
 import { CanvasTextBBoxCalculator } from '../../utils/bbox/canvas_text_bbox_calculator';
 import { Position, isDefined, LayoutDirection } from '../../utils/common';
 import { GlobalChartState } from '../chart_state';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getChartThemeSelector } from './get_chart_theme';
 import { getLegendConfigSelector } from './get_legend_config_selector';
 import { getLegendItemsLabelsSelector } from './get_legend_items_labels';
@@ -46,7 +44,7 @@ export type LegendSizing = BBox & {
 };
 
 /** @internal */
-export const getLegendSizeSelector = createCachedSelector(
+export const getLegendSizeSelector = createCustomCachedSelector(
   [getLegendConfigSelector, getChartThemeSelector, getParentDimensionSelector, getLegendItemsLabelsSelector],
   (legendConfig, theme, parentDimensions, labels): LegendSizing => {
     if (!legendConfig.showLegend) {
@@ -107,4 +105,4 @@ export const getLegendSizeSelector = createCachedSelector(
       position: legendPosition,
     };
   },
-)(getChartIdSelector);
+);

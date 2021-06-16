@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { mergePartial, RecursivePartial } from '../../../../utils/common';
 import { AxisId } from '../../../../utils/ids';
@@ -32,7 +30,7 @@ import { getAxisSpecsSelector } from './get_specs';
  *
  * @internal
  */
-export const getAxesStylesSelector = createCachedSelector(
+export const getAxesStylesSelector = createCustomCachedSelector(
   [getAxisSpecsSelector, getChartThemeSelector],
   (axesSpecs, { axes: sharedAxesStyle }): Map<AxisId, AxisStyle | null> => {
     const axesStyles = new Map<AxisId, AxisStyle | null>();
@@ -53,4 +51,4 @@ export const getAxesStylesSelector = createCachedSelector(
     });
     return axesStyles;
   },
-)(getChartIdSelector);
+);

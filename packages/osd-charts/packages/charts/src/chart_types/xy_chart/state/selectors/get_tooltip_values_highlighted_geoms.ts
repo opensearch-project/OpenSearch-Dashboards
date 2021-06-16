@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { TooltipInfo } from '../../../../components/tooltip/types';
 import {
   PointerEvent,
@@ -31,7 +29,7 @@ import {
 } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipHeaderFormatterSelector } from '../../../../state/selectors/get_tooltip_header_formatter';
@@ -72,7 +70,7 @@ export interface TooltipAndHighlightedGeoms {
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
 /** @internal */
-export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
+export const getTooltipInfoAndGeometriesSelector = createCustomCachedSelector(
   [
     getSeriesSpecsSelector,
     getAxisSpecsSelector,
@@ -88,7 +86,7 @@ export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
     getTooltipHeaderFormatterSelector,
   ],
   getTooltipAndHighlightFromValue,
-)(({ chartId }) => chartId);
+);
 
 function getTooltipAndHighlightFromValue(
   seriesSpecs: BasicSeriesSpec[],
@@ -222,13 +220,13 @@ function getTooltipAndHighlightFromValue(
 }
 
 /** @internal */
-export const getTooltipInfoSelector = createCachedSelector(
+export const getTooltipInfoSelector = createCustomCachedSelector(
   [getTooltipInfoAndGeometriesSelector],
   ({ tooltip }): TooltipInfo => tooltip,
-)(getChartIdSelector);
+);
 
 /** @internal */
-export const getHighlightedGeomsSelector = createCachedSelector(
+export const getHighlightedGeomsSelector = createCustomCachedSelector(
   [getTooltipInfoAndGeometriesSelector],
   ({ highlightedGeometries }): IndexedGeometry[] => highlightedGeometries,
-)(getChartIdSelector);
+);

@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSmallMultiplesSpec } from '../../../../state/selectors/get_small_multiples_spec';
 import { computeChartDimensions, ChartDimensions } from '../../utils/dimensions';
@@ -29,7 +27,7 @@ import { getAxesStylesSelector } from './get_axis_styles';
 import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
-export const computeChartDimensionsSelector = createCachedSelector(
+export const computeChartDimensionsSelector = createCustomCachedSelector(
   [
     getChartContainerDimensionsSelector,
     getChartThemeSelector,
@@ -47,4 +45,4 @@ export const computeChartDimensionsSelector = createCachedSelector(
       axesSpecs,
       smSpec && smSpec[0],
     ),
-)(getChartIdSelector);
+);

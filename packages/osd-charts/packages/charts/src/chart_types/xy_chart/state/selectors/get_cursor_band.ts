@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { Rect } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isValidPointerOverEvent } from '../../../../utils/events';
@@ -43,7 +41,7 @@ import { isTooltipSnapEnableSelector } from './is_tooltip_snap_enabled';
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
 /** @internal */
-export const getCursorBandPositionSelector = createCachedSelector(
+export const getCursorBandPositionSelector = createCustomCachedSelector(
   [
     getOrientedProjectedPointerPositionSelector,
     getExternalPointerEventStateSelector,
@@ -80,7 +78,7 @@ export const getCursorBandPositionSelector = createCachedSelector(
       geometriesIndexKeys,
       smallMultipleScales,
     ),
-)(getChartIdSelector);
+);
 
 function getCursorBand(
   orientedProjectedPointerPosition: PointerPosition,

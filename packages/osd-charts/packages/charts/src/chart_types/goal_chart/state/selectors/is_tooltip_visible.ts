@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { getTooltipType } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipInfoSelector } from './tooltip';
 
 /** @internal */
-export const isTooltipVisibleSelector = createCachedSelector(
+export const isTooltipVisibleSelector = createCustomCachedSelector(
   [getSettingsSpecSelector, getTooltipInfoSelector],
   (settingsSpec, tooltipInfo): boolean => {
     if (getTooltipType(settingsSpec) === TooltipType.None) {
@@ -34,4 +32,4 @@ export const isTooltipVisibleSelector = createCachedSelector(
     }
     return tooltipInfo.values.length > 0;
   },
-)(getChartIdSelector);
+);

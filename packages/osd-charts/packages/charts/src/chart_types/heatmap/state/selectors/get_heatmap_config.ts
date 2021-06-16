@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { mergePartial } from '../../../../utils/common';
 import { config as defaultConfig } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';
 import { getHeatmapSpecSelector } from './get_heatmap_spec';
 
 /** @internal */
-export const getHeatmapConfigSelector = createCachedSelector(
+export const getHeatmapConfigSelector = createCustomCachedSelector(
   [getHeatmapSpecSelector],
   (spec): Config => {
     return mergePartial<Config>(defaultConfig, spec.config, { mergeOptionalPartialValues: true });
   },
-)(getChartIdSelector);
+);

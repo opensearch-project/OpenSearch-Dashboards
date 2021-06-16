@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ScaleBand } from '../../../../scales';
 import { DEFAULT_SM_PANEL_PADDING, RelativeBandsPadding } from '../../../../specs/small_multiples';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSmallMultiplesSpec } from '../../../../state/selectors/get_small_multiples_spec';
 import { OrdinalDomain } from '../../../../utils/domain';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
@@ -37,7 +35,7 @@ export interface SmallMultipleScales {
  * Return the small multiple scales for horizontal and vertical grids
  * @internal
  */
-export const computeSmallMultipleScalesSelector = createCachedSelector(
+export const computeSmallMultipleScalesSelector = createCustomCachedSelector(
   [computeSeriesDomainsSelector, computeChartDimensionsSelector, getSmallMultiplesSpec],
   ({ smHDomain, smVDomain }, { chartDimensions: { width, height } }, smSpec): SmallMultipleScales => {
     return {
@@ -45,7 +43,7 @@ export const computeSmallMultipleScalesSelector = createCachedSelector(
       vertical: getScale(smVDomain, height, smSpec && smSpec[0].style?.verticalPanelPadding),
     };
   },
-)(getChartIdSelector);
+);
 
 /**
  * @internal

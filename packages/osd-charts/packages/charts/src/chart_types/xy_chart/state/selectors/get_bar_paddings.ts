@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const getBarPaddingsSelector = createCachedSelector(
+export const getBarPaddingsSelector = createCustomCachedSelector(
   [isHistogramModeEnabledSelector, getChartThemeSelector],
   (isHistogramMode, chartTheme): number =>
     isHistogramMode ? chartTheme.scales.histogramPadding : chartTheme.scales.barsPadding,
-)(getChartIdSelector);
+);

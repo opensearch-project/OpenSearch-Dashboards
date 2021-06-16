@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeLegendSelector } from './compute_legend';
 
 /** @internal */
-export const getLegendItemsLabelsSelector = createCachedSelector(
+export const getLegendItemsLabelsSelector = createCustomCachedSelector(
   [computeLegendSelector, getSettingsSpecSelector],
   (legendItems, { showLegendExtra }): LegendItemLabel[] =>
     legendItems.map(({ label, defaultExtra }) => {
@@ -34,4 +32,4 @@ export const getLegendItemsLabelsSelector = createCachedSelector(
       }
       return { label, depth: 0 };
     }),
-)(getChartIdSelector);
+);

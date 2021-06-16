@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { isSimpleLinear } from '../../layout/viewmodel/viewmodel';
 import { getPartitionSpecs } from './partition_spec';
 
 /** @internal */
-export const drilldownActive = createCachedSelector([getPartitionSpecs], (specs) => {
+export const drilldownActive = createCustomCachedSelector([getPartitionSpecs], (specs) => {
   return specs.length === 1 && isSimpleLinear(specs[0].config, specs[0].layers); // singleton!
-})((state) => state.chartId);
+});

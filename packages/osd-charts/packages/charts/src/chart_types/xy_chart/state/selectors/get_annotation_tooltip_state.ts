@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { TooltipPortalSettings } from '../../../../components/portal/types';
 import { TooltipInfo } from '../../../../components/tooltip/types';
 import { DOMElement } from '../../../../state/actions/dom_element';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -45,7 +43,7 @@ const getCurrentPointerPosition = (state: GlobalChartState) => state.interaction
 const getHoveredDOMElement = (state: GlobalChartState) => state.interactions.hoveredDOMElement;
 
 /** @internal */
-export const getAnnotationTooltipStateSelector = createCachedSelector(
+export const getAnnotationTooltipStateSelector = createCustomCachedSelector(
   [
     getCurrentPointerPosition,
     computeChartDimensionsSelector,
@@ -58,7 +56,7 @@ export const getAnnotationTooltipStateSelector = createCachedSelector(
     getHoveredDOMElement,
   ],
   getAnnotationTooltipState,
-)(getChartIdSelector);
+);
 
 function getAnnotationTooltipState(
   cursorPosition: Point,

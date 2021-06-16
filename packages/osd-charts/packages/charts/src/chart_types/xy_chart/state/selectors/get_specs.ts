@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../..';
 import { GroupBySpec, SmallMultiplesSpec } from '../../../../specs';
 import { SpecType } from '../../../../specs/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSpecs } from '../../../../state/selectors/get_settings_specs';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { AnnotationSpec, AxisSpec, BasicSeriesSpec } from '../../utils/specs';
@@ -34,22 +32,22 @@ export interface SmallMultiplesGroupBy {
 }
 
 /** @internal */
-export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] =>
+export const getAxisSpecsSelector = createCustomCachedSelector([getSpecs], (specs): AxisSpec[] =>
   getSpecsFromStore<AxisSpec>(specs, ChartType.XYAxis, SpecType.Axis),
-)(getChartIdSelector);
+);
 
 /** @internal */
-export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
+export const getSeriesSpecsSelector = createCustomCachedSelector([getSpecs], (specs) => {
   return getSpecsFromStore<BasicSeriesSpec>(specs, ChartType.XYAxis, SpecType.Series);
-})(getChartIdSelector);
+});
 
 /** @internal */
-export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) =>
+export const getAnnotationSpecsSelector = createCustomCachedSelector([getSpecs], (specs) =>
   getSpecsFromStore<AnnotationSpec>(specs, ChartType.XYAxis, SpecType.Annotation),
-)(getChartIdSelector);
+);
 
 /** @internal */
-export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpecs], (specs):
+export const getSmallMultiplesIndexOrderSelector = createCustomCachedSelector([getSpecs], (specs):
   | SmallMultiplesGroupBy
   | undefined => {
   const [smallMultiples] = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartType.Global, SpecType.SmallMultiples);
@@ -58,4 +56,4 @@ export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpec
     horizontal: groupBySpecs.find((s) => s.id === smallMultiples?.splitHorizontally),
     vertical: groupBySpecs.find((s) => s.id === smallMultiples?.splitVertically),
   };
-})(getChartIdSelector);
+});

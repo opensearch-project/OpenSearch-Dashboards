@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { RGBtoString } from '../../../../common/color_library_wrappers';
 import { TooltipInfo } from '../../../../components/tooltip/types';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
 import { getSpecOrNull } from './heatmap_spec';
 import { getPickedShapes } from './picked_shapes';
@@ -32,7 +30,7 @@ const EMPTY_TOOLTIP = Object.freeze({
 });
 
 /** @internal */
-export const getTooltipInfoSelector = createCachedSelector(
+export const getTooltipInfoSelector = createCustomCachedSelector(
   [getSpecOrNull, getHeatmapConfigSelector, getPickedShapes],
   (spec, config, pickedShapes): TooltipInfo => {
     if (!spec) {
@@ -111,4 +109,4 @@ export const getTooltipInfoSelector = createCachedSelector(
 
     return tooltipInfo;
   },
-)(getChartIdSelector);
+);

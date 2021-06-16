@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { Size } from '../../../../utils/dimensions';
 import { getPanelSize } from '../../utils/panel';
 import { PerPanelMap, getPerPanelMap } from '../../utils/panel_utils';
@@ -29,10 +27,10 @@ import { computeSmallMultipleScalesSelector } from './compute_small_multiple_sca
 export type PanelGeoms = Array<Size & PerPanelMap>;
 
 /** @internal */
-export const computePanelsSelectors = createCachedSelector(
+export const computePanelsSelectors = createCustomCachedSelector(
   [computeSmallMultipleScalesSelector],
   (scales): PanelGeoms => {
     const panelSize = getPanelSize(scales);
     return getPerPanelMap(scales, () => panelSize);
   },
-)(getChartIdSelector);
+);

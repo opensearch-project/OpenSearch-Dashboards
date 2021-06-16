@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { computeChartDimensionsSelector } from '../../chart_types/xy_chart/state/selectors/compute_chart_dimensions';
 import { getComputedScalesSelector } from '../../chart_types/xy_chart/state/selectors/get_computed_scales';
 import { PointerEventType } from '../../specs';
 import { GlobalChartState } from '../chart_state';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSettingsSpecSelector } from './get_settings_specs';
 import { hasExternalEventSelector } from './has_external_pointer_event';
 
 const getExternalEventPointer = ({ externalEvents: { pointer } }: GlobalChartState) => pointer;
 
 /** @internal */
-export const isExternalTooltipVisibleSelector = createCachedSelector(
+export const isExternalTooltipVisibleSelector = createCustomCachedSelector(
   [
     getSettingsSpecSelector,
     hasExternalEventSelector,
@@ -49,4 +47,4 @@ export const isExternalTooltipVisibleSelector = createCachedSelector(
     }
     return hasExternalEvent && externalPointerEvents.tooltip?.visible === true;
   },
-)(getChartIdSelector);
+);

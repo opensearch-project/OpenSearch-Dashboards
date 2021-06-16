@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
@@ -25,6 +24,7 @@ import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs';
 import { PointerEventType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
@@ -32,7 +32,7 @@ import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 import { PointerPosition } from './get_projected_pointer_position';
 
-const getPointerEventSelector = createCachedSelector(
+const getPointerEventSelector = createCustomCachedSelector(
   [
     getChartIdSelector,
     getOrientedProjectedPointerPositionSelector,
@@ -41,7 +41,7 @@ const getPointerEventSelector = createCachedSelector(
   ],
   (chartId, orientedProjectedPointerPosition, seriesGeometries, geometriesIndexKeys): PointerEvent =>
     getPointerEvent(chartId, orientedProjectedPointerPosition, seriesGeometries.scales.xScale, geometriesIndexKeys),
-)(getChartIdSelector);
+);
 
 function getPointerEvent(
   chartId: string,
@@ -110,7 +110,7 @@ export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.XYAxis) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getSettingsSpecSelector, getPointerEventSelector, getChartIdSelector],
         (settings: SettingsSpec, nextPointerEvent: PointerEvent, chartId: string): void => {
           if (prevPointerEvent === null) {
@@ -129,9 +129,7 @@ export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
             settings.onPointerUpdate(nextPointerEvent);
           }
         },
-      )({
-        keySelector: getChartIdSelector,
-      });
+      );
     }
     if (selector) {
       selector(state);

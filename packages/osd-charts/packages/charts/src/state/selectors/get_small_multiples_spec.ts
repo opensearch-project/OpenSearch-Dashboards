@@ -17,27 +17,25 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../chart_types';
 import { SpecType } from '../../specs/constants';
 import { SmallMultiplesSpec } from '../../specs/small_multiples';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSpecsFromStore } from '../utils';
-import { getChartIdSelector } from './get_chart_id';
 import { getSpecs } from './get_settings_specs';
 
 /**
  * Return the small multiple specs
  * @internal
  */
-export const getSmallMultiplesSpecs = createCachedSelector([getSpecs], (specs) =>
+export const getSmallMultiplesSpecs = createCustomCachedSelector([getSpecs], (specs) =>
   getSpecsFromStore<SmallMultiplesSpec>(specs, ChartType.Global, SpecType.SmallMultiples),
-)(getChartIdSelector);
+);
 
 /**
  * Return the small multiple spec
  * @internal
  */
-export const getSmallMultiplesSpec = createCachedSelector([getSmallMultiplesSpecs], (smallMultiples) =>
+export const getSmallMultiplesSpec = createCustomCachedSelector([getSmallMultiplesSpecs], (smallMultiples) =>
   smallMultiples.length === 1 ? smallMultiples : undefined,
-)(getChartIdSelector);
+);

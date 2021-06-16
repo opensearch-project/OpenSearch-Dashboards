@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { AnchorPosition } from '../../../../components/portal/types';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getPickedShapes } from './picked_shapes';
 
@@ -30,7 +28,7 @@ function getCurrentPointerPosition(state: GlobalChartState) {
 }
 
 /** @internal */
-export const getTooltipAnchorSelector = createCachedSelector(
+export const getTooltipAnchorSelector = createCustomCachedSelector(
   [getPickedShapes, computeChartDimensionsSelector, getCurrentPointerPosition],
   (shapes, chartDimensions, position): AnchorPosition => {
     if (Array.isArray(shapes) && shapes.length > 0) {
@@ -49,4 +47,4 @@ export const getTooltipAnchorSelector = createCachedSelector(
       height: 0,
     };
   },
-)(getChartIdSelector);
+);

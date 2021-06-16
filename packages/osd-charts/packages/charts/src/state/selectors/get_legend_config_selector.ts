@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { getLegendPositionConfig } from '../../components/legend/position_style';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
-export const getLegendConfigSelector = createCachedSelector(
+export const getLegendConfigSelector = createCustomCachedSelector(
   [getSettingsSpecSelector],
   ({
     flatLegend,
@@ -57,4 +55,4 @@ export const getLegendConfigSelector = createCachedSelector(
       showLegendExtra,
     };
   },
-)(getChartIdSelector);
+);

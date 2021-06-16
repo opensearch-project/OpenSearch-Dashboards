@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { Rotation } from '../../utils/common';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
-export const getChartRotationSelector = createCachedSelector(
+export const getChartRotationSelector = createCustomCachedSelector(
   [getSettingsSpecSelector],
   (settingsSpec): Rotation => settingsSpec.rotation,
-)(getChartIdSelector);
+);

@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItem } from '../../../../common/legend';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getDeselectedSeriesSelector } from '../../../../state/selectors/get_deselected_data_series';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
@@ -33,7 +31,7 @@ import { getSiDataSeriesMapSelector } from './get_si_dataseries_map';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
-export const computeLegendSelector = createCachedSelector(
+export const computeLegendSelector = createCustomCachedSelector(
   [
     getSeriesSpecsSelector,
     computeSeriesDomainsSelector,
@@ -69,4 +67,4 @@ export const computeLegendSelector = createCachedSelector(
       settings.sortSeriesBy,
     );
   },
-)(getChartIdSelector);
+);

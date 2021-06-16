@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LayoutDirection } from '../../utils/common';
 import { Dimensions } from '../../utils/dimensions';
 import { GlobalChartState } from '../chart_state';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getLegendConfigSelector } from './get_legend_config_selector';
 import { getLegendSizeSelector } from './get_legend_size';
 
 const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
 
 /** @internal */
-export const getChartContainerDimensionsSelector = createCachedSelector(
+export const getChartContainerDimensionsSelector = createCustomCachedSelector(
   [getLegendConfigSelector, getLegendSizeSelector, getParentDimension],
   ({ showLegend, legendPosition: { floating, direction } }, legendSize, parentDimensions): Dimensions => {
     if (!showLegend || floating) {
@@ -50,4 +48,4 @@ export const getChartContainerDimensionsSelector = createCachedSelector(
       height: parentDimensions.height - legendSize.height - legendSize.margin * 2,
     };
   },
-)(getChartIdSelector);
+);

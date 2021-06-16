@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
@@ -34,7 +32,7 @@ import { render } from './scenegraph';
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
 /** @internal */
-export const geometries = createCachedSelector(
+export const geometries = createCustomCachedSelector(
   [
     getHeatmapSpecSelector,
     computeChartDimensionsSelector,
@@ -73,4 +71,4 @@ export const geometries = createCachedSelector(
       ? render(heatmapSpec, settingSpec, chartDimensions, heatmapTable, colorScale, ranges, gridHeightParams)
       : nullShapeViewModel();
   },
-)(getChartIdSelector);
+);

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ScaleContinuous } from '../../../../scales';
 import { ScaleType } from '../../../../scales/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { CanvasTextBBoxCalculator } from '../../../../utils/bbox/canvas_text_bbox_calculator';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
 import { getHeatmapTableSelector } from './get_heatmap_table';
@@ -30,7 +28,7 @@ import { getHeatmapTableSelector } from './get_heatmap_table';
  * @internal
  * Gets color scale based on specification and values range.
  */
-export const getXAxisRightOverflow = createCachedSelector(
+export const getXAxisRightOverflow = createCustomCachedSelector(
   [getHeatmapConfigSelector, getHeatmapTableSelector],
   ({ xAxisLabel: { fontSize, fontFamily, padding, formatter, width }, timeZone }, { xDomain }): number => {
     if (xDomain.type !== ScaleType.Time) {
@@ -59,4 +57,4 @@ export const getXAxisRightOverflow = createCachedSelector(
     bboxCompute.destroy();
     return maxTextWidth / 2;
   },
-)(getChartIdSelector);
+);

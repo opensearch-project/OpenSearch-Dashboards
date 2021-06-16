@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../..';
 import { SpecType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { WordcloudSpec } from '../../specs';
@@ -32,10 +31,10 @@ const getSpecs = (state: GlobalChartState) => state.specs;
 const getParentDimensions = (state: GlobalChartState) => state.parentDimensions;
 
 /** @internal */
-export const geometries = createCachedSelector(
+export const geometries = createCustomCachedSelector(
   [getSpecs, getParentDimensions],
   (specs, parentDimensions): ShapeViewModel => {
     const wordcloudSpecs = getSpecsFromStore<WordcloudSpec>(specs, ChartType.Wordcloud, SpecType.Series);
     return wordcloudSpecs.length === 1 ? render(wordcloudSpecs[0], parentDimensions) : nullShapeViewModel();
   },
-)((state) => state.chartId);
+);

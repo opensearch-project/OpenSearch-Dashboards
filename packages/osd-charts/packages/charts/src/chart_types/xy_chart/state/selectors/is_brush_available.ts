@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ScaleType } from '../../../../scales/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getComputedScalesSelector } from './get_computed_scales';
 
@@ -29,7 +27,7 @@ import { getComputedScalesSelector } from './get_computed_scales';
  * if we have configured an onBrushEnd listener
  * @internal
  */
-export const isBrushAvailableSelector = createCachedSelector(
+export const isBrushAvailableSelector = createCustomCachedSelector(
   [getSettingsSpecSelector, getComputedScalesSelector],
   (settingsSpec, scales): boolean => {
     if (!scales.xScale) {
@@ -37,4 +35,4 @@ export const isBrushAvailableSelector = createCachedSelector(
     }
     return scales.xScale.type !== ScaleType.Ordinal && Boolean(settingsSpec.onBrushEnd);
   },
-)(getChartIdSelector);
+);

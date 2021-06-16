@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 import { mergeWithDefaultTheme } from '../../utils/themes/merge_utils';
 import { PartialTheme, Theme } from '../../utils/themes/theme';
-import { getChartIdSelector } from './get_chart_id';
+import { createCustomCachedSelector } from '../create_selector';
 import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
-export const getChartThemeSelector = createCachedSelector(
+export const getChartThemeSelector = createCustomCachedSelector(
   [getSettingsSpecSelector],
   (settingsSpec): Theme => getTheme(settingsSpec.baseTheme, settingsSpec.theme),
-)(getChartIdSelector);
+);
 
 function getTheme(baseTheme?: Theme, theme?: PartialTheme | PartialTheme[]): Theme {
   const base = baseTheme || LIGHT_THEME;

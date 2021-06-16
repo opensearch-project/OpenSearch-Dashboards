@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { DEFAULT_CSS_CURSOR } from '../../../../common/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getProjectedScaledValues } from './get_projected_scaled_values';
@@ -31,7 +29,7 @@ import { isBrushAvailableSelector } from './is_brush_available';
 const getCurrentPointerPositionSelector = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
 /** @internal */
-export const getPointerCursorSelector = createCachedSelector(
+export const getPointerCursorSelector = createCustomCachedSelector(
   [
     getHighlightedGeomsSelector,
     getSettingsSpecSelector,
@@ -65,4 +63,4 @@ export const getPointerCursorSelector = createCachedSelector(
     }
     return isBrushAvailable ? 'crosshair' : DEFAULT_CSS_CURSOR;
   },
-)(getChartIdSelector);
+);

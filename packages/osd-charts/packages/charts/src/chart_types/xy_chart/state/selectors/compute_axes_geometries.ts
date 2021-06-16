@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getAxesGeometries, AxisGeometry, defaultTickFormatter } from '../../utils/axis_utils';
@@ -34,7 +32,7 @@ import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const computeAxesGeometriesSelector = createCachedSelector(
+export const computeAxesGeometriesSelector = createCustomCachedSelector(
   [
     computeChartDimensionsSelector,
     getChartThemeSelector,
@@ -82,4 +80,4 @@ export const computeAxesGeometriesSelector = createCachedSelector(
       barsPadding,
     );
   },
-)(getChartIdSelector);
+);

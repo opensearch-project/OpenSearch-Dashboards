@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItemExtraValues } from '../../../../common/legend';
 import { SeriesKey } from '../../../../common/series_id';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getExtraValueMap } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { getPartitionSpec } from './partition_spec';
 import { getTrees } from './tree';
 
 /** @internal */
-export const getLegendItemsExtra = createCachedSelector(
+export const getLegendItemsExtra = createCustomCachedSelector(
   [getPartitionSpec, getSettingsSpecSelector, getTrees],
   (spec, { legendMaxDepth }, trees): Map<SeriesKey, LegendItemExtraValues> => {
     const emptyMap = new Map<SeriesKey, LegendItemExtraValues>();
@@ -42,4 +40,4 @@ export const getLegendItemsExtra = createCachedSelector(
         }, emptyMap)
       : emptyMap;
   },
-)(getChartIdSelector);
+);

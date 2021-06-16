@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getAnnotationTooltipStateSelector } from './get_annotation_tooltip_state';
 
 /** @internal */
-export const isAnnotationTooltipVisibleSelector = createCachedSelector(
+export const isAnnotationTooltipVisibleSelector = createCustomCachedSelector(
   [getAnnotationTooltipStateSelector],
   (annotationTooltipState): boolean => annotationTooltipState !== null && annotationTooltipState.isVisible,
-)(getChartIdSelector);
+);

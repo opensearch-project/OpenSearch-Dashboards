@@ -10,7 +10,7 @@ exports[`Chart should render the legend name test 1`] = `
         </ChartBackground>
       </Connect(ChartBackground)>
       <Connect(ChartStatusComponent)>
-        <ChartStatusComponent rendered={true} renderedCount={1} onRenderChange={[undefined]} debugState={{...}} dispatch={[Function: dispatch]}>
+        <ChartStatusComponent chartId=\\"chart1\\" rendered={true} renderedCount={1} onRenderChange={[undefined]} debugState={{...}} dispatch={[Function: dispatch]}>
           <div className=\\"echChartStatus\\" data-ech-render-complete={true} data-ech-render-count={1} data-ech-debug-state={{...}} />
         </ChartStatusComponent>
       </Connect(ChartStatusComponent)>

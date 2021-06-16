@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
 import { SeriesIdentifier } from '../../../../common/series_id';
 import { SettingsSpec } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isClicking } from '../../../../state/utils';
@@ -43,7 +43,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.Heatmap) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapes],
         (spec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
           if (!spec) {
@@ -68,9 +68,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
           }
           prevClick = lastClick;
         },
-      )({
-        keySelector: (state: GlobalChartState) => state.chartId,
-      });
+      );
     }
     if (selector) {
       selector(state);

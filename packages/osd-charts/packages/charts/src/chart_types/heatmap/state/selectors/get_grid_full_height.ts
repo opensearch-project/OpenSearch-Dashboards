@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isHorizontalLegend } from '../../../../utils/legend';
@@ -37,7 +35,7 @@ export interface GridHeightParams {
 const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
 
 /** @internal */
-export const getGridHeightParamsSelector = createCachedSelector(
+export const getGridHeightParamsSelector = createCustomCachedSelector(
   [
     getLegendSizeSelector,
     getSettingsSpecSelector,
@@ -74,7 +72,7 @@ export const getGridHeightParamsSelector = createCachedSelector(
       pageSize,
     };
   },
-)(getChartIdSelector);
+);
 
 function getGridCellHeight(yValues: Array<string | number>, grid: Config['grid'], height: number): number {
   if (yValues.length === 0) {

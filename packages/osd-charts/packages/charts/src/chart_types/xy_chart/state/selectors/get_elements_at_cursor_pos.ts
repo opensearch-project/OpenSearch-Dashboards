@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { PointerEvent } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { isValidPointerOverEvent } from '../../../../utils/events';
 import { IndexedGeometry } from '../../../../utils/geometry';
 import { ChartDimensions } from '../../utils/dimensions';
@@ -38,7 +36,7 @@ import { PointerPosition } from './get_projected_pointer_position';
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
 /** @internal */
-export const getElementAtCursorPositionSelector = createCachedSelector(
+export const getElementAtCursorPositionSelector = createCustomCachedSelector(
   [
     getOrientedProjectedPointerPositionSelector,
     getComputedScalesSelector,
@@ -48,7 +46,7 @@ export const getElementAtCursorPositionSelector = createCachedSelector(
     computeChartDimensionsSelector,
   ],
   getElementAtCursorPosition,
-)(getChartIdSelector);
+);
 
 function getElementAtCursorPosition(
   orientedProjectedPointerPosition: PointerPosition,

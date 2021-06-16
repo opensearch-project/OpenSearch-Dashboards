@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 
 /** @internal */
-export const getGeometriesIndexSelector = createCachedSelector(
+export const getGeometriesIndexSelector = createCustomCachedSelector(
   [computeSeriesGeometriesSelector],
   ({ geometriesIndex }): IndexedGeometryMap => geometriesIndex,
-)(getChartIdSelector);
+);

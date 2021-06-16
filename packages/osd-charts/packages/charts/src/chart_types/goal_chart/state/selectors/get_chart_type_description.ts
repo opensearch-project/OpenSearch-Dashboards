@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSpecOrNull } from './goal_spec';
 
 /** @internal */
-export const getChartTypeDescriptionSelector = createCachedSelector([getSpecOrNull], (spec) => {
+export const getChartTypeDescriptionSelector = createCustomCachedSelector([getSpecOrNull], (spec) => {
   return `${spec?.subtype ?? 'goal'} chart`;
-})(getChartIdSelector);
+});

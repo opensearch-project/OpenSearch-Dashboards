@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { BulletViewModel } from '../../layout/types/viewmodel_types';
 import { geometries } from './geometries';
 
@@ -30,7 +28,7 @@ function getCurrentPointerPosition(state: GlobalChartState) {
 }
 
 /** @internal */
-export const getPickedShapes = createCachedSelector(
+export const getPickedShapes = createCustomCachedSelector(
   [geometries, getCurrentPointerPosition],
   (geoms, pointerPosition): BulletViewModel[] => {
     const picker = geoms.pickQuads;
@@ -39,10 +37,10 @@ export const getPickedShapes = createCachedSelector(
     const y = pointerPosition.y - chartCenter.y;
     return picker(x, y);
   },
-)(getChartIdSelector);
+);
 
 /** @internal */
-export const getPickedShapesLayerValues = createCachedSelector(
+export const getPickedShapesLayerValues = createCustomCachedSelector(
   [getPickedShapes],
   (pickedShapes): Array<Array<LayerValue>> => {
     const elements = pickedShapes.map<Array<LayerValue>>((model) => {
@@ -59,4 +57,4 @@ export const getPickedShapesLayerValues = createCachedSelector(
     });
     return elements;
   },
-)(getChartIdSelector);
+);

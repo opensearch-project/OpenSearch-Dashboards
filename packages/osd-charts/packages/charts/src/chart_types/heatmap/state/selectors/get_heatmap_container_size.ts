@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLegendConfigSelector } from '../../../../state/selectors/get_legend_config_selector';
 import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { LayoutDirection } from '../../../../utils/common';
@@ -33,7 +31,7 @@ const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
  * Gets charts grid area excluding legend and X,Y axis labels and paddings.
  * @internal
  */
-export const getHeatmapContainerSizeSelector = createCachedSelector(
+export const getHeatmapContainerSizeSelector = createCustomCachedSelector(
   [getParentDimension, getLegendSizeSelector, getHeatmapConfigSelector, getLegendConfigSelector],
   (parentDimensions, legendSize, { maxLegendHeight }, { showLegend, legendPosition }): Dimensions => {
     if (!showLegend || legendPosition.floating) {
@@ -57,4 +55,4 @@ export const getHeatmapContainerSizeSelector = createCachedSelector(
       height: parentDimensions.height - legendHeight,
     };
   },
-)(getChartIdSelector);
+);

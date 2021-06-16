@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { TooltipInfo } from '../../../../components/tooltip/types';
 import { getTooltipType } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isExternalTooltipVisibleSelector } from '../../../../state/selectors/is_external_tooltip_visible';
 import { Point } from '../../../../utils/point';
@@ -36,7 +34,7 @@ const getTooltipTypeSelector = (state: GlobalChartState): TooltipType => getTool
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
 /** @internal */
-export const isTooltipVisibleSelector = createCachedSelector(
+export const isTooltipVisibleSelector = createCustomCachedSelector(
   [
     getTooltipTypeSelector,
     getPointerSelector,
@@ -46,7 +44,7 @@ export const isTooltipVisibleSelector = createCachedSelector(
     isExternalTooltipVisibleSelector,
   ],
   isTooltipVisible,
-)(getChartIdSelector);
+);
 
 function isTooltipVisible(
   tooltipType: TooltipType,

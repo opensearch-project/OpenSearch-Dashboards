@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
@@ -25,7 +24,7 @@ import { Scale } from '../../../../scales';
 import { GroupBrushExtent, XYBrushArea } from '../../../../specs';
 import { BrushAxis } from '../../../../specs/constants';
 import { DragState, GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { maxValueWithUpperLimit, minValueWithLowerLimit, Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -57,7 +56,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
         prevProps = null;
         return;
       }
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [
           getLastDragSelector,
           getSettingsSpecSelector,
@@ -118,7 +117,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
           }
           prevProps = nextProps;
         },
-      )(getChartIdSelector);
+      );
     }
     if (selector) {
       selector(state);

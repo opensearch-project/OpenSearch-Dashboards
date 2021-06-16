@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { highlightedGeoms } from '../../layout/utils/highlighted_geoms';
@@ -29,7 +27,7 @@ import { partitionMultiGeometries } from './geometries';
 const getHighlightedLegendItemPath = (state: GlobalChartState) => state.interactions.highlightedLegendPath;
 
 /** @internal */
-export const legendHoverHighlightNodes = createCachedSelector(
+export const legendHoverHighlightNodes = createCustomCachedSelector(
   [getSettingsSpecSelector, getHighlightedLegendItemPath, partitionMultiGeometries],
   ({ legendStrategy, flatLegend }, highlightedLegendItemPath, geometries): QuadViewModel[] => {
     if (highlightedLegendItemPath.length === 0) return [];
@@ -37,4 +35,4 @@ export const legendHoverHighlightNodes = createCachedSelector(
       highlightedGeoms(legendStrategy, flatLegend, quadViewModel, highlightedLegendItemPath),
     );
   },
-)(getChartIdSelector);
+);

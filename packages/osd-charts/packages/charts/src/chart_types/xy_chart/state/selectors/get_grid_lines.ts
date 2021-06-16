@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getGridLines, LinesGrid } from '../../utils/grid_lines';
 import { computeAxesGeometriesSelector } from './compute_axes_geometries';
@@ -27,9 +25,9 @@ import { computeSmallMultipleScalesSelector } from './compute_small_multiple_sca
 import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
-export const computeGridLinesSelector = createCachedSelector(
+export const computeGridLinesSelector = createCustomCachedSelector(
   [getChartThemeSelector, getAxisSpecsSelector, computeAxesGeometriesSelector, computeSmallMultipleScalesSelector],
   (chartTheme, axesSpecs, axesGeoms, scales): LinesGrid[] => {
     return getGridLines(axesSpecs, axesGeoms, chartTheme.axes, scales);
   },
-)(getChartIdSelector);
+);

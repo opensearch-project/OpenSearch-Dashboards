@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { DragShape } from '../../layout/types/viewmodel_types';
 import { geometries } from './geometries';
 
@@ -29,7 +27,7 @@ function getCurrentPointerStates(state: GlobalChartState) {
 }
 
 /** @internal */
-export const getBrushedHighlightedShapesSelector = createCachedSelector(
+export const getBrushedHighlightedShapesSelector = createCustomCachedSelector(
   [geometries, getCurrentPointerStates],
   (geoms, pointerStates): DragShape | null => {
     if (!pointerStates.dragging || !pointerStates.down) {
@@ -51,4 +49,4 @@ export const getBrushedHighlightedShapesSelector = createCachedSelector(
     ]);
     return shape;
   },
-)(getChartIdSelector);
+);

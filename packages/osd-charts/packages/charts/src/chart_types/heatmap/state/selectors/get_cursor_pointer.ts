@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { DEFAULT_CSS_CURSOR } from '../../../../common/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { isBrushingSelector } from './is_brushing';
 import { getPickedShapes } from './picked_shapes';
 
 /** @internal */
-export const getPointerCursorSelector = createCachedSelector(
+export const getPointerCursorSelector = createCustomCachedSelector(
   [getPickedShapes, isBrushingSelector],
   (pickedShapes, isBrushing) => {
     return isBrushing || (Array.isArray(pickedShapes) && pickedShapes.length > 0) ? 'pointer' : DEFAULT_CSS_CURSOR;
   },
-)(getChartIdSelector);
+);

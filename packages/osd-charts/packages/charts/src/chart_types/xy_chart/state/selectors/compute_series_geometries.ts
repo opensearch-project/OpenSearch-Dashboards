@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { ComputedGeometries } from '../utils/types';
@@ -31,7 +29,7 @@ import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const computeSeriesGeometriesSelector = createCachedSelector(
+export const computeSeriesGeometriesSelector = createCustomCachedSelector(
   [
     getSettingsSpecSelector,
     getSeriesSpecsSelector,
@@ -63,4 +61,4 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
       isHistogramMode,
     );
   },
-)(getChartIdSelector);
+);

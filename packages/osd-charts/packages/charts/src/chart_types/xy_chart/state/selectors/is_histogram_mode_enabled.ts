@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { isHistogramModeEnabled } from '../utils/utils';
 import { getSeriesSpecsSelector } from './get_specs';
 
 /** @internal */
-export const isHistogramModeEnabledSelector = createCachedSelector([getSeriesSpecsSelector], (seriesSpecs): boolean =>
-  isHistogramModeEnabled(seriesSpecs),
-)(getChartIdSelector);
+export const isHistogramModeEnabledSelector = createCustomCachedSelector(
+  [getSeriesSpecsSelector],
+  (seriesSpecs): boolean => isHistogramModeEnabled(seriesSpecs),
+);

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { BrushAxis } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -32,7 +30,7 @@ const getIsDragging = (state: GlobalChartState) => state.interactions.pointer.dr
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
 /** @internal */
-export const getBrushAreaSelector = createCachedSelector(
+export const getBrushAreaSelector = createCustomCachedSelector(
   [
     getIsDragging,
     getMouseDownPosition,
@@ -55,4 +53,4 @@ export const getBrushAreaSelector = createCachedSelector(
         return { top: start.y, left: start.x, width: end.x - start.x - chartDimensions.left, height: end.y - start.y };
     }
   },
-)(getChartIdSelector);
+);

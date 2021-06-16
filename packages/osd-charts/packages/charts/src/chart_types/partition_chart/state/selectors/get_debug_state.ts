@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { TAU } from '../../../../common/constants';
 import { Pixels, PointObject } from '../../../../common/geometry';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { DebugState, PartitionDebugState } from '../../../../state/types';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { isSunburst } from '../../layout/viewmodel/viewmodel';
 import { partitionMultiGeometries } from './geometries';
 
 /** @internal */
-export const getDebugStateSelector = createCachedSelector(
+export const getDebugStateSelector = createCustomCachedSelector(
   [partitionMultiGeometries],
   (geoms): DebugState => {
     return {
@@ -53,7 +51,7 @@ export const getDebugStateSelector = createCachedSelector(
       }, []),
     };
   },
-)(getChartIdSelector);
+);
 
 function getCoordsForSector({ x0, x1, y1px, y0px }: QuadViewModel, diskCenter: PointObject): [Pixels, Pixels] {
   const X0 = x0 - TAU / 4;

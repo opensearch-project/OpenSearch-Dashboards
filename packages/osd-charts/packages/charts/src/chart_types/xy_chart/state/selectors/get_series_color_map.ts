@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { SeriesKey } from '../../../../common/series_id';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { Color } from '../../../../utils/common';
 import { getSeriesColors } from '../../utils/series';
@@ -33,7 +31,7 @@ function getColorOverrides({ colors }: GlobalChartState) {
 }
 
 /** @internal */
-export const getSeriesColorsSelector = createCachedSelector(
+export const getSeriesColorsSelector = createCustomCachedSelector(
   [computeSeriesDomainsSelector, getChartThemeSelector, getColorOverrides],
   (seriesDomainsAndData, chartTheme, colorOverrides): Map<SeriesKey, Color> => {
     const updatedCustomSeriesColors = getCustomSeriesColors(seriesDomainsAndData.formattedDataSeries);
@@ -45,4 +43,4 @@ export const getSeriesColorsSelector = createCachedSelector(
       colorOverrides,
     );
   },
-)(getChartIdSelector);
+);

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { AnchorPosition } from '../../../../components/portal/types';
 import { isTooltipType } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipAnchorPosition } from '../../crosshair/crosshair_utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
@@ -30,7 +28,7 @@ import { getCursorBandPositionSelector } from './get_cursor_band';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 
 /** @internal */
-export const getTooltipAnchorPositionSelector = createCachedSelector(
+export const getTooltipAnchorPositionSelector = createCustomCachedSelector(
   [
     computeChartDimensionsSelector,
     getSettingsSpecSelector,
@@ -67,4 +65,4 @@ export const getTooltipAnchorPositionSelector = createCachedSelector(
       isTooltipType(settings.tooltip) ? undefined : settings.tooltip.stickTo,
     );
   },
-)(getChartIdSelector);
+);

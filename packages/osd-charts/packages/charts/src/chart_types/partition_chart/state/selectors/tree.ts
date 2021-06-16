@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ChartType } from '../../..';
 import { getPredicateFn } from '../../../../common/predicate';
 import {
@@ -29,7 +27,7 @@ import {
   SmallMultiplesStyle,
   SpecType,
 } from '../../../../specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSpecs } from '../../../../state/selectors/get_settings_specs';
 import { getSmallMultiplesSpecs } from '../../../../state/selectors/get_small_multiples_spec';
 import { getSpecsFromStore } from '../../../../state/utils';
@@ -40,9 +38,9 @@ import { partitionTree } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { PartitionSpec } from '../../specs';
 import { getPartitionSpecs } from './get_partition_specs';
 
-const getGroupBySpecs = createCachedSelector([getSpecs], (specs) =>
+const getGroupBySpecs = createCustomCachedSelector([getSpecs], (specs) =>
   getSpecsFromStore<GroupBySpec>(specs, ChartType.Global, SpecType.IndexOrder),
-)(getChartIdSelector);
+);
 
 /** @internal */
 export type StyledTree = {
@@ -115,8 +113,8 @@ function getTreesForSpec(
 }
 
 /** @internal */
-export const getTrees = createCachedSelector(
+export const getTrees = createCustomCachedSelector(
   [getPartitionSpecs, getSmallMultiplesSpecs, getGroupBySpecs],
   (partitionSpecs, smallMultiplesSpecs, groupBySpecs): StyledTree[] =>
     partitionSpecs.length > 0 ? getTreesForSpec(partitionSpecs[0], smallMultiplesSpecs, groupBySpecs) : [], // singleton!
-)(getChartIdSelector);
+);

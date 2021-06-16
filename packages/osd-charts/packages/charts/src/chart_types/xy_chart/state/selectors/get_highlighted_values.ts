@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItemExtraValues } from '../../../../common/legend';
 import { SeriesKey } from '../../../../common/series_id';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getHighligthedValues } from '../../tooltip/tooltip';
 import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
 
 /** @internal */
-export const getHighlightedValuesSelector = createCachedSelector(
+export const getHighlightedValuesSelector = createCustomCachedSelector(
   [getTooltipInfoSelector],
   ({ values }): Map<SeriesKey, LegendItemExtraValues> => getHighligthedValues(values),
-)(getChartIdSelector);
+);

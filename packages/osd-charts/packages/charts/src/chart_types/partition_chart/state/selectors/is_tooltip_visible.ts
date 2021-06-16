@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { getTooltipType } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipInfoSelector } from './tooltip';
 
@@ -30,9 +28,9 @@ import { getTooltipInfoSelector } from './tooltip';
  * if we have configured an onBrushEnd listener
  * @internal
  */
-export const isTooltipVisibleSelector = createCachedSelector(
+export const isTooltipVisibleSelector = createCustomCachedSelector(
   [getSettingsSpecSelector, getTooltipInfoSelector],
   (settingsSpec, tooltipInfo): boolean => {
     return getTooltipType(settingsSpec) !== TooltipType.None && tooltipInfo.values.length > 0;
   },
-)(getChartIdSelector);
+);

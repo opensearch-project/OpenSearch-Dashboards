@@ -18,11 +18,10 @@
  */
 
 import { max as d3Max } from 'd3-array';
-import createCachedSelector from 're-reselect';
 
 import { Box, measureText } from '../../../../common/text_utils';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Position } from '../../../../utils/common';
@@ -50,7 +49,7 @@ const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
  * Gets charts grid area excluding legend and X,Y axis labels and paddings.
  * @internal
  */
-export const computeChartDimensionsSelector = createCachedSelector(
+export const computeChartDimensionsSelector = createCustomCachedSelector(
   [
     getParentDimension,
     getLegendSizeSelector,
@@ -114,4 +113,4 @@ export const computeChartDimensionsSelector = createCachedSelector(
       left,
     };
   },
-)(getChartIdSelector);
+);

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { STATISTICS_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec } from '../../specs';
@@ -72,7 +70,7 @@ const getScreenReaderDataForPartitions = (
 };
 
 /** @internal */
-export const getScreenReaderDataSelector = createCachedSelector(
+export const getScreenReaderDataSelector = createCustomCachedSelector(
   [getPartitionSpecs, partitionMultiGeometries],
   (specs, shapeViewModel): PartitionData => {
     if (specs.length === 0) {
@@ -88,4 +86,4 @@ export const getScreenReaderDataSelector = createCachedSelector(
       data: getScreenReaderDataForPartitions(specs, shapeViewModel),
     };
   },
-)(getChartIdSelector);
+);

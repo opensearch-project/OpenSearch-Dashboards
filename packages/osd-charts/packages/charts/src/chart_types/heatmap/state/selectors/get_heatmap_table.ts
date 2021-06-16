@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { getPredicateFn } from '../../../../common/predicate';
 import { ScaleType } from '../../../../scales/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getAccessorValue } from '../../../../utils/accessor';
 import { mergeXDomain } from '../../../xy_chart/domains/x_domain';
@@ -34,7 +32,7 @@ import { getHeatmapSpecSelector } from './get_heatmap_spec';
  * Extracts axis and cell values from the input data.
  * @internal
  */
-export const getHeatmapTableSelector = createCachedSelector(
+export const getHeatmapTableSelector = createCustomCachedSelector(
   [getHeatmapSpecSelector, getSettingsSpecSelector],
   (spec, settingsSpec): HeatmapTable => {
     const { data, valueAccessor, xAccessor, yAccessor, xSortPredicate, ySortPredicate } = spec;
@@ -94,4 +92,4 @@ export const getHeatmapTableSelector = createCachedSelector(
 
     return resultData;
   },
-)(getChartIdSelector);
+);

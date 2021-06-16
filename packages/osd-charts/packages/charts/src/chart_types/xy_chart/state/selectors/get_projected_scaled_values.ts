@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ProjectedValues } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 
 /** @internal */
-export const getProjectedScaledValues = createCachedSelector(
+export const getProjectedScaledValues = createCustomCachedSelector(
   [getOrientedProjectedPointerPositionSelector, computeSeriesGeometriesSelector, getGeometriesIndexKeysSelector],
   (
     { x, y, verticalPanelValue, horizontalPanelValue },
@@ -51,4 +49,4 @@ export const getProjectedScaledValues = createCachedSelector(
       smHorizontalValue: horizontalPanelValue,
     };
   },
-)(getChartIdSelector);
+);

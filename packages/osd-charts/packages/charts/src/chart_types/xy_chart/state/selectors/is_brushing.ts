@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { isBrushAvailableSelector } from './is_brush_available';
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
 /** @internal */
-export const isBrushingSelector = createCachedSelector(
+export const isBrushingSelector = createCustomCachedSelector(
   [isBrushAvailableSelector, getPointerSelector],
   (isBrushAvailable, pointer): boolean => {
     if (!isBrushAvailable) {
@@ -35,4 +33,4 @@ export const isBrushingSelector = createCachedSelector(
 
     return pointer.dragging;
   },
-)(getChartIdSelector);
+);

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { RGBtoString } from '../../../../common/color_library_wrappers';
 import { LegendItem } from '../../../../common/legend';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { DebugState, DebugStateLegend } from '../../../../state/types';
 import { Position } from '../../../../utils/common';
 import { computeLegendSelector } from './compute_legend';
@@ -33,7 +31,7 @@ import { getPickedCells } from './get_picked_cells';
  * Returns a stringified version of the `debugState`
  * @internal
  */
-export const getDebugStateSelector = createCachedSelector(
+export const getDebugStateSelector = createCustomCachedSelector(
   [geometries, computeLegendSelector, getHighlightedAreaSelector, getPickedCells, getHighlightedDataSelector],
   (geoms, legend, pickedArea, pickedCells, highlightedData): DebugState => {
     return {
@@ -77,7 +75,7 @@ export const getDebugStateSelector = createCachedSelector(
       },
     };
   },
-)(getChartIdSelector);
+);
 
 function getLegendState(legendItems: LegendItem[]): DebugStateLegend {
   const items = legendItems

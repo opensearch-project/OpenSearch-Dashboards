@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { DEFAULT_TOOLTIP_SNAP } from '../../../../specs/constants';
 import { SettingsSpec, isTooltipProps } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 
 /** @internal */
-export const getTooltipSnapSelector = createCachedSelector(
-  [getSettingsSpecSelector],
-  getTooltipSnap,
-)(getChartIdSelector);
+export const getTooltipSnapSelector = createCustomCachedSelector([getSettingsSpecSelector], getTooltipSnap);
 
 function getTooltipSnap(settings: SettingsSpec): boolean {
   const { tooltip } = settings;

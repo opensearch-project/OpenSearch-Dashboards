@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { SeriesType } from '../../../../specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { groupBy } from '../../utils/group_data_series';
 import { SeriesDomainsAndData } from '../utils/types';
 import { getBarIndexKey } from '../utils/utils';
@@ -28,10 +26,10 @@ import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const countBarsInClusterSelector = createCachedSelector(
+export const countBarsInClusterSelector = createCustomCachedSelector(
   [computeSeriesDomainsSelector, isHistogramModeEnabledSelector],
   countBarsInCluster,
-)(getChartIdSelector);
+);
 
 /** @internal */
 export function countBarsInCluster({ formattedDataSeries }: SeriesDomainsAndData, isHistogramEnabled: boolean): number {

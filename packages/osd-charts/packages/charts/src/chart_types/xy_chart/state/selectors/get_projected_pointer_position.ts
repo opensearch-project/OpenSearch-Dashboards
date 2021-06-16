@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { ScaleBand } from '../../../../scales/scale_band';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
 import { PrimitiveValue } from '../../../partition_chart/layout/utils/group_by_rollup';
@@ -36,11 +34,11 @@ export type PointerPosition = Point & { horizontalPanelValue: PrimitiveValue; ve
  * Get the x and y pointer position relative to the chart projection area
  * @internal
  */
-export const getProjectedPointerPositionSelector = createCachedSelector(
+export const getProjectedPointerPositionSelector = createCustomCachedSelector(
   [getCurrentPointerPosition, computeChartDimensionsSelector, computeSmallMultipleScalesSelector],
   (currentPointerPosition, { chartDimensions }, smallMultipleScales): PointerPosition =>
     getProjectedPointerPosition(currentPointerPosition, chartDimensions, smallMultipleScales),
-)(getChartIdSelector);
+);
 
 /**
  * Get the x and y pointer position relative to the chart projection area

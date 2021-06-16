@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItem } from '../../../../common/legend';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { computeLegendSelector } from './compute_legend';
 
 const getHighlightedLegendPath = (state: GlobalChartState) => state.interactions.highlightedLegendPath;
 
 /** @internal */
-export const getHighlightedSeriesSelector = createCachedSelector(
+export const getHighlightedSeriesSelector = createCustomCachedSelector(
   [getHighlightedLegendPath, computeLegendSelector],
   (highlightedLegendPaths, legendItems): LegendItem | undefined => {
     if (highlightedLegendPaths.length === 0) {
@@ -38,4 +36,4 @@ export const getHighlightedSeriesSelector = createCachedSelector(
       seriesIdentifiers.some(({ key }) => highlightedSeriesKeys.some((hKey) => hKey === key)),
     );
   },
-)(getChartIdSelector);
+);

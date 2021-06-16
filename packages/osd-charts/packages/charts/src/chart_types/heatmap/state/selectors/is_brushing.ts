@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
 /** @internal */
-export const isBrushingSelector = createCachedSelector([getPointerSelector], (pointer): boolean => {
+export const isBrushingSelector = createCustomCachedSelector([getPointerSelector], (pointer): boolean => {
   return pointer.dragging;
-})(getChartIdSelector);
+});

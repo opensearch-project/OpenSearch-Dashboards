@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastDragSelector } from '../../../../state/selectors/get_last_drag';
 import { PickDragFunction } from '../../layout/types/viewmodel_types';
 import { geometries } from './geometries';
 
 /** @internal */
-export const getPickedCells = createCachedSelector(
+export const getPickedCells = createCustomCachedSelector(
   [geometries, getLastDragSelector],
   (geoms, dragState): ReturnType<PickDragFunction> | null => {
     if (!dragState) {
@@ -46,4 +44,4 @@ export const getPickedCells = createCachedSelector(
       { x: endX, y: endY },
     ]);
   },
-)(getChartIdSelector);
+);

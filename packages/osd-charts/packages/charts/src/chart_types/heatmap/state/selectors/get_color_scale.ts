@@ -29,10 +29,9 @@ import {
   ScaleThreshold,
   scaleThreshold,
 } from 'd3-scale';
-import createCachedSelector from 're-reselect';
 
 import { ScaleType } from '../../../../scales/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getHeatmapSpecSelector } from './get_heatmap_spec';
 import { getHeatmapTableSelector } from './get_heatmap_table';
 
@@ -52,7 +51,7 @@ export type ColorScaleType = ScaleLinearType | ScaleQuantizeType | ScaleQuantile
  * @internal
  * Gets color scale based on specification and values range.
  */
-export const getColorScale = createCachedSelector(
+export const getColorScale = createCustomCachedSelector(
   [getHeatmapSpecSelector, getHeatmapTableSelector],
   (spec, heatmapTable) => {
     const { colors, colorScale: colorScaleSpec } = spec;
@@ -81,7 +80,7 @@ export const getColorScale = createCachedSelector(
     }
     return colorScale;
   },
-)(getChartIdSelector);
+);
 
 function addBaselineOnLinearScale(min: number, max: number, ticks: Array<number>): Array<number> {
   if (min < 0 && max < 0) {

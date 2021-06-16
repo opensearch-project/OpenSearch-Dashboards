@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
 
 /**
  * The brush is available only if a onBrushEnd listener is configured
  * @internal
  */
-export const isBrushAvailableSelector = createCachedSelector([getHeatmapConfigSelector], (config): boolean => {
+export const isBrushAvailableSelector = createCustomCachedSelector([getHeatmapConfigSelector], (config): boolean => {
   return Boolean(config.onBrushEnd) && config.brushTool.visible;
-})(getChartIdSelector);
+});
 
 /** @internal */
-export const isBrushEndProvided = createCachedSelector([getHeatmapConfigSelector], (config): boolean => {
+export const isBrushEndProvided = createCustomCachedSelector([getHeatmapConfigSelector], (config): boolean => {
   return Boolean(config.onBrushEnd);
-})(getChartIdSelector);
+});

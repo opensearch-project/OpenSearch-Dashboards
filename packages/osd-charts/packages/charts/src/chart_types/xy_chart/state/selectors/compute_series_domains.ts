@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { SeriesDomainsAndData } from '../utils/types';
 import { computeSeriesDomains } from '../utils/utils';
@@ -30,7 +28,7 @@ import { getSeriesSpecsSelector, getSmallMultiplesIndexOrderSelector } from './g
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
 /** @internal */
-export const computeSeriesDomainsSelector = createCachedSelector(
+export const computeSeriesDomainsSelector = createCustomCachedSelector(
   [
     getSeriesSpecsSelector,
     getDeselectedSeriesSelector,
@@ -49,4 +47,4 @@ export const computeSeriesDomainsSelector = createCachedSelector(
       settingsSpec.sortSeriesBy,
     );
   },
-)(getChartIdSelector);
+);

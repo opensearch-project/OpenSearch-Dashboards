@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Transform } from '../utils/types';
 import { computeChartTransform } from '../utils/utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 
 /** @internal */
-export const computeChartTransformSelector = createCachedSelector(
+export const computeChartTransformSelector = createCustomCachedSelector(
   [computeChartDimensionsSelector, getSettingsSpecSelector],
   (chartDimensions, settingsSpecs): Transform =>
     computeChartTransform(chartDimensions.chartDimensions, settingsSpecs.rotation),
-)(getChartIdSelector);
+);

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { BrushAxis } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { clamp, Rotation } from '../../../../utils/common';
@@ -37,7 +35,7 @@ const getMouseDownPosition = (state: GlobalChartState) => state.interactions.poi
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
 /** @internal */
-export const getBrushAreaSelector = createCachedSelector(
+export const getBrushAreaSelector = createCustomCachedSelector(
   [
     getMouseDownPosition,
     getCurrentPointerPosition,
@@ -64,7 +62,7 @@ export const getBrushAreaSelector = createCachedSelector(
         return getBrushForXAxis(chartRotation, panelPoints);
     }
   },
-)(getChartIdSelector);
+);
 
 /** @internal */
 export type PanelPoints = {

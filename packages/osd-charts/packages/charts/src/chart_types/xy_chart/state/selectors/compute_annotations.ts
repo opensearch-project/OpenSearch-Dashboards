@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { AnnotationId } from '../../../../utils/ids';
 import { AnnotationDimensions } from '../../annotations/types';
@@ -31,7 +29,7 @@ import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export const computeAnnotationDimensionsSelector = createCachedSelector(
+export const computeAnnotationDimensionsSelector = createCustomCachedSelector(
   [
     getAnnotationSpecsSelector,
     computeChartDimensionsSelector,
@@ -60,4 +58,4 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
       isHistogramMode,
       smallMultipleScales,
     ),
-)(getChartIdSelector);
+);

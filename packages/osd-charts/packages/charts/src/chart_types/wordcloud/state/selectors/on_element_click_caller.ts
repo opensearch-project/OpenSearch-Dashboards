@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
 import { getOnElementClickSelector } from '../../../../common/event_handler_selectors';
 import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
@@ -41,10 +40,10 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.Wordcloud) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
         getOnElementClickSelector(prev),
-      )(getChartIdSelector);
+      );
     }
     if (selector) {
       selector(state);

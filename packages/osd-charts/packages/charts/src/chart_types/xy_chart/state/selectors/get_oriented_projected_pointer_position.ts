@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { SettingsSpec } from '../../../../specs/settings';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getOrientedXPosition, getOrientedYPosition } from '../../utils/interactions';
 import { getPanelSize } from '../../utils/panel';
@@ -28,10 +26,10 @@ import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compu
 import { getProjectedPointerPositionSelector, PointerPosition } from './get_projected_pointer_position';
 
 /** @internal */
-export const getOrientedProjectedPointerPositionSelector = createCachedSelector(
+export const getOrientedProjectedPointerPositionSelector = createCustomCachedSelector(
   [getProjectedPointerPositionSelector, getSettingsSpecSelector, computeSmallMultipleScalesSelector],
   getOrientedProjectedPointerPosition,
-)(getChartIdSelector);
+);
 
 function getOrientedProjectedPointerPosition(
   { x, y, horizontalPanelValue, verticalPanelValue }: PointerPosition,

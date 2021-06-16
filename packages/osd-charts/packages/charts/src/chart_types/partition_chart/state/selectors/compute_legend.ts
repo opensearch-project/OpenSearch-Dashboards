@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { LegendItem } from '../../../../common/legend';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLegendConfigSelector } from '../../../../state/selectors/get_legend_config_selector';
 import { getLegendItems } from '../../layout/utils/legend';
 import { partitionMultiGeometries } from './geometries';
 import { getPartitionSpecs } from './get_partition_specs';
 
 /** @internal */
-export const computeLegendSelector = createCachedSelector(
+export const computeLegendSelector = createCustomCachedSelector(
   [getPartitionSpecs, getLegendConfigSelector, partitionMultiGeometries],
   (specs, { flatLegend, legendMaxDepth, legendPosition }, geometries): LegendItem[] =>
     specs.flatMap((partitionSpec, i) => {
@@ -41,4 +39,4 @@ export const computeLegendSelector = createCachedSelector(
         quadViewModel,
       );
     }),
-)(getChartIdSelector);
+);

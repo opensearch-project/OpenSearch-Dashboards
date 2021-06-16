@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
-
 import { TooltipInfo } from '../../../../components/tooltip/types';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { EMPTY_TOOLTIP, getTooltipInfo } from '../../layout/viewmodel/tooltip_info';
 import { getPartitionSpec } from './partition_spec';
 import { getPickedShapes } from './picked_shapes';
 
 /** @internal */
-export const getTooltipInfoSelector = createCachedSelector(
+export const getTooltipInfoSelector = createCustomCachedSelector(
   [getPartitionSpec, getPickedShapes],
   (spec, pickedShapes): TooltipInfo => {
     return spec
@@ -40,4 +38,4 @@ export const getTooltipInfoSelector = createCachedSelector(
         )
       : EMPTY_TOOLTIP;
   },
-)(getChartIdSelector);
+);

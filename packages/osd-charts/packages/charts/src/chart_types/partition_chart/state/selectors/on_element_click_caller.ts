@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
 import { getOnElementClickSelector } from '../../../../common/event_handler_selectors';
 import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getPartitionSpec } from './partition_spec';
@@ -40,12 +40,10 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartType.Partition) {
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getPartitionSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
         getOnElementClickSelector(prev),
-      )({
-        keySelector: (s: GlobalChartState) => s.chartId,
-      });
+      );
     }
     if (selector) {
       selector(state);

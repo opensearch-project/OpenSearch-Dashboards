@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartType } from '../../..';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { createCustomCachedSelector } from '../../../../state/create_selector';
 import { getLastDragSelector } from '../../../../state/selectors/get_last_drag';
 import { DragCheckProps, hasDragged } from '../../../../utils/events';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
@@ -46,7 +45,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
         prevProps = null;
         return;
       }
-      selector = createCachedSelector(
+      selector = createCustomCachedSelector(
         [getLastDragSelector, getSpecOrNull, getHeatmapConfigSelector, getPickedCells],
         (lastDrag, spec, { onBrushEnd }, pickedCells): void => {
           const nextProps: DragCheckProps = {
@@ -61,9 +60,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
           }
           prevProps = nextProps;
         },
-      )({
-        keySelector: getChartIdSelector,
-      });
+      );
     }
     if (selector) {
       selector(state);
