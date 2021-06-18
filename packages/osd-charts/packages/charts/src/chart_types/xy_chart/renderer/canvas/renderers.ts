@@ -79,20 +79,20 @@ export function renderXYChartCanvas2d(
         }
       },
       (ctx: CanvasRenderingContext2D) => {
-        renderAxes(ctx, {
+        renderGrids(ctx, {
           axesSpecs,
-          perPanelAxisGeoms,
           renderingArea,
-          debug,
+          perPanelGridLines,
           axesStyles,
           sharedAxesStyle,
         });
       },
       (ctx: CanvasRenderingContext2D) => {
-        renderGrids(ctx, {
+        renderAxes(ctx, {
           axesSpecs,
+          perPanelAxisGeoms,
           renderingArea,
-          perPanelGridLines,
+          debug,
           axesStyles,
           sharedAxesStyle,
         });
