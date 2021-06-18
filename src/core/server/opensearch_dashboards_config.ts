@@ -31,8 +31,19 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
+import { ConfigDeprecationProvider } from 'packages/osd-config';
 
 export type OpenSearchDashboardsConfigType = TypeOf<typeof config.schema>;
+
+const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+  renameFromRoot('kibana.enabled', 'opensearchDashboards.enabled'),
+  renameFromRoot('kibana.index', 'opensearchDashboards.index'),
+  renameFromRoot(
+    'kibana.autocompleteTerminateAfter',
+    'opensearchDashboards.autocompleteTerminateAfter'
+  ),
+  renameFromRoot('kibana.autocompleteTimeout', 'opensearchDashboards.autocompleteTimeout'),
+];
 
 export const config = {
   path: 'opensearchDashboards',
@@ -42,4 +53,5 @@ export const config = {
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
+  deprecations,
 };

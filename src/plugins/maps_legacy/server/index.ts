@@ -51,6 +51,14 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
     emsTileLayerId: true,
   },
   schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('map.includeElasticMapsService', 'map.includeOpenSearchMapsService'),
+    renameFromRoot('map.proxyOpenSearchMapsServiceInMaps', 'map.proxyElasticMapsServiceInMaps'),
+    renameFromRoot(
+      'map.regionmap.includeElasticMapsService',
+      'map.regionmap.includeOpenSearchMapsService'
+    ),
+  ],
 };
 
 export interface MapsLegacyPluginSetup {
