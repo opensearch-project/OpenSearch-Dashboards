@@ -273,7 +273,7 @@ export class VegaBaseView {
 
       if (this._parser.tooltips) {
         // position and padding can be specified with
-        // {config:{opensearchDashboards:{tooltips: {position: 'top', padding: 15 } }}}
+        // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
         const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
 
         // Vega bug workaround - need to destroy tooltip by hand

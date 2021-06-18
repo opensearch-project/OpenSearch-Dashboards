@@ -258,9 +258,7 @@ describe('VegaParser.parseSchema', () => {
 describe('VegaParser._parseTooltips', () => {
   function check(tooltips, position, padding, centerOnMark) {
     return () => {
-      const vp = new VegaParser(
-        tooltips !== undefined ? { config: { opensearchDashboards: { tooltips } } } : {}
-      );
+      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
       vp._config = vp._parseConfig();
       if (position === undefined) {
         // error
@@ -384,7 +382,7 @@ describe('VegaParser._parseConfig', () => {
   test('simple config', check({ config: { a: 1 } }, {}));
   test(
     'opensearchDashboards config',
-    check({ config: { opensearchDashboards: { a: 1 } } }, { a: 1 }, { config: {} })
+    check({ config: { kibana: { a: 1 } } }, { a: 1 }, { config: {} })
   );
   test('_hostConfig', check({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
 });
