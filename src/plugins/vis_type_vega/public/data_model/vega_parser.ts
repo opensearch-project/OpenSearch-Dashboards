@@ -369,24 +369,21 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
               '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
             values: {
               deprecatedConfigName: '"_hostConfig"',
-              newConfigName: 'config.opensearchDashboards',
+              newConfigName: 'config.kibana',
             },
           })
         );
       }
-      if (
-        _.isPlainObject(this.spec.config) &&
-        this.spec.config.opensearchDashboards !== undefined
-      ) {
-        result = this.spec.config.opensearchDashboards;
-        delete this.spec.config.opensearchDashboards;
+      if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
+        result = this.spec.config.kibana;
+        delete this.spec.config.kibana;
         if (!_.isPlainObject(result)) {
           throw new Error(
             i18n.translate(
               'visTypeVega.vegaParser.opensearchDashboardsConfigValueTypeErrorMessage',
               {
                 defaultMessage: 'If present, {configName} must be an object',
-                values: { configName: 'config.opensearchDashboards' },
+                values: { configName: 'config.kibana' },
               }
             )
           );
@@ -423,7 +420,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.paddingConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be a number',
-          values: { configName: 'config.opensearchDashboards.result.padding' },
+          values: { configName: 'config.kibana.result.padding' },
         })
       );
     }
@@ -438,7 +435,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         i18n.translate('visTypeVega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be {trueValue}, {falseValue}, or a number',
           values: {
-            configName: 'config.opensearchDashboards.result.centerOnMark',
+            configName: 'config.kibana.result.centerOnMark',
             trueValue: 'true',
             falseValue: 'false',
           },
@@ -472,7 +469,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
             'visTypeVega.vegaParser.someOpenSearchDashboardsurationIsNoValidWarningMessage',
             {
               defaultMessage: '{configName} is not valid',
-              values: { configName: `config.opensearchDashboards.${name}` },
+              values: { configName: `config.kibana.${name}` },
             }
           )
         );
@@ -494,7 +491,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           defaultMessage:
             '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
           values: {
-            mapStyleConfigName: 'config.opensearchDashboards.mapStyle',
+            mapStyleConfigName: 'config.kibana.mapStyle',
             mapStyleConfigFirstAllowedValue: 'false',
             mapStyleConfigSecondAllowedValue: '"default"',
           },
@@ -517,7 +514,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           i18n.translate('visTypeVega.vegaParser.maxBoundsValueTypeWarningMessage', {
             defaultMessage: '{maxBoundsConfigName} must be an array with four numbers',
             values: {
-              maxBoundsConfigName: 'config.opensearchDashboards.maxBounds',
+              maxBoundsConfigName: 'config.kibana.maxBounds',
             },
           })
         );
@@ -540,7 +537,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           {
             defaultMessage: '{configName} must be a boolean value',
             values: {
-              configName: `config.opensearchDashboards.${paramName}`,
+              configName: `config.kibana.${paramName}`,
             },
           }
         )

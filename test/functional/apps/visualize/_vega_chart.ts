@@ -35,7 +35,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const getTestSpec = (expression: string) => `
 {
-config: { "opensearchDashboards": {"renderer": "svg"} }
+config: { "kibana": {"renderer": "svg"} }
 $schema: https://vega.github.io/schema/vega/v5.json
 marks: [{
   type: text
@@ -106,9 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await PageObjects.vegaChart.typeInSpec(
-            '"config": { "opensearchDashboards": {"renderer": "svg"} },'
-          );
+          await PageObjects.vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();

@@ -83,7 +83,7 @@ interface Mark {
 type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends OpenSearchDashboards {
-  opensearchDashboards?: OpenSearchDashboards;
+  kibana?: OpenSearchDashboards;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
