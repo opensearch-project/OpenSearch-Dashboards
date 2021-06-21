@@ -19,7 +19,7 @@
 
 import { Rotation } from '../../../../utils/common';
 import { GroupId } from '../../../../utils/ids';
-import { isCompleteBound, isLowerBound, isUpperBound, isBounded } from '../../utils/axis_type_utils';
+import { isBounded, isCompleteBound, isLowerBound, isUpperBound } from '../../utils/axis_type_utils';
 import { isYDomain } from '../../utils/axis_utils';
 import { AxisSpec, YDomainRange } from '../../utils/specs';
 
@@ -37,9 +37,7 @@ export function mergeYCustomDomainsByGroupId(
       return;
     }
 
-    const isAxisYDomain = isYDomain(spec.position, chartRotation);
-
-    if (!isAxisYDomain) {
+    if (!isYDomain(spec.position, chartRotation)) {
       const errorMessage = `[Axis ${id}]: custom domain for xDomain should be defined in Settings`;
       throw new Error(errorMessage);
     }

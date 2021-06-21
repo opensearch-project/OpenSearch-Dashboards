@@ -21,20 +21,20 @@ import { Line } from '../../../geoms/types';
 import { Scale } from '../../../scales';
 import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
 import {
-  Position,
-  Rotation,
-  getUniqueValues,
-  VerticalAlignment,
-  HorizontalAlignment,
   getPercentageValue,
   getRadians,
+  getUniqueValues,
+  HorizontalAlignment,
+  Position,
+  Rotation,
+  VerticalAlignment,
 } from '../../../utils/common';
-import { Dimensions, Margins, getSimplePadding, Size } from '../../../utils/dimensions';
+import { Dimensions, getSimplePadding, Margins, Size } from '../../../utils/dimensions';
 import { Range } from '../../../utils/domain';
 import { AxisId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { Point } from '../../../utils/point';
-import { AxisStyle, Theme, TextAlignment, TextOffset } from '../../../utils/themes/theme';
+import { AxisStyle, TextAlignment, TextOffset, Theme } from '../../../utils/themes/theme';
 import { XDomain, YDomain } from '../domains/types';
 import { MIN_STROKE_WIDTH } from '../renderer/canvas/primitives/line';
 import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
@@ -42,18 +42,20 @@ import { getSpecsById } from '../state/utils/spec';
 import { isVerticalAxis } from './axis_type_utils';
 import { getPanelSize, hasSMDomain } from './panel';
 import { computeXScale, computeYScales } from './scales';
-import { AxisSpec, TickFormatterOptions, TickFormatter } from './specs';
+import { AxisSpec, TickFormatter, TickFormatterOptions } from './specs';
+
+type TickValue = number | string;
 
 /** @internal */
 export interface AxisTick {
-  value: number | string;
+  value: TickValue;
   label: string;
   position: number;
 }
 
 /** @internal */
-export interface AxisTicksDimensions {
-  tickValues: string[] | number[];
+export interface AxisViewModel {
+  tickValues: TickValue[];
   tickLabels: string[];
   maxLabelBboxWidth: number;
   maxLabelBboxHeight: number;
@@ -81,25 +83,14 @@ export interface TickLabelProps {
 }
 
 /** @internal */
-export const defaultTickFormatter = (tick: any) => `${tick}`;
+export const defaultTickFormatter = (tick: unknown) => `${tick}`;
 
 /**
  * Compute the ticks values and identify max width and height of the labels
  * so we can compute the max space occupied by the axis component.
- * @param axisSpec the spec of the axis
- * @param xDomain the x domain associated
- * @param yDomains the y domain array
- * @param totalBarsInCluster the total number of grouped series
- * @param bboxCalculator an instance of the boundingbox calculator
- * @param chartRotation the rotation of the chart
- * @param gridLine
- * @param tickLabel
- * @param fallBackTickFormatter
- * @param barsPadding
- * @param enableHistogramMode
  * @internal
  */
-export function computeAxisTicksDimensions(
+export function axisViewModel(
   axisSpec: AxisSpec,
   xDomain: XDomain,
   yDomains: YDomain[],
@@ -110,7 +101,7 @@ export function computeAxisTicksDimensions(
   fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
   enableHistogramMode?: boolean,
-): AxisTicksDimensions | null {
+): AxisViewModel | null {
   const gridLineVisible = isVerticalAxis(axisSpec.position) ? gridLine.vertical.visible : gridLine.horizontal.visible;
 
   // don't compute anything on this axis if grid is hidden and axis is hidden
@@ -124,75 +115,68 @@ export function computeAxisTicksDimensions(
     yDomains,
     totalBarsInCluster,
     chartRotation,
-    0,
-    1,
+    [0, 1],
     barsPadding,
     enableHistogramMode,
   );
 
   if (!scale) {
     Logger.warn(`Cannot compute scale for axis spec ${axisSpec.id}. Axis will not be displayed.`);
-
     return null;
   }
 
-  const dimensions = computeTickDimensions(
-    scale,
-    axisSpec.labelFormat ?? axisSpec.tickFormat ?? fallBackTickFormatter,
-    bboxCalculator,
-    tickLabel,
-    { timeZone: xDomain.timeZone },
-  );
+  const tickFormat = axisSpec.labelFormat ?? axisSpec.tickFormat ?? fallBackTickFormatter;
+  const tickFormatOptions = { timeZone: xDomain.timeZone };
+
+  const tickValues = scale.ticks();
+  const tickLabels = tickValues.map((d) => tickFormat(d, tickFormatOptions));
+
+  let maxLabelBboxWidth = 0;
+  let maxLabelBboxHeight = 0;
+  let maxLabelTextWidth = 0;
+  let maxLabelTextHeight = 0;
+
+  if (tickLabel.visible) {
+    for (const labelText of tickLabels) {
+      const bbox = bboxCalculator.compute(labelText, 0, tickLabel.fontSize, tickLabel.fontFamily);
+      const rotatedBbox = computeRotatedLabelDimensions(bbox, tickLabel.rotation);
+      maxLabelBboxWidth = Math.max(maxLabelBboxWidth, Math.ceil(rotatedBbox.width));
+      maxLabelBboxHeight = Math.max(maxLabelBboxHeight, Math.ceil(rotatedBbox.height));
+      maxLabelTextWidth = Math.max(maxLabelTextWidth, Math.ceil(bbox.width));
+      maxLabelTextHeight = Math.max(maxLabelTextHeight, Math.ceil(bbox.height));
+    }
+  }
 
   return {
-    ...dimensions,
+    maxLabelBboxWidth,
+    maxLabelBboxHeight,
+    maxLabelTextWidth,
+    maxLabelTextHeight,
+    tickValues,
+    tickLabels,
     isHidden: axisSpec.hide && gridLineVisible,
   };
 }
 
 /** @internal */
 export function isYDomain(position: Position, chartRotation: Rotation): boolean {
-  const isStraightRotation = chartRotation === 0 || chartRotation === 180;
-  if (isVerticalAxis(position)) {
-    return isStraightRotation;
-  }
-
-  return !isStraightRotation;
+  return isVerticalAxis(position) === (chartRotation % 180 === 0);
 }
 
 /** @internal */
 export function getScaleForAxisSpec(
-  axisSpec: AxisSpec,
+  { groupId, integersOnly, position }: AxisSpec,
   xDomain: XDomain,
   yDomains: YDomain[],
   totalBarsInCluster: number,
   chartRotation: Rotation,
-  minRange: number,
-  maxRange: number,
+  range: Range,
   barsPadding?: number,
   enableHistogramMode?: boolean,
 ): Scale | null {
-  const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
-  const range: Range = [minRange, maxRange];
-  if (axisIsYDomain) {
-    const yScales = computeYScales({
-      yDomains,
-      range,
-      integersOnly: axisSpec.integersOnly,
-    });
-    if (yScales.has(axisSpec.groupId)) {
-      return yScales.get(axisSpec.groupId)!;
-    }
-    return null;
-  }
-  return computeXScale({
-    xDomain,
-    totalBarsInCluster,
-    range,
-    barsPadding,
-    enableHistogramMode,
-    integersOnly: axisSpec.integersOnly,
-  });
+  return isYDomain(position, chartRotation)
+    ? computeYScales({ yDomains, range, integersOnly }).get(groupId) ?? null
+    : computeXScale({ xDomain, totalBarsInCluster, range, barsPadding, enableHistogramMode, integersOnly });
 }
 
 /** @internal */
@@ -208,61 +192,7 @@ export function computeRotatedLabelDimensions(unrotatedDims: BBox, degreesRotati
   };
 }
 
-/** @internal */
-export const getMaxLabelDimensions = (
-  bboxCalculator: BBoxCalculator,
-  { fontSize, fontFamily, rotation }: AxisStyle['tickLabel'],
-) => (
-  acc: Record<string, number>,
-  tickLabel: string,
-): {
-  maxLabelBboxWidth: number;
-  maxLabelBboxHeight: number;
-  maxLabelTextWidth: number;
-  maxLabelTextHeight: number;
-} => {
-  const bbox = bboxCalculator.compute(tickLabel, 0, fontSize, fontFamily);
-  const rotatedBbox = computeRotatedLabelDimensions(bbox, rotation);
-
-  const width = Math.ceil(rotatedBbox.width);
-  const height = Math.ceil(rotatedBbox.height);
-  const labelWidth = Math.ceil(bbox.width);
-  const labelHeight = Math.ceil(bbox.height);
-
-  const prevWidth = acc.maxLabelBboxWidth;
-  const prevHeight = acc.maxLabelBboxHeight;
-  const prevLabelWidth = acc.maxLabelTextWidth;
-  const prevLabelHeight = acc.maxLabelTextHeight;
-  return {
-    maxLabelBboxWidth: prevWidth > width ? prevWidth : width,
-    maxLabelBboxHeight: prevHeight > height ? prevHeight : height,
-    maxLabelTextWidth: prevLabelWidth > labelWidth ? prevLabelWidth : labelWidth,
-    maxLabelTextHeight: prevLabelHeight > labelHeight ? prevLabelHeight : labelHeight,
-  };
-};
-
-function computeTickDimensions(
-  scale: Scale,
-  tickFormat: TickFormatter,
-  bboxCalculator: BBoxCalculator,
-  tickLabelStyle: AxisStyle['tickLabel'],
-  tickFormatOptions?: TickFormatterOptions,
-) {
-  const tickValues = scale.ticks();
-  const tickLabels = tickValues.map((d) => tickFormat(d, tickFormatOptions));
-  const defaultAcc = { maxLabelBboxWidth: 0, maxLabelBboxHeight: 0, maxLabelTextWidth: 0, maxLabelTextHeight: 0 };
-  const dimensions = tickLabelStyle.visible
-    ? tickLabels.reduce(getMaxLabelDimensions(bboxCalculator, tickLabelStyle), defaultAcc)
-    : defaultAcc;
-
-  return {
-    ...dimensions,
-    tickValues,
-    tickLabels,
-  };
-}
-
-function getUserTextOffsets(dimensions: AxisTicksDimensions, offset: TextOffset) {
+function getUserTextOffsets(dimensions: AxisViewModel, offset: TextOffset) {
   const defaults = {
     x: 0,
     y: 0,
@@ -411,7 +341,7 @@ export function getTickLabelProps(
   position: Position,
   rotation: number,
   axisSize: Size,
-  tickDimensions: AxisTicksDimensions,
+  tickDimensions: AxisViewModel,
   showTicks: boolean,
   textOffset: TextOffset,
   textAlignment?: TextAlignment,
@@ -525,6 +455,7 @@ function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
       return { minRange: 0, maxRange: width };
   }
 }
+
 function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
   switch (chartRotation) {
     case 90:
@@ -621,7 +552,7 @@ export function enableDuplicatedTicks(
 }
 
 /** @internal */
-export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDim: AxisTicksDimensions): AxisTick[] {
+export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDim: AxisViewModel): AxisTick[] {
   // We sort the ticks by position so that we can incrementally compute previousOccupiedSpace
   allTicks.sort((a: AxisTick, b: AxisTick) => a.position - b.position);
 
@@ -670,9 +601,10 @@ export function getTitleDimension({
 export function getAxisPosition(
   chartDimensions: Dimensions,
   chartMargins: Margins,
-  { axisTitle, axisPanelTitle }: Pick<AxisStyle, 'axisTitle' | 'axisPanelTitle'>,
+  axisTitle: AxisStyle['axisTitle'],
+  axisPanelTitle: AxisStyle['axisPanelTitle'],
   axisSpec: AxisSpec,
-  axisDim: AxisTicksDimensions,
+  axisDim: AxisViewModel,
   smScales: SmallMultipleScales,
   cumTopSum: number,
   cumBottomSum: number,
@@ -742,7 +674,7 @@ export interface AxisGeometry {
     panelTitle?: string; // defined later per panel
     secondary?: boolean; // defined later per panel
   };
-  dimension: AxisTicksDimensions;
+  dimension: AxisViewModel;
   ticks: AxisTick[];
   visibleTicks: AxisTick[];
 }
@@ -756,7 +688,7 @@ export function getAxesGeometries(
   { chartPaddings, chartMargins, axes: sharedAxesStyle }: Theme,
   chartRotation: Rotation,
   axisSpecs: AxisSpec[],
-  axisDimensions: Map<AxisId, AxisTicksDimensions>,
+  axisDimensions: Map<AxisId, AxisViewModel>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   xDomain: XDomain,
   yDomains: YDomain[],
@@ -778,7 +710,7 @@ export function getAxesGeometries(
         return acc;
       }
 
-      const { tickLine, tickLabel, ...otherStyles } = axesStyles.get(axisId) ?? sharedAxesStyle;
+      const { tickLine, tickLabel, axisTitle, axisPanelTitle } = axesStyles.get(axisId) ?? sharedAxesStyle;
       const labelPadding = getSimplePadding(tickLabel.padding);
       const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
       const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
@@ -787,7 +719,8 @@ export function getAxesGeometries(
       const { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement } = getAxisPosition(
         chartDimensions,
         chartMargins,
-        otherStyles,
+        axisTitle,
+        axisPanelTitle,
         axisSpec,
         dimension,
         smScales,
@@ -850,8 +783,7 @@ export function getAxesGeometries(
       yDomains,
       totalGroupsCount,
       chartRotation,
-      minMaxRanges.minRange,
-      minMaxRanges.maxRange,
+      [minMaxRanges.minRange, minMaxRanges.maxRange],
       barsPadding,
       enableHistogramMode,
     );
@@ -910,31 +842,20 @@ export function getAxesGeometries(
 }
 
 /** @internal */
-export const isDuplicateAxis = (
+export const hasDuplicateAxis = (
   { position, title }: AxisSpec,
-  { tickLabels }: AxisTicksDimensions,
-  tickMap: Map<AxisId, AxisTicksDimensions>,
+  { tickLabels }: AxisViewModel,
+  tickMap: Map<AxisId, AxisViewModel>,
   specs: AxisSpec[],
-): boolean => {
-  const [firstTickLabel] = tickLabels;
-  const [lastTickLabel] = tickLabels.slice(-1);
-
-  let hasDuplicate = false;
-  tickMap.forEach(({ tickLabels: axisTickLabels }, axisId) => {
-    if (
-      !hasDuplicate &&
+): boolean =>
+  [...tickMap].some(([axisId, { tickLabels: axisTickLabels }]) => {
+    const spec = getSpecsById<AxisSpec>(specs, axisId);
+    return (
+      spec?.position === position &&
+      title === spec.title &&
       axisTickLabels &&
       tickLabels.length === axisTickLabels.length &&
-      firstTickLabel === axisTickLabels[0] &&
-      lastTickLabel === axisTickLabels.slice(-1)[0]
-    ) {
-      const spec = getSpecsById<AxisSpec>(specs, axisId);
-
-      if (spec && spec.position === position && title === spec.title) {
-        hasDuplicate = true;
-      }
-    }
+      tickLabels[0] === axisTickLabels[0] &&
+      tickLabels[tickLabels.length - 1] === axisTickLabels[axisTickLabels.length - 1]
+    );
   });
-
-  return hasDuplicate;
-};

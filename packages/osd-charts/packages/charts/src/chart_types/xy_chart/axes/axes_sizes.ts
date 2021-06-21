@@ -19,41 +19,26 @@
 
 import { SmallMultiplesSpec } from '../../../specs';
 import { Position } from '../../../utils/common';
-import { getSimplePadding } from '../../../utils/dimensions';
+import { getSimplePadding, PerSideDistance } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { AxisStyle, Theme } from '../../../utils/themes/theme';
 import { getSpecsById } from '../state/utils/spec';
 import { isVerticalAxis } from '../utils/axis_type_utils';
-import { AxisTicksDimensions, getTitleDimension, shouldShowTicks } from '../utils/axis_utils';
+import { AxisViewModel, getTitleDimension, shouldShowTicks } from '../utils/axis_utils';
 import { AxisSpec } from '../utils/specs';
 
-/**
- * Compute the axes required size around the chart
- * @param chartTheme the theme style of the chart
- * @param axisDimensions the axis dimensions
- * @param axesStyles a map with all the custom axis styles
- * @param axisSpecs the axis specs
- * @internal
- */
+const nullPadding = (): PerSideDistance => ({ left: 0, right: 0, top: 0, bottom: 0 });
+
+/** @internal */
 export function computeAxesSizes(
   { axes: sharedAxesStyles, chartMargins }: Theme,
-  axisDimensions: Map<AxisId, AxisTicksDimensions>,
+  axisDimensions: Map<AxisId, AxisViewModel>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   axisSpecs: AxisSpec[],
   smSpec?: SmallMultiplesSpec,
-): { left: number; right: number; top: number; bottom: number; margin: { left: number } } {
-  const axisMainSize = {
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  };
-  const axisLabelOverflow = {
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  };
+): PerSideDistance & { margin: { left: number } } {
+  const axisMainSize = nullPadding();
+  const axisLabelOverflow = nullPadding();
 
   axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0, isHidden }, id) => {
     const axisSpec = getSpecsById<AxisSpec>(axisSpecs, id);

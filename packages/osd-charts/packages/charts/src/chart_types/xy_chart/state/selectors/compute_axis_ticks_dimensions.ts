@@ -22,12 +22,7 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { CanvasTextBBoxCalculator } from '../../../../utils/bbox/canvas_text_bbox_calculator';
 import { AxisId } from '../../../../utils/ids';
-import {
-  computeAxisTicksDimensions,
-  AxisTicksDimensions,
-  isDuplicateAxis,
-  defaultTickFormatter,
-} from '../../utils/axis_utils';
+import { axisViewModel, AxisViewModel, hasDuplicateAxis, defaultTickFormatter } from '../../utils/axis_utils';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
 import { getAxesStylesSelector } from './get_axis_styles';
@@ -58,15 +53,15 @@ export const computeAxisTicksDimensionsSelector = createCustomCachedSelector(
     totalBarsInCluster,
     seriesSpecs,
     axesStyles,
-  ): Map<AxisId, AxisTicksDimensions> => {
+  ): Map<AxisId, AxisViewModel> => {
     const { xDomain, yDomains } = seriesDomainsAndData;
     const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
     const bboxCalculator = new CanvasTextBBoxCalculator();
-    const axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map();
+    const axesTicksDimensions: Map<AxisId, AxisViewModel> = new Map();
     axesSpecs.forEach((axisSpec) => {
       const { id } = axisSpec;
       const axisStyle = axesStyles.get(id) ?? chartTheme.axes;
-      const dimensions = computeAxisTicksDimensions(
+      const dimensions = axisViewModel(
         axisSpec,
         xDomain,
         yDomains,
@@ -80,7 +75,7 @@ export const computeAxisTicksDimensionsSelector = createCustomCachedSelector(
       );
       if (
         dimensions &&
-        (!settingsSpec.hideDuplicateAxes || !isDuplicateAxis(axisSpec, dimensions, axesTicksDimensions, axesSpecs))
+        (!settingsSpec.hideDuplicateAxes || !hasDuplicateAxis(axisSpec, dimensions, axesTicksDimensions, axesSpecs))
       ) {
         axesTicksDimensions.set(id, dimensions);
       }

@@ -24,7 +24,7 @@ import { Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { LegendStyle } from '../../../utils/themes/theme';
-import { AxisTicksDimensions } from './axis_utils';
+import { AxisViewModel } from './axis_utils';
 import { computeChartDimensions } from './dimensions';
 import { AxisSpec } from './specs';
 
@@ -48,7 +48,7 @@ describe('Computed chart dimensions', () => {
     bottom: 10,
   };
 
-  const axis1Dims: AxisTicksDimensions = {
+  const axis1Dims: AxisViewModel = {
     tickValues: [0, 1],
     tickLabels: ['first', 'second'],
     maxLabelBboxWidth: 10,
@@ -87,7 +87,7 @@ describe('Computed chart dimensions', () => {
   chartTheme.axes.axisTitle.fontSize = 10;
   chartTheme.axes.axisTitle.padding = 10;
   test('should be equal to parent dimension with no axis minus margins', () => {
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs: AxisSpec[] = [];
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisStyles, axisSpecs);
@@ -98,7 +98,7 @@ describe('Computed chart dimensions', () => {
   test('should be padded by a left axis', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxWidth|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from left
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs = [axisLeftSpec];
     axisDims.set('axis_1', axis1Dims);
@@ -110,7 +110,7 @@ describe('Computed chart dimensions', () => {
   test('should be padded by a right axis', () => {
     // |padding|tickSize|tickPadding|maxLabelBBoxWidth|titlePadding|titleFontSize\margin|
     // \10|10|10|10|10|10|10| = 70px from right
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs = [{ ...axisLeftSpec, position: Position.Right }];
     axisDims.set('axis_1', axis1Dims);
@@ -122,7 +122,7 @@ describe('Computed chart dimensions', () => {
   test('should be padded by a top axis', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from top
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs = [
       {
@@ -139,7 +139,7 @@ describe('Computed chart dimensions', () => {
   test('should be padded by a bottom axis', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from bottom
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs = [
       {
@@ -154,7 +154,7 @@ describe('Computed chart dimensions', () => {
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should not add space for axis when no spec for axis dimensions or axis is hidden', () => {
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     const axisStyles = new Map();
     const axisSpecs = [
       {
@@ -177,7 +177,7 @@ describe('Computed chart dimensions', () => {
 
     expect(chartDimensions).toEqual(expectedDims);
 
-    const hiddenAxisDims = new Map<AxisId, AxisTicksDimensions>();
+    const hiddenAxisDims = new Map<AxisId, AxisViewModel>();
     const hiddenAxisSpecs = new Map<AxisId, AxisSpec>();
     hiddenAxisDims.set('axis_1', axis1Dims);
     hiddenAxisSpecs.set('axis_1', {

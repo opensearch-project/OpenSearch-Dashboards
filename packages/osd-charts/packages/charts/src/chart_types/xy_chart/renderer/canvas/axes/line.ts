@@ -18,33 +18,17 @@
  */
 
 import { AxisProps } from '.';
-import { Position } from '../../../../../utils/common';
-import { isVerticalAxis } from '../../../utils/axis_type_utils';
+import { Position as P } from '../../../../../utils/common';
 
 /** @internal */
-export function renderLine(
+export function renderAxisLine(
   ctx: CanvasRenderingContext2D,
-  { axisSpec: { position }, size, axisStyle: { axisLine } }: AxisProps,
+  { axisSpec: { position: p }, size: { width, height }, axisStyle: { axisLine } }: AxisProps,
 ) {
-  if (!axisLine.visible) {
-    return;
-  }
-
-  const lineProps: number[] = [];
-  if (isVerticalAxis(position)) {
-    lineProps[0] = position === Position.Left ? size.width : 0;
-    lineProps[2] = position === Position.Left ? size.width : 0;
-    lineProps[1] = 0;
-    lineProps[3] = size.height;
-  } else {
-    lineProps[0] = 0;
-    lineProps[2] = size.width;
-    lineProps[1] = position === Position.Top ? size.height : 0;
-    lineProps[3] = position === Position.Top ? size.height : 0;
-  }
+  if (!axisLine.visible) return;
   ctx.beginPath();
-  ctx.moveTo(lineProps[0], lineProps[1]);
-  ctx.lineTo(lineProps[2], lineProps[3]);
+  ctx.moveTo(p === P.Left ? width : 0, p === P.Top ? height : 0);
+  ctx.lineTo(p !== P.Right ? width : 0, p !== P.Bottom ? height : 0);
   ctx.strokeStyle = axisLine.stroke;
   ctx.lineWidth = axisLine.strokeWidth;
   ctx.stroke();

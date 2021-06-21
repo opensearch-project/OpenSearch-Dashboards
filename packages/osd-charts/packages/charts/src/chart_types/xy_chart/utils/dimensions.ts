@@ -22,7 +22,7 @@ import { Dimensions } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Theme, AxisStyle } from '../../../utils/themes/theme';
 import { computeAxesSizes } from '../axes/axes_sizes';
-import { AxisTicksDimensions } from './axis_utils';
+import { AxisViewModel } from './axis_utils';
 import { AxisSpec } from './specs';
 
 /**
@@ -47,7 +47,7 @@ export interface ChartDimensions {
 export function computeChartDimensions(
   parentDimensions: Dimensions,
   theme: Theme,
-  axisDimensions: Map<AxisId, AxisTicksDimensions>,
+  axisDimensions: Map<AxisId, AxisViewModel>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   axisSpecs: AxisSpec[],
   smSpec?: SmallMultiplesSpec,

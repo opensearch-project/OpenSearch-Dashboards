@@ -20,64 +20,26 @@
 import { AxisProps } from '.';
 import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Position } from '../../../../../utils/common';
-import { TickStyle } from '../../../../../utils/themes/theme';
-import { isVerticalAxis } from '../../../utils/axis_type_utils';
+import { isHorizontalAxis } from '../../../utils/axis_type_utils';
 import { AxisTick } from '../../../utils/axis_utils';
-import { renderLine } from '../primitives/line';
+import { renderMultiLine } from '../primitives/line';
 
 /** @internal */
-export function renderTick(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
-  const {
-    axisSpec: { position },
-    size,
-    axisStyle: { tickLine },
-  } = props;
-  if (isVerticalAxis(position)) {
-    renderVerticalTick(ctx, position, size.width, tickLine.size, tick.position, tickLine);
-  } else {
-    renderHorizontalTick(ctx, position, size.height, tickLine.size, tick.position, tickLine);
-  }
-}
-
-function renderVerticalTick(
+export function renderTick(
   ctx: CanvasRenderingContext2D,
-  position: Position,
-  axisWidth: number,
-  tickSize: number,
-  tickPosition: number,
-  tickStyle: TickStyle,
+  { position: tickPosition }: AxisTick,
+  { axisSpec: { position: axisPosition }, size: { width, height }, axisStyle: { tickLine } }: AxisProps,
 ) {
-  const isLeftAxis = position === Position.Left;
-  const x1 = isLeftAxis ? axisWidth : 0;
-  const x2 = isLeftAxis ? axisWidth - tickSize : tickSize;
-  renderLine(
-    ctx,
-    { x1, y1: tickPosition, x2, y2: tickPosition },
-    {
-      color: stringToRGB(tickStyle.stroke),
-      width: tickStyle.strokeWidth,
-    },
-  );
-}
-
-function renderHorizontalTick(
-  ctx: CanvasRenderingContext2D,
-  position: Position,
-  axisHeight: number,
-  tickSize: number,
-  tickPosition: number,
-  tickStyle: TickStyle,
-) {
-  const isTopAxis = position === Position.Top;
-  const y1 = isTopAxis ? axisHeight - tickSize : 0;
-  const y2 = isTopAxis ? axisHeight : tickSize;
-
-  renderLine(
-    ctx,
-    { x1: tickPosition, y1, x2: tickPosition, y2 },
-    {
-      color: stringToRGB(tickStyle.stroke),
-      width: tickStyle.strokeWidth,
-    },
-  );
+  const xy = isHorizontalAxis(axisPosition)
+    ? {
+        x1: tickPosition,
+        x2: tickPosition,
+        ...(axisPosition === Position.Top ? { y1: height - tickLine.size, y2: height } : { y1: 0, y2: tickLine.size }),
+      }
+    : {
+        y1: tickPosition,
+        y2: tickPosition,
+        ...(axisPosition === Position.Left ? { x1: width, x2: width - tickLine.size } : { x1: 0, x2: tickLine.size }),
+      };
+  renderMultiLine(ctx, [xy], { color: stringToRGB(tickLine.stroke), width: tickLine.strokeWidth });
 }

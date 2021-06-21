@@ -22,12 +22,11 @@ import { Rect } from '../../../../geoms/types';
 import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
 import { renderAnnotations } from './annotations';
 import { renderAreas } from './areas';
-import { renderAxes } from './axes';
 import { renderBars } from './bars';
 import { renderBubbles } from './bubbles';
 import { renderGrids } from './grids';
 import { renderLines } from './lines';
-import { renderGridPanels } from './panels/panels';
+import { renderGridPanels, renderPanelSubstrates } from './panels/panels';
 import { renderDebugRect } from './utils/debug';
 import { renderBarValues } from './values/bar';
 import { ReactiveChartStateProps } from './xy_chart';
@@ -88,7 +87,7 @@ export function renderXYChartCanvas2d(
         });
       },
       (ctx: CanvasRenderingContext2D) => {
-        renderAxes(ctx, {
+        renderPanelSubstrates(ctx, {
           axesSpecs,
           perPanelAxisGeoms,
           renderingArea,

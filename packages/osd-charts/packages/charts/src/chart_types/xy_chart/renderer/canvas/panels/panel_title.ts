@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { AxisProps } from '.';
 import { FontStyle } from '../../../../../common/text_utils';
 import { Position } from '../../../../../utils/common';
 import { getSimplePadding } from '../../../../../utils/dimensions';
-import { AxisStyle } from '../../../../../utils/themes/theme';
+import { AxisStyle } from '../../../../../utils/themes/theme'; // todo revise if it should rely on axis-anything
 import { isHorizontalAxis } from '../../../utils/axis_type_utils';
 import { getTitleDimension, shouldShowTicks } from '../../../utils/axis_utils';
+import { AxisProps } from '../axes';
 import { renderText, TextFont } from '../primitives/text';
 import { renderDebugRect } from '../utils/debug';
 

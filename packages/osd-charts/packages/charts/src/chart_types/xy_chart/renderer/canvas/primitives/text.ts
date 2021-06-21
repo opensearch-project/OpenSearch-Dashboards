@@ -41,10 +41,6 @@ export function renderText(
   translation?: Partial<Point>,
   scale: number = 1,
 ) {
-  if (text === undefined || text === null) {
-    return;
-  }
-
   withRotatedOrigin(ctx, origin, degree, (ctx) => {
     withContext(ctx, (ctx) => {
       ctx.fillStyle = font.fill;

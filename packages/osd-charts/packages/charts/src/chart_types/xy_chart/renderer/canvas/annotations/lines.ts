@@ -23,7 +23,7 @@ import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { AnnotationLineProps } from '../../../annotations/line/types';
-import { renderLine } from '../primitives/line';
+import { renderMultiLine } from '../primitives/line';
 import { withPanelTransform } from '../utils/panel_transform';
 
 /** @internal */
@@ -44,7 +44,7 @@ export function renderLineAnnotations(
 
   annotations.forEach(({ linePathPoints, panel }) => {
     withPanelTransform(ctx, panel, rotation, renderingArea, (ctx) => {
-      renderLine(ctx, linePathPoints, stroke);
+      renderMultiLine(ctx, [linePathPoints], stroke);
     });
   });
 }

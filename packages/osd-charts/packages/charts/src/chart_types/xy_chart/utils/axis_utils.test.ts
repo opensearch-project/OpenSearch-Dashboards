@@ -43,14 +43,13 @@ import { computeGridLinesSelector } from '../state/selectors/get_grid_lines';
 import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import {
   AxisTick,
-  AxisTicksDimensions,
-  computeAxisTicksDimensions,
+  AxisViewModel,
+  axisViewModel,
   computeRotatedLabelDimensions,
   getAvailableTicks,
   getAxisPosition,
   getAxesGeometries,
   getHorizontalAxisTickLineProps,
-  getMaxLabelDimensions,
   getMinMaxRange,
   getScaleForAxisSpec,
   getTickLabelProps,
@@ -226,7 +225,7 @@ describe('Axis computational utils', () => {
 
   test('should compute axis dimensions', () => {
     const bboxCalculator = new SvgTextBBoxCalculator();
-    const axisDimensions = computeAxisTicksDimensions(
+    const axisDimensions = axisViewModel(
       verticalAxisSpec,
       xDomain,
       [yDomain],
@@ -239,7 +238,7 @@ describe('Axis computational utils', () => {
     expect(axisDimensions).toEqual(axis1Dims);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
-    const result = computeAxisTicksDimensions(
+    const result = axisViewModel(
       ungroupedAxisSpec,
       xDomain,
       [yDomain],
@@ -260,7 +259,7 @@ describe('Axis computational utils', () => {
   test('should not compute axis dimensions when spec is configured to hide', () => {
     const bboxCalculator = new CanvasTextBBoxCalculator();
     verticalAxisSpec.hide = true;
-    const axisDimensions = computeAxisTicksDimensions(
+    const axisDimensions = axisViewModel(
       verticalAxisSpec,
       xDomain,
       [yDomain],
@@ -281,7 +280,7 @@ describe('Axis computational utils', () => {
       minInterval: 0,
       timeZone: 'utc',
     });
-    let axisDimensions = computeAxisTicksDimensions(
+    let axisDimensions = axisViewModel(
       xAxisWithTime,
       xDomain,
       [yDomain],
@@ -295,7 +294,7 @@ describe('Axis computational utils', () => {
     expect(axisDimensions?.tickLabels[0]).toBe('11:00:00');
     expect(axisDimensions?.tickLabels[11]).toBe('11:55:00');
 
-    axisDimensions = computeAxisTicksDimensions(
+    axisDimensions = axisViewModel(
       xAxisWithTime,
       {
         ...xDomain,
@@ -312,7 +311,7 @@ describe('Axis computational utils', () => {
     expect(axisDimensions?.tickLabels[0]).toBe('14:00:00');
     expect(axisDimensions?.tickLabels[11]).toBe('14:55:00');
 
-    axisDimensions = computeAxisTicksDimensions(
+    axisDimensions = axisViewModel(
       xAxisWithTime,
       {
         ...xDomain,
@@ -348,7 +347,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should generate a valid scale', () => {
-    const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, [100, 0]);
     expect(yScale).toBeDefined();
     expect(yScale?.bandwidth).toBe(0);
     expect(yScale?.domain).toEqual([0, 1]);
@@ -356,14 +355,14 @@ describe('Axis computational utils', () => {
     expect(yScale?.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
-    const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, [100, 0]);
     expect(nullYScale).toBe(null);
 
-    const xScale = getScaleForAxisSpec(horizontalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    const xScale = getScaleForAxisSpec(horizontalAxisSpec, xDomain, [yDomain], 0, 0, [100, 0]);
     expect(xScale).toBeDefined();
   });
 
-  const axisDimensions: AxisTicksDimensions = {
+  const axisDimensions: AxisViewModel = {
     maxLabelBboxWidth: 100,
     maxLabelBboxHeight: 100,
     maxLabelTextHeight: 100,
@@ -380,7 +379,7 @@ describe('Axis computational utils', () => {
 
   describe('getAvailableTicks', () => {
     test('should compute to end of domain when histogram mode not enabled', () => {
-      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, [100, 0]);
       const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, 0);
       const expectedAxisPositions = [
         { label: '0', position: 100, value: 0 },
@@ -400,7 +399,7 @@ describe('Axis computational utils', () => {
 
     test('should compute positions with rotational offset', () => {
       const rotationalOffset = 2;
-      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, [100, 0]);
       const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, rotationalOffset);
       const expectedAxisPositions = [
         { label: '0', position: 100 + rotationalOffset, value: 0 },
@@ -425,7 +424,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 10,
       });
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, [100, 0]);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -445,7 +444,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 90000,
       });
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, [100, 0]);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -482,7 +481,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 90000,
       });
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, [100, 0]);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -704,18 +703,6 @@ describe('Axis computational utils', () => {
       height: 50,
     });
     expect(minMax).toEqual({ minRange: 50, maxRange: 0 });
-  });
-  test('should get max bbox dimensions for a tick in comparison to previous values', () => {
-    const bboxCalculator = new CanvasTextBBoxCalculator();
-    const reducer = getMaxLabelDimensions(bboxCalculator, LIGHT_THEME.axes.tickLabel);
-
-    const accWithGreaterValues = {
-      maxLabelBboxWidth: 100,
-      maxLabelBboxHeight: 100,
-      maxLabelTextWidth: 100,
-      maxLabelTextHeight: 100,
-    };
-    expect(reducer(accWithGreaterValues, 'foo')).toEqual(accWithGreaterValues);
   });
 
   test('should compute positions and alignment of tick labels along a vertical axis', () => {
@@ -1040,7 +1027,8 @@ describe('Axis computational utils', () => {
     const leftAxisPosition = getAxisPosition(
       chartDim,
       LIGHT_THEME.chartMargins,
-      axisTitleStyles(axisTitleHeight),
+      axisTitleStyles(axisTitleHeight).axisTitle,
+      axisTitleStyles(axisTitleHeight).axisPanelTitle,
       verticalAxisSpec,
       axis1Dims,
       emptySmScales,
@@ -1080,7 +1068,8 @@ describe('Axis computational utils', () => {
     const rightAxisPosition = getAxisPosition(
       chartDim,
       LIGHT_THEME.chartMargins,
-      axisTitleStyles(axisTitleHeight),
+      axisTitleStyles(axisTitleHeight).axisTitle,
+      axisTitleStyles(axisTitleHeight).axisPanelTitle,
       verticalAxisSpec,
       axis1Dims,
       emptySmScales,
@@ -1120,7 +1109,8 @@ describe('Axis computational utils', () => {
     const topAxisPosition = getAxisPosition(
       chartDim,
       LIGHT_THEME.chartMargins,
-      axisTitleStyles(axisTitleHeight),
+      axisTitleStyles(axisTitleHeight).axisTitle,
+      axisTitleStyles(axisTitleHeight).axisPanelTitle,
       horizontalAxisSpec,
       axis1Dims,
       emptySmScales,
@@ -1161,7 +1151,8 @@ describe('Axis computational utils', () => {
     const bottomAxisPosition = getAxisPosition(
       chartDim,
       LIGHT_THEME.chartMargins,
-      axisTitleStyles(axisTitleHeight),
+      axisTitleStyles(axisTitleHeight).axisTitle,
+      axisTitleStyles(axisTitleHeight).axisPanelTitle,
       horizontalAxisSpec,
       axis1Dims,
       emptySmScales,
@@ -1193,7 +1184,7 @@ describe('Axis computational utils', () => {
   test('should not compute axis ticks positions if missaligned specs', () => {
     const axisSpecs = [verticalAxisSpec];
     const axisStyles = new Map();
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisDims = new Map<AxisId, AxisViewModel>();
     axisDims.set('not_a_mapped_one', axis1Dims);
 
     const axisTicksPosition = getAxesGeometries(
@@ -1756,7 +1747,8 @@ describe('Axis computational utils', () => {
         const leftAxisPosition = getAxisPosition(
           chartDim,
           LIGHT_THEME.chartMargins,
-          axisStyles,
+          axisStyles.axisTitle,
+          axisStyles.axisPanelTitle,
           { ...verticalAxisSpec, title },
           axis1Dims,
           smScales,
@@ -1790,7 +1782,8 @@ describe('Axis computational utils', () => {
         const rightAxisPosition = getAxisPosition(
           chartDim,
           LIGHT_THEME.chartMargins,
-          axisStyles,
+          axisStyles.axisTitle,
+          axisStyles.axisPanelTitle,
           { ...verticalAxisSpec, title },
           axis1Dims,
           smScales,
@@ -1824,7 +1817,8 @@ describe('Axis computational utils', () => {
         const topAxisPosition = getAxisPosition(
           chartDim,
           LIGHT_THEME.chartMargins,
-          axisStyles,
+          axisStyles.axisTitle,
+          axisStyles.axisPanelTitle,
           { ...horizontalAxisSpec, title },
           axis1Dims,
           smScales,
@@ -1858,7 +1852,8 @@ describe('Axis computational utils', () => {
         const bottomAxisPosition = getAxisPosition(
           chartDim,
           LIGHT_THEME.chartMargins,
-          axisStyles,
+          axisStyles.axisTitle,
+          axisStyles.axisPanelTitle,
           { ...horizontalAxisSpec, title },
           axis1Dims,
           smScales,
