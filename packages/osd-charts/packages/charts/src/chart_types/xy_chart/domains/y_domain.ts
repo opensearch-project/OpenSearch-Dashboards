@@ -70,7 +70,8 @@ function mergeYDomainForGroup(
   const [{ stackMode, spec }] = dataSeries;
   const groupId = getSpecDomainGroupId(spec);
   const { customDomain, type, nice, desiredTickCount } = yScaleConfig[groupId];
-  const newCustomDomain = customDomain ? { ...customDomain } : {};
+  const newCustomDomain: YDomainRange = customDomain ? { ...customDomain } : {};
+  const { paddingUnit, padding, constrainPadding } = newCustomDomain;
 
   let domain: ContinuousDomain;
   if (stackMode === StackMode.Percentage) {
@@ -106,6 +107,7 @@ function mergeYDomainForGroup(
       }
     }
   }
+
   return {
     type,
     nice,
@@ -115,8 +117,8 @@ function mergeYDomainForGroup(
     logBase: customDomain?.logBase,
     logMinLimit: customDomain?.logMinLimit,
     desiredTickCount,
-    domainPixelPadding: newCustomDomain.paddingUnit === DomainPaddingUnit.Pixel ? newCustomDomain.padding : 0,
-    constrainDomainPadding: newCustomDomain.constrainPadding,
+    domainPixelPadding: paddingUnit === DomainPaddingUnit.Pixel ? padding : 0,
+    constrainDomainPadding: constrainPadding,
   };
 }
 
