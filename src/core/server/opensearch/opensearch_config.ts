@@ -135,7 +135,24 @@ export const configSchema = schema.object({
   ),
 });
 
-const deprecations: ConfigDeprecationProvider = () => [
+const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+  renameFromRoot('elasticsearch.sniffOnStart', 'opensearch.sniffOnStart'),
+  renameFromRoot('elasticsearch.sniffInterval', 'opensearch.sniffInterval'),
+  renameFromRoot('elasticsearch.sniffOnConnectionFault', 'opensearch.sniffOnConnectionFault'),
+  renameFromRoot('elasticsearch.hosts', 'opensearch.hosts'),
+  renameFromRoot('elasticsearch.username', 'opensearch.username'),
+  renameFromRoot('elasticsearch.password', 'opensearch.password'),
+  renameFromRoot('elasticsearch.requestHeadersWhitelist', 'opensearch.requestHeadersWhitelist'),
+  renameFromRoot('elasticsearch.customHeaders', 'opensearch.customHeaders'),
+  renameFromRoot('elasticsearch.shardTimeout', 'opensearch.shardTimeout'),
+  renameFromRoot('elasticsearch.requestTimeout', 'opensearch.requestTimeout'),
+  renameFromRoot('elasticsearch.pingTimeout', 'opensearch.pingTimeout'),
+  renameFromRoot('elasticsearch.logQueries', 'opensearch.logQueries'),
+  renameFromRoot('elasticsearch.optimizedHealthcheckId', 'opensearch.optimizedHealthcheckId'),
+  renameFromRoot('elasticsearch.ssl', 'opensearch.ssl'),
+  renameFromRoot('elasticsearch.apiVersion', 'opensearch.apiVersion'),
+  renameFromRoot('elasticsearch.healthCheck', 'opensearch.healthCheck'),
+  renameFromRoot('elasticsearch.ignoreVersionMismatch', 'opensearch.ignoreVersionMismatch'),
   (settings, fromPath, log) => {
     const opensearch = settings[fromPath];
     if (!opensearch) {
