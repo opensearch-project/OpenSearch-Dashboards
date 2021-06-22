@@ -92,7 +92,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   return opensearchClient;
 }
 
-describe.skip('get_local_stats', () => {
+describe('get_local_stats', () => {
   const clusterUuid = 'abc123';
   const clusterName = 'my-cool-cluster';
   const version = '2.3.4';
@@ -194,7 +194,7 @@ describe.skip('get_local_stats', () => {
     version: '8.0.0',
   };
 
-  describe.skip('handleLocalStats', () => {
+  describe('handleLocalStats', () => {
     it('returns expected object without OpenSearch Dashboards data', () => {
       const result = handleLocalStats(
         clusterInfo,
@@ -235,7 +235,7 @@ describe.skip('get_local_stats', () => {
     });
   });
 
-  describe.skip('getLocalStats', () => {
+  describe('getLocalStats', () => {
     it('returns expected object with OpenSearch Dashboards data', async () => {
       const callCluster = jest.fn();
       const usageCollection = mockUsageCollection(opensearchDashboards);
