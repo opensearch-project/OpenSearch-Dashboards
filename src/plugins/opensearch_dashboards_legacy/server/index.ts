@@ -52,10 +52,14 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       'opensearch_dashboards_legacy.defaultAppId',
       true
     ),
+    renameFromRoot('kibana.defaultAppId', 'opensearch_dashboards_legacy.defaultAppId', true),
+    renameFromRoot('kibana_legacy.defaultAppId', 'opensearch_dashboards_legacy.defaultAppId', true),
     (completeConfig: Record<string, any>, rootPath: string, log: ConfigDeprecationLogger) => {
       if (
         get(completeConfig, 'opensearchDashboards.defaultAppId') === undefined &&
-        get(completeConfig, 'opensearch_dashboards_legacy.defaultAppId') === undefined
+        get(completeConfig, 'opensearch_dashboards_legacy.defaultAppId') === undefined &&
+        get(completeConfig, 'kibana.defaultAppId') === undefined &&
+        get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
       ) {
         return completeConfig;
       }

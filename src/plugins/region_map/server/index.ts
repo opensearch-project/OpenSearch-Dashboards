@@ -41,6 +41,12 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     layers: true,
   },
   schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot(
+      'map.regionmap.includeElasticMapsService',
+      'map.regionmap.includeOpenSearchMapsService'
+    ),
+  ],
 };
 
 export const plugin = () => ({

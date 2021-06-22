@@ -39,18 +39,22 @@ import {
 import { applyDeprecations, configDeprecationFactory } from '@osd/config';
 import { OpenSearchConfig, config } from './opensearch_config';
 
-const CONFIG_PATH = 'opensearch';
+const DEFAULT_CONFIG_PATH = 'opensearch';
+const LEGACY_CONFIG_PATH = 'elasticsearch';
 
-const applyOpenSearchDeprecations = (settings: Record<string, any> = {}) => {
+const applyOpenSearchDeprecations = (
+  settings: Record<string, any> = {},
+  path = DEFAULT_CONFIG_PATH
+) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
   const deprecationMessages: string[] = [];
   const _config: any = {};
-  _config[CONFIG_PATH] = settings;
+  _config[path] = settings;
   const migrated = applyDeprecations(
     _config,
     deprecations.map((deprecation) => ({
       deprecation,
-      path: CONFIG_PATH,
+      path,
     })),
     (msg) => deprecationMessages.push(msg)
   );
@@ -58,6 +62,10 @@ const applyOpenSearchDeprecations = (settings: Record<string, any> = {}) => {
     messages: deprecationMessages,
     migrated,
   };
+};
+
+const applyLegacyDeprecations = (settings: Record<string, any> = {}) => {
+  return applyOpenSearchDeprecations(settings, LEGACY_CONFIG_PATH);
 };
 
 test('set correct defaults', () => {
@@ -370,6 +378,168 @@ describe('deprecations', () => {
   it('does not log a warning if both ssl.key and ssl.certificate are set', () => {
     const { messages } = applyOpenSearchDeprecations({ ssl: { key: '', certificate: '' } });
     expect(messages).toEqual([]);
+  });
+
+  it('logs a warning if elasticsearch.sniffOnStart is set and opensearch.sniffOnStart is not', () => {
+    const { messages } = applyLegacyDeprecations({ sniffOnStart: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.sniffOnStart\\" is deprecated and has been replaced by \\"opensearch.sniffOnStart\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.sniffInterval is set and opensearch.sniffInterval is not', () => {
+    const { messages } = applyLegacyDeprecations({ sniffInterval: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.sniffInterval\\" is deprecated and has been replaced by \\"opensearch.sniffInterval\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.sniffOnConnectionFault is set and opensearch.sniffOnConnectionFault is not', () => {
+    const { messages } = applyLegacyDeprecations({ sniffOnConnectionFault: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.sniffOnConnectionFault\\" is deprecated and has been replaced by \\"opensearch.sniffOnConnectionFault\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.hosts is set and opensearch.hosts is not', () => {
+    const { messages } = applyLegacyDeprecations({ hosts: [''] });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.hosts\\" is deprecated and has been replaced by \\"opensearch.hosts\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.username is set and opensearch.username is not', () => {
+    const { messages } = applyLegacyDeprecations({ username: '' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.username\\" is deprecated and has been replaced by \\"opensearch.username\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.password is set and opensearch.password is not', () => {
+    const { messages } = applyLegacyDeprecations({ password: '' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.password\\" is deprecated and has been replaced by \\"opensearch.password\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.requestHeadersWhitelist is set and opensearch.requestHeadersWhitelist is not', () => {
+    const { messages } = applyLegacyDeprecations({ requestHeadersWhitelist: [''] });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersWhitelist\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.customHeaders is set and opensearch.customHeaders is not', () => {
+    const { messages } = applyLegacyDeprecations({ customHeaders: [''] });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.customHeaders\\" is deprecated and has been replaced by \\"opensearch.customHeaders\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.shardTimeout is set and opensearch.shardTimeout is not', () => {
+    const { messages } = applyLegacyDeprecations({ shardTimeout: 100 });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.shardTimeout\\" is deprecated and has been replaced by \\"opensearch.shardTimeout\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.requestTimeout is set and opensearch.requestTimeout is not', () => {
+    const { messages } = applyLegacyDeprecations({ requestTimeout: 100 });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.requestTimeout\\" is deprecated and has been replaced by \\"opensearch.requestTimeout\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.pingTimeout is set and opensearch.pingTimeout is not', () => {
+    const { messages } = applyLegacyDeprecations({ pingTimeout: 100 });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.pingTimeout\\" is deprecated and has been replaced by \\"opensearch.pingTimeout\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.logQueries is set and opensearch.logQueries is not', () => {
+    const { messages } = applyLegacyDeprecations({ logQueries: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.logQueries\\" is deprecated and has been replaced by \\"opensearch.logQueries\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.optimizedHealthcheckId is set and opensearch.optimizedHealthcheckId is not', () => {
+    const { messages } = applyLegacyDeprecations({ optimizedHealthcheckId: '' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.optimizedHealthcheckId\\" is deprecated and has been replaced by \\"opensearch.optimizedHealthcheckId\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.ssl is set and opensearch.ssl is not', () => {
+    const { messages } = applyLegacyDeprecations({ ssl: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.ssl\\" is deprecated and has been replaced by \\"opensearch.ssl\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.ssl.certificate is set and opensearch.ssl.certificate is not', () => {
+    const { messages } = applyLegacyDeprecations({ ssl: { certificate: '' } });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.ssl\\" is deprecated and has been replaced by \\"opensearch.ssl\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.apiVersion is set and opensearch.apiVersion is not', () => {
+    const { messages } = applyLegacyDeprecations({ apiVersion: '' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.apiVersion\\" is deprecated and has been replaced by \\"opensearch.apiVersion\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.healthCheck is set and opensearch.healthCheck is not', () => {
+    const { messages } = applyLegacyDeprecations({ healthCheck: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.healthCheck\\" is deprecated and has been replaced by \\"opensearch.healthCheck\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if elasticsearch.ignoreVersionMismatch is set and opensearch.ignoreVersionMismatch is not', () => {
+    const { messages } = applyLegacyDeprecations({ ignoreVersionMismatch: true });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.ignoreVersionMismatch\\" is deprecated and has been replaced by \\"opensearch.ignoreVersionMismatch\\"",
+      ]
+    `);
   });
 });
 

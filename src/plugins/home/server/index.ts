@@ -44,6 +44,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('opensearchDashboards.disableWelcomeScreen', 'home.disableWelcomeScreen'),
+    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen'),
   ],
 };
 
