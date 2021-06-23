@@ -5,7 +5,7 @@ exports[`empty_news rendering renders the default Empty News 1`] = `
   body={
     <p>
       <FormattedMessage
-        defaultMessage="If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
+        defaultMessage="If your OpenSearch Dashboards instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
         id="newsfeed.emptyPrompt.noNewsText"
         values={Object {}}
       />
