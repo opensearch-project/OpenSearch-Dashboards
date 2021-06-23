@@ -64,7 +64,7 @@ jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-describe.skip('NewsfeedApiDriver', () => {
+describe('NewsfeedApiDriver', () => {
   const opensearchDashboardsVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
   const fetchInterval = 2000;
@@ -75,7 +75,7 @@ describe.skip('NewsfeedApiDriver', () => {
     sinon.reset();
   });
 
-  describe.skip('shouldFetch', () => {
+  describe('shouldFetch', () => {
     it('defaults to true', () => {
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(true);
@@ -100,7 +100,7 @@ describe.skip('NewsfeedApiDriver', () => {
     });
   });
 
-  describe.skip('updateHashes', () => {
+  describe('updateHashes', () => {
     it('returns previous and current storage', () => {
       const driver = getDriver();
       const items: NewsfeedItem[] = [
@@ -192,7 +192,7 @@ describe.skip('NewsfeedApiDriver', () => {
     ).toBe(false);
   });
 
-  describe.skip('modelItems', () => {
+  describe('modelItems', () => {
     it('Models empty set with defaults', () => {
       const driver = getDriver();
       const apiItems: ApiItem[] = [];
@@ -465,7 +465,7 @@ describe.skip('NewsfeedApiDriver', () => {
   });
 });
 
-describe.skip('getApi', () => {
+describe('getApi', () => {
   const mockHttpGet = jest.fn();
   let httpMock = ({
     fetch: mockHttpGet,
@@ -630,7 +630,7 @@ describe.skip('getApi', () => {
     });
   });
 
-  describe.skip('Retry fetching', () => {
+  describe('Retry fetching', () => {
     const successItems: ApiItem[] = [
       {
         title: { en: 'hasNew test' },
