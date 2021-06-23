@@ -68,7 +68,7 @@
     "sinon": "^7.4.2",
     "style-loader": "^1.1.3",
     "webpack": "^4.41.5",
-    "webpack-dev-server": "^3.8.2",
+    "webpack-dev-server": "^3.11.0",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.6"
   }
