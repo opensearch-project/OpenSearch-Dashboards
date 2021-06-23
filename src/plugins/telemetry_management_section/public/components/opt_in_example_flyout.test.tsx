@@ -33,7 +33,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
-describe.skip('OptInDetailsComponent', () => {
+describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(
       shallowWithIntl(
