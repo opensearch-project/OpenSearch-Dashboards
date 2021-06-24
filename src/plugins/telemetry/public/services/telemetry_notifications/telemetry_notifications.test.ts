@@ -33,7 +33,7 @@
 /* eslint-disable dot-notation */
 import { mockTelemetryNotifications, mockTelemetryService } from '../../mocks';
 
-describe.skip('onSetOptInClick', () => {
+describe('onSetOptInClick', () => {
   it('sets setting successfully and removes banner', async () => {
     const optIn = true;
     const bannerId = 'bruce-banner';
@@ -51,7 +51,7 @@ describe.skip('onSetOptInClick', () => {
   });
 });
 
-describe.skip('setOptedInNoticeSeen', () => {
+describe('setOptedInNoticeSeen', () => {
   it('sets setting successfully and removes banner', async () => {
     const bannerId = 'bruce-banner';
 
@@ -67,7 +67,7 @@ describe.skip('setOptedInNoticeSeen', () => {
   });
 });
 
-describe.skip('shouldShowOptedInNoticeBanner', () => {
+describe('shouldShowOptedInNoticeBanner', () => {
   it("should return true because a banner hasn't been shown, the notice hasn't been seen and the user has privileges to edit saved objects", () => {
     const telemetryService = mockTelemetryService();
     telemetryService.getUserShouldSeeOptInNotice = jest.fn().mockReturnValue(true);
