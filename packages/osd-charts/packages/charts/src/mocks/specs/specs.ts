@@ -18,6 +18,7 @@
  */
 
 import { ChartType } from '../../chart_types';
+import { X_SCALE_DEFAULT } from '../../chart_types/heatmap/specs/scale_defaults';
 import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config';
 import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
@@ -42,7 +43,15 @@ import {
 } from '../../chart_types/xy_chart/utils/specs';
 import { Predicate } from '../../common/predicate';
 import { ScaleType } from '../../scales/constants';
-import { SettingsSpec, SpecType, DEFAULT_SETTINGS_SPEC, SmallMultiplesSpec, GroupBySpec, Spec } from '../../specs';
+import {
+  SettingsSpec,
+  SpecType,
+  DEFAULT_SETTINGS_SPEC,
+  SmallMultiplesSpec,
+  GroupBySpec,
+  Spec,
+  HeatmapSpec,
+} from '../../specs';
 import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/common';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
@@ -172,6 +181,23 @@ export class MockSeriesSpec {
     data: [],
   };
 
+  private static readonly heatmapBase: HeatmapSpec = {
+    id: 'spec1',
+    chartType: ChartType.Heatmap,
+    specType: SpecType.Series,
+    data: [],
+    colors: ['red', 'yellow', 'green'],
+    colorScale: ScaleType.Linear,
+    xAccessor: ({ x }: { x: string | number }) => x,
+    yAccessor: ({ y }: { y: string | number }) => y,
+    xScaleType: X_SCALE_DEFAULT.type,
+    valueAccessor: ({ value }: { value: string | number }) => value,
+    valueFormatter: (value: number) => `${value}`,
+    xSortPredicate: Predicate.AlphaAsc,
+    ySortPredicate: Predicate.AlphaAsc,
+    config: {},
+  };
+
   static bar(partial?: Partial<BarSeriesSpec>): BarSeriesSpec {
     return mergePartial<BarSeriesSpec>(MockSeriesSpec.barBase, partial as RecursivePartial<BarSeriesSpec>, {
       mergeOptionalPartialValues: true,
@@ -214,6 +240,12 @@ export class MockSeriesSpec {
 
   static treemap(partial?: Partial<PartitionSpec>): PartitionSpec {
     return mergePartial<PartitionSpec>(MockSeriesSpec.treemapBase, partial as RecursivePartial<PartitionSpec>, {
+      mergeOptionalPartialValues: true,
+    });
+  }
+
+  static heatmap(partial?: Partial<HeatmapSpec>): HeatmapSpec {
+    return mergePartial<HeatmapSpec>(MockSeriesSpec.heatmapBase, partial as RecursivePartial<HeatmapSpec>, {
       mergeOptionalPartialValues: true,
     });
   }

@@ -30,13 +30,7 @@ export const Example = () => {
   const [min, max] = extent(values);
   return (
     <Chart className="story-chart">
-      <Settings
-        onElementClick={action('onElementClick')}
-        showLegend
-        legendPosition="left"
-        onBrushEnd={action('onBrushEnd')}
-        brushAxis="both"
-      />
+      <Settings onElementClick={action('onElementClick')} showLegend legendPosition="right" brushAxis="both" />
       <Heatmap
         id="heatmap2"
         colorScale={ScaleType.Linear}
@@ -67,8 +61,8 @@ export const Example = () => {
           },
           yAxisLabel: {
             visible: true,
-            width: 100,
           },
+          onBrushEnd: action('onBrushEnd'),
         }}
       />
     </Chart>

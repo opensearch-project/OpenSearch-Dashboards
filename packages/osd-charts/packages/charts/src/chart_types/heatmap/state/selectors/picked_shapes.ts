@@ -19,8 +19,7 @@
 
 import { GlobalChartState } from '../../../../state/chart_state';
 import { createCustomCachedSelector } from '../../../../state/create_selector';
-import { Cell } from '../../layout/types/viewmodel_types';
-import { TextBox } from '../../layout/viewmodel/viewmodel';
+import { Cell, TextBox } from '../../layout/types/viewmodel_types';
 import { geometries } from './geometries';
 
 function getCurrentPointerPosition(state: GlobalChartState) {

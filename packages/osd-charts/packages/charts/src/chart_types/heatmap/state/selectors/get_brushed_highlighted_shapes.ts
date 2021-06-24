@@ -29,24 +29,11 @@ function getCurrentPointerStates(state: GlobalChartState) {
 /** @internal */
 export const getBrushedHighlightedShapesSelector = createCustomCachedSelector(
   [geometries, getCurrentPointerStates],
-  (geoms, pointerStates): DragShape | null => {
+  (geoms, pointerStates): DragShape => {
     if (!pointerStates.dragging || !pointerStates.down) {
       return null;
     }
 
-    const {
-      down: {
-        position: { x: startX, y: startY },
-      },
-      current: {
-        position: { x: endX, y: endY },
-      },
-    } = pointerStates;
-
-    const shape = geoms.pickDragShape([
-      { x: startX, y: startY },
-      { x: endX, y: endY },
-    ]);
-    return shape;
+    return geoms.pickDragShape([pointerStates.down.position, pointerStates.current.position]);
   },
 );
