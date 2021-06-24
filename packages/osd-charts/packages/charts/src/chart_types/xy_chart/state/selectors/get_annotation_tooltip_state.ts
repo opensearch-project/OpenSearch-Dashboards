@@ -96,7 +96,6 @@ function getAnnotationTooltipState(
     annotationDimensions,
     annotationSpecs,
     chartRotation,
-    axesSpecs,
     chartDimensions,
   );
 

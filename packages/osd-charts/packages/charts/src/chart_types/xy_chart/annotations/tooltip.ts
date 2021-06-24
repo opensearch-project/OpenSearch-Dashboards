@@ -22,7 +22,7 @@ import { Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
-import { AnnotationSpec, AxisSpec, isRectAnnotation } from '../utils/specs';
+import { AnnotationSpec, isRectAnnotation } from '../utils/specs';
 import { getRectAnnotationTooltipState } from './rect/tooltip';
 import { AnnotationRectProps } from './rect/types';
 import { AnnotationDimensions, AnnotationTooltipState } from './types';
@@ -33,7 +33,6 @@ export function computeRectAnnotationTooltipState(
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>,
   annotationSpecs: AnnotationSpec[],
   chartRotation: Rotation,
-  axesSpecs: AxisSpec[],
   chartDimensions: Dimensions,
 ): AnnotationTooltipState | null {
   // allow picking up the last spec added as the top most or use it's zIndex value

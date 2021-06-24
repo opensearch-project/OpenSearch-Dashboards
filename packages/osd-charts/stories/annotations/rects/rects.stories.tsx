@@ -33,3 +33,4 @@ export { Example as styling } from './4_styling';
 export { Example as tooltipOptions } from './5_tooltip_options';
 export { Example as zeroDomain } from './6_zero_domain';
 export { Example as withGroupId } from './7_with_group_id';
+export { Example as outside } from './8_outside';

@@ -1575,6 +1575,8 @@ export interface RectAnnotationDatum {
 export type RectAnnotationSpec = BaseAnnotationSpec<typeof AnnotationType.Rectangle, RectAnnotationDatum, RectAnnotationStyle> & {
     renderTooltip?: AnnotationTooltipFormatter;
     zIndex?: number;
+    outside?: boolean;
+    outsideDimension?: number;
 };
 
 // @public (undocumented)

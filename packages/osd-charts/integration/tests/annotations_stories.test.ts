@@ -130,4 +130,46 @@ describe('Annotations stories', () => {
       });
     });
   });
+
+  describe('Outside annotations', () => {
+    describe.each(['x', 'y'])('Domain - %s', (domain) => {
+      eachRotation.it(async (rotation) => {
+        await common.expectChartAtUrlToMatchScreenshot(
+          `http://localhost:9001/?path=/story/annotations-rects--outside&knob-debug=&knob-chartRotation=${rotation}&knob-Domain%20axis_Annotations=${domain}&knob-Render%20outside%20chart_Annotations=true&knob-Red%20groupId_Annotations=primary&knob-Blue%20groupId_Annotations=secondary&knob-Tick%20size=10`,
+        );
+      });
+    });
+
+    it('should show tooltip on hover - x domain', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--outside&knob-Outside dimension_Annotations=20&knob-debug=&knob-chartRotation=0&knob-Tick size=20&knob-Domain axis_Annotations=x&knob-Render outside chart_Annotations=true&knob-Red groupId_Annotations=primary&knob-Blue groupId_Annotations=secondary',
+        {
+          top: 60,
+          right: 100,
+        },
+      );
+    });
+
+    it('should show tooltip on hover - y domain', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--outside&knob-Outside dimension_Annotations=20&knob-debug=&knob-chartRotation=0&knob-Tick size=20&knob-Domain axis_Annotations=y&knob-Render outside chart_Annotations=true&knob-Red groupId_Annotations=primary&knob-Blue groupId_Annotations=secondary',
+        {
+          top: 125,
+          left: 60,
+        },
+      );
+    });
+
+    it('should render outside annotations when tickLine is not rendered', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--outside&knob-debug=&knob-chartRotation=180&knob-Tick size=0&knob-Domain axis_Annotations=x&knob-Render outside chart_Annotations=true&knob-Red groupId_Annotations=primary&knob-Blue groupId_Annotations=secondary',
+      );
+    });
+
+    it('should render outside annotations when axes are hidden', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--outside&knob-debug=&knob-chartRotation=0&knob-Tick size=10&knob-Hide all axes=true&knob-Domain axis_Annotations=x&knob-Render outside chart_Annotations=true&knob-Outside dimension_Annotations=5&knob-Red groupId_Annotations=primary&knob-Blue groupId_Annotations=secondary',
+      );
+    });
+  });
 });

@@ -20,8 +20,9 @@
 import { Scale } from '../../../scales';
 import { Rotation, Position } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
-import { AnnotationId, GroupId } from '../../../utils/ids';
+import { AnnotationId, AxisId, GroupId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
+import { AxisStyle } from '../../../utils/themes/theme';
 import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from '../state/utils/common';
 import { getAxesSpecForSpecId } from '../state/utils/spec';
@@ -127,13 +128,13 @@ export function invertTransformedCursor(
 /** @internal */
 export function computeAnnotationDimensions(
   annotations: AnnotationSpec[],
-  chartDimensions: Dimensions,
   chartRotation: Rotation,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
   axesSpecs: AxisSpec[],
   isHistogramModeEnabled: boolean,
   smallMultipleScales: SmallMultipleScales,
+  getAxisStyle: (id?: AxisId) => AxisStyle,
 ): Map<AnnotationId, AnnotationDimensions> {
   return annotations.reduce<Map<AnnotationId, AnnotationDimensions>>((annotationDimensions, annotationSpec) => {
     const { id } = annotationSpec;
@@ -161,7 +162,10 @@ export function computeAnnotationDimensions(
       annotationSpec,
       yScales,
       xScale,
+      axesSpecs,
       smallMultipleScales,
+      chartRotation,
+      getAxisStyle,
       isHistogramModeEnabled,
     );
 

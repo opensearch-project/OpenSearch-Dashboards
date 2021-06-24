@@ -32,6 +32,7 @@ const defaultProps = {
   annotationType: AnnotationType.Rectangle,
   zIndex: -1,
   style: DEFAULT_ANNOTATION_RECT_STYLE,
+  outside: false,
 };
 
 /** @public */

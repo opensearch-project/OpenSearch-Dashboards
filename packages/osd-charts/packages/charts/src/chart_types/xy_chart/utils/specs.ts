@@ -893,6 +893,16 @@ export type RectAnnotationSpec = BaseAnnotationSpec<
    * @defaultValue -1
    */
   zIndex?: number;
+  /**
+   * Renders annotation outside of chart area within axis gutter
+   *
+   * @defaultValue false
+   */
+  outside?: boolean;
+  /**
+   * Dimension, either height or width, of outside annotation
+   */
+  outsideDimension?: number;
 };
 
 /**

@@ -31,7 +31,7 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationId } from '../../../../utils/ids';
 import { LineAnnotation } from '../../specs/line_annotation';
 import { LineSeries } from '../../specs/line_series';
-import { AnnotationDomainType, AnnotationType, AxisSpec, RectAnnotationSpec } from '../../utils/specs';
+import { AnnotationDomainType, AnnotationType, RectAnnotationSpec } from '../../utils/specs';
 import { computeRectAnnotationTooltipState } from '../tooltip';
 import { AnnotationDimensions } from '../types';
 import { AnnotationLineProps } from './types';
@@ -138,7 +138,6 @@ describe('Annotation tooltips', () => {
       }),
     ];
     const chartRotation: Rotation = 0;
-    const localAxesSpecs: AxisSpec[] = [];
 
     const annotationDimensions = new Map<AnnotationId, AnnotationDimensions>();
     annotationDimensions.set('foo', annotationLines);
@@ -165,7 +164,6 @@ describe('Annotation tooltips', () => {
       annotationDimensions,
       rectAnnotations,
       chartRotation,
-      localAxesSpecs,
       chartDimensions,
     );
 
@@ -186,7 +184,6 @@ describe('Annotation tooltips', () => {
       annotationDimensions,
       rectAnnotations,
       chartRotation,
-      localAxesSpecs,
       chartDimensions,
     );
 
