@@ -33,7 +33,7 @@
 import { getTelemetrySavedObject } from './get_telemetry_saved_object';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
-describe.skip('getTelemetrySavedObject', () => {
+describe('getTelemetrySavedObject', () => {
   it('returns null when saved object not found', async () => {
     const params = getCallGetTelemetrySavedObjectParams({
       savedObjectNotFound: true,
