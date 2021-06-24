@@ -108,7 +108,6 @@ describe('TelemetrySender', () => {
       const shouldSendRerpot = telemetrySender['shouldSendReport']();
 
       expect(telemetrySender['lastReported']).toBeUndefined();
-      // expect(shouldSendRerpot).toBe(true);
       expect(shouldSendRerpot).toBe(false);
     });
 
@@ -120,7 +119,6 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `${lastReported}`;
       const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      // expect(shouldSendRerpot).toBe(true);
       expect(shouldSendRerpot).toBe(false);
     });
 
@@ -141,7 +139,6 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `random_malformed_string`;
       const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      // expect(shouldSendRerpot).toBe(true);
       expect(shouldSendRerpot).toBe(false);
     });
 
@@ -192,17 +189,8 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = false;
         await telemetrySender['sendIfDue']();
 
-        // expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        // expect(mockFetch).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(0);
-        // expect(mockFetch).toBeCalledWith(mockTelemetryUrl, {
-        //  method: 'POST',
-        //  headers: {
-        //    'Content-Type': 'application/json',
-        //  },
-        //  body: mockTelemetryPayload[0],
-        // });
       });
 
       it('sends report separately for every cluster', async () => {
@@ -217,9 +205,7 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = false;
         await telemetrySender['sendIfDue']();
 
-        // expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        // expect(mockFetch).toBeCalledTimes(2);
         expect(mockFetch).toBeCalledTimes(0);
       });
 
@@ -236,7 +222,6 @@ describe('TelemetrySender', () => {
 
         await telemetrySender['sendIfDue']();
 
-        // expect(mockFetch).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeDefined();
         expect(telemetrySender['saveToBrowser']).toBeCalledTimes(1);
@@ -251,7 +236,6 @@ describe('TelemetrySender', () => {
           throw Error('Error fetching usage');
         });
         await telemetrySender['sendIfDue']();
-        // expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeUndefined();
         expect(telemetrySender['isSending']).toBe(false);
@@ -267,9 +251,7 @@ describe('TelemetrySender', () => {
           throw Error('Error sending usage');
         });
         await telemetrySender['sendIfDue']();
-        // expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        // expect(mockFetch).toBeCalledTimes(2);
         expect(mockFetch).toBeCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeUndefined();
         expect(telemetrySender['isSending']).toBe(false);
