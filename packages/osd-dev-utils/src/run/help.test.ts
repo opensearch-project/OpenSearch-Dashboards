@@ -70,7 +70,7 @@ const barCommand: Command<any> = {
   usage: 'bar [...names]',
 };
 
-describe.skip('getHelp()', () => {
+describe('getHelp()', () => {
   it('returns the expected output', () => {
     expect(
       getHelp({
@@ -108,13 +108,16 @@ describe.skip('getHelp()', () => {
   });
 });
 
-describe.skip('getCommandLevelHelp()', () => {
+describe('getCommandLevelHelp()', () => {
   it('returns the expected output', () => {
     expect(
       getCommandLevelHelp({
         command: fooCommand,
         globalFlagHelp: `
           --global-flag      some flag that applies to all commands
+        `,
+        usage: `
+          node node_modules/jest-worker/build/workers/processChild.js
         `,
       })
     ).toMatchInlineSnapshot(`
@@ -154,7 +157,7 @@ describe.skip('getCommandLevelHelp()', () => {
   });
 });
 
-describe.skip('getHelpForAllCommands()', () => {
+describe('getHelpForAllCommands()', () => {
   it('returns the expected output', () => {
     expect(
       getHelpForAllCommands({
