@@ -46,7 +46,7 @@ export function mockGetClusterInfo(clusterInfo: any) {
   return opensearchClient;
 }
 
-describe.skip('get_cluster_info using the opensearch client', () => {
+describe('get_cluster_info using the opensearch client', () => {
   it('uses the opensearchClient to get info API', async () => {
     const clusterInfo = {
       cluster_uuid: '1234',
