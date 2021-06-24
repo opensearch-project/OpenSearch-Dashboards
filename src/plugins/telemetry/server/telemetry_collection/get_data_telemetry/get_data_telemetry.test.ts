@@ -34,10 +34,10 @@ import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetr
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
 import { opensearchServiceMock } from '../../../../../../src/core/server/mocks';
 
-describe.skip('get_data_telemetry', () => {
-  describe.skip('DATA_DATASETS_INDEX_PATTERNS', () => {
+describe('get_data_telemetry', () => {
+  describe('DATA_DATASETS_INDEX_PATTERNS', () => {
     DATA_DATASETS_INDEX_PATTERNS.forEach((entry, index, array) => {
-      describe.skip(`Pattern ${entry.pattern}`, () => {
+      describe(`Pattern ${entry.pattern}`, () => {
         test('there should only be one in DATA_DATASETS_INDEX_PATTERNS_UNIQUE', () => {
           expect(
             DATA_DATASETS_INDEX_PATTERNS_UNIQUE.filter(({ pattern }) => pattern === entry.pattern)
@@ -56,7 +56,7 @@ describe.skip('get_data_telemetry', () => {
     });
   });
 
-  describe.skip('buildDataTelemetryPayload', () => {
+  describe('buildDataTelemetryPayload', () => {
     test('return the base object when no indices provided', () => {
       expect(buildDataTelemetryPayload([])).toStrictEqual([]);
     });
@@ -207,7 +207,7 @@ describe.skip('get_data_telemetry', () => {
     });
   });
 
-  describe.skip('getDataTelemetry', () => {
+  describe('getDataTelemetry', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
       const opensearchClient = mockOpenSearchClient();
       await expect(getDataTelemetry(opensearchClient)).resolves.toStrictEqual([]);
