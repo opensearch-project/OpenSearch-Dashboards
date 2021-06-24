@@ -40,7 +40,7 @@ export function mockGetClusterStats(clusterStats: any) {
   return opensearchClient;
 }
 
-describe.skip('get_cluster_stats', () => {
+describe('get_cluster_stats', () => {
   it('uses the opensearchClient to get the response from the `cluster.stats` API', async () => {
     const response = Promise.resolve({ body: { cluster_uuid: '1234' } });
     const opensearchClient = opensearchServiceMock.createClusterClient().asInternalUser;
