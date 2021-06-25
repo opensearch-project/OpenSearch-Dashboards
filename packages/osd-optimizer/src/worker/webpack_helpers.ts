@@ -47,24 +47,12 @@ export function isFailureStats(stats: webpack.Stats) {
   // exported, typescript has no choice but to emit the export. Fortunately,
   // the extraneous export should not be harmful, so we just suppress these warnings
   // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-  //
-  // 2 - Mini Css Extract plugin tracks the order for each css import we have
-  // through the project (and it's successive imports) since version 0.4.2.
-  // In case we have the same imports more than one time with different
-  // sequences, this plugin will throw a warning. This should not be harmful,
-  // but the an issue was opened and can be followed on:
-  // https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250#issuecomment-415345126
   const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
 
   return filteredWarnings.length > 0;
 }
 
-const STATS_WARNINGS_FILTER = new RegExp(
-  [
-    '(export .* was not found in)',
-    '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)',
-  ].join('')
-);
+const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
 
 export function failedStatsToErrorMessage(stats: webpack.Stats) {
   const details = stats.toString({
