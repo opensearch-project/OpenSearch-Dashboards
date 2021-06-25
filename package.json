@@ -85,6 +85,7 @@
     "**/istanbul-instrumenter-loader/schema-utils": "^1.0.0",
     "**/load-grunt-config/lodash": "^4.17.20",
     "**/locutus": "^2.0.14",
+    "**/merge": "^2.1.1",
     "**/minimist": "^1.2.5",
     "**/node-jose/node-forge": "^0.10.0",
     "**/prismjs": "^1.23.0",
