@@ -5,7 +5,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
   iconType="questionInCircle"
   title={
     <FormattedMessage
-      defaultMessage="Help us improve the Elastic Stack"
+      defaultMessage="Help us improve the OpenSearch Stack"
       id="telemetry.welcomeBanner.title"
       values={Object {}}
     />
