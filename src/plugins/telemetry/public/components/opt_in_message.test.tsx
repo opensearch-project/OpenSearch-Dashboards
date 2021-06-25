@@ -33,7 +33,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptInMessage } from './opt_in_message';
 
-describe.skip('OptInMessage', () => {
+describe('OptInMessage', () => {
   it('renders as expected', () => {
     expect(shallowWithIntl(<OptInMessage />)).toMatchSnapshot();
   });
