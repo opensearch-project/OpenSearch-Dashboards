@@ -2,7 +2,7 @@
 
 exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiCallOut
-  title="Help us improve the Elastic Stack"
+  title="Help us improve the OpenSearch Stack"
 >
   <FormattedMessage
     defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
@@ -10,7 +10,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     values={
       Object {
         "disableLink": <EuiLink
-          href="management/kibana/settings"
+          href="management/opensearch-dashboards/settings"
           onClick={[Function]}
         >
           <FormattedMessage
@@ -20,7 +20,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
           />
         </EuiLink>,
         "privacyStatementLink": <EuiLink
-          href="https://www.opensearch.org/legal/privacy-statement"
+          href=""
           onClick={[Function]}
           rel="noopener"
           target="_blank"
