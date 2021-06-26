@@ -9,7 +9,7 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
       values={
         Object {
           "privacyStatementLink": <EuiLink
-            href="https://www.opensearch.org/legal/privacy-statement"
+            href=""
             target="_blank"
           >
             <FormattedMessage
@@ -74,14 +74,14 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
         title={
           <p>
             <FormattedMessage
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+              defaultMessage="Changes to this setting apply to {allOfOpenSearchDashboardsText} and are saved automatically."
               id="telemetry.callout.appliesSettingTitle"
               values={
                 Object {
-                  "allOfKibanaText": <strong>
+                  "allOfOpenSearchDashboardsText": <strong>
                     <FormattedMessage
-                      defaultMessage="all of Kibana"
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                      defaultMessage="all of OpenSearchDashboards"
+                      id="telemetry.callout.appliesSettingTitle.allOfOpenSearchDashboardsText"
                       values={Object {}}
                     />
                   </strong>,
@@ -111,7 +111,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   values={
                     Object {
                       "privacyStatementLink": <EuiLink
-                        href="https://www.opensearch.org/legal/privacy-statement"
+                        href=""
                         target="_blank"
                       >
                         <FormattedMessage
@@ -158,7 +158,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
             "displayName": "Provide usage statistics",
             "name": "telemetry:enabled",
             "type": "boolean",
-            "value": true,
+            "value": false,
           }
         }
         toasts={null}
