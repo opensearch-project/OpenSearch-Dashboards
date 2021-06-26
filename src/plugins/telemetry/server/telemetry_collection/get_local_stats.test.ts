@@ -92,7 +92,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   return opensearchClient;
 }
 
-describe.skip('get_local_stats', () => {
+describe('get_local_stats', () => {
   const clusterUuid = 'abc123';
   const clusterName = 'my-cool-cluster';
   const version = '2.3.4';
@@ -194,7 +194,7 @@ describe.skip('get_local_stats', () => {
     version: '8.0.0',
   };
 
-  describe.skip('handleLocalStats', () => {
+  describe('handleLocalStats', () => {
     it('returns expected object without OpenSearch Dashboards data', () => {
       const result = handleLocalStats(
         clusterInfo,
@@ -211,31 +211,9 @@ describe.skip('get_local_stats', () => {
       expect(Object.keys(result)).not.toContain('license');
       expect(result.stack_stats).toEqual({ opensearch_dashboards: undefined, data: undefined });
     });
-
-    it('returns expected object with xpack', () => {
-      const result = handleLocalStats(
-        clusterInfo,
-        clusterStatsWithNodesUsage,
-        void 0,
-        void 0,
-        context
-      );
-
-      const { stack_stats: stack, ...cluster } = result;
-      expect(cluster.collection).toBe(combinedStatsResult.collection);
-      expect(cluster.cluster_uuid).toBe(combinedStatsResult.cluster_uuid);
-      expect(cluster.cluster_name).toBe(combinedStatsResult.cluster_name);
-      expect(stack.kibana).toBe(undefined); // not mocked for this test
-      expect(stack.data).toBe(undefined); // not mocked for this test
-
-      expect(cluster.version).toEqual(combinedStatsResult.version);
-      expect(cluster.cluster_stats).toEqual(combinedStatsResult.cluster_stats);
-      expect(Object.keys(cluster).indexOf('license')).toBeLessThan(0);
-      expect(Object.keys(stack).indexOf('xpack')).toBeLessThan(0);
-    });
   });
 
-  describe.skip('getLocalStats', () => {
+  describe('getLocalStats', () => {
     it('returns expected object with OpenSearch Dashboards data', async () => {
       const callCluster = jest.fn();
       const usageCollection = mockUsageCollection(opensearchDashboards);
