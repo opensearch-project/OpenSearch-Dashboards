@@ -17,7 +17,7 @@ exports[`security flyout renders as expected renders as expected 1`] = `
         color="subdued"
       >
         <EuiText>
-          This is a representative sample of the endpoint security alert event that we collect. Endpoint security data is collected only when the Elastic Endpoint is enabled. It includes information about the endpoint configuration and detection events.
+          This is a representative sample of the endpoint security alert event that we collect. Endpoint security data is collected only when the OpenSearch Endpoint is enabled. It includes information about the endpoint configuration and detection events.
         </EuiText>
       </EuiTextColor>
     </EuiFlyoutHeader>
@@ -76,7 +76,7 @@ exports[`security flyout renders as expected renders as expected 1`] = `
   "ecs": {
     "version": "1.5.0"
   },
-  "elastic": {
+  "opensearch": {
     "agent": {
       "id": "b2e88aea-2671-402a-828a-957526bac315"
     }
@@ -125,7 +125,7 @@ exports[`security flyout renders as expected renders as expected 1`] = `
     "kind": "alert"
   },
   "cluster_uuid": "kLbKvSMcRiiFAR0t8LebDA",
-  "cluster_name": "elasticsearch"
+  "cluster_name": "opensearch"
 }
       </EuiCodeBlock>
     </EuiFlyoutBody>

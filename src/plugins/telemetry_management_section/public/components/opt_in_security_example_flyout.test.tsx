@@ -33,7 +33,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 
-describe.skip('security flyout renders as expected', () => {
+describe('security flyout renders as expected', () => {
   it('renders as expected', () => {
     expect(shallowWithIntl(<OptInSecurityExampleFlyout onClose={jest.fn()} />)).toMatchSnapshot();
   });
