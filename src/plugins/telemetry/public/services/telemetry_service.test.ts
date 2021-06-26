@@ -57,7 +57,8 @@ jest.mock('moment', () => {
   });
 });
 
-describe.skip('TelemetryService', () => {
+describe('TelemetryService', () => {
+  // TODO: enable this unit test when fetchTelemtry function is restored
   describe.skip('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
       const telemetryService = mockTelemetryService();
@@ -70,7 +71,7 @@ describe.skip('TelemetryService', () => {
     });
   });
 
-  describe.skip('fetchExample', () => {
+  describe('fetchExample', () => {
     it('calls fetchTelemetry with unencrupted: true', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
@@ -79,7 +80,7 @@ describe.skip('TelemetryService', () => {
     });
   });
 
-  describe.skip('setOptIn', () => {
+  describe('setOptIn', () => {
     it('does not call the api if canChangeOptInStatus==false', async () => {
       const telemetryService = mockTelemetryService({
         reportOptInStatusChange: false,
@@ -183,7 +184,7 @@ describe.skip('TelemetryService', () => {
     });
   });
 
-  describe.skip('getTelemetryUrl', () => {
+  describe('getTelemetryUrl', () => {
     it('should return the config.url parameter', async () => {
       const url = 'http://test.com';
       const telemetryService = mockTelemetryService({
@@ -194,7 +195,7 @@ describe.skip('TelemetryService', () => {
     });
   });
 
-  describe.skip('setUserHasSeenNotice', () => {
+  describe('setUserHasSeenNotice', () => {
     it('should hit the API and change the config', async () => {
       const telemetryService = mockTelemetryService({
         config: { telemetryNotifyUserAboutOptInDefault: undefined, userCanChangeSettings: true },
@@ -229,7 +230,7 @@ describe.skip('TelemetryService', () => {
     });
   });
 
-  describe.skip('getUserShouldSeeOptInNotice', () => {
+  describe('getUserShouldSeeOptInNotice', () => {
     it('returns whether the user can update the telemetry config (has SavedObjects access)', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
