@@ -18,7 +18,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean, select } from '@storybook/addon-knobs';
+import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
@@ -89,6 +89,18 @@ export const Example = () => {
   const topPlacement = getPlacementKnob('external tooltip placement', Placement.Left, group1);
   const bottomPlacement = getPlacementKnob('external tooltip placement', Placement.Left, group2);
 
+  const debounceDelay = number('pointer update debounce', 20, { min: 0, max: 200, step: 10 });
+  const trigger =
+    select(
+      'pointer update trigger',
+      {
+        'Only x': 'x',
+        'Only y': 'y',
+        'Both x and y': 'both',
+      },
+      'x',
+    ) ?? 'x';
+
   return (
     <>
       <Chart className="story-chart" ref={ref1} size={{ height: '50%' }} id="chart1">
@@ -96,6 +108,8 @@ export const Example = () => {
           showLegend
           showLegendExtra
           onPointerUpdate={pointerUpdate}
+          pointerUpdateDebounce={debounceDelay}
+          pointerUpdateTrigger={trigger}
           externalPointerEvents={{
             tooltip: { visible: topVisible, placement: topPlacement },
           }}

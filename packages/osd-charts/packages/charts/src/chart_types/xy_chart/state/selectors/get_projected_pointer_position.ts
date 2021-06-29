@@ -92,10 +92,10 @@ function getPosRelativeToPanel(panelScale: ScaleBand, pos: number): { pos: numbe
     if (relativePos > panelScale.bandwidth) {
       return { pos: -1, value: null };
     }
-    return { pos: relativePos, value: panelScale.domain[relativePosIndex] };
+    return { pos: relativePos, value: panelScale.domain[relativePosIndex] ?? null };
   }
   return {
     pos: posWOInitialOuterPadding - panelScale.step * (numOfDomainSteps - 1),
-    value: panelScale.domain[numOfDomainSteps - 1],
+    value: panelScale.domain[numOfDomainSteps - 1] ?? null,
   };
 }

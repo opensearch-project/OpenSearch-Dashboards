@@ -105,7 +105,7 @@ function getCursorBand(
   // external pointer events takes precedence over the current mouse pointer
   if (isValidPointerOverEvent(xScale, externalPointerEvent)) {
     fromExternalEvent = true;
-    const x = xScale.pureScale(externalPointerEvent.value);
+    const x = xScale.pureScale(externalPointerEvent.x);
     if (x == null || x > chartDimensions.width || x < 0) {
       return;
     }
@@ -116,7 +116,7 @@ function getCursorBand(
       horizontalPanelValue: null,
     };
     xValue = {
-      value: externalPointerEvent.value,
+      value: externalPointerEvent.x,
       withinBandwidth: true,
     };
   } else {

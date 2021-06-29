@@ -40,7 +40,7 @@ export const isExternalTooltipVisibleSelector = createCustomCachedSelector(
     if (!pointer || pointer.type !== PointerEventType.Over || externalPointerEvents.tooltip?.visible === false) {
       return false;
     }
-    const x = xScale.pureScale(pointer.value);
+    const x = xScale.pureScale(pointer.x);
 
     if (x == null || x > chartDimensions.width + chartDimensions.left || x < 0) {
       return false;

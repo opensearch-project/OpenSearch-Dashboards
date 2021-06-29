@@ -31,7 +31,7 @@ export const getProjectedScaledValues = createCustomCachedSelector(
     { scales: { xScale, yScales } },
     geometriesIndexKeys,
   ): ProjectedValues | undefined => {
-    if (!xScale) {
+    if (!xScale || x === -1) {
       return;
     }
 

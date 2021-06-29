@@ -57,13 +57,13 @@ function getElementAtCursorPosition(
   { chartDimensions }: ChartDimensions,
 ): IndexedGeometry[] {
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
-    const x = scales.xScale.pureScale(externalPointerEvent.value);
+    const x = scales.xScale.pureScale(externalPointerEvent.x);
 
     if (x == null || x > chartDimensions.width + chartDimensions.left || x < 0) {
       return [];
     }
     // TODO: Handle external event with spatial points
-    return geometriesIndex.find(externalPointerEvent.value, { x: -1, y: -1 });
+    return geometriesIndex.find(externalPointerEvent.x, { x: -1, y: -1 });
   }
   const xValue = scales.xScale.invertWithStep(orientedProjectedPointerPosition.x, geometriesIndexKeys);
   if (!xValue) {

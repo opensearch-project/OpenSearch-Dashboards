@@ -45,7 +45,15 @@ import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
 import { SeriesCompareFn } from '../utils/series_sort';
 import { PartialTheme, Theme } from '../utils/themes/theme';
-import { BinAgg, BrushAxis, DEFAULT_SETTINGS_SPEC, Direction, PointerEventType, TooltipType } from './constants';
+import {
+  BinAgg,
+  BrushAxis,
+  DEFAULT_SETTINGS_SPEC,
+  Direction,
+  PointerEventType,
+  PointerUpdateTrigger,
+  TooltipType,
+} from './constants';
 
 /** @public */
 export interface LayerValue {
@@ -144,7 +152,11 @@ export type ElementOverListener = (
 export type BrushEndListener = (brushArea: XYBrushArea) => void;
 /** @public */
 export type LegendItemListener = (series: SeriesIdentifier[]) => void;
-/** @public */
+/**
+ * The listener type for generic mouse move
+ *
+ * @public
+ */
 export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
  * Listener to be called when chart render state changes
@@ -167,7 +179,7 @@ export interface BasePointerEvent {
  * fired as callback argument for `PointerUpdateListener`
  * @public
  */
-export interface PointerOverEvent extends BasePointerEvent {
+export interface PointerOverEvent extends BasePointerEvent, ProjectedValues {
   type: typeof PointerEventType.Over;
   scale: ScaleContinuousType | ScaleOrdinalType;
   /**
@@ -175,7 +187,6 @@ export interface PointerOverEvent extends BasePointerEvent {
    * @alpha
    */
   unit?: string;
-  value: number | string | null;
 }
 /** @public */
 export interface PointerOutEvent extends BasePointerEvent {
@@ -501,11 +512,30 @@ export interface SettingsSpec extends Spec, LegendSpec {
   onElementOut?: BasicListener;
   pointBuffer?: MarkBuffer;
   onBrushEnd?: BrushEndListener;
-
   onPointerUpdate?: PointerUpdateListener;
   onRenderChange?: RenderChangeListener;
   xDomain?: CustomXDomain;
+
+  /**
+   * debounce delay used for resizing chart
+   */
   resizeDebounce?: number;
+
+  /**
+   * debounce delay used for onPointerUpdate listener
+   */
+  pointerUpdateDebounce?: number;
+
+  /**
+   * trigger for onPointerUpdate listener.
+   *
+   *  - `'x'` - only triggers lister when x value changes
+   *  - `'y'` - only triggers lister when y values change
+   *  - `'both'` - triggers lister when x or y values change
+   *
+   * @defaultValue 'x'
+   */
+  pointerUpdateTrigger: PointerUpdateTrigger;
 
   /**
    * Block the brush tool on a specific axis: x, y or both.
@@ -639,6 +669,8 @@ export type DefaultSettingsProps =
   | 'rendering'
   | 'rotation'
   | 'resizeDebounce'
+  | 'pointerUpdateDebounce'
+  | 'pointerUpdateTrigger'
   | 'animateData'
   | 'debug'
   | 'tooltip'

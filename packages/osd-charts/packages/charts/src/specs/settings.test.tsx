@@ -122,13 +122,13 @@ describe('Settings spec component', () => {
     expect(settingSpec.onLegendItemPlusClick).toBeUndefined();
     expect(settingSpec.onLegendItemMinusClick).toBeUndefined();
 
-    const onElementClick = (): void => {};
-    const onElementOver = (): void => {};
-    const onOut = () => {};
-    const onBrushEnd = (): void => {};
-    const onLegendEvent = (): void => {};
-    const onPointerUpdateEvent = (): void => {};
-    const onRenderChangeEvent = (): void => {};
+    const onElementClick = jest.fn();
+    const onElementOver = jest.fn();
+    const onOut = jest.fn();
+    const onBrushEnd = jest.fn();
+    const onLegendEvent = jest.fn();
+    const onPointerUpdateEvent = jest.fn();
+    const onRenderChangeEvent = jest.fn();
 
     const updatedProps: Partial<SettingsSpec> = {
       onElementClick,
@@ -156,8 +156,10 @@ describe('Settings spec component', () => {
     expect(settingSpec.onLegendItemClick).toEqual(onLegendEvent);
     expect(settingSpec.onLegendItemPlusClick).toEqual(onLegendEvent);
     expect(settingSpec.onLegendItemMinusClick).toEqual(onLegendEvent);
-    expect(settingSpec.onPointerUpdate).toEqual(onPointerUpdateEvent);
     expect(settingSpec.onRenderChange).toEqual(onRenderChangeEvent);
+
+    // check for debounced functions
+    expect(settingSpec.onPointerUpdate).toBeDefined();
   });
 
   test('should allow partial theme', () => {

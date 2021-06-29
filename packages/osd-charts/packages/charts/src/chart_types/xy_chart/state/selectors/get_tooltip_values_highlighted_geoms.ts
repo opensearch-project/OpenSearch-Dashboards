@@ -110,7 +110,7 @@ function getTooltipAndHighlightFromValue(
   let tooltipType = getTooltipType(settings);
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
     tooltipType = getTooltipType(settings, true);
-    const scaledX = scales.xScale.pureScale(externalPointerEvent.value);
+    const scaledX = scales.xScale.pureScale(externalPointerEvent.x);
 
     if (scaledX === null) {
       return EMPTY_VALUES;

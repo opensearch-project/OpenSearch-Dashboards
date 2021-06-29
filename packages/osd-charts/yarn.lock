@@ -24597,10 +24597,10 @@ trough@^1.0.0:
   resolved "https://registry.yarnpkg.com/true-myth/-/true-myth-4.1.0.tgz#a73e1f945c5382758ba9806c15062d2ebbf35427"
   integrity sha512-X4oBf1WOuLMfXpcKLI94dV4Htknv06vMADss3Whcybr85W1ctjZGZOzMMRYXUUBlhV4bDAGeMojzN/dw7N7qWA==
 
-ts-debounce@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-1.0.0.tgz#e433301744ba75fe25466f7f23e1382c646aae6a"
-  integrity sha512-V+IzWj418IoqqxVJD6I0zjPtgIyvAJ8VyViqzcxZ0JRiJXsi5mCmy1yUKkWd2gUygT28a8JsVFCgqdrf2pLUHQ==
+ts-debounce@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-3.0.0.tgz#9beedf59c04de3b5bef8ff28bd6885624df357be"
+  integrity sha512-7jiRWgN4/8IdvCxbIwnwg2W0bbYFBH6BxFqBjMKk442t7+liF2Z1H6AUCcl8e/pD93GjPru+axeiJwFmRww1WQ==
 
 ts-dedent@^1.1.0:
   version "1.1.1"

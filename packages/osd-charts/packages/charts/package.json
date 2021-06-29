@@ -50,7 +50,7 @@
     "redux": "^4.0.4",
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.1",
-    "ts-debounce": "^1.0.0",
+    "ts-debounce": "^3.0.0",
     "utility-types": "^3.10.0",
     "uuid": "^3.3.2"
   },

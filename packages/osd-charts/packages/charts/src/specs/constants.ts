@@ -109,6 +109,18 @@ export const BrushAxis = Object.freeze({
 export type BrushAxis = $Values<typeof BrushAxis>;
 
 /**
+ * pointer update trigger
+ * @public
+ */
+export const PointerUpdateTrigger = Object.freeze({
+  X: 'x' as const,
+  Y: 'y' as const,
+  Both: 'both' as const,
+});
+/** @public */
+export type PointerUpdateTrigger = $Values<typeof PointerUpdateTrigger>;
+
+/**
  * The position to stick the tooltip to
  * @public
  */
@@ -162,6 +174,7 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
     type: DEFAULT_TOOLTIP_TYPE,
     snap: DEFAULT_TOOLTIP_SNAP,
   },
+  pointerUpdateTrigger: PointerUpdateTrigger.X,
   externalPointerEvents: {
     tooltip: {
       visible: false,

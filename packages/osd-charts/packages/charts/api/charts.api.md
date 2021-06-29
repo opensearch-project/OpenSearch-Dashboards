@@ -626,7 +626,7 @@ export const DEFAULT_TOOLTIP_SNAP = true;
 export const DEFAULT_TOOLTIP_TYPE: "vertical";
 
 // @public (undocumented)
-export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'debug' | 'tooltip' | 'theme' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents' | 'showLegend' | 'showLegendExtra' | 'legendPosition' | 'legendMaxDepth' | 'ariaUseDefaultSummary' | 'ariaLabelHeadingLevel' | 'ariaTableCaption';
+export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'pointerUpdateDebounce' | 'pointerUpdateTrigger' | 'animateData' | 'debug' | 'tooltip' | 'theme' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents' | 'showLegend' | 'showLegendExtra' | 'legendPosition' | 'legendMaxDepth' | 'ariaUseDefaultSummary' | 'ariaLabelHeadingLevel' | 'ariaTableCaption';
 
 // @public (undocumented)
 export const DEPTH_KEY = "depth";
@@ -1473,19 +1473,27 @@ export interface PointerOutEvent extends BasePointerEvent {
 }
 
 // @public
-export interface PointerOverEvent extends BasePointerEvent {
+export interface PointerOverEvent extends BasePointerEvent, ProjectedValues {
     // (undocumented)
     scale: ScaleContinuousType | ScaleOrdinalType;
     // (undocumented)
     type: typeof PointerEventType.Over;
     // @alpha
     unit?: string;
-    // (undocumented)
-    value: number | string | null;
 }
 
-// @public (undocumented)
+// @public
 export type PointerUpdateListener = (event: PointerEvent_2) => void;
+
+// @public
+export const PointerUpdateTrigger: Readonly<{
+    X: "x";
+    Y: "y";
+    Both: "both";
+}>;
+
+// @public (undocumented)
+export type PointerUpdateTrigger = $Values<typeof PointerUpdateTrigger>;
 
 // @public (undocumented)
 export const PointShape: Readonly<{
@@ -1798,9 +1806,10 @@ export interface SettingsSpec extends Spec, LegendSpec {
     orderOrdinalBinsBy?: OrderBy;
     // (undocumented)
     pointBuffer?: MarkBuffer;
+    pointerUpdateDebounce?: number;
+    pointerUpdateTrigger: PointerUpdateTrigger;
     // (undocumented)
     rendering: Rendering;
-    // (undocumented)
     resizeDebounce?: number;
     // (undocumented)
     rotation: Rotation;
