@@ -19,8 +19,6 @@
 
 import { Store } from 'redux';
 
-import { MockPointGeometry } from '../../../mocks/geometries';
-import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
@@ -107,68 +105,7 @@ describe('Rendering points - areas', () => {
 
     test('Can render two points', () => {
       const { points } = areaGeometry;
-      expect(points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'red',
-          seriesIdentifier: {
-            specId: SPEC_ID,
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 10,
-            mark: null,
-            datum: [0, 10],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
-      expect(points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 50,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: {
-            specId: SPEC_ID,
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 5,
-            mark: null,
-            datum: [1, 5],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
+      expect(points).toMatchSnapshot();
       expect(geometriesIndex.size).toEqual(points.length);
     });
   });
@@ -228,135 +165,13 @@ describe('Rendering points - areas', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
       expect(firstArea.points.length).toEqual(2);
-      expect(firstArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: {
-            specId: 'spec_1',
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 10,
-            mark: null,
-            datum: [0, 10],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
-      expect(firstArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 50,
-          y: 75,
-          color: 'red',
-          seriesIdentifier: {
-            specId: 'spec_1',
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 5,
-            mark: null,
-            datum: [1, 5],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
+      expect(firstArea.points).toMatchSnapshot();
     });
     test('can render second spec points', () => {
       const { areas } = geometries.geometries;
       const [, { value: secondArea }] = areas;
       expect(secondArea.points.length).toEqual(2);
-      expect(secondArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'blue',
-          seriesIdentifier: {
-            specId: 'spec_2',
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 20,
-            mark: null,
-            datum: [0, 20],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
-      expect(secondArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 50,
-          y: 50,
-          color: 'blue',
-          seriesIdentifier: {
-            specId: 'spec_2',
-            yAccessor: 1,
-            splitAccessors: new Map(),
-            seriesKeys: [1],
-            key: 'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}',
-          },
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 10,
-            mark: null,
-            datum: [1, 10],
-          },
-          transform: {
-            x: 25,
-            y: 0,
-          },
-          panel: {
-            width: 100,
-            height: 100,
-            top: 0,
-            left: 0,
-          },
-        }),
-      );
+      expect(secondArea.points).toMatchSnapshot();
     });
     test('has the right number of geometry in the indexes', () => {
       const { areas } = geometries.geometries;
@@ -397,36 +212,7 @@ describe('Rendering points - areas', () => {
     test('Can render two points', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
-      expect(firstArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 10,
-            mark: null,
-            datum: [0, 10],
-          },
-        }),
-      );
-      expect(firstArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 5,
-            mark: null,
-            datum: [1, 5],
-          },
-        }),
-      );
+      expect(firstArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
   });
@@ -482,74 +268,14 @@ describe('Rendering points - areas', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
       expect(firstArea.points.length).toEqual(2);
-      expect(firstArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
-
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 10,
-            mark: null,
-            datum: [0, 10],
-          },
-        }),
-      );
-      expect(firstArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 75,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 5,
-            mark: null,
-            datum: [1, 5],
-          },
-        }),
-      );
+      expect(firstArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
     test('can render second spec points', () => {
       const { areas } = geometries.geometries;
       const [, { value: secondArea }] = areas;
       expect(secondArea.points.length).toEqual(2);
-      expect(secondArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'blue',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
-
-          value: {
-            accessor: 'y1',
-            x: 0,
-            y: 20,
-            mark: null,
-            datum: [0, 20],
-          },
-        }),
-      );
-      expect(secondArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 50,
-          color: 'blue',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
-          value: {
-            accessor: 'y1',
-            x: 1,
-            y: 10,
-            mark: null,
-            datum: [1, 10],
-          },
-        }),
-      );
+      expect(secondArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(secondArea.points.length);
     });
   });
@@ -585,37 +311,7 @@ describe('Rendering points - areas', () => {
     test('Can render two points', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
-      expect(firstArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
-
-          value: {
-            accessor: 'y1',
-            x: 1546300800000,
-            y: 10,
-            mark: null,
-            datum: [1546300800000, 10],
-          },
-        }),
-      );
-      expect(firstArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
-          value: {
-            accessor: 'y1',
-            x: 1546387200000,
-            y: 5,
-            mark: null,
-            datum: [1546387200000, 5],
-          },
-        }),
-      );
+      expect(firstArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
   });
@@ -653,78 +349,14 @@ describe('Rendering points - areas', () => {
     test('can render first spec points', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
-      expect(firstArea.points.length).toEqual(2);
-      expect(firstArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 50,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
-
-          value: {
-            accessor: 'y1',
-            x: 1546300800000,
-            y: 10,
-            mark: null,
-            datum: [1546300800000, 10],
-          },
-        }),
-      );
-      expect(firstArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 75,
-          color: 'red',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
-
-          value: {
-            accessor: 'y1',
-            x: 1546387200000,
-            y: 5,
-            mark: null,
-            datum: [1546387200000, 5],
-          },
-        }),
-      );
+      expect(firstArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
     test('can render second spec points', () => {
       const { areas } = geometries.geometries;
       const [, { value: secondArea }] = areas;
 
-      expect(secondArea.points.length).toEqual(2);
-      expect(secondArea.points[0]).toEqual(
-        MockPointGeometry.default({
-          x: 0,
-          y: 0,
-          color: 'blue',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
-
-          value: {
-            accessor: 'y1',
-            x: 1546300800000,
-            y: 20,
-            mark: null,
-            datum: [1546300800000, 20],
-          },
-        }),
-      );
-      expect(secondArea.points[1]).toEqual(
-        MockPointGeometry.default({
-          x: 100,
-          y: 50,
-          color: 'blue',
-          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
-
-          value: {
-            accessor: 'y1',
-            x: 1546387200000,
-            y: 10,
-            mark: null,
-            datum: [1546387200000, 10],
-          },
-        }),
-      );
+      expect(secondArea.points).toMatchSnapshot();
       expect(geometries.geometriesIndex.size).toEqual(secondArea.points.length);
     });
   });
@@ -822,26 +454,7 @@ describe('Rendering points - areas', () => {
     const store = initStore([pointSeriesSpec1, pointSeriesSpec2]);
     const domains = computeSeriesDomainsSelector(store.getState());
 
-    expect(domains.formattedDataSeries[0].data).toMatchObject([
-      {
-        datum: [1546300800000, 0],
-        initialY0: null,
-        initialY1: 0,
-        x: 1546300800000,
-        y0: 0,
-        y1: 0,
-        mark: null,
-      },
-      {
-        datum: [1546387200000, 5],
-        initialY0: null,
-        initialY1: 5,
-        x: 1546387200000,
-        y0: 0,
-        y1: 0.7142857142857143,
-        mark: null,
-      },
-    ]);
+    expect(domains.formattedDataSeries[0].data).toMatchSnapshot();
   });
   it('Stacked areas with null values', () => {
     const pointSeriesSpec1: AreaSeriesSpec = MockSeriesSpec.area({
@@ -871,133 +484,7 @@ describe('Rendering points - areas', () => {
     const store = initStore([pointSeriesSpec1, pointSeriesSpec2]);
     const domains = computeSeriesDomainsSelector(store.getState());
 
-    expect(domains.formattedDataSeries[0].data).toMatchObject([
-      {
-        datum: [1546300800000, null],
-        initialY0: null,
-        initialY1: null,
-        x: 1546300800000,
-        y0: 0,
-        y1: 0,
-        mark: null,
-      },
-      {
-        datum: [1546387200000, 5],
-        initialY0: null,
-        initialY1: 5,
-        x: 1546387200000,
-        y0: 0,
-        y1: 5,
-        mark: null,
-      },
-    ]);
-
-    expect(domains.formattedDataSeries[1].data).toEqual([
-      {
-        datum: [1546300800000, 3],
-        initialY0: null,
-        initialY1: 3,
-        x: 1546300800000,
-        y0: 0,
-        y1: 3,
-        mark: null,
-      },
-      {
-        datum: [1546387200000, null],
-        initialY0: null,
-        initialY1: null,
-        x: 1546387200000,
-        y0: 5,
-        y1: 5,
-        mark: null,
-      },
-    ]);
+    expect(domains.formattedDataSeries[0].data).toMatchSnapshot();
+    expect(domains.formattedDataSeries[1].data).toMatchSnapshot();
   });
-
-  // describe('Error guards for scaled values', () => {
-  //   const pointSeriesSpec: AreaSeriesSpec = {
-  //     chartType: ChartType.XYAxis,
-  //     specType: SpecType.Series,
-  //     id: SPEC_ID,
-  //     groupId: GROUP_ID,
-  //     seriesType: SeriesType.Area,
-  //     data: [
-  //       [0, 10],
-  //       [1, 5],
-  //     ],
-  //     xAccessor: 0,
-  //     yAccessors: [1],
-  //     xScaleType: ScaleType.Ordinal,
-  //     yScaleType: ScaleType.Linear,
-  //   };
-  //   const pointSeriesMap = [pointSeriesSpec];
-  //   const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-  //   const xScale = computeXScale({
-  //     xDomain: pointSeriesDomains.xDomain,
-  //     totalBarsInCluster: pointSeriesMap.length,
-  //     range: [0, 100],
-  //   });
-  //   const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-  //   let renderedArea: {
-  //     areaGeometry: AreaGeometry;
-  //     indexedGeometryMap: IndexedGeometryMap;
-  //   };
-  //
-  //   beforeEach(() => {
-  //     renderedArea = renderArea(
-  //       25, // adding a ideal 25px shift, generally applied by renderGeometries
-  //       pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-  //       xScale,
-  //       yScales.get(GROUP_ID)!,
-  //       'red',
-  //       CurveType.LINEAR,
-  //       false,
-  //       0,
-  //       LIGHT_THEME.areaSeriesStyle,
-  //       {
-  //         enabled: false,
-  //       },
-  //     );
-  //   });
-  //
-  //   describe('xScale values throw error', () => {
-  //     beforeAll(() => {
-  //       jest.spyOn(xScale, 'scaleOrThrow').mockImplementation(() => {
-  //         throw new Error();
-  //       });
-  //     });
-  //
-  //     test('Should include no lines nor area', () => {
-  //       const {
-  //         areaGeometry: { lines, area, color, seriesIdentifier, transform },
-  //       } = renderedArea;
-  //       expect(lines).toHaveLength(0);
-  //       expect(area).toBe('');
-  //       expect(color).toBe('red');
-  //       expect(seriesIdentifier.seriesKeys).toEqual([1]);
-  //       expect(seriesIdentifier.specId).toEqual(SPEC_ID);
-  //       expect(transform).toEqual({ x: 25, y: 0 });
-  //     });
-  //   });
-  //
-  //   describe('yScale values throw error', () => {
-  //     beforeAll(() => {
-  //       jest.spyOn(yScales.get(GROUP_ID)!, 'scaleOrThrow').mockImplementation(() => {
-  //         throw new Error();
-  //       });
-  //     });
-  //
-  //     test('Should include no lines nor area', () => {
-  //       const {
-  //         areaGeometry: { lines, area, color, seriesIdentifier, transform },
-  //       } = renderedArea;
-  //       expect(lines).toHaveLength(0);
-  //       expect(area).toBe('');
-  //       expect(color).toBe('red');
-  //       expect(seriesIdentifier.seriesKeys).toEqual([1]);
-  //       expect(seriesIdentifier.specId).toEqual(SPEC_ID);
-  //       expect(transform).toEqual({ x: 25, y: 0 });
-  //     });
-  //   });
-  // });
 });
