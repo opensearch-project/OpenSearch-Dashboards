@@ -1,3 +1,24 @@
+# [31.0.0](https://github.com/elastic/elastic-charts/compare/v30.2.0...v31.0.0) (2021-06-29)
+
+
+### Bug Fixes
+
+* **xy:** render gridlines behind axis  ([#1204](https://github.com/elastic/elastic-charts/issues/1204)) ([38ebe2d](https://github.com/elastic/elastic-charts/commit/38ebe2d502cb1449a771f803a90db1811093fe64)), closes [#1203](https://github.com/elastic/elastic-charts/issues/1203)
+* memory leak related to re-reselect cache ([#1201](https://github.com/elastic/elastic-charts/issues/1201)) ([02025cf](https://github.com/elastic/elastic-charts/commit/02025cf000948bf5e183f12e6cded7abc9e8d547))
+* **partition:** getLegendItemsExtra no longer assumes a singleton ([#1199](https://github.com/elastic/elastic-charts/issues/1199)) ([100145b](https://github.com/elastic/elastic-charts/commit/100145b227b122bc082b6038ca23f8d166ec0363))
+
+
+### Features
+
+* **annotations:** option to render rect annotations outside chart ([#1207](https://github.com/elastic/elastic-charts/issues/1207)) ([4eda382](https://github.com/elastic/elastic-charts/commit/4eda382d2f99902ad129fd42febfe6a3c8419cf8))
+* **heatmap:** enable brushing on categorical charts ([#1212](https://github.com/elastic/elastic-charts/issues/1212)) ([10c3493](https://github.com/elastic/elastic-charts/commit/10c3493a29e1e5f6778fd9d4c7acee00d979e81c)), closes [#1170](https://github.com/elastic/elastic-charts/issues/1170) [#1171](https://github.com/elastic/elastic-charts/issues/1171)
+* **xy:** add onPointerUpdate debounce and trigger options ([#1194](https://github.com/elastic/elastic-charts/issues/1194)) ([a9a9b25](https://github.com/elastic/elastic-charts/commit/a9a9b2517cdd9787077d7fa49029d815c1b845f2))
+
+
+### BREAKING CHANGES
+
+* **xy:** the `PointerOverEvent` type now extends `ProjectedValues` and drops value. This effectively replaces value with `x`, `y`, `smVerticalValue` and `smHorizontalValue`.
+
 # [30.2.0](https://github.com/elastic/elastic-charts/compare/v30.1.0...v30.2.0) (2021-06-10)
 
 
