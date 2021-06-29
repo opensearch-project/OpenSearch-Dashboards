@@ -32,14 +32,11 @@
 
 import path from 'path';
 import os from 'os';
-import fs from 'fs';
 
 import del from 'del';
 import glob from 'glob';
 
 import { analyzeArchive, extractArchive } from './zip';
-
-const getMode = (path) => (fs.statSync(path).mode & parseInt('777', 8)).toString(8);
 
 describe('opensearchDashboards cli', function () {
   describe('zip', function () {
@@ -91,25 +88,6 @@ describe('opensearchDashboards cli', function () {
             "public/index.js",
           ]
         `);
-      });
-    });
-
-    describe('checkFilePermission', () => {
-      // TODO:: Verify why zip is not validating correct permission.
-      it.skip('verify consistency of modes of files', async () => {
-        const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
-
-        await extractArchive(archivePath, tempPath, 'opensearch-dashboards/test-plugin/bin');
-
-        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
-          Array [
-            "executable",
-            "not-executable",
-          ]
-        `);
-
-        expect(getMode(path.resolve(tempPath, 'executable'))).toEqual('755');
-        expect(getMode(path.resolve(tempPath, 'not-executable'))).toEqual('644');
       });
     });
 
