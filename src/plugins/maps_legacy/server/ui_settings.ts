@@ -51,7 +51,9 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',
           values: {
             cellDimensionsLink:
-              `<a href="http://www.opensearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
+              // TODO: [RENAMEME] Need prod urls.
+              // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
+              `<a href="https://docs-beta.opensearch.org/dashboards/maptiles"
             target="_blank" rel="noopener">` +
               i18n.translate(
                 'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',

@@ -103,7 +103,7 @@ exports[`EmptyState should render normally 1`] = `
                   Object {
                     "description": <EuiLink
                       external={true}
-                      href="https://www.opensearch.org/guide/en/opensearch/mocked-test-branch/connect-to-elasticsearch.html"
+                      href="https://docs-beta.opensearch.org/docs/opensearch-dashboards/"
                       target="_blank"
                     >
                       <FormattedMessage

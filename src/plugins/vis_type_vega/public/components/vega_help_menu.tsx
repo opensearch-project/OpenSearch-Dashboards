@@ -54,7 +54,9 @@ function VegaHelpMenu() {
   const items = [
     <EuiContextMenuItem
       key="vegaHelp"
-      href="https://www.opensearch.org/guide/en/kibana/master/vega-graph.html"
+      // TODO: [RENAMEME] Need prod urls.
+      // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
+      href="https://docs-beta.opensearch.org/docs/opensearch-dashboards"
       target="_blank"
       onClick={closePopover}
     >
