@@ -10,11 +10,14 @@ RUN apt-get update && \
       libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget openjdk-8-jre && \
     rm -rf /var/lib/apt/lists/*
 
+# Specify the version of Chrome that matches the version of chromedriver in the package.json.
+# A list of Chrome versions can be found here: 
+# https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
+ARG CHROME_VERSION=91.0.4472.114-1
 RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+  && wget -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
   && apt-get update \
-  && apt-get install -y rsync jq bsdtar google-chrome-stable \
-  --no-install-recommends python-pip \
+  && apt-get install -y rsync jq bsdtar /tmp/chrome.deb --no-install-recommends python-pip \
   && pip install awscli \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
