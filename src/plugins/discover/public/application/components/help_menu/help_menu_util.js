@@ -42,7 +42,9 @@ export function addHelpMenuToAppChrome(chrome) {
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.OPENSEARCH_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/discover.html`,
+        // TODO: [RENAMEME] Need prod urls.
+        // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
+        href: `${docLinks.links.opensearchDashboards}`,
       },
     ],
   });

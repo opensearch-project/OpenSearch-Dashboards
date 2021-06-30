@@ -124,9 +124,13 @@ export class DocLinksService {
         },
         indexPatterns: {
           loadingData: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
-          introduction: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/index-patterns.html`,
+          // TODO: [RENAMEME] Need prod urls.
+          // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
+          introduction: `${OPENSEARCH_DASHBOARDS_DOCS}`,
         },
-        addData: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
+        // TODO: [RENAMEME] Need prod urls.
+        // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
+        addData: `${OPENSEARCH_DASHBOARDS_DOCS}`,
         opensearchDashboards: `${OPENSEARCH_DASHBOARDS_DOCS}`,
         siem: {
           guide: `${OPENSEARCH_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -147,8 +151,8 @@ export class DocLinksService {
           dashboardSettings: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/advanced-options.html#opensearch-dashboard-settings`,
         },
         visualize: {
-          guide: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/dashboard.html`,
-          timelineDeprecation: `${OPENSEARCH_WEBSITE_URL}guide/en/opensearch/${DOC_LINK_VERSION}/dashboard.html#timeline-deprecation`,
+          guide: `${OPENSEARCH_DASHBOARDS_DOCS}`,
+          timelineDeprecation: `${OPENSEARCH_DASHBOARDS_DOCS}`,
         },
       },
     });
