@@ -45,7 +45,7 @@ Or
 
 To run Dashboards with OpenSearch
 * [Yarn](https://classic.yarnpkg.com/en/docs/install) is required for building and running the OpenSearch Dashboards
-* Install [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) to use the Node 10.23.1 version as it is required
+* Install [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) to use the Node 10.24.1 version as it is required
 * Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
 * While OpenSearch is running locally, run ```yarn start```
 * You can now navigate to ```http://localhost:5603``` where Dashboards runs by default
