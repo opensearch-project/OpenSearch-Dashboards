@@ -48,7 +48,6 @@ const pkg = require('../../../../../package.json');
 const actualVersion = pkg.version;
 const versionHeader = 'osd-version';
 const xsrfHeader = 'osd-xsrf';
-const nameHeader = 'osd-name';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const opensearchDashboardsName = 'my-opensearch-dashboards-name';
@@ -137,22 +136,12 @@ describe('core lifecycle handlers', () => {
       await server.start();
     });
 
-    it('adds the osd-name header', async () => {
+    it('does not add the osd-name header', async () => {
       const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
-        expect.objectContaining({
-          [nameHeader]: opensearchDashboardsName,
-        })
-      );
-    });
-
-    it('adds the osd-name header in case of error', async () => {
-      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
-      const headers = result.header as Record<string, string>;
-      expect(headers).toEqual(
-        expect.objectContaining({
-          [nameHeader]: opensearchDashboardsName,
+        expect.not.objectContaining({
+          'osd-name': opensearchDashboardsName,
         })
       );
     });

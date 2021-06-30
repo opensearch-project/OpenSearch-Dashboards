@@ -259,16 +259,6 @@ describe('customHeaders pre-response handler', () => {
     toolkit = httpServerMock.createToolkit();
   });
 
-  it('adds the osd-name header to the response', () => {
-    const config = createConfig({ name: 'my-server-name' });
-    const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
-
-    handler({} as any, {} as any, toolkit);
-
-    expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'osd-name': 'my-server-name' } });
-  });
-
   it('adds the custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
@@ -284,30 +274,6 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
-        'osd-name': 'my-server-name',
-        headerA: 'value-A',
-        headerB: 'value-B',
-      },
-    });
-  });
-
-  it('preserve the osd-name value from server.name if definied in custom headders ', () => {
-    const config = createConfig({
-      name: 'my-server-name',
-      customResponseHeaders: {
-        'osd-name': 'custom-name',
-        headerA: 'value-A',
-        headerB: 'value-B',
-      },
-    });
-    const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
-
-    handler({} as any, {} as any, toolkit);
-
-    expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({
-      headers: {
-        'osd-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'value-B',
       },

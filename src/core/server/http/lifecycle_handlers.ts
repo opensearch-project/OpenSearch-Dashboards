@@ -39,7 +39,6 @@ import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'osd-version';
 const XSRF_HEADER = 'osd-xsrf';
-const OPENSEARCH_DASHBOARDS_NAME_HEADER = 'osd-name';
 
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
   const { whitelist, disableProtection } = config.xsrf;
@@ -88,17 +87,7 @@ export const createVersionCheckPostAuthHandler = (
 };
 
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
-  const serverName = config.name;
-  const customHeaders = config.customResponseHeaders;
-
-  return (request, response, toolkit) => {
-    const additionalHeaders = {
-      ...customHeaders,
-      [OPENSEARCH_DASHBOARDS_NAME_HEADER]: serverName,
-    };
-
-    return toolkit.next({ headers: additionalHeaders });
-  };
+  return (request, response, toolkit) => toolkit.next({ headers: config.customResponseHeaders });
 };
 
 export const registerCoreHandlers = (
