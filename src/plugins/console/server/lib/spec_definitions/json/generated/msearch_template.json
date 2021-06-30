@@ -21,6 +21,6 @@
       "{indices}/_msearch/template",
       "{indices}/{type}/_msearch/template"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/current/search-multi-search.html"
+    "documentation": "https://docs-beta.opensearch.org/opensearch/query-dsl/full-text/#multi-match"
   }
 }
