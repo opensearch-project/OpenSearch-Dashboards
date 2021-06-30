@@ -21,8 +21,7 @@ import React, { MouseEvent, RefObject } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
-import { ScreenReaderSummary } from '../../../../components/accessibility';
-import { ScreenReaderPartitionTable } from '../../../../components/accessibility/partitions_data_table';
+import { ScreenReaderSummary, ScreenReaderPartitionTable } from '../../../../components/accessibility';
 import { clearCanvas } from '../../../../renderers/canvas';
 import { SettingsSpec } from '../../../../specs/settings';
 import { onChartRendered } from '../../../../state/actions/chart';

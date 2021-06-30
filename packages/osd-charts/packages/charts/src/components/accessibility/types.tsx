@@ -19,19 +19,41 @@
 
 import React from 'react';
 
+import { GoalChartData } from '../../chart_types/goal_chart/state/selectors/get_goal_chart_data';
 import { A11ySettings } from '../../state/selectors/get_accessibility_config';
 
 interface ScreenReaderTypesProps {
   chartTypeDescription: string;
+  goalChartData?: GoalChartData;
 }
 
 /** @internal */
-export function ScreenReaderTypes(props: A11ySettings & ScreenReaderTypesProps) {
-  if (!props.defaultSummaryId) return null;
+export function ScreenReaderTypes({
+  goalChartData,
+  defaultSummaryId,
+  chartTypeDescription,
+}: A11ySettings & ScreenReaderTypesProps) {
+  if (!defaultSummaryId && !goalChartData) return null;
+  const validGoalChart =
+    chartTypeDescription === 'goal chart' ||
+    chartTypeDescription === 'horizontalBullet chart' ||
+    chartTypeDescription === 'verticalBullet chart';
   return (
     <dl>
       <dt>Chart type:</dt>
-      <dd id={props.defaultSummaryId}>{props.chartTypeDescription}</dd>
+      <dd id={defaultSummaryId}>{chartTypeDescription}</dd>
+      {validGoalChart && goalChartData ? (
+        <>
+          <dt>Minimum:</dt>
+          <dd>{goalChartData.minimum}</dd>
+          <dt>Maximum:</dt>
+          <dd>{goalChartData.maximum}</dd>
+          <dt>Target:</dt>
+          <dd>${goalChartData.target}</dd>
+          <dd>Value:</dd>
+          <dt>{goalChartData.value}</dt>
+        </>
+      ) : null}
     </dl>
   );
 }

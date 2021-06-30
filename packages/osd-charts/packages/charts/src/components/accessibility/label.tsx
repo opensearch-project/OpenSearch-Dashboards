@@ -19,11 +19,37 @@
 
 import React from 'react';
 
+import { GoalChartLabels } from '../../chart_types/goal_chart/state/selectors/get_goal_chart_data';
 import { A11ySettings } from '../../state/selectors/get_accessibility_config';
 
+interface ScreenReaderLabelProps {
+  goalChartLabels?: GoalChartLabels;
+}
+
 /** @internal */
-export function ScreenReaderLabel(props: A11ySettings) {
-  if (!props.label) return null;
-  const Heading = props.labelHeadingLevel;
-  return <Heading id={props.labelId}>{props.label}</Heading>;
+export function ScreenReaderLabel({
+  label,
+  labelHeadingLevel,
+  labelId,
+  goalChartLabels,
+}: A11ySettings & ScreenReaderLabelProps) {
+  const Heading = labelHeadingLevel;
+
+  if (!label && !goalChartLabels?.majorLabel && !goalChartLabels?.minorLabel) return null;
+
+  let unifiedLabel = '';
+  if (!label && goalChartLabels?.majorLabel) {
+    unifiedLabel = goalChartLabels?.majorLabel;
+  } else if (label && !goalChartLabels?.majorLabel) {
+    unifiedLabel = label;
+  } else if (label && goalChartLabels?.majorLabel && label !== goalChartLabels?.majorLabel) {
+    unifiedLabel = `${label}; Chart visible label: ${goalChartLabels?.majorLabel}`;
+  }
+
+  return (
+    <>
+      {unifiedLabel && <Heading id={labelId}>{unifiedLabel}</Heading>}
+      {goalChartLabels?.minorLabel && <p>{goalChartLabels?.minorLabel}</p>}
+    </>
+  );
 }

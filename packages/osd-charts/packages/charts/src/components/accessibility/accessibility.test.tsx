@@ -20,6 +20,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { Goal } from '../../chart_types/goal_chart/specs';
+import { GoalSubtype } from '../../chart_types/goal_chart/specs/constants';
 import { config } from '../../chart_types/partition_chart/layout/config';
 import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 import { arrayToLookup } from '../../common/color_calcs';
@@ -130,6 +132,32 @@ describe('Accessibility', () => {
     });
     it('should  include additional columns if a multilayer pie chart', () => {
       expect(sunburstLayerWrapper.find('tr').first().text()).toBe('DepthLabelParentValuePercentage');
+    });
+  });
+
+  describe('Goal chart type accessibility', () => {
+    const goalChartWrapper = mount(
+      <Chart className="story-chart">
+        <Goal
+          id="spec_1"
+          subtype={GoalSubtype.Goal}
+          base={0}
+          target={260}
+          actual={170}
+          bands={[200, 250, 300]}
+          ticks={[0, 50, 100, 150, 200, 250, 300]}
+          labelMajor="Revenue 2020 YTD  "
+          labelMinor="(thousand USD)  "
+          centralMajor="170"
+          centralMinor=""
+          config={{ angleStart: Math.PI, angleEnd: 0 }}
+        />
+      </Chart>,
+    );
+    it('should test defaults for goal charts', () => {
+      expect(goalChartWrapper.find('.echScreenReaderOnly').first().text()).toBe(
+        'Revenue 2020 YTD  (thousand USD)  Chart type:goal chartMinimum:0Maximum:300Target:$260Value:170',
+      );
     });
   });
 });

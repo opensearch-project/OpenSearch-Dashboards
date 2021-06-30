@@ -20,6 +20,12 @@
 import React, { memo } from 'react';
 import { connect } from 'react-redux';
 
+import {
+  getGoalChartDataSelector,
+  getGoalChartLabelsSelector,
+  GoalChartData,
+  GoalChartLabels,
+} from '../../chart_types/goal_chart/state/selectors/get_goal_chart_data';
 import { GlobalChartState } from '../../state/chart_state';
 import {
   A11ySettings,
@@ -35,14 +41,21 @@ import { ScreenReaderTypes } from './types';
 interface ScreenReaderSummaryStateProps {
   a11ySettings: A11ySettings;
   chartTypeDescription: string;
+  goalChartData?: GoalChartData;
+  goalChartLabels?: GoalChartLabels;
 }
 
-const ScreenReaderSummaryComponent = ({ a11ySettings, chartTypeDescription }: ScreenReaderSummaryStateProps) => {
+const ScreenReaderSummaryComponent = ({
+  a11ySettings,
+  chartTypeDescription,
+  goalChartData,
+  goalChartLabels,
+}: ScreenReaderSummaryStateProps) => {
   return (
     <div className="echScreenReaderOnly">
-      <ScreenReaderLabel {...a11ySettings} />
+      <ScreenReaderLabel {...a11ySettings} goalChartLabels={goalChartLabels} />
       <ScreenReaderDescription {...a11ySettings} />
-      <ScreenReaderTypes {...a11ySettings} chartTypeDescription={chartTypeDescription} />
+      <ScreenReaderTypes {...a11ySettings} chartTypeDescription={chartTypeDescription} goalChartData={goalChartData} />
     </div>
   );
 };
@@ -50,6 +63,7 @@ const ScreenReaderSummaryComponent = ({ a11ySettings, chartTypeDescription }: Sc
 const DEFAULT_SCREEN_READER_SUMMARY = {
   a11ySettings: DEFAULT_A11Y_SETTINGS,
   chartTypeDescription: '',
+  goalChartData: undefined,
 };
 
 const mapStateToProps = (state: GlobalChartState): ScreenReaderSummaryStateProps => {
@@ -59,6 +73,8 @@ const mapStateToProps = (state: GlobalChartState): ScreenReaderSummaryStateProps
   return {
     chartTypeDescription: getChartTypeDescriptionSelector(state),
     a11ySettings: getA11ySettingsSelector(state),
+    goalChartData: getGoalChartDataSelector(state),
+    goalChartLabels: getGoalChartLabelsSelector(state),
   };
 };
 

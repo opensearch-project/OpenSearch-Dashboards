@@ -19,3 +19,4 @@
 
 /* @internal */
 export { ScreenReaderSummary } from './screen_reader_summary';
+export { ScreenReaderPartitionTable } from './partitions_data_table';
