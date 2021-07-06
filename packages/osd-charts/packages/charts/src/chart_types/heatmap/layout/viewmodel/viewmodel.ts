@@ -275,25 +275,10 @@ export function shapeViewModel(
     const startY = yInvertedScale(clamp(topLeft[1], 0, currentGridHeight - 1));
     const endY = yInvertedScale(clamp(bottomRight[1], 0, currentGridHeight - 1));
 
-    let allXValuesInRange: Array<NonNullable<PrimitiveValue>> = [];
-    const invertedXValues: Array<NonNullable<PrimitiveValue>> = [];
-
-    if (timeScale && typeof endX === 'number') {
-      invertedXValues.push(startX);
-      invertedXValues.push(endX + xDomain.minInterval);
-      let [startXValue] = invertedXValues;
-      if (typeof startXValue === 'number') {
-        while (startXValue < invertedXValues[1]) {
-          allXValuesInRange.push(startXValue);
-          startXValue += xDomain.minInterval;
-        }
-      }
-    } else {
-      allXValuesInRange = getValuesInRange(xValues, startX, endX);
-      invertedXValues.push(...allXValuesInRange);
-    }
-
+    const allXValuesInRange: Array<NonNullable<PrimitiveValue>> = getValuesInRange(xValues, startX, endX);
     const allYValuesInRange: Array<NonNullable<PrimitiveValue>> = getValuesInRange(yValues, startY, endY);
+    const invertedXValues: Array<NonNullable<PrimitiveValue>> =
+      timeScale && typeof endX === 'number' ? [startX, endX + xDomain.minInterval] : [...allXValuesInRange];
 
     const cells: Cell[] = [];
 
@@ -325,7 +310,7 @@ export function shapeViewModel(
 
     // find X coordinated based on the time range
     const leftIndex = typeof startValue === 'number' ? bisectLeft(xValues, startValue) : xValues.indexOf(startValue);
-    const rightIndex = typeof endValue === 'number' ? bisectLeft(xValues, endValue) : xValues.indexOf(endValue);
+    const rightIndex = typeof endValue === 'number' ? bisectLeft(xValues, endValue) : xValues.indexOf(endValue) + 1;
 
     const isRightOutOfRange = rightIndex > xValues.length - 1 || rightIndex < 0;
     const isLeftOutOfRange = leftIndex > xValues.length - 1 || leftIndex < 0;
@@ -340,7 +325,7 @@ export function shapeViewModel(
     const xStart = chartDimensions.left + startFromScale;
 
     // extend the range in case the right boundary has been selected
-    const width = endFromScale - startFromScale + cellWidth; // (isRightOutOfRange || isLeftOutOfRange ? cellWidth : 0);
+    const width = endFromScale - startFromScale + (isRightOutOfRange || isLeftOutOfRange ? cellWidth : 0);
 
     // resolve Y coordinated making sure the order is correct
     const { y: yStart, totalHeight } = y

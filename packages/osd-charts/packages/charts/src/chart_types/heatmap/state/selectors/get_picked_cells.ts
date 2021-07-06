@@ -30,18 +30,6 @@ export const getPickedCells = createCustomCachedSelector(
       return null;
     }
 
-    const {
-      start: {
-        position: { x: startX, y: startY },
-      },
-      end: {
-        position: { x: endX, y: endY },
-      },
-    } = dragState;
-
-    return geoms.pickDragArea([
-      { x: startX, y: startY },
-      { x: endX, y: endY },
-    ]);
+    return geoms.pickDragArea([dragState.start.position, dragState.end.position]);
   },
 );
