@@ -1,3 +1,15 @@
+# [31.1.0](https://github.com/elastic/elastic-charts/compare/v31.0.0...v31.1.0) (2021-07-06)
+
+
+### Bug Fixes
+
+* **heatmap:** pick correct brush end value ([#1230](https://github.com/elastic/elastic-charts/issues/1230)) ([57678fe](https://github.com/elastic/elastic-charts/commit/57678fee789e3c19229f279fc0c3246a50b5c56f)), closes [#1229](https://github.com/elastic/elastic-charts/issues/1229)
+
+
+### Features
+
+* **a11y:** accessible goal and gauge chart ([#1174](https://github.com/elastic/elastic-charts/issues/1174)) ([ffa8822](https://github.com/elastic/elastic-charts/commit/ffa88226c4d0c9107df3f324ff99628322a7d1eb)), closes [#1160](https://github.com/elastic/elastic-charts/issues/1160)
+
 # [31.0.0](https://github.com/elastic/elastic-charts/compare/v30.2.0...v31.0.0) (2021-06-29)
 
 
