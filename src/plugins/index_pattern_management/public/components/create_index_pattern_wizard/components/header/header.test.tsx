@@ -33,6 +33,7 @@
 import React from 'react';
 import { Header } from '../header';
 import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { DocLinksStart } from 'opensearch-dashboards/public';
@@ -48,7 +49,7 @@ describe('Header', () => {
 
   it('should render normally', () => {
     const component = mount(
-      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
+      wrapWithIntl(<Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />),
       {
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
@@ -62,7 +63,7 @@ describe('Header', () => {
 
   it('should render without including system indices', () => {
     const component = mount(
-      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
+      wrapWithIntl(<Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />),
       {
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
@@ -76,12 +77,14 @@ describe('Header', () => {
 
   it('should render a different name, prompt, and beta tag if provided', () => {
     const component = mount(
-      <Header
-        prompt={<div>Test prompt</div>}
-        indexPatternName={indexPatternName}
-        isBeta={true}
-        docLinks={mockedDocLinks}
-      />,
+      wrapWithIntl(
+        <Header
+          prompt={<div>Test prompt</div>}
+          indexPatternName={indexPatternName}
+          isBeta={true}
+          docLinks={mockedDocLinks}
+        />
+      ),
       {
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {

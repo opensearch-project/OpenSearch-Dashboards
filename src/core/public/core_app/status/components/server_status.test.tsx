@@ -31,9 +31,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { ServerStatus } from './server_status';
 import { FormattedStatus } from '../lib';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
   id: 'green',
@@ -46,7 +46,7 @@ const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStat
 describe('ServerStatus', () => {
   it('renders correctly for green state', () => {
     const status = getStatus();
-    const component = mount(<ServerStatus serverState={status} name="My Computer" />);
+    const component = mountWithIntl(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(
       `"OpenSearch Dashboards status is Green"`
     );
@@ -58,7 +58,7 @@ describe('ServerStatus', () => {
       id: 'red',
       title: 'Red',
     });
-    const component = mount(<ServerStatus serverState={status} name="My Computer" />);
+    const component = mountWithIntl(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(
       `"OpenSearch Dashboards status is Red"`
     );
@@ -66,10 +66,12 @@ describe('ServerStatus', () => {
   });
 
   it('displays the correct `name`', () => {
-    let component = mount(<ServerStatus serverState={getStatus()} name="Localhost" />);
+    let component = mountWithIntl(<ServerStatus serverState={getStatus()} name="Localhost" />);
     expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Localhost"`);
 
-    component = mount(<ServerStatus serverState={getStatus()} name="OpenSearchDashboards" />);
+    component = mountWithIntl(
+      <ServerStatus serverState={getStatus()} name="OpenSearchDashboards" />
+    );
     expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"OpenSearchDashboards"`);
   });
 });

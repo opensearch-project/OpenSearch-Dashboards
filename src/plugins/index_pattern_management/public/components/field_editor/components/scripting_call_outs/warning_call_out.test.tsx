@@ -32,6 +32,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
@@ -40,7 +41,7 @@ describe('ScriptingWarningCallOut', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
   it('should render normally', async () => {
-    const component = mount(<ScriptingWarningCallOut isVisible={true} />, {
+    const component = mount(wrapWithIntl(<ScriptingWarningCallOut isVisible={true} />), {
       wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {
         services: mockedContext,
@@ -51,7 +52,7 @@ describe('ScriptingWarningCallOut', () => {
   });
 
   it('should render nothing if not visible', async () => {
-    const component = mount(<ScriptingWarningCallOut isVisible={false} />, {
+    const component = mount(wrapWithIntl(<ScriptingWarningCallOut isVisible={false} />), {
       wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {
         services: mockedContext,
