@@ -1,6 +1,6 @@
-# elastic-eslint-config-kibana
+# opensearch-eslint-config-opensearch-dashboards
 
-The eslint config used by the kibana team
+The eslint config used by the opensearch dashboards team
 
 ## Usage
 
