@@ -9,9 +9,9 @@ To run, go to the OpenSearch Dashboards root and run `node scripts/opensearch --
 
 ### Examples
 
-Run a snapshot install with a trial license
+Run a snapshot 
 ```
-node scripts/opensearch snapshot --license=trial
+node scripts/opensearch snapshot 
 ```
 
 Run from source with a configured data directory
@@ -26,8 +26,7 @@ Start a cluster
 ```
 var opensearch = require('@osd/opensearch');
 opensearch.run({
-  license: 'basic',
-  version: 7.0,
+  version: 1.0.0,
 })
 .catch(function (e) {
   console.error(e);
@@ -36,12 +35,6 @@ opensearch.run({
 ```
 
 #### Options
-
-##### options.license
-
-Type: `String`
-
-License type, one of: trial, basic, gold, platinum
 
 ##### options.version
 
