@@ -37,7 +37,7 @@
   "bugs": {
     "url": "https://github.com/opensearch-project/OpenSearch-Dashboards/issues"
   },
-  "homepage": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/packages/safer-lodash-set#readme",
+  "homepage": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/opensearch-safer-lodash-set",
   "standard": {
     "ignore": [
       "/lodash/"
