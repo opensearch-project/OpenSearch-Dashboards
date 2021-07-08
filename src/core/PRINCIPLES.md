@@ -1,7 +1,7 @@
 ## Common dictionary
 Plugin - a piece of software expressing specific subject of the business unit within the code.
 
-Platform - functionality required to run all the Kibana plugins.
+Platform - functionality required to run all the OpenSearch Dashboards plugins.
 
 ## New platform principles
 ### Explicit business domains separation
