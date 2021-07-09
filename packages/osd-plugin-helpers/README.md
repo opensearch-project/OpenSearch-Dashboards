@@ -62,9 +62,8 @@ $ plugin-helpers help
 
 ## Versions
 
-The plugins helpers in the OpenSearch Dashboards repo are available for OpenSearch Dashboards 6.3 and greater. Just checkout the branch of OpenSearch Dashboards you want to build against and the plugin helpers should be up to date for that version of OpenSearch Dashboards.
+The plugins helpers in the OpenSearch Dashboards repo are available for OpenSearch Dashboards 1.0 and greater. Just checkout the branch of OpenSearch Dashboards you want to build against and the plugin helpers should be up to date for that version of OpenSearch Dashboards.
 
-When you're targeting versions before OpenSearch Dashboards 6.3, use the `@elastic/plugin-helpers` from npm. See the [versions](https://github.com/elastic/kibana-plugin-helpers#versions) section of the [`@elastic/plugin-helpers` readme](https://github.com/elastic/kibana-plugin-helpers) for information about version compatibility.
 
 ## Configuration
 
