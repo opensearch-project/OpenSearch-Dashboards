@@ -1,5 +1,10 @@
 # PKCS12 Test Fixtures
 
+```shell
+TODO: REPLACE PKCS12 FILES, CERTS, AND KEYS.
+Temporarily removed until we regenerate them ourselves.
+```
+
 These PKCS12 files are used to test different scenarios. Each has an empty password.
 
 Including `-noiter` uses a single encryption iteration, and `-nomaciter` uses a single MAC verification iteration.
