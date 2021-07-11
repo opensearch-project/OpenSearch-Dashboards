@@ -271,10 +271,6 @@ The tests cover:
 
 - authenticated / non-authenticated user access (when applicable)
 
-```typescript
-// TODO after https://github.com/elastic/kibana/pull/53208/
-```
-
 - request validation
 
 ```typescript
