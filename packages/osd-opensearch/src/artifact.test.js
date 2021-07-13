@@ -48,12 +48,12 @@ const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
 const ARCHITECTURE = process.arch === 'arm64' ? 'arm64' : 'x64';
 const MOCK_VERSION = 'test-version';
 const MOCK_RC_VERSION = `test-version-rc4`;
-const MOCK_FILENAME = 'opensearch-test-version-SNAPSHOT-linux-x64-latest.tar.gz';
-const MOCK_RC_FILENAME = `opensearch-test-version-rc4-SNAPSHOT-linux-x64-latest.tar.gz`;
+const MOCK_FILENAME = `opensearch-test-version-SNAPSHOT-linux-${ARCHITECTURE}-latest.tar.gz`;
+const MOCK_RC_FILENAME = `opensearch-test-version-rc4-SNAPSHOT-linux-${ARCHITECTURE}-latest.tar.gz`;
 const MOCK_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/${MOCK_FILENAME}`;
 const MOCK_RC_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_RC_VERSION}/${MOCK_RC_FILENAME}`;
 
-const itif = process.platform === 'linux' && process.arch === 'x64' ? it : it.skip;
+const itif = process.platform === 'linux' ? it : it.skip;
 
 const createArchive = (params = {}) => {
   const architecture = params.architecture || ARCHITECTURE;
@@ -106,6 +106,7 @@ beforeEach(() => {
     },
     multipleArch: {
       archives: [
+        createArchive({ architecture: 'arm64', useRCVersion: false }),
         createArchive({ architecture: 'fake_arch', useRCVersion: false }),
         createArchive({ architecture: ARCHITECTURE, useRCVersion: false }),
       ],
@@ -164,21 +165,30 @@ describe('Artifact', () => {
       });
 
       it('should throw when on a non-Linux platform', async () => {
-        Object.defineProperty(process, 'platform', {
-          value: 'win32',
+        Object.defineProperties(process, {
+          platform: {
+            value: 'win32',
+          },
+          arch: {
+            value: ORIGINAL_ARCHITECTURE,
+          },
         });
         await expect(Artifact.getSnapshot('default', 'INVALID_PLATFORM', log)).rejects.toThrow(
-          'Snapshots are only available for Linux x64'
+          'Snapshots are only available for Linux'
         );
       });
 
-      it('should throw when on a non-x64 arch', async () => {
-        Object.defineProperty(process, 'arch', {
-          value: 'arm64',
+      it('should not throw when on a non-x64 arch', async () => {
+        Object.defineProperties(process, {
+          platform: {
+            value: ORIGINAL_PLATFROM,
+          },
+          arch: {
+            value: 'arm64',
+          },
         });
-        await expect(Artifact.getSnapshot('default', 'INVALID_ARCH', log)).rejects.toThrow(
-          'Snapshots are only available for Linux x64'
-        );
+        mockFetch(MOCKS.multipleArch[0]);
+        artifactTest();
       });
     });
 
