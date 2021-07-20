@@ -51,6 +51,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <EuiFormRow
+        fullWidth={true}
         label={intl.formatMessage({
           id: 'data.filter.filterEditor.valuesSelectLabel',
           defaultMessage: 'Values',
@@ -61,6 +62,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             id: 'data.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
+          fullWidth={true}
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}
