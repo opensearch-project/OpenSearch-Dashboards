@@ -40,6 +40,7 @@
 import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@osd/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
+import { IntlProvider } from 'react-intl';
 
 // Use fake component to extract `intl` property to use in tests.
 const { intl } = (mount(
@@ -67,8 +68,20 @@ function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, pr
 /**
  * When using @osd/i18n `injectI18n` on components, props.intl is required.
  */
-function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
+export function nodeWithIntlProp<T>(
+  node: ReactElement<T>
+): ReactElement<T & { intl: InjectedIntl }> {
   return React.cloneElement<any>(node, { intl });
+}
+
+/**
+ *  Creates the wrapped IntlProvider instance
+ *
+ *  @param node The React element or cheerio wrapper
+ *  @return The wrapped IntlProvider instance
+ */
+export function wrapWithIntl<T>(node: ReactElement<T>) {
+  return <IntlProvider locale="en">{node}</IntlProvider>;
 }
 
 /**

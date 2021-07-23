@@ -31,16 +31,15 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from 'opensearch-dashboards/public';
 import { scopedHistoryMock } from '../../../../../../../../core/public/mocks';
-
 import { Header } from './header';
 
 describe('Header', () => {
   test('should render normally', () => {
-    const component = render(
+    const component = renderWithIntl(
       <Header.WrappedComponent
         indexPatternId="test"
         history={(scopedHistoryMock.create() as unknown) as ScopedHistory}

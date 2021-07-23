@@ -34,6 +34,7 @@ import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from 'src/plugins/data/public';
 import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { PercentilesEditor } from './percentiles';
 import { EditorVisState } from '../sidebar/state/reducers';
 
@@ -66,13 +67,13 @@ describe('PercentilesEditor component', () => {
 
   it('should set valid state to true after adding a unique percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 70];
-    mount(<PercentilesEditor {...defaultProps} />);
+    mountWithIntl(<PercentilesEditor {...defaultProps} />);
     expect(setValidity).lastCalledWith(true);
   });
 
   it('should set valid state to false after adding a duplicate percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 50];
-    mount(<PercentilesEditor {...defaultProps} />);
+    mountWithIntl(<PercentilesEditor {...defaultProps} />);
     expect(setValidity).lastCalledWith(false);
   });
 });
