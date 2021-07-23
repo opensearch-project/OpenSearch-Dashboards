@@ -10,17 +10,13 @@ exports[`Header should render normally 1`] = `
     <h3
       class="euiTitle euiTitle--small"
     >
-      <span>
-        Scripted fields
-      </span>
+      Scripted fields
     </h3>
     <div
       class="euiText euiText--medium"
     >
       <p>
-        <span>
-          You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
-        </span>
+        You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
       </p>
     </div>
   </div>
@@ -38,9 +34,7 @@ exports[`Header should render normally 1`] = `
         <span
           class="euiButton__text"
         >
-          <span>
-            Add scripted field
-          </span>
+          Add scripted field
         </span>
       </span>
     </button>

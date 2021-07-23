@@ -33,6 +33,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
@@ -82,7 +83,7 @@ describe('AppContainer', () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = createMounter(waitPromise);
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AppContainer
         appPath={`/app/${appId}`}
         appId={appId}

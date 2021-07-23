@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, wrapWithIntl } from 'test_utils/enzyme_helpers';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
@@ -91,31 +91,35 @@ describe('TelemetryManagementSectionComponent', () => {
     });
 
     const component = render(
-      <React.Suspense fallback={<span>Fallback</span>}>
-        <TelemetryManagementSection
-          telemetryService={telemetryService}
-          onQueryMatchChange={onQueryMatchChange}
-          showAppliesSettingMessage={false}
-          enableSaving={true}
-          isSecurityExampleEnabled={isSecurityExampleEnabled}
-          toasts={coreStart.notifications.toasts}
-        />
-      </React.Suspense>
-    );
-
-    try {
-      component.rerender(
+      wrapWithIntl(
         <React.Suspense fallback={<span>Fallback</span>}>
           <TelemetryManagementSection
-            query={{ text: 'asdasdasd' }}
             telemetryService={telemetryService}
             onQueryMatchChange={onQueryMatchChange}
             showAppliesSettingMessage={false}
             enableSaving={true}
-            toasts={coreStart.notifications.toasts}
             isSecurityExampleEnabled={isSecurityExampleEnabled}
+            toasts={coreStart.notifications.toasts}
           />
         </React.Suspense>
+      )
+    );
+
+    try {
+      component.rerender(
+        wrapWithIntl(
+          <React.Suspense fallback={<span>Fallback</span>}>
+            <TelemetryManagementSection
+              query={{ text: 'asdasdasd' }}
+              telemetryService={telemetryService}
+              onQueryMatchChange={onQueryMatchChange}
+              showAppliesSettingMessage={false}
+              enableSaving={true}
+              toasts={coreStart.notifications.toasts}
+              isSecurityExampleEnabled={isSecurityExampleEnabled}
+            />
+          </React.Suspense>
+        )
       );
       expect(onQueryMatchChange).toHaveBeenCalledWith(false);
       expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
