@@ -140,7 +140,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       .pipe(first())
       .toPromise()
       .then((value) => {
-        if (value.search.aggs.shardDelay.enabled) {
+        if (value?.search?.aggs?.shardDelay?.enabled) {
           aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
           registerFunction(aggShardDelay);
         }
