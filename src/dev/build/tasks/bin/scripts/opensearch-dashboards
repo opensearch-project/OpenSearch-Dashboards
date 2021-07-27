@@ -15,8 +15,13 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
-NODE="${DIR}/node/bin/node"
-test -x "$NODE"
+
+if [ -x "${DIR}/node/bin/node" ]; then
+  NODE="/usr/local/bin/node"
+else
+  NODE="$(which node)"
+fi
+
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
   exit 1
