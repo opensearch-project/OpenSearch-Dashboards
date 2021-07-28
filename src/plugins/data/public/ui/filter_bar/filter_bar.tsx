@@ -30,7 +30,13 @@
  * GitHub history for details.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiResizeObserver,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
@@ -60,9 +66,12 @@ interface Props {
   intl: InjectedIntl;
 }
 
+const maxFilterWidth = 600;
+
 function FilterBarUI(props: Props) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards();
+  const [filterWidth, setFilterWidth] = useState(maxFilterWidth);
 
   const uiSettings = opensearchDashboards.services.uiSettings;
   if (!uiSettings) return null;
@@ -87,6 +96,10 @@ function FilterBarUI(props: Props) {
         />
       </EuiFlexItem>
     ));
+  }
+
+  function onResize(dimensions: { height: number; width: number }) {
+    setFilterWidth(dimensions.width);
   }
 
   function renderAddFilter() {
@@ -124,17 +137,21 @@ function FilterBarUI(props: Props) {
           initialFocus=".globalFilterEditor__fieldInput input"
           repositionOnScroll
         >
-          <EuiFlexItem grow={false}>
-            <div style={{ width: 400 }}>
-              <FilterEditor
-                filter={newFilter}
-                indexPatterns={props.indexPatterns}
-                onSubmit={onAdd}
-                onCancel={() => setIsAddFilterPopoverOpen(false)}
-                key={JSON.stringify(newFilter)}
-              />
-            </div>
-          </EuiFlexItem>
+          <EuiResizeObserver onResize={onResize}>
+            {(resizeRef) => (
+              <div style={{ width: maxFilterWidth, maxWidth: '100%' }} ref={resizeRef}>
+                <EuiFlexItem style={{ width: filterWidth }} grow={false}>
+                  <FilterEditor
+                    filter={newFilter}
+                    indexPatterns={props.indexPatterns}
+                    onSubmit={onAdd}
+                    onCancel={() => setIsAddFilterPopoverOpen(false)}
+                    key={JSON.stringify(newFilter)}
+                  />
+                </EuiFlexItem>
+              </div>
+            )}
+          </EuiResizeObserver>
         </EuiPopover>
       </EuiFlexItem>
     );
