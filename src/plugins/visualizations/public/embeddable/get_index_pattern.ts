@@ -31,11 +31,7 @@
  */
 
 import { VisSavedObject } from '../types';
-import {
-  indexPatterns,
-  IIndexPattern,
-  IndexPatternAttributes,
-} from '../../../../plugins/data/public';
+import { indexPatterns, IIndexPattern, IndexPatternAttributes } from '../../../data/public';
 import { getUISettings, getSavedObjects } from '../services';
 
 export async function getIndexPattern(

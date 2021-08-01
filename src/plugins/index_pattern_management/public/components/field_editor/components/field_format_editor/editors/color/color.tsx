@@ -38,7 +38,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, FormatEditorProps } from '../default';
 
-import { fieldFormats } from '../../../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../../../data/public';
 
 interface Color {
   range?: string;

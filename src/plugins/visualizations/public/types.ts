@@ -31,7 +31,7 @@
  */
 
 import { ExpressionAstExpression } from 'src/plugins/expressions';
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import { SavedObject } from '../../saved_objects/public';
 import {
   AggConfigOptions,
   SearchSourceFields,

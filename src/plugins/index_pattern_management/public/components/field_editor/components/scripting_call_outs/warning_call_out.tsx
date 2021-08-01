@@ -36,7 +36,7 @@ import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 
-import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {

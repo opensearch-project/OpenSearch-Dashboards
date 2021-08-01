@@ -35,7 +35,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
-import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 

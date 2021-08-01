@@ -74,7 +74,7 @@ import { visualization as visualizationFunction } from './expressions/visualizat
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import {
   Setup as InspectorSetup,
   Start as InspectorStart,

@@ -36,8 +36,8 @@ import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
 } from 'src/plugins/expressions/public';
-import { PersistedState } from '../../../../../plugins/visualizations/public';
-import { Adapters } from '../../../../../plugins/inspector/public';
+import { PersistedState } from '../../../../visualizations/public';
+import { Adapters } from '../../../../inspector';
 
 import {
   calculateBounds,
@@ -55,7 +55,7 @@ import {
   IAggConfigs,
   ISearchSource,
   tabifyAggResponse,
-} from '../../../common/search';
+} from '../../../common';
 
 import { FilterManager } from '../../query';
 import {

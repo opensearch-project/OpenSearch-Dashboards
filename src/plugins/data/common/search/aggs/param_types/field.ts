@@ -32,7 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/opensearch_dashboards_utils/common';
+import { SavedObjectNotFound } from '../../../../../opensearch_dashboards_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { OSD_FIELD_TYPES } from '../../../osd_field_types/types';

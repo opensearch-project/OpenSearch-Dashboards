@@ -36,7 +36,7 @@ import {
   OverlayStart,
 } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../plugins/data/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import { SavedObjectLoader } from '../../../saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {
