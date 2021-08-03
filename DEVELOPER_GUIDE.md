@@ -1,8 +1,8 @@
 # OpenSearch Dashboards Developer Guide
 
-This guide applies to all development within the OpenSearch Dashboards project and is
-recommended for the development of all OpenSearch Dashboards plugins.
+This guide applies to all development within the OpenSearch Dashboards project and is recommended for the development of all OpenSearch Dashboards plugins.
 
+- [Getting Started](#getting-started)
 - [General](#general)
 - [HTML](#html)
 - [API endpoints](#api-endpoints)
@@ -10,11 +10,35 @@ recommended for the development of all OpenSearch Dashboards plugins.
 - [SASS files](#sass-files)
 - [React](#react)
 
-Besides the content in this developer guide, the following developer guides may also apply
-to all development within the OpenSearch Dashboards project. Please make sure to also read them:
+Besides the content in this developer guide, the following developer guides may also apply to all development within the OpenSearch Dashboards project. Please make sure to also read them:
 
 - [Accessibility developer guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/accessibility)
 - [SASS developer guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/sass)
+
+## Getting Started
+
+If you would like to install and run this project, please see the [Downloads Page](https://opensearch.org/downloads.html).
+
+### Run OpenSearch
+To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
+* Clone the OpenSearch repo with ```git clone https://github.com/opensearch-project/OpenSearch.git```
+* Follow installation and setup instructions in the [OpenSearch Developer Guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md)
+* Run ```./gradlew assemble``` to generate build artifacts for all platforms
+* Run ```./gradlew run```
+
+Or
+* You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory with ```tar -xvf /path/to/tar/file```
+* After extracting, run ```./bin/opensearch``` inside of the extracted build artifact directory
+
+### Run OpenSearch Dashboards
+* Install [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) to use the Node 10.24.1 version as it is required
+  * ```curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash```
+  * ```nvm install v10.24.1```
+* [Yarn](https://classic.yarnpkg.com/en/docs/install) is required for building and running the OpenSearch Dashboards
+  * ```npm install -g yarn```
+* Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
+* While OpenSearch is running locally, run ```yarn start```
+* You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
 
 ## General
 
