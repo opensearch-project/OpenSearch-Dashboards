@@ -155,7 +155,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -372,7 +372,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -652,7 +652,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -950,7 +950,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -1286,7 +1286,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
