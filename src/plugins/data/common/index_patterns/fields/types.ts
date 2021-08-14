@@ -51,5 +51,6 @@ export interface IFieldType {
   subType?: IFieldSubType;
   displayName?: string;
   format?: any;
+  spec?: FieldSpec;
   toSpec?: (options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }) => FieldSpec;
 }

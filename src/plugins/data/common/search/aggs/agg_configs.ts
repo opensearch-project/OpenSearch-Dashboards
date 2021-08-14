@@ -175,6 +175,7 @@ export class AggConfigs {
     const dslTopLvl = {};
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
+    let prevNestedPath: string | undefined;
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
@@ -192,20 +193,42 @@ export class AggConfigs {
     this.getRequestAggs()
       .filter((config: AggConfig) => !config.type.hasNoDsl)
       .forEach((config: AggConfig, i: number, list) => {
+        let nestedPath = config.params.field
+          ? config.params.field.spec?.subType?.nested?.path
+          : undefined;
+
         if (!dslLvlCursor) {
           // start at the top level
           dslLvlCursor = dslTopLvl;
-        } else {
-          const prevConfig: AggConfig = list[i - 1];
-          const prevDsl = dslLvlCursor[prevConfig.id];
-
-          // advance the cursor and nest under the previous agg, or
-          // put it on the same level if the previous agg doesn't accept
-          // sub aggs
-          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
         }
 
-        const dsl = (dslLvlCursor[config.id] = config.toDsl(this));
+        // nested field support
+        let reverseNested = false;
+
+        if (config.params.filters) {
+          config.params.filters.forEach(function findNestedPath(filter: { [index: string]: any }) {
+            nestedPath = filter.input.query.nested?.path;
+          });
+        }
+
+        if (prevNestedPath !== undefined) {
+          if (
+            nestedPath === undefined ||
+            (nestedPath !== prevNestedPath && prevNestedPath.startsWith(nestedPath))
+          ) {
+            reverseNested = true;
+          }
+        }
+
+        if (nestedPath !== undefined) {
+          if (nestedPath === prevNestedPath) {
+            nestedPath = undefined;
+          } else {
+            prevNestedPath = nestedPath;
+          }
+        }
+
+        const dsl = config.toDslNested(config.aggConfigs, dslLvlCursor, nestedPath, reverseNested);
         let subAggs: any;
 
         parseParentAggs(dslLvlCursor, dsl);
@@ -216,7 +239,7 @@ export class AggConfigs {
         }
 
         if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach((agg: any) => {
+          nestedMetrics.forEach((agg) => {
             subAggs[agg.config.id] = agg.dsl;
             // if a nested metric agg has parent aggs, we have to add them to every level of the tree
             // to make sure "bucket_path" references in the nested metric agg itself are still working
@@ -226,7 +249,17 @@ export class AggConfigs {
               });
             }
           });
+        } else {
+          if (dsl.aggs === undefined && !(config.type.type === 'metrics')) {
+            prevNestedPath = undefined;
+          }
         }
+
+        // advance the cursor and nest under the previous agg, or
+        // put it on the same level if the previous agg doesn't accept
+        // sub aggs
+        dslLvlCursor =
+          dsl.aggs || (nestedPath ? dslLvlCursor['nested_' + config.id].aggs : dslLvlCursor);
       });
 
     removeParentAggs(dslTopLvl);

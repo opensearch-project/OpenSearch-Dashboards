@@ -89,4 +89,30 @@ export const stubFields: IFieldType[] = [
     searchable: true,
     filterable: true,
   },
+  {
+    name: 'nested.field.example',
+    type: 'number',
+    esTypes: ['float'],
+    aggregatable: true,
+    searchable: true,
+    filterable: true,
+    subType: {
+      nested: {
+        path: 'nested.field.example',
+      },
+    },
+    // This spec is necessary to build the nested dsl.
+    spec: {
+      name: 'nested.field.example',
+      type: 'number',
+      esTypes: ['float'],
+      aggregatable: true,
+      searchable: true,
+      subType: {
+        nested: {
+          path: 'nested.field.example',
+        },
+      },
+    },
+  },
 ];

@@ -252,8 +252,32 @@ export class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggConfigs?: IAggConfigs) {
+  toDsl(aggConfigs?: IAggConfigs, prevNestedPath?: string) {
     if (this.type.hasNoDsl) return;
+    if (this.params.orderAgg) {
+      let reverseNested = false;
+      let nestedPath = this.params.orderAgg.params?.field;
+
+      if (prevNestedPath !== undefined) {
+        if (
+          nestedPath === undefined ||
+          (nestedPath !== prevNestedPath && prevNestedPath.startsWith(nestedPath))
+        ) {
+          reverseNested = true;
+        }
+      }
+
+      if (nestedPath !== undefined) {
+        if (nestedPath === prevNestedPath) {
+          nestedPath = undefined;
+        } else {
+          prevNestedPath = nestedPath;
+        }
+      }
+      this.params.orderAgg.nestedPath = nestedPath;
+      this.params.orderAgg.reverseNested = reverseNested;
+    }
+
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
@@ -276,6 +300,62 @@ export class AggConfig {
     }
 
     return configDsl;
+  }
+
+  toDslNested(
+    aggConfigs: IAggConfigs,
+    destination: Record<string, any>,
+    nestedPath: string,
+    reverseNested: boolean
+  ) {
+    let id = this.id;
+    let dsl = this.toDsl(aggConfigs, nestedPath);
+    const result = dsl; // save the original dsl to return later
+
+    if (this.params.countByParent) {
+      const countId = 'count_' + this.id;
+      const aggsKey = 'aggs';
+      let countAgg: { [index: string]: any } = {};
+
+      if (dsl.aggs) {
+        countAgg = dsl.aggs;
+      }
+      countAgg[countId] = {
+        reverse_nested: {},
+      };
+      dsl[aggsKey] = countAgg;
+    }
+
+    if (nestedPath || reverseNested) {
+      // save the current dsl as a sub-agg of the nested agg
+      const aggs: { [index: string]: any } = {};
+
+      aggs[id] = dsl;
+      if (reverseNested) {
+        // let reverseNestedDsl: IReverseNestedDsl;
+        const reverseNestedDsl: { [index: string]: any } = {};
+        // when reverse nesting, the path is optional
+        if (nestedPath) {
+          reverseNestedDsl.path = nestedPath;
+        }
+        id = 'nested_' + this.id;
+        dsl = {
+          reverse_nested: reverseNestedDsl,
+          aggs,
+        };
+      } else if (nestedPath) {
+        id = 'nested_' + this.id;
+        dsl = {
+          nested: {
+            path: nestedPath,
+          },
+          aggs,
+        };
+      }
+    }
+    // apply the change to the destination
+    destination[id] = dsl;
+    return result;
   }
 
   /**

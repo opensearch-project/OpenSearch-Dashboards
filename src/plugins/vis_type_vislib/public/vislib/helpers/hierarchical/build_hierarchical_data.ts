@@ -90,7 +90,6 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
         const name = bucketFormatter.convert(row[bucketColumn.id]);
         const size = row[bucketValueColumn.id] as number;
         names[name] = name;
-
         let slice = dataLevel.find((dataLevelSlice) => dataLevelSlice.name === name);
         if (!slice) {
           slice = {

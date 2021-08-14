@@ -47,6 +47,7 @@ export type IFieldParamType = FieldParamType;
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;
+  nestedAggregationsSupported = ['histogram'];
   filterFieldTypes: FieldTypes;
   onlyAggregatable: boolean;
 
@@ -123,10 +124,17 @@ export class FieldParamType extends BaseParamType {
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
     const filteredFields = fields.filter((field: IndexPatternField) => {
-      const { onlyAggregatable, scriptable, filterFieldTypes } = this;
+      const { onlyAggregatable, scriptable, nestedAggregationsSupported, filterFieldTypes } = this;
+
+      let nestedFieldsAllowed = false;
+
+      if (nestedAggregationsSupported.includes(aggConfig.type?.name)) {
+        nestedFieldsAllowed = true;
+      }
 
       if (
-        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
+        (onlyAggregatable &&
+          (!field.aggregatable || (isNestedField(field) && !nestedFieldsAllowed))) ||
         (!scriptable && field.scripted)
       ) {
         return false;

@@ -6,6 +6,8 @@
  * compatible open source license.
  */
 
+import { stubIndexPatternWithNestedFields } from './../../index_patterns/index_pattern.stub';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -427,6 +429,36 @@ describe('AggConfigs', () => {
         'buckets_path',
         '1-bucket>_count'
       );
+    });
+    it('supports nested aggregations on histograms', () => {
+      const configStates = [
+        {
+          enabled: true,
+          id: '1',
+          type: 'count',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          id: '2',
+          type: 'histogram',
+          schema: 'segment',
+          params: {
+            field: 'nested.field.example',
+            extended_bound: {
+              max: '',
+              min: '',
+            },
+            has_extended_bounds: false,
+            interval: 'auto',
+            min_doc_count: false,
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const topLevelDsl = ac.toDsl(true);
+      expect(topLevelDsl.nested_2.aggs[2].histogram.field).toContain('nested.field.example');
     });
   });
 });

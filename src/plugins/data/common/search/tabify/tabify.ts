@@ -62,11 +62,19 @@ export function tabifyAggResponse(
     if (column) {
       const agg = column.aggConfig;
       const aggInfo = agg.write(aggs);
+      const nestedKey = 'nested_' + agg.id;
+
       aggScale *= aggInfo.metricScale || 1;
 
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
-          const aggBucket = get(bucket, agg.id);
+          let prefix = '';
+
+          if (nestedKey in bucket) {
+            prefix = nestedKey + '.';
+          }
+
+          const aggBucket = get(bucket, prefix + agg.id);
           const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
 
           if (tabifyBuckets.length) {
