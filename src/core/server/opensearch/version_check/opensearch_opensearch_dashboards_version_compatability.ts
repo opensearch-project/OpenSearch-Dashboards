@@ -32,6 +32,13 @@
 
 import semver, { coerce } from 'semver';
 
+/** @private */
+interface VersionNumbers {
+  major: number;
+  minor: number;
+  patch: number;
+}
+
 /**
  * Checks for the compatibilitiy between OpenSearch and OpenSearchDashboards versions
  * 1. Major version differences will never work together.
@@ -41,17 +48,26 @@ export function opensearchVersionCompatibleWithOpenSearchDashboards(
   opensearchVersion: string,
   opensearchDashboardsVersion: string
 ) {
-  const opensearchVersionNumbers = {
+  const opensearchVersionNumbers: VersionNumbers = {
     major: semver.major(opensearchVersion),
     minor: semver.minor(opensearchVersion),
     patch: semver.patch(opensearchVersion),
   };
 
-  const opensearchDashboardsVersionNumbers = {
+  const opensearchDashboardsVersionNumbers: VersionNumbers = {
     major: semver.major(opensearchDashboardsVersion),
     minor: semver.minor(opensearchDashboardsVersion),
     patch: semver.patch(opensearchDashboardsVersion),
   };
+
+  if (
+    legacyVersionCompatibleWithOpenSearchDashboards(
+      opensearchVersionNumbers,
+      opensearchDashboardsVersionNumbers
+    )
+  ) {
+    return true;
+  }
 
   // Reject mismatching major version numbers.
   if (opensearchVersionNumbers.major !== opensearchDashboardsVersionNumbers.major) {
@@ -76,5 +92,26 @@ export function opensearchVersionEqualsOpenSearchDashboards(
     nodeSemVer &&
     opensearchDashboardsSemver &&
     nodeSemVer.version === opensearchDashboardsSemver.version
+  );
+}
+
+/**
+ * Verify legacy version of engines is compatible with current version
+ * of OpenSearch Dashboards if OpenSearch Dashboards is 1.x.
+ *
+ * @private
+ * @param legacyVersionNumbers semantic version of legacy engine
+ * @param opensearchDashboardsVersionNumbers semantic version of application
+ * @returns {boolean}
+ */
+function legacyVersionCompatibleWithOpenSearchDashboards(
+  legacyVersionNumbers: VersionNumbers,
+  opensearchDashboardsVersionNumbers: VersionNumbers
+) {
+  return (
+    legacyVersionNumbers.major === 7 &&
+    legacyVersionNumbers.minor === 10 &&
+    legacyVersionNumbers.patch === 2 &&
+    opensearchDashboardsVersionNumbers.major === 1
   );
 }
