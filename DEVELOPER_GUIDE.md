@@ -1,4 +1,5 @@
-# OpenSearch Dashboards Developer Guide
+<p align="center"><img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg" height="64px"/></p>
+<h1 align="center">OpenSearch Dashboards Developer Guide</h1>
 
 This guide applies to all development within the OpenSearch Dashboards project and is recommended for the development of all OpenSearch Dashboards plugins.
 
@@ -19,26 +20,49 @@ Besides the content in this developer guide, the following developer guides may 
 
 If you would like to install and run this project, please see the [Downloads Page](https://opensearch.org/downloads.html).
 
-### Run OpenSearch
-To run OpenSearch Dashboards locally, you first need build artifacts from OpenSearch.
-* Clone the OpenSearch repo with ```git clone https://github.com/opensearch-project/OpenSearch.git```
-* Follow installation and setup instructions in the [OpenSearch Developer Guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md)
-* Run ```./gradlew assemble``` to generate build artifacts for all platforms
-* Run ```./gradlew run```
+#### Prerequisites
 
-Or
-* You can also manually find the tar.gz file (.zip on Windows) at ```./distribution/archives/<platform-dir>/build/distributions``` and extract to your desired directory with ```tar -xvf /path/to/tar/file```
-* After extracting, run ```./bin/opensearch``` inside of the extracted build artifact directory
+You need to have an OpenSearch server up and running to be able to run OpenSearch
+Dashboards. The easiest way to do it is [using Docker](https://opensearch.org/docs/opensearch/install/docker).
+
+We recommend using [Node Version Manager](https://github.com/nvm-sh/nvm) to install
+the node version we need.
+
+### Bootstrap OpenSearch Dashboards
+
+While OpenSearch is starting, you can already bootstrap OpenSearch Dashboards:
+```bash
+$ git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
+$ cd OpenSearch-Dashboards
+$ nvm use
+$ npm i -g yarn
+$ yarn osd bootstrap # This command will also install npm dependencies
+```
+
+### Configure OpenSearch Dashboards
+
+*This step is only mandatory if you have https/authentication enabled, or if you use the OpenSearch Docker image in its default configuration.*
+
+Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
+changes to `opensearch_dashboards.yml` in order to connect to OpenSearch.
+
+```yml
+opensearch.hosts: ["https://localhost:9200"]
+opensearch.username: "admin" # Default username on the docker image
+opensearch.password: "admin" # Default password on the docker image
+opensearch.ssl.verificationMode: none
+```
 
 ### Run OpenSearch Dashboards
-* Install [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) to use the Node 10.24.1 version as it is required
-  * ```curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash```
-  * ```nvm install v10.24.1```
-* [Yarn](https://classic.yarnpkg.com/en/docs/install) is required for building and running the OpenSearch Dashboards
-  * ```npm install -g yarn```
-* Run ```yarn osd bootstrap``` in the OpenSearch Dashboards directory
-* While OpenSearch is running locally, run ```yarn start```
-* You can now navigate to ```http://localhost:5601``` where Dashboards runs by default
+
+After you've installed OpenSearch Dashboards and configured it, you can start
+the development server:
+```bash
+$ yarn start
+```
+
+When the server is up and ready, click on the link displayed in your terminal to
+access it.
 
 ## General
 
