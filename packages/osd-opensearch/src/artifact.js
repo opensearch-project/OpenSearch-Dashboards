@@ -186,8 +186,8 @@ async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
     throw createCliError(`Snapshots are only available for Linux`);
   }
 
-  const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}`;
-  const latestFile = `opensearch-${desiredVersion}-SNAPSHOT-${platform}-${arch}-latest.tar.gz`;
+  const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-SNAPSHOT`;
+  const latestFile = `opensearch-min-${desiredVersion}-SNAPSHOT-${platform}-${arch}-latest.tar.gz`;
   const completeLatestUrl = `${latestUrl}/${latestFile}`;
 
   let { abc, resp } = await verifySnapshotUrl(completeLatestUrl, log);
@@ -208,8 +208,13 @@ async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
   let completeUrl = null;
   let snapshotFile = null;
 
-  // This checks and uses an RC if a RC exists at a higher increment than RC1 or it tries to use RC1
-  // This is in replacement of having a manifest URL, so the exact RC number is unknown but expect it not to be a large number
+  /**
+   * TODO: This might not be relevant anymore. After a few iterations if RC builds are no longer being built
+   * then we can remove this logic.
+   *
+   * This checks and uses an RC if a RC exists at a higher increment than RC1 or it tries to use RC1
+   * This is in replacement of having a manifest URL, so the exact RC number is unknown but expect it not to be a large number
+   */
   let rcCheck = MAX_RC_CHECK;
   do {
     const secondaryLatestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-rc${rcCheck}`;
