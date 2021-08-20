@@ -32,9 +32,12 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 
+import Axios from 'axios';
+// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
+import AxiosHttpAdapter from 'axios/lib/adapters/http';
 import { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
@@ -44,16 +47,24 @@ import {
   InternalRenderingServiceSetup,
   RenderingMetadata,
 } from './types';
+import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 
 /** @internal */
 export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
-
+  private logger = this.coreContext.logger;
   public async setup({
     http,
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    const opensearchDashboardsConfig = await this.coreContext.configService
+      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboards')
+      .pipe(first())
+      .toPromise();
+
+    const validLogoUrl = await this.checkUrlValid(opensearchDashboardsConfig.branding.logoUrl);
+
     return {
       render: async (
         request,
@@ -102,6 +113,9 @@ export class RenderingService {
             legacyMetadata: {
               uiSettings: settings,
             },
+            branding: {
+              logoUrl: validLogoUrl,
+            },
           },
         };
 
@@ -117,4 +131,23 @@ export class RenderingService {
 
     return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
   }
+
+  public checkUrlValid = async (url: string): Promise<string> => {
+    if (url.match(/\.(png|svg)$/) === null) {
+      this.logger
+        .get('branding')
+        .error('Invalid URL for logo. Rendering default OpenSearch Dashboard Logo.');
+      return 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg';
+    }
+    return await Axios.get(url, { adapter: AxiosHttpAdapter })
+      .then(() => {
+        return url;
+      })
+      .catch(() => {
+        this.logger
+          .get('branding')
+          .error('Invalid URL for logo. Rendering default OpenSearch Dashboard Logo.');
+        return 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg';
+      });
+  };
 }
