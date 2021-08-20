@@ -5,6 +5,9 @@ Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
+  "branding": Object {
+    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+  },
   "buildNumber": Any<Number>,
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -48,6 +51,9 @@ Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
+  "branding": Object {
+    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+  },
   "buildNumber": Any<Number>,
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -91,6 +97,9 @@ Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
+  "branding": Object {
+    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+  },
   "buildNumber": Any<Number>,
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -138,6 +147,9 @@ Object {
   "anonymousStatusPage": false,
   "basePath": "",
   "branch": Any<String>,
+  "branding": Object {
+    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+  },
   "buildNumber": Any<Number>,
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -181,6 +193,9 @@ Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
+  "branding": Object {
+    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+  },
   "buildNumber": Any<Number>,
   "csp": Object {
     "warnLegacyBrowsers": true,

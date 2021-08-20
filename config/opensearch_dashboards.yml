@@ -150,3 +150,7 @@
 #  'ff00::/8',
 # ]
 #vis_type_timeline.graphiteBlockedIPs: []
+
+# user input URL for customized logo 
+# opensearchDashboards.branding.logoUrl: ""
+
