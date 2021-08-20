@@ -74,6 +74,9 @@ export interface RenderingMetadata {
         user: Record<string, UserProvidedValues<any>>;
       };
     };
+    branding: {
+      logoUrl: string;
+    };
   };
 }
 

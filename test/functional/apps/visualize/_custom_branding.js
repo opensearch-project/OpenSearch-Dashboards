@@ -29,24 +29,30 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import type { PublicMethodsOf } from '@osd/utility-types';
-import { RenderingService as Service } from '../rendering_service';
-import { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
+import expect from '@osd/expect';
 
-type IRenderingService = PublicMethodsOf<Service>;
+export default function ({ getService, getPageObjects }) {
+  const browser = getService('browser');
+  const globalNav = getService('globalNav');
+  const PageObjects = getPageObjects(['common', 'home', 'header']);
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
-};
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockCheckUrlValid = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
-  checkUrlValid: mockCheckUrlValid,
-};
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);
+  describe('OpenSearch Dashboards branding configuration', function customLogo() {
+    this.tags('includeFirefox');
+    const expectedUrl = 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+    before(async function () {
+      await PageObjects.common.navigateToApp('home');
+    });
+
+    it('should show customized logo in Navbar on the main page', async () => {
+      await globalNav.logoExistsOrFail(expectedUrl);
+    });
+
+    it('should show a customized logo that can take to home page', async () => {
+      await PageObjects.common.navigateToApp('settings');
+      await globalNav.clickLogo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const url = await browser.getCurrentUrl();
+      expect(url.includes('/app/home')).to.be(true);
+    });
+  });
+}

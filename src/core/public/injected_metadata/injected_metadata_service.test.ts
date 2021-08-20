@@ -229,3 +229,16 @@ describe('setup.getInjectedVars()', () => {
     );
   });
 });
+
+describe('setup.getBranding()', () => {
+  it('returns injectedMetadata.branding', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        branding: { logoUrl: '/' },
+      },
+    } as any);
+
+    const logoURL = injectedMetadata.setup().getBranding();
+    expect(logoURL).toEqual({ logoUrl: '/' });
+  });
+});

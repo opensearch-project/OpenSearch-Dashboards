@@ -29,24 +29,23 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import type { PublicMethodsOf } from '@osd/utility-types';
-import { RenderingService as Service } from '../rendering_service';
-import { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = PublicMethodsOf<Service>;
+import React from 'react';
+import '../header_logo.scss';
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
+export interface CustomLogoType {
+  logoUrl: string;
+}
+
+export const CustomLogo = ({ ...branding }: CustomLogoType) => {
+  return (
+    <img
+      data-test-subj="customLogo"
+      data-test-image-url={branding.logoUrl}
+      src={branding.logoUrl}
+      alt="logo"
+      loading="lazy"
+      className="logoImage"
+    />
+  );
 };
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockCheckUrlValid = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
-  checkUrlValid: mockCheckUrlValid,
-};
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);

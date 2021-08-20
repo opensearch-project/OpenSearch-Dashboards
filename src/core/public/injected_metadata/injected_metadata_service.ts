@@ -76,6 +76,9 @@ export interface InjectedMetadataParams {
         user?: Record<string, UserProvidedValues>;
       };
     };
+    branding: {
+      logoUrl: string;
+    };
   };
 }
 
@@ -143,6 +146,10 @@ export class InjectedMetadataService {
       getOpenSearchDashboardsBranch: () => {
         return this.state.branch;
       },
+
+      getBranding: () => {
+        return this.state.branding;
+      },
     };
   }
 }
@@ -175,6 +182,9 @@ export interface InjectedMetadataSetup {
   getInjectedVar: (name: string, defaultValue?: any) => unknown;
   getInjectedVars: () => {
     [key: string]: unknown;
+  };
+  getBranding: () => {
+    logoUrl: string;
   };
 }
 

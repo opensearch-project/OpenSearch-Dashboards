@@ -34,9 +34,13 @@ import { load } from 'cheerio';
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { mockRenderingServiceParams, mockRenderingSetupDeps } from './__mocks__/params';
+import { mockRenderingSetupDeps } from './__mocks__/params';
 import { InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
+import { configServiceMock } from '../config/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
+import { mockCoreContext } from '../core_context.mock';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -62,10 +66,15 @@ const { createOpenSearchDashboardsRequest, createRawRequest } = httpServerMock;
 
 describe('RenderingService', () => {
   let service: RenderingService;
+  const configService = configServiceMock.create();
+  configService.atPath.mockImplementation(() => {
+    return new BehaviorSubject(RawOpenSearchDashboardsConfig.schema.validate({}));
+  });
+  const context = mockCoreContext.create({ configService });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new RenderingService(mockRenderingServiceParams);
+    service = new RenderingService(context);
   });
 
   describe('setup()', () => {
@@ -125,6 +134,44 @@ describe('RenderingService', () => {
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
+    });
+  });
+  describe('checkUrlvalid()', () => {
+    it('URL is valid', async () => {
+      jest.mock('axios', () => ({
+        async get() {
+          return {
+            status: 200,
+          };
+        },
+      }));
+      const result = await service.checkUrlValid(
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg'
+      );
+      expect(result).toEqual(
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg'
+      );
+    });
+    it('URL does not contain jpeg, jpg, gif, or png', async () => {
+      const result = await service.checkUrlValid(
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode'
+      );
+      expect(result).toEqual(
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg'
+      );
+    });
+    it('URL is invalid', async () => {
+      jest.mock('axios', () => ({
+        async get() {
+          return {
+            status: 404,
+          };
+        },
+      }));
+      const result = await service.checkUrlValid('http://notfound');
+      expect(result).toEqual(
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg'
+      );
     });
   });
 });

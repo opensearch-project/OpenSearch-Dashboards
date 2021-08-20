@@ -52,6 +52,12 @@ export const config = {
     index: schema.string({ defaultValue: '.kibana' }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
+    branding: schema.object({
+      logoUrl: schema.string({
+        defaultValue:
+          'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg',
+      }),
+    }),
   }),
   deprecations,
 };
