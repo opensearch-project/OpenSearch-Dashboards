@@ -247,6 +247,11 @@ exports[`Header renders 1`] = `
       "serverBasePath": "/test",
     }
   }
+  branding={
+    Object {
+      "logoUrl": "/",
+    }
+  }
   breadcrumbs$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1715,6 +1720,7 @@ exports[`Header renders 1`] = `
                     }
                   }
                   href="/"
+                  logoUrl="/"
                   navLinks$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -2821,6 +2827,7 @@ exports[`Header renders 1`] = `
                       }
                     }
                     href="/"
+                    logoUrl="/"
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2916,36 +2923,24 @@ exports[`Header renders 1`] = `
                     }
                     navigateToApp={[MockFunction]}
                   >
-                    <EuiHeaderLogo
+                    <a
                       aria-label="Go to home page"
+                      className="logoContainer"
                       data-test-subj="logo"
                       href="/"
-                      iconType={[Function]}
                       onClick={[Function]}
                     >
-                      <a
-                        aria-label="Go to home page"
-                        className="euiHeaderLogo"
-                        data-test-subj="logo"
-                        href="/"
-                        onClick={[Function]}
-                        rel="noreferrer"
+                      <CustomLogo
+                        logoUrl="/"
                       >
-                        <EuiIcon
-                          aria-label="Elastic"
-                          className="euiHeaderLogo__icon"
-                          size="l"
-                          type={[Function]}
-                        >
-                          <div
-                            aria-label="Elastic"
-                            className="euiHeaderLogo__icon"
-                            data-euiicon-type="OpenSearchDashboardsLogoDarkMode"
-                            size="l"
-                          />
-                        </EuiIcon>
-                      </a>
-                    </EuiHeaderLogo>
+                        <img
+                          alt="logo"
+                          className="logoImage"
+                          loading="lazy"
+                          src="/"
+                        />
+                      </CustomLogo>
+                    </a>
                   </HeaderLogo>
                 </div>
               </EuiHeaderSectionItem>

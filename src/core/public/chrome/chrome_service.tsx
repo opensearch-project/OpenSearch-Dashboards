@@ -253,6 +253,7 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          branding={injectedMetadata.getBranding()}
         />
       ),
 
