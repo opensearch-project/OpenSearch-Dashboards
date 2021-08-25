@@ -291,13 +291,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
            away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
            searches will not terminate.`,
       }),
-      deprecation: {
-        message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
-          defaultMessage:
-            'This setting is deprecated and will be removed in OpenSearch Dashboards 8.0.',
-        }),
-        docLinksKey: 'opensearchDashboardsSearchSettings',
-      },
       category: ['search'],
       schema: schema.boolean(),
     },
