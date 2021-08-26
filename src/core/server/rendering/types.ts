@@ -75,7 +75,9 @@ export interface RenderingMetadata {
       };
     };
     branding: {
-      logoUrl: string;
+      logoUrl?: string;
+      smallLogoUrl?: string;
+      title: string;
     };
   };
 }

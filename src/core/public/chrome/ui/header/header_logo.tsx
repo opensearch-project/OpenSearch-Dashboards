@@ -104,7 +104,7 @@ interface Props {
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
-  logoUrl: string;
+  logoUrl?: string;
 }
 
 export function HeaderLogo({ href, navigateToApp, logoUrl, ...observables }: Props) {

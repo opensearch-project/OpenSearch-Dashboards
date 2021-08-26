@@ -68,6 +68,14 @@ export interface HomeOpenSearchDashboardsServices {
   environmentService: EnvironmentService;
   telemetry?: TelemetryPluginStart;
   tutorialService: TutorialService;
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    getBranding: () => {
+      logoUrl?: string;
+      smallLogoUrl?: string;
+      title: string;
+    };
+  };
 }
 
 let services: HomeOpenSearchDashboardsServices | null = null;
