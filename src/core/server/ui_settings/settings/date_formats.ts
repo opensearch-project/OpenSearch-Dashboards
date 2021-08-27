@@ -170,7 +170,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
           dateNanosLink:
             // TODO: [RENAMEME] Need prod urls.
             // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-            '<a href="https://docs-beta.opensearch.org/opensearch/units" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://opensearch.org/docs/opensearch/units" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('core.ui_settings.params.dateNanosLinkTitle', {
               defaultMessage: 'date_nanos',
             }) +

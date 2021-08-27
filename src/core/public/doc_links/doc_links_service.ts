@@ -43,8 +43,8 @@ export class DocLinksService {
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getOpenSearchDashboardsBranch();
     const OPENSEARCH_WEBSITE_URL = 'https://www.opensearch.org/';
-    const OPENSEARCH_DOCS = `https://docs-beta.opensearch.org/docs/opensearch/`;
-    const OPENSEARCH_DASHBOARDS_DOCS = `https://docs-beta.opensearch.org/docs/opensearch-dashboards/`;
+    const OPENSEARCH_DOCS = `https://opensearch.org/docs/opensearch/`;
+    const OPENSEARCH_DASHBOARDS_DOCS = `https://opensearch.org/docs/dashboards/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
