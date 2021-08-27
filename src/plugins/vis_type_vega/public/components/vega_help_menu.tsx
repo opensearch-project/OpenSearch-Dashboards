@@ -56,7 +56,7 @@ function VegaHelpMenu() {
       key="vegaHelp"
       // TODO: [RENAMEME] Need prod urls.
       // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-      href="https://docs-beta.opensearch.org/docs/opensearch-dashboards"
+      href="https://opensearch.org/docs/dashboards"
       target="_blank"
       onClick={closePopover}
     >

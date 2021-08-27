@@ -115,10 +115,7 @@ export const createZoomWarningMsg = (function () {
               // TODO: [RENAMEME] Need prod urls.
               values={{
                 wms: (
-                  <a
-                    target="_blank"
-                    href="https://docs-beta.opensearch.org/docs/opensearch-dashboards/maptiles"
-                  >
+                  <a target="_blank" href="https://opensearch.org/docs/dashboards/maptiles/">
                     {`Custom WMS Configuration`}
                   </a>
                 ),

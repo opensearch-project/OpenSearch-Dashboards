@@ -37,7 +37,7 @@ import {
 
 /**
  * Returns `OpenSearchQuerySort` which is used to sort records in the OpenSearch query
- * https://docs-beta.opensearch.org/opensearch/ux/#sort-results
+ * https://opensearch.org/docs/opensearch/ux/#sort-results
  * @param timeField
  * @param tieBreakerField
  * @param sortDir
