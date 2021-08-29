@@ -71,6 +71,10 @@ export class RenderingService {
       opensearchDashboardsConfig.branding.smallLogoUrl,
       'smallLogoUrl'
     );
+    const isLoadingLogoUrlValid = await this.checkUrlValid(
+      opensearchDashboardsConfig.branding.loadingLogoUrl,
+      'loadingLogoUrl'
+    );
 
     return {
       render: async (
@@ -125,6 +129,9 @@ export class RenderingService {
               smallLogoUrl: isSmallLogoUrlValid
                 ? opensearchDashboardsConfig.branding.smallLogoUrl
                 : undefined,
+              loadingLogoUrl: isLoadingLogoUrlValid
+                ? opensearchDashboardsConfig.branding.loadingLogoUrl
+                : undefined,
               title: opensearchDashboardsConfig.branding.title,
             },
           },
@@ -144,7 +151,7 @@ export class RenderingService {
   }
 
   public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
-    if (url.match(/\.(png|svg)$/) === null) {
+    if (url.match(/\.(png|svg|gif)$/) === null) {
       this.logger.get('branding').warn(configName + ' config is not found or invalid.');
       return false;
     }
