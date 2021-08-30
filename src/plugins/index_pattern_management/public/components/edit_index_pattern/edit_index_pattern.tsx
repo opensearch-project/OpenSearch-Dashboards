@@ -233,7 +233,7 @@ export const EditIndexPattern = withRouter(
               <EuiLink
                 // TODO: [RENAMEME] Need prod urls.
                 // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-                href="https://docs-beta.opensearch.org/opensearch/index-templates"
+                href="https://opensearch.org/docs/opensearch/index-templates"
                 target="_blank"
                 external
               >

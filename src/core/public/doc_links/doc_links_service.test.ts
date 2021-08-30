@@ -40,8 +40,6 @@ describe('DocLinksService#start()', () => {
     const service = new DocLinksService();
     const api = service.start({ injectedMetadata });
     expect(api.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(api.links.opensearchDashboards).toEqual(
-      'https://docs-beta.opensearch.org/docs/opensearch-dashboards/'
-    );
+    expect(api.links.opensearchDashboards).toEqual('https://opensearch.org/docs/dashboards/');
   });
 });
