@@ -91,6 +91,16 @@
   padding: $euiSizeS;
 }
 
+.homSolutionPanel__customIconContainer {
+  height: 50px;
+  padding: 5px 5px 5px 5px;
+}
+
+.homSolutionPanel__customIcon {
+  height: 100%;
+  max-width: 100%;
+}
+
 .homSolutionPanel__subtitle {
   margin-top: $euiSizeXS;
 }

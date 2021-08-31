@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
   describe('OpenSearch Dashboards branding configuration', function customHomeBranding() {
     describe('should render welcome page', async () => {
       this.tags('includeFirefox');
-      const expectedWelcomeLogo =
+      const expectedWelcomeLogoUrl =
         'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
       const expectedWelcomeMessage = 'Welcome to OpenSearch';
 
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeLogoUrl.toUpperCase());
       });
 
       it('with customized title', async () => {
@@ -90,6 +90,7 @@ export default function ({ getService, getPageObjects }) {
       this.tags('includeFirefox');
       const expectedUrl =
         'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+      const title = 'OpenSearch';
 
       before(async function () {
         await PageObjects.common.navigateToApp('home');
@@ -97,6 +98,24 @@ export default function ({ getService, getPageObjects }) {
 
       it('with customized logo in Navbar', async () => {
         await globalNav.logoExistsOrFail(expectedUrl);
+      });
+
+      it('with customized logo in primary dashboards card', async () => {
+        await testSubjects.existOrFail('dashboardCustomLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'dashboardCustomLogo',
+          'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());
+      });
+
+      it('with customized title in primary dashboards card', async () => {
+        await testSubjects.existOrFail('dashboardCustomTitle');
+        const actualLabel = await testSubjects.getAttribute(
+          'dashboardCustomTitle',
+          'data-test-title'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(title.toUpperCase());
       });
 
       it('with customized logo that can take back to home page', async () => {

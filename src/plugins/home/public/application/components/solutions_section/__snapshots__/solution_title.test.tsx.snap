@@ -1,6 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SolutionTitle renders the title section of the solution panel 1`] = `
+exports[`SolutionTitle renders the title section of the solution panel with custom branding 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    className="eui-textCenter"
+  >
+    <EuiToken
+      className="homSolutionPanel__icon"
+      fill="light"
+      iconType="inputOutput"
+      shape="circle"
+      size="l"
+    />
+    <EuiTitle
+      className="homSolutionPanel__title eui-textInheritColor"
+      size="s"
+    >
+      <h3>
+        OpenSearch Dashboards
+      </h3>
+    </EuiTitle>
+    <EuiText
+      size="s"
+    >
+      <p
+        className="homSolutionPanel__subtitle"
+      >
+        Visualize & analyze
+         
+        <EuiIcon
+          type="sortRight"
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`SolutionTitle renders the title section of the solution panel with default branding 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="none"

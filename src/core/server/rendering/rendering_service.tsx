@@ -75,6 +75,8 @@ export class RenderingService {
       opensearchDashboardsConfig.branding.loadingLogoUrl,
       'loadingLogoUrl'
     );
+    const isTitleValid = this.checkTitleValid(opensearchDashboardsConfig.branding.title, 'title');
+    const defaultTitle = 'OpenSearch Dashboards';
 
     return {
       render: async (
@@ -132,7 +134,7 @@ export class RenderingService {
               loadingLogoUrl: isLoadingLogoUrlValid
                 ? opensearchDashboardsConfig.branding.loadingLogoUrl
                 : undefined,
-              title: opensearchDashboardsConfig.branding.title,
+              title: isTitleValid ? opensearchDashboardsConfig.branding.title : defaultTitle,
             },
           },
         };
@@ -151,7 +153,7 @@ export class RenderingService {
   }
 
   public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
-    if (url.match(/\.(png|svg|gif)$/) === null) {
+    if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').warn(configName + ' config is not found or invalid.');
       return false;
     }
@@ -163,5 +165,13 @@ export class RenderingService {
         this.logger.get('branding').warn(configName + ' config is not found or invalid');
         return false;
       });
+  };
+
+  public checkTitleValid = (title: string, configName?: string): boolean => {
+    if (!title || title.length > 36) {
+      this.logger.get('branding').warn(configName + ' config is not found or invalid');
+      return false;
+    }
+    return true;
   };
 }

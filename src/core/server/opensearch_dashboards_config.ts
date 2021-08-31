@@ -62,7 +62,7 @@ export const config = {
       loadingLogoUrl: schema.string({
         defaultValue: '/',
       }),
-      title: schema.string({ defaultValue: 'OpenSearch Dashboards' }),
+      title: schema.string({ defaultValue: '' }),
     }),
   }),
   deprecations,

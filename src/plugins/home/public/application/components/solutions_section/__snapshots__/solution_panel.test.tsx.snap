@@ -24,9 +24,14 @@ exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
           grow={1}
         >
           <SolutionTitle
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             iconType="inputOutput"
             subtitle="Visualize & analyze"
-            title="OpenSearch Dashboards"
           />
         </EuiFlexItem>
         <EuiFlexItem

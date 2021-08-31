@@ -52,6 +52,12 @@ exports[`SolutionsSection renders a single solution 1`] = `
     >
       <SolutionPanel
         addBasePath={[Function]}
+        branding={
+          Object {
+            "smallLogoUrl": "/",
+            "title": "OpenSearch Dashboards",
+          }
+        }
         solution={
           Object {
             "appDescriptions": Array [
@@ -105,6 +111,12 @@ exports[`SolutionsSection renders multiple solutions in a single column when Ope
         >
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-2"
             solution={
               Object {
@@ -123,6 +135,12 @@ exports[`SolutionsSection renders multiple solutions in a single column when Ope
           />
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-3"
             solution={
               Object {
@@ -141,6 +159,12 @@ exports[`SolutionsSection renders multiple solutions in a single column when Ope
           />
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-4"
             solution={
               Object {
@@ -198,6 +222,12 @@ exports[`SolutionsSection renders multiple solutions in two columns with OpenSea
         >
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-2"
             solution={
               Object {
@@ -216,6 +246,12 @@ exports[`SolutionsSection renders multiple solutions in two columns with OpenSea
           />
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-3"
             solution={
               Object {
@@ -234,6 +270,12 @@ exports[`SolutionsSection renders multiple solutions in two columns with OpenSea
           />
           <SolutionPanel
             addBasePath={[Function]}
+            branding={
+              Object {
+                "smallLogoUrl": "/",
+                "title": "OpenSearch Dashboards",
+              }
+            }
             key="solution-4"
             solution={
               Object {
@@ -254,6 +296,12 @@ exports[`SolutionsSection renders multiple solutions in two columns with OpenSea
       </EuiFlexItem>
       <SolutionPanel
         addBasePath={[Function]}
+        branding={
+          Object {
+            "smallLogoUrl": "/",
+            "title": "OpenSearch Dashboards",
+          }
+        }
         solution={
           Object {
             "appDescriptions": Array [

@@ -163,6 +163,7 @@ export class Home extends Component {
               addBasePath={addBasePath}
               solutions={solutions}
               directories={directories}
+              branding={getServices().injectedMetadata.getBranding()}
             />
           ) : null}
 

@@ -64,9 +64,13 @@ interface Props {
   addBasePath: (path: string) => string;
   solution: FeatureCatalogueSolution;
   apps?: FeatureCatalogueEntry[];
+  branding: {
+    smallLogoUrl?: string;
+    title: string;
+  };
 }
 
-export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) => (
+export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [], branding }) => (
   <EuiFlexItem
     key={solution.id}
     data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
@@ -87,8 +91,8 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) =
           <EuiFlexItem grow={1} className={`homSolutionPanel__header`}>
             <SolutionTitle
               iconType={solution.icon}
-              title={solution.title}
               subtitle={solution.subtitle}
+              branding={branding}
             />
           </EuiFlexItem>
 

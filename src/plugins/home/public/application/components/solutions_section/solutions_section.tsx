@@ -46,9 +46,13 @@ interface Props {
   addBasePath: (path: string) => string;
   solutions: FeatureCatalogueSolution[];
   directories: FeatureCatalogueEntry[];
+  branding: {
+    smallLogoUrl?: string;
+    title: string;
+  };
 }
 
-export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories }) => {
+export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories, branding }) => {
   // Separate OpenSearch Dashboards from other solutions
   const opensearchDashboards = solutions.find(({ id }) => id === 'opensearchDashboards');
   const opensearchDashboardsApps = directories
@@ -73,7 +77,12 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
             <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
               <EuiFlexGroup direction="column">
                 {solutions.map((solution) => (
-                  <SolutionPanel key={solution.id} solution={solution} addBasePath={addBasePath} />
+                  <SolutionPanel
+                    key={solution.id}
+                    solution={solution}
+                    addBasePath={addBasePath}
+                    branding={branding}
+                  />
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -83,6 +92,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
               solution={opensearchDashboards}
               addBasePath={addBasePath}
               apps={opensearchDashboardsApps.length ? opensearchDashboardsApps : undefined}
+              branding={branding}
             />
           ) : null}
         </EuiFlexGroup>

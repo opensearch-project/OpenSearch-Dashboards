@@ -36,7 +36,6 @@ import { SolutionTitle } from './solution_title';
 
 const solutionEntry = {
   id: 'opensearchDashboards',
-  title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   descriptions: ['Analyze data in dashboards'],
   icon: 'inputOutput',
@@ -45,12 +44,30 @@ const solutionEntry = {
 };
 
 describe('SolutionTitle', () => {
-  test('renders the title section of the solution panel', () => {
+  test('renders the title section of the solution panel with default branding', () => {
+    const branding = {
+      title: 'OpenSearch Dashboards',
+    };
     const component = shallow(
       <SolutionTitle
-        title={solutionEntry.title}
         subtitle={solutionEntry.subtitle}
         iconType={solutionEntry.icon}
+        branding={branding}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders the title section of the solution panel with custom branding', () => {
+    const branding = {
+      smallLogoUrl: '/',
+      title: 'OpenSearch Dashboards',
+    };
+    const component = shallow(
+      <SolutionTitle
+        subtitle={solutionEntry.subtitle}
+        iconType={solutionEntry.icon}
+        branding={branding}
       />
     );
     expect(component).toMatchSnapshot();

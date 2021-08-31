@@ -42,14 +42,20 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  title: string;
   subtitle: string;
   iconType: IconType;
+  branding: {
+    smallLogoUrl?: string;
+    title: string;
+  };
 }
 
-export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
-  <EuiFlexGroup gutterSize="none" alignItems="center">
-    <EuiFlexItem className="eui-textCenter">
+const renderBrandingEnabledOrDisabledCardLogo = (
+  iconType: IconType,
+  branding: { smallLogoUrl?: string; title: string }
+) => {
+  if (!branding.smallLogoUrl) {
+    return (
       <EuiToken
         iconType={iconType}
         shape="circle"
@@ -57,9 +63,34 @@ export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
         size="l"
         className="homSolutionPanel__icon"
       />
+    );
+  } else {
+    return (
+      <div className="homSolutionPanel__customIcon">
+        <img
+          className="homSolutionPanel__customIconContainer"
+          data-test-subj="dashboardCustomLogo"
+          data-test-image-url={branding.smallLogoUrl}
+          alt={branding.title + ' logo'}
+          src={branding.smallLogoUrl}
+        />
+      </div>
+    );
+  }
+};
 
-      <EuiTitle className="homSolutionPanel__title eui-textInheritColor" size="s">
-        <h3>{title}</h3>
+export const SolutionTitle: FC<Props> = ({ subtitle, iconType, branding }) => (
+  <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexItem className="eui-textCenter">
+      {renderBrandingEnabledOrDisabledCardLogo(iconType, branding)}
+
+      <EuiTitle
+        className="homSolutionPanel__title eui-textInheritColor"
+        size="s"
+        data-test-subj="dashboardCustomTitle"
+        data-test-title={branding.title}
+      >
+        <h3>{branding.title}</h3>
       </EuiTitle>
 
       <EuiText size="s">
