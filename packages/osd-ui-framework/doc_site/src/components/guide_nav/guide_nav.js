@@ -172,8 +172,8 @@ export class GuideNav extends Component {
           </Link>
           <a
             href="http://opensearch.org"
-            className="guideNav__elasticLogo"
-            aria-label="Go to the Elastic website"
+            className="guideNav__opensearchLogo"
+            aria-label="Go to the OpenSearch website"
           />
 
           {this.renderPagination()}
