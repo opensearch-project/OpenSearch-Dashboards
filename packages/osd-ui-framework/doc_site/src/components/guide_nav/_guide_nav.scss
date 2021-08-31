@@ -80,9 +80,10 @@
       font-size: 14px;
     }
 
-    .guideNav__elasticLogo {
+    // TODO: [RENAMEME] replacement background-image might be needed
+    .guideNav__opensearchLogo {
       position: absolute;
-      background-image: url("images/elastic-logo.svg");
+      background-image: url("images/react-logo.svg");
       width: 106px;
       height: 36px;
       background-repeat: no-repeat;
