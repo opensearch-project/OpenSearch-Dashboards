@@ -75,7 +75,7 @@ export function isConfigVersionUpgradeable(
   // If the saved config is from the fork and from 6.8.0 to 7.10.2 then we should be able to upgrade.
   const savedIsFromPrefork =
     semver.gte(savedReleaseVersion, '6.8.0') && semver.lte(savedReleaseVersion, '7.10.2');
-  const currentVersionIsVersion1 = semver.eq(opensearchDashboardsReleaseVersion, '1.0.0');
+  const currentVersionIsVersion1 = semver.major(opensearchDashboardsReleaseVersion) === 1;
   return (
     savedIsLessThanOpenSearchDashboards ||
     (savedIsSameAsOpenSearchDashboards && savedRcIsLessThanOpenSearchDashboards) ||
