@@ -104,15 +104,12 @@ interface Props {
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
-  logoUrl?: string;
+  branding: CustomLogoType;
 }
 
-export function HeaderLogo({ href, navigateToApp, logoUrl, ...observables }: Props) {
+export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
-  const branding: CustomLogoType = {
-    logoUrl,
-  };
 
   return (
     <a

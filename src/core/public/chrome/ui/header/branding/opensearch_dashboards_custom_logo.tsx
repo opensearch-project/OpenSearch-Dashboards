@@ -35,21 +35,33 @@ import '../header_logo.scss';
 import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_darkmode';
 
 /**
- * @param {string} logoUrl - custom URL for the top left logo of the main screen
+ * @param {string} fullLogoUrl - custom URL for the top left logo of the main screen
+ * @param {string} logoUrl - custom URL for the logo icon
+ * @param {string} title - custom title for the application
  */
 export interface CustomLogoType {
+  fullLogoUrl?: string;
   logoUrl?: string;
+  title: string;
 }
-
+/**
+ *
+ * @param {CustomLogoType} - branding object consist of fullLogoUrl, logoUrl and title
+ * @returns A image component which is going to be rendered on the main page header bar.
+ *          If fullLogoUrl is valid, the full logo by fullLogoUrl config will be rendered;
+ *          if not, the logo icon by logoUrl config will be rendered; if both are not found,
+ *          the default opensearch logo will be rendered.
+ */
 export const CustomLogo = ({ ...branding }: CustomLogoType) => {
-  return !branding.logoUrl ? (
+  const headerLogoUrl = !branding.fullLogoUrl ? branding.logoUrl : branding.fullLogoUrl;
+  return !branding.fullLogoUrl && !branding.logoUrl ? (
     OpenSearchDashboardsLogoDarkMode()
   ) : (
     <img
       data-test-subj="customLogo"
-      data-test-image-url={branding.logoUrl}
-      src={branding.logoUrl}
-      alt="logo"
+      data-test-image-url={headerLogoUrl}
+      src={headerLogoUrl}
+      alt={branding.title + ' logo'}
       loading="lazy"
       className="logoImage"
     />

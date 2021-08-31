@@ -97,13 +97,13 @@ export const Template: FunctionComponent<Props> = ({
   );
 
   const renderBrandingEnabledOrDisabledLoadingBar = () => {
-    if (!injectedMetadata.branding.loadingLogoUrl && injectedMetadata.branding.smallLogoUrl) {
+    if (!injectedMetadata.branding.loadingLogoUrl && injectedMetadata.branding.logoUrl) {
       return <div className="osdProgress" />;
     }
   };
 
   const renderBrandingEnabledOrDisabledLoadingLogo = () => {
-    if (!injectedMetadata.branding.loadingLogoUrl && !injectedMetadata.branding.smallLogoUrl) {
+    if (!injectedMetadata.branding.loadingLogoUrl && !injectedMetadata.branding.logoUrl) {
       return openSearchLogoSpinner;
     } else {
       return (
@@ -112,7 +112,7 @@ export const Template: FunctionComponent<Props> = ({
             className="loadingLogo"
             src={
               !injectedMetadata.branding.loadingLogoUrl
-                ? injectedMetadata.branding.smallLogoUrl
+                ? injectedMetadata.branding.logoUrl
                 : injectedMetadata.branding.loadingLogoUrl
             }
             alt={injectedMetadata.branding.title + ' logo'}
