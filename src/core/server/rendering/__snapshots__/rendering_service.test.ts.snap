@@ -6,7 +6,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+    "title": "OpenSearch Dashboards",
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -52,7 +52,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+    "title": "OpenSearch Dashboards",
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -98,7 +98,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+    "title": "OpenSearch Dashboards",
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -148,7 +148,7 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "branding": Object {
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+    "title": "OpenSearch Dashboards",
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -194,7 +194,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "logoUrl": "https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg",
+    "title": "OpenSearch Dashboards",
   },
   "buildNumber": Any<Number>,
   "csp": Object {

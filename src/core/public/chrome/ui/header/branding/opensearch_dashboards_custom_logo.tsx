@@ -32,13 +32,19 @@
 
 import React from 'react';
 import '../header_logo.scss';
+import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_darkmode';
 
+/**
+ * @param {string} logoUrl - custom URL for the top left logo of the main screen
+ */
 export interface CustomLogoType {
-  logoUrl: string;
+  logoUrl?: string;
 }
 
 export const CustomLogo = ({ ...branding }: CustomLogoType) => {
-  return (
+  return !branding.logoUrl ? (
+    OpenSearchDashboardsLogoDarkMode()
+  ) : (
     <img
       data-test-subj="customLogo"
       data-test-image-url={branding.logoUrl}

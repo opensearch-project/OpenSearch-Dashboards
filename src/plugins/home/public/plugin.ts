@@ -119,6 +119,7 @@ export class HomePublicPlugin
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
+          injectedMetadata: coreStart.injectedMetadata,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

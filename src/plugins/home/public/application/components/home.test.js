@@ -45,6 +45,9 @@ jest.mock('../opensearch_dashboards_services', () => ({
     chrome: {
       setBreadcrumbs: () => {},
     },
+    injectedMetadata: {
+      getBranding: () => ({}),
+    },
   }),
 }));
 

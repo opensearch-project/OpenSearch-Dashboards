@@ -250,6 +250,8 @@ exports[`Header renders 1`] = `
   branding={
     Object {
       "logoUrl": "/",
+      "smallLogoUrl": "/",
+      "title": "OpenSearch Dashboards",
     }
   }
   breadcrumbs$={
@@ -2936,6 +2938,8 @@ exports[`Header renders 1`] = `
                         <img
                           alt="logo"
                           className="logoImage"
+                          data-test-image-url="/"
+                          data-test-subj="customLogo"
                           loading="lazy"
                           src="/"
                         />

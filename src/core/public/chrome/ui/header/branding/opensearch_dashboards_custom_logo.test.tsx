@@ -12,7 +12,12 @@ import { CustomLogo } from './opensearch_dashboards_custom_logo';
 
 describe('Custom Logo', () => {
   it('Take in a normal URL string', () => {
-    const branding = { logoUrl: '/', className: '' };
+    const branding = { logoUrl: '/custom' };
+    const component = mountWithIntl(<CustomLogo {...branding} />);
+    expect(component).toMatchSnapshot();
+  });
+  it('Take in a invalid URL string', () => {
+    const branding = {};
     const component = mountWithIntl(<CustomLogo {...branding} />);
     expect(component).toMatchSnapshot();
   });
