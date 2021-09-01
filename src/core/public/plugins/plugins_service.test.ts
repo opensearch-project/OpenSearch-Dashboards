@@ -113,7 +113,7 @@ describe('PluginsService', () => {
       ...mockSetupDeps,
       application: expect.any(Object),
       getStartServices: expect.any(Function),
-      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
+      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar', 'getBranding'),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -132,7 +132,7 @@ describe('PluginsService', () => {
       ...mockStartDeps,
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
-      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
+      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar', 'getBranding'),
     };
 
     // Reset these for each test.

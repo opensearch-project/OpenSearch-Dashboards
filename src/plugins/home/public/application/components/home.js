@@ -201,6 +201,7 @@ export class Home extends Component {
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
         telemetry={this.props.telemetry}
+        branding={getServices().injectedMetadata.getBranding()}
       />
     );
   }
@@ -216,7 +217,6 @@ export class Home extends Component {
         return this.renderWelcome();
       }
     }
-
     return this.renderNormal();
   }
 }
