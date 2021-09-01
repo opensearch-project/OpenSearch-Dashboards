@@ -234,11 +234,11 @@ describe('setup.getBranding()', () => {
   it('returns injectedMetadata.branding', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        branding: { logoUrl: '/' },
+        branding: { logoUrl: '/', smallLogoUrl: '/', title: 'title' },
       },
     } as any);
 
-    const logoURL = injectedMetadata.setup().getBranding();
-    expect(logoURL).toEqual({ logoUrl: '/' });
+    const branding = injectedMetadata.setup().getBranding();
+    expect(branding).toEqual({ logoUrl: '/', smallLogoUrl: '/', title: 'title' });
   });
 });

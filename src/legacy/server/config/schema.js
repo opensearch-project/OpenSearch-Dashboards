@@ -234,9 +234,9 @@ export default () =>
       // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       branding: Joi.object({
-        logoUrl: Joi.string().default(
-          'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg'
-        ),
+        logoUrl: Joi.string().default('/'),
+        smallLogoUrl: Joi.string().default('/'),
+        title: Joi.string().default('OpenSearch Dashboards'),
       }),
     }).default(),
 
