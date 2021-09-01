@@ -77,7 +77,9 @@ export interface InjectedMetadataParams {
       };
     };
     branding: {
-      logoUrl: string;
+      logoUrl?: string;
+      smallLogoUrl?: string;
+      title: string;
     };
   };
 }
@@ -184,7 +186,9 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
   getBranding: () => {
-    logoUrl: string;
+    logoUrl?: string;
+    smallLogoUrl?: string;
+    title: string;
   };
 }
 

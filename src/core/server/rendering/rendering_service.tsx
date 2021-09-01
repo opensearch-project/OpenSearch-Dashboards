@@ -63,7 +63,14 @@ export class RenderingService {
       .pipe(first())
       .toPromise();
 
-    const validLogoUrl = await this.checkUrlValid(opensearchDashboardsConfig.branding.logoUrl);
+    const isLogoUrlValid = await this.checkUrlValid(
+      opensearchDashboardsConfig.branding.logoUrl,
+      'logoUrl'
+    );
+    const isSmallLogoUrlValid = await this.checkUrlValid(
+      opensearchDashboardsConfig.branding.smallLogoUrl,
+      'smallLogoUrl'
+    );
 
     return {
       render: async (
@@ -114,7 +121,11 @@ export class RenderingService {
               uiSettings: settings,
             },
             branding: {
-              logoUrl: validLogoUrl,
+              logoUrl: isLogoUrlValid ? opensearchDashboardsConfig.branding.logoUrl : undefined,
+              smallLogoUrl: isSmallLogoUrlValid
+                ? opensearchDashboardsConfig.branding.smallLogoUrl
+                : undefined,
+              title: opensearchDashboardsConfig.branding.title,
             },
           },
         };
@@ -132,22 +143,18 @@ export class RenderingService {
     return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
   }
 
-  public checkUrlValid = async (url: string): Promise<string> => {
+  public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url.match(/\.(png|svg)$/) === null) {
-      this.logger
-        .get('branding')
-        .error('Invalid URL for logo. Rendering default OpenSearch Dashboard Logo.');
-      return 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg';
+      this.logger.get('branding').warn(configName + ' config is not found or invalid.');
+      return false;
     }
     return await Axios.get(url, { adapter: AxiosHttpAdapter })
       .then(() => {
-        return url;
+        return true;
       })
       .catch(() => {
-        this.logger
-          .get('branding')
-          .error('Invalid URL for logo. Rendering default OpenSearch Dashboard Logo.');
-        return 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg';
+        this.logger.get('branding').warn(configName + ' config is not found or invalid');
+        return false;
       });
   };
 }

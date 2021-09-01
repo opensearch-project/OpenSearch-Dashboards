@@ -54,9 +54,12 @@ export const config = {
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
     branding: schema.object({
       logoUrl: schema.string({
-        defaultValue:
-          'https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg',
+        defaultValue: '/',
       }),
+      smallLogoUrl: schema.string({
+        defaultValue: '/',
+      }),
+      title: schema.string({ defaultValue: 'OpenSearch Dashboards' }),
     }),
   }),
   deprecations,
