@@ -30,29 +30,82 @@
  * GitHub history for details.
  */
 import expect from '@osd/expect';
+import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['common', 'home', 'header']);
+  const testSubjects = getService('testSubjects');
 
-  describe('OpenSearch Dashboards branding configuration', function customLogo() {
-    this.tags('includeFirefox');
-    const expectedUrl = 'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
-    before(async function () {
-      await PageObjects.common.navigateToApp('home');
+  describe('OpenSearch Dashboards branding configuration', function customHomeBranding() {
+    describe('should render welcome page', async () => {
+      this.tags('includeFirefox');
+      const expectedWelcomeLogo =
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+      const expectedWelcomeMessage = 'Welcome to OpenSearch';
+
+      //unloading any pre-existing settings so the welcome page will appear
+      before(async function () {
+        await opensearchArchiver.unload('logstash_functional');
+        await opensearchArchiver.unload('long_window_logstash');
+        await opensearchArchiver.unload('visualize');
+        await PageObjects.common.navigateToApp('home');
+      });
+
+      //loading the settings again for
+      after(async function () {
+        await browser.setWindowSize(1280, 800);
+        await opensearchArchiver.loadIfNeeded('logstash_functional');
+        await opensearchArchiver.loadIfNeeded('long_window_logstash');
+        await opensearchArchiver.load('visualize');
+        await opensearchDashboardsServer.uiSettings.replace({
+          defaultIndex: 'logstash-*',
+          [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+        });
+      });
+
+      it('with customized logo', async () => {
+        await testSubjects.existOrFail('welcomeCustomLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'welcomeCustomLogo',
+          'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeLogo.toUpperCase());
+      });
+
+      it('with customized title', async () => {
+        await testSubjects.existOrFail('welcomeCustomTitle');
+        const actualLabel = await testSubjects.getAttribute(
+          'welcomeCustomTitle',
+          'data-test-title-message'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeMessage.toUpperCase());
+      });
     });
 
-    it('should show customized logo in Navbar on the main page', async () => {
-      await globalNav.logoExistsOrFail(expectedUrl);
-    });
+    describe('should render home page', async () => {
+      this.tags('includeFirefox');
+      const expectedUrl =
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
 
-    it('should show a customized logo that can take to home page', async () => {
-      await PageObjects.common.navigateToApp('settings');
-      await globalNav.clickLogo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/home')).to.be(true);
+      before(async function () {
+        await PageObjects.common.navigateToApp('home');
+      });
+
+      it('with customized logo in Navbar', async () => {
+        await globalNav.logoExistsOrFail(expectedUrl);
+      });
+
+      it('with customized logo that can take back to home page', async () => {
+        await PageObjects.common.navigateToApp('settings');
+        await globalNav.clickLogo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('/app/home')).to.be(true);
+      });
     });
   });
 }

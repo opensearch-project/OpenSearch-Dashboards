@@ -60,7 +60,7 @@ export default function () {
         `--opensearch.hosts=${formatUrl(servers.opensearch)}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
-        `--home.disableWelcomeScreen=true`,
+        `--home.disableWelcomeScreen=false`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         //`--security.showInsecureClusterWarning=false`,
@@ -76,6 +76,8 @@ export default function () {
         // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
         // Custom branding config
         `--opensearchDashboards.branding.logoUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg`,
+        `--opensearchDashboards.branding.smallLogoUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg`,
+        `--opensearchDashboards.branding.title=OpenSearch`,
       ],
     },
     services,
