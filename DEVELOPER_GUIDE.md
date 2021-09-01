@@ -64,6 +64,15 @@ $ yarn start
 When the server is up and ready, click on the link displayed in your terminal to
 access it.
 
+### Building the Docker Image
+
+To build the Docker image, run the following:
+
+```
+yarn osd bootstrap
+yarn build --docker
+```
+
 ## General
 
 ### Filenames
