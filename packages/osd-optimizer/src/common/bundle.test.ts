@@ -39,6 +39,7 @@ const SPEC: BundleSpec = {
   publicDirNames: ['public'],
   id: 'bar',
   outputDir: '/foo/bar/target',
+  moduleAliases: undefined,
   sourceRoot: '/foo',
   type: 'plugin',
 };
@@ -65,6 +66,7 @@ it('creates cache keys', () => {
         "contextDir": "/foo/bar",
         "id": "bar",
         "manifestPath": undefined,
+        "moduleAliases": undefined,
         "outputDir": "/foo/bar/target",
         "publicDirNames": Array [
           "public",
@@ -102,6 +104,7 @@ it('parses bundles from JSON specs', () => {
         "contextDir": "/foo/bar",
         "id": "bar",
         "manifestPath": undefined,
+        "moduleAliases": undefined,
         "outputDir": "/foo/bar/target",
         "publicDirNames": Array [
           "public",

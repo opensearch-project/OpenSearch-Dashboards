@@ -50,6 +50,14 @@ const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
+  const webpackAliases: Record<string, string> = {};
+  if (bundle.moduleAliases !== undefined) {
+    const aliases = bundle.moduleAliases;
+    Object.keys(aliases).forEach(
+      (key) => (webpackAliases[key] = `${bundle.contextDir}/${aliases[key]}`)
+    );
+  }
+
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: bundle.contextDir,
@@ -229,6 +237,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
+        ...webpackAliases,
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },

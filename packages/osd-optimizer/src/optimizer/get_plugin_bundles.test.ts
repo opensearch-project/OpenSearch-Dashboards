@@ -74,6 +74,7 @@ it('returns a bundle for core and each plugin', () => {
         "contextDir": <repoRoot>/plugins/foo,
         "id": "foo",
         "manifestPath": <repoRoot>/plugins/foo/opensearch_dashboards.json,
+        "moduleAliases": undefined,
         "outputDir": <outputRoot>/plugins/foo/target/public,
         "publicDirNames": Array [
           "public",
@@ -86,6 +87,7 @@ it('returns a bundle for core and each plugin', () => {
         "contextDir": <outsideOfRepo>/plugins/baz,
         "id": "baz",
         "manifestPath": <outsideOfRepo>/plugins/baz/opensearch_dashboards.json,
+        "moduleAliases": undefined,
         "outputDir": <outsideOfRepo>/plugins/baz/target/public,
         "publicDirNames": Array [
           "public",

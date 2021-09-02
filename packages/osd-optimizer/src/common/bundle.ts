@@ -56,6 +56,8 @@ export interface BundleSpec {
   readonly sourceRoot: string;
   /** Absolute path to the directory where output should be written */
   readonly outputDir: string;
+  /** Optional module aliases to inject inside webpack to avoid relative imports if it's preferable */
+  readonly moduleAliases: Record<string, string> | undefined;
   /** Banner that should be written to all bundle JS files */
   readonly banner?: string;
   /** Absolute path to a opensearch_dashboards.json manifest file, if omitted we assume there are not dependenices */
@@ -79,6 +81,8 @@ export class Bundle {
   public readonly sourceRoot: BundleSpec['sourceRoot'];
   /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
+  /** Module aliases to avoid relative imports if it's preferable */
+  readonly moduleAliases: BundleSpec['moduleAliases'];
   /** Banner that should be written to all bundle JS files */
   public readonly banner: BundleSpec['banner'];
   /**
@@ -97,6 +101,7 @@ export class Bundle {
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
+    this.moduleAliases = spec.moduleAliases;
     this.manifestPath = spec.manifestPath;
     this.banner = spec.banner;
 
@@ -129,6 +134,7 @@ export class Bundle {
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
+      moduleAliases: this.moduleAliases,
       manifestPath: this.manifestPath,
       banner: this.banner,
     };
@@ -232,6 +238,15 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have an absolute path `outputDir` property');
         }
 
+        const { moduleAliases } = spec;
+        if (moduleAliases !== undefined) {
+          if (!isPlainObject(moduleAliases)) {
+            throw new Error(
+              '`bundles[]` must have an object composed of strings on keys and values `moduleAliases` property'
+            );
+          }
+        }
+
         const { manifestPath } = spec;
         if (manifestPath !== undefined) {
           if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
@@ -253,6 +268,7 @@ export function parseBundles(json: string) {
           contextDir,
           sourceRoot,
           outputDir,
+          moduleAliases,
           banner,
           manifestPath,
         });
@@ -262,3 +278,9 @@ export function parseBundles(json: string) {
     throw new Error(`unable to parse bundles: ${error.message}`);
   }
 }
+
+const isPlainObject = (value: unknown): value is Record<string, string> =>
+  typeof value === 'object' &&
+  value !== null &&
+  value.constructor === Object &&
+  Object.getPrototypeOf(value) === Object.prototype;

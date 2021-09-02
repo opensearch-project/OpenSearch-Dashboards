@@ -30,6 +30,7 @@
  * GitHub history for details.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 
 import { Bundle } from '../common';
@@ -56,8 +57,18 @@ export function getPluginBundles(
             Path.relative(repoRoot, p.directory),
             'target/public'
           ),
+          moduleAliases: getBundleAliases(p.directory),
           manifestPath: p.manifestPath,
           banner: undefined,
         })
     );
 }
+
+const getBundleAliases = (contextDir: string): Record<string, string> | undefined => {
+  const pathPackage = `${contextDir}/package.json`;
+  if (Fs.existsSync(pathPackage)) {
+    const pluginPackage = JSON.parse(Fs.readFileSync(pathPackage, 'utf8'));
+    const aliases = pluginPackage?._moduleAliases as Record<string, string>;
+    if (aliases !== undefined) return aliases;
+  }
+};

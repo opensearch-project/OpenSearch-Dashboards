@@ -244,6 +244,7 @@ export class OptimizerConfig {
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              moduleAliases: undefined,
             }),
           ]
         : []),

@@ -12,6 +12,7 @@ OptimizerConfig {
       "contextDir": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar,
       "id": "bar",
       "manifestPath": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/opensearch_dashboards.json,
+      "moduleAliases": undefined,
       "outputDir": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/target/public,
       "publicDirNames": Array [
         "public",
@@ -28,6 +29,7 @@ OptimizerConfig {
       "contextDir": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo,
       "id": "foo",
       "manifestPath": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/opensearch_dashboards.json,
+      "moduleAliases": undefined,
       "outputDir": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/target/public,
       "publicDirNames": Array [
         "public",
