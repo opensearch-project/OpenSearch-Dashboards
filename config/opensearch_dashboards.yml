@@ -157,6 +157,9 @@
 # smaller version customized logo URL
 # opensearchDashboards.branding.smallLogoUrl: ""
 
+# customized loading logo URL
+# opensearchDashboards.branding.loadingLogoUrl: ""
+
 # custom application title
 # opensearchDashboards.branding.title: ""
 

@@ -59,6 +59,9 @@ export const config = {
       smallLogoUrl: schema.string({
         defaultValue: '/',
       }),
+      loadingLogoUrl: schema.string({
+        defaultValue: '/',
+      }),
       title: schema.string({ defaultValue: 'OpenSearch Dashboards' }),
     }),
   }),

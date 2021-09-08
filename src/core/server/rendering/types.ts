@@ -77,6 +77,7 @@ export interface RenderingMetadata {
     branding: {
       logoUrl?: string;
       smallLogoUrl?: string;
+      loadingLogoUrl?: string;
       title: string;
     };
   };
