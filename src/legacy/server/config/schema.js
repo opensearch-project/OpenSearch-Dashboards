@@ -236,6 +236,7 @@ export default () =>
       branding: Joi.object({
         logoUrl: Joi.string().default('/'),
         smallLogoUrl: Joi.string().default('/'),
+        loadingLogoUrl: Joi.string().default('/'),
         title: Joi.string().default('OpenSearch Dashboards'),
       }),
     }).default(),

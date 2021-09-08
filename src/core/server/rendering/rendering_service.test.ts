@@ -136,6 +136,7 @@ describe('RenderingService', () => {
       });
     });
   });
+
   describe('checkUrlValid()', () => {
     it('SVG URL is valid', async () => {
       const result = await service.checkUrlValid(
@@ -144,6 +145,7 @@ describe('RenderingService', () => {
       );
       expect(result).toEqual(true);
     });
+
     it('PNG URL is valid', async () => {
       const result = await service.checkUrlValid(
         'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
@@ -151,10 +153,12 @@ describe('RenderingService', () => {
       );
       expect(result).toEqual(true);
     });
-    it('URL does not contain svg, or png', async () => {
+
+    it('URL does not contain svg, png or gif', async () => {
       const result = await service.checkUrlValid('https://validUrl', 'config');
       expect(result).toEqual(false);
     });
+
     it('URL is invalid', async () => {
       const result = await service.checkUrlValid('http://notfound.svg', 'config');
       expect(result).toEqual(false);
