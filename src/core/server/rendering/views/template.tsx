@@ -95,6 +95,33 @@ export const Template: FunctionComponent<Props> = ({
       />
     </svg>
   );
+
+  const renderBrandingEnabledOrDisabledLoadingBar = () => {
+    if (!injectedMetadata.branding.loadingLogoUrl && injectedMetadata.branding.smallLogoUrl) {
+      return <div className="osdProgress" />;
+    }
+  };
+
+  const renderBrandingEnabledOrDisabledLoadingLogo = () => {
+    if (!injectedMetadata.branding.loadingLogoUrl && !injectedMetadata.branding.smallLogoUrl) {
+      return openSearchLogoSpinner;
+    } else {
+      return (
+        <div className="loadingLogoContainer">
+          <img
+            className="loadingLogo"
+            src={
+              !injectedMetadata.branding.loadingLogoUrl
+                ? injectedMetadata.branding.smallLogoUrl
+                : injectedMetadata.branding.loadingLogoUrl
+            }
+            alt={injectedMetadata.branding.title + ' logo'}
+          />
+        </div>
+      );
+    }
+  };
+
   return (
     <html lang={locale}>
       <head>
@@ -147,17 +174,19 @@ export const Template: FunctionComponent<Props> = ({
           style={{ display: 'none' }}
           data-test-subj="osdLoadingMessage"
         >
-          <div className="osdLoaderWrap">
-            {openSearchLogoSpinner}
+          <div className="osdLoaderWrap" data-test-subj="loadingLogo">
+            {renderBrandingEnabledOrDisabledLoadingLogo()}
             <div
               className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
-                defaultMessage:
-                  'OpenSearch did not load properly. Check the server output for more information.',
+                defaultMessage: `${injectedMetadata.branding.title} did not load properly. Check the server output for more information.`,
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading OpenSearch' })}
+              {i18n('core.ui.welcomeMessage', {
+                defaultMessage: `Loading ${injectedMetadata.branding.title}`,
+              })}
             </div>
+            {renderBrandingEnabledOrDisabledLoadingBar()}
           </div>
         </div>
 
