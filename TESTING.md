@@ -1,4 +1,4 @@
-Below is a draft of the contents, what do y'all think:
+Overview
 ---
 - [General information](#general-information)
 - [Requirements](#requirements)
