@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
     describe('should render welcome page', async () => {
       this.tags('includeFirefox');
       const expectedWelcomeLogo =
-        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
       const expectedWelcomeMessage = 'Welcome to OpenSearch';
 
       //unloading any pre-existing settings so the welcome page will appear
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
     describe('should render home page', async () => {
       this.tags('includeFirefox');
       const expectedUrl =
-        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
 
       before(async function () {
         await PageObjects.common.navigateToApp('home');

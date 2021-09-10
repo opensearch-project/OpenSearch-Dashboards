@@ -49,6 +49,8 @@ import {
 } from './types';
 import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 
+const DEFAULT_TITLE = 'OpenSearch Dashboards';
+
 /** @internal */
 export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
@@ -63,18 +65,19 @@ export class RenderingService {
       .pipe(first())
       .toPromise();
 
+    const isFullLogoUrlValid = await this.checkUrlValid(
+      opensearchDashboardsConfig.branding.fullLogoUrl,
+      'fullLogoUrl'
+    );
     const isLogoUrlValid = await this.checkUrlValid(
       opensearchDashboardsConfig.branding.logoUrl,
       'logoUrl'
-    );
-    const isSmallLogoUrlValid = await this.checkUrlValid(
-      opensearchDashboardsConfig.branding.smallLogoUrl,
-      'smallLogoUrl'
     );
     const isLoadingLogoUrlValid = await this.checkUrlValid(
       opensearchDashboardsConfig.branding.loadingLogoUrl,
       'loadingLogoUrl'
     );
+    const isTitleValid = this.checkTitleValid(opensearchDashboardsConfig.branding.title, 'title');
 
     return {
       render: async (
@@ -125,14 +128,14 @@ export class RenderingService {
               uiSettings: settings,
             },
             branding: {
-              logoUrl: isLogoUrlValid ? opensearchDashboardsConfig.branding.logoUrl : undefined,
-              smallLogoUrl: isSmallLogoUrlValid
-                ? opensearchDashboardsConfig.branding.smallLogoUrl
+              fullLogoUrl: isFullLogoUrlValid
+                ? opensearchDashboardsConfig.branding.fullLogoUrl
                 : undefined,
+              logoUrl: isLogoUrlValid ? opensearchDashboardsConfig.branding.logoUrl : undefined,
               loadingLogoUrl: isLoadingLogoUrlValid
                 ? opensearchDashboardsConfig.branding.loadingLogoUrl
                 : undefined,
-              title: opensearchDashboardsConfig.branding.title,
+              title: isTitleValid ? opensearchDashboardsConfig.branding.title : DEFAULT_TITLE,
             },
           },
         };
@@ -151,7 +154,7 @@ export class RenderingService {
   }
 
   public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
-    if (url.match(/\.(png|svg|gif)$/) === null) {
+    if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').warn(configName + ' config is not found or invalid.');
       return false;
     }
@@ -163,5 +166,18 @@ export class RenderingService {
         this.logger.get('branding').warn(configName + ' config is not found or invalid');
         return false;
       });
+  };
+
+  public checkTitleValid = (title: string, configName?: string): boolean => {
+    if (!title || title.length > 36) {
+      this.logger
+        .get('branding')
+        .warn(
+          configName +
+            ' config is not found or invalid. Title length should be between 1 to 36 characters.'
+        );
+      return false;
+    }
+    return true;
   };
 }
