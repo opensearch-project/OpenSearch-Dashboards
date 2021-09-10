@@ -35,6 +35,9 @@ import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  linuxX64: boolean;
+  linuxArm64: boolean;
+  darwinX64: boolean;
   versionQualifier?: string;
 }
 
@@ -48,12 +51,22 @@ interface Package {
 }
 
 export class Config {
-  static async create({ isRelease, targetAllPlatforms, versionQualifier }: Options) {
+  static async create({
+    isRelease,
+    targetAllPlatforms,
+    darwinX64,
+    linuxArm64,
+    linuxX64,
+    versionQualifier,
+  }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
     return new Config(
       targetAllPlatforms,
+      linuxX64,
+      linuxArm64,
+      darwinX64,
       pkg,
       pkg.engines.node,
       dirname(pkgPath),
@@ -68,6 +81,9 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
+    private readonly darwinX64: boolean,
+    private readonly linuxArm64: boolean,
+    private readonly linuxX64: boolean,
     private readonly pkg: Package,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -104,12 +120,26 @@ export class Config {
   }
 
   /**
-   * Return the list of Platforms we are targeting, if --this-platform flag is
-   * specified only the platform for this OS will be returned
+   * Return true if a supported Platform is specified
+   */
+  hasSpecifiedPlatform() {
+    return this.darwinX64 || this.linuxArm64 || this.linuxX64;
+  }
+
+  /**
+   * Return the list of supported Platforms, if --all-platform flag is specified.
+   * Return the targeted Platform, if --target-platform flag is specified.
+   * If no flag, only the platform for this OS will be returned.
    */
   getTargetPlatforms() {
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
+    } else if (this.darwinX64) {
+      return [this.getPlatform('darwin', 'x64')];
+    } else if (this.linuxArm64) {
+      return [this.getPlatform('linux', 'arm64')];
+    } else if (this.linuxX64) {
+      return [this.getPlatform('linux', 'x64')];
     }
 
     return [this.getPlatformForThisOs()];

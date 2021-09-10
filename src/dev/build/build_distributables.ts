@@ -40,6 +40,9 @@ export interface BuildOptions {
   createDockerUbiPackage: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  darwinX64: boolean;
+  linuxArm64: boolean;
+  linuxX64: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {

@@ -50,8 +50,83 @@ it('build dist for current platform, without packages, by default', () => {
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
         "createRpmPackage": false,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
+        "targetAllPlatforms": false,
+        "versionQualifier": "",
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('build dist for linux x64 platform, without packages, if --linux-x64 is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createDockerUbiPackage": false,
+        "createRpmPackage": false,
+        "darwinX64": false,
+        "downloadFreshNode": true,
+        "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
+        "targetAllPlatforms": false,
+        "versionQualifier": "",
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('build dist for linux x64 platform, without packages, if --linux-arm64 is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createDockerUbiPackage": false,
+        "createRpmPackage": false,
+        "darwinX64": false,
+        "downloadFreshNode": true,
+        "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
+        "targetAllPlatforms": false,
+        "versionQualifier": "",
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('build dist for linux x64 platform, without packages, if --darwin-x64 is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createDockerUbiPackage": false,
+        "createRpmPackage": false,
+        "darwinX64": false,
+        "downloadFreshNode": true,
+        "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": false,
         "versionQualifier": "",
       },
@@ -71,8 +146,11 @@ it('builds packages if --all-platforms is passed', () => {
         "createDockerPackage": true,
         "createDockerUbiPackage": true,
         "createRpmPackage": true,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
@@ -92,8 +170,11 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
         "createRpmPackage": true,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
@@ -113,8 +194,11 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
         "createRpmPackage": false,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
@@ -135,8 +219,11 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "createDockerPackage": true,
         "createDockerUbiPackage": true,
         "createRpmPackage": false,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
@@ -157,8 +244,11 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "createDockerPackage": true,
         "createDockerUbiPackage": false,
         "createRpmPackage": false,
+        "darwinX64": false,
         "downloadFreshNode": true,
         "isRelease": false,
+        "linuxArm64": false,
+        "linuxX64": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
