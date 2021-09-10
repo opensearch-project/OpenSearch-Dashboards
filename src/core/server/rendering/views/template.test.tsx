@@ -86,7 +86,10 @@ function mockProps() {
 describe('Template', () => {
   it('renders with default OpenSearch loading logo', () => {
     const branding = {
-      title: '',
+      logo: {},
+      mark: {},
+      loadingLogo: {},
+      applicationTitle: '',
     };
     injectedMetadata.getBranding.mockReturnValue(branding);
     const component = renderWithIntl(<Template metadata={mockProps()} />);
@@ -95,8 +98,10 @@ describe('Template', () => {
 
   it('renders with static logo with horizontal loading bar', () => {
     const branding = {
-      logoUrl: '/',
-      title: '',
+      logo: {},
+      mark: { defaultUrl: '/' },
+      loadingLogo: {},
+      applicationTitle: '',
     };
     injectedMetadata.getBranding.mockReturnValue(branding);
     const component = renderWithIntl(<Template metadata={mockProps()} />);
@@ -105,9 +110,10 @@ describe('Template', () => {
 
   it('renders with customized loading logo', () => {
     const branding = {
-      logoUrl: '/',
-      loadingLogoUrl: '/',
-      title: '',
+      logo: {},
+      mark: { defaultUrl: '/' },
+      loadingLogo: { defaultUrl: '/' },
+      applicationTitle: '',
     };
     injectedMetadata.getBranding.mockReturnValue(branding);
     const component = renderWithIntl(<Template metadata={mockProps()} />);

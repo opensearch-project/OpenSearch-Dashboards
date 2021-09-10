@@ -51,8 +51,10 @@ test('should render a Welcome screen with the telemetry disclaimer', () => {
 */
 
 const branding = {
-  logoUrl: '/',
-  title: 'OpenSearch Dashboards',
+  mark: {
+    defaultUrl: '/',
+  },
+  applicationTitle: 'OpenSearch Dashboards',
 };
 
 test('should render a Welcome screen with the telemetry disclaimer when optIn is true', () => {
@@ -92,7 +94,8 @@ test('fires opt-in seen when mounted', () => {
 
 test('should render a Welcome screen with the default OpenSearch Dashboards branding', () => {
   const defaultBranding = {
-    title: 'OpenSearch Dashboards',
+    mark: {},
+    applicationTitle: 'OpenSearch Dashboards',
   };
   const component = shallow(
     <Welcome urlBasePath="/" onSkip={() => {}} branding={defaultBranding} />
@@ -102,8 +105,10 @@ test('should render a Welcome screen with the default OpenSearch Dashboards bran
 
 test('should render a Welcome screen with customized branding', () => {
   const customBranding = {
-    logoUrl: '/custom',
-    title: 'custom title',
+    mark: {
+      defaultUrl: '/custom',
+    },
+    applicationTitle: 'custom title',
   };
   const component = shallow(
     <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
