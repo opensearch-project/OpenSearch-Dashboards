@@ -87,7 +87,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
-  branding: { logoUrl?: string };
+  branding: { fullLogoUrl?: string; logoUrl?: string; title: string };
 }
 
 export function Header({
@@ -127,7 +127,7 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
-                    logoUrl={branding.logoUrl}
+                    branding={branding}
                   />,
                   <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],

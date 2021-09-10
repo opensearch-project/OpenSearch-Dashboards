@@ -237,8 +237,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => {
+      fullLogoUrl?: string;
       logoUrl?: string;
-      smallLogoUrl?: string;
       title: string;
     };
   };
@@ -297,8 +297,8 @@ export interface CoreStart {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => {
+      fullLogoUrl?: string;
       logoUrl?: string;
-      smallLogoUrl?: string;
       title: string;
     };
   };

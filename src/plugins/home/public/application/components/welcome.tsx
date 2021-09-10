@@ -59,7 +59,7 @@ interface Props {
   onSkip: () => void;
   telemetry?: TelemetryPluginStart;
   branding: {
-    smallLogoUrl?: string;
+    logoUrl?: string;
     title: string;
   };
 }
@@ -145,7 +145,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private renderBrandingEnabledOrDisabledLogo = () => {
-    if (!this.props.branding.smallLogoUrl) {
+    if (!this.props.branding.logoUrl) {
       return (
         <span className="homWelcome__logo">
           <EuiIcon type={OpenSearchMarkCentered} size="original" />
@@ -157,9 +157,9 @@ export class Welcome extends React.Component<Props> {
           <img
             className="homWelcome__customLogo"
             data-test-subj="welcomeCustomLogo"
-            data-test-image-url={this.props.branding.smallLogoUrl}
-            alt="logo"
-            src={this.props.branding.smallLogoUrl}
+            data-test-image-url={this.props.branding.logoUrl}
+            alt={this.props.branding.title + ' logo'}
+            src={this.props.branding.logoUrl}
           />
         </div>
       );

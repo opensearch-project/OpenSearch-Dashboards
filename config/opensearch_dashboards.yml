@@ -150,10 +150,10 @@
 #vis_type_timeline.graphiteBlockedIPs: []
 
 # full version customized logo URL
-# opensearchDashboards.branding.logoUrl: ""
+# opensearchDashboards.branding.fullLogoUrl: ""
 
 # smaller version customized logo URL
-# opensearchDashboards.branding.smallLogoUrl: ""
+# opensearchDashboards.branding.logoUrl: ""
 
 # customized loading logo URL
 # opensearchDashboards.branding.loadingLogoUrl: ""
