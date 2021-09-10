@@ -138,7 +138,7 @@ describe('RenderingService', () => {
   });
 
   describe('checkUrlValid()', () => {
-    it('SVG URL is valid', async () => {
+    it('checks valid SVG URL', async () => {
       const result = await service.checkUrlValid(
         'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
         'config'
@@ -146,7 +146,7 @@ describe('RenderingService', () => {
       expect(result).toEqual(true);
     });
 
-    it('PNG URL is valid', async () => {
+    it('checks valid PNG URL', async () => {
       const result = await service.checkUrlValid(
         'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
         'config'
@@ -154,13 +154,33 @@ describe('RenderingService', () => {
       expect(result).toEqual(true);
     });
 
-    it('URL does not contain svg, png or gif', async () => {
+    it('checks invalid URL that does not contain svg, png or gif', async () => {
       const result = await service.checkUrlValid('https://validUrl', 'config');
       expect(result).toEqual(false);
     });
 
-    it('URL is invalid', async () => {
+    it('checks invalid URL', async () => {
       const result = await service.checkUrlValid('http://notfound.svg', 'config');
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe('checkTitleValid()', () => {
+    it('checks valid title', () => {
+      const result = service.checkTitleValid('OpenSearch Dashboards', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks invalid title with empty string', () => {
+      const result = service.checkTitleValid('', 'config');
+      expect(result).toEqual(false);
+    });
+
+    it('checks invalid title with length > 36 character', () => {
+      const result = service.checkTitleValid(
+        'OpenSearch Dashboardssssssssssssssssssssss',
+        'config'
+      );
       expect(result).toEqual(false);
     });
   });

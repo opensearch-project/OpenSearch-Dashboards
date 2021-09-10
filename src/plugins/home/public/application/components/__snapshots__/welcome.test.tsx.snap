@@ -18,7 +18,7 @@ exports[`should render a Welcome screen with customized branding 1`] = `
           className="homWelcome__customLogoContainer"
         >
           <img
-            alt="logo"
+            alt="custom title logo"
             className="homWelcome__customLogo"
             data-test-image-url="/custom"
             data-test-subj="welcomeCustomLogo"
@@ -84,7 +84,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
           className="homWelcome__customLogoContainer"
         >
           <img
-            alt="logo"
+            alt="OpenSearch Dashboards logo"
             className="homWelcome__customLogo"
             data-test-image-url="/"
             data-test-subj="welcomeCustomLogo"
@@ -213,7 +213,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           className="homWelcome__customLogoContainer"
         >
           <img
-            alt="logo"
+            alt="OpenSearch Dashboards logo"
             className="homWelcome__customLogo"
             data-test-image-url="/"
             data-test-subj="welcomeCustomLogo"
@@ -316,7 +316,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           className="homWelcome__customLogoContainer"
         >
           <img
-            alt="logo"
+            alt="OpenSearch Dashboards logo"
             className="homWelcome__customLogo"
             data-test-image-url="/"
             data-test-subj="welcomeCustomLogo"

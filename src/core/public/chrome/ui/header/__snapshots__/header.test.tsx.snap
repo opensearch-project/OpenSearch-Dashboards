@@ -249,8 +249,8 @@ exports[`Header renders 1`] = `
   }
   branding={
     Object {
+      "fullLogoUrl": "/",
       "logoUrl": "/",
-      "smallLogoUrl": "/",
       "title": "OpenSearch Dashboards",
     }
   }
@@ -1672,6 +1672,13 @@ exports[`Header renders 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
+                  branding={
+                    Object {
+                      "fullLogoUrl": "/",
+                      "logoUrl": "/",
+                      "title": "OpenSearch Dashboards",
+                    }
+                  }
                   forceNavigation$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -1722,7 +1729,6 @@ exports[`Header renders 1`] = `
                     }
                   }
                   href="/"
-                  logoUrl="/"
                   navLinks$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -2779,6 +2785,13 @@ exports[`Header renders 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
+                    branding={
+                      Object {
+                        "fullLogoUrl": "/",
+                        "logoUrl": "/",
+                        "title": "OpenSearch Dashboards",
+                      }
+                    }
                     forceNavigation$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2829,7 +2842,6 @@ exports[`Header renders 1`] = `
                       }
                     }
                     href="/"
-                    logoUrl="/"
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2933,10 +2945,12 @@ exports[`Header renders 1`] = `
                       onClick={[Function]}
                     >
                       <CustomLogo
+                        fullLogoUrl="/"
                         logoUrl="/"
+                        title="OpenSearch Dashboards"
                       >
                         <img
-                          alt="logo"
+                          alt="OpenSearch Dashboards logo"
                           className="logoImage"
                           data-test-image-url="/"
                           data-test-subj="customLogo"
