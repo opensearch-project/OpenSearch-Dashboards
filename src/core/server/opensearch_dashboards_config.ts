@@ -53,16 +53,16 @@ export const config = {
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
     branding: schema.object({
-      logoUrl: schema.string({
+      fullLogoUrl: schema.string({
         defaultValue: '/',
       }),
-      smallLogoUrl: schema.string({
+      logoUrl: schema.string({
         defaultValue: '/',
       }),
       loadingLogoUrl: schema.string({
         defaultValue: '/',
       }),
-      title: schema.string({ defaultValue: 'OpenSearch Dashboards' }),
+      title: schema.string({ defaultValue: '' }),
     }),
   }),
   deprecations,

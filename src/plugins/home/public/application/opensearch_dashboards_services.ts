@@ -71,8 +71,8 @@ export interface HomeOpenSearchDashboardsServices {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => {
+      fullLogoUrl?: string;
       logoUrl?: string;
-      smallLogoUrl?: string;
       title: string;
     };
   };
