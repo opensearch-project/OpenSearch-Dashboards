@@ -66,7 +66,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"smallLogoUrl\\":\\"/\\",\\"loadingLogoUrl\\":\\"/\\",\\"title\\":\\"\\"}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"logoUrl\\":\\"/\\",\\"loadingLogoUrl\\":\\"/\\",\\"title\\":\\"\\"}}"
   />,
   <div
     class="osdWelcomeView"
@@ -82,7 +82,7 @@ Array [
         class="loadingLogoContainer"
       >
         <img
-          alt="loadingLogo"
+          alt=" logo"
           class="loadingLogo"
           src="/"
         />
@@ -367,7 +367,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"smallLogoUrl\\":\\"/\\",\\"title\\":\\"\\"}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"logoUrl\\":\\"/\\",\\"title\\":\\"\\"}}"
   />,
   <div
     class="osdWelcomeView"
@@ -383,7 +383,7 @@ Array [
         class="loadingLogoContainer"
       >
         <img
-          alt="staticLoadingLogo"
+          alt=" logo"
           class="loadingLogo"
           src="/"
         />

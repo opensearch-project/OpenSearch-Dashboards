@@ -69,7 +69,7 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
-    branding: { logoUrl: '/', smallLogoUrl: '/', title: 'OpenSearch Dashboards' },
+    branding: { fullLogoUrl: '/', logoUrl: '/', title: 'OpenSearch Dashboards' },
   };
 }
 

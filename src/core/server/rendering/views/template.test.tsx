@@ -95,7 +95,7 @@ describe('Template', () => {
 
   it('renders with static logo with horizontal loading bar', () => {
     const branding = {
-      smallLogoUrl: '/',
+      logoUrl: '/',
       title: '',
     };
     injectedMetadata.getBranding.mockReturnValue(branding);
@@ -105,7 +105,7 @@ describe('Template', () => {
 
   it('renders with customized loading logo', () => {
     const branding = {
-      smallLogoUrl: '/',
+      logoUrl: '/',
       loadingLogoUrl: '/',
       title: '',
     };
