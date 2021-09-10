@@ -250,6 +250,7 @@ exports[`Header renders 1`] = `
   branding={
     Object {
       "applicationTitle": "OpenSearch Dashboards",
+      "darkMode": false,
       "logo": Object {
         "defaultUrl": "/",
       },
@@ -1679,6 +1680,7 @@ exports[`Header renders 1`] = `
                   branding={
                     Object {
                       "applicationTitle": "OpenSearch Dashboards",
+                      "darkMode": false,
                       "logo": Object {
                         "defaultUrl": "/",
                       },
@@ -2796,6 +2798,7 @@ exports[`Header renders 1`] = `
                     branding={
                       Object {
                         "applicationTitle": "OpenSearch Dashboards",
+                        "darkMode": false,
                         "logo": Object {
                           "defaultUrl": "/",
                         },
@@ -2958,6 +2961,7 @@ exports[`Header renders 1`] = `
                     >
                       <CustomLogo
                         applicationTitle="OpenSearch Dashboards"
+                        darkMode={false}
                         logo={
                           Object {
                             "defaultUrl": "/",

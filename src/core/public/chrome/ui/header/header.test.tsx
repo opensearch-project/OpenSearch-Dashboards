@@ -70,6 +70,7 @@ function mockProps() {
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
     branding: {
+      darkMode: false,
       logo: { defaultUrl: '/' },
       mark: { defaultUrl: '/' },
       applicationTitle: 'OpenSearch Dashboards',
