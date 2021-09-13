@@ -75,9 +75,9 @@ export default function () {
         // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
         // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
         // Custom branding config
-        `--opensearchDashboards.branding.fullLogoUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg`,
-        `--opensearchDashboards.branding.logoUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
-        `--opensearchDashboards.branding.title=OpenSearch`,
+        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg`,
+        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
+        `--opensearchDashboards.branding.applicationTitle=OpenSearch`,
       ],
     },
     services,

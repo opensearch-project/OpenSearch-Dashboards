@@ -149,16 +149,15 @@
 # ]
 #vis_type_timeline.graphiteBlockedIPs: []
 
-# full version customized logo URL
-# opensearchDashboards.branding.fullLogoUrl: ""
-
-# smaller version customized logo URL
-# opensearchDashboards.branding.logoUrl: ""
-
-# customized loading logo URL
-# opensearchDashboards.branding.loadingLogoUrl: ""
-
-# custom application title
-# opensearchDashboards.branding.title: ""
-
-
+# opensearchDashboards.branding:
+  # logo:
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # mark:
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # loadingLogo: 
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # favicon: ""
+  # applicationTitle: ""

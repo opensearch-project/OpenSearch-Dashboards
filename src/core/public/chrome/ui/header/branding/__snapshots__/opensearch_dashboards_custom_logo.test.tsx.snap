@@ -2,7 +2,7 @@
 
 exports[`Custom Logo Take in a normal full logo URL string 1`] = `
 <CustomLogo
-  fullLogoUrl="/custom"
+  applicationTitle="title"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -105,21 +105,31 @@ exports[`Custom Logo Take in a normal full logo URL string 1`] = `
       "timeZone": null,
     }
   }
-  title="title"
+  logo={
+    Object {
+      "defaultUrl": "/",
+    }
+  }
+  mark={Object {}}
 >
-  <img
-    alt="title logo"
-    className="logoImage"
-    data-test-image-url="/custom"
-    data-test-subj="customLogo"
-    loading="lazy"
-    src="/custom"
-  />
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="title logo"
+      className="logoImage"
+      data-test-image-url="/"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/"
+    />
+  </div>
 </CustomLogo>
 `;
 
 exports[`Custom Logo Take in an invalid full logo URL string and a valid logo URL string 1`] = `
 <CustomLogo
+  applicationTitle="title"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -222,22 +232,31 @@ exports[`Custom Logo Take in an invalid full logo URL string and a valid logo UR
       "timeZone": null,
     }
   }
-  logoUrl="/custom"
-  title="title"
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/",
+    }
+  }
 >
-  <img
-    alt="title logo"
-    className="logoImage"
-    data-test-image-url="/custom"
-    data-test-subj="customLogo"
-    loading="lazy"
-    src="/custom"
-  />
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="title logo"
+      className="logoImage"
+      data-test-image-url="/"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/"
+    />
+  </div>
 </CustomLogo>
 `;
 
 exports[`Custom Logo Take in invalid full logo URL and logo URL 1`] = `
 <CustomLogo
+  applicationTitle="title"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -340,7 +359,8 @@ exports[`Custom Logo Take in invalid full logo URL and logo URL 1`] = `
       "timeZone": null,
     }
   }
-  title="title"
+  logo={Object {}}
+  mark={Object {}}
 >
   <svg
     fill="none"

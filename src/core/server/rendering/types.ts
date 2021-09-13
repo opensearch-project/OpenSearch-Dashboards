@@ -75,10 +75,20 @@ export interface RenderingMetadata {
       };
     };
     branding: {
-      fullLogoUrl?: string;
-      logoUrl?: string;
-      loadingLogoUrl?: string;
-      title: string;
+      logo: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      mark: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      loadingLogo: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      favicon?: string;
+      applicationTitle?: string;
     };
   };
 }

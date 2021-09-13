@@ -97,13 +97,19 @@ export const Template: FunctionComponent<Props> = ({
   );
 
   const renderBrandingEnabledOrDisabledLoadingBar = () => {
-    if (!injectedMetadata.branding.loadingLogoUrl && injectedMetadata.branding.logoUrl) {
+    if (
+      !injectedMetadata.branding.loadingLogo.defaultUrl &&
+      injectedMetadata.branding.mark.defaultUrl
+    ) {
       return <div className="osdProgress" />;
     }
   };
 
   const renderBrandingEnabledOrDisabledLoadingLogo = () => {
-    if (!injectedMetadata.branding.loadingLogoUrl && !injectedMetadata.branding.logoUrl) {
+    if (
+      !injectedMetadata.branding.loadingLogo.defaultUrl &&
+      !injectedMetadata.branding.mark.defaultUrl
+    ) {
       return openSearchLogoSpinner;
     } else {
       return (
@@ -111,11 +117,11 @@ export const Template: FunctionComponent<Props> = ({
           <img
             className="loadingLogo"
             src={
-              !injectedMetadata.branding.loadingLogoUrl
-                ? injectedMetadata.branding.logoUrl
-                : injectedMetadata.branding.loadingLogoUrl
+              !injectedMetadata.branding.loadingLogo.defaultUrl
+                ? injectedMetadata.branding.mark.defaultUrl
+                : injectedMetadata.branding.loadingLogo.defaultUrl
             }
-            alt={injectedMetadata.branding.title + ' logo'}
+            alt={injectedMetadata.branding.applicationTitle + ' logo'}
           />
         </div>
       );
@@ -179,11 +185,11 @@ export const Template: FunctionComponent<Props> = ({
             <div
               className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
-                defaultMessage: `${injectedMetadata.branding.title} did not load properly. Check the server output for more information.`,
+                defaultMessage: `${injectedMetadata.branding.applicationTitle} did not load properly. Check the server output for more information.`,
               })}
             >
               {i18n('core.ui.welcomeMessage', {
-                defaultMessage: `Loading ${injectedMetadata.branding.title}`,
+                defaultMessage: `Loading ${injectedMetadata.branding.applicationTitle}`,
               })}
             </div>
             {renderBrandingEnabledOrDisabledLoadingBar()}

@@ -35,35 +35,45 @@ import '../header_logo.scss';
 import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_darkmode';
 
 /**
- * @param {string} fullLogoUrl - custom URL for the top left logo of the main screen
- * @param {string} logoUrl - custom URL for the logo icon
- * @param {string} title - custom title for the application
+ * @param {object} logo - full logo on main screen: defaultUrl will be used in default mode; darkModeUrl will be used in dark mode
+ * @param {object} mark - thumbnail logo: defaultUrl will be used in default mode; darkModeUrl will be used in dark mode
+ * @param {string} applicationTitle - custom title for the application
  */
 export interface CustomLogoType {
-  fullLogoUrl?: string;
-  logoUrl?: string;
-  title: string;
+  logo: {
+    defaultUrl?: string;
+    darkModeUrl?: string;
+  };
+  mark: {
+    defaultUrl?: string;
+    darkModeUrl?: string;
+  };
+  applicationTitle?: string;
 }
 /**
  *
- * @param {CustomLogoType} - branding object consist of fullLogoUrl, logoUrl and title
+ * @param {CustomLogoType} - branding object consist of logo, mark and title
  * @returns A image component which is going to be rendered on the main page header bar.
- *          If fullLogoUrl is valid, the full logo by fullLogoUrl config will be rendered;
- *          if not, the logo icon by logoUrl config will be rendered; if both are not found,
+ *          If logo default is valid, the full logo by logo default config will be rendered;
+ *          if not, the logo icon by mark default config will be rendered; if both are not found,
  *          the default opensearch logo will be rendered.
  */
 export const CustomLogo = ({ ...branding }: CustomLogoType) => {
-  const headerLogoUrl = !branding.fullLogoUrl ? branding.logoUrl : branding.fullLogoUrl;
-  return !branding.fullLogoUrl && !branding.logoUrl ? (
+  const headerLogoUrl = !branding.logo.defaultUrl
+    ? branding.mark.defaultUrl
+    : branding.logo.defaultUrl;
+  return !branding.logo.defaultUrl && !branding.mark.defaultUrl ? (
     OpenSearchDashboardsLogoDarkMode()
   ) : (
-    <img
-      data-test-subj="customLogo"
-      data-test-image-url={headerLogoUrl}
-      src={headerLogoUrl}
-      alt={branding.title + ' logo'}
-      loading="lazy"
-      className="logoImage"
-    />
+    <div className="logoContainer">
+      <img
+        data-test-subj="customLogo"
+        data-test-image-url={headerLogoUrl}
+        src={headerLogoUrl}
+        alt={branding.applicationTitle + ' logo'}
+        loading="lazy"
+        className="logoImage"
+      />
+    </div>
   );
 };
