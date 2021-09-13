@@ -6,7 +6,17 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "title": "OpenSearch Dashboards",
+    "applicationTitle": "OpenSearch Dashboards",
+    "favicon": "",
+    "loadingLogo": Object {
+      "darkModeUrl": "",
+    },
+    "logo": Object {
+      "darkModeUrl": "",
+    },
+    "mark": Object {
+      "darkModeUrl": "",
+    },
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -52,7 +62,17 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "title": "OpenSearch Dashboards",
+    "applicationTitle": "OpenSearch Dashboards",
+    "favicon": "",
+    "loadingLogo": Object {
+      "darkModeUrl": "",
+    },
+    "logo": Object {
+      "darkModeUrl": "",
+    },
+    "mark": Object {
+      "darkModeUrl": "",
+    },
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -98,7 +118,17 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "title": "OpenSearch Dashboards",
+    "applicationTitle": "OpenSearch Dashboards",
+    "favicon": "",
+    "loadingLogo": Object {
+      "darkModeUrl": "",
+    },
+    "logo": Object {
+      "darkModeUrl": "",
+    },
+    "mark": Object {
+      "darkModeUrl": "",
+    },
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -148,7 +178,17 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "branding": Object {
-    "title": "OpenSearch Dashboards",
+    "applicationTitle": "OpenSearch Dashboards",
+    "favicon": "",
+    "loadingLogo": Object {
+      "darkModeUrl": "",
+    },
+    "logo": Object {
+      "darkModeUrl": "",
+    },
+    "mark": Object {
+      "darkModeUrl": "",
+    },
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -194,7 +234,17 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "branding": Object {
-    "title": "OpenSearch Dashboards",
+    "applicationTitle": "OpenSearch Dashboards",
+    "favicon": "",
+    "loadingLogo": Object {
+      "darkModeUrl": "",
+    },
+    "logo": Object {
+      "darkModeUrl": "",
+    },
+    "mark": Object {
+      "darkModeUrl": "",
+    },
   },
   "buildNumber": Any<Number>,
   "csp": Object {

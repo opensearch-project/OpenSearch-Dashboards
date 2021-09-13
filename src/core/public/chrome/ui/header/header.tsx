@@ -87,7 +87,17 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
-  branding: { fullLogoUrl?: string; logoUrl?: string; title: string };
+  branding: {
+    logo: {
+      defaultUrl?: string;
+      darkModeUrl?: string;
+    };
+    mark: {
+      defaultUrl?: string;
+      darkModeUrl?: string;
+    };
+    applicationTitle?: string;
+  };
 }
 
 export function Header({

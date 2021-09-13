@@ -249,9 +249,13 @@ exports[`Header renders 1`] = `
   }
   branding={
     Object {
-      "fullLogoUrl": "/",
-      "logoUrl": "/",
-      "title": "OpenSearch Dashboards",
+      "applicationTitle": "OpenSearch Dashboards",
+      "logo": Object {
+        "defaultUrl": "/",
+      },
+      "mark": Object {
+        "defaultUrl": "/",
+      },
     }
   }
   breadcrumbs$={
@@ -1674,9 +1678,13 @@ exports[`Header renders 1`] = `
                 <HeaderLogo
                   branding={
                     Object {
-                      "fullLogoUrl": "/",
-                      "logoUrl": "/",
-                      "title": "OpenSearch Dashboards",
+                      "applicationTitle": "OpenSearch Dashboards",
+                      "logo": Object {
+                        "defaultUrl": "/",
+                      },
+                      "mark": Object {
+                        "defaultUrl": "/",
+                      },
                     }
                   }
                   forceNavigation$={
@@ -2787,9 +2795,13 @@ exports[`Header renders 1`] = `
                   <HeaderLogo
                     branding={
                       Object {
-                        "fullLogoUrl": "/",
-                        "logoUrl": "/",
-                        "title": "OpenSearch Dashboards",
+                        "applicationTitle": "OpenSearch Dashboards",
+                        "logo": Object {
+                          "defaultUrl": "/",
+                        },
+                        "mark": Object {
+                          "defaultUrl": "/",
+                        },
                       }
                     }
                     forceNavigation$={
@@ -2945,18 +2957,30 @@ exports[`Header renders 1`] = `
                       onClick={[Function]}
                     >
                       <CustomLogo
-                        fullLogoUrl="/"
-                        logoUrl="/"
-                        title="OpenSearch Dashboards"
+                        applicationTitle="OpenSearch Dashboards"
+                        logo={
+                          Object {
+                            "defaultUrl": "/",
+                          }
+                        }
+                        mark={
+                          Object {
+                            "defaultUrl": "/",
+                          }
+                        }
                       >
-                        <img
-                          alt="OpenSearch Dashboards logo"
-                          className="logoImage"
-                          data-test-image-url="/"
-                          data-test-subj="customLogo"
-                          loading="lazy"
-                          src="/"
-                        />
+                        <div
+                          className="logoContainer"
+                        >
+                          <img
+                            alt="OpenSearch Dashboards logo"
+                            className="logoImage"
+                            data-test-image-url="/"
+                            data-test-subj="customLogo"
+                            loading="lazy"
+                            src="/"
+                          />
+                        </div>
                       </CustomLogo>
                     </a>
                   </HeaderLogo>

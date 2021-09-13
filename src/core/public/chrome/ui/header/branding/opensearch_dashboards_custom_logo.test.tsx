@@ -12,19 +12,31 @@ import { CustomLogo } from './opensearch_dashboards_custom_logo';
 
 describe('Custom Logo', () => {
   it('Take in a normal full logo URL string', () => {
-    const branding = { fullLogoUrl: '/custom', title: 'title' };
+    const branding = {
+      logo: { defaultUrl: '/' },
+      mark: {},
+      applicationTitle: 'title',
+    };
     const component = mountWithIntl(<CustomLogo {...branding} />);
     expect(component).toMatchSnapshot();
   });
 
   it('Take in an invalid full logo URL string and a valid logo URL string', () => {
-    const branding = { logoUrl: '/custom', title: 'title' };
+    const branding = {
+      logo: {},
+      mark: { defaultUrl: '/' },
+      applicationTitle: 'title',
+    };
     const component = mountWithIntl(<CustomLogo {...branding} />);
     expect(component).toMatchSnapshot();
   });
 
   it('Take in invalid full logo URL and logo URL', () => {
-    const branding = { title: 'title' };
+    const branding = {
+      logo: {},
+      mark: {},
+      applicationTitle: 'title',
+    };
     const component = mountWithIntl(<CustomLogo {...branding} />);
     expect(component).toMatchSnapshot();
   });
