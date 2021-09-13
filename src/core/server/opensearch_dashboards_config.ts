@@ -53,16 +53,36 @@ export const config = {
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
     branding: schema.object({
-      fullLogoUrl: schema.string({
+      logo: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      mark: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      loadingLogo: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      favicon: schema.string({
         defaultValue: '/',
       }),
-      logoUrl: schema.string({
-        defaultValue: '/',
+      applicationTitle: schema.string({
+        defaultValue: '',
       }),
-      loadingLogoUrl: schema.string({
-        defaultValue: '/',
-      }),
-      title: schema.string({ defaultValue: '' }),
     }),
   }),
   deprecations,

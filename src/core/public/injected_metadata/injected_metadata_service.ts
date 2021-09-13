@@ -77,9 +77,20 @@ export interface InjectedMetadataParams {
       };
     };
     branding: {
-      fullLogoUrl?: string;
-      logoUrl?: string;
-      title: string;
+      logo: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      mark: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      loadingLogo: {
+        defaultUrl?: string;
+        darkModeUrl?: string;
+      };
+      favicon?: string;
+      applicationTitle?: string;
     };
   };
 }
@@ -186,9 +197,20 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
   getBranding: () => {
-    fullLogoUrl?: string;
-    logoUrl?: string;
-    title: string;
+    logo: {
+      defaultUrl?: string;
+      darkModeUrl?: string;
+    };
+    mark: {
+      defaultUrl?: string;
+      darkModeUrl?: string;
+    };
+    loadingLogo: {
+      defaultUrl?: string;
+      darkModeUrl?: string;
+    };
+    favicon?: string;
+    applicationTitle?: string;
   };
 }
 
