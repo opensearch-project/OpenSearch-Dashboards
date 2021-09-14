@@ -30,14 +30,18 @@ import os from 'os';
 import loadJsonFile from 'load-json-file';
 
 import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import {
+  PlatformName,
+  PlatformArchitecture,
+  ALL_PLATFORMS,
+  Platform,
+  TargetPlatforms,
+} from './platform';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
-  linuxX64: boolean;
-  linuxArm64: boolean;
-  darwinX64: boolean;
+  targetPlatforms: TargetPlatforms;
   versionQualifier?: string;
 }
 
@@ -54,9 +58,7 @@ export class Config {
   static async create({
     isRelease,
     targetAllPlatforms,
-    darwinX64,
-    linuxArm64,
-    linuxX64,
+    targetPlatforms,
     versionQualifier,
   }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
@@ -64,9 +66,7 @@ export class Config {
 
     return new Config(
       targetAllPlatforms,
-      linuxX64,
-      linuxArm64,
-      darwinX64,
+      targetPlatforms,
       pkg,
       pkg.engines.node,
       dirname(pkgPath),
@@ -81,9 +81,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
-    private readonly darwinX64: boolean,
-    private readonly linuxArm64: boolean,
-    private readonly linuxX64: boolean,
+    private readonly targetPlatforms: TargetPlatforms,
     private readonly pkg: Package,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -123,24 +121,28 @@ export class Config {
    * Return true if a supported Platform is specified
    */
   hasSpecifiedPlatform() {
-    return this.darwinX64 || this.linuxArm64 || this.linuxX64;
+    for (const platform in this.targetPlatforms) {
+      if (platform) return true;
+    }
+    return false;
   }
 
   /**
    * Return the list of supported Platforms, if --all-platform flag is specified.
-   * Return the targeted Platform, if --target-platform flag is specified.
-   * If no flag, only the platform for this OS will be returned.
+   * Return the targeted Platforms, if --target-platform flags are specified.
+   * Return the platform of local OS. If it is not a supported Platform, raise an error.
    */
   getTargetPlatforms() {
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
-    } else if (this.darwinX64) {
-      return [this.getPlatform('darwin', 'x64')];
-    } else if (this.linuxArm64) {
-      return [this.getPlatform('linux', 'arm64')];
-    } else if (this.linuxX64) {
-      return [this.getPlatform('linux', 'x64')];
     }
+
+    const platforms: Platform[] = [];
+    if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
+    if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
+    if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));
+
+    if (platforms.length > 0) return platforms;
 
     return [this.getPlatformForThisOs()];
   }

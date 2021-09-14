@@ -35,9 +35,11 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const config = new Config(
   true,
-  false,
-  false,
-  false,
+  {
+    darwin: false,
+    linux: false,
+    linuxArm: false,
+  },
   {
     version: '1.0.0',
     engines: {

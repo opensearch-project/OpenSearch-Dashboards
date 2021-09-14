@@ -50,6 +50,7 @@ export const CreateArchivesSources: Task = {
           source: getNodeDownloadInfo(config, platform).extractDir,
           destination: build.resolvePathForPlatform(platform, 'node'),
         });
+
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
       })
     );

@@ -47,21 +47,23 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const setup = async ({
   targetAllPlatforms = true,
-  darwinX64 = false,
-  linuxArm64 = false,
-  linuxX64 = false,
+  targetPlatforms = {
+    darwin: false,
+    linux: false,
+    linuxArm: false,
+  },
 }: {
   targetAllPlatforms?: boolean;
-  darwinX64?: boolean;
-  linuxArm64?: boolean;
-  linuxX64?: boolean;
+  targetPlatforms?: {
+    darwin: boolean;
+    linux: boolean;
+    linuxArm: boolean;
+  };
 } = {}) => {
   return await Config.create({
     isRelease: true,
     targetAllPlatforms,
-    darwinX64,
-    linuxArm64,
-    linuxX64,
+    targetPlatforms,
   });
 };
 
@@ -103,10 +105,14 @@ describe('#resolveFromRepo()', () => {
 });
 
 describe('#hasSpecifiedPlatform', () => {
-  it('return true if darwin x64 is specified', async () => {
+  it('return true if darwin is specified', async () => {
     const config = await setup({
       targetAllPlatforms: false,
-      darwinX64: true,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: false,
+      },
     });
     expect(config.hasSpecifiedPlatform() === true);
   });
@@ -114,15 +120,23 @@ describe('#hasSpecifiedPlatform', () => {
   it('return true if linux arm64 is specified', async () => {
     const config = await setup({
       targetAllPlatforms: false,
-      linuxArm64: true,
+      targetPlatforms: {
+        darwin: false,
+        linux: false,
+        linuxArm: true,
+      },
     });
     expect(config.hasSpecifiedPlatform() === true);
   });
 
-  it('return true if linux x64 is specified', async () => {
+  it('return true if linux is specified', async () => {
     const config = await setup({
       targetAllPlatforms: false,
-      linuxX64: true,
+      targetPlatforms: {
+        darwin: false,
+        linux: true,
+        linuxArm: false,
+      },
     });
     expect(config.hasSpecifiedPlatform() === true);
   });
@@ -181,28 +195,14 @@ describe('#getTargetPlatforms()', () => {
     `);
   });
 
-  it('returns just darwin x64 platform when darwinX64 = true', async () => {
+  it('returns just darwin x64 platform when darwin = true', async () => {
     const config = await setup({
       targetAllPlatforms: false,
-      darwinX64: true,
-    });
-
-    expect(
-      config
-        .getTargetPlatforms()
-        .map((p) => p.getNodeArch())
-        .sort()
-    ).toMatchInlineSnapshot(`
-      Array [
-        "linux-x64",
-      ]
-    `);
-  });
-
-  it('returns just linux x64 platform when linuxX64 = true', async () => {
-    const config = await setup({
-      targetAllPlatforms: false,
-      linuxX64: true,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: false,
+      },
     });
 
     expect(
@@ -217,10 +217,14 @@ describe('#getTargetPlatforms()', () => {
     `);
   });
 
-  it('returns just linux arm64 platform when linuxArm64 = true', async () => {
+  it('returns just linux x64 platform when linux = true', async () => {
     const config = await setup({
       targetAllPlatforms: false,
-      linuxArm64: true,
+      targetPlatforms: {
+        darwin: false,
+        linux: true,
+        linuxArm: false,
+      },
     });
 
     expect(
@@ -230,6 +234,51 @@ describe('#getTargetPlatforms()', () => {
         .sort()
     ).toMatchInlineSnapshot(`
       Array [
+        "linux-x64",
+      ]
+    `);
+  });
+
+  it('returns just linux arm64 platform when linuxArm64 = true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        linux: false,
+        linuxArm: true,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "linux-arm64",
+      ]
+    `);
+  });
+
+  it('returns both linux arm64 and darwin x64 platforms when linuxArm64 and darwin equal to true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: true,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "darwin-x64",
         "linux-arm64",
       ]
     `);

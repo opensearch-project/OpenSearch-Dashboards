@@ -27,7 +27,7 @@
 
 import { ToolingLog } from '@osd/dev-utils';
 
-import { Config, createRunner } from './lib';
+import { Config, createRunner, TargetPlatforms } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -40,9 +40,7 @@ export interface BuildOptions {
   createDockerUbiPackage: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
-  darwinX64: boolean;
-  linuxArm64: boolean;
-  linuxX64: boolean;
+  targetPlatforms: TargetPlatforms;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
