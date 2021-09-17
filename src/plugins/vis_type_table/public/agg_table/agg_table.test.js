@@ -487,7 +487,7 @@ describe('Table Vis - AggTable Directive', function () {
         'one,two,"with double-quotes("")"' + '\r\n' + '1,2,"""foobar"""' + '\r\n',
       ]);
       expect(call.args[0].opts).toEqual({
-        type: 'text/plain;charset=utf-8',
+        type: 'text/csv;charset=utf-8',
       });
       expect(call.args[1]).toBe('somefilename.csv');
     });
