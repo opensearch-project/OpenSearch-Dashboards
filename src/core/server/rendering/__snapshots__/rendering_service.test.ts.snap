@@ -7,16 +7,11 @@ Object {
   "branch": Any<String>,
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
+    "darkMode": false,
     "favicon": "",
-    "loadingLogo": Object {
-      "darkModeUrl": "",
-    },
-    "logo": Object {
-      "darkModeUrl": "",
-    },
-    "mark": Object {
-      "darkModeUrl": "",
-    },
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -63,16 +58,11 @@ Object {
   "branch": Any<String>,
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
+    "darkMode": false,
     "favicon": "",
-    "loadingLogo": Object {
-      "darkModeUrl": "",
-    },
-    "logo": Object {
-      "darkModeUrl": "",
-    },
-    "mark": Object {
-      "darkModeUrl": "",
-    },
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -119,16 +109,11 @@ Object {
   "branch": Any<String>,
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
+    "darkMode": true,
     "favicon": "",
-    "loadingLogo": Object {
-      "darkModeUrl": "",
-    },
-    "logo": Object {
-      "darkModeUrl": "",
-    },
-    "mark": Object {
-      "darkModeUrl": "",
-    },
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -179,16 +164,11 @@ Object {
   "branch": Any<String>,
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
+    "darkMode": false,
     "favicon": "",
-    "loadingLogo": Object {
-      "darkModeUrl": "",
-    },
-    "logo": Object {
-      "darkModeUrl": "",
-    },
-    "mark": Object {
-      "darkModeUrl": "",
-    },
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -235,16 +215,11 @@ Object {
   "branch": Any<String>,
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
+    "darkMode": false,
     "favicon": "",
-    "loadingLogo": Object {
-      "darkModeUrl": "",
-    },
-    "logo": Object {
-      "darkModeUrl": "",
-    },
-    "mark": Object {
-      "darkModeUrl": "",
-    },
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
   },
   "buildNumber": Any<Number>,
   "csp": Object {

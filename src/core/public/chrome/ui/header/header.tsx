@@ -88,6 +88,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: {
+    darkMode: boolean;
     logo: {
       defaultUrl?: string;
       darkModeUrl?: string;
