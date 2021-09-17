@@ -46,6 +46,8 @@ import {
   RenderingSetupDeps,
   InternalRenderingServiceSetup,
   RenderingMetadata,
+  BrandingValidation,
+  BrandingAssignment,
 } from './types';
 import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 
@@ -65,23 +67,6 @@ export class RenderingService {
       .pipe(first())
       .toPromise();
 
-    const isLogoDefaultValid = await this.checkUrlValid(
-      opensearchDashboardsConfig.branding.logo.defaultUrl,
-      'logo default'
-    );
-    const isMarkDefaultValid = await this.checkUrlValid(
-      opensearchDashboardsConfig.branding.mark.defaultUrl,
-      'mark default'
-    );
-    const isLoadingLogoDefaultValid = await this.checkUrlValid(
-      opensearchDashboardsConfig.branding.loadingLogo.defaultUrl,
-      'loadingLogo default'
-    );
-    const isTitleValid = this.checkTitleValid(
-      opensearchDashboardsConfig.branding.applicationTitle,
-      'applicationTitle'
-    );
-
     return {
       render: async (
         request,
@@ -98,15 +83,21 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
+        const darkMode = settings.user?.['theme:darkMode']?.userValue
+          ? Boolean(settings.user['theme:darkMode'].userValue)
+          : false;
+        const brandingAssignment = await this.assignBrandingConfig(
+          darkMode,
+          opensearchDashboardsConfig
+        );
+
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
           bootstrapScriptUrl: `${basePath}/bootstrap.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
-          darkMode: settings.user?.['theme:darkMode']?.userValue
-            ? Boolean(settings.user['theme:darkMode'].userValue)
-            : false,
+          darkMode,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,
@@ -131,28 +122,21 @@ export class RenderingService {
               uiSettings: settings,
             },
             branding: {
+              darkMode,
               logo: {
-                defaultUrl: isLogoDefaultValid
-                  ? opensearchDashboardsConfig.branding.logo.defaultUrl
-                  : undefined,
-                darkModeUrl: '',
+                defaultUrl: brandingAssignment.logoDefault,
+                darkModeUrl: brandingAssignment.logoDarkmode,
               },
               mark: {
-                defaultUrl: isMarkDefaultValid
-                  ? opensearchDashboardsConfig.branding.mark.defaultUrl
-                  : undefined,
-                darkModeUrl: '',
+                defaultUrl: brandingAssignment.markDefault,
+                darkModeUrl: brandingAssignment.markDarkmode,
               },
               loadingLogo: {
-                defaultUrl: isLoadingLogoDefaultValid
-                  ? opensearchDashboardsConfig.branding.loadingLogo.defaultUrl
-                  : undefined,
-                darkModeUrl: '',
+                defaultUrl: brandingAssignment.loadingLogoDefault,
+                darkModeUrl: brandingAssignment.loadingLogoDarkmode,
               },
               favicon: '',
-              applicationTitle: isTitleValid
-                ? opensearchDashboardsConfig.branding.applicationTitle
-                : DEFAULT_TITLE,
+              applicationTitle: brandingAssignment.applicationTitle,
             },
           },
         };
@@ -164,12 +148,163 @@ export class RenderingService {
 
   public async stop() {}
 
+  /**
+   * Assign values for branding related configurations based on branding validation
+   * by calling checkBrandingValid(). For dark mode URLs, add additonal validation
+   * to see if there is a valid default mode URL exist first. If URL is valid, pass in
+   * the actual URL; if not, pass in undefined.
+   *
+   * @param {boolean} darkMode
+   * @param {Readonly<OpenSearchDashboardsConfigType>} opensearchDashboardsConfig
+   * @returns {BrandingAssignment} valid URLs or undefined assigned for each branding configs
+   */
+  private assignBrandingConfig = async (
+    darkMode: boolean,
+    opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
+  ): Promise<BrandingAssignment> => {
+    const brandingValidation: BrandingValidation = await this.checkBrandingValid(
+      darkMode,
+      opensearchDashboardsConfig
+    );
+    const branding = opensearchDashboardsConfig.branding;
+
+    // assign default mode URL based on the brandingValidation function result
+    const logoDefault = brandingValidation.isLogoDefaultValid
+      ? branding.logo.defaultUrl
+      : undefined;
+
+    const markDefault = brandingValidation.isMarkDefaultValid
+      ? branding.mark.defaultUrl
+      : undefined;
+
+    const loadingLogoDefault = brandingValidation.isLoadingLogoDefaultValid
+      ? branding.loadingLogo.defaultUrl
+      : undefined;
+
+    // assign dark mode URLs based on brandingValidation function result
+    let logoDarkmode = brandingValidation.isLogoDarkmodeValid
+      ? branding.logo.darkModeUrl
+      : undefined;
+
+    let markDarkmode = brandingValidation.isMarkDarkmodeValid
+      ? branding.mark.darkModeUrl
+      : undefined;
+
+    let loadingLogoDarkmode = brandingValidation.isLoadingLogoDarkmodeValid
+      ? branding.loadingLogo.darkModeUrl
+      : undefined;
+
+    /**
+     * For dark mode URLs, we added another validation:
+     * user can only provide a dark mode URL after providing a valid default mode URL,
+     * If user provides a valid dark mode URL but fails to provide a valid default mode URL,
+     * return undefined for the dark mode URL
+     */
+    if (logoDarkmode && !logoDefault) {
+      this.logger
+        .get('branding')
+        .error('Must provide a valid logo default mode URL before providing a logo dark mode URL');
+      logoDarkmode = undefined;
+    }
+
+    if (markDarkmode && !markDefault) {
+      this.logger
+        .get('branding')
+        .error('Must provide a valid mark default mode URL before providing a mark dark mode URL');
+      markDarkmode = undefined;
+    }
+
+    if (loadingLogoDarkmode && !loadingLogoDefault) {
+      this.logger
+        .get('branding')
+        .error(
+          'Must provide a valid loading logo default mode URL before providing a loading logo dark mode URL'
+        );
+      loadingLogoDarkmode = undefined;
+    }
+
+    // assign applition title based on brandingValidation function result
+    const applicationTitle = brandingValidation.isTitleValid
+      ? branding.applicationTitle
+      : DEFAULT_TITLE;
+
+    const brandingAssignment: BrandingAssignment = {
+      logoDefault,
+      logoDarkmode,
+      markDefault,
+      markDarkmode,
+      loadingLogoDefault,
+      loadingLogoDarkmode,
+      applicationTitle,
+    };
+
+    return brandingAssignment;
+  };
+
+  /**
+   * Assign boolean values for branding related configurations to indicate if
+   * user inputs valid or invalid URLs by calling checkUrlValid() function. Also
+   * check if title is valid by calling checkTitleValid() function.
+   *
+   * @param {boolean} darkMode
+   * @param {Readonly<OpenSearchDashboardsConfigType>} opensearchDashboardsConfig
+   * @returns {BrandingValidation} indicate valid/invalid URL for each branding config
+   */
+  private checkBrandingValid = async (
+    darkMode: boolean,
+    opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
+  ): Promise<BrandingValidation> => {
+    const branding = opensearchDashboardsConfig.branding;
+    const isLogoDefaultValid = await this.checkUrlValid(branding.logo.defaultUrl, 'logo default');
+
+    const isLogoDarkmodeValid = darkMode
+      ? await this.checkUrlValid(branding.logo.darkModeUrl, 'logo darkMode')
+      : false;
+
+    const isMarkDefaultValid = await this.checkUrlValid(branding.mark.defaultUrl, 'mark default');
+
+    const isMarkDarkmodeValid = darkMode
+      ? await this.checkUrlValid(branding.mark.darkModeUrl, 'mark darkMode')
+      : false;
+
+    const isLoadingLogoDefaultValid = await this.checkUrlValid(
+      branding.loadingLogo.defaultUrl,
+      'loadingLogo default'
+    );
+
+    const isLoadingLogoDarkmodeValid = darkMode
+      ? await this.checkUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
+      : false;
+
+    const isTitleValid = this.checkTitleValid(branding.applicationTitle, 'applicationTitle');
+
+    const brandingValidation: BrandingValidation = {
+      isLogoDefaultValid,
+      isLogoDarkmodeValid,
+      isMarkDefaultValid,
+      isMarkDarkmodeValid,
+      isLoadingLogoDefaultValid,
+      isLoadingLogoDarkmodeValid,
+      isTitleValid,
+    };
+
+    return brandingValidation;
+  };
+
   private async getUiConfig(uiPlugins: UiPlugins, pluginId: string) {
     const browserConfig = uiPlugins.browserConfigs.get(pluginId);
 
     return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
   }
 
+  /**
+   * Validation function for URLs. Use Axios to call URL and check validity.
+   * Also needs to be ended with png, svg, gif, PNG, SVG and GIF.
+   *
+   * @param {string} url
+   * @param {string} configName
+   * @returns {boolean} indicate if the URL is valid/invalid
+   */
   public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').warn(configName + ' config is not found or invalid.');
@@ -185,6 +320,14 @@ export class RenderingService {
       });
   };
 
+  /**
+   * Validation function for applicationTitle config.
+   * Title length needs to be between 1 to 36 letters.
+   *
+   * @param {string} title
+   * @param {string} configName
+   * @returns {boolean} indicate if user input title is valid/invalid
+   */
   public checkTitleValid = (title: string, configName?: string): boolean => {
     if (!title || title.length > 36) {
       this.logger

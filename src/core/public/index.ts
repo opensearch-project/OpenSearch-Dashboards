@@ -299,6 +299,7 @@ export interface CoreStart {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => {
+      darkMode: boolean;
       mark: {
         defaultUrl?: string;
         darkModeUrl?: string;
