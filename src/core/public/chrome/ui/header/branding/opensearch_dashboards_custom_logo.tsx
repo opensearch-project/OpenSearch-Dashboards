@@ -40,6 +40,7 @@ import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_d
  * @param {string} applicationTitle - custom title for the application
  */
 export interface CustomLogoType {
+  darkMode: boolean;
   logo: {
     defaultUrl?: string;
     darkModeUrl?: string;
@@ -50,7 +51,9 @@ export interface CustomLogoType {
   };
   applicationTitle?: string;
 }
+
 /**
+ * Use branding configurations to render the header logo on the nab bar.
  *
  * @param {CustomLogoType} - branding object consist of logo, mark and title
  * @returns A image component which is going to be rendered on the main page header bar.
@@ -59,21 +62,57 @@ export interface CustomLogoType {
  *          the default opensearch logo will be rendered.
  */
 export const CustomLogo = ({ ...branding }: CustomLogoType) => {
-  const headerLogoUrl = !branding.logo.defaultUrl
-    ? branding.mark.defaultUrl
-    : branding.logo.defaultUrl;
-  return !branding.logo.defaultUrl && !branding.mark.defaultUrl ? (
-    OpenSearchDashboardsLogoDarkMode()
-  ) : (
+  const darkMode = branding.darkMode;
+  const logoDefault = branding.logo.defaultUrl;
+  const logoDarkMode = branding.logo.darkModeUrl;
+  const markDefault = branding.mark.defaultUrl;
+  const markDarkMode = branding.mark.darkModeUrl;
+  const applicationTitle = branding.applicationTitle;
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * header logo in nav bar in default mode
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customHeaderLogoDefaultMode = () => {
+    return logoDefault ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * header logo in nav bar in dark mode
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customHeaderLogoDarkMode = () => {
+    return logoDarkMode ?? logoDefault ?? markDarkMode ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Render custom header logo for both default mode and dark mode
+   *
+   * @returns a valid custom header logo URL, or undefined
+   */
+  const customHeaderLogo = () => {
+    if (darkMode) {
+      return customHeaderLogoDarkMode();
+    }
+    return customHeaderLogoDefaultMode();
+  };
+
+  return customHeaderLogo() ? (
     <div className="logoContainer">
       <img
         data-test-subj="customLogo"
-        data-test-image-url={headerLogoUrl}
-        src={headerLogoUrl}
-        alt={branding.applicationTitle + ' logo'}
+        data-test-image-url={customHeaderLogo()}
+        src={customHeaderLogo()}
+        alt={applicationTitle + ' logo'}
         loading="lazy"
         className="logoImage"
       />
     </div>
+  ) : (
+    OpenSearchDashboardsLogoDarkMode()
   );
 };
