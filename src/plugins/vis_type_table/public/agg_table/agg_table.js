@@ -66,7 +66,7 @@ export function OsdAggTable(config, RecursionHelper) {
       };
 
       self.exportAsCsv = function (formatted) {
-        const csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
+        const csv = new Blob([self.toCsv(formatted)], { type: 'text/csv;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
