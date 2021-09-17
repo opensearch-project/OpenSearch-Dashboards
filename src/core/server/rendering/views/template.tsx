@@ -96,36 +96,79 @@ export const Template: FunctionComponent<Props> = ({
     </svg>
   );
 
+  const loadingLogoDefault = injectedMetadata.branding.loadingLogo.defaultUrl;
+  const loadingLogoDarkMode = injectedMetadata.branding.loadingLogo.darkModeUrl;
+  const markDefault = injectedMetadata.branding.mark.defaultUrl;
+  const markDarkMode = injectedMetadata.branding.mark.darkModeUrl;
+  const applicationTitle = injectedMetadata.branding.applicationTitle;
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * loading logo in default mode. In default mode, loading logo will
+   * proritize default loading logo URL, and then default mark URL.
+   * If both are invalid, default opensearch logo and spinner will be rendered.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customLoadingLogoDefaultMode = () => {
+    return loadingLogoDefault ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * loading logo in default mode. In dark mode, loading logo will proritize
+   * loading logo URLs, then mark logo URLs.
+   * Within each type, the dark mode URL will be proritized if provided.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customLoadingLogoDarkMode = () => {
+    return loadingLogoDarkMode ?? loadingLogoDefault ?? markDarkMode ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Render custom loading logo for both default mode and dark mode
+   *
+   * @returns a valid custom loading logo URL, or undefined
+   */
+  const customLoadingLogo = () => {
+    if (darkMode) {
+      return customLoadingLogoDarkMode();
+    }
+    return customLoadingLogoDefaultMode();
+  };
+
+  /**
+   * Check if a horizontal loading is needed to be rendered.
+   * Loading bar will be rendered only when a default mode mark URL or
+   * dark mode mark URL is rendered as the loading logo. We add the
+   * horizontal loading bar on the bottom of the static mark logo to have
+   * some loading effect for the loading page.
+   *
+   * @returns a loading bar component or no loading bar component
+   */
   const renderBrandingEnabledOrDisabledLoadingBar = () => {
-    if (
-      !injectedMetadata.branding.loadingLogo.defaultUrl &&
-      injectedMetadata.branding.mark.defaultUrl
-    ) {
+    if (customLoadingLogo() && !injectedMetadata.branding.loadingLogo.defaultUrl) {
       return <div className="osdProgress" />;
     }
   };
 
+  /**
+   * Check if we render a custom loading logo or the default opensearch spinner.
+   * If customLoadingLogo() returns undefined(no valid custom URL is found), we
+   * render the default opensearch logo spinenr
+   *
+   * @returns a image component with custom logo URL, or the default opensearch logo spinner
+   */
   const renderBrandingEnabledOrDisabledLoadingLogo = () => {
-    if (
-      !injectedMetadata.branding.loadingLogo.defaultUrl &&
-      !injectedMetadata.branding.mark.defaultUrl
-    ) {
-      return openSearchLogoSpinner;
-    } else {
+    if (customLoadingLogo()) {
       return (
         <div className="loadingLogoContainer">
-          <img
-            className="loadingLogo"
-            src={
-              !injectedMetadata.branding.loadingLogo.defaultUrl
-                ? injectedMetadata.branding.mark.defaultUrl
-                : injectedMetadata.branding.loadingLogo.defaultUrl
-            }
-            alt={injectedMetadata.branding.applicationTitle + ' logo'}
-          />
+          <img className="loadingLogo" src={customLoadingLogo()} alt={applicationTitle + ' logo'} />
         </div>
       );
     }
+    return openSearchLogoSpinner;
   };
 
   return (
@@ -154,14 +197,18 @@ export const Template: FunctionComponent<Props> = ({
           sizes="16x16"
           href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
         />
+
         <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
+
         <link
           rel="mask-icon"
           color="#e8488b"
           href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
         />
         <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
+
         <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
 
