@@ -41,6 +41,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   AppStatus,
   AppNavLinkStatus,
+  Branding,
 } from '../../../core/public';
 import {
   OpenSearchDashboardsOverviewPluginSetup,
@@ -49,6 +50,9 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
+
+/** @public */
+export type OverviewPluginBranding = Branding;
 
 export class OpenSearchDashboardsOverviewPlugin
   implements

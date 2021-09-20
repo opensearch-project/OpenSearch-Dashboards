@@ -317,9 +317,7 @@ export function CollapsibleNav({
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
           const opensearchLinkLogo =
-            category.label === 'OpenSearch Dashboards'
-              ? customSideMenuLogo()
-              : category.euiIconType;
+            category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
 
           return (
             <EuiCollapsibleNavGroup

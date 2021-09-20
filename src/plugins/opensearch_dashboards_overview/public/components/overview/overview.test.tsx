@@ -167,6 +167,14 @@ const mockFeatures = [
   },
 ];
 
+const mockBranding = {
+  darkMode: false,
+  mark: {
+    defaultUrl: '/defaultModeUrl',
+    darkModeUrl: '/darkModeUrl',
+  },
+};
+
 describe('Overview', () => {
   test('render', () => {
     const component = shallowWithIntl(
@@ -174,19 +182,30 @@ describe('Overview', () => {
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
+        branding={mockBranding}
       />
     );
     expect(component).toMatchSnapshot();
   });
   test('without solutions', () => {
     const component = shallowWithIntl(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={[]}
+        features={mockFeatures}
+        branding={mockBranding}
+      />
     );
     expect(component).toMatchSnapshot();
   });
   test('without features', () => {
     const component = shallowWithIntl(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={[]}
+        branding={mockBranding}
+      />
     );
     expect(component).toMatchSnapshot();
   });

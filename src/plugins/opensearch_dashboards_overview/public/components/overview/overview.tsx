@@ -62,17 +62,18 @@ import { AddData } from '../add_data';
 import { GettingStarted } from '../getting_started';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
+import { OverviewPluginBranding } from '../../plugin';
 
 const sortByOrder = (featureA: FeatureCatalogueEntry, featureB: FeatureCatalogueEntry) =>
   (featureA.order || Infinity) - (featureB.order || Infinity);
-
 interface Props {
   newsFetchResult: FetchResult | null | void;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
+  branding: OverviewPluginBranding;
 }
 
-export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
+export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, branding }) => {
   const [isNewOpenSearchDashboardsInstance, setNewOpenSearchDashboardsInstance] = useState(false);
   const {
     services: { http, data, uiSettings, application },
@@ -155,6 +156,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             id="opensearchDashboardsOverview.header.title"
           />
         }
+        branding={branding}
       />
 
       <div className="osdOverviewContent">
