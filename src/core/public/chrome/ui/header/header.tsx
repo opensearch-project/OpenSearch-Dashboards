@@ -55,7 +55,7 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -87,18 +87,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
-  branding: {
-    darkMode: boolean;
-    logo: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
-    mark: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
-    applicationTitle?: string;
-  };
+  branding: ChromeBranding;
 }
 
 export function Header({

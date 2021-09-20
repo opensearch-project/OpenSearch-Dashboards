@@ -106,6 +106,11 @@ export default function ({ getService, getPageObjects }) {
         'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
       const expectedHeaderLogoDarkMode =
         'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+      const expectedMarkLogo =
+        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
+      const expectedMarkLogoDarkMode =
+        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+      const applicationTitle = 'OpenSearch';
 
       before(async function () {
         await PageObjects.common.navigateToApp('home');
@@ -123,6 +128,24 @@ export default function ({ getService, getPageObjects }) {
         expect(url.includes('/app/home')).to.be(true);
       });
 
+      it('with customized logo in home dashboard card', async () => {
+        await testSubjects.existOrFail('dashboardCustomLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'dashboardCustomLogo',
+          'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+      });
+
+      it('with customized title in home dashboard card', async () => {
+        await testSubjects.existOrFail('dashboardCustomTitle');
+        const actualLabel = await testSubjects.getAttribute(
+          'dashboardCustomTitle',
+          'data-test-title'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
+      });
+
       it('with customized logo in header bar in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
@@ -136,6 +159,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         expect(url.includes('/app/home')).to.be(true);
+      });
+
+      it('with customized logo in home dashboard card in dark mode', async () => {
+        await testSubjects.existOrFail('dashboardCustomLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'dashboardCustomLogo',
+          'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
       });
     });
   });
