@@ -64,7 +64,7 @@ $ yarn start
 When the server is up and ready, click on the link displayed in your terminal to
 access it.
 
-### Building the archives
+### Building the artifacts
 
 To build the archives for each platform,  run the following:
 
