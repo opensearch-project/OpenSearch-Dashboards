@@ -41,14 +41,50 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'header', 'settings']);
   const testSubjects = getService('testSubjects');
 
+  const expectedFullLogo =
+    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
+  const expectedFullLogoDarkMode =
+    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+  const expectedMarkLogo =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
+  const expectedMarkLogoDarkMode =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+  const applicationTitle = 'OpenSearch';
+  const expectedWelcomeMessage = 'Welcome to OpenSearch';
+
   describe('OpenSearch Dashboards branding configuration', function customHomeBranding() {
+    describe('should render overview page', async () => {
+      this.tags('includeFirefox');
+
+      before(async function () {
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
+      });
+
+      it('with customized logo for opensearch overview header in default mode', async () => {
+        await testSubjects.existOrFail('osdOverviewPageHeaderLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'osdOverviewPageHeaderLogo',
+          'data-test-logo'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+      });
+
+      it('with customized logo for opensearch overview header in dark mode', async () => {
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
+        await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
+        await testSubjects.existOrFail('osdOverviewPageHeaderLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'osdOverviewPageHeaderLogo',
+          'data-test-logo'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+      });
+    });
+
     describe('should render welcome page', async () => {
       this.tags('includeFirefox');
-      const expectedWelcomeLogo =
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
-      const expectedWelcomeLogoDarkmode =
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
-      const expectedWelcomeMessage = 'Welcome to OpenSearch';
 
       //unloading any pre-existing settings so the welcome page will appear
       before(async function () {
@@ -76,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
       });
 
       it('with customized title', async () => {
@@ -97,28 +133,25 @@ export default function ({ getService, getPageObjects }) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeLogoDarkmode.toUpperCase());
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
       });
     });
 
     describe('should render home page', async () => {
       this.tags('includeFirefox');
-      const expectedHeaderLogo =
-        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
-      const expectedHeaderLogoDarkMode =
-        'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
-      const expectedMarkLogo =
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
-      const expectedMarkLogoDarkMode =
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
-      const applicationTitle = 'OpenSearch';
 
       before(async function () {
         await PageObjects.common.navigateToApp('home');
       });
 
+      after(async function () {
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
+        await PageObjects.common.navigateToApp('home');
+      });
+
       it('with customized logo in header bar', async () => {
-        await globalNav.logoExistsOrFail(expectedHeaderLogo);
+        await globalNav.logoExistsOrFail(expectedFullLogo);
       });
 
       it('with customized logo that can take back to home page', async () => {
@@ -161,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
-        await globalNav.logoExistsOrFail(expectedHeaderLogoDarkMode);
+        await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
       });
 
       it('with customized logo that can take back to home page in dark mode', async () => {

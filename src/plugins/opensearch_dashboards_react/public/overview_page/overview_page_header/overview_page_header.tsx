@@ -43,6 +43,7 @@ import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { RedirectAppLinks } from '../../app_links';
 import { useOpenSearchDashboards } from '../../context';
+import { ReactPluginBranding } from '../..';
 
 import './index.scss';
 
@@ -54,6 +55,7 @@ interface Props {
   showManagementLink?: boolean;
   title: JSX.Element | string;
   addBasePath: (path: string) => string;
+  branding: ReactPluginBranding;
 }
 
 export const OverviewPageHeader: FC<Props> = ({
@@ -64,6 +66,7 @@ export const OverviewPageHeader: FC<Props> = ({
   showManagementLink,
   title,
   addBasePath,
+  branding,
 }) => {
   const {
     services: { application },
@@ -73,6 +76,63 @@ export const OverviewPageHeader: FC<Props> = ({
     management: isManagementEnabled,
     dev_tools: isDevToolsEnabled,
   } = application.capabilities.navLinks;
+
+  const DEFAULT_OPENSEARCH_MARK =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
+  const DARKMODE_OPENSEARCH_MARK =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+
+  const darkMode = branding.darkMode;
+  const markDefault = branding.mark?.defaultUrl;
+  const markDarkMode = branding.mark?.darkModeUrl;
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * overview logo in default mode. In default mode, overview logo will
+   * proritize default mode mark URL. If it is invalid, default opensearch logo
+   * will be rendered.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customOverviewLogoDefaultMode = () => {
+    return markDefault ?? DEFAULT_OPENSEARCH_MARK;
+  };
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * overview logo in dark mode. In dark mode, overview logo will render
+   * dark mode mark URL if valid. Otherwise, it will render the default
+   * mode mark URL if valid. If both dark mode mark URL and default mode mark
+   * URL are invalid, the default opensearch logo will be rendered.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customOverviewLogoDarkMode = () => {
+    return markDarkMode ?? markDefault ?? DARKMODE_OPENSEARCH_MARK;
+  };
+
+  /**
+   * Render custom overview logo for both default mode and dark mode
+   *
+   * @returns a valid custom loading logo URL, or undefined
+   */
+  const customOverviewLogo = () => {
+    if (darkMode) {
+      return customOverviewLogoDarkMode();
+    }
+    return customOverviewLogoDefaultMode();
+  };
+
+  /**
+   * Check if we render a custom overview logo or the default opensearch spinner.
+   * If customOverviewLogo() returns undefined(no valid custom URL is found), we
+   * render the default opensearch logo
+   *
+   * @returns a image component with custom logo URL, or the default opensearch logo
+   */
+  const renderBrandingEnabledOrDisabledLogo = (iconTypeInput?: IconType) => {
+    return customOverviewLogo() ?? iconTypeInput ?? '';
+  };
 
   return (
     <header
@@ -86,7 +146,12 @@ export const OverviewPageHeader: FC<Props> = ({
             <EuiFlexGroup gutterSize="m" responsive={false}>
               {iconType && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xxl" type={iconType} />
+                  <EuiIcon
+                    size="xxl"
+                    type={renderBrandingEnabledOrDisabledLogo(iconType)}
+                    data-test-subj={`osdOverviewPageHeaderLogo`}
+                    data-test-logo={renderBrandingEnabledOrDisabledLogo(iconType)}
+                  />
                 </EuiFlexItem>
               )}
 
