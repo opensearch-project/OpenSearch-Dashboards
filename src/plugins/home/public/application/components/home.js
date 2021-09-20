@@ -155,6 +155,7 @@ export class Home extends Component {
           showDevToolsLink
           showManagementLink
           title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
+          branding={getServices().injectedMetadata.getBranding()}
         />
 
         <div className="homContent">
