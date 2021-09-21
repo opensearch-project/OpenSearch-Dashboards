@@ -2,15 +2,6 @@
 SCRIPT=$0
 
 
-UNAME=$(uname -s)
-if [ $UNAME = "FreeBSD" ]; then
-  OS="freebsd"
-elif [ $UNAME = "Darwin" ]; then
-  OS="darwin"
-else
-  OS="other"
-fi
-
 
 # SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
 while [ -h "$SCRIPT" ] ; do
@@ -27,10 +18,10 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
 
-if [ $OS = "freebsd" ]; then
+if [ -x "${DIR}/node/bin/node" ]; then
   NODE="/usr/local/bin/node"
-else
-  NODE="${DIR}/node/bin/node"
+elif [ -x "$(which node)" ]; then
+  NODE="$(which node)"
 fi
 
 test -x "$NODE"
