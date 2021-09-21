@@ -246,7 +246,7 @@ export default () =>
           defaultUrl: Joi.any().default('/'),
           darkModeUrl: Joi.any().default('/'),
         }),
-        favicon: Joi.any().default('/'),
+        faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
       }),
     }).default(),

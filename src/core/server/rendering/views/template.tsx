@@ -100,6 +100,7 @@ export const Template: FunctionComponent<Props> = ({
   const loadingLogoDarkMode = injectedMetadata.branding.loadingLogo.darkModeUrl;
   const markDefault = injectedMetadata.branding.mark.defaultUrl;
   const markDarkMode = injectedMetadata.branding.mark.darkModeUrl;
+  const favicon = injectedMetadata.branding.faviconUrl;
   const applicationTitle = injectedMetadata.branding.applicationTitle;
 
   /**
@@ -177,37 +178,55 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>OpenSearch</title>
+        <title>{applicationTitle}</title>
         <Fonts url={uiPublicUrl} />
-        {/* Favicons (generated from https://realfavicongenerator.net/) */}
+        {/**
+         * Favicons (generated from https://realfavicongenerator.net/)
+         *
+         * For user customized favicon using yml file:
+         * If user inputs a valid URL, we gurantee basic favicon customization, such as
+         * browser favicon(Chrome, Firefox, Safari, and Edge), apple touch icon, safari
+         * pinned icon. (For Safari browser favicon, we recommend input a png image URL,
+         * svg image URL might not work)
+         *
+         * we do not guarantee other advanced favicon customization such as
+         * windows tile icon, Andriod device favicon etc. However, the opensearch favicon
+         * will not be shown at those places and the default browser/device icon will be shown instead.
+         *
+         * If user inputs a invalid URL, original opensearch favicon will be used.
+         */}
+
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/apple-touch-icon.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/favicon-32x32.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/favicon-16x16.png`}
         />
 
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
+        <link rel="manifest" href={favicon ? `` : `${uiPublicUrl}/favicons/manifest.json`} />
 
         <link
           rel="mask-icon"
           color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
+          href={favicon ?? `${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
         />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
+        <link rel="shortcut icon" href={favicon ?? `${uiPublicUrl}/favicons/favicon.ico`} />
 
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        <meta
+          name="msapplication-config"
+          content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
+        />
 
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
