@@ -77,7 +77,7 @@ export const config = {
           defaultValue: '/',
         }),
       }),
-      favicon: schema.string({
+      faviconUrl: schema.string({
         defaultValue: '/',
       }),
       applicationTitle: schema.string({

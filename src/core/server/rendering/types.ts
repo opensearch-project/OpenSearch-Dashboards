@@ -88,7 +88,7 @@ export interface RenderingMetadata {
         defaultUrl?: string;
         darkModeUrl?: string;
       };
-      favicon?: string;
+      faviconUrl?: string;
       applicationTitle?: string;
     };
   };
@@ -148,6 +148,7 @@ export interface BrandingValidation {
   isMarkDarkmodeValid: boolean;
   isLoadingLogoDefaultValid: boolean;
   isLoadingLogoDarkmodeValid: boolean;
+  isFaviconValid: boolean;
   isTitleValid: boolean;
 }
 
@@ -163,5 +164,6 @@ export interface BrandingAssignment {
   markDarkmode?: string;
   loadingLogoDefault?: string;
   loadingLogoDarkmode?: string;
+  favicon?: string;
   applicationTitle?: string;
 }

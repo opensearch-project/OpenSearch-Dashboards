@@ -83,8 +83,8 @@ function mockProps() {
   };
 }
 
-describe('Loading logo ', () => {
-  describe('in default mode ', () => {
+describe('Loading page ', () => {
+  describe('logo in default mode ', () => {
     it('rendered using loading logo default mode URL', () => {
       const branding = {
         darkMode: false,
@@ -125,7 +125,7 @@ describe('Loading logo ', () => {
     });
   });
 
-  describe('in dark mode ', () => {
+  describe('logo in dark mode ', () => {
     it('rendered using loading logo dark mode URL', () => {
       const branding = {
         darkMode: false,
@@ -179,6 +179,34 @@ describe('Loading logo ', () => {
     });
 
     it('renders using original opensearch loading spinner', () => {
+      const branding = {
+        darkMode: false,
+        logo: {},
+        mark: {},
+        loadingLogo: {},
+        title: 'custom title',
+      };
+      injectedMetadata.getBranding.mockReturnValue(branding);
+      const component = renderWithIntl(<Template metadata={mockProps()} />);
+      expect(component).toMatchSnapshot();
+    });
+  });
+  describe('render favicon ', () => {
+    it('using a valid URL', () => {
+      const branding = {
+        darkMode: false,
+        logo: {},
+        mark: {},
+        loadingLogo: {},
+        faviconUrl: '/customFavicon',
+        title: 'custom title',
+      };
+      injectedMetadata.getBranding.mockReturnValue(branding);
+      const component = renderWithIntl(<Template metadata={mockProps()} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('using an invalid URL', () => {
       const branding = {
         darkMode: false,
         logo: {},
