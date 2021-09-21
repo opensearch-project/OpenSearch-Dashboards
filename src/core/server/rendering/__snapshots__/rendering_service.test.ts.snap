@@ -8,7 +8,6 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "darkMode": false,
-    "favicon": "",
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
@@ -59,7 +58,6 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "darkMode": false,
-    "favicon": "",
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
@@ -110,7 +108,6 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "darkMode": true,
-    "favicon": "",
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
@@ -165,7 +162,6 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "darkMode": false,
-    "favicon": "",
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
@@ -216,7 +212,6 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "darkMode": false,
-    "favicon": "",
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
