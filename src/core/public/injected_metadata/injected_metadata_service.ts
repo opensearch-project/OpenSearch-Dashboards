@@ -90,7 +90,7 @@ export interface InjectedMetadataParams {
         defaultUrl?: string;
         darkModeUrl?: string;
       };
-      favicon?: string;
+      faviconUrl?: string;
       applicationTitle?: string;
     };
   };
@@ -211,7 +211,7 @@ export interface InjectedMetadataSetup {
       defaultUrl?: string;
       darkModeUrl?: string;
     };
-    favicon?: string;
+    faviconUrl?: string;
     applicationTitle?: string;
   };
 }

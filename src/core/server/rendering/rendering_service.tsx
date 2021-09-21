@@ -135,7 +135,7 @@ export class RenderingService {
                 defaultUrl: brandingAssignment.loadingLogoDefault,
                 darkModeUrl: brandingAssignment.loadingLogoDarkmode,
               },
-              favicon: '',
+              faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
             },
           },
@@ -223,6 +223,9 @@ export class RenderingService {
       loadingLogoDarkmode = undefined;
     }
 
+    // assign favicon based on brandingValidation function result
+    const favicon = brandingValidation.isFaviconValid ? branding.faviconUrl : undefined;
+
     // assign applition title based on brandingValidation function result
     const applicationTitle = brandingValidation.isTitleValid
       ? branding.applicationTitle
@@ -235,6 +238,7 @@ export class RenderingService {
       markDarkmode,
       loadingLogoDefault,
       loadingLogoDarkmode,
+      favicon,
       applicationTitle,
     };
 
@@ -276,6 +280,8 @@ export class RenderingService {
       ? await this.checkUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
       : false;
 
+    const isFaviconValid = await this.checkUrlValid(branding.faviconUrl, 'favicon');
+
     const isTitleValid = this.checkTitleValid(branding.applicationTitle, 'applicationTitle');
 
     const brandingValidation: BrandingValidation = {
@@ -285,6 +291,7 @@ export class RenderingService {
       isMarkDarkmodeValid,
       isLoadingLogoDefaultValid,
       isLoadingLogoDarkmodeValid,
+      isFaviconValid,
       isTitleValid,
     };
 
@@ -307,7 +314,7 @@ export class RenderingService {
    */
   public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
-      this.logger.get('branding').warn(configName + ' config is not found or invalid.');
+      this.logger.get('branding').info(configName + ' config is not found or invalid.');
       return false;
     }
     return await Axios.get(url, { adapter: AxiosHttpAdapter })
@@ -315,7 +322,7 @@ export class RenderingService {
         return true;
       })
       .catch(() => {
-        this.logger.get('branding').warn(configName + ' config is not found or invalid');
+        this.logger.get('branding').info(configName + ' config is not found or invalid');
         return false;
       });
   };
@@ -332,7 +339,7 @@ export class RenderingService {
     if (!title || title.length > 36) {
       this.logger
         .get('branding')
-        .warn(
+        .info(
           configName +
             ' config is not found or invalid. Title length should be between 1 to 36 characters.'
         );
