@@ -64,6 +64,22 @@ $ yarn start
 When the server is up and ready, click on the link displayed in your terminal to
 access it.
 
+### Building the artifacts
+
+To build the archives for each platform,  run the following:
+
+```
+yarn build --skip-os-packages
+```
+
+If you want to build a specific platform, pass the platform flag after `yarn build-platform`. For example, to build darwin x64, run the following:
+
+```
+yarn build-platform --darwin
+```
+
+You could pass one or multiple flags. If you don't pass any flag, `yarn build-platform` will use your local environment. Currenly we only support `darwin` (darwin x64), `linux` (linux x64) and `linux-arm` (linux arm64).  
+
 ### Building the Docker Image
 
 To build the Docker image, run the following:
