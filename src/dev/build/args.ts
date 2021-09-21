@@ -45,6 +45,9 @@ export function readCliArgs(argv: string[]) {
       'verbose',
       'debug',
       'all-platforms',
+      'darwin',
+      'linux',
+      'linux-arm',
       'verbose',
       'quiet',
       'silent',
@@ -111,6 +114,11 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerPackage: isOsPackageDesired('docker'),
     createDockerUbiPackage: isOsPackageDesired('docker') && !Boolean(flags['skip-docker-ubi']),
+    targetPlatforms: {
+      darwin: Boolean(flags.darwin),
+      linux: Boolean(flags.linux),
+      linuxArm: Boolean(flags['linux-arm']),
+    },
     targetAllPlatforms: Boolean(flags['all-platforms']),
   };
 
