@@ -1,6 +1,48 @@
 ## Version 1.1.0 Release Notes
 
 
+* __Bump prismjs from 1.24.0 to 1.25.0 (#805) (#817)__
+
+    [Tommy Markley](mailto:markleyt@amazon.com) - Fri, 24 Sep 2021 15:46:06 -0500
+    
+    Bumps [prismjs](https://github.com/PrismJS/prism) from 1.24.0 to 1.25.0.
+    - [Release notes](https://github.com/PrismJS/prism/releases)
+    - [Changelog](https://github.com/PrismJS/prism/blob/master/CHANGELOG.md)
+    - [Commits](https://github.com/PrismJS/prism/compare/v1.24.0...v1.25.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: prismjs
+     dependency-type: indirect
+    ...
+     Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+
+* __Bump tmpl from 1.0.4 to 1.0.5 (#807) (#819)__
+
+    [Tommy Markley](mailto:markleyt@amazon.com) - Fri, 24 Sep 2021 15:45:18 -0500
+    
+    
+    Bumps [tmpl](https://github.com/daaku/nodejs-tmpl) from 1.0.4 to 1.0.5.
+    - [Release notes](https://github.com/daaku/nodejs-tmpl/releases)
+    - [Commits](https://github.com/daaku/nodejs-tmpl/commits/v1.0.5)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: tmpl
+     dependency-type: indirect
+    ...
+     Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+
+* __Revert &#34;[1.1] Upgrade `immer` from 8.0.1 to 9.0.6 (#788)&#34; (#813)__
+
+    [Tommy Markley](mailto:markleyt@amazon.com) - Fri, 24 Sep 2021 15:13:59 -0500
+    
+    
+    This reverts commit 9f57b182e159e23838fa04ae85e141d6bd518a2f.
+     This introduces breaking changes; it will need to wait for 2.0.
+     Signed-off-by: Tommy Markley &lt;markleyt@amazon.com&gt;
+
+
 * __Bump `axios` from 0.21.1 to 0.21.4 (#779)__
 
     [Tommy Markley](mailto:markleyt@amazon.com) - Fri, 10 Sep 2021 08:35:07 -0700
