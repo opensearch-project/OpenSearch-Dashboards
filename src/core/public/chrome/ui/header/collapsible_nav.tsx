@@ -52,6 +52,7 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
+import { ChromeBranding } from '../../chrome_service';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -102,6 +103,7 @@ interface Props {
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
+  branding: ChromeBranding;
 }
 
 export function CollapsibleNav({
@@ -115,6 +117,7 @@ export function CollapsibleNav({
   closeNav,
   navigateToApp,
   navigateToUrl,
+  branding,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -135,6 +138,46 @@ export function CollapsibleNav({
       onClick: closeNav,
       ...(needsIcon && { basePath }),
     });
+  };
+
+  const DEFAULT_OPENSEARCH_MARK =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
+  const DARKMODE_OPENSEARCH_MARK =
+    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+  const darkMode = branding.darkMode;
+  const markDefault = branding.mark?.defaultUrl;
+  const markDarkMode = branding.mark?.darkModeUrl;
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * side menu opensearch logo in default mode
+   *
+   * @returns a valid custom URL or original default mode opensearch mark if no valid URL is provided
+   */
+  const customSideMenuLogoDefaultMode = () => {
+    return markDefault ?? DEFAULT_OPENSEARCH_MARK;
+  };
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * side menu opensearch logo in dark mode
+   *
+   * @returns a valid custom URL or original dark mode opensearch mark if no valid URL is provided
+   */
+  const customSideMenuLogoDarkMode = () => {
+    return markDarkMode ?? markDefault ?? DARKMODE_OPENSEARCH_MARK;
+  };
+
+  /**
+   * Render custom side menu logo for both default mode and dark mode
+   *
+   * @returns a valid logo URL
+   */
+  const customSideMenuLogo = () => {
+    if (darkMode) {
+      return customSideMenuLogoDarkMode();
+    }
+    return customSideMenuLogoDefaultMode();
   };
 
   return (
@@ -273,16 +316,21 @@ export function CollapsibleNav({
         {/* OpenSearchDashboards, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
+          const opensearchLinkLogo =
+            category.label === 'OpenSearch Dashboards'
+              ? customSideMenuLogo()
+              : category.euiIconType;
 
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
-              iconType={category.euiIconType}
+              iconType={opensearchLinkLogo}
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
+              data-test-opensearch-logo={opensearchLinkLogo}
             >
               <EuiListGroup
                 aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
