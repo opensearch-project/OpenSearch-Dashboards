@@ -216,6 +216,7 @@ export function Header({
             }
           }}
           customNavLink$={observables.customNavLink$}
+          branding={branding}
         />
       </header>
     </>
