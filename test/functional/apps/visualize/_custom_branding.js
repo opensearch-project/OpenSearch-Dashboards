@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
+  const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'home', 'header', 'settings']);
   const testSubjects = getService('testSubjects');
 
@@ -146,6 +147,16 @@ export default function ({ getService, getPageObjects }) {
         expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
       });
 
+      it('with customized logo for opensearch in side menu', async () => {
+        await appsMenu.openCollapsibleNav();
+        await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
+        const actualLabel = await testSubjects.getAttribute(
+          'collapsibleNavGroup-opensearchDashboards',
+          'data-test-opensearch-logo'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+      });
+
       it('with customized logo in header bar in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
@@ -166,6 +177,16 @@ export default function ({ getService, getPageObjects }) {
         const actualLabel = await testSubjects.getAttribute(
           'dashboardCustomLogo',
           'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+      });
+
+      it('with customized logo for opensearch in side menu in dark mode', async () => {
+        await appsMenu.openCollapsibleNav();
+        await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
+        const actualLabel = await testSubjects.getAttribute(
+          'collapsibleNavGroup-opensearchDashboards',
+          'data-test-opensearch-logo'
         );
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
       });

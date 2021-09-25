@@ -5262,6 +5262,18 @@ exports[`Header renders 1`] = `
           "serverBasePath": "/test",
         }
       }
+      branding={
+        Object {
+          "applicationTitle": "OpenSearch Dashboards",
+          "darkMode": false,
+          "logo": Object {
+            "defaultUrl": "/",
+          },
+          "mark": Object {
+            "defaultUrl": "/",
+          },
+        }
+      }
       closeNav={[Function]}
       customNavLink$={
         BehaviorSubject {
