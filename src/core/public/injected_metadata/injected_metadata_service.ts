@@ -39,7 +39,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { AppCategory } from '../';
+import { AppCategory, Branding } from '../';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -76,23 +76,7 @@ export interface InjectedMetadataParams {
         user?: Record<string, UserProvidedValues>;
       };
     };
-    branding: {
-      darkMode: boolean;
-      logo: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      mark: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      loadingLogo: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      faviconUrl?: string;
-      applicationTitle?: string;
-    };
+    branding: Branding;
   };
 }
 
@@ -197,23 +181,7 @@ export interface InjectedMetadataSetup {
   getInjectedVars: () => {
     [key: string]: unknown;
   };
-  getBranding: () => {
-    darkMode: boolean;
-    logo: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
-    mark: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
-    loadingLogo: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
-    faviconUrl?: string;
-    applicationTitle?: string;
-  };
+  getBranding: () => Branding;
 }
 
 /** @internal */

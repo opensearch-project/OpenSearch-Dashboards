@@ -107,6 +107,15 @@ const mockDirectories = [
 
 const addBasePathMock = (path: string) => (path ? path : 'path');
 
+const branding = {
+  darkMode: false,
+  mark: {
+    defaultUrl: '/defaultModeLogo',
+    darkModeUrl: '/darkModeLogo',
+  },
+  applicationTitle: 'custom title',
+};
+
 describe('SolutionsSection', () => {
   test('only renders a spacer if no solutions are available', () => {
     const component = shallow(
@@ -114,6 +123,7 @@ describe('SolutionsSection', () => {
         addBasePath={addBasePathMock}
         solutions={[]}
         directories={mockDirectories}
+        branding={branding}
       />
     );
     expect(component).toMatchSnapshot();
@@ -125,6 +135,7 @@ describe('SolutionsSection', () => {
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1]}
         directories={mockDirectories}
+        branding={branding}
       />
     );
     expect(component).toMatchSnapshot();
@@ -136,6 +147,7 @@ describe('SolutionsSection', () => {
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4]}
         directories={mockDirectories}
+        branding={branding}
       />
     );
     expect(component).toMatchSnapshot();
@@ -146,6 +158,7 @@ describe('SolutionsSection', () => {
         addBasePath={addBasePathMock}
         solutions={[solutionEntry2, solutionEntry3, solutionEntry4]}
         directories={mockDirectories}
+        branding={branding}
       />
     );
     expect(component).toMatchSnapshot();
