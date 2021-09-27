@@ -96,10 +96,10 @@ export const Template: FunctionComponent<Props> = ({
     </svg>
   );
 
-  const loadingLogoDefault = injectedMetadata.branding.loadingLogo.defaultUrl;
-  const loadingLogoDarkMode = injectedMetadata.branding.loadingLogo.darkModeUrl;
-  const markDefault = injectedMetadata.branding.mark.defaultUrl;
-  const markDarkMode = injectedMetadata.branding.mark.darkModeUrl;
+  const loadingLogoDefault = injectedMetadata.branding.loadingLogo?.defaultUrl;
+  const loadingLogoDarkMode = injectedMetadata.branding.loadingLogo?.darkModeUrl;
+  const markDefault = injectedMetadata.branding.mark?.defaultUrl;
+  const markDarkMode = injectedMetadata.branding.mark?.darkModeUrl;
   const favicon = injectedMetadata.branding.faviconUrl;
   const applicationTitle = injectedMetadata.branding.applicationTitle;
 
@@ -149,7 +149,7 @@ export const Template: FunctionComponent<Props> = ({
    * @returns a loading bar component or no loading bar component
    */
   const renderBrandingEnabledOrDisabledLoadingBar = () => {
-    if (customLoadingLogo() && !injectedMetadata.branding.loadingLogo.defaultUrl) {
+    if (customLoadingLogo() && !loadingLogoDefault) {
       return <div className="osdProgress" />;
     }
   };

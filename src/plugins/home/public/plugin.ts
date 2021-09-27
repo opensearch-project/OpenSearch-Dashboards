@@ -40,6 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
 
+import { Branding } from 'src/core/types';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -187,6 +188,9 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 
 /** @public */
 export type TutorialSetup = TutorialServiceSetup;
+
+/** @public */
+export type HomePluginBranding = Branding;
 
 /** @public */
 export interface HomePublicPluginSetup {

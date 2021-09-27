@@ -33,40 +33,23 @@
 import React from 'react';
 import '../header_logo.scss';
 import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_darkmode';
-
-/**
- * @param {object} logo - full logo on main screen: defaultUrl will be used in default mode; darkModeUrl will be used in dark mode
- * @param {object} mark - thumbnail logo: defaultUrl will be used in default mode; darkModeUrl will be used in dark mode
- * @param {string} applicationTitle - custom title for the application
- */
-export interface CustomLogoType {
-  darkMode: boolean;
-  logo: {
-    defaultUrl?: string;
-    darkModeUrl?: string;
-  };
-  mark: {
-    defaultUrl?: string;
-    darkModeUrl?: string;
-  };
-  applicationTitle?: string;
-}
+import { ChromeBranding } from '../../../chrome_service';
 
 /**
  * Use branding configurations to render the header logo on the nab bar.
  *
- * @param {CustomLogoType} - branding object consist of logo, mark and title
+ * @param {ChromeBranding} - branding object consist of logo, mark and title
  * @returns A image component which is going to be rendered on the main page header bar.
  *          If logo default is valid, the full logo by logo default config will be rendered;
  *          if not, the logo icon by mark default config will be rendered; if both are not found,
  *          the default opensearch logo will be rendered.
  */
-export const CustomLogo = ({ ...branding }: CustomLogoType) => {
+export const CustomLogo = ({ ...branding }: ChromeBranding) => {
   const darkMode = branding.darkMode;
-  const logoDefault = branding.logo.defaultUrl;
-  const logoDarkMode = branding.logo.darkModeUrl;
-  const markDefault = branding.mark.defaultUrl;
-  const markDarkMode = branding.mark.darkModeUrl;
+  const logoDefault = branding.logo?.defaultUrl;
+  const logoDarkMode = branding.logo?.darkModeUrl;
+  const markDefault = branding.mark?.defaultUrl;
+  const markDarkMode = branding.mark?.darkModeUrl;
   const applicationTitle = branding.applicationTitle;
 
   /**

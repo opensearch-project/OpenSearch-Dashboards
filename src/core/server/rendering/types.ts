@@ -32,6 +32,7 @@
 
 import { i18n } from '@osd/i18n';
 
+import { Branding } from 'src/core/types';
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, OpenSearchDashboardsRequest, LegacyRequest } from '../http';
@@ -74,23 +75,7 @@ export interface RenderingMetadata {
         user: Record<string, UserProvidedValues<any>>;
       };
     };
-    branding: {
-      darkMode: boolean;
-      logo: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      mark: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      loadingLogo: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      faviconUrl?: string;
-      applicationTitle?: string;
-    };
+    branding: Branding;
   };
 }
 
