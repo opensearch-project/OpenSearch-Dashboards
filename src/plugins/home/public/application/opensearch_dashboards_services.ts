@@ -47,6 +47,7 @@ import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
 import { ConfigSchema } from '../../config';
+import { HomePluginBranding } from '..';
 
 export interface HomeOpenSearchDashboardsServices {
   indexPatternService: any;
@@ -70,13 +71,7 @@ export interface HomeOpenSearchDashboardsServices {
   tutorialService: TutorialService;
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    getBranding: () => {
-      mark: {
-        defaultUrl?: string;
-        darkModeUrl?: string;
-      };
-      applicationTitle?: string;
-    };
+    getBranding: () => HomePluginBranding;
   };
 }
 
