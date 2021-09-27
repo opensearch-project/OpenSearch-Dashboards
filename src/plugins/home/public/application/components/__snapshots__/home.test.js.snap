@@ -248,6 +248,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   >
     <SolutionsSection
       addBasePath={[Function]}
+      branding={Object {}}
       directories={Array []}
       solutions={
         Array [

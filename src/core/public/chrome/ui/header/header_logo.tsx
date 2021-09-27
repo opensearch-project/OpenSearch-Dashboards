@@ -36,7 +36,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import { ChromeNavLink } from '../..';
-import { CustomLogo, CustomLogoType } from './branding/opensearch_dashboards_custom_logo';
+import { CustomLogo } from './branding/opensearch_dashboards_custom_logo';
+import { ChromeBranding } from '../../chrome_service';
 import './header_logo.scss';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -104,7 +105,7 @@ interface Props {
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
-  branding: CustomLogoType;
+  branding: ChromeBranding;
 }
 
 export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
