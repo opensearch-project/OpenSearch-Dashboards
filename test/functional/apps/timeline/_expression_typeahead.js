@@ -52,7 +52,7 @@ export default function ({ getPageObjects }) {
       await PageObjects.timeline.setExpression('.es');
       await PageObjects.timeline.clickSuggestion();
       const suggestions = await PageObjects.timeline.getSuggestionItemsText();
-      expect(suggestions.length).to.eql(9);
+      expect(suggestions.length).to.eql(10);
       expect(suggestions[0].includes('fit=')).to.eql(true);
     });
 

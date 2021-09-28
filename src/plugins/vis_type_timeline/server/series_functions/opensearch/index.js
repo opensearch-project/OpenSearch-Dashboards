@@ -92,6 +92,14 @@ export default new Datasource('es', {
       }),
     },
     {
+      name: 'kibana',
+      types: ['boolean', 'null'],
+      help: i18n.translate('timeline.help.functions.opensearch.args.opensearchDashboardsHelpText', {
+        defaultMessage:
+          'Respect filters on OpenSearch Dashboards dashboards. Only has an effect when using on OpenSearch Dashboards dashboards',
+      }),
+    },
+    {
       name: 'opensearchDashboards',
       types: ['boolean', 'null'],
       help: i18n.translate('timeline.help.functions.opensearch.args.opensearchDashboardsHelpText', {
@@ -110,7 +118,7 @@ export default new Datasource('es', {
   help: i18n.translate('timeline.help.functions.opensearchHelpText', {
     defaultMessage: 'Pull data from an opensearch instance',
   }),
-  aliases: ['es'],
+  aliases: ['elasticsearch', 'opensearch'],
   fn: async function opensearchFn(args, tlConfig) {
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
@@ -118,6 +126,7 @@ export default new Datasource('es', {
       index: tlConfig.settings['timeline:es.default_index'],
       timefield: tlConfig.settings['timeline:es.timefield'],
       interval: tlConfig.time.interval,
+      kibana: true,
       opensearchDashboards: true,
       fit: 'nearest',
     });
