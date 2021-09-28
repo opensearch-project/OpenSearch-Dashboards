@@ -1,5 +1,34 @@
 ## Version 1.1.0 Release Notes
 
+* __[Bug] Restore timeline legacy functions and filters__
+
+    [Kawika Avilla](mailto:kavilla414@gmail.com) - Fri, 28 Sep 2021 8:00:00 -0500
+    
+    While renaming we changed values from legacy naming schema to
+    OpenSearch Dashboards naming schema. However, after realizing
+    we impacted backwards compatibility, we restored some of the
+    "under the hood" components backed to legacy application to
+    allow for seemless migration.
+
+    However, upon attempting to restore Timeline to work with saved
+    objects we neglected to restore the Timeline functions.
+
+    Previously users could set kibana=false to ignore filters on
+    the dashboards being applied to their Timeline visualizations.
+    Now, if users tried to set it then it would fail because it
+    didn't know what that function was.
+
+    This commit fixes this issue by keeping the update since we
+    do not want to impact people who have now updated their functions
+    and re-added the legacy functions.
+
+    In this commit, I also restore the aliases for "elasticsearch" and
+    now included "opensearch" for Timeline queries.
+
+    Finally, the key was incorrect for actually accessing the filter
+    so it never applied the filters in the default state.   
+    
+    Signed-off-by: Kawika Avilla &lt;kavilla414@gmail.com&gt;
 
 * __Bump prismjs from 1.24.0 to 1.25.0 (#805) (#817)__
 
