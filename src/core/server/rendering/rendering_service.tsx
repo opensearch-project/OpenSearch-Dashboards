@@ -317,7 +317,7 @@ export class RenderingService {
       this.logger.get('branding').info(configName + ' config is not found or invalid.');
       return false;
     }
-    return await Axios.get(url, { adapter: AxiosHttpAdapter })
+    return await Axios.get(url, { adapter: AxiosHttpAdapter, maxRedirects: 0 })
       .then(() => {
         return true;
       })
