@@ -67,8 +67,34 @@ it('build dist for current platform, without packages, by default', () => {
   `);
 });
 
-it('build dist for linux x64 platform, without packages, if --linux-x64 is passed', () => {
-  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
+it('build dist for linux x64 platform, without packages, if --linux is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform', '--linux'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createDockerUbiPackage": false,
+        "createRpmPackage": false,
+        "downloadFreshNode": true,
+        "isRelease": false,
+        "targetAllPlatforms": false,
+        "targetPlatforms": Object {
+          "darwin": false,
+          "linux": true,
+          "linuxArm": false,
+        },
+        "versionQualifier": "",
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('build dist for linux arm64 platform, without packages, if --linux-arm is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform', '--linux-arm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "createArchives": true,
@@ -82,7 +108,7 @@ it('build dist for linux x64 platform, without packages, if --linux-x64 is passe
         "targetPlatforms": Object {
           "darwin": false,
           "linux": false,
-          "linuxArm": false,
+          "linuxArm": true,
         },
         "versionQualifier": "",
       },
@@ -93,8 +119,8 @@ it('build dist for linux x64 platform, without packages, if --linux-x64 is passe
   `);
 });
 
-it('build dist for linux x64 platform, without packages, if --linux-arm64 is passed', () => {
-  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
+it('build dist for darwin x64 platform, without packages, if --darwin is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build-platform', '--darwin'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "createArchives": true,
@@ -106,33 +132,7 @@ it('build dist for linux x64 platform, without packages, if --linux-arm64 is pas
         "isRelease": false,
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
-          "darwin": false,
-          "linux": false,
-          "linuxArm": false,
-        },
-        "versionQualifier": "",
-      },
-      "log": <ToolingLog>,
-      "showHelp": false,
-      "unknownFlags": Array [],
-    }
-  `);
-});
-
-it('build dist for linux x64 platform, without packages, if --darwin-x64 is passed', () => {
-  expect(readCliArgs(['node', 'scripts/build-platform'])).toMatchInlineSnapshot(`
-    Object {
-      "buildOptions": Object {
-        "createArchives": true,
-        "createDebPackage": false,
-        "createDockerPackage": false,
-        "createDockerUbiPackage": false,
-        "createRpmPackage": false,
-        "downloadFreshNode": true,
-        "isRelease": false,
-        "targetAllPlatforms": false,
-        "targetPlatforms": Object {
-          "darwin": false,
+          "darwin": true,
           "linux": false,
           "linuxArm": false,
         },
