@@ -66,7 +66,7 @@ access it.
 
 ### Building the artifacts
 
-To build the archives for each platform,  run the following:
+To build the artifacts for all supported platforms,  run the following:
 
 ```
 yarn build --skip-os-packages
