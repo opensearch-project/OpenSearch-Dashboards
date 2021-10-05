@@ -1,5 +1,92 @@
 ## Version 1.1.0 Release Notes
 
+* __[1.1] Fix yarn build docs and update test (#844)__
+
+    [Anan](mailto:79961084+ananzh@users.noreply.github.com) - Tue, 5 Oct 2021 12:55:30 -0700
+    
+    yarn build flags in /src/dev/build/cli.ts are not updated to match the renamed flags in de-couple PR (#795). This PR fixes the issue
+    and update the tests. Also modify words in DEVELOPER_GUIDE.md.
+     
+    PR resolved: 
+    https://github.com/opensearch-project/OpenSearch-Dashboards/issues/836
+    
+    Backport PR:  
+    https://github.com/opensearch-project/OpenSearch-Dashboards/pull/840
+    
+    Signed-off-by: Anan Zhuang &lt;ananzh@amazon.com&gt;
+
+* __[1.1] Ensure DCO Workflow Check (#846)__
+
+    [Anan](mailto:79961084+ananzh@users.noreply.github.com) - Tue, 5 Oct 2021 12:55:08 -0700
+        
+    Issue Resolved:    
+    https://github.com/opensearch-project/OpenSearch-Dashboards/issues/834
+    
+    Backport PR:    
+    https://github.com/opensearch-project/OpenSearch-Dashboards/pull/841
+    
+    Signed-off-by: Anan Zhuang &lt;ananzh@amazon.com&gt;
+
+* __[1.1] De-Couple Dashboards linux building process (#843)__
+
+    [Anan](mailto:79961084+ananzh@users.noreply.github.com) - Tue, 5 Oct 2021 11:44:48 -0700
+    
+    When running yarn build --skip-os-packages it will build 4 tarballs for Dashboards (2x linux, 1x macOS, 1x windows) and takes 10+min to do so.
+    
+    In this PR, we break the building process to allow single linux to build. If run `yarn build-platform --linux-x64` only linux x64 tarball is created. Same for linux arm64 and darwin x64. You could run `yarn build-platform
+    --linux-arm64` and `yarn build-platform darwin-x64`.
+    
+    partially solved:  
+    https://github.com/opensearch-project/OpenSearch-Dashboards/issues/473
+    
+    backport PR:    
+    https://github.com/opensearch-project/OpenSearch-Dashboards/pull/795
+    
+    Signed-off-by: Anan Zhuang &lt;ananzh@amazon.com&gt;
+
+* __[1.1][Bug] Restore timeline legacy functions and filters__
+
+    [Kawika Avilla](mailto:kavilla414@gmail.com) - Tue, 28 Sep 2021 12:38:11 -0700
+        
+    While renaming we changed values from legacy naming schema to OpenSearch
+    Dashboards naming schema. However, after realizing we impacted backwards
+    compatibility, we restored some of the
+    &#34;under the hood&#34; components backed to legacy application to allow for seemless
+    migration.
+    
+    However, upon attempting to restore Timeline to work with saved objects we
+    neglected to restore the Timeline functions.
+    
+    Previously users could set kibana=false to ignore filters on the dashboards
+    being applied to their Timeline visualizations. Now, if users tried to set it
+    then it would fail because it didn&#39;t know what that function was.
+    
+    This commit fixes this issue by keeping the update since we do not want to
+    impact people who have now updated their functions and re-added the legacy
+    functions.
+    
+    In this commit, I also restore the aliases for &#34;elasticsearch&#34; and now included
+    &#34;opensearch&#34; for Timeline queries.
+    
+    Finally, the key was incorrect for actually accessing the filter so it never
+    applied the filters in the default state.
+    
+    Issue resolved: 
+    https://github.com/opensearch-project/OpenSearch-Dashboards/issues/820
+    
+    Backport PR: 
+    https://github.com/opensearch-project/OpenSearch-Dashboards/pull/825
+    
+    Signed-off-by: Kawika Avilla &lt;kavilla414@gmail.com&gt;    
+
+* __[1.1] Update release notes for 1.1 release (#822)__
+
+    [Anan](mailto:79961084+ananzh@users.noreply.github.com) - Mon, 27 Sep 2021 11:07:07 -0500
+        
+    Backport PR:
+    https://github.com/opensearch-project/OpenSearch-Dashboards/pull/821
+    
+    Signed-off-by: Anan Zhuang &lt;ananzh@amazon.com&gt;
 
 * __Bump prismjs from 1.24.0 to 1.25.0 (#805) (#817)__
 
