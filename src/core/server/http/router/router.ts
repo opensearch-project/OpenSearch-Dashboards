@@ -30,10 +30,11 @@
  * GitHub history for details.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
+import { Request, ResponseObject, ResponseToolkit, ServerRoute } from 'hapi';
 import Boom from 'boom';
 
 import { isConfigSchema } from '@osd/config-schema';
+import { IncomingMessage } from 'http';
 import { Logger } from '../../logging';
 import { LegacyOpenSearchErrorHelpers } from '../../opensearch/legacy/errors';
 import {
@@ -60,6 +61,25 @@ interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
+interface ProxyRouterExtraOptions {
+  proxyPath: string;
+  additionalHeaders?:
+    | Record<string, string>
+    | ((request: Request) => Promise<Record<string, string>>);
+  onResponse?: (err: null | Boom, res: IncomingMessage, req: Request) => IncomingMessage;
+}
+
+type RouterProxy = ServerRoute;
+
+/**
+ * Proxy handler common definition
+ *
+ * @public
+ */
+export type ProxyRegistrar = <P, Q, B>(
+  route: RouteConfig<P, Q, B, any> & ProxyRouterExtraOptions
+) => void;
+
 /**
  * Route handler common definition
  *
@@ -81,6 +101,12 @@ export interface IRouter {
    * Resulted path
    */
   routerPath: string;
+
+  /**
+   * Register a proxy handler for requests.
+   * @param route {@link RouteConfig} - a route configuration.
+   */
+  proxy: ProxyRegistrar;
 
   /**
    * Register a route handler for `GET` request.
@@ -129,6 +155,13 @@ export interface IRouter {
    * @internal
    */
   getRoutes: () => RouterRoute[];
+
+  /**
+   * Returns all proxies registered with this router.
+   * @returns List of registered proxies.
+   * @internal
+   */
+  getProxies: () => RouterProxy[];
 }
 
 export type ContextEnhancer<P, Q, B, Method extends RouteMethod> = (
@@ -218,11 +251,13 @@ function validOptions(
  */
 export class Router implements IRouter {
   public routes: Array<Readonly<RouterRoute>> = [];
+  public proxies: Array<Readonly<RouterProxy>> = [];
   public get: IRouter['get'];
   public post: IRouter['post'];
   public delete: IRouter['delete'];
   public put: IRouter['put'];
   public patch: IRouter['patch'];
+  public proxy: IRouter['proxy'];
 
   constructor(
     public readonly routerPath: string,
@@ -249,15 +284,72 @@ export class Router implements IRouter {
       });
     };
 
+    const buildProxy = () => <P, Q, B>(
+      proxyConfig: RouteConfig<P, Q, B, any> & ProxyRouterExtraOptions
+    ) => {
+      const methods: RouteMethod[] = ['get', 'post', 'delete', 'put', 'patch', 'options'];
+      const proxyPath =
+        proxyConfig.proxyPath +
+        (proxyConfig.proxyPath.charAt(proxyConfig.proxyPath.length - 1) === '/' ? '' : '/');
+
+      methods.forEach((method) => {
+        this.proxies.push({
+          path: `${proxyConfig.path}/{path*}`,
+          method,
+          options:
+            method === 'get'
+              ? undefined
+              : {
+                  payload: { parse: false },
+                  validate: { payload: true },
+                },
+          handler: {
+            proxy: {
+              onResponse: (err, res, req) => {
+                if (proxyConfig.onResponse) {
+                  return proxyConfig.onResponse(err, res, req);
+                }
+                return res;
+              },
+              mapUri: async (request) => {
+                let additionalHeaders;
+
+                if (typeof proxyConfig.additionalHeaders === 'function') {
+                  additionalHeaders = await proxyConfig.additionalHeaders(request);
+                } else {
+                  additionalHeaders = proxyConfig.additionalHeaders;
+                }
+
+                return {
+                  uri: proxyPath + request.params.path,
+                  headers: {
+                    ...request.headers,
+                    ...additionalHeaders,
+                  },
+                };
+              },
+              passThrough: true,
+              xforward: true,
+            },
+          },
+        });
+      });
+    };
+
     this.get = buildMethod('get');
     this.post = buildMethod('post');
     this.delete = buildMethod('delete');
     this.put = buildMethod('put');
     this.patch = buildMethod('patch');
+    this.proxy = buildProxy();
   }
 
   public getRoutes() {
     return [...this.routes];
+  }
+
+  public getProxies() {
+    return [...this.proxies];
   }
 
   public handleLegacyErrors = wrapErrors;

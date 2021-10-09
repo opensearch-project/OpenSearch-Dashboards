@@ -247,6 +247,10 @@ export class HttpServer {
           },
         });
       }
+
+      for (const proxy of router.getProxies()) {
+        this.server.route(proxy);
+      }
     }
 
     await this.server.start();
