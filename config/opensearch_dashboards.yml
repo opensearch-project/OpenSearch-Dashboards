@@ -14,8 +14,6 @@
 
 # Specifies whether OpenSearch Dashboards should rewrite requests that are prefixed with
 # `server.basePath` or require that they are rewritten by your reverse proxy.
-# This setting was effectively always `false` before OpenSearch Dashboards 6.3 and will
-# default to `true` starting in OpenSearch Dashboards 7.0.
 #server.rewriteBasePath: false
 
 # The maximum payload size in bytes for incoming server requests.
