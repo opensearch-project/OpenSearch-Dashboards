@@ -55,7 +55,7 @@ const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
     log(
       'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
-        'It will be removed in 8.0 release. Instead, supply the "osd-xsrf" header.'
+        'Instead, supply the "osd-xsrf" header.'
     );
   }
   return settings;
@@ -64,7 +64,7 @@ const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
-      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, OpenSearch Dashboards ' +
+      'You should set server.basePath along with server.rewriteBasePath. OpenSearch Dashboards ' +
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
         'current behavior and silence this warning.'
@@ -118,7 +118,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   if (has(settings, 'map.manifestServiceUrl')) {
     log(
       'You should no longer use the map.manifestServiceUrl setting in opensearch_dashboards.yml to configure the location ' +
-        'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
+        'of the Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
         '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
         'modified for use in production environments.'
     );
