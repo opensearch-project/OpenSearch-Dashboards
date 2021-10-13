@@ -78,6 +78,7 @@ export class RenderingService {
           packageInfo: this.coreContext.env.packageInfo,
         };
         const basePath = http.basePath.get(request);
+        const uiPublicUrl = `${basePath}/ui`;
         const serverBasePath = http.basePath.serverBasePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
@@ -93,7 +94,7 @@ export class RenderingService {
 
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
-          uiPublicUrl: `${basePath}/ui`,
+          uiPublicUrl,
           bootstrapScriptUrl: `${basePath}/bootstrap.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
@@ -123,6 +124,7 @@ export class RenderingService {
             },
             branding: {
               darkMode,
+              assetFolderUrl: `${uiPublicUrl}/default_branding`,
               logo: {
                 defaultUrl: brandingAssignment.logoDefault,
                 darkModeUrl: brandingAssignment.logoDarkmode,

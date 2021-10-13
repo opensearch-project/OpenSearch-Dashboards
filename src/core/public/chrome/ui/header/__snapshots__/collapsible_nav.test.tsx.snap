@@ -6243,9 +6243,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
               className="euiFlexItem eui-yScroll"
             >
               <EuiCollapsibleNavGroup
-                data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
-                iconType="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                iconType="undefined/opensearch_mark_default_mode.svg"
                 initialIsOpen={true}
                 isCollapsible={true}
                 key="opensearchDashboards"
@@ -6266,7 +6266,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                       >
                         <EuiIcon
                           size="l"
-                          type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                          type="undefined/opensearch_mark_default_mode.svg"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -6284,7 +6284,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                     </EuiFlexGroup>
                   }
                   className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                  data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   id="mockId"
                   initialIsOpen={true}
@@ -6295,7 +6295,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                 >
                   <div
                     className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                    data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                    data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                     data-test-subj="collapsibleNavGroup-opensearchDashboards"
                     onToggle={[Function]}
                   >
@@ -6344,10 +6344,10 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                 >
                                   <EuiIcon
                                     size="l"
-                                    type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                                    type="undefined/opensearch_mark_default_mode.svg"
                                   >
                                     <div
-                                      data-euiicon-type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                                      data-euiicon-type="undefined/opensearch_mark_default_mode.svg"
                                       size="l"
                                     />
                                   </EuiIcon>
@@ -8644,9 +8644,9 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
               className="euiFlexItem eui-yScroll"
             >
               <EuiCollapsibleNavGroup
-                data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
-                iconType="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                iconType="undefined/opensearch_mark_default_mode.svg"
                 initialIsOpen={true}
                 isCollapsible={true}
                 key="opensearchDashboards"
@@ -8667,7 +8667,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                       >
                         <EuiIcon
                           size="l"
-                          type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                          type="undefined/opensearch_mark_default_mode.svg"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -8685,7 +8685,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                     </EuiFlexGroup>
                   }
                   className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                  data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   id="mockId"
                   initialIsOpen={true}
@@ -8696,7 +8696,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                 >
                   <div
                     className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                    data-test-opensearch-logo="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                    data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                     data-test-subj="collapsibleNavGroup-opensearchDashboards"
                     onToggle={[Function]}
                   >
@@ -8745,10 +8745,10 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                 >
                                   <EuiIcon
                                     size="l"
-                                    type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                                    type="undefined/opensearch_mark_default_mode.svg"
                                   >
                                     <div
-                                      data-euiicon-type="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+                                      data-euiicon-type="undefined/opensearch_mark_default_mode.svg"
                                       size="l"
                                     />
                                   </EuiIcon>
