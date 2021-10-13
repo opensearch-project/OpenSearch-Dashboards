@@ -32,7 +32,6 @@
 
 import React from 'react';
 import '../header_logo.scss';
-import { OpenSearchDashboardsLogoDarkMode } from './opensearch_dashboards_logo_darkmode';
 import { ChromeBranding } from '../../../chrome_service';
 
 /**
@@ -46,6 +45,7 @@ import { ChromeBranding } from '../../../chrome_service';
  */
 export const CustomLogo = ({ ...branding }: ChromeBranding) => {
   const darkMode = branding.darkMode;
+  const assetFolderUrl = branding.assetFolderUrl;
   const logoDefault = branding.logo?.defaultUrl;
   const logoDarkMode = branding.logo?.darkModeUrl;
   const markDefault = branding.mark?.defaultUrl;
@@ -96,6 +96,6 @@ export const CustomLogo = ({ ...branding }: ChromeBranding) => {
       />
     </div>
   ) : (
-    OpenSearchDashboardsLogoDarkMode()
+    <img src={`${assetFolderUrl}/opensearch_logo.svg`} alt={applicationTitle + ' logo'} />
   );
 };

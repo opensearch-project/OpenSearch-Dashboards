@@ -103,7 +103,7 @@ exports[`SolutionTitle  in dark mode renders the home dashboard logo using origi
     <EuiToken
       className="homSolutionPanel__icon"
       fill="light"
-      iconType="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg"
+      iconType="undefined/opensearch_mark_dark_mode.svg"
       shape="circle"
       size="l"
     />
@@ -191,7 +191,7 @@ exports[`SolutionTitle  in default mode renders the home dashboard logo using or
     <EuiToken
       className="homSolutionPanel__icon"
       fill="light"
-      iconType="https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg"
+      iconType="undefined/opensearch_mark_default_mode.svg"
       shape="circle"
       size="l"
     />

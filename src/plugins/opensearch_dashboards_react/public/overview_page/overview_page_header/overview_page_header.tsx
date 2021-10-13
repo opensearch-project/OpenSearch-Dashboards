@@ -77,10 +77,8 @@ export const OverviewPageHeader: FC<Props> = ({
     dev_tools: isDevToolsEnabled,
   } = application.capabilities.navLinks;
 
-  const DEFAULT_OPENSEARCH_MARK =
-    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
-  const DARKMODE_OPENSEARCH_MARK =
-    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+  const DEFAULT_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_default_mode.svg`;
+  const DARKMODE_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_dark_mode.svg`;
 
   const darkMode = branding.darkMode;
   const markDefault = branding.mark?.defaultUrl;

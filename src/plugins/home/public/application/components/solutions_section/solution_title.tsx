@@ -57,11 +57,6 @@ interface Props {
   branding: HomePluginBranding;
 }
 
-const DEFAULT_OPENSEARCH_MARK =
-  'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
-const DARKMODE_OPENSEARCH_MARK =
-  'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
-
 /**
  * Use branding configurations to check which URL to use for rendering
  * home card logo in default mode. In default mode, home card logo will
@@ -125,6 +120,9 @@ const renderBrandingEnabledOrDisabledLogo = (branding: HomePluginBranding) => {
       </div>
     );
   }
+  const DEFAULT_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_default_mode.svg`;
+  const DARKMODE_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_dark_mode.svg`;
+
   return (
     <EuiToken
       iconType={branding.darkMode ? DARKMODE_OPENSEARCH_MARK : DEFAULT_OPENSEARCH_MARK}
