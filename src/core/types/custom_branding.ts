@@ -38,6 +38,8 @@
 export interface Branding {
   /** Default mode or Dark mode*/
   darkMode?: boolean;
+  /** Relative path to the asset folder */
+  assetFolderUrl?: string;
   /** Small logo icon that will be used in most logo occurrences */
   mark?: {
     defaultUrl?: string;
