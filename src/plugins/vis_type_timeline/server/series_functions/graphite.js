@@ -37,12 +37,6 @@ import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 import { isValidConfig } from './helpers/graphite_helper';
 
-const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
-You can always enable the default allowlist configuration.`;
-
-const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
-Please update your config from OpenSearch Dashboards's Advanced Setting.`;
-
 export default new Datasource('graphite', {
   args: [
     {
@@ -74,7 +68,8 @@ export default new Datasource('graphite', {
     if (allowedUrls.length === 0 && blockedIPs.length === 0) {
       throw new Error(
         i18n.translate('timeline.help.functions.missCheckGraphiteConfig', {
-          defaultMessage: MISS_CHECKLIST_MESSAGE,
+          defaultMessage:
+            'Please configure on the opensearch_dashboards.yml file. You can always enable the default allowlist configuration.',
         })
       );
     }
@@ -82,7 +77,8 @@ export default new Datasource('graphite', {
     if (!isValidConfig(blockedIPs, allowedUrls, configuredUrl)) {
       throw new Error(
         i18n.translate('timeline.help.functions.invalidGraphiteConfig', {
-          defaultMessage: INVALID_URL_MESSAGE,
+          defaultMessage:
+            "The Graphite URL provided by you is invalid. Please update your config from OpenSearch Dashboards's Advanced Setting.",
         })
       );
     }

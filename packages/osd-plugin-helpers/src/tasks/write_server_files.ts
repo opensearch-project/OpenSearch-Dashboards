@@ -63,6 +63,7 @@ export async function writeServerFiles({
         // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in opensearch_dashboards.json manifest
         ...(OPENSEARCH_DASHBOARDS_VERSION_79 || plugin.manifest.server
           ? config.serverSourcePatterns || [
+              '.i18nrc.json',
               'yarn.lock',
               'tsconfig.json',
               'package.json',
