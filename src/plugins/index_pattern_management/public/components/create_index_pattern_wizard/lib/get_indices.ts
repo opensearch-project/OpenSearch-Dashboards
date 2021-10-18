@@ -127,9 +127,12 @@ export const getIndicesViaResolve = async ({
   showAllIndices: boolean;
 }) =>
   http
-    .get<ResolveIndexResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
-      query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
-    })
+    .get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/${encodeURIComponent(pattern)}`,
+      {
+        query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+      }
+    )
     .then((response) => {
       if (!response) {
         return [];
