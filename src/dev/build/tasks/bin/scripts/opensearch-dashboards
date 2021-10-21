@@ -18,9 +18,11 @@ CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
 
 if [ -x "${DIR}/node/bin/node" ]; then
   NODE="/usr/local/bin/node"
-else
+elif [ -x "$(which node)" ]; then
   NODE="$(which node)"
 fi
+
+test -x "$NODE"
 
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
