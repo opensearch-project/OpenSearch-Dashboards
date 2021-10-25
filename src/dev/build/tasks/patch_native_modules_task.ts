@@ -54,15 +54,19 @@ const packages: Package[] = [
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
-      darwin: {
+      'darwin-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-64.gz',
         sha256: '595c6653d796493ddb288fc0732a0d1df8560099796f55a1dd242357d96bb8d6',
       },
-      linux: {
+      'linux-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-64.gz',
         sha256: 'e743587bc96314edf10c3e659c03168bc374a5cd9a6623ee99d989251e331f28',
       },
-      win32: {
+      'linux-arm64': {
+        url: 'https://d1v1sj258etie.cloudfront.net/node-re2/1.15.4/linux-arm64-64.gz',
+        sha256: '19fa97f39d4965276382429bcd932dd696915f711663e7cef9b0a304b3e8e6f7',
+      },
+      'win32-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-64.gz',
         sha256: 'b33de62cda24fb02dc80a19fb79977d686468ac746e97cd211059d2d4c75d529',
       },
@@ -92,7 +96,7 @@ async function patchModule(
       `Can't patch ${pkg.name}'s native module, we were expecting version ${pkg.version} and found ${installedVersion}`
     );
   }
-  const platformName = platform.getName();
+  const platformName = platform.getNodeArch();
   const archive = pkg.archives[platformName];
   const archiveName = path.basename(archive.url);
   const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, pkg.name, archiveName);
