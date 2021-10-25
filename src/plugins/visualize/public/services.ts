@@ -33,7 +33,7 @@
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
-import { SharePluginStart } from '../../../plugins/share/public';
+import { SharePluginStart } from '../../share/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

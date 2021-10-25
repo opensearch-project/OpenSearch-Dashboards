@@ -33,7 +33,7 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { IndexPattern } from '../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 

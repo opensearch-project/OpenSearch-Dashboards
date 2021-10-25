@@ -35,7 +35,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';

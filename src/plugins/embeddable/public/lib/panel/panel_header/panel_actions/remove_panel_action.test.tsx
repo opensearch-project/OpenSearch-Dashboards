@@ -42,7 +42,7 @@ import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/f
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
 import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { opensearchFilters, Filter } from '../../../../../../../plugins/data/public';
+import { opensearchFilters, Filter } from '../../../../../../data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

@@ -34,11 +34,7 @@ import React, { Component } from 'react';
 import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  indexPatterns,
-  IndexPatternAttributes,
-  UI_SETTINGS,
-} from '../../../../../../../plugins/data/public';
+import { indexPatterns, IndexPatternAttributes, UI_SETTINGS } from '../../../../../../data/public';
 import {
   getIndices,
   containsIllegalCharacters,

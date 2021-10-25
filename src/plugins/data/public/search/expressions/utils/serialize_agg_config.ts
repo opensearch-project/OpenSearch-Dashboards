@@ -33,7 +33,7 @@
 import { OpenSearchDashboardsDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
 import { IAggConfig } from '../../../../common';
 import { IndexPattern } from '../../../index_patterns';
-import { getSearchService } from '../../../../public/services';
+import { getSearchService } from '../../../services';
 
 /** @internal */
 export const serializeAggConfig = (

@@ -39,7 +39,7 @@ import { getPositions, Positions } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
