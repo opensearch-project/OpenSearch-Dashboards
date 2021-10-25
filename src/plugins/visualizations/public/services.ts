@@ -41,16 +41,16 @@ import {
   SavedObjectsStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
 import {
   DataPublicPluginStart,
   FilterManager,
   IndexPatternsContract,
   TimefilterContract,
 } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExpressionsStart } from '../../expressions/public';
+import { UiActionsStart } from '../../ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';

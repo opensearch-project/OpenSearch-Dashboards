@@ -65,7 +65,7 @@ import {
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
-import { opensearchFilters, Filter } from '../../../../plugins/data/public';
+import { opensearchFilters, Filter } from '../../../data/public';
 import { createEmbeddablePanelMock } from '../mocks';
 
 async function creatHelloWorldContainerAndEmbeddable(

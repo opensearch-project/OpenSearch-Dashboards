@@ -41,7 +41,7 @@ import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
-} from '../../../../plugins/saved_objects/public';
+} from '../../../saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';

@@ -35,7 +35,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { search } from '../../../../../../../plugins/data/server';
+import { search } from '../../../../../../data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(
