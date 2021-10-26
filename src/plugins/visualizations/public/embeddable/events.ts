@@ -34,7 +34,7 @@ import {
   APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../plugins/ui_actions/public';
+} from '../../../ui_actions/public';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

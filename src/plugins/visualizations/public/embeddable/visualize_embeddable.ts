@@ -56,7 +56,7 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
-} from '../../../../plugins/expressions/public';
+} from '../../../expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';

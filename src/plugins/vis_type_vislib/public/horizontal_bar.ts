@@ -50,7 +50,7 @@ import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
 import { Rotates } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export const createHorizontalBarVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'horizontal_bar',

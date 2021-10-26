@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { basicAggs } from '../../../../../../../plugins/vis_type_timeseries/common/basic_aggs';
+import { basicAggs } from '../../../../../common/basic_aggs';
 
 export function isSortable(metric) {
   return basicAggs.includes(metric.type);

@@ -47,7 +47,7 @@ import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import { coreMock } from '../../../../core/public/mocks';
-import { opensearchFilters, Filter } from '../../../../plugins/data/public';
+import { opensearchFilters, Filter } from '../../../data/public';
 import { createEmbeddablePanelMock } from '../mocks';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
