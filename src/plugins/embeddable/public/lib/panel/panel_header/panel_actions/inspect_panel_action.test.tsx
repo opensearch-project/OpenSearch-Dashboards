@@ -39,10 +39,10 @@ import {
   FilterableEmbeddable,
   ContactCardEmbeddable,
 } from '../../../test_samples';
-import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../../../inspector/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
-import { opensearchFilters } from '../../../../../../../plugins/data/public';
+import { opensearchFilters } from '../../../../../../data/public';
 import { embeddablePluginMock } from '../../../../mocks';
 import { EmbeddableStart } from '../../../../plugin';
 

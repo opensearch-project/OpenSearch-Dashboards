@@ -36,7 +36,7 @@ import moment from 'moment';
 import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
-import { getHeatmapColors } from '../../../../../../plugins/charts/public';
+import { getHeatmapColors } from '../../../../../charts/public';
 
 const defaults = {
   color: undefined, // todo

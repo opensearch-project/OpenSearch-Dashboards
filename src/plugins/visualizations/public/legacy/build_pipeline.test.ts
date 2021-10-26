@@ -40,7 +40,7 @@ import {
   Schemas,
 } from './build_pipeline';
 import { Vis } from '..';
-import { dataPluginMock } from '../../../../plugins/data/public/mocks';
+import { dataPluginMock } from '../../../data/public/mocks';
 import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
 import { parseExpression } from '../../../expressions/common';
 

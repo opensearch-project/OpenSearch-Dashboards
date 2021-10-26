@@ -41,7 +41,7 @@ import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams, ValueAxis } from './types';
 import { VisTypeVislibDependencies } from './plugin';
 import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';

@@ -50,7 +50,7 @@ import {
   UI_SETTINGS,
   DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
