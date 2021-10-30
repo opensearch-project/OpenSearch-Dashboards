@@ -133,10 +133,7 @@ export const Template: FunctionComponent<Props> = ({
    * @returns a valid custom loading logo URL, or undefined
    */
   const customLoadingLogo = () => {
-    if (darkMode) {
-      return customLoadingLogoDarkMode();
-    }
-    return customLoadingLogoDefaultMode();
+    return darkMode ? customLoadingLogoDarkMode() : customLoadingLogoDefaultMode();
   };
 
   /**

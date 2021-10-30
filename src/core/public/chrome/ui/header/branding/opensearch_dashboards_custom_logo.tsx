@@ -35,13 +35,13 @@ import '../header_logo.scss';
 import { ChromeBranding } from '../../../chrome_service';
 
 /**
- * Use branding configurations to render the header logo on the nab bar.
+ * Use branding configurations to render the header logo on the nav bar.
  *
  * @param {ChromeBranding} - branding object consist of logo, mark and title
- * @returns A image component which is going to be rendered on the main page header bar.
+ * @returns Custom branding logo component which is going to be rendered on the main page header bar.
  *          If logo default is valid, the full logo by logo default config will be rendered;
  *          if not, the logo icon by mark default config will be rendered; if both are not found,
- *          the default opensearch logo will be rendered.
+ *          the default OpenSearch Dashboards logo will be rendered.
  */
 export const CustomLogo = ({ ...branding }: ChromeBranding) => {
   const darkMode = branding.darkMode;
@@ -78,10 +78,7 @@ export const CustomLogo = ({ ...branding }: ChromeBranding) => {
    * @returns a valid custom header logo URL, or undefined
    */
   const customHeaderLogo = () => {
-    if (darkMode) {
-      return customHeaderLogoDarkMode();
-    }
-    return customHeaderLogoDefaultMode();
+    return darkMode ? customHeaderLogoDarkMode() : customHeaderLogoDefaultMode();
   };
 
   return customHeaderLogo() ? (

@@ -115,10 +115,7 @@ export const OverviewPageHeader: FC<Props> = ({
    * @returns a valid custom loading logo URL, or undefined
    */
   const customOverviewLogo = () => {
-    if (darkMode) {
-      return customOverviewLogoDarkMode();
-    }
-    return customOverviewLogoDefaultMode();
+    return darkMode ? customOverviewLogoDarkMode() : customOverviewLogoDefaultMode();
   };
 
   /**

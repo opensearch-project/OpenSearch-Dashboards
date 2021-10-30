@@ -173,10 +173,7 @@ export function CollapsibleNav({
    * @returns a valid logo URL
    */
   const customSideMenuLogo = () => {
-    if (darkMode) {
-      return customSideMenuLogoDarkMode();
-    }
-    return customSideMenuLogoDefaultMode();
+    return darkMode ? customSideMenuLogoDarkMode() : customSideMenuLogoDefaultMode();
   };
 
   return (

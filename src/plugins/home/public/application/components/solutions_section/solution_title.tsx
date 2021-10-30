@@ -91,10 +91,7 @@ const customHomeLogoDarkMode = (branding: HomePluginBranding) => {
  * @returns {string|undefined} a valid custom loading logo URL, or undefined
  */
 const customHomeLogo = (branding: HomePluginBranding) => {
-  if (branding.darkMode) {
-    return customHomeLogoDarkMode(branding);
-  }
-  return customHomeLogoDefaultMode(branding);
+  return branding.darkMode ? customHomeLogoDarkMode(branding) : customHomeLogoDefaultMode(branding);
 };
 
 /**

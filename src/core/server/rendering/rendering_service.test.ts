@@ -137,9 +137,9 @@ describe('RenderingService', () => {
     });
   });
 
-  describe('checkUrlValid()', () => {
+  describe('isUrlValid()', () => {
     it('checks valid SVG URL', async () => {
-      const result = await service.checkUrlValid(
+      const result = await service.isUrlValid(
         'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
         'config'
       );
@@ -147,7 +147,7 @@ describe('RenderingService', () => {
     });
 
     it('checks valid PNG URL', async () => {
-      const result = await service.checkUrlValid(
+      const result = await service.isUrlValid(
         'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
         'config'
       );
@@ -155,32 +155,29 @@ describe('RenderingService', () => {
     });
 
     it('checks invalid URL that does not contain svg, png or gif', async () => {
-      const result = await service.checkUrlValid('https://validUrl', 'config');
+      const result = await service.isUrlValid('https://validUrl', 'config');
       expect(result).toEqual(false);
     });
 
     it('checks invalid URL', async () => {
-      const result = await service.checkUrlValid('http://notfound.svg', 'config');
+      const result = await service.isUrlValid('http://notfound.svg', 'config');
       expect(result).toEqual(false);
     });
   });
 
-  describe('checkTitleValid()', () => {
+  describe('isTitleValid()', () => {
     it('checks valid title', () => {
-      const result = service.checkTitleValid('OpenSearch Dashboards', 'config');
+      const result = service.isTitleValid('OpenSearch Dashboards', 'config');
       expect(result).toEqual(true);
     });
 
     it('checks invalid title with empty string', () => {
-      const result = service.checkTitleValid('', 'config');
+      const result = service.isTitleValid('', 'config');
       expect(result).toEqual(false);
     });
 
     it('checks invalid title with length > 36 character', () => {
-      const result = service.checkTitleValid(
-        'OpenSearch Dashboardssssssssssssssssssssss',
-        'config'
-      );
+      const result = service.isTitleValid('OpenSearch Dashboardssssssssssssssssssssss', 'config');
       expect(result).toEqual(false);
     });
   });
