@@ -249,8 +249,8 @@ export class RenderingService {
 
   /**
    * Assign boolean values for branding related configurations to indicate if
-   * user inputs valid or invalid URLs by calling checkUrlValid() function. Also
-   * check if title is valid by calling checkTitleValid() function.
+   * user inputs valid or invalid URLs by calling isUrlValid() function. Also
+   * check if title is valid by calling isTitleValid() function.
    *
    * @param {boolean} darkMode
    * @param {Readonly<OpenSearchDashboardsConfigType>} opensearchDashboardsConfig
@@ -261,30 +261,30 @@ export class RenderingService {
     opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
   ): Promise<BrandingValidation> => {
     const branding = opensearchDashboardsConfig.branding;
-    const isLogoDefaultValid = await this.checkUrlValid(branding.logo.defaultUrl, 'logo default');
+    const isLogoDefaultValid = await this.isUrlValid(branding.logo.defaultUrl, 'logo default');
 
     const isLogoDarkmodeValid = darkMode
-      ? await this.checkUrlValid(branding.logo.darkModeUrl, 'logo darkMode')
+      ? await this.isUrlValid(branding.logo.darkModeUrl, 'logo darkMode')
       : false;
 
-    const isMarkDefaultValid = await this.checkUrlValid(branding.mark.defaultUrl, 'mark default');
+    const isMarkDefaultValid = await this.isUrlValid(branding.mark.defaultUrl, 'mark default');
 
     const isMarkDarkmodeValid = darkMode
-      ? await this.checkUrlValid(branding.mark.darkModeUrl, 'mark darkMode')
+      ? await this.isUrlValid(branding.mark.darkModeUrl, 'mark darkMode')
       : false;
 
-    const isLoadingLogoDefaultValid = await this.checkUrlValid(
+    const isLoadingLogoDefaultValid = await this.isUrlValid(
       branding.loadingLogo.defaultUrl,
       'loadingLogo default'
     );
 
     const isLoadingLogoDarkmodeValid = darkMode
-      ? await this.checkUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
+      ? await this.isUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
       : false;
 
-    const isFaviconValid = await this.checkUrlValid(branding.faviconUrl, 'favicon');
+    const isFaviconValid = await this.isUrlValid(branding.faviconUrl, 'favicon');
 
-    const isTitleValid = this.checkTitleValid(branding.applicationTitle, 'applicationTitle');
+    const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
     const brandingValidation: BrandingValidation = {
       isLogoDefaultValid,
@@ -314,7 +314,7 @@ export class RenderingService {
    * @param {string} configName
    * @returns {boolean} indicate if the URL is valid/invalid
    */
-  public checkUrlValid = async (url: string, configName?: string): Promise<boolean> => {
+  public isUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').info(configName + ' config is not found or invalid.');
       return false;
@@ -337,7 +337,7 @@ export class RenderingService {
    * @param {string} configName
    * @returns {boolean} indicate if user input title is valid/invalid
    */
-  public checkTitleValid = (title: string, configName?: string): boolean => {
+  public isTitleValid = (title: string, configName?: string): boolean => {
     if (!title || title.length > 36) {
       this.logger
         .get('branding')
