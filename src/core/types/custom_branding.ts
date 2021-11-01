@@ -30,37 +30,33 @@
  * GitHub history for details.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { SolutionPanel } from './solution_panel';
+/**
+ * A type definition for custom branding configurations from yml file
+ * @public
+ */
 
-const solutionEntry = {
-  id: 'opensearchDashboards',
-  title: 'OpenSearch Dashboards',
-  subtitle: 'Visualize & analyze',
-  description: 'Explore and analyze your data',
-  appDescriptions: ['Analyze data in dashboards'],
-  icon: 'inputOutput',
-  path: 'opensearch_dashboards_landing_page',
-  order: 1,
-};
-
-const addBasePathMock = (path: string) => (path ? path : 'path');
-
-const branding = {
-  darkMode: false,
-  mark: {
-    defaultUrl: '/defaultModeLogo',
-    darkModeUrl: '/darkModeLogo',
-  },
-  applicationTitle: 'custom title',
-};
-
-describe('SolutionPanel', () => {
-  test('renders the solution panel for the given solution', () => {
-    const component = shallow(
-      <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} branding={branding} />
-    );
-    expect(component).toMatchSnapshot();
-  });
-});
+export interface Branding {
+  /** Default mode or Dark mode*/
+  darkMode?: boolean;
+  /** Relative path to the asset folder */
+  assetFolderUrl?: string;
+  /** Small logo icon that will be used in most logo occurrences */
+  mark?: {
+    defaultUrl?: string;
+    darkModeUrl?: string;
+  };
+  /** Fuller logo that will be rendered on nav bar header */
+  logo?: {
+    defaultUrl?: string;
+    darkModeUrl?: string;
+  };
+  /** Loading logo that will be rendered on the loading page */
+  loadingLogo?: {
+    defaultUrl?: string;
+    darkModeUrl?: string;
+  };
+  /** Custom favicon that will be rendered on the browser tab */
+  faviconUrl?: string;
+  /** Application title that will replace the default opensearch dashboard string */
+  applicationTitle?: string;
+}

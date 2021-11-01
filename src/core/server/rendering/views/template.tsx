@@ -95,40 +95,136 @@ export const Template: FunctionComponent<Props> = ({
       />
     </svg>
   );
+
+  const loadingLogoDefault = injectedMetadata.branding.loadingLogo?.defaultUrl;
+  const loadingLogoDarkMode = injectedMetadata.branding.loadingLogo?.darkModeUrl;
+  const markDefault = injectedMetadata.branding.mark?.defaultUrl;
+  const markDarkMode = injectedMetadata.branding.mark?.darkModeUrl;
+  const favicon = injectedMetadata.branding.faviconUrl;
+  const applicationTitle = injectedMetadata.branding.applicationTitle;
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * loading logo in default mode. In default mode, loading logo will
+   * proritize default loading logo URL, and then default mark URL.
+   * If both are invalid, default opensearch logo and spinner will be rendered.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customLoadingLogoDefaultMode = () => {
+    return loadingLogoDefault ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Use branding configurations to check which URL to use for rendering
+   * loading logo in default mode. In dark mode, loading logo will proritize
+   * loading logo URLs, then mark logo URLs.
+   * Within each type, the dark mode URL will be proritized if provided.
+   *
+   * @returns a valid custom URL or undefined if no valid URL is provided
+   */
+  const customLoadingLogoDarkMode = () => {
+    return loadingLogoDarkMode ?? loadingLogoDefault ?? markDarkMode ?? markDefault ?? undefined;
+  };
+
+  /**
+   * Render custom loading logo for both default mode and dark mode
+   *
+   * @returns a valid custom loading logo URL, or undefined
+   */
+  const customLoadingLogo = () => {
+    return darkMode ? customLoadingLogoDarkMode() : customLoadingLogoDefaultMode();
+  };
+
+  /**
+   * Check if a horizontal loading is needed to be rendered.
+   * Loading bar will be rendered only when a default mode mark URL or
+   * dark mode mark URL is rendered as the loading logo. We add the
+   * horizontal loading bar on the bottom of the static mark logo to have
+   * some loading effect for the loading page.
+   *
+   * @returns a loading bar component or no loading bar component
+   */
+  const renderBrandingEnabledOrDisabledLoadingBar = () => {
+    if (customLoadingLogo() && !loadingLogoDefault) {
+      return <div className="osdProgress" />;
+    }
+  };
+
+  /**
+   * Check if we render a custom loading logo or the default opensearch spinner.
+   * If customLoadingLogo() returns undefined(no valid custom URL is found), we
+   * render the default opensearch logo spinenr
+   *
+   * @returns a image component with custom logo URL, or the default opensearch logo spinner
+   */
+  const renderBrandingEnabledOrDisabledLoadingLogo = () => {
+    if (customLoadingLogo()) {
+      return (
+        <div className="loadingLogoContainer">
+          <img className="loadingLogo" src={customLoadingLogo()} alt={applicationTitle + ' logo'} />
+        </div>
+      );
+    }
+    return openSearchLogoSpinner;
+  };
+
   return (
     <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>OpenSearch</title>
+        <title>{applicationTitle}</title>
         <Fonts url={uiPublicUrl} />
-        {/* Favicons (generated from https://realfavicongenerator.net/) */}
+        {/**
+         * Favicons (generated from https://realfavicongenerator.net/)
+         *
+         * For user customized favicon using yml file:
+         * If user inputs a valid URL, we gurantee basic favicon customization, such as
+         * browser favicon(Chrome, Firefox, Safari, and Edge), apple touch icon, safari
+         * pinned icon. (For Safari browser favicon, we recommend input a png image URL,
+         * svg image URL might not work)
+         *
+         * we do not guarantee other advanced favicon customization such as
+         * windows tile icon, Andriod device favicon etc. However, the opensearch favicon
+         * will not be shown at those places and the default browser/device icon will be shown instead.
+         *
+         * If user inputs a invalid URL, original opensearch favicon will be used.
+         */}
+
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/apple-touch-icon.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/favicon-32x32.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
+          href={favicon ?? `${uiPublicUrl}/favicons/favicon-16x16.png`}
         />
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
+
+        <link rel="manifest" href={favicon ? `` : `${uiPublicUrl}/favicons/manifest.json`} />
+
         <link
           rel="mask-icon"
           color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
+          href={favicon ?? `${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
         />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        <link rel="shortcut icon" href={favicon ?? `${uiPublicUrl}/favicons/favicon.ico`} />
+
+        <meta
+          name="msapplication-config"
+          content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
+        />
+
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
 
@@ -147,17 +243,19 @@ export const Template: FunctionComponent<Props> = ({
           style={{ display: 'none' }}
           data-test-subj="osdLoadingMessage"
         >
-          <div className="osdLoaderWrap">
-            {openSearchLogoSpinner}
+          <div className="osdLoaderWrap" data-test-subj="loadingLogo">
+            {renderBrandingEnabledOrDisabledLoadingLogo()}
             <div
               className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
-                defaultMessage:
-                  'OpenSearch did not load properly. Check the server output for more information.',
+                defaultMessage: `${injectedMetadata.branding.applicationTitle} did not load properly. Check the server output for more information.`,
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading OpenSearch' })}
+              {i18n('core.ui.welcomeMessage', {
+                defaultMessage: `Loading ${injectedMetadata.branding.applicationTitle}`,
+              })}
             </div>
+            {renderBrandingEnabledOrDisabledLoadingBar()}
           </div>
         </div>
 

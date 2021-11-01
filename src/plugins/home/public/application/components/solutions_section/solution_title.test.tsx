@@ -44,15 +44,121 @@ const solutionEntry = {
   order: 1,
 };
 
-describe('SolutionTitle', () => {
-  test('renders the title section of the solution panel', () => {
-    const component = shallow(
-      <SolutionTitle
-        title={solutionEntry.title}
-        subtitle={solutionEntry.subtitle}
-        iconType={solutionEntry.icon}
-      />
-    );
-    expect(component).toMatchSnapshot();
+describe('SolutionTitle ', () => {
+  describe('in default mode', () => {
+    test('renders the title section of the solution panel', () => {
+      const branding = {
+        darkMode: false,
+        mark: {
+          defaultUrl: '/defaultModeUrl',
+          darkModeUrl: '/darkModeUrl',
+        },
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('renders the home dashboard logo using mark default mode URL', () => {
+      const branding = {
+        darkMode: false,
+        mark: {
+          defaultUrl: '/defaultModeUrl',
+          darkModeUrl: '/darkModeUrl',
+        },
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('renders the home dashboard logo using original in and out door logo', () => {
+      const branding = {
+        darkMode: false,
+        mark: {},
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('in dark mode', () => {
+    test('renders the home dashboard logo using mark dark mode URL', () => {
+      const branding = {
+        darkMode: true,
+        mark: {
+          defaultUrl: '/defaultModeUrl',
+          darkModeUrl: '/darkModeUrl',
+        },
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('renders the home dashboard logo using mark default mode URL', () => {
+      const branding = {
+        darkMode: true,
+        mark: {
+          defaultUrl: '/defaultModeUrl',
+        },
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('renders the home dashboard logo using original in and out door logo', () => {
+      const branding = {
+        darkMode: true,
+        mark: {},
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <SolutionTitle
+          title={solutionEntry.title}
+          subtitle={solutionEntry.subtitle}
+          iconType={solutionEntry.icon}
+          branding={branding}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 });

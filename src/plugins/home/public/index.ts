@@ -38,6 +38,7 @@ export {
   TutorialSetup,
   HomePublicPluginSetup,
   HomePublicPluginStart,
+  HomePluginBranding,
 } from './plugin';
 export {
   FeatureCatalogueEntry,

@@ -155,6 +155,7 @@ export class Home extends Component {
           showDevToolsLink
           showManagementLink
           title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
+          branding={getServices().injectedMetadata.getBranding()}
         />
 
         <div className="homContent">
@@ -163,6 +164,7 @@ export class Home extends Component {
               addBasePath={addBasePath}
               solutions={solutions}
               directories={directories}
+              branding={getServices().injectedMetadata.getBranding()}
             />
           ) : null}
 
@@ -201,6 +203,7 @@ export class Home extends Component {
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
         telemetry={this.props.telemetry}
+        branding={getServices().injectedMetadata.getBranding()}
       />
     );
   }
@@ -216,7 +219,6 @@ export class Home extends Component {
         return this.renderWelcome();
       }
     }
-
     return this.renderNormal();
   }
 }
