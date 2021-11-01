@@ -1,39 +1,33 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
+<!--
+ SPDX-License-Identifier: Apache-2.0
+ This conversation was marked as resolved by abbyhu2000
+ 
+ The OpenSearch Contributors require contributions made to
+ this file be licensed under the Apache-2.0 license or a
+ compatible open source license.
+ 
+ Licensed to Elasticsearch B.V. under one or more contributor
+ license agreements. See the NOTICE file distributed with
+ this work for additional information regarding copyright
+ ownership. Elasticsearch B.V. licenses this file to you under
+ the Apache License, Version 2.0 (the "License"); you may
+ not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+    http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ 
+ Modifications Copyright OpenSearch Contributors. See
+ GitHub history for details.
+ -->
 
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-import React from 'react';
-
-export function OpenSearchDashboardsLogoDarkMode() {
-  return (
-    <svg height="28" viewBox="0 0 148 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg height="28" viewBox="0 0 148 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M13.7235 5.87915C13.4537 5.87915 13.2349 6.0979 13.2349 6.36775C13.2349 10.3884 9.97556 13.6478 5.9549 13.6478C5.68506 13.6478 5.46631 13.8665 5.46631 14.1364C5.46631 14.4062 5.68506 14.625 5.9549 14.625C10.5153 14.625 14.2121 10.9281 14.2121 6.36775C14.2121 6.0979 13.9934 5.87915 13.7235 5.87915Z"
         fill="#00A3E0"
@@ -99,5 +93,3 @@ export function OpenSearchDashboardsLogoDarkMode() {
         fill="#D9E1E2"
       />
     </svg>
-  );
-}

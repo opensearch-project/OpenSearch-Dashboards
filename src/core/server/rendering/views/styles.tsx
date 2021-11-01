@@ -159,6 +159,16 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
 
+          .loadingLogoContainer {
+            height: 60px;
+            padding: 10px 10px 10px 10px;
+          }
+          
+          .loadingLogo {
+            height: 100%;
+            max-width: 100%;
+          }
+
           @keyframes osdProgress {
             0% {
               transform: scaleX(1) translateX(-100%);

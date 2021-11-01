@@ -70,6 +70,15 @@ exports[`Overview render 1`] = `
         ],
       }
     }
+    branding={
+      Object {
+        "darkMode": false,
+        "mark": Object {
+          "darkModeUrl": "/darkModeUrl",
+          "defaultUrl": "/defaultModeUrl",
+        },
+      }
+    }
     hideToolbar={false}
     iconType="inputOutput"
     title={
@@ -490,6 +499,15 @@ exports[`Overview without features 1`] = `
         ],
       }
     }
+    branding={
+      Object {
+        "darkMode": false,
+        "mark": Object {
+          "darkModeUrl": "/darkModeUrl",
+          "defaultUrl": "/defaultModeUrl",
+        },
+      }
+    }
     hideToolbar={false}
     iconType="inputOutput"
     title={
@@ -908,6 +926,15 @@ exports[`Overview without solutions 1`] = `
             "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
           },
         ],
+      }
+    }
+    branding={
+      Object {
+        "darkMode": false,
+        "mark": Object {
+          "darkModeUrl": "/darkModeUrl",
+          "defaultUrl": "/defaultModeUrl",
+        },
       }
     }
     hideToolbar={false}
