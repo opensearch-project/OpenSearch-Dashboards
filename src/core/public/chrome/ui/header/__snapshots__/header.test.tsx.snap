@@ -247,6 +247,18 @@ exports[`Header renders 1`] = `
       "serverBasePath": "/test",
     }
   }
+  branding={
+    Object {
+      "applicationTitle": "OpenSearch Dashboards",
+      "darkMode": false,
+      "logo": Object {
+        "defaultUrl": "/",
+      },
+      "mark": Object {
+        "defaultUrl": "/",
+      },
+    }
+  }
   breadcrumbs$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1665,6 +1677,18 @@ exports[`Header renders 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
+                  branding={
+                    Object {
+                      "applicationTitle": "OpenSearch Dashboards",
+                      "darkMode": false,
+                      "logo": Object {
+                        "defaultUrl": "/",
+                      },
+                      "mark": Object {
+                        "defaultUrl": "/",
+                      },
+                    }
+                  }
                   forceNavigation$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -2771,6 +2795,18 @@ exports[`Header renders 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
+                    branding={
+                      Object {
+                        "applicationTitle": "OpenSearch Dashboards",
+                        "darkMode": false,
+                        "logo": Object {
+                          "defaultUrl": "/",
+                        },
+                        "mark": Object {
+                          "defaultUrl": "/",
+                        },
+                      }
+                    }
                     forceNavigation$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2916,36 +2952,41 @@ exports[`Header renders 1`] = `
                     }
                     navigateToApp={[MockFunction]}
                   >
-                    <EuiHeaderLogo
+                    <a
                       aria-label="Go to home page"
+                      className="logoContainer"
                       data-test-subj="logo"
                       href="/"
-                      iconType={[Function]}
                       onClick={[Function]}
                     >
-                      <a
-                        aria-label="Go to home page"
-                        className="euiHeaderLogo"
-                        data-test-subj="logo"
-                        href="/"
-                        onClick={[Function]}
-                        rel="noreferrer"
+                      <CustomLogo
+                        applicationTitle="OpenSearch Dashboards"
+                        darkMode={false}
+                        logo={
+                          Object {
+                            "defaultUrl": "/",
+                          }
+                        }
+                        mark={
+                          Object {
+                            "defaultUrl": "/",
+                          }
+                        }
                       >
-                        <EuiIcon
-                          aria-label="Elastic"
-                          className="euiHeaderLogo__icon"
-                          size="l"
-                          type={[Function]}
+                        <div
+                          className="logoContainer"
                         >
-                          <div
-                            aria-label="Elastic"
-                            className="euiHeaderLogo__icon"
-                            data-euiicon-type="OpenSearchDashboardsLogoDarkMode"
-                            size="l"
+                          <img
+                            alt="OpenSearch Dashboards logo"
+                            className="logoImage"
+                            data-test-image-url="/"
+                            data-test-subj="customLogo"
+                            loading="lazy"
+                            src="/"
                           />
-                        </EuiIcon>
-                      </a>
-                    </EuiHeaderLogo>
+                        </div>
+                      </CustomLogo>
+                    </a>
                   </HeaderLogo>
                 </div>
               </EuiHeaderSectionItem>
@@ -5219,6 +5260,18 @@ exports[`Header renders 1`] = `
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
+        }
+      }
+      branding={
+        Object {
+          "applicationTitle": "OpenSearch Dashboards",
+          "darkMode": false,
+          "logo": Object {
+            "defaultUrl": "/",
+          },
+          "mark": Object {
+            "defaultUrl": "/",
+          },
         }
       }
       closeNav={[Function]}

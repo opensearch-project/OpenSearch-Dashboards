@@ -148,3 +148,16 @@
 #  'ff00::/8',
 # ]
 #vis_type_timeline.graphiteBlockedIPs: []
+
+# opensearchDashboards.branding:
+  # logo:
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # mark:
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # loadingLogo: 
+    # defaultUrl: ""
+    # darkModeUrl: ""
+  # faviconUrl: ""
+  # applicationTitle: ""

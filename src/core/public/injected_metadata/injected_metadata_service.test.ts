@@ -229,3 +229,16 @@ describe('setup.getInjectedVars()', () => {
     );
   });
 });
+
+describe('setup.getBranding()', () => {
+  it('returns injectedMetadata.branding', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        branding: { fullLogoUrl: '/', logoUrl: '/', title: 'title' },
+      },
+    } as any);
+
+    const branding = injectedMetadata.setup().getBranding();
+    expect(branding).toEqual({ fullLogoUrl: '/', logoUrl: '/', title: 'title' });
+  });
+});

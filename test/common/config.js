@@ -60,7 +60,7 @@ export default function () {
         `--opensearch.hosts=${formatUrl(servers.opensearch)}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
-        `--home.disableWelcomeScreen=true`,
+        `--home.disableWelcomeScreen=false`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         //`--security.showInsecureClusterWarning=false`,
@@ -74,6 +74,12 @@ export default function () {
         // `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
         // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
         // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
+        // Custom branding config
+        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg`,
+        `--opensearchDashboards.branding.logo.darkModeUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg`,
+        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
+        `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg`,
+        `--opensearchDashboards.branding.applicationTitle=OpenSearch`,
       ],
     },
     services,
