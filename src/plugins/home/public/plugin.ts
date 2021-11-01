@@ -40,6 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
 
+import { Branding } from 'src/core/types';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -119,6 +120,7 @@ export class HomePublicPlugin
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
+          injectedMetadata: coreStart.injectedMetadata,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -186,6 +188,9 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 
 /** @public */
 export type TutorialSetup = TutorialServiceSetup;
+
+/** @public */
+export type HomePluginBranding = Branding;
 
 /** @public */
 export interface HomePublicPluginSetup {

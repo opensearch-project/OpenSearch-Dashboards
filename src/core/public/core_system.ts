@@ -239,7 +239,7 @@ export class CoreSystem {
         docLinks,
         http,
         i18n,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar', 'getBranding']),
         notifications,
         overlays,
         savedObjects,

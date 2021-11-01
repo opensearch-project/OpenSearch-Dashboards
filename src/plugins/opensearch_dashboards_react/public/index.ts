@@ -48,6 +48,10 @@ export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint, MountPointPortal } from './util';
 export { RedirectAppLinks } from './app_links';
+import { Branding } from 'opensearch-dashboards/public';
+
+/** Custom branding configurations for opensearch dashboards react plugin */
+export type ReactPluginBranding = Branding;
 
 /** dummy plugin, we just want opensearchDashboardsReact to have its own bundle */
 export function plugin() {

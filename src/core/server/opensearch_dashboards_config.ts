@@ -52,6 +52,38 @@ export const config = {
     index: schema.string({ defaultValue: '.kibana' }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
+    branding: schema.object({
+      logo: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      mark: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      loadingLogo: schema.object({
+        defaultUrl: schema.string({
+          defaultValue: '/',
+        }),
+        darkModeUrl: schema.string({
+          defaultValue: '/',
+        }),
+      }),
+      faviconUrl: schema.string({
+        defaultValue: '/',
+      }),
+      applicationTitle: schema.string({
+        defaultValue: '',
+      }),
+    }),
   }),
   deprecations,
 };

@@ -55,7 +55,7 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -87,6 +87,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
+  branding: ChromeBranding;
 }
 
 export function Header({
@@ -96,6 +97,7 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
+  branding,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -125,6 +127,7 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
+                    branding={branding}
                   />,
                   <LoadingIndicator loadingCount$={observables.loadingCount$} />,
                 ],
@@ -213,6 +216,7 @@ export function Header({
             }
           }}
           customNavLink$={observables.customNavLink$}
+          branding={branding}
         />
       </header>
     </>

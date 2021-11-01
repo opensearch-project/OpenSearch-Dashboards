@@ -233,6 +233,22 @@ export default () =>
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
       // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
+      branding: Joi.object({
+        logo: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        mark: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        loadingLogo: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        faviconUrl: Joi.any().default('/'),
+        applicationTitle: Joi.any().default(''),
+      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,
