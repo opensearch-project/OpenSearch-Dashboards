@@ -56,16 +56,16 @@ export function replaceTemplateStrings(text, params = {}) {
     config: {
       ...tutorialService.getVariables(),
       docs: {
-        base_url: docLinks.ELASTIC_WEBSITE_URL,
+        base_url: docLinks.OPENSEARCH_WEBSITE_URL,
         beats: {
-          filebeat: docLinks.links.filebeat.base,
-          metricbeat: docLinks.links.metricbeat.base,
-          heartbeat: docLinks.links.heartbeat.base,
-          functionbeat: docLinks.links.functionbeat.base,
-          winlogbeat: docLinks.links.winlogbeat.base,
-          auditbeat: docLinks.links.auditbeat.base,
+          filebeat: docLinks.links.noDocumentation.filebeat,
+          metricbeat: docLinks.links.noDocumentation.metricbeat,
+          heartbeat: docLinks.links.noDocumentation.heartbeat,
+          functionbeat: docLinks.links.noDocumentation.functionbeat,
+          winlogbeat: docLinks.links.noDocumentation.winlogbeat,
+          auditbeat: docLinks.links.noDocumentation.auditbeat,
         },
-        logstash: docLinks.links.logstash.base,
+        logstash: docLinks.links.noDocumentation.logstash,
         version: docLinks.DOC_LINK_VERSION,
       },
       opensearchDashboards: {

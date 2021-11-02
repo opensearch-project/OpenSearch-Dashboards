@@ -41,7 +41,7 @@ function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-// See https://www.opensearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
+// See https://opensearch.org/docs/latest/opensearch/query-dsl/term/#regex
 function escapeQueryString(str: string) {
   return str.replace(/[+-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
 }

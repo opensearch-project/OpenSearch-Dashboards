@@ -112,10 +112,9 @@ export const createZoomWarningMsg = (function () {
               defaultMessage="You've reached the maximum number of zoom
               levels. To zoom all the way in, you can configure your own map server.
               Please go to { wms } for more information."
-              // TODO: [RENAMEME] Need prod urls.
               values={{
                 wms: (
-                  <a target="_blank" href="https://opensearch.org/docs/dashboards/maptiles/">
+                  <a target="_blank" href="https://opensearch.org/docs/latest/dashboards/maptiles/">
                     {`Custom WMS Configuration`}
                   </a>
                 ),

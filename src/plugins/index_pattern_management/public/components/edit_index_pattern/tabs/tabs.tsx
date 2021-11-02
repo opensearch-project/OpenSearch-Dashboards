@@ -215,7 +215,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                   },
                 }}
                 onRemoveField={refreshFilters}
-                painlessDocLink={docLinks.links.scriptedFields.painless}
+                painlessDocLink={docLinks.links.noDocumentation.scriptedFields.painless}
               />
             </Fragment>
           );
@@ -237,7 +237,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       }
     },
     [
-      docLinks.links.scriptedFields.painless,
+      docLinks.links.noDocumentation.scriptedFields.painless,
       fieldFilter,
       fieldWildcardMatcherDecorated,
       fields,

@@ -19,8 +19,10 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
       docLinks={
         Object {
           "links": Object {
-            "indexPatterns": Object {},
-            "scriptedFields": Object {},
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
           },
         }
       }
@@ -67,8 +69,10 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
       docLinks={
         Object {
           "links": Object {
-            "indexPatterns": Object {},
-            "scriptedFields": Object {},
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
           },
         }
       }
@@ -109,8 +113,10 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
       docLinks={
         Object {
           "links": Object {
-            "indexPatterns": Object {},
-            "scriptedFields": Object {},
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
           },
         }
       }
@@ -151,8 +157,10 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
       docLinks={
         Object {
           "links": Object {
-            "indexPatterns": Object {},
-            "scriptedFields": Object {},
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
           },
         }
       }
@@ -193,8 +201,10 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
       docLinks={
         Object {
           "links": Object {
-            "indexPatterns": Object {},
-            "scriptedFields": Object {},
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
           },
         }
       }

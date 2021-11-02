@@ -96,7 +96,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
-  const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
+  const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -344,7 +344,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
                have opensearchDashboards Query Language (DQL) selected. Please review the DQL docs {link}."
                 values={{
                   link: (
-                    <EuiLink href={kueryQuerySyntaxLink} target="_blank">
+                    <EuiLink href={osdDQLDocs} target="_blank">
                       <FormattedMessage
                         id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"

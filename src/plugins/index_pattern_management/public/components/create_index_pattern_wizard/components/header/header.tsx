@@ -93,7 +93,11 @@ export const Header = ({
             }}
           />
           <br />
-          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
+          <EuiLink
+            href={docLinks.links.noDocumentation.indexPatterns.introduction}
+            target="_blank"
+            external
+          >
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.documentation"
               defaultMessage="Read documentation"

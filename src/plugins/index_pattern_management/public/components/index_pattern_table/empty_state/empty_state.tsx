@@ -207,7 +207,11 @@ export const EmptyState = ({
                         />
                       ),
                       description: (
-                        <EuiLink href={docLinks.links.addData} target="_blank" external>
+                        <EuiLink
+                          href={docLinks.links.noDocumentation.addData}
+                          target="_blank"
+                          external
+                        >
                           <FormattedMessage
                             id="indexPatternManagement.createIndexPattern.emptyState.readDocs"
                             defaultMessage="Read documentation"

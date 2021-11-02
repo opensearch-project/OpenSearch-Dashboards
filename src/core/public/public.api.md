@@ -452,104 +452,221 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 export interface DocLinksStart {
     // (undocumented)
     readonly DOC_LINK_VERSION: string;
+    readonly OPENSEARCH_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
-        readonly dashboard: {
-            readonly drilldowns: string;
-            readonly drilldownsTriggerPicker: string;
-            readonly urlDrilldownTemplateSyntax: string;
-            readonly urlDrilldownVariables: string;
-        };
-        readonly filebeat: {
-            readonly base: string;
-            readonly installation: string;
-            readonly configuration: string;
-            readonly elasticsearchOutput: string;
-            readonly startup: string;
-            readonly exportedFields: string;
-        };
-        readonly auditbeat: {
-            readonly base: string;
-        };
-        readonly metricbeat: {
-            readonly base: string;
-        };
-        readonly heartbeat: {
-            readonly base: string;
-        };
-        readonly logstash: {
-            readonly base: string;
-        };
-        readonly functionbeat: {
-            readonly base: string;
-        };
-        readonly winlogbeat: {
-            readonly base: string;
-        };
-        readonly aggs: {
-            readonly date_histogram: string;
-            readonly date_range: string;
-            readonly filter: string;
-            readonly filters: string;
-            readonly geohash_grid: string;
-            readonly histogram: string;
-            readonly ip_range: string;
-            readonly range: string;
-            readonly significant_terms: string;
-            readonly terms: string;
-            readonly avg: string;
-            readonly avg_bucket: string;
-            readonly max_bucket: string;
-            readonly min_bucket: string;
-            readonly sum_bucket: string;
-            readonly cardinality: string;
-            readonly count: string;
-            readonly cumulative_sum: string;
-            readonly derivative: string;
-            readonly geo_bounds: string;
-            readonly geo_centroid: string;
-            readonly max: string;
-            readonly median: string;
-            readonly min: string;
-            readonly moving_avg: string;
-            readonly percentile_ranks: string;
-            readonly serial_diff: string;
-            readonly std_dev: string;
-            readonly sum: string;
-            readonly top_hits: string;
-        };
-        readonly scriptedFields: {
-            readonly scriptFields: string;
-            readonly scriptAggs: string;
-            readonly painless: string;
-            readonly painlessApi: string;
-            readonly painlessSyntax: string;
-            readonly luceneExpressions: string;
-        };
-        readonly indexPatterns: {
-            readonly loadingData: string;
+        readonly opensearch: {
             readonly introduction: string;
+            readonly installation: {
+                readonly base: string;
+                readonly compatibility: string;
+                readonly docker: string;
+                readonly dockerSecurity: string;
+                readonly helm: string;
+                readonly tar: string;
+                readonly ansible: string;
+                readonly settings: string;
+                readonly plugins: string;
+            };
+            readonly configuration: string;
+            readonly cluster: {
+                readonly base: string;
+                readonly naming: string;
+                readonly set_attribute: string;
+                readonly build_cluster: string;
+                readonly config_host: string;
+                readonly start: string;
+                readonly config_shard: string;
+                readonly setup_hot_arch: string;
+            };
+            readonly indexData: {
+                readonly base: string;
+                readonly naming: string;
+                readonly read_data: string;
+                readonly update_data: string;
+                readonly delete_data: string;
+            };
+            readonly indexAlias: {
+                readonly base: string;
+                readonly create_alias: string;
+                readonly add_remove_index: string;
+                readonly manage_alias: string;
+                readonly filtered_alias: string;
+                readonly alias_option: string;
+            };
+            readonly dataStreams: string;
+            readonly aggregations: {
+                readonly base: string;
+                readonly metric: {
+                readonly base: string;
+                readonly types: string;
+                readonly sum: string;
+                readonly cardinality: string;
+                readonly value_count: string;
+                readonly stats: string;
+                readonly percentile: string;
+                readonly geo_bound: string;
+                readonly top_hits: string;
+                readonly scripted_metric: string;
+                };
+                readonly bucket: {
+                readonly base: string;
+                readonly terms: string;
+                readonly smapler: string;
+                readonly significant_terms: string;
+                readonly missing: string;
+                readonly histogram: string;
+                readonly range: string;
+                readonly filter: string;
+                readonly global: string;
+                readonly geo: string;
+                readonly adjacency_matrix: string;
+                readonly nested: string;
+                };
+                readonly pipeline: {
+                readonly base: string;
+                readonly syntax: string;
+                readonly types: string;
+                readonly avg_bucket: string;
+                readonly stats_bucket: string;
+                readonly bucket_script: string;
+                readonly bucket_sort: string;
+                readonly cumulative_sum: string;
+                readonly derivative: string;
+                readonly moving_avg: string;
+                readonly serial_diff: string;
+                };
+            };
+            readonly indexTemplates: {
+                readonly base: string;
+                readonly composable: string;
+                readonly options: string;
+            };
+            readonly reindexData: {
+                readonly base: string;
+                readonly all: string;
+                readonly remote: string;
+                readonly subset: string;
+                readonly combine: string;
+                readonly unique: string;
+                readonly transform: string;
+                readonly update: string;
+                readonly source: string;
+                readonly destination: string;
+            };
+            readonly queryDSL: {
+                readonly base: string;
+                readonly term: {
+                readonly base: string;
+                readonly terms: string;
+                readonly ids: string;
+                readonly range: string;
+                readonly prefix: string;
+                readonly exists: string;
+                readonly wildcards: string;
+                readonly regex: string;
+                };
+                readonly fullText: {
+                readonly base: string;
+                readonly match: string;
+                readonly multi_match: string;
+                readonly match_phrase: string;
+                readonly common_terms: string;
+                readonly query_string: string;
+                readonly options: string;
+                };
+                readonly boolQuery: string;
+            };
+            readonly searchTemplate: {
+                readonly base: string;
+                readonly create: string;
+                readonly execute: string;
+                readonly advanced_operation: string;
+                readonly multiple_search: string;
+                readonly manage: string;
+            };
+            readonly searchExperience: {
+                readonly base: string;
+                readonly autocomplete: string;
+                readonly paginate: string;
+                readonly scroll: string;
+                readonly sort: string;
+                readonly highlight_match: string;
+            };
+            readonly logs: {
+                readonly base: string;
+                readonly application_log: string;
+                readonly slow_log: string;
+                readonly deprecation_log: string;
+            };
+            readonly snapshotRestore: {
+                readonly base: string;
+                readonly register: string;
+                readonly take_snapshot: string;
+                readonly restore_snapshot: string;
+                readonly security_plugin: string;
+            };
+            readonly supportedUnits: string;
+            readonly commonParameters: string;
+            readonly popularAPI: string;
+            readonly restAPI: string;
         };
-        readonly addData: string;
-        readonly opensearchDashboards: string;
-        readonly siem: {
-            readonly guide: string;
-            readonly gettingStarted: string;
+        readonly opensearchDashboards: {
+            readonly introduction: string;
+            readonly installation: {
+                readonly base: string;
+                readonly docker: string;
+                readonly tar: string;
+                readonly helm: string;
+                readonly tls: string;
+                readonly plugins: string;
+            };
+            readonly mapTiles: string;
+            readonly ganttCharts: string;
+            readonly reporting: string;
+            readonly notebooks: {
+                readonly base: string;
+                readonly notebook_tutorial: string;
+                readonly paragraph_tutorial: string;
+                readonly sample_notebook: string;
+                readonly create_report: string;
+            };
+            readonly dql: {
+                readonly base: string;
+                readonly terms_query: string;
+                readonly boolean_query: string;
+                readonly date_query: string;
+                readonly nested_query: string;
+            };
         };
-        readonly query: {
-            readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
-            readonly kueryQuerySyntax: string;
-        };
-        readonly date: {
+        readonly noDocumentation: {
+            readonly auditbeat: string;
+            readonly filebeat: string;
+            readonly metricbeat: string;
+            readonly heartbeat: string;
+            readonly logstash: string;
+            readonly functionbeat: string;
+            readonly winlogbeat: string;
+            readonly siem: string;
+            readonly indexPatterns: {
+                readonly loadingData: string;
+                readonly introduction: string;
+            };
+            readonly scriptedFields: {
+                readonly scriptFields: string;
+                readonly scriptAggs: string;
+                readonly painless: string;
+                readonly painlessApi: string;
+                readonly painlessSyntax: string;
+                readonly luceneExpressions: string;
+            };
+            readonly management: Record<string, string>;
+            readonly visualize: Record<string, string>;
+            readonly addData: string;
+            readonly vega: string;
             readonly dateMath: string;
         };
-        readonly management: Record<string, string>;
-        readonly visualize: Record<string, string>;
     };
-    // (undocumented)
-    readonly OPENSEARCH_WEBSITE_URL: string;
 }
 
 export { EnvironmentMode }
