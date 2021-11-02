@@ -528,7 +528,10 @@ export class Field extends PureComponent<FieldProps> {
             <EuiBadge
               color="warning"
               onClick={() => {
-                window.open(links.management[setting.deprecation!.docLinksKey], '_blank');
+                window.open(
+                  links.noDocumentation.management[setting.deprecation!.docLinksKey],
+                  '_blank'
+                );
               }}
               onClickAriaLabel={i18n.translate('advancedSettings.field.deprecationClickAreaLabel', {
                 defaultMessage: 'Click to view deprecation documentation for {settingName}.',

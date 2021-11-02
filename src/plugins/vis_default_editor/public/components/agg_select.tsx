@@ -85,8 +85,7 @@ function DefaultEditorAggSelect({
 
   let aggHelpLink: string | undefined;
   if (has(value, 'name')) {
-    // @ts-expect-error
-    aggHelpLink = services.docLinks.links.aggs[value.name];
+    aggHelpLink = services.docLinks.links.opensearch.aggregations.base;
   }
 
   const helpLink = value && aggHelpLink && (
