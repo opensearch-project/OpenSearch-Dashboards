@@ -53,8 +53,8 @@ interface Props {
 }
 
 export function QueryLanguageSwitcher(props: Props) {
-  const opensearchDashboards = useOpenSearchDashboards();
-  const kueryQuerySyntaxDocs = opensearchDashboards.services.docLinks!.links.query.kueryQuerySyntax;
+  const osdDQLDocs = useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql
+    .base;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const luceneLabel = (
     <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />
@@ -108,7 +108,7 @@ export function QueryLanguageSwitcher(props: Props) {
               OpenSearch Dashboards uses Lucene."
               values={{
                 docsLink: (
-                  <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
+                  <EuiLink href={osdDQLDocs} target="_blank">
                     {dqlFullName}
                   </EuiLink>
                 ),

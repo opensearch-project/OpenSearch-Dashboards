@@ -39,7 +39,7 @@ import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
   const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services
-    .docLinks?.links.scriptedFields;
+    .docLinks?.links.noDocumentation.scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

@@ -8,7 +8,9 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     docLinks={
       Object {
         "links": Object {
-          "indexPatterns": Object {},
+          "noDocumentation": Object {
+            "indexPatterns": Object {},
+          },
         },
       }
     }
@@ -147,7 +149,9 @@ exports[`Header should render normally 1`] = `
     docLinks={
       Object {
         "links": Object {
-          "indexPatterns": Object {},
+          "noDocumentation": Object {
+            "indexPatterns": Object {},
+          },
         },
       }
     }
@@ -259,7 +263,9 @@ exports[`Header should render without including system indices 1`] = `
     docLinks={
       Object {
         "links": Object {
-          "indexPatterns": Object {},
+          "noDocumentation": Object {
+            "indexPatterns": Object {},
+          },
         },
       }
     }

@@ -94,8 +94,10 @@ const createInstance = async () => {
 
 const docLinks = {
   links: {
-    indexPatterns: {},
-    scriptedFields: {},
+    noDocumentation: {
+      indexPatterns: {},
+      scriptedFields: {},
+    },
   },
 };
 

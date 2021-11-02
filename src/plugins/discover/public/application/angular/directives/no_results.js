@@ -176,7 +176,7 @@ export class DiscoverNoResults extends Component {
                   queryStringSyntaxLink: (
                     <EuiLink
                       target="_blank"
-                      href={getServices().docLinks.links.query.luceneQuerySyntax}
+                      href={getServices().docLinks.links.opensearch.queryDSL.base}
                     >
                       <FormattedMessage
                         id="discover.noResults.searchExamples.queryStringSyntaxLinkText"

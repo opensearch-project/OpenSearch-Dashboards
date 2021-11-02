@@ -44,7 +44,7 @@ export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksSt
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.links.visualize.guide}`,
+        href: `${docLinks.links.noDocumentation.visualize.guide}`,
       },
     ],
   });

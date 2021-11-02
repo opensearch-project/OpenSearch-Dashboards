@@ -44,7 +44,7 @@ export enum OpenSearchRequestState {
 
 /**
  * helper function to build a query body for OpenSearch
- * https://www.opensearch.org/guide/en/elasticsearch/reference/current//query-dsl-ids-query.html
+ * https://opensearch.org/docs/latest/opensearch/query-dsl/index/
  */
 export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<string, any> {
   const computedFields = indexPattern.getComputedFields();

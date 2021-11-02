@@ -45,7 +45,7 @@ import { ControlParams } from '../editor_utils';
 import { InputControlSettings, InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
-  // https://www.opensearch.org/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+  // https://opensearch.org/docs/latest/opensearch/query-dsl/index/
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 

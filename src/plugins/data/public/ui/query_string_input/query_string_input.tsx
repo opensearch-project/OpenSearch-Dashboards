@@ -409,7 +409,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   Learn more in our {link}."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+                      <EuiLink href={docLinks.links.opensearchDashboards.dql.base} target="_blank">
                         <FormattedMessage
                           id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"
