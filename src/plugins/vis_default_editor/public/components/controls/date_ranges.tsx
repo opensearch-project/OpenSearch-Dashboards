@@ -141,7 +141,7 @@ function DateRangesParamEditor({
     <EuiFormRow compressed fullWidth>
       <>
         <EuiText size="xs">
-          <EuiLink href={services.docLinks.links.date.dateMath} target="_blank">
+          <EuiLink href={services.docLinks.links.noDocumentation.dateMath} target="_blank">
             <FormattedMessage
               id="visDefaultEditor.controls.dateRanges.acceptedDateFormatsLinkText"
               defaultMessage="Acceptable date formats"

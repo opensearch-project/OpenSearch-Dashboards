@@ -44,9 +44,7 @@ export function addHelpMenuToAppChrome(
     links: [
       {
         linkType: 'documentation',
-        // TODO: [RENAMEME] Need prod urls.
-        // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-        href: `${docLinks.links.opensearchDashboards}`,
+        href: `${docLinks.links.opensearchDashboards.introduction}`,
       },
     ],
   });

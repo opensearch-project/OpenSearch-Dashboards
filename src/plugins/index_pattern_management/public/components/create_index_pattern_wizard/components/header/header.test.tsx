@@ -43,7 +43,9 @@ describe('Header', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
   const mockedDocLinks = {
     links: {
-      indexPatterns: {},
+      noDocumentation: {
+        indexPatterns: {},
+      },
     },
   } as DocLinksStart;
 

@@ -34,12 +34,15 @@ import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 
 function VegaHelpMenu() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const vegaHelpDoc = useOpenSearchDashboards().services.docLinks?.links.noDocumentation.vega;
 
   const button = (
     <EuiButtonIcon
@@ -52,14 +55,7 @@ function VegaHelpMenu() {
   );
 
   const items = [
-    <EuiContextMenuItem
-      key="vegaHelp"
-      // TODO: [RENAMEME] Need prod urls.
-      // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-      href="https://opensearch.org/docs/dashboards"
-      target="_blank"
-      onClick={closePopover}
-    >
+    <EuiContextMenuItem key="vegaHelp" href={vegaHelpDoc} target="_blank" onClick={closePopover}>
       <FormattedMessage
         id="visTypeVega.editor.vegaHelpLinkText"
         defaultMessage="OpenSearch Dashboards Vega help"
