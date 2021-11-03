@@ -34,7 +34,9 @@ import React from 'react';
 import { wait, render } from '@testing-library/react';
 import MarkdownVisComponent from './markdown_vis_controller';
 
-describe('markdown vis controller', () => {
+const describeif = process.env.SKIP_BAD_APPLES === 'true' ? describe.skip : describe;
+
+describeif('markdown vis controller', () => {
   it('should set html from markdown params', async () => {
     const vis = {
       params: {
