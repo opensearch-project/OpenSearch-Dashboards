@@ -40,11 +40,13 @@ import { visualizeAppStateStub } from '../stubs';
 import { VisualizeConstants } from '../../visualize_constants';
 import { createVisualizeServicesMock } from '../mocks';
 
+const describeif = process.env.SKIP_BAD_APPLES === 'true' ? describe.skip : describe;
+
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');
 jest.mock('../../../../../data/public');
 
-describe('useVisualizeAppState', () => {
+describeif('useVisualizeAppState', () => {
   const { visStateToEditorState } = jest.requireMock('../utils');
   const { createVisualizeAppState } = jest.requireMock('../create_visualize_app_state');
   const { connectToQueryState } = jest.requireMock('../../../../../data/public');

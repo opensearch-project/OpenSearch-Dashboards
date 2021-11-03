@@ -84,7 +84,7 @@ export default {
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
-  coverageReporters: ['html', 'text'],
+  coverageReporters: ['html', 'text', 'text-summary'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: [
     '__fixtures__/',
