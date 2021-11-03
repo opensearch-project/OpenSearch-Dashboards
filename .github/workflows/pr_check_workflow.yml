@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: Build and test
 
 on:
   push:
@@ -9,17 +9,199 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  CACHE_NAME: osd-node-modules
+  TEST_BROWSER_HEADLESS: 1
+  CI: 1
+  GCS_UPLOAD_PREFIX: fake
+  TEST_OPENSEARCH_DASHBOARDS_HOST: localhost
+  TEST_OPENSEARCH_DASHBOARDS_PORT: 6610
+  TEST_OPENSEARCH_TRANSPORT_PORT: 9403
+  TEST_OPENSEARCH_PORT: 9400
+
 jobs:
-  build:
-
+  build-lint-test:
     runs-on: ubuntu-latest
-
+    name: Build and Verify
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '10.24.1'
-        check-latest: false
-    - run: yarn osd bootstrap
-    - run: yarn lint
+      # Access a cache of set results from a previous run of the job
+      # This is to prevent re-running steps that were already successful since it is not native to github actions
+      # Can be used to verify flaky steps with reduced times
+      - name: Restore the cached run
+        uses: actions/cache@v2
+        with:
+          path: |
+            job_successful
+            linter_results
+            unit_tests_results
+            integration_tests_results
+          key: ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
+
+      - name: Get if previous job was successful
+        id: job_successful
+        run: cat job_successful 2>/dev/null || echo 'false'
+
+      - name: Get the previous linter results 
+        id: linter_results
+        run: cat linter_results 2>/dev/null || echo 'default'
+
+      - name: Get the previous unit tests results 
+        id: unit_tests_results
+        run: cat unit_tests_results 2>/dev/null || echo 'default'
+
+      - name: Get the previous integration tests results 
+        id: integration_tests_results
+        run: cat integration_tests_results 2>/dev/null || echo 'default'
+
+      - name: Checkout code
+        if: steps.job_successful.outputs.job_successful != 'true'
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        if: steps.job_successful.outputs.job_successful != 'true'
+        uses: actions/setup-node@v2
+        with:
+          node-version: "10.24.1"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        if: steps.job_successful.outputs.job_successful != 'true'
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        if: steps.job_successful.outputs.job_successful != 'true'
+        run: yarn osd bootstrap
+
+      - name: Run linter
+        if: steps.linter_results.outputs.linter_results != 'success'
+        id: linter
+        run: yarn lint
+
+      # Runs unit tests while limiting workers because github actions will spawn more than it can handle and crash
+      # Continues on error but will create a comment on the pull request if this step failed.
+      - name: Run unit tests
+        if: steps.unit_tests_results.outputs.unit_tests_results != 'success'
+        id: unit-tests
+        continue-on-error: true
+        run: node scripts/jest --ci --colors --maxWorkers=10
+        env:
+          SKIP_BAD_APPLES: true
+
+      - name: Add comment if unit tests did not succeed
+        if: steps.unit_tests_results.outputs.unit_tests_results != 'success' && steps.unit-tests.outcome != 'success'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Unit tests completed unsuccessfully. However, unit tests are inconsistent on the CI so please verify locally with `yarn test:jest`.'
+            })
+
+      - name: Run integration tests
+        if: steps.integration_tests_results.outputs.integration_tests_results != 'success'
+        id: integration-tests
+        run: node scripts/jest_integration --ci --colors --max-old-space-size=5120 
+
+      # Set cache if linter, unit tests, and integration tests were successful then the job will be marked successful
+      # Sets individual results to empower re-runs of the same build without re-running successful steps.
+      - if: | 
+          (steps.linter.outcome == 'success' || steps.linter.outcome == 'skipped') && 
+          (steps.unit-tests.outcome == 'success' || steps.unit-tests.outcome == 'skipped') && 
+          (steps.integration-tests.outcome == 'success' || steps.integration-tests.outcome == 'skipped')
+        run: echo "::set-output name=job_successful::true" > job_successful
+      - if: steps.linter.outcome == 'success' || steps.linter.outcome == 'skipped'
+        run: echo "::set-output name=linter_results::success" > linter_results
+      - if: steps.unit-tests.outcome == 'success' || steps.unit-tests.outcome == 'skipped'
+        run: echo "::set-output name=unit_tests_results::success" > unit_tests_results
+      - if: steps.integration-tests.outcome == 'success' || steps.integration-tests.outcome == 'skipped'
+        run: echo "::set-output name=integration_tests_results::success" > integration_tests_results
+  functional-tests:
+    needs: [ build-lint-test ]
+    runs-on: ubuntu-latest
+    name: Run functional tests
+    strategy: 
+      matrix:
+        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+    steps:
+      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      # Access a cache of set results from a previous run of the job
+      # This is to prevent re-running a CI group that was already successful since it is not native to github actions
+      # Can be used to verify flaky steps with reduced times
+      - name: Restore the cached run
+        uses: actions/cache@v2
+        with:
+          path: |
+            ftr_tests_results
+          key: ${{ github.run_id }}-${{ github.job }}-${{ matrix.group }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.run_id }}-${{ github.job }}-${{ matrix.group }}-${{ github.sha }}
+
+      - name: Get the cached tests results 
+        id: ftr_tests_results
+        run: cat ftr_tests_results 2>/dev/null || echo 'default'
+
+      - name: Checkout code
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        uses: actions/setup-node@v2
+        with:
+          node-version: "10.24.1"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get cache path
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        id: cache-path
+        run: echo "::set-output name=CACHE_DIR::$(yarn cache dir)"
+
+      - name: Setup cache
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-path.outputs.CACHE_DIR }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_NAME }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_NAME }}-
+            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-
+
+      # github virtual env is the latest chrome
+      - name: Setup chromedriver
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        run: yarn add --dev chromedriver@95.0.0
+
+      - name: Run bootstrap
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        id: ftr-tests
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
+          JOB: ci${{ matrix.group }}
+          CACHE_DIR: ciGroup${{ matrix.group }}
+      
+      - if: steps.ftr-tests.outcome == 'success' || steps.ftr-tests.outcome == 'skipped'
+        run: echo "::set-output name=ftr_tests_results::success" > ftr_tests_results
