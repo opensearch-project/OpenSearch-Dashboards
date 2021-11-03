@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: Build and test
 
 on:
   push:
@@ -9,17 +9,99 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  CACHE_NAME: osd-node-modules
+  TEST_BROWSER_HEADLESS: 1
+  CI: 1
+  GCS_UPLOAD_PREFIX: fake
+  TEST_OPENSEARCH_DASHBOARDS_HOST: localhost
+  TEST_OPENSEARCH_DASHBOARDS_PORT: 6610
+  TEST_OPENSEARCH_TRANSPORT_PORT: 9403
+  TEST_OPENSEARCH_PORT: 9400
+
 jobs:
-  build:
-
+  build-lint-test:
     runs-on: ubuntu-latest
-
+    name: Build and Verify
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '10.24.1'
-        check-latest: false
-    - run: yarn osd bootstrap
-    - run: yarn lint
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "10.24.1"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Run linter
+        run: yarn lint
+
+      - name: Run unit tests
+        run: node scripts/jest --ci --colors --maxWorkers=10
+        env:
+          SKIP_BAD_APPLES: true
+
+      - name: Run integration tests
+        run: node scripts/jest_integration --ci --colors --max-old-space-size=5120 
+  functional-tests:
+    needs: [ build-lint-test ]
+    runs-on: ubuntu-latest
+    name: Run functional tests
+    strategy: 
+      matrix:
+        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+    steps:
+      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "10.24.1"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get cache path
+        id: cache-path
+        run: echo "::set-output name=CACHE_DIR::$(yarn cache dir)"
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.cache-path.outputs.CACHE_DIR }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_NAME }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_NAME }}-
+            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-
+
+      # github virtual env is the latest chrome
+      - name: Setup chromedriver
+        run: yarn add --dev chromedriver@latest
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
+          JOB: ci${{ matrix.group }}
+          CACHE_DIR: ciGroup${{ matrix.group }}
