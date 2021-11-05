@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
+exports[`Welcome page  should render a Welcome screen  with no telemetry disclaimer 1`] = `
 <EuiPortal>
   <div
     className="homWelcome"
@@ -14,21 +14,26 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
         <EuiSpacer
           size="xl"
         />
-        <span
-          className="homWelcome__logo"
+        <div
+          className="homWelcome__customLogoContainer"
         >
-          <EuiIcon
-            size="original"
-            type="test-file-stub"
+          <img
+            alt="OpenSearch Dashboards logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/"
+            data-test-subj="welcomeCustomLogo"
+            src="/"
           />
-        </span>
+        </div>
         <EuiTitle
           className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to OpenSearch Dashboards"
           size="l"
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to OpenSearch"
+              defaultMessage="Welcome to OpenSearch Dashboards"
               id="home.welcomeTitle"
               values={Object {}}
             />
@@ -61,7 +66,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
 </EuiPortal>
 `;
 
-exports[`should render a Welcome screen with the telemetry disclaimer when optIn is false 1`] = `
+exports[`Welcome page  should render a Welcome screen  with the telemetry disclaimer when optIn is false 1`] = `
 <EuiPortal>
   <div
     className="homWelcome"
@@ -75,21 +80,26 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         <EuiSpacer
           size="xl"
         />
-        <span
-          className="homWelcome__logo"
+        <div
+          className="homWelcome__customLogoContainer"
         >
-          <EuiIcon
-            size="original"
-            type="test-file-stub"
+          <img
+            alt="OpenSearch Dashboards logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/"
+            data-test-subj="welcomeCustomLogo"
+            src="/"
           />
-        </span>
+        </div>
         <EuiTitle
           className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to OpenSearch Dashboards"
           size="l"
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to OpenSearch"
+              defaultMessage="Welcome to OpenSearch Dashboards"
               id="home.welcomeTitle"
               values={Object {}}
             />
@@ -159,7 +169,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
 </EuiPortal>
 `;
 
-exports[`should render a Welcome screen with the telemetry disclaimer when optIn is true 1`] = `
+exports[`Welcome page  should render a Welcome screen  with the telemetry disclaimer when optIn is true 1`] = `
 <EuiPortal>
   <div
     className="homWelcome"
@@ -173,21 +183,26 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         <EuiSpacer
           size="xl"
         />
-        <span
-          className="homWelcome__logo"
+        <div
+          className="homWelcome__customLogoContainer"
         >
-          <EuiIcon
-            size="original"
-            type="test-file-stub"
+          <img
+            alt="OpenSearch Dashboards logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/"
+            data-test-subj="welcomeCustomLogo"
+            src="/"
           />
-        </span>
+        </div>
         <EuiTitle
           className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to OpenSearch Dashboards"
           size="l"
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to OpenSearch"
+              defaultMessage="Welcome to OpenSearch Dashboards"
               id="home.welcomeTitle"
               values={Object {}}
             />
@@ -249,6 +264,330 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
           </EuiTextColor>
           <EuiSpacer
             size="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`Welcome page  should render welcome logo in dark mode  using mark dark mode URL 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <div
+          className="homWelcome__customLogoContainer"
+        >
+          <img
+            alt="undefined logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/darkModeMark"
+            data-test-subj="welcomeCustomLogo"
+            src="/darkModeMark"
+          />
+        </div>
+        <EuiTitle
+          className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to undefined"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to undefined"
+              id="home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+            urlBasePath="/"
+          />
+          <EuiSpacer
+            size="s"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`Welcome page  should render welcome logo in dark mode  using mark default mode URL 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <div
+          className="homWelcome__customLogoContainer"
+        >
+          <img
+            alt="undefined logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/defaultModeMark"
+            data-test-subj="welcomeCustomLogo"
+            src="/defaultModeMark"
+          />
+        </div>
+        <EuiTitle
+          className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to undefined"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to undefined"
+              id="home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+            urlBasePath="/"
+          />
+          <EuiSpacer
+            size="s"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`Welcome page  should render welcome logo in dark mode  using the original opensearch logo 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <span
+          className="homWelcome__logo"
+        >
+          <EuiIcon
+            size="original"
+            type="test-file-stub"
+          />
+        </span>
+        <EuiTitle
+          className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to undefined"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to undefined"
+              id="home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+            urlBasePath="/"
+          />
+          <EuiSpacer
+            size="s"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`Welcome page  should render welcome logo in default mode  using mark default mode URL 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <div
+          className="homWelcome__customLogoContainer"
+        >
+          <img
+            alt="custom title logo"
+            className="homWelcome__customLogo"
+            data-test-image-url="/defaultModeMark"
+            data-test-subj="welcomeCustomLogo"
+            src="/defaultModeMark"
+          />
+        </div>
+        <EuiTitle
+          className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to custom title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to custom title"
+              id="home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+            urlBasePath="/"
+          />
+          <EuiSpacer
+            size="s"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`Welcome page  should render welcome logo in default mode  using the original OpenSearch Dashboards logo 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <span
+          className="homWelcome__logo"
+        >
+          <EuiIcon
+            size="original"
+            type="test-file-stub"
+          />
+        </span>
+        <EuiTitle
+          className="homWelcome__title"
+          data-test-subj="welcomeCustomTitle"
+          data-test-title-message="Welcome to OpenSearch Dashboards"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to OpenSearch Dashboards"
+              id="home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+            urlBasePath="/"
+          />
+          <EuiSpacer
+            size="s"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

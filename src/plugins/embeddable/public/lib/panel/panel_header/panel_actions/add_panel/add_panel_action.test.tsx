@@ -41,7 +41,7 @@ import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddable
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
-import { opensearchFilters, Filter } from '../../../../../../../../plugins/data/public';
+import { opensearchFilters, Filter } from '../../../../../../../data/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
 import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';

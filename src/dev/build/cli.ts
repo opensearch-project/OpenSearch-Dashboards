@@ -55,6 +55,9 @@ if (showHelp) {
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
         --all-platforms         {dim Produce archives for all platforms, not just this one}
+        --linux                 {dim Produce archives for only linux x64 platform}
+        --linux-arm             {dim Produce archives for only linux arm64 platform}
+        --darwin                {dim Produce archives for only darwin x64 platform}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
         --docker                {dim Only build the docker image}

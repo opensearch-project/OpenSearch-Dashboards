@@ -33,7 +33,7 @@
 import { OpenSearchDashboardsDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
 import { opensearchFilters, Filter } from '../../../public';
-import { getIndexPatterns } from '../../../public/services';
+import { getIndexPatterns } from '../../services';
 import type { ValueClickContext } from '../../../../embeddable/public';
 
 /**

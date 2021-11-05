@@ -34,13 +34,13 @@ import { PluginInitializerContext } from '../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
-import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
-import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
-import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
-import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
-import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
+import { embeddablePluginMock } from '../../embeddable/public/mocks';
+import { expressionsPluginMock } from '../../expressions/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
+import { inspectorPluginMock } from '../../inspector/public/mocks';
+import { dashboardPluginMock } from '../../dashboard/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),

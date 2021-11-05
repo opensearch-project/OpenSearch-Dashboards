@@ -34,7 +34,7 @@ import {
   OpenSearchDashboardsContext,
   OpenSearchDashboardsDatatable,
   ExpressionFunctionDefinition,
-} from '../../../../../plugins/expressions/common';
+} from '../../../common/search';
 
 type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<OpenSearchDashboardsDatatable>;

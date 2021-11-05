@@ -40,7 +40,7 @@ import {
 } from '../types';
 
 import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
+import { dataPluginMock, createSearchSourceMock } from '../../../data/public/mocks';
 import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'opensearch-dashboards/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';

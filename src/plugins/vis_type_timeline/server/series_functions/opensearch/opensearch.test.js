@@ -264,7 +264,7 @@ describe('opensearch', () => {
           request: {
             body: {
               extended: {
-                opensearch: {
+                es: {
                   filter: {
                     bool: {
                       must: [{ query: { query_string: { query: 'foo' } } }],
@@ -281,8 +281,9 @@ describe('opensearch', () => {
         });
       });
 
-      it('adds the contents of body.extended.opensearch.filter to a filter clause of the bool', () => {
+      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.opensearchDashboards = true;
+        config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.params.body.query.bool.filter.bool;
         expect(filter.must.length).to.eql(1);
@@ -291,6 +292,21 @@ describe('opensearch', () => {
 
       it('does not include filters if config.opensearchDashboards = false', () => {
         config.opensearchDashboards = false;
+        config.kibana = true;
+        const request = fn(config, tlConfig, emptyScriptedFields);
+        expect(request.params.body.query.bool.filter).to.eql(undefined);
+      });
+
+      it('does not include filters if config.kibana = false', () => {
+        config.opensearchDashboards = true;
+        config.kibana = false;
+        const request = fn(config, tlConfig, emptyScriptedFields);
+        expect(request.params.body.query.bool.filter).to.eql(undefined);
+      });
+
+      it('does not include filters if config.opensearchDashboards = false and config.kibana = false', () => {
+        config.opensearchDashboards = false;
+        config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.params.body.query.bool.filter).to.eql(undefined);
       });

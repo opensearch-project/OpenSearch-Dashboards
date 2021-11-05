@@ -98,7 +98,9 @@ export class TutorialsRegistry {
 
   public start() {
     // pre-populate with built in tutorials
-    this.tutorialProviders.push(...builtInTutorials);
+    // TODO: [RENAMEME] Need prod urls.
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335
+    // this.tutorialProviders.push(...builtInTutorials);
     return {};
   }
 }

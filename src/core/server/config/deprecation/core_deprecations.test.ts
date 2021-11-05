@@ -100,7 +100,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"osd-xsrf\\" header.",
+          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. Instead, supply the \\"osd-xsrf\\" header.",
         ]
       `);
     });
@@ -115,7 +115,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, OpenSearch Dashboards will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
+          "You should set server.basePath along with server.rewriteBasePath. OpenSearch Dashboards will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
         ]
       `);
     });

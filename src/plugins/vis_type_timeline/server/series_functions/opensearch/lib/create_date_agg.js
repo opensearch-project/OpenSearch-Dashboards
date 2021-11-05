@@ -32,7 +32,7 @@
 
 import _ from 'lodash';
 import { buildAggBody } from './agg_body';
-import { search } from '../../../../../../plugins/data/server';
+import { search } from '../../../../../data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {

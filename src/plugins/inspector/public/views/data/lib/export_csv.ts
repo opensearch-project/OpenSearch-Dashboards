@@ -86,7 +86,7 @@ export function exportAsCsv({
   csvSeparator,
   quoteValues,
 }: any) {
-  const type = 'text/plain;charset=utf-8';
+  const type = 'text/csv;charset=utf-8';
 
   const csv = new Blob([buildCsv(columns, rows, csvSeparator, quoteValues, valueFormatter)], {
     type,

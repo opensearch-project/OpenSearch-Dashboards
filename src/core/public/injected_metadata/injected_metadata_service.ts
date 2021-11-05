@@ -39,7 +39,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { AppCategory } from '../';
+import { AppCategory, Branding } from '../';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -76,6 +76,7 @@ export interface InjectedMetadataParams {
         user?: Record<string, UserProvidedValues>;
       };
     };
+    branding: Branding;
   };
 }
 
@@ -143,6 +144,10 @@ export class InjectedMetadataService {
       getOpenSearchDashboardsBranch: () => {
         return this.state.branch;
       },
+
+      getBranding: () => {
+        return this.state.branding;
+      },
     };
   }
 }
@@ -176,6 +181,7 @@ export interface InjectedMetadataSetup {
   getInjectedVars: () => {
     [key: string]: unknown;
   };
+  getBranding: () => Branding;
 }
 
 /** @internal */

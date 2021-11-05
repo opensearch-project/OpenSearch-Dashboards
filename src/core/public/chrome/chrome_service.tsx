@@ -51,6 +51,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
+import { Branding } from '../';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -70,6 +71,9 @@ export interface ChromeBrand {
 
 /** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
+
+/** @public */
+export type ChromeBranding = Branding;
 
 /** @public */
 export interface ChromeHelpExtension {
@@ -253,6 +257,7 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          branding={injectedMetadata.getBranding()}
         />
       ),
 

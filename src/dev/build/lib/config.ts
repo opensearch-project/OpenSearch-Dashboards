@@ -30,11 +30,18 @@ import os from 'os';
 import loadJsonFile from 'load-json-file';
 
 import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import {
+  PlatformName,
+  PlatformArchitecture,
+  ALL_PLATFORMS,
+  Platform,
+  TargetPlatforms,
+} from './platform';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  targetPlatforms: TargetPlatforms;
   versionQualifier?: string;
 }
 
@@ -48,12 +55,18 @@ interface Package {
 }
 
 export class Config {
-  static async create({ isRelease, targetAllPlatforms, versionQualifier }: Options) {
+  static async create({
+    isRelease,
+    targetAllPlatforms,
+    targetPlatforms,
+    versionQualifier,
+  }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
     return new Config(
       targetAllPlatforms,
+      targetPlatforms,
       pkg,
       pkg.engines.node,
       dirname(pkgPath),
@@ -68,6 +81,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
+    private readonly targetPlatforms: TargetPlatforms,
     private readonly pkg: Package,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -104,13 +118,31 @@ export class Config {
   }
 
   /**
-   * Return the list of Platforms we are targeting, if --this-platform flag is
-   * specified only the platform for this OS will be returned
+   * Return true if a supported Platform is specified
+   */
+  hasSpecifiedPlatform() {
+    for (const platform in this.targetPlatforms) {
+      if (platform) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Return the list of supported Platforms, if --all-platform flag is specified.
+   * Return the targeted Platforms, if --target-platform flags are specified.
+   * Return the platform of local OS. If it is not a supported Platform, raise an error.
    */
   getTargetPlatforms() {
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
+
+    const platforms: Platform[] = [];
+    if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
+    if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
+    if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));
+
+    if (platforms.length > 0) return platforms;
 
     return [this.getPlatformForThisOs()];
   }

@@ -49,33 +49,122 @@ test('should render a Welcome screen with the telemetry disclaimer', () => {
   expect(component).toMatchSnapshot();
 });
 */
-test('should render a Welcome screen with the telemetry disclaimer when optIn is true', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
-  expect(component).toMatchSnapshot();
-});
+const branding = {
+  darkMode: false,
+  mark: {
+    defaultUrl: '/',
+  },
+  applicationTitle: 'OpenSearch Dashboards',
+};
 
-test('should render a Welcome screen with the telemetry disclaimer when optIn is false', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
+describe('Welcome page ', () => {
+  describe('should render a Welcome screen ', () => {
+    test('with the telemetry disclaimer when optIn is true', () => {
+      const telemetry = telemetryPluginMock.createStartContract();
+      telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
+      );
 
-  expect(component).toMatchSnapshot();
-});
+      expect(component).toMatchSnapshot();
+    });
 
-test('should render a Welcome screen with no telemetry disclaimer', () => {
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
+    test('with the telemetry disclaimer when optIn is false', () => {
+      const telemetry = telemetryPluginMock.createStartContract();
+      telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
+      );
 
-  expect(component).toMatchSnapshot();
-});
+      expect(component).toMatchSnapshot();
+    });
 
-test('fires opt-in seen when mounted', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  const mockSetOptedInNoticeSeen = jest.fn();
-  telemetry.telemetryNotifications.setOptedInNoticeSeen = mockSetOptedInNoticeSeen;
-  shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
+    test('with no telemetry disclaimer', () => {
+      const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} branding={branding} />);
 
-  expect(mockSetOptedInNoticeSeen).toHaveBeenCalled();
+      expect(component).toMatchSnapshot();
+    });
+
+    test('fires opt-in seen when mounted', () => {
+      const telemetry = telemetryPluginMock.createStartContract();
+      const mockSetOptedInNoticeSeen = jest.fn();
+      telemetry.telemetryNotifications.setOptedInNoticeSeen = mockSetOptedInNoticeSeen;
+      shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
+      );
+
+      expect(mockSetOptedInNoticeSeen).toHaveBeenCalled();
+    });
+  });
+
+  describe('should render welcome logo in default mode ', () => {
+    test('using mark default mode URL', () => {
+      const customBranding = {
+        darkMode: false,
+        mark: {
+          defaultUrl: '/defaultModeMark',
+        },
+        applicationTitle: 'custom title',
+      };
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('using the original OpenSearch Dashboards logo', () => {
+      const defaultBranding = {
+        darkMode: false,
+        mark: {},
+        applicationTitle: 'OpenSearch Dashboards',
+      };
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} branding={defaultBranding} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+  });
+  describe('should render welcome logo in dark mode ', () => {
+    test('using mark dark mode URL', () => {
+      const customBranding = {
+        darkMode: true,
+        mark: {
+          defaultUrl: '/defaultModeMark',
+          darkModeUrl: '/darkModeMark',
+        },
+        title: 'custom title',
+      };
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('using mark default mode URL', () => {
+      const customBranding = {
+        darkMode: true,
+        mark: {
+          defaultUrl: '/defaultModeMark',
+        },
+        title: 'custom title',
+      };
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('using the original opensearch logo', () => {
+      const customBranding = {
+        darkMode: true,
+        mark: {},
+        title: 'custom title',
+      };
+      const component = shallow(
+        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+  });
 });

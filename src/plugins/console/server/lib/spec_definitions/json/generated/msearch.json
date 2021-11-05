@@ -23,6 +23,6 @@
       "{indices}/_msearch",
       "{indices}/{type}/_msearch"
     ],
-    "documentation": "https://docs-beta.opensearch.org/opensearch/query-dsl/full-text/#multi-match"
+    "documentation": "https://opensearch.org/docs/opensearch/query-dsl/full-text/#multi-match"
   }
 }

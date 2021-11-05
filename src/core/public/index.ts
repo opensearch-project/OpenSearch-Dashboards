@@ -89,6 +89,7 @@ import {
   HandlerContextType,
   HandlerParameters,
 } from './context';
+import { Branding } from '../types';
 
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
@@ -236,6 +237,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    getBranding: () => Branding;
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -291,6 +293,7 @@ export interface CoreStart {
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    getBranding: () => Branding;
   };
 }
 
@@ -337,6 +340,7 @@ export {
   IUiSettingsClient,
   UiSettingsState,
   NavType,
+  Branding,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

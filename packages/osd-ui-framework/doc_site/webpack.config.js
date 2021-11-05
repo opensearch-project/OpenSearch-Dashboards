@@ -64,7 +64,19 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
+        loaders: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                path: require.resolve('@osd/optimizer/postcss.config.js'),
+              },
+            },
+          },
+          'sass-loader',
+        ],
         exclude: /node_modules/,
       },
       {

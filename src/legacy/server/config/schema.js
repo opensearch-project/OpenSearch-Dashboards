@@ -202,14 +202,12 @@ export default () =>
           .default([]),
       }).default(),
       manifestServiceUrl: Joi.string().default('').allow(''),
-      opensearchManifestServiceUrl: Joi.string().default(
-        'https://maps.search-services.aws.a2z.com/v4/ap-southeast-1/manifest'
-      ),
-      emsFileApiUrl: Joi.string().default('https://vectors.maps.search-services.aws.a2z.com'),
-      emsTileApiUrl: Joi.string().default('https://tiles.maps.search-services.aws.a2z.com'),
-      emsLandingPageUrl: Joi.string().default('https://maps.search-services.aws.a2z.com/v4'),
+      opensearchManifestServiceUrl: Joi.string().default('https://maps.opensearch.org/manifest'),
+      emsFileApiUrl: Joi.string().default('https://vectors.maps.opensearch.org'),
+      emsTileApiUrl: Joi.string().default('https://tiles.maps.opensearch.org'),
+      emsLandingPageUrl: Joi.string().default('https://maps.opensearch.org'),
       emsFontLibraryUrl: Joi.string().default(
-        'https://tiles.maps.search-services.aws.a2z.com/fonts/{fontstack}/{range}.pbf'
+        'https://tiles.maps.opensearch.org/fonts/{fontstack}/{range}.pbf'
       ),
       emsTileLayerId: Joi.object({
         bright: Joi.string().default('road_map'),
@@ -233,6 +231,22 @@ export default () =>
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
       // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
+      branding: Joi.object({
+        logo: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        mark: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        loadingLogo: Joi.object({
+          defaultUrl: Joi.any().default('/'),
+          darkModeUrl: Joi.any().default('/'),
+        }),
+        faviconUrl: Joi.any().default('/'),
+        applicationTitle: Joi.any().default(''),
+      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

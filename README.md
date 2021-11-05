@@ -10,7 +10,7 @@
 
 OpenSearch Dashboards is an open source search and analytics visualization. We aim to to be the best community-driven platform and provide all the contributors a great open source experience.
 
-Feel free to take a look at what the community has been up to, and then head over to the [Project Board](https://github.com/opensearch-project/OpenSearch-Dashboards/projects) to track release targets, or jump in and [start opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) or [contributing](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md).
+Feel free to take a look at what the community has been up to, and then head over to the [Project Board](https://github.com/opensearch-project/OpenSearch-Dashboards/projects) to track release targets, or jump in and [start opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose), [set up your development environment](DEVELOPER_GUIDE.md#getting-started), or [start contributing](CONTRIBUTING.md).
 
 ## Project Resources
 
@@ -19,10 +19,10 @@ Feel free to take a look at what the community has been up to, and then head ove
 * [Documentation](https://opensearch.org/docs/)
 * Need help? Try [Forums](https://discuss.opendistrocommunity.dev/)
 * [Project Principles](https://opensearch.org/#principles)
+* [Developer Guide](DEVELOPER_GUIDE.md)
 * [Contributing to OpenSearch](CONTRIBUTING.md)
 * [Maintainer Responsibilities](MAINTAINERS.md)
 * [Release Management](RELEASING.md)
-* [Admin Responsibilities](ADMINS.md)
 * [Testing](TESTING.md)
 * [Security](SECURITY.md)
 
@@ -36,4 +36,4 @@ This project is licensed under the [Apache v2.0 License](LICENSE.txt).
 
 ## Copyright
 
-Copyright 2020-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright OpenSearch Contributors. See [NOTICE](NOTICE.txt) for details.

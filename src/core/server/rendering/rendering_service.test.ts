@@ -34,9 +34,13 @@ import { load } from 'cheerio';
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { mockRenderingServiceParams, mockRenderingSetupDeps } from './__mocks__/params';
+import { mockRenderingSetupDeps } from './__mocks__/params';
 import { InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
+import { configServiceMock } from '../config/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
+import { mockCoreContext } from '../core_context.mock';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -62,10 +66,15 @@ const { createOpenSearchDashboardsRequest, createRawRequest } = httpServerMock;
 
 describe('RenderingService', () => {
   let service: RenderingService;
+  const configService = configServiceMock.create();
+  configService.atPath.mockImplementation(() => {
+    return new BehaviorSubject(RawOpenSearchDashboardsConfig.schema.validate({}));
+  });
+  const context = mockCoreContext.create({ configService });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new RenderingService(mockRenderingServiceParams);
+    service = new RenderingService(context);
   });
 
   describe('setup()', () => {
@@ -125,6 +134,51 @@ describe('RenderingService', () => {
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
+    });
+  });
+
+  describe('isUrlValid()', () => {
+    it('checks valid SVG URL', async () => {
+      const result = await service.isUrlValid(
+        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
+        'config'
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('checks valid PNG URL', async () => {
+      const result = await service.isUrlValid(
+        'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
+        'config'
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('checks invalid URL that does not contain svg, png or gif', async () => {
+      const result = await service.isUrlValid('https://validUrl', 'config');
+      expect(result).toEqual(false);
+    });
+
+    it('checks invalid URL', async () => {
+      const result = await service.isUrlValid('http://notfound.svg', 'config');
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe('isTitleValid()', () => {
+    it('checks valid title', () => {
+      const result = service.isTitleValid('OpenSearch Dashboards', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks invalid title with empty string', () => {
+      const result = service.isTitleValid('', 'config');
+      expect(result).toEqual(false);
+    });
+
+    it('checks invalid title with length > 36 character', () => {
+      const result = service.isTitleValid('OpenSearch Dashboardssssssssssssssssssssss', 'config');
+      expect(result).toEqual(false);
     });
   });
 });

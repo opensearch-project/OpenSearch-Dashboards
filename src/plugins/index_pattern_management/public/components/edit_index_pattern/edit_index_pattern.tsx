@@ -46,7 +46,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -233,7 +233,7 @@ export const EditIndexPattern = withRouter(
               <EuiLink
                 // TODO: [RENAMEME] Need prod urls.
                 // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-                href="https://docs-beta.opensearch.org/opensearch/index-templates"
+                href="https://opensearch.org/docs/opensearch/index-templates"
                 target="_blank"
                 external
               >

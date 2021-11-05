@@ -47,10 +47,19 @@ const solutionEntry = {
 
 const addBasePathMock = (path: string) => (path ? path : 'path');
 
+const branding = {
+  darkMode: false,
+  mark: {
+    defaultUrl: '/defaultModeLogo',
+    darkModeUrl: '/darkModeLogo',
+  },
+  applicationTitle: 'custom title',
+};
+
 describe('SolutionPanel', () => {
   test('renders the solution panel for the given solution', () => {
     const component = shallow(
-      <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} />
+      <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} branding={branding} />
     );
     expect(component).toMatchSnapshot();
   });
