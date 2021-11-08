@@ -131,6 +131,18 @@ const K = [
 
 const W = new Array(64);
 
+type BufferEncoding =
+  | 'ascii'
+  | 'utf8'
+  | 'utf-8'
+  | 'utf16le'
+  | 'ucs2'
+  | 'ucs-2'
+  | 'base64'
+  | 'latin1'
+  | 'binary'
+  | 'hex';
+
 /* eslint-disable  no-bitwise, no-shadow */
 export class Sha256 {
   private _a: number;
@@ -170,7 +182,7 @@ export class Sha256 {
     this._s = 0;
   }
 
-  update(data: string | Buffer, encoding?: string): Sha256 {
+  update(data: string | Buffer, encoding?: BufferEncoding): Sha256 {
     if (typeof data === 'string') {
       encoding = encoding || 'utf8';
       data = Buffer.from(data, encoding);
@@ -201,7 +213,7 @@ export class Sha256 {
     return this;
   }
 
-  digest(encoding: string): string {
+  digest(encoding: BufferEncoding): string {
     // Suppose the length of the message M, in bits, is l
     const l = this._len * 8;
 
