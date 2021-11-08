@@ -89,7 +89,7 @@ export class FileAppender implements DisposableAppender {
         return resolve();
       }
 
-      this.outputStream.end(undefined, undefined, () => {
+      this.outputStream.end(() => {
         this.outputStream = undefined;
         resolve();
       });

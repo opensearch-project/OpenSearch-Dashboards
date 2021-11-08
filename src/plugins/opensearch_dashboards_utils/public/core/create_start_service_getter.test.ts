@@ -62,6 +62,7 @@ describe('createStartServicesGetter', () => {
     await new Promise((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
+    await new Promise((r) => process.nextTick(r)); // Allow the current event loop to finish
 
     expect(start()).toEqual({
       core,
@@ -81,6 +82,7 @@ describe('createStartServicesGetter', () => {
     await new Promise((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
+    await new Promise((r) => process.nextTick(r)); // Allow the current event loop to finish
 
     expect(start()).toEqual({
       core,
