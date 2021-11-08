@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import good from '@elastic/good';
+import { plugin as good } from '@elastic/good';
 import loggingConfiguration from './configuration';
 import { logWithMetadata } from './log_with_metadata';
 import { setupLoggingRotate } from './rotate';

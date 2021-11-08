@@ -74,9 +74,9 @@ describe('with randomness', () => {
     await phase.trigger();
     expect(order).toMatchInlineSnapshot(`
       Array [
-        "one",
         "three",
         "two",
+        "one",
       ]
     `);
   });
