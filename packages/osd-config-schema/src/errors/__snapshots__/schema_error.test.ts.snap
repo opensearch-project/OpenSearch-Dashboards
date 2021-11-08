@@ -2,6 +2,6 @@
 
 exports[`includes stack 1`] = `
 "Error: test
-    at Object.<anonymous>.it (packages/osd-config-schema/src/errors/schema_error.test.ts:57:11)
+    at Object.<anonymous> (packages/osd-config-schema/src/errors/schema_error.test.ts:57:11)
     at new Promise (<anonymous>)"
 `;
