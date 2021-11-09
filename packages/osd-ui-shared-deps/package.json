@@ -16,6 +16,7 @@
     "@osd/monaco": "1.0.0",
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.8.0",
+    "axios": "^0.21.4",
     "compression-webpack-plugin": "^4.0.0",
     "core-js": "^3.6.5",
     "custom-event-polyfill": "^0.3.0",
