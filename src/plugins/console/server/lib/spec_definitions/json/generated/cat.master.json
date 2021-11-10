@@ -15,6 +15,6 @@
     "patterns": [
       "_cat/master"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-master.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-master/"
   }
 }

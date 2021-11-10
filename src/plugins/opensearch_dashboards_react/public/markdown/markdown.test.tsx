@@ -70,7 +70,7 @@ test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () 
 // TODO: [RENAMEME] if we fork EUI and update that regex then we can include this test again
 xtest('should only add `nooopener` to known links in new tabs', () => {
   const component = shallow(
-    <Markdown openLinksInNewTab={true} markdown="[link](https://www.opensearch.org/cool/path" />
+    <Markdown openLinksInNewTab={true} markdown="[link](https://opensearch.org/cool/path" />
   );
   expect(component.render().find('a').prop('rel')).toBe('noopener');
 });

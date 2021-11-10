@@ -56,7 +56,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getUrlParts() {
-    // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://elastic:changeme@myCloudInstance:9200
+    // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
       const testOpenSearchUrl = url.parse(process.env.TEST_OPENSEARCH_URL);
       return {

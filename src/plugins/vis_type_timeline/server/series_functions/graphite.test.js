@@ -146,7 +146,7 @@ describe('graphite', function () {
 
   it('setting with unmatched blocklist https url should return result', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/' },
+      settings: { 'timeline:graphite.url': 'https://opensearch.org/' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
@@ -176,7 +176,7 @@ describe('graphite', function () {
 
   it('setting with redirection error message', function () {
     return invoke(fn, [], {
-      settings: { 'timeline:graphite.url': 'https://www.opensearch.org/redirect' },
+      settings: { 'timeline:graphite.url': 'https://opensearch.org/redirect' },
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {

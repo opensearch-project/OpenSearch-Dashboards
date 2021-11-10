@@ -19,6 +19,6 @@
       "_segments",
       "{indices}/_segments"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-segments.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-segments.html"
   }
 }

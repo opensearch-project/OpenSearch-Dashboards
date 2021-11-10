@@ -12,6 +12,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-create-index.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/create-index/"
   }
 }

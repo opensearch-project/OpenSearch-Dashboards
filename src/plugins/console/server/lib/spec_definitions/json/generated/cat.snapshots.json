@@ -25,6 +25,6 @@
       "_cat/snapshots",
       "_cat/snapshots/{repository}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-snapshots.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-snapshots/"
   }
 }

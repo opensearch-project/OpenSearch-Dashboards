@@ -25,6 +25,6 @@
     "patterns": [
       "{indices}/_doc/{id}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/docs-delete.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/delete-document/"
   }
 }

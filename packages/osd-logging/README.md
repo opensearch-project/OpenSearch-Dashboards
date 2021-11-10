@@ -10,7 +10,7 @@ is still in `core` for now.
 - [Log level](#log-level)
 - [Layouts](#layouts)
 
-The way logging works in OpenSearch Dashboards is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.opensearch.org/guide/en/elasticsearch/reference/current/settings.html#logging).
+The way logging works in OpenSearch Dashboards is inspired by `log4j 2` logging framework used by [OpenSearch](https://opensearch.org/docs/latest/opensearch/logs/).
 The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack 
 where possible.
 

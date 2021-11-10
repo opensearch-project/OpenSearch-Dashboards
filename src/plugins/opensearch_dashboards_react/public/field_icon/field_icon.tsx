@@ -62,7 +62,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
-  // is a plugin's data type https://www.opensearch.org/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
+  // is a plugin's data type https://opensearch.org/docs/latest/opensearch/install/plugins/#available-plugins
   murmur3: { iconType: 'tokenFile' },
   number: { iconType: 'tokenNumber' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },

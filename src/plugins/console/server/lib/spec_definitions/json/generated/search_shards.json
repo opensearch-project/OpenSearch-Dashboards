@@ -22,6 +22,6 @@
       "_search_shards",
       "{indices}/_search_shards"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/search-shards.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-shards.html"
   }
 }

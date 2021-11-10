@@ -23,6 +23,6 @@
       "_cache/clear",
       "{indices}/_cache/clear"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-clearcache.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-clearcache.html"
   }
 }

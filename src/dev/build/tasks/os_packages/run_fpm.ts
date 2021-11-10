@@ -75,7 +75,7 @@ export async function runFpm(
     '--version',
     version,
     '--url',
-    'https://www.opensearch.org',
+    'https://opensearch.org',
     '--vendor',
     'OpenSearch',
     '--maintainer',
