@@ -41,6 +41,7 @@
     "osd": "node scripts/osd",
     "opensearch": "node scripts/opensearch",
     "test": "grunt test",
+    "test:bwc": "./scripts/bwctest-osd.sh",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
     "test:mocha": "node scripts/mocha",
