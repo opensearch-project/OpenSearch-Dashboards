@@ -1,6 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
+ */
+
+/*
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
@@ -105,7 +108,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/babel-*',
   'packages/*',
   'packages/osd-ui-framework/generator-kui',
-  'src/legacy/ui/public/flot-charts',
+  'src/legacy/core_plugins/opensearch-dashboards/public/context/query_parameters',
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',
 ];
