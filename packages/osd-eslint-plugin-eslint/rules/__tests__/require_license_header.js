@@ -50,7 +50,7 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '/* license */' }],
+      options: [{ licenses: ['/* license */'] }],
     },
     {
       code: dedent`
@@ -59,7 +59,17 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '// license' }],
+      options: [{ licenses: ['// license'] }],
+    },
+    // multiple valid licenses
+    {
+      code: dedent`
+        /* license 2 */
+
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license 1 */', '/* license 2 */'] }],
     },
   ],
 
@@ -73,7 +83,7 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
       options: [],
       errors: [
         {
-          message: '"license" option is required',
+          message: '"licenses" option is required',
         },
       ],
     },
@@ -84,10 +94,10 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '/* one *//* two */' }],
+      options: [{ licenses: ['/* one *//* two */'] }],
       errors: [
         {
-          message: '"license" option must only include a single comment',
+          message: '"licenses[0]" option must only include a single comment',
         },
       ],
     },
@@ -98,10 +108,10 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: `// one\n// two` }],
+      options: [{ licenses: [`// one\n// two`] }],
       errors: [
         {
-          message: '"license" option must only include a single comment',
+          message: '"licenses[0]" option must only include a single comment',
         },
       ],
     },
@@ -114,15 +124,17 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
 
       options: [
         {
-          license: dedent`
+          licenses: [
+            dedent`
             /* license */
             console.log('hello world');
           `,
+          ],
         },
       ],
       errors: [
         {
-          message: '"license" option must only include a single comment',
+          message: '"licenses[0]" option must only include a single comment',
         },
       ],
     },
@@ -133,10 +145,10 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: `console.log('hello world');` }],
+      options: [{ licenses: [`console.log('hello world');`] }],
       errors: [
         {
-          message: '"license" option must only include a single comment',
+          message: '"licenses[0]" option must only include a single comment',
         },
       ],
     },
@@ -147,7 +159,7 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '/* license */' }],
+      options: [{ licenses: ['/* license */'] }],
       errors: [
         {
           message: 'File must start with a license header',
@@ -171,7 +183,7 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '/* license */' }],
+      options: [{ licenses: ['/* license */'] }],
       errors: [
         {
           message: 'License header must be at the very beginning of the file',
@@ -193,7 +205,7 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [{ license: '/* license */' }],
+      options: [{ licenses: ['/* license */'] }],
       errors: [
         {
           message: 'License header must be at the very beginning of the file',
@@ -207,6 +219,54 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
 
         console.log('foo')
       `,
+    },
+
+    // atleast one of multiple licenses must be present
+    {
+      code: dedent`
+        /* not license */
+        /* also not license */
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license 1 */', '/* license 2 */'] }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: dedent`
+        /* license 1 */
+
+        /* not license */
+        /* also not license */
+        console.log('foo')
+      `,
+    },
+
+    // atleast one of multiple licenses must be present at the top of the file
+    {
+      code: dedent`
+            /* not license */
+            /* license 2 */
+            console.log('foo')
+          `,
+
+      options: [{ licenses: ['/* license 1 */', '/* license 2 */'] }],
+      errors: [
+        {
+          message: 'License header must be at the very beginning of the file',
+        },
+      ],
+
+      output: dedent`
+            /* license 2 */
+
+            /* not license */
+
+            console.log('foo')
+          `,
     },
   ],
 });

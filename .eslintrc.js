@@ -30,6 +30,13 @@
  * GitHub history for details.
  */
 
+const SIMPLIFIED_OOS_HEADER = `
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+`;
+
 const NEW_OSS_HEADER = `
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -151,7 +158,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: NEW_OSS_HEADER,
+            licenses: [SIMPLIFIED_OOS_HEADER, NEW_OSS_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -187,7 +194,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_LODASH_HEADER,
+            licenses: [SAFER_LODASH_SET_LODASH_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -209,7 +216,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_HEADER,
+            licenses: [SAFER_LODASH_SET_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -233,7 +240,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+            licenses: [SAFER_LODASH_SET_DEFINITELYTYPED_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
