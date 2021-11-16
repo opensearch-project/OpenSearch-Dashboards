@@ -163,6 +163,11 @@ describe('RenderingService', () => {
       const result = await service.isUrlValid('http://notfound.svg', 'config');
       expect(result).toEqual(false);
     });
+
+    it('checks default URL returns false', async () => {
+      const result = await service.isUrlValid('/', 'config');
+      expect(result).toEqual(false);
+    });
   });
 
   describe('isTitleValid()', () => {

@@ -315,8 +315,11 @@ export class RenderingService {
    * @returns {boolean} indicate if the URL is valid/invalid
    */
   public isUrlValid = async (url: string, configName?: string): Promise<boolean> => {
+    if (url === '/') {
+      return false;
+    }
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
-      this.logger.get('branding').info(configName + ' config is not found or invalid.');
+      this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
       return false;
     }
     return await Axios.get(url, { adapter: AxiosHttpAdapter, maxRedirects: 0 })
@@ -324,7 +327,9 @@ export class RenderingService {
         return true;
       })
       .catch(() => {
-        this.logger.get('branding').info(configName + ' config is not found or invalid');
+        this.logger
+          .get('branding')
+          .error(`${configName} URL was not found or invalid. Using default branding.`);
         return false;
       });
   };
@@ -338,12 +343,14 @@ export class RenderingService {
    * @returns {boolean} indicate if user input title is valid/invalid
    */
   public isTitleValid = (title: string, configName?: string): boolean => {
-    if (!title || title.length > 36) {
+    if (!title) {
+      return false;
+    }
+    if (title.length > 36) {
       this.logger
         .get('branding')
-        .info(
-          configName +
-            ' config is not found or invalid. Title length should be between 1 to 36 characters.'
+        .error(
+          `${configName} config is not found or invalid. Title length should be between 1 to 36 characters. Using default title.`
         );
       return false;
     }
