@@ -30,14 +30,20 @@
  * GitHub history for details.
  */
 
-const SIMPLIFIED_OOS_HEADER = `
+/**
+ * For new files created by OpenSearch Contributers
+ */
+const OSD_HEADER = `
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 `;
 
-const NEW_OSS_HEADER = `
+/**
+ * For files that modify or use code with an exsting OSS header
+ */
+const OSS_HEADER = `
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -158,7 +164,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            licenses: [SIMPLIFIED_OOS_HEADER, NEW_OSS_HEADER],
+            licenses: [OSD_HEADER, OSS_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -223,7 +229,7 @@ module.exports = {
           'error',
           {
             licenses: [
-              NEW_OSS_HEADER,
+              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -247,7 +253,7 @@ module.exports = {
           'error',
           {
             licenses: [
-              NEW_OSS_HEADER,
+              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
