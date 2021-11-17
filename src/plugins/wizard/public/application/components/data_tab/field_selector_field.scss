@@ -1,0 +1,12 @@
+.wizFieldSelectorField {
+  @include euiBottomShadowSmall;
+  padding: $euiSizeXS;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  margin-top: $euiSizeS;
+
+  & > button {
+    align-items: center;
+    gap: 4px;
+  }
+}
