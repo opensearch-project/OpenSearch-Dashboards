@@ -7,6 +7,8 @@
 ### Check List
 - [ ] New functionality includes testing.
   - [ ] All tests pass
+    - [ ] `yarn test:jest`
+    - [ ] `yarn test:jest_integration`
+    - [ ] `yarn test:ftr`
 - [ ] New functionality has been documented.
-  - [ ] New functionality has javadoc added
 - [ ] Commits are signed per the DCO using --signoff 
