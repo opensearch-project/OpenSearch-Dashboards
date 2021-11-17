@@ -30,7 +30,20 @@
  * GitHub history for details.
  */
 
-const NEW_OSS_HEADER = `
+/**
+ * For new files created by OpenSearch Contributers
+ */
+const OSD_HEADER = `
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+`;
+
+/**
+ * For files that modify or use code with an exsting OSS header
+ */
+const OSS_HEADER = `
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -151,7 +164,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: NEW_OSS_HEADER,
+            licenses: [OSD_HEADER, OSS_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -187,7 +200,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_LODASH_HEADER,
+            licenses: [SAFER_LODASH_SET_LODASH_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -209,14 +222,14 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_HEADER,
+            licenses: [SAFER_LODASH_SET_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
-              NEW_OSS_HEADER,
+              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -233,14 +246,14 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            license: SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+            licenses: [SAFER_LODASH_SET_DEFINITELYTYPED_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [
-              NEW_OSS_HEADER,
+              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
