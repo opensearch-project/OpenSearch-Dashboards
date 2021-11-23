@@ -1,0 +1,10 @@
+@import "../util";
+
+.wizFieldSelector {
+  @include scrollNavParent(auto 1fr);
+  padding: $euiSizeS;
+}
+
+.wizFieldSelector__fieldGroups {
+  overflow-y: auto;
+}
