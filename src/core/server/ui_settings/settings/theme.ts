@@ -51,14 +51,19 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: 'v7',
+      value: 'v1',
       type: 'select',
-      options: ['v7', 'v8 (beta)'],
+      options: ['v1'],
+      readonly: true, // This flag will hide the `theme:version` UI from Advancend Settings.
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
         defaultMessage: `Switch between the theme used for the current and next version of OpenSearch Dashboards, A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
-      schema: schema.oneOf([schema.literal('v7'), schema.literal('v8 (beta)')]),
+      schema: schema.oneOf([
+        schema.literal('v1'),
+        schema.literal('v7'),
+        schema.literal('v8 (beta)'),
+      ]),
     },
   };
 };

@@ -60,6 +60,8 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
+    this.resetThemeVersion();
+
     params.done$.subscribe({
       complete: () => {
         this.update$.complete();
@@ -173,6 +175,17 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   getUpdateErrors$() {
     return this.updateErrors$.asObservable();
+  }
+
+  resetThemeVersion() {
+    const key = 'theme:version';
+    // Reset userValue to default value if any legacy theme verion exists.
+    if (
+      this.cache[key] !== undefined &&
+      (this.cache[key].userValue === 'v7' || this.cache[key].userValue === 'v8 (beta)')
+    ) {
+      this.setLocally(key, this.defaults[key].value);
+    }
   }
 
   private assertUpdateAllowed(key: string) {

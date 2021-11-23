@@ -99,10 +99,8 @@ export function uiRenderMixin(osdServer, server, config) {
           ? await uiSettings.get('theme:darkMode')
           : false;
 
-      const themeVersion =
-        !authEnabled || request.auth.isAuthenticated ? await uiSettings.get('theme:version') : 'v7';
-
-      const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+      const themeVersion = 'v1';
+      const themeTag = `${themeVersion}${darkMode ? 'dark' : 'light'}`;
 
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
       const basePath = config.get('server.basePath');
@@ -113,16 +111,12 @@ export function uiRenderMixin(osdServer, server, config) {
         `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
         ...(darkMode
           ? [
-              themeVersion === 'v7'
-                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
-                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
+              `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
               `${basePath}/node_modules/@osd/ui-framework/dist/kui_dark.css`,
               `${basePath}/ui/legacy_dark_theme.css`,
             ]
           : [
-              themeVersion === 'v7'
-                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
-                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
+              `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
               `${basePath}/node_modules/@osd/ui-framework/dist/kui_light.css`,
               `${basePath}/ui/legacy_light_theme.css`,
             ]),

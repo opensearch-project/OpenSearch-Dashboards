@@ -37,7 +37,10 @@ import { UiSettingsClient } from './ui_settings_client';
 let done$: Subject<unknown>;
 
 function setup(options: { defaults?: any; initialSettings?: any } = {}) {
-  const { defaults = { dateFormat: { value: 'Browser' } }, initialSettings = {} } = options;
+  const {
+    defaults = { dateFormat: { value: 'Browser' }, 'theme:version': { value: 'v1' } },
+    initialSettings = {},
+  } = options;
 
   const batchSet = jest.fn(() => ({
     settings: {},
@@ -57,6 +60,41 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
 
 afterEach(() => {
   done$.complete();
+});
+
+describe('#resetThemeVersion', () => {
+  it('do nothing when userValie is valid v1', () => {
+    const { client } = setup();
+    // Suppose userValue is valid themeVersion v1
+    client.set('theme:version', 'v1');
+    expect(client.get('theme:version')).toEqual('v1');
+
+    client.resetThemeVersion();
+    // expect no change
+    expect(client.get('theme:version')).toEqual('v1');
+  });
+
+  it('reset theme:version userValue v7 to default v1', () => {
+    const { client } = setup();
+    // Suppose userValue is cached with old themeVersion v7
+    client.set('theme:version', 'v7');
+
+    expect(client.get('theme:version')).toEqual('v7');
+    client.resetThemeVersion();
+    // Then theme:version is expected to be default v1
+    expect(client.get('theme:version')).toEqual('v1');
+  });
+
+  it('reset theme:version userValue v8 (beta) to default v1', () => {
+    const { client } = setup();
+    // Suppose userValue is cached with old themeVersion v8 (beta)
+    client.set('theme:version', 'v8 (beta)');
+    expect(client.get('theme:version')).toEqual('v8 (beta)');
+
+    client.resetThemeVersion();
+    // theme:version then is expected to be default v1
+    expect(client.get('theme:version')).toEqual('v1');
+  });
 });
 
 describe('#get', () => {

@@ -31,6 +31,7 @@
  */
 
 import LightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import DarkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
@@ -38,19 +39,11 @@ export type Theme = typeof LightTheme;
 
 // in the OpenSearch Dashboards app we can rely on this global being defined, but in
 // some cases (like jest) the global is undefined
-export const tag: string = globals.__osdThemeTag__ || 'v7light';
-export const version = tag.startsWith('v7') ? 7 : 8;
+export const tag: string = globals.__osdThemeTag__ || 'v1light';
 export const darkMode = tag.endsWith('dark');
 
-export let euiLightVars: Theme;
-export let euiDarkVars: Theme;
-if (version === 7) {
-  euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
-  euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
-} else {
-  euiLightVars = require('@elastic/eui/dist/eui_theme_amsterdam_light.json');
-  euiDarkVars = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
-}
+export const euiLightVars: Theme = LightTheme;
+export const euiDarkVars: Theme = DarkTheme;
 
 /**
  * EUI Theme vars that automatically adjust to light/dark theme

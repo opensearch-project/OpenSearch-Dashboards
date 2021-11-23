@@ -65,6 +65,9 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "theme:version": Object {
+    "value": "v1",
+  },
 }
 `;
 
@@ -72,6 +75,9 @@ exports[`#overrideLocalDefault key has no user value synchronously modifies the 
 Object {
   "dateFormat": Object {
     "value": "Browser",
+  },
+  "theme:version": Object {
+    "value": "v1",
   },
 }
 `;
@@ -86,6 +92,9 @@ Object {
     "userValue": "foo",
     "value": "bar",
   },
+  "theme:version": Object {
+    "value": "v1",
+  },
 }
 `;
 
@@ -94,6 +103,9 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "Browser",
+  },
+  "theme:version": Object {
+    "value": "v1",
   },
 }
 `;
@@ -107,6 +119,9 @@ Object {
   "dateFormat": Object {
     "value": "bar",
   },
+  "theme:version": Object {
+    "value": "v1",
+  },
 }
 `;
 
@@ -115,6 +130,9 @@ Object {
   "dateFormat": Object {
     "userValue": "foo",
     "value": "bar",
+  },
+  "theme:version": Object {
+    "value": "v1",
   },
 }
 `;
