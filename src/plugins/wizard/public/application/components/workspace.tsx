@@ -13,7 +13,7 @@ export const Workspace: FC = ({ children }) => {
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
         <EuiFlexItem grow={false}>
-          {/* TODO: This is the teporary view of the selected chard, should be replaced by dropdown */}
+          {/* TODO: This is the temporary view of the selected chard, should be replaced by dropdown */}
           <EuiButton iconType="visBarVertical" disabled>
             Bar
           </EuiButton>
@@ -27,7 +27,7 @@ export const Workspace: FC = ({ children }) => {
             <EuiEmptyPrompt
               iconType="visBarVertical"
               title={<h2>Welcome to the wizard!</h2>}
-              body={<p>Drag some fileds onto the panel to visualize some data.</p>}
+              body={<p>Drag some fields onto the panel to visualize some data.</p>}
             />
           </EuiFlexItem>
         )}
