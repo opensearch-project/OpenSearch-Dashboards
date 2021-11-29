@@ -39,7 +39,7 @@ import Crypto from 'crypto';
 
 import * as babel from '@babel/core';
 import { addHook } from 'pirates';
-import { REPO_ROOT } from '@osd/dev-utils';
+import { REPO_ROOT, UPSTREAM_BRANCH } from '@osd/dev-utils';
 import sourceMapSupport from 'source-map-support';
 
 import { Cache } from './cache';
@@ -88,7 +88,7 @@ function determineCachePrefix() {
     tsx: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.tsx')),
   });
 
-  const checksum = Crypto.createHash('sha256').update(json).digest('hex');
+  const checksum = Crypto.createHash('sha256').update(json).digest('hex').slice(0, 8);
   return `${checksum}:`;
 }
 
@@ -131,6 +131,13 @@ export function registerNodeAutoTranspilation() {
   installed = true;
 
   const cache = new Cache({
+    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v1', UPSTREAM_BRANCH),
+    log: process.env.DEBUG_NODE_TRANSPILER_CACHE
+      ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
+          flags: 'a',
+        })
+      : undefined,
+    pathRoot: REPO_ROOT,
     prefix: determineCachePrefix(),
   });
 

@@ -149,7 +149,7 @@ function findManifestInFolder(
   notFound: () => never[] | Observable<string | PluginDiscoveryError>
 ): string[] | Observable<string | PluginDiscoveryError> {
   return fsStat$(resolve(dir, 'opensearch_dashboards.json')).pipe(
-    mergeMap((stats) => {
+    mergeMap((stats: any) => {
       // `opensearch_dashboards.json` exists in given directory, we got a plugin
       if (stats.isFile()) {
         return [dir];
@@ -180,7 +180,7 @@ function mapSubdirectories(
     mergeMap((subDirs: string[]) => subDirs.map((subDir) => resolve(dir, subDir))),
     mergeMap((subDir) =>
       fsStat$(subDir).pipe(
-        mergeMap((pathStat) => (pathStat.isDirectory() ? mapFunc(subDir) : [])),
+        mergeMap((pathStat: any) => (pathStat.isDirectory() ? mapFunc(subDir) : [])),
         catchError((subDirStatError) => [
           PluginDiscoveryError.invalidPluginPath(subDir, subDirStatError),
         ])

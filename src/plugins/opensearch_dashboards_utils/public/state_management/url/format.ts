@@ -40,6 +40,7 @@ export function replaceUrlQuery(
   queryReplacer: (query: ParsedQuery) => ParsedQuery
 ) {
   const url = parseUrl(rawUrl);
+  // @ts-expect-error due to conflict between `queryReplacer` and `@types/node`
   const newQuery = queryReplacer(url.query || {});
   const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
@@ -58,6 +59,7 @@ export function replaceUrlHashQuery(
 ) {
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);
+  // @ts-expect-error due to conflict between `queryReplacer` and `@types/node`
   const newQuery = queryReplacer(hash?.query || {});
   const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
