@@ -55,16 +55,22 @@ jobs:
         id: integration_tests_results
         run: cat integration_tests_results 2>/dev/null || echo 'default'
 
+       # TODO: This gets rejected
+      - name: Add comment if unit tests did not succeed
+        # if: steps.unit_tests_results.outputs.unit_tests_results != 'success' && steps.unit-tests.outcome != 'success'
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Unit tests completed unsuccessfully. However, unit tests are inconsistent on the CI so please verify locally with `yarn test:jest`.'
+            })
+
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/checkout@v2
-      
-      - uses: mshick/add-pr-comment@v1
-        with:
-          message: |
-            **Hello foobar**
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'opensearch-bot'
 
       - name: Setup Node
         if: steps.job_successful.outputs.job_successful != 'true'
