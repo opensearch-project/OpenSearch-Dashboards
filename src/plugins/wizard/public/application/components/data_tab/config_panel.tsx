@@ -6,25 +6,13 @@
 import { EuiForm, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { BUCKET_TYPES, METRIC_TYPES } from '../../../../../data/public';
 import { ConfigSection } from './config_section';
 
 import './config_panel.scss';
-
-// TODO: Temp. Remove once visualizations can be refgistered and editor configs can be passed along
-const CONFIG = {
-  x: {
-    title: 'X Axis',
-    allowedAggregation: BUCKET_TYPES.TERMS,
-  },
-  y: {
-    title: 'Y Axis',
-    allowedAggregation: METRIC_TYPES.AVG,
-  },
-};
+import { useTypedSelector } from '../../utils/state_management';
 
 export function ConfigPanel() {
-  const sections = CONFIG;
+  const { configSections } = useTypedSelector((state) => state.config);
 
   return (
     <EuiForm className="wizConfigPanel">
@@ -35,8 +23,8 @@ export function ConfigPanel() {
           })}
         </h2>
       </EuiTitle>
-      {Object.entries(sections).map(([sectionId, sectionProps], index) => (
-        <ConfigSection key={index} id={sectionId} {...sectionProps} onChange={() => {}} />
+      {Object.entries(configSections).map(([sectionId, sectionProps], index) => (
+        <ConfigSection key={index} id={sectionId} {...sectionProps} />
       ))}
     </EuiForm>
   );
