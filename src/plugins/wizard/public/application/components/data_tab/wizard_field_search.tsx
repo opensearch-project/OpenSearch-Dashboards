@@ -54,12 +54,6 @@ export function WizardFieldSearch({ onChange, value }: Props) {
     defaultMessage: 'Search field names',
   });
 
-  if (typeof value !== 'string') {
-    // at initial rendering value is undefined (angular related), this catches the warning
-    // should be removed once all is react
-    return null;
-  }
-
   return (
     <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
