@@ -3,26 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { IndexPatternField } from 'src/plugins/data/common';
 import { useDrop } from '../../utils/drag_drop';
+import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  addConfigSectionField,
+  removeConfigSectionField,
+} from '../../utils/state_management/config_slice';
 
 import './config_section.scss';
 
 interface ConfigSectionProps {
   id: string;
   title: string;
-  onChange: Function;
 }
 
-export const ConfigSection = ({ title, id, onChange }: ConfigSectionProps) => {
-  const [currentField, setCurrentField] = useState<IndexPatternField>();
+export const ConfigSection = ({ title, id }: ConfigSectionProps) => {
+  const dispatch = useTypedDispatch();
+  const { fields } = useTypedSelector((state) => state.config.configSections[id]);
 
-  const dropHandler = useCallback((field: IndexPatternField) => {
-    setCurrentField(field);
-  }, []);
+  const dropHandler = useCallback(
+    (field: IndexPatternField) => {
+      dispatch(
+        addConfigSectionField({
+          sectionId: id,
+          field,
+        })
+      );
+    },
+    [dispatch, id]
+  );
   const [dropProps, { isValidDropTarget, dragData }] = useDrop('dataPlane', dropHandler);
 
   const dropTargetString = dragData
@@ -31,24 +44,32 @@ export const ConfigSection = ({ title, id, onChange }: ConfigSectionProps) => {
         defaultMessage: 'Click or drop to add',
       });
 
-  useEffect(() => {
-    onChange(id, currentField);
-  }, [id, currentField, onChange]);
-
   return (
-    <EuiFormRow label={title} className="wizConfigSection">
-      {currentField ? (
-        <EuiPanel paddingSize="s" className="wizConfigSection__field">
-          <EuiText grow size="m">
-            {currentField.displayName}
-          </EuiText>
-          <EuiButtonIcon
-            color="danger"
-            iconType="cross"
-            aria-label="clear-field"
-            onClick={() => setCurrentField(undefined)}
-          />
-        </EuiPanel>
+    <div className="wizConfigSection">
+      <EuiTitle size="xxxs">
+        <h3 className="wizConfigSection__title">{title}</h3>
+      </EuiTitle>
+      {fields.length ? (
+        fields.map((field, index) => (
+          <EuiPanel key={index} paddingSize="s" className="wizConfigSection__field">
+            <EuiText grow size="m">
+              {field.displayName}
+            </EuiText>
+            <EuiButtonIcon
+              color="danger"
+              iconType="cross"
+              aria-label="clear-field"
+              onClick={() =>
+                dispatch(
+                  removeConfigSectionField({
+                    sectionId: id,
+                    field,
+                  })
+                )
+              }
+            />
+          </EuiPanel>
+        ))
       ) : (
         <div
           className={`wizConfigSection__dropTarget ${isValidDropTarget && 'validDropTarget'}`}
@@ -57,6 +78,6 @@ export const ConfigSection = ({ title, id, onChange }: ConfigSectionProps) => {
           <EuiText size="s">{dropTargetString}</EuiText>
         </div>
       )}
-    </EuiFormRow>
+    </div>
   );
 };

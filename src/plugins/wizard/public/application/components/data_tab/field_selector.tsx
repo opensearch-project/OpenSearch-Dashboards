@@ -15,10 +15,7 @@ import {
 import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
-
-interface FieldSelectorDeps {
-  indexFields: IndexPatternField[];
-}
+import { useTypedSelector } from '../../utils/state_management';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -33,7 +30,8 @@ const META_FIELDS: string[] = [
   OPENSEARCH_FIELD_TYPES._TYPE,
 ];
 
-export const FieldSelector = ({ indexFields }: FieldSelectorDeps) => {
+export const FieldSelector = () => {
+  const indexFields = useTypedSelector((state) => state.dataSource.visualizableFields);
   const [filteredFields, setFilteredFields] = useState(indexFields);
   const [fieldSearchValue, setFieldSearchValue] = useState('');
 

@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState } from 'react';
-import { IndexPattern } from '../../../../data/public';
+import React, { useMemo } from 'react';
 import { PLUGIN_ID } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavconfig } from '../utils/get_top_nav_config';
 import { WizardServices } from '../../types';
 
 import './top_nav.scss';
+import { useTypedSelector } from '../utils/state_management';
 
 export const TopNav = () => {
   const { services } = useOpenSearchDashboards<WizardServices>();
@@ -22,8 +22,7 @@ export const TopNav = () => {
   } = services;
 
   const config = useMemo(() => getTopNavconfig(services), [services]);
-  //   TODO: Set index pattern/data source here. Filters wont show up until you do
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const { indexPattern } = useTypedSelector((state) => state.dataSource);
 
   return (
     <div className="wizTopNav">
@@ -34,7 +33,7 @@ export const TopNav = () => {
         showSearchBar={true}
         useDefaultBehaviors={true}
         screenTitle="Test"
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPattern ? [indexPattern] : []}
       />
     </div>
   );
