@@ -3,16 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
-import {
-  EuiFormLabel,
-  EuiFlexItem,
-  EuiAccordion,
-  EuiSpacer,
-  EuiNotificationBadge,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
+import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { WizardFieldSearch } from './wizard_field_search';
 
 import {
   IndexPatternField,
@@ -41,7 +35,25 @@ const META_FIELDS: string[] = [
 ];
 
 export const FieldSelector = ({ indexFields }: FieldSelectorDeps) => {
-  const fields = indexFields?.reduce<IFieldCategories>(
+  const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
+  const [filteredFields, setFilteredFields] = useState(indexFields);
+
+  useEffect(() => {
+    const filteredSubset = indexFields.filter((field) => {
+      if (!field.displayName.includes(fieldFilterState.name)) {
+        return false;
+      }
+
+      // Other conditions
+
+      return true;
+    });
+
+    setFilteredFields(filteredSubset);
+    return;
+  }, [indexFields, fieldFilterState]);
+
+  const fields = filteredFields?.reduce<IFieldCategories>(
     (fieldGroups, currentField) => {
       const category = getFieldCategory(currentField);
       fieldGroups[category].push(currentField);
@@ -55,10 +67,36 @@ export const FieldSelector = ({ indexFields }: FieldSelectorDeps) => {
     }
   );
 
+  const onChangeFieldSearch = useCallback(
+    (field: string, value: string | boolean | undefined) => {
+      const newState = setFieldFilterProp(fieldFilterState, field, value);
+      setFieldFilterState(newState);
+    },
+    [fieldFilterState]
+  );
+
+  const fieldTypes = useMemo(() => {
+    const result = ['any'];
+    if (Array.isArray(fields)) {
+      for (const field of fields) {
+        if (result.indexOf(field.type) === -1) {
+          result.push(field.type);
+        }
+      }
+    }
+    return result;
+  }, [fields]);
+
   return (
     <div className="wizFieldSelector">
       <div>
-        <EuiFormLabel>TODO: Search goes here</EuiFormLabel>
+        <form>
+          <WizardFieldSearc
+            onChange={onChangeFieldSearch}
+            value={fieldFilterState.name}
+            types={fieldTypes}
+          />
+        </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">
         <FieldGroup
