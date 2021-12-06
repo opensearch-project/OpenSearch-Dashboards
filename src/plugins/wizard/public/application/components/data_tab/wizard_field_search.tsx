@@ -33,14 +33,6 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export interface State {
-  searchable: string;
-  aggregatable: string;
-  type: string;
-  missing: boolean;
-  [index: string]: string | boolean;
-}
-
 export interface Props {
   /**
    * triggered on input of user into search field
