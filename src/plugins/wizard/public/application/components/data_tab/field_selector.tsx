@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { WizardFieldSearch } from './wizard_field_search';
 
 import {
@@ -35,23 +34,21 @@ const META_FIELDS: string[] = [
 ];
 
 export const FieldSelector = ({ indexFields }: FieldSelectorDeps) => {
-  const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const [filteredFields, setFilteredFields] = useState(indexFields);
+  const [fieldSearchValue, setFieldSearchValue] = useState('');
 
   useEffect(() => {
     const filteredSubset = indexFields.filter((field) => {
-      if (!field.displayName.includes(fieldFilterState.name)) {
+      if (!field.displayName.includes(fieldSearchValue)) {
         return false;
       }
-
-      // Other conditions
 
       return true;
     });
 
     setFilteredFields(filteredSubset);
     return;
-  }, [indexFields, fieldFilterState]);
+  }, [indexFields, fieldSearchValue]);
 
   const fields = filteredFields?.reduce<IFieldCategories>(
     (fieldGroups, currentField) => {
@@ -67,35 +64,15 @@ export const FieldSelector = ({ indexFields }: FieldSelectorDeps) => {
     }
   );
 
-  const onChangeFieldSearch = useCallback(
-    (field: string, value: string | boolean | undefined) => {
-      const newState = setFieldFilterProp(fieldFilterState, field, value);
-      setFieldFilterState(newState);
-    },
-    [fieldFilterState]
-  );
-
-  const fieldTypes = useMemo(() => {
-    const result = ['any'];
-    if (Array.isArray(fields)) {
-      for (const field of fields) {
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
-        }
-      }
-    }
-    return result;
-  }, [fields]);
+  const onChangeFieldSearch = useCallback((field: string) => {
+    setFieldSearchValue(field);
+  }, []);
 
   return (
     <div className="wizFieldSelector">
       <div>
         <form>
-          <WizardFieldSearc
-            onChange={onChangeFieldSearch}
-            value={fieldFilterState.name}
-            types={fieldTypes}
-          />
+          <WizardFieldSearch onChange={onChangeFieldSearch} value={fieldSearchValue} />
         </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">

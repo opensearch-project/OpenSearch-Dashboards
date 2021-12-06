@@ -8,18 +8,3 @@
 .wizFieldSelector__fieldGroups {
   overflow-y: auto;
 }
-
-.wizFieldSearch__toggleButton {
-  width: calc(100% - #{$euiSizeS});
-  color: $euiColorPrimary;
-  padding-left: $euiSizeXS;
-  margin-left: $euiSizeXS;
-}
-
-.wizFieldSearch__filterWrapper {
-  flex-grow: 0;
-}
-
-.wizFieldSearch__formWrapper {
-  padding: $euiSizeM;
-}
