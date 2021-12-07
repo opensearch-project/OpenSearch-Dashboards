@@ -49,7 +49,7 @@ export interface Props {
  * Component is Wizard's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function WizardFieldSearch({ onChange, value }: Props) {
+export function FieldSearch({ onChange, value }: Props) {
   const searchPlaceholder = i18n.translate('wizard.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });

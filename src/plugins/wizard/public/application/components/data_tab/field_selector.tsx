@@ -5,7 +5,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
-import { WizardFieldSearch } from './wizard_field_search';
+import { FieldSearch } from './field_search';
 
 import {
   IndexPatternField,
@@ -36,13 +36,9 @@ export const FieldSelector = () => {
   const [fieldSearchValue, setFieldSearchValue] = useState('');
 
   useEffect(() => {
-    const filteredSubset = indexFields.filter((field) => {
-      if (!field.displayName.includes(fieldSearchValue)) {
-        return false;
-      }
-
-      return true;
-    });
+    const filteredSubset = indexFields.filter((field) =>
+      field.displayName.includes(fieldSearchValue)
+    );
 
     setFilteredFields(filteredSubset);
     return;
@@ -70,7 +66,7 @@ export const FieldSelector = () => {
     <div className="wizFieldSelector">
       <div>
         <form>
-          <WizardFieldSearch onChange={onChangeFieldSearch} value={fieldSearchValue} />
+          <FieldSearch onChange={onChangeFieldSearch} value={fieldSearchValue} />
         </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">
