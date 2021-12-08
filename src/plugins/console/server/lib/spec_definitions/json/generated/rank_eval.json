@@ -23,6 +23,6 @@
       "_rank_eval",
       "{indices}/_rank_eval"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/search-rank-eval.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-rank-eval.html"
   }
 }

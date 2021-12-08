@@ -32,7 +32,7 @@ import * as helper from './graphite_helper';
 
 describe('graphite_helper', function () {
   it('valid Url should not be blocked and isBlockedURL should return false', function () {
-    expect(helper.isBlockedURL('https://www.opensearch.org', ['127.0.0.0/8'])).toEqual(false);
+    expect(helper.isBlockedURL('https://opensearch.org', ['127.0.0.0/8'])).toEqual(false);
   });
 
   it('blocked Url should be blocked and isBlockedURL should return true', function () {
@@ -45,7 +45,7 @@ describe('graphite_helper', function () {
 
   it('blocklist should be checked if blocklist is enabled', function () {
     jest.spyOn(helper, 'isBlockedURL').mockReturnValueOnce(false);
-    helper.isValidConfig(['127.0.0.0/8'], [], 'https://www.opensearch.org');
+    helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org');
     expect(helper.isBlockedURL).toBeCalled();
   });
 
@@ -54,7 +54,7 @@ describe('graphite_helper', function () {
     helper.isValidConfig(
       ['127.0.0.0/8'],
       ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
-      'https://www.opensearch.org'
+      'https://opensearch.org'
     );
     expect(helper.isBlockedURL).toBeCalled();
   });
@@ -64,7 +64,7 @@ describe('graphite_helper', function () {
       helper.isValidConfig(
         [],
         ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
-        'https://www.opensearch.org'
+        'https://opensearch.org'
       )
     ).toEqual(false);
   });
@@ -84,7 +84,7 @@ describe('graphite_helper', function () {
   });
 
   it('with only blocklist, isValidConfig should return true for Url not in the blocklist', function () {
-    expect(helper.isValidConfig(['127.0.0.0/8'], [], 'https://www.opensearch.org')).toEqual(true);
+    expect(helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org')).toEqual(true);
   });
 
   it('with both blocklist and allowlist, isValidConfig should return false if allowlist check fails', function () {
@@ -92,7 +92,7 @@ describe('graphite_helper', function () {
       helper.isValidConfig(
         ['127.0.0.0/8'],
         ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
-        'https://www.opensearch.org'
+        'https://opensearch.org'
       )
     ).toEqual(false);
   });

@@ -91,7 +91,7 @@ export class SearchTimeoutError extends OsdError {
   private onClick(application: ApplicationStart) {
     switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
-        application.navigateToUrl('https://www.opensearch.org/subscriptions');
+        application.navigateToUrl('https://opensearch.org/subscriptions');
         break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {

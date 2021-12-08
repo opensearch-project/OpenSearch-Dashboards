@@ -45,7 +45,6 @@ export async function ensureMinimumTime(
 ) {
   let returnValue;
 
-  // https://kibana-ci.opensearch.org/job/elastic+kibana+6.x+multijob-intake/128/console
   // We're having periodic failures around the timing here. I'm not exactly sure
   // why it's not consistent but I'm going to add some buffer space here to
   // prevent these random failures

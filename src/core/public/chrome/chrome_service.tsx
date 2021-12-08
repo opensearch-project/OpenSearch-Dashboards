@@ -215,7 +215,11 @@ export class ChromeService {
             defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
             values={{
               link: (
-                <EuiLink target="_blank" href="https://www.opensearch.org/support/matrix" external>
+                <EuiLink
+                  target="_blank"
+                  href={docLinks.links.opensearchDashboards.browser}
+                  external
+                >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
                     defaultMessage="the support matrix on our website"

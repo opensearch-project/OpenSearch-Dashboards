@@ -65,7 +65,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.org/downloads/beats/heartbeat' },
+        values: { link: 'https://opensearch.org/docs/latest/downloads/beats/heartbeat' },
       }),
     },
     RPM: {
@@ -82,7 +82,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.org/downloads/beats/heartbeat' },
+        values: { link: 'https://opensearch.org/docs/latest/downloads/beats/heartbeat' },
       }),
     },
     WINDOWS: {
@@ -105,7 +105,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             heartbeatLink:
               '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
-            opensearchLink: 'https://www.opensearch.org/downloads/beats/heartbeat',
+            opensearchLink: 'https://opensearch.org/docs/latest/downloads/beats/heartbeat',
           },
         }
       ),

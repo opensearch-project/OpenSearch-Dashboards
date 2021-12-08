@@ -52,6 +52,6 @@
       "_cat/indices",
       "_cat/indices/{indices}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-indices.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-indices/"
   }
 }

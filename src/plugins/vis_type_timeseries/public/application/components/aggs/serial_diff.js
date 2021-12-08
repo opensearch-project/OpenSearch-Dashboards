@@ -47,6 +47,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
 export const SerialDiffAgg = (props) => {
   const { siblings } = props;
@@ -58,6 +59,7 @@ export const SerialDiffAgg = (props) => {
   const handleNumberChange = createNumberHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
+  const docLinks = useOpenSearchDashboards().services.docLinks;
 
   return (
     <AggRow
@@ -110,9 +112,9 @@ export const SerialDiffAgg = (props) => {
               <FormattedMessage
                 id="visTypeTimeseries.serialDiff.lagLabel"
                 defaultMessage="Lag"
-                description="'Lag' refers to the parameter name of the serial diff translation
-                https://www.opensearch.org/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
-                This should only be translated if there is a reasaonable word explaining what that parameter does."
+                description={`'Lag' refers to the parameter name of the serial diff translation
+                ${docLinks.services.links.opensearch.aggregations.pipeline.serial_diff}.
+                This should only be translated if there is a reasaonable word explaining what that parameter does.`}
               />
             }
           >

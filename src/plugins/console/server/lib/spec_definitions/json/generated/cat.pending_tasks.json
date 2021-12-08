@@ -24,6 +24,6 @@
     "patterns": [
       "_cat/pending_tasks"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-pending-tasks.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-pending-tasks/"
   }
 }

@@ -53,6 +53,6 @@ Follow the steps below to add new Sample data sets to OpenSearch Dashboards.
 
 1. Create new-line delimited json containing sample data.
 2. Create file with OpenSearch field mappings for sample data indices.
-3. Create OpenSearch Dashboards saved objects for sample data including index-patterns, visualizations, and dashboards. The best way to extract the saved objects is from the OpenSearch Dashboards management -> saved objects [export UI](https://www.opensearch.org/guide/en/kibana/current/managing-saved-objects.html#_export)
+3. Create OpenSearch Dashboards saved objects for sample data including index-patterns, visualizations, and dashboards. The best way to extract the saved objects is from the OpenSearch Dashboards Stack Management -> saved objects.
 4. Define sample data spec conforming to [Data Set Schema](/src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts).
 5. Register sample data by calling `plguins.home.sampleData.registerSampleDataset(yourSpecProvider)` in your `setup` method where `yourSpecProvider` is a function that returns an object containing your sample data spec from step 4.

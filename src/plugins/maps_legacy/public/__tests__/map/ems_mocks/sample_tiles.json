@@ -12,7 +12,7 @@
         { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
         {
           "label": { "en": "<iframe id='iframe' style='position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;' src='http://256.256.256.256'></iframe>" },
-          "url": { "en": "https://www.opensearch.org/opensearch-maps-service" }
+          "url": { "en": "https://opensearch.org/docs/latest/dashboards/maptiles/" }
         }
       ],
       "formats": [
@@ -40,7 +40,7 @@
         { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
         {
           "label": { "en": "OpenSearch Maps Service" },
-          "url": { "en": "https://www.opensearch.org/opensearch-maps-service" }
+          "url": { "en": "https://opensearch.org/docs/latest/dashboards/maptiles/" }
         }
       ],
       "formats": [
@@ -68,7 +68,7 @@
         { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
         {
           "label": { "en": "OpenSearch Maps Service" },
-          "url": { "en": "https://www.opensearch.org/opensearch-maps-service" }
+          "url": { "en": "https://opensearch.org/docs/latest/dashboards/maptiles/" }
         }
       ],
       "formats": [

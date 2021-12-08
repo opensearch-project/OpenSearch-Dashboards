@@ -45,7 +45,7 @@ export class DocLinksService {
       injectedMetadata.getOpenSearchDashboardsBranch() === 'main'
         ? 'latest'
         : injectedMetadata.getOpenSearchDashboardsBranch();
-    const OPENSEARCH_WEBSITE_URL = 'https://www.opensearch.org/';
+    const OPENSEARCH_WEBSITE_URL = 'https://opensearch.org/';
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
     const OPENSEARCH_DASHBOARDS_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`;
@@ -329,7 +329,17 @@ export class DocLinksService {
           // https://opensearch.org/docs/latest/opensearch/popular-api/
           popularAPI: `${OPENSEARCH_VERSIONED_DOCS}popular-api`,
           // https://opensearch.org/docs/latest/opensearch/rest-api/index/
-          restAPI: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index/`,
+          restAPI: {
+            base: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index/`,
+            indexAPI: {
+              base: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/index/`,
+              create: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/create-index/`,
+              exists: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/exists/`,
+              delete: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/delete-index/`,
+              get: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/get-index/`,
+              close: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/close-index/`,
+            },
+          },
         },
         opensearchDashboards: {
           // https://opensearch.org/docs/latest/dashboards/index/
@@ -378,14 +388,15 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/dashboards/dql/#nested-field-query
             nested_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#nested-field-query`,
           },
+          browser: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}browser-compatibility`,
         },
         noDocumentation: {
-          auditbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
-          filebeat: `${OPENSEARCH_WEBSITE_DOCS}`,
-          metricbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
-          heartbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
+          auditbeat: `https://opensearch.org/docs/latest/downloads/beats/auditbeat`,
+          filebeat: `https://opensearch.org/docs/latest/downloads/beats/filebeat`,
+          metricbeat: `https://opensearch.org/docs/latest/downloads/beats/metricbeat`,
+          heartbeat: `https://opensearch.org/docs/latest/downloads/beats/heartbeat`,
           logstash: `${OPENSEARCH_WEBSITE_DOCS}`,
-          functionbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
+          functionbeat: `https://opensearch.org/docs/latest/downloads/beats/functionbeat`,
           winlogbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
           siem: `${OPENSEARCH_WEBSITE_DOCS}`,
           indexPatterns: {
@@ -412,6 +423,122 @@ export class DocLinksService {
           addData: `${OPENSEARCH_WEBSITE_DOCS}`,
           vega: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}`,
           dateMath: `${OPENSEARCH_WEBSITE_DOCS}`,
+          savedObject: {
+            manageSavedObject: `https://opensearch.org/docs/latest/guide/en/kibana/current/managing-saved-objects.html#_export`,
+          },
+          clusterAPI: {
+            clusterRoute: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-reroute.html`,
+            clusterState: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-state.html`,
+            clusterStats: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-stats.html`,
+            clusterPending: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-pending.html`,
+          },
+          mappingTypes: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/current/mapping-types.html`,
+          moduleScripting: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/modules-scripting.html`,
+          indexAPI: {
+            indexAnalyze: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-analyze.html`,
+            indexClearCache: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-clearcache.html`,
+            indexClone: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-clone-index.html`,
+            indexSynced: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-synced-flush-api.html`,
+            indexFlush: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-flush.html`,
+            indexForceMerge: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-forcemerge.html`,
+            indexSetting: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-get-settings.html`,
+            indexUpgrade: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-upgrade.html`,
+            indexUpdateSetting: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-update-settings.html`,
+            indexRecovery: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-recovery.html`,
+            indexRefresh: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-refresh.html`,
+            indexRollover: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-rollover-index.html`,
+            indexSegment: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-segments.html`,
+            indexShardStore: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-shards-stores.html`,
+            indexShrink: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-shrink-index.html`,
+            indexSplit: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-split-index.html`,
+            indexStats: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-stats.html`,
+            indexGetFieldMapping: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html`,
+            indexGetMapping: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-get-mapping.html`,
+            indexOpenClose: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-open-close.html`,
+            indexPutMapping: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-put-mapping.html`,
+            indexSearchValidate: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-validate.html`,
+          },
+          ingest: {
+            deletePipeline: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/delete-pipeline-api.html`,
+            getPipeline: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/get-pipeline-api.html`,
+            putPipeline: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/put-pipeline-api.html`,
+            simulatePipeline: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/simulate-pipeline-api.html`,
+            grokProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/grok-processor.html`,
+            appendProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/append-processor.html`,
+            bytesProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/bytes-processor.html`,
+            ingestCircleProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/ingest-circle-processor.html`,
+            csvProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/csv-processor.html`,
+            convertProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/convert-processor.html`,
+            dataProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/date-processor.html`,
+            dataIndexNamProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/date-index-name-processor.html`,
+            dissectProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/dissect-processor.html`,
+            dotExpandProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/dot-expand-processor.html`,
+            dropProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/drop-processor.html`,
+            failProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/fail-processor.html`,
+            foreachProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/foreach-processor.html`,
+            geoIPProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/geoip-processor.html`,
+            gusbProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/gsub-processor.html`,
+            htmlstripProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/htmlstrip-processor.html`,
+            inferenceProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/inference-processor.html`,
+            joinProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/join-processor.html`,
+            jsonProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/json-processor.html`,
+            kvProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/kv-processor.html`,
+            lowecaseProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/lowercase-processor.html`,
+            pipelineProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/pipeline-processor.html`,
+            removeProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/remove-processor.html`,
+            renameProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/rename-processor.html`,
+            scriptProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/script-processor.html`,
+            setProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/set-processor.html`,
+            securityUserProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/ingest-node-set-security-user-processor.html`,
+            splitProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/split-processor.html`,
+            sortProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/sort-processor.html`,
+            trimProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/trim-processor.html`,
+            uppercaseProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/uppercase-processor.html`,
+            urldecodeProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/urldecode-processor.html`,
+            userAgentProcessor: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/user-agent-processor.html`,
+          },
+          nodes: {
+            info: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-info.html`,
+            hotThreads: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html`,
+            reloadSecuritySetting: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/secure-settings.html#reloadable-secure-settings`,
+            // Possible here but no details: https://opensearch.org/docs/latest/opensearch/popular-api/#get-node-statistics
+            nodeStats: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html`,
+            usage: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-usage.html`,
+          },
+          reIndex: {
+            // Missing  _rethrottle
+            rethrottle: `https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/reindex/`,
+          },
+          timelineDeprecation: `https://opensearch.org/docs/latest/guide/en/kibana/master/dashboard.html#timeline-deprecation`,
+          apmServer: `https://opensearch.org/downloads/apm/apm-server`,
+          tutorial: {
+            loadDataTutorial: `https://opensearch.org/guide/en/kibana/current/tutorial-load-dataset.html`,
+            visualizeTutorial: `https://opensearch.org/guide/en/kibana/current/tutorial-visualizing.html`,
+          },
+          scroll: {
+            clear_scroll: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-request-body.html#_clear_scroll_api`,
+          },
+          documentAPI: {
+            // missing `rethrottle` info
+            delete_by_query: `https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/delete-by-query/`,
+            multiTermVector: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html`,
+            termVector: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/docs-termvectors.html`,
+            update_by_query_rethrottle: `https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/update-by-query/`,
+          },
+          filed_caps: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-field-caps.html`,
+          painless_execute: `https://opensearch.org/docs/latest/guide/en/elasticsearch/painless/master/painless-execute-api.html`,
+          search: {
+            search: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-search.html`,
+            searchRankEval: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-rank-eval.html`,
+            searchShards: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-shards.html`,
+            searchFieldCap: `https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-field-caps.html`,
+          },
+          snapshot: {
+            deleteSnapshot: `https://opensearch.org/docs/latest/opensearch/snapshot-restore/`,
+            deleteRepository: `https://opensearch.org/docs/latest/opensearch/snapshot-restore/`,
+            cleanup: `https://opensearch.org/docs/latest/opensearch/snapshot-restore/`,
+            veirfyRepository: `https://opensearch.org/docs/latest/opensearch/snapshot-restore/`,
+          },
         },
       },
     });
@@ -577,7 +704,17 @@ export interface DocLinksStart {
       readonly supportedUnits: string;
       readonly commonParameters: string;
       readonly popularAPI: string;
-      readonly restAPI: string;
+      readonly restAPI: {
+        readonly base: string;
+        readonly indexAPI: {
+          readonly base: string;
+          readonly create: string;
+          readonly exists: string;
+          readonly delete: string;
+          readonly get: string;
+          readonly close: string;
+        };
+      };
     };
     readonly opensearchDashboards: {
       readonly introduction: string;
@@ -606,6 +743,7 @@ export interface DocLinksStart {
         readonly date_query: string;
         readonly nested_query: string;
       };
+      readonly browser: string;
     };
     readonly noDocumentation: {
       readonly auditbeat: string;
@@ -633,6 +771,110 @@ export interface DocLinksStart {
       readonly addData: string;
       readonly vega: string;
       readonly dateMath: string;
+      readonly savedObject: {
+        readonly manageSavedObject: string;
+      };
+      readonly clusterAPI: {
+        readonly clusterRoute: string;
+        readonly clusterState: string;
+        readonly clusterStats: string;
+        readonly clusterPending: string;
+      };
+      readonly mappingTypes: string;
+      readonly moduleScripting: string;
+      readonly ingest: {
+        readonly appendProcessor: string;
+        readonly bytesProcessor: string;
+        readonly ingestCircleProcessor: string;
+        readonly csvProcessor: string;
+        readonly convertProcessor: string;
+        readonly dataProcessor: string;
+        readonly dataIndexNamProcessor: string;
+        readonly dissectProcessor: string;
+        readonly dotExpandProcessor: string;
+        readonly dropProcessor: string;
+        readonly failProcessor: string;
+        readonly foreachProcessor: string;
+        readonly geoIPProcessor: string;
+        readonly grokProcessor: string;
+        readonly gusbProcessor: string;
+        readonly htmlstripProcessor: string;
+        readonly inferenceProcessor: string;
+        readonly joinProcessor: string;
+        readonly jsonProcessor: string;
+        readonly kvProcessor: string;
+        readonly lowecaseProcessor: string;
+        readonly pipelineProcessor: string;
+        readonly removeProcessor: string;
+        readonly renameProcessor: string;
+        readonly scriptProcessor: string;
+        readonly setProcessor: string;
+        readonly securityUserProcessor: string;
+        readonly splitProcessor: string;
+        readonly sortProcessor: string;
+        readonly trimProcessor: string;
+        readonly uppercaseProcessor: string;
+        readonly urldecodeProcessor: string;
+        readonly userAgentProcessor: string;
+      };
+      readonly indexAPI: {
+        readonly indexAnalyze: string;
+        readonly indexClearCache: string;
+        readonly indexClone: string;
+        readonly indexSynced: string;
+        readonly indexFlush: string;
+        readonly indexForceMerge: string;
+        readonly indexSetting: string;
+        readonly indexUpgrade: string;
+        readonly indexUpdateSetting: string;
+        readonly indexRecovery: string;
+        readonly indexRefresh: string;
+        readonly indexRollover: string;
+        readonly indexSegment: string;
+        readonly indexShardStore: string;
+        readonly indexShrink: string;
+        readonly indexSplit: string;
+        readonly indexStats: string;
+      };
+      readonly nodes: {
+        readonly info: string;
+        readonly hotThreads: string;
+        readonly reloadSecuritySetting: string;
+        readonly nodeStats: string;
+        readonly usage: string;
+      };
+      readonly reIndex: {
+        readonly rethrottle: string;
+      };
+      readonly timelineDeprecation: string;
+      readonly apmServer: string;
+      readonly tutorial: {
+        readonly loadDataTutorial: string;
+        readonly visualizeTutorial: string;
+      };
+      readonly scroll: {
+        readonly clear_scroll: string;
+      };
+      readonly documentAPI: {
+        readonly delete_by_query: string;
+        readonly multiTermVector: string;
+        readonly termVector: string;
+        readonly update_by_query_rethrottle: string;
+      };
+      readonly filed_caps: string;
+      readonly painless_execute: string;
+      readonly search: {
+        readonly search: string;
+        readonly searchRankEval: string;
+        readonly searchShards: string;
+        readonly searchFieldCap: string;
+      };
+      readonly snapshot: {
+        readonly deleteSnapshot: string;
+        readonly deleteRepository: string;
+        readonly cleanup: string;
+        readonly veirfyRepository: string;
+      };
     };
   };
 }

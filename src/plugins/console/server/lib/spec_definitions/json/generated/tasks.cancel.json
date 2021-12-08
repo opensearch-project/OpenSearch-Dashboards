@@ -12,6 +12,6 @@
       "_tasks/_cancel",
       "_tasks/{task_id}/_cancel"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/tasks.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/tasks/#task-canceling"
   }
 }

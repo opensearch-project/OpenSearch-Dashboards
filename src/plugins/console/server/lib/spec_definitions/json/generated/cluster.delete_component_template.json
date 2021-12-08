@@ -10,6 +10,6 @@
     "patterns": [
       "_component_template/{name}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-component-templates.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates"
   }
 }
