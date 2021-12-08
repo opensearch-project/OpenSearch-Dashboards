@@ -24,6 +24,6 @@
     "patterns": [
       "{indices}/_create/{id}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/index-document/"
   }
 }

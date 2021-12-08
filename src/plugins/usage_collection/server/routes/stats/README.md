@@ -1,6 +1,6 @@
 # `/api/stats`
 
-This API returns the metrics for the OpenSearch Dashboards server and usage stats. It allows the [Metricbeat OpenSearch Dashboards module](https://www.opensearch.org/guide/en/beats/metricbeat/current/metricbeat-module-kibana.html) to collect the [stats metricset](https://www.opensearch.org/guide/en/beats/metricbeat/current/metricbeat-metricset-kibana-stats.html).
+This API returns the metrics for the OpenSearch Dashboards server and usage stats. It allows the [Metricbeat OpenSearch Dashboards module](https://opensearch.org/docs/latest/clients/agents-and-ingestion-tools/index/) to collect the stats metricset.
 
 By default, it returns the simplest level of stats; consisting of the OpenSearch Dashboards server's ops metrics, version, status, and basic config like the server name, host, port, and locale.
 
@@ -14,7 +14,7 @@ However, the information detailed above can be extended, with the combination of
 
 ## Known use cases
 
-Metricbeat OpenSearch Dashboards's stats metricset ([code](https://github.com/elastic/beats/blob/master/metricbeat/module/kibana/stats/stats.go)) uses this API to collect the metrics (every 10s) and usage (only once every 24h), and then reports them to the Monitoring cluster. They call this API in 2 ways:
+Metricbeat OpenSearch Dashboards's stats metricset uses this API to collect the metrics (every 10s) and usage (only once every 24h), and then reports them to the Monitoring cluster. They call this API in 2 ways:
 
 1. Metrics-only collection (every 10 seconds): `GET /api/stats?extended=true&legacy=true&exclude_usage=true`
 2. Metrics+usage (every 24 hours): `GET /api/stats?extended=true&legacy=true&exclude_usage=false`

@@ -137,7 +137,7 @@ directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install \
 PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
         values: {
-          downloadPageLink: 'https://www.opensearch.org/downloads/apm/apm-server',
+          downloadPageLink: 'https://opensearch.org/downloads/apm/apm-server',
           zipFileExtractFolder: '`C:\\Program Files`',
           apmServerDirectory: '`apm-server-{config.opensearchDashboards.version}-windows`',
         },

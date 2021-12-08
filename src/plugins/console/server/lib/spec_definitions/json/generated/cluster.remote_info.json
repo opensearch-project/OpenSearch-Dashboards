@@ -6,6 +6,6 @@
     "patterns": [
       "_remote/info"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cluster-remote-info.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/remote-info/"
   }
 }

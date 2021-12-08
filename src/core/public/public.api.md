@@ -609,7 +609,17 @@ export interface DocLinksStart {
             readonly supportedUnits: string;
             readonly commonParameters: string;
             readonly popularAPI: string;
-            readonly restAPI: string;
+            readonly restAPI: {
+                readonly base: string;
+                readonly indexAPI: {
+                    readonly base: string,
+                    readonly create: string,
+                    readonly exists: string,
+                    readonly delete: string,
+                    readonly get: string,
+                    readonly close: string,
+                },
+            };
         };
         readonly opensearchDashboards: {
             readonly introduction: string;
@@ -638,6 +648,7 @@ export interface DocLinksStart {
                 readonly date_query: string;
                 readonly nested_query: string;
             };
+            readonly browser: string;
         };
         readonly noDocumentation: {
             readonly auditbeat: string;
@@ -665,6 +676,110 @@ export interface DocLinksStart {
             readonly addData: string;
             readonly vega: string;
             readonly dateMath: string;
+            readonly savedObject: {
+                readonly manageSavedObject: string;
+            };
+            readonly clusterAPI: {
+                readonly clusterRoute: string;
+                readonly clusterState: string;
+                readonly clusterStats: string;
+                readonly clusterPending: string;
+            };
+            readonly mappingTypes: string;
+            readonly moduleScripting: string;
+            readonly ingest: {
+                readonly appendProcessor: string;
+                readonly bytesProcessor: string;
+                readonly ingestCircleProcessor: string;
+                readonly csvProcessor: string;
+                readonly convertProcessor: string;
+                readonly dataProcessor: string;
+                readonly dataIndexNamProcessor: string;
+                readonly dissectProcessor: string;
+                readonly dotExpandProcessor: string;
+                readonly dropProcessor: string;
+                readonly failProcessor: string;
+                readonly foreachProcessor: string;
+                readonly geoIPProcessor: string;
+                readonly grokProcessor: string;
+                readonly gusbProcessor: string;
+                readonly htmlstripProcessor: string;
+                readonly inferenceProcessor: string;
+                readonly joinProcessor: string;
+                readonly jsonProcessor: string;
+                readonly kvProcessor: string;
+                readonly lowecaseProcessor: string;
+                readonly pipelineProcessor: string;
+                readonly removeProcessor: string;
+                readonly renameProcessor: string;
+                readonly scriptProcessor: string;
+                readonly setProcessor: string;
+                readonly securityUserProcessor: string;
+                readonly splitProcessor: string;
+                readonly sortProcessor: string;
+                readonly trimProcessor: string;
+                readonly uppercaseProcessor: string;
+                readonly urldecodeProcessor: string;
+                readonly userAgentProcessor: string;
+            };
+            readonly indexAPI : {
+                readonly indexAnalyze: string;
+                readonly indexClearCache: string;
+                readonly indexClone: string;
+                readonly indexSynced: string;
+                readonly indexFlush: string;
+                readonly indexForceMerge: string;
+                readonly indexSetting: string;
+                readonly indexUpgrade: string;
+                readonly indexUpdateSetting: string;
+                readonly indexRecovery: string;
+                readonly indexRefresh: string;
+                readonly indexRollover: string;
+                readonly indexSegment: string;
+                readonly indexShardStore: string;
+                readonly indexShrink: string;
+                readonly indexSplit: string;
+                readonly indexStats: string;
+            };
+            readonly nodes: {
+                readonly info: string;
+                readonly hotThreads: string;
+                readonly reloadSecuritySetting: string;
+                readonly nodeStats: string;
+                readonly usage: string;
+            };
+            readonly reIndex: {
+                readonly rethrottle: string;
+            };
+            readonly timelineDeprecation: string;
+            readonly apmServer: string;
+            readonly tutorial: {
+                readonly loadDataTutorial: string;
+                readonly visualizeTutorial: string;
+            };
+            readonly scroll: {
+                readonly clear_scroll: string;
+            };
+            readonly documentAPI: {
+                readonly delete_by_query: string;
+                readonly multiTermVector: string;
+                readonly termVector: string;
+                readonly update_by_query_rethrottle: string;
+            };
+            readonly filed_caps: string;
+            readonly painless_execute: string;
+            readonly search: {
+                readonly search : string;
+                readonly searchRankEval: string;
+                readonly searchShards: string;
+                readonly searchFieldCap: string;
+            };
+            readonly snapshot: {          
+                readonly deleteSnapshot: string;
+                readonly deleteRepository: string;
+                readonly cleanup: string;
+                readonly veirfyRepository: string; 
+            };
         };
     };
 }

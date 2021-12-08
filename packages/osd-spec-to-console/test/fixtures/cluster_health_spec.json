@@ -1,7 +1,7 @@
 {
   "cluster.health":{
     "documentation":{
-      "url":"https://www.opensearch.org/guide/en/elasticsearch/reference/master/cluster-health.html",
+      "url":"https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/",
       "description":"Returns basic information about the health of the cluster."
     },
     "stability":"stable",

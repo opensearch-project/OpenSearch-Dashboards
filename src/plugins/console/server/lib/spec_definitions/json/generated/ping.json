@@ -6,6 +6,6 @@
     "patterns": [
       ""
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/current/index.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/index/"
   }
 }

@@ -16,6 +16,6 @@
       "_cat/templates",
       "_cat/templates/{name}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-templates.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-templates/"
   }
 }

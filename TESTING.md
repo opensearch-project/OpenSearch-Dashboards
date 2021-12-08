@@ -50,6 +50,12 @@ Say that you would want to debug a test in CI group 1, you can run the following
 
 This will print of an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
 
+### Additional checks
+Make sure you run lint checker before submitting a pull request. To run lint checker:
+`node scripts/precommit_hook.js --fix`
+
+Please ensure that you don't introduce any broken links accidently. For any intentional broken link (e.g. dummy url in unit test), you can add it to [lycheeexclude](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.lycheeexclude) allow list specifically. 
+
 # Continuous Integration
 Automated testing is provided with Jenkins for Continuous Integration. Jenkins enables developers to build, deploy, and automate projects and provides us to run groups of tests quickly. CI groups are ran from the [Jenkinsfile](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/Jenkinsfile). 
 

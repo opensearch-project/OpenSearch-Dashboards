@@ -11,6 +11,6 @@
       "_snapshot",
       "_snapshot/{repository}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/snapshot-restore/#take-snapshots"
   }
 }

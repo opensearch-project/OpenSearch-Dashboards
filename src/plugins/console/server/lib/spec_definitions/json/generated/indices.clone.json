@@ -12,6 +12,6 @@
     "patterns": [
       "{indices}/_clone/{target}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-clone-index.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-clone-index.html"
   }
 }

@@ -78,7 +78,7 @@ export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
   linkType: 'discuss';
   /**
    * URL to discuss page.
-   * i.e. `https://discuss.opensearch.org/c/${appName}`
+   * i.e. https://discuss.opendistrocommunity.dev/
    */
   href: string;
 };

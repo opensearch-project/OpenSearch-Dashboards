@@ -69,7 +69,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.org/downloads/beats/metricbeat' },
+        values: { link: 'https://opensearch.org/docs/latest/downloads/beats/metricbeat' },
       }),
     },
     RPM: {
@@ -88,7 +88,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.opensearch.org/downloads/beats/metricbeat' },
+        values: { link: 'https://opensearch.org/docs/latest/downloads/beats/metricbeat' },
       }),
     },
     WINDOWS: {
@@ -111,7 +111,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             metricbeatLink:
               '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-            opensearchLink: 'https://www.opensearch.org/downloads/beats/metricbeat',
+            opensearchLink: 'https://opensearch.org/docs/latest/downloads/beats/metricbeat',
           },
         }
       ),
