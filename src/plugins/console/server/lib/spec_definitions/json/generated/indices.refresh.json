@@ -19,6 +19,6 @@
       "_refresh",
       "{indices}/_refresh"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-refresh.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-refresh.html"
   }
 }

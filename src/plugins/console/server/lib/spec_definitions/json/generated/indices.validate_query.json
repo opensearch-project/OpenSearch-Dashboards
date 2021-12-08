@@ -31,6 +31,6 @@
       "_validate/query",
       "{indices}/_validate/query"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/search-validate.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/search-validate.html"
   }
 }

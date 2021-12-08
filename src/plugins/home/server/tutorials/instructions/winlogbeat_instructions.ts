@@ -57,7 +57,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
             folderPath: '`C:\\Program Files`',
             winlogbeatLink:
               '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
-            opensearchLink: 'https://www.opensearch.org/downloads/beats/winlogbeat',
+            opensearchLink: 'https://opensearch.org/downloads/beats/winlogbeat',
           },
         }
       ),

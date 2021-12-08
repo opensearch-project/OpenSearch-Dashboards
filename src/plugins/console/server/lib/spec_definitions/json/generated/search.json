@@ -69,6 +69,6 @@
       "{indices}/_search",
       "{indices}/{type}/_search"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/search-search.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/ux/"
   }
 }

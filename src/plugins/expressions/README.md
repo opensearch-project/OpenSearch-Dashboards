@@ -32,4 +32,4 @@ filters
 
 ![image](https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png)
 
-[See Canvas documentation about expressions](https://www.opensearch.org/guide/en/kibana/current/canvas-function-arguments.html).
+[See Canvas documentation about expressions](https://opensearch.org/docs/latest/dashboards/index/).

@@ -11,6 +11,6 @@
       "_recovery",
       "{indices}/_recovery"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-recovery.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-recovery.html"
   }
 }

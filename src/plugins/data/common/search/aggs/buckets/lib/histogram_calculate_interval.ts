@@ -100,8 +100,8 @@ const calculateAutoInterval = (
   const exactInterval = diff / maxBars;
 
   // For integer fields that are less than maxBars, we should use 1 as the value of interval
-  // Elastic has 4 integer data types: long, integer, short, byte
-  // see: https://www.opensearch.org/guide/en/elasticsearch/reference/current/number.html
+  // OpenSearch has 5 integer data types: long, integer, byte, double and float
+  // see: https://opensearch.org/docs/latest/search-plugins/sql/datatypes/#data-types
   if (
     diff < maxBars &&
     esTypes.every((opensearchType) =>

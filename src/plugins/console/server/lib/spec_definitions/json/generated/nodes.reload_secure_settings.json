@@ -10,6 +10,6 @@
       "_nodes/reload_secure_settings",
       "_nodes/{nodes}/reload_secure_settings"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/secure-settings.html#reloadable-secure-settings"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/secure-settings.html#reloadable-secure-settings"
   }
 }

@@ -70,7 +70,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.opensearch.org/downloads/beats/filebeat',
+          linkUrl: 'https://opensearch.org/docs/latest/downloads/beats/filebeat',
         },
       }),
     },
@@ -91,7 +91,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.opensearch.org/downloads/beats/filebeat',
+          linkUrl: 'https://opensearch.org/docs/latest/downloads/beats/filebeat',
         },
       }),
     },
@@ -111,7 +111,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         values: {
           folderPath: '`C:\\Program Files`',
           guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
-          filebeatLinkUrl: 'https://www.opensearch.org/downloads/beats/filebeat',
+          filebeatLinkUrl: 'https://opensearch.org/docs/latest/downloads/beats/filebeat',
           directoryName: 'filebeat-{config.opensearchDashboards.version}-windows',
         },
       }),

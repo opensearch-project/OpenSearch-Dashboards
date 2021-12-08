@@ -19,6 +19,6 @@
       "_nodes/hot_threads",
       "_nodes/{nodes}/hot_threads"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
   }
 }

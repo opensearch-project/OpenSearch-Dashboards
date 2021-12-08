@@ -27,6 +27,6 @@
       "_cat/segments",
       "_cat/segments/{indices}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/cat-segments.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-segments/"
   }
 }

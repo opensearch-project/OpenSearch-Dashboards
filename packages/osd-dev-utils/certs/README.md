@@ -28,7 +28,7 @@ The password used for both of these is "storepass". Other copies are also provid
 
 ## Certificate generation
 
-[OpenSearch cert-util](https://www.opensearch.org/guide/en/elasticsearch/reference/current/certutil.html) and [OpenSSL](https://www.openssl.org/) were used to generate these certificates. The following commands were used from the root directory of OpenSearch:
+[OpenSearch Self-signed Certificates](https://opensearch.org/docs/latest/security-plugin/configuration/generate-certificates/) and [OpenSSL](https://www.openssl.org/) were used to generate these certificates. The following commands were used from the root directory of OpenSearch:
 
 ```
 # Generate the PKCS #12 keystore for a CA, valid for 50 years

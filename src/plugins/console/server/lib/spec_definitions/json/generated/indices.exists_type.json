@@ -18,6 +18,6 @@
     "patterns": [
       "{indices}/_mapping/{type}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-types-exists.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/exists/"
   }
 }

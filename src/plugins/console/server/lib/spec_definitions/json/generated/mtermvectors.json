@@ -28,6 +28,6 @@
       "{indices}/_mtermvectors",
       "{indices}/{type}/_mtermvectors"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
   }
 }
