@@ -60,6 +60,7 @@ export class VegaMapView extends VegaBaseView {
       baseMapOpts = {
         ...baseMapOpts,
         ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
+        showRegionBlockedWarning: this._serviceSettings._mapConfig.showRegionBlockedWarning,
       };
       if (!baseMapOpts) {
         this.onWarn(
