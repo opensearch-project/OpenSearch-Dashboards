@@ -161,3 +161,7 @@
     # darkModeUrl: ""
   # faviconUrl: ""
   # applicationTitle: ""
+
+# Set the value of this setting to true to capture region blocked warnings and errors 
+# for your map rendering services.
+# map.showRegionBlockedWarning: false
