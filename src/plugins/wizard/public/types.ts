@@ -7,11 +7,13 @@ import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart } from 'opensearch-dashboards/public';
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
 
 export interface WizardPluginSetupDependencies {
   embeddable: EmbeddableSetup;
+  visualizations: VisualizationsSetup;
 }
 export interface WizardPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
