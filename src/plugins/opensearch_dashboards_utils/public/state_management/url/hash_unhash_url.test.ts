@@ -82,6 +82,36 @@ describe('hash unhash url', () => {
         expect(hashUrl(url)).toBe(url);
       });
 
+      it('if just a path with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana';
+        expect(hashUrl(url)).toBe(url);
+      });
+
+      it('if just a path and query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana?foo=bar';
+        expect(hashUrl(url)).toBe(url);
+      });
+
+      it('if empty hash with query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana?foo=bar#';
+        expect(hashUrl(url)).toBe(url);
+      });
+
+      it('if query parameter matches and there is no hash with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana?testParam=(yes:!t)';
+        expect(hashUrl(url)).toBe(url);
+      });
+
+      it(`if query parameter matches and it's before the hash with legacy app`, () => {
+        const url = 'https://localhost:5601/app/kibana?testParam=(yes:!t)';
+        expect(hashUrl(url)).toBe(url);
+      });
+
+      it('if empty hash without query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana#';
+        expect(hashUrl(url)).toBe(url);
+      });
+
       it('if hash is just a path', () => {
         const url = 'https://localhost:5601/app/discover#/';
         expect(hashUrl(url)).toBe(url);
@@ -186,6 +216,26 @@ describe('hash unhash url', () => {
 
       it('if empty hash without query', () => {
         const url = 'https://localhost:5601/app/opensearch-dashboards#';
+        expect(unhashUrl(url)).toBe(url);
+      });
+
+      it('if just a path with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana';
+        expect(unhashUrl(url)).toBe(url);
+      });
+
+      it('if just a path and query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana?foo=bar';
+        expect(unhashUrl(url)).toBe(url);
+      });
+
+      it('if empty hash with query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana?foo=bar#';
+        expect(unhashUrl(url)).toBe(url);
+      });
+
+      it('if empty hash without query with legacy app', () => {
+        const url = 'https://localhost:5601/app/kibana#';
         expect(unhashUrl(url)).toBe(url);
       });
 
