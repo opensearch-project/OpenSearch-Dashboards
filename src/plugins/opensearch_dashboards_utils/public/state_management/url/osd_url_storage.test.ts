@@ -49,6 +49,7 @@ import { ScopedHistory } from '../../../../../core/public';
 describe('osd_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {
     const url = 'http://localhost:5601/oxf/app/opensearch-dashboards#/yourApp';
+    const legacyUrl = 'http://localhost:5601/oxf/app/kibana#/yourApp';
     const state1 = {
       testStr: '123',
       testNumber: 0,
@@ -110,6 +111,59 @@ describe('osd_url_storage', () => {
       );
       expect(newUrl).toMatchInlineSnapshot(
         `"http://localhost:5601/oxf/app/opensearch-dashboards/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')"`
+      );
+    });
+
+    it('should set expanded state to url for legacy app', () => {
+      let newUrl = setStateToOsdUrl('_s', state1, { useHash: false }, legacyUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')"`
+      );
+      const retrievedState1 = getStateFromOsdUrl('_s', newUrl);
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToOsdUrl('_s', state2, { useHash: false }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=(test:'123')"`
+      );
+      const retrievedState2 = getStateFromOsdUrl('_s', newUrl);
+      expect(retrievedState2).toEqual(state2);
+    });
+
+    it('should set hashed state to url for legacy app', () => {
+      let newUrl = setStateToOsdUrl('_s', state1, { useHash: true }, legacyUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@a897fac"`
+      );
+      const retrievedState1 = getStateFromOsdUrl('_s', newUrl);
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToOsdUrl('_s', state2, { useHash: true }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@40f94d5"`
+      );
+      const retrievedState2 = getStateFromOsdUrl('_s', newUrl);
+      expect(retrievedState2).toEqual(state2);
+    });
+
+    it('should set query to url for legacy app with storeInHashQuery: false', () => {
+      let newUrl = setStateToOsdUrl(
+        '_a',
+        { tab: 'other' },
+        { useHash: false, storeInHashQuery: false },
+        'http://localhost:5601/oxf/app/kibana/yourApp'
+      );
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana/yourApp?_a=(tab:other)"`
+      );
+      newUrl = setStateToOsdUrl(
+        '_b',
+        { f: 'test', i: '', l: '' },
+        { useHash: false, storeInHashQuery: false },
+        newUrl
+      );
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')"`
       );
     });
   });
@@ -329,6 +383,93 @@ describe('osd_url_storage', () => {
       const history = createHashHistory({ basename: 'management' });
       const url =
         "/oxf/app/opensearch-dashboards#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+    });
+  });
+
+  describe('urlControls - scoped history integration - legacy app', () => {
+    let history: History;
+    let urlControls: IOsdUrlControls;
+    beforeEach(() => {
+      const parentHistory = createBrowserHistory();
+      parentHistory.replace('/app/kibana/');
+      history = new ScopedHistory(parentHistory, '/app/kibana/');
+      urlControls = createOsdUrlControls(history);
+    });
+
+    const getCurrentUrl = () => history.createHref(history.location);
+
+    it('should flush async url updates', async () => {
+      const pr1 = urlControls.updateAsync(() => '/app/kibana/1', false);
+      const pr2 = urlControls.updateAsync(() => '/app/kibana/2', false);
+      const pr3 = urlControls.updateAsync(() => '/app/kibana/3', false);
+      expect(getCurrentUrl()).toBe('/app/kibana/');
+      expect(urlControls.flush()).toBe('/app/kibana/3');
+      expect(getCurrentUrl()).toBe('/app/kibana/3');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/app/kibana/3');
+    });
+
+    it('flush() should return undefined, if no url updates happened', () => {
+      expect(urlControls.flush()).toBeUndefined();
+      urlControls.updateAsync(() => '/app/kibana/1', false);
+      urlControls.updateAsync(() => '/app/kibana/', false);
+      expect(urlControls.flush()).toBeUndefined();
+    });
+  });
+
+  describe('getRelativeToHistoryPath - legacy app', () => {
+    it('should extract path relative to browser history without basename', () => {
+      const history = createBrowserHistory();
+      const url =
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual(
+        "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+      );
+    });
+
+    it('should extract path relative to browser history with basename', () => {
+      const url =
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const history1 = createBrowserHistory({ basename: '/oxf/app/' });
+      const relativePath1 = getRelativeToHistoryPath(url, history1);
+      expect(relativePath1).toEqual(
+        "/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+      );
+
+      const history2 = createBrowserHistory({ basename: '/oxf/app/kibana/' });
+      const relativePath2 = getRelativeToHistoryPath(url, history2);
+      expect(relativePath2).toEqual("#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+    });
+
+    it('should extract path relative to browser history with basename from relative url', () => {
+      const history = createBrowserHistory({ basename: '/oxf/app/' });
+      const url = "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual("/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+    });
+
+    it('should extract path relative to hash history without basename', () => {
+      const history = createHashHistory();
+      const url =
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+    });
+
+    it('should extract path relative to hash history with basename', () => {
+      const history = createHashHistory({ basename: 'management' });
+      const url =
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
+    });
+
+    it('should extract path relative to hash history with basename from relative url', () => {
+      const history = createHashHistory({ basename: 'management' });
+      const url = "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
       expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
