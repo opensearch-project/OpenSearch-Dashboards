@@ -39,6 +39,46 @@ export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, UrlForwardingStart>,
   forwards: ForwardDefinition[]
 ): App => ({
+  id: 'kibana',
+  chromeless: true,
+  title: 'Legacy URL migration',
+  appRoute: '/app/kibana#/',
+  navLinkStatus: AppNavLinkStatus.hidden,
+  async mount(params: AppMountParameters) {
+    const hash = params.history.location.hash.substr(1);
+
+    if (!hash) {
+      const [, , opensearchDashboardsLegacyStart] = await core.getStartServices();
+      opensearchDashboardsLegacyStart.navigateToDefaultApp();
+    }
+
+    const [
+      {
+        application,
+        http: { basePath },
+      },
+    ] = await core.getStartServices();
+
+    const result = await navigateToLegacyOpenSearchDashboardsUrl(
+      hash,
+      forwards,
+      basePath,
+      application
+    );
+
+    if (!result.navigated) {
+      const [, , opensearchDashboardsLegacyStart] = await core.getStartServices();
+      opensearchDashboardsLegacyStart.navigateToDefaultApp();
+    }
+
+    return () => {};
+  },
+});
+
+export const createLegacyUrlForwardCurrentApp = (
+  core: CoreSetup<{}, UrlForwardingStart>,
+  forwards: ForwardDefinition[]
+): App => ({
   id: 'opensearch-dashboards',
   chromeless: true,
   title: 'Legacy URL migration',
