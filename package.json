@@ -42,7 +42,7 @@
     "opensearch": "node scripts/opensearch",
     "test": "grunt test",
     "test:jest": "node scripts/jest",
-    "test:jest_integration": "node scripts/jest_integration",
+    "test:jest_integration": "node --no-deprecation scripts/jest_integration",
     "test:mocha": "node scripts/mocha",
     "test:mocha:coverage": "grunt test:mochaCoverage",
     "test:ftr": "node scripts/functional_tests",
