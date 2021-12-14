@@ -63,7 +63,11 @@ jobs:
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/setup-node@v2
         with:
+<<<<<<< HEAD
           node-version: "14.18.2"
+=======
+          node-version: "14.18.1"
+>>>>>>> Update node version in github workflow to 14
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -160,7 +164,11 @@ jobs:
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         uses: actions/setup-node@v2
         with:
+<<<<<<< HEAD
           node-version: "14.18.2"
+=======
+          node-version: "14.18.1"
+>>>>>>> Update node version in github workflow to 14
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
