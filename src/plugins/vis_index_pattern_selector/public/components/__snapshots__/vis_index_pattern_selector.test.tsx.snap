@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VisIndexPatternSelector fails without an exception on invalid props: "" 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <VisIndexPatternSelector
+    onChange={[MockFunction]}
+    selectedIndexPattern={null}
+  />
+</IntlProvider>
+`;
+
+exports[`VisIndexPatternSelector should display the selected index pattern 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <VisIndexPatternSelector
+    onChange={[MockFunction]}
+    selectedIndexPattern={
+      Object {
+        "id": "test1",
+        "title": "Test 1",
+      }
+    }
+  >
+    <div
+      className="visIndexPatternSelector__container"
+    >
+      <I18nProvider>
+        <IntlProvider
+          defaultLocale="en"
+          formats={
+            Object {
+              "date": Object {
+                "full": Object {
+                  "day": "numeric",
+                  "month": "long",
+                  "weekday": "long",
+                  "year": "numeric",
+                },
+                "long": Object {
+                  "day": "numeric",
+                  "month": "long",
+                  "year": "numeric",
+                },
+                "medium": Object {
+                  "day": "numeric",
+                  "month": "short",
+                  "year": "numeric",
+                },
+                "short": Object {
+                  "day": "numeric",
+                  "month": "numeric",
+                  "year": "2-digit",
+                },
+              },
+              "number": Object {
+                "currency": Object {
+                  "style": "currency",
+                },
+                "percent": Object {
+                  "style": "percent",
+                },
+              },
+              "relative": Object {
+                "days": Object {
+                  "units": "day",
+                },
+                "hours": Object {
+                  "units": "hour",
+                },
+                "minutes": Object {
+                  "units": "minute",
+                },
+                "months": Object {
+                  "units": "month",
+                },
+                "seconds": Object {
+                  "units": "second",
+                },
+                "years": Object {
+                  "units": "year",
+                },
+              },
+              "time": Object {
+                "full": Object {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "second": "numeric",
+                  "timeZoneName": "short",
+                },
+                "long": Object {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "second": "numeric",
+                  "timeZoneName": "short",
+                },
+                "medium": Object {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "second": "numeric",
+                },
+                "short": Object {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                },
+              },
+            }
+          }
+          locale="en"
+          messages={Object {}}
+          textComponent={Symbol(react.fragment)}
+        >
+          <PseudoLocaleWrapper>
+            <ChangeIndexPattern
+              indexPatternId="test1"
+              indexPatternItems={
+                Array [
+                  Object {
+                    "id": "test1",
+                    "title": "Test 1",
+                  },
+                  Object {
+                    "id": "test2",
+                    "title": "Test 2",
+                  },
+                  Object {
+                    "id": "test3",
+                    "title": "Test 3",
+                  },
+                ]
+              }
+              onChange={[Function]}
+              trigger={
+                Object {
+                  "className": "visIndexPatternSelector__triggerButton",
+                  "data-test-subj": "indexPatternSelector-switch-link",
+                  "label": "Test 1",
+                  "title": "Test 1",
+                }
+              }
+            >
+              <EuiPopover
+                anchorClassName="eui-textTruncate"
+                anchorPosition="downCenter"
+                button={
+                  <EuiButtonEmpty
+                    className="visIndexPatternSelector__triggerButton"
+                    color="text"
+                    data-test-subj="indexPatternSelector-switch-link"
+                    flush="left"
+                    iconSide="right"
+                    iconType="arrowDown"
+                    onClick={[Function]}
+                    title="Test 1"
+                  >
+                    Test 1
+                  </EuiButtonEmpty>
+                }
+                className="eui-textTruncate"
+                closePopover={[Function]}
+                display="inlineBlock"
+                hasArrow={true}
+                isOpen={false}
+                ownFocus={true}
+                panelPaddingSize="s"
+              >
+                <EuiOutsideClickDetector
+                  isDisabled={true}
+                  onOutsideClick={[Function]}
+                >
+                  <div
+                    className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+                    onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                  >
+                    <div
+                      className="euiPopover__anchor eui-textTruncate"
+                    >
+                      <EuiButtonEmpty
+                        className="visIndexPatternSelector__triggerButton"
+                        color="text"
+                        data-test-subj="indexPatternSelector-switch-link"
+                        flush="left"
+                        iconSide="right"
+                        iconType="arrowDown"
+                        onClick={[Function]}
+                        title="Test 1"
+                      >
+                        <button
+                          className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushLeft visIndexPatternSelector__triggerButton"
+                          data-test-subj="indexPatternSelector-switch-link"
+                          disabled={false}
+                          onClick={[Function]}
+                          title="Test 1"
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconSide="right"
+                            iconType="arrowDown"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                            >
+                              <EuiIcon
+                                className="euiButtonContent__icon"
+                                size="m"
+                                type="arrowDown"
+                              >
+                                <div
+                                  className="euiButtonContent__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                Test 1
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </div>
+                  </div>
+                </EuiOutsideClickDetector>
+              </EuiPopover>
+            </ChangeIndexPattern>
+          </PseudoLocaleWrapper>
+        </IntlProvider>
+      </I18nProvider>
+    </div>
+  </VisIndexPatternSelector>
+</IntlProvider>
+`;

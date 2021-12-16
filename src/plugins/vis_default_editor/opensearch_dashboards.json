@@ -2,5 +2,6 @@
   "id": "visDefaultEditor",
   "version": "opensearchDashboards",
   "ui": true,
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "data"]
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "data"],
+  "requiredPlugins": ["visIndexPatternSelector"]
 }

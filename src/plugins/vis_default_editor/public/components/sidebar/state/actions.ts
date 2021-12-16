@@ -31,7 +31,7 @@
  */
 
 import { Vis, VisParams } from 'src/plugins/visualizations/public';
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig, IndexPattern } from 'src/plugins/data/public';
 import { EditorStateActionTypes } from './constants';
 import { Schema } from '../../../schemas';
 
@@ -45,6 +45,10 @@ type AggParams = IAggConfig['params'];
 
 type AddNewAgg = ActionType<EditorStateActionTypes.ADD_NEW_AGG, { schema: Schema }>;
 type DiscardChanges = ActionType<EditorStateActionTypes.DISCARD_CHANGES, Vis>;
+type ChangeIndexPattern = ActionType<
+  EditorStateActionTypes.CHANGE_INDEX_PATTERN,
+  { value: IndexPattern }
+>;
 type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: IAggConfig['type'] }
@@ -78,6 +82,7 @@ type UpdateStateParams = ActionType<
 export type EditorAction =
   | AddNewAgg
   | DiscardChanges
+  | ChangeIndexPattern
   | ChangeAggType
   | SetAggParamValue
   | SetStateParamValue
@@ -88,6 +93,7 @@ export type EditorAction =
 
 export interface EditorActions {
   addNewAgg(schema: Schema): AddNewAgg;
+  changeIndexPattern(value: IndexPattern): ChangeIndexPattern;
   discardChanges(vis: Vis): DiscardChanges;
   changeAggType(aggId: AggId, value: IAggConfig['type']): ChangeAggType;
   setAggParamValue<T extends keyof AggParams>(
@@ -115,6 +121,13 @@ const addNewAgg: EditorActions['addNewAgg'] = (schema) => ({
 const discardChanges: EditorActions['discardChanges'] = (vis) => ({
   type: EditorStateActionTypes.DISCARD_CHANGES,
   payload: vis,
+});
+
+const changeIndexPattern: EditorActions['changeIndexPattern'] = (value) => ({
+  type: EditorStateActionTypes.CHANGE_INDEX_PATTERN,
+  payload: {
+    value,
+  },
 });
 
 const changeAggType: EditorActions['changeAggType'] = (aggId, value) => ({
@@ -176,6 +189,7 @@ const updateStateParams: EditorActions['updateStateParams'] = (params) => ({
 export {
   addNewAgg,
   discardChanges,
+  changeIndexPattern,
   changeAggType,
   setAggParamValue,
   setStateParamValue,

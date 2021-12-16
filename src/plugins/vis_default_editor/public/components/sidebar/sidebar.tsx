@@ -41,11 +41,17 @@ import {
   PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
-import { TimeRange } from 'src/plugins/data/public';
+import { IndexPattern, TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
+import {
+  setStateParamValue,
+  useEditorReducer,
+  useEditorFormState,
+  discardChanges,
+  changeIndexPattern,
+} from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { Schema } from '../../schemas';
@@ -109,19 +115,22 @@ function DefaultEditorSideBar({
     [dispatch, state.params]
   );
 
-  const applyChanges = useCallback(() => {
+  const applyChanges = useCallback(async () => {
     if (formState.invalid || !isDirty) {
       setTouched(true);
       return;
     }
 
-    vis.setState({
+    await vis.setState({
       ...vis.serialize(),
       params: state.params,
       data: {
+        indexPattern: state.data.indexPattern,
+        searchSource: state.data.searchSource?.getSerializedFields(),
         aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
       },
     });
+
     embeddableHandler.reload();
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
@@ -155,6 +164,17 @@ function DefaultEditorSideBar({
       eventEmitter.off('dirtyStateChange', changeHandler);
     };
   }, [resetValidity, eventEmitter]);
+
+  useEffect(() => {
+    const changeHandler = (indexPattern: IndexPattern) => {
+      dispatch(changeIndexPattern(indexPattern));
+    };
+    eventEmitter.on('changeIndexPattern', changeHandler);
+
+    return () => {
+      eventEmitter.off('changeIndexPattern', changeHandler);
+    };
+  }, [dispatch, vis, eventEmitter]);
 
   // subscribe on external vis changes using browser history, for example press back button
   useEffect(() => {
@@ -205,9 +225,8 @@ function DefaultEditorSideBar({
           >
             {vis.type.requiresSearch && (
               <SidebarTitle
-                isLinkedSearch={isLinkedSearch}
-                savedSearch={savedSearch}
-                vis={vis}
+                savedSearch={isLinkedSearch && savedSearch}
+                indexPattern={state.type.options.showIndexSelection && state.data.indexPattern!}
                 eventEmitter={eventEmitter}
               />
             )}

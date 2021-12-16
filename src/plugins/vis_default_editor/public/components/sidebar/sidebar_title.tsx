@@ -48,20 +48,24 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { Vis } from 'src/plugins/visualizations/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { ApplicationStart } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { VisIndexPatternSelector } from '../../../../vis_index_pattern_selector/public';
+import { IndexPattern } from '../../../../data/common';
 
 interface LinkedSearchProps {
   savedSearch: SavedObject;
   eventEmitter: EventEmitter;
 }
+interface IndexPatternProps {
+  indexPattern: IndexPattern;
+  eventEmitter: EventEmitter;
+}
 
 interface SidebarTitleProps {
-  isLinkedSearch: boolean;
-  savedSearch?: SavedObject;
-  vis: Vis;
+  savedSearch: SavedObject | undefined | false;
+  indexPattern: IndexPattern | undefined | false;
   eventEmitter: EventEmitter;
 }
 
@@ -182,22 +186,22 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   );
 }
 
-function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
-  return isLinkedSearch && savedSearch ? (
+export function IndexPatternSelector({ indexPattern, eventEmitter }: IndexPatternProps) {
+  return (
+    <VisIndexPatternSelector
+      selectedIndexPattern={indexPattern}
+      onChange={(newIndexPattern) => {
+        eventEmitter.emit('changeIndexPattern', newIndexPattern);
+      }}
+    />
+  );
+}
+
+function SidebarTitle({ savedSearch, indexPattern, eventEmitter }: SidebarTitleProps) {
+  return savedSearch ? (
     <LinkedSearch savedSearch={savedSearch} eventEmitter={eventEmitter} />
-  ) : vis.type.options.showIndexSelection ? (
-    <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
-      <h2
-        title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
-          defaultMessage: 'Index pattern: {title}',
-          values: {
-            title: vis.data.indexPattern!.title,
-          },
-        })}
-      >
-        {vis.data.indexPattern!.title}
-      </h2>
-    </EuiTitle>
+  ) : indexPattern ? (
+    <IndexPatternSelector indexPattern={indexPattern} eventEmitter={eventEmitter} />
   ) : (
     <div className="visEditorSidebar__indexPatternPlaceholder" />
   );

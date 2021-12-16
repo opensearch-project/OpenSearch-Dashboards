@@ -1,0 +1,6 @@
+{
+  "id": "visIndexPatternSelector",
+  "version": "opensearchDashboards",
+  "ui": true,
+  "requiredPlugins": ["opensearchDashboardsReact"]
+}

@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChangeIndexPattern fails without an exception on invalid props: "" 1`] = `""`;
+
+exports[`ChangeIndexPattern should render correctly when not open 1`] = `
+<EuiPopover
+  anchorClassName="eui-textTruncate"
+  anchorPosition="downCenter"
+  button={
+    <EuiButtonEmpty
+      className="eui-textTruncate"
+      color="text"
+      flush="left"
+      iconSide="right"
+      iconType="arrowDown"
+      onClick={[Function]}
+    >
+      Test 1
+    </EuiButtonEmpty>
+  }
+  className="eui-textTruncate"
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="s"
+>
+  <div
+    style={
+      Object {
+        "width": 320,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      Change index pattern
+    </EuiPopoverTitle>
+    <EuiSelectable
+      data-test-subj="indexPatternSelector-switcher"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "checked": "on",
+            "key": "test1",
+            "label": "Test 1",
+            "value": "test1",
+          },
+          Object {
+            "checked": undefined,
+            "key": "test2",
+            "label": "Test 2",
+            "value": "test2",
+          },
+          Object {
+            "checked": undefined,
+            "key": "test3",
+            "label": "Test 3",
+            "value": "test3",
+          },
+        ]
+      }
+      searchProps={
+        Object {
+          "compressed": true,
+        }
+      }
+      searchable={true}
+      singleSelection="always"
+    >
+      <Component />
+    </EuiSelectable>
+  </div>
+</EuiPopover>
+`;
+
+exports[`ChangeIndexPattern should render correctly when open 1`] = `
+<EuiPopover
+  anchorClassName="eui-textTruncate"
+  anchorPosition="downCenter"
+  button={
+    <EuiButtonEmpty
+      className="eui-textTruncate"
+      color="text"
+      flush="left"
+      iconSide="right"
+      iconType="arrowDown"
+      onClick={[Function]}
+    >
+      Test 1
+    </EuiButtonEmpty>
+  }
+  className="eui-textTruncate"
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  isOpen={true}
+  ownFocus={true}
+  panelPaddingSize="s"
+>
+  <div
+    style={
+      Object {
+        "width": 320,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      Change index pattern
+    </EuiPopoverTitle>
+    <EuiSelectable
+      data-test-subj="indexPatternSelector-switcher"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "checked": "on",
+            "key": "test1",
+            "label": "Test 1",
+            "value": "test1",
+          },
+          Object {
+            "checked": undefined,
+            "key": "test2",
+            "label": "Test 2",
+            "value": "test2",
+          },
+          Object {
+            "checked": undefined,
+            "key": "test3",
+            "label": "Test 3",
+            "value": "test3",
+          },
+        ]
+      }
+      searchProps={
+        Object {
+          "compressed": true,
+        }
+      }
+      searchable={true}
+      singleSelection="always"
+    >
+      <Component />
+    </EuiSelectable>
+  </div>
+</EuiPopover>
+`;

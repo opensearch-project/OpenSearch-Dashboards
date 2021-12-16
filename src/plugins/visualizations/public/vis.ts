@@ -57,6 +57,7 @@ import {
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigOptions[];
+  indexPattern: IndexPattern;
   searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
@@ -152,7 +153,13 @@ export class Vis<TVisParams = VisParams> {
     }
     if (state.data && state.data.searchSource) {
       this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
-      this.data.indexPattern = this.data.searchSource.getField('index');
+      // If state.data has an indexPattern, use it. If not, get it from searchSource
+      if (state.data.indexPattern) {
+        this.data.searchSource.setField('index', state.data.indexPattern);
+        this.data.indexPattern = state.data.indexPattern;
+      } else {
+        this.data.indexPattern = this.data.searchSource.getField('index');
+      }
     }
     if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
@@ -210,6 +217,7 @@ export class Vis<TVisParams = VisParams> {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
         savedSearchId: this.data.savedSearchId,
+        indexPattern: this.data.indexPattern!,
       },
     };
   }

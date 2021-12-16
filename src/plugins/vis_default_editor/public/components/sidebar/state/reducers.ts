@@ -78,6 +78,19 @@ const createEditorStateReducer = ({
       return initEditorState(action.payload);
     }
 
+    case EditorStateActionTypes.CHANGE_INDEX_PATTERN: {
+      const { value } = action.payload;
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          indexPattern: value,
+          aggs: createAggConfigs(value!, state.data.aggs!.aggs),
+          searchSource: state.data.searchSource!.setField('index', value),
+        },
+      };
+    }
+
     case EditorStateActionTypes.CHANGE_AGG_TYPE: {
       const { aggId, value } = action.payload;
 
