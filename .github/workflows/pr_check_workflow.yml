@@ -134,6 +134,7 @@ jobs:
       matrix:
         group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
     steps:
+<<<<<<< HEAD
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
       # Access a cache of set results from a previous run of the job
@@ -209,3 +210,13 @@ jobs:
       
       - if: steps.ftr-tests.outcome == 'success' || steps.ftr-tests.outcome == 'skipped'
         run: echo "::set-output name=ftr_tests_results::success" > ftr_tests_results
+=======
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.18.1'
+        check-latest: false
+    - run: yarn osd bootstrap
+    - run: yarn lint
+>>>>>>> 51f496bf62f5b5ce0397a22fb58313e574d3cccb
