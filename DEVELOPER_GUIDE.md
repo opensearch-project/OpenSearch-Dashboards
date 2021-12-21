@@ -1,4 +1,4 @@
-<p align="center"><img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg" height="64px"/></p>
+<p align="center"><img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/></p>
 <h1 align="center">OpenSearch Dashboards Developer Guide</h1>
 
 This guide applies to all development within the OpenSearch Dashboards project and is recommended for the development of all OpenSearch Dashboards plugins.
