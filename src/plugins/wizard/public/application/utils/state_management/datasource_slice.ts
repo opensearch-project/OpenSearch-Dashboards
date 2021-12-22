@@ -13,11 +13,13 @@ const ALLOWED_FIELDS: string[] = [OSD_FIELD_TYPES.STRING, OSD_FIELD_TYPES.NUMBER
 interface DataSourceState {
   indexPattern: IndexPattern | null;
   visualizableFields: IndexPatternField[];
+  searchField: string;
 }
 
 const initialState: DataSourceState = {
   indexPattern: null,
   visualizableFields: [],
+  searchField: '',
 };
 
 export const slice = createSlice({
@@ -35,7 +37,7 @@ export const { reducer } = slice;
 export const { setIndexPattern } = slice.actions;
 
 // TODO: Temporary validate function
-// Need to identify hopw to get fieldCounts to use the standard filter and group functions
+// Need to identify how to get fieldCounts to use the standard filter and group functions
 function isVisualizable(field: IndexPatternField): boolean {
   const isAggregatable = field.aggregatable === true;
   const isNotScripted = !field.scripted;
