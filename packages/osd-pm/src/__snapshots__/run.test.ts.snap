@@ -7,6 +7,7 @@ Object {
     "baz": Array [
       "bar",
     ],
+    "corge": Array [],
     "opensearch-dashboards": Array [],
     "quux": Array [
       "bar",
@@ -17,6 +18,7 @@ Object {
   "projects": Array [
     "bar",
     "baz",
+    "corge",
     "opensearch-dashboards",
     "quux",
     "with-additional-projects",
@@ -27,11 +29,13 @@ Object {
 exports[`excludes projects if multiple \`exclude\` filter are specified 1`] = `
 Object {
   "graph": Object {
+    "corge": Array [],
     "opensearch-dashboards": Array [],
     "quux": Array [],
     "with-additional-projects": Array [],
   },
   "projects": Array [
+    "corge",
     "opensearch-dashboards",
     "quux",
     "with-additional-projects",
@@ -78,6 +82,7 @@ Object {
     "baz": Array [
       "bar",
     ],
+    "corge": Array [],
     "foo": Array [],
     "opensearch-dashboards": Array [
       "foo",
@@ -91,6 +96,7 @@ Object {
   "projects": Array [
     "bar",
     "baz",
+    "corge",
     "foo",
     "opensearch-dashboards",
     "quux",

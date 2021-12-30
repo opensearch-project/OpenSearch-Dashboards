@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { StorybookConfig } from '@storybook/core/types';
+import { StorybookConfig } from '@storybook/core-common';
 
 export const defaultConfig: StorybookConfig = {
   addons: ['@osd/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],

@@ -9,21 +9,21 @@
     "osd:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@babel/runtime": "^7.11.2",
+    "@babel/runtime": "^7.16.5",
     "@osd/i18n": "1.0.0",
     "lodash": "^4.17.21",
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.14.5",
-    "@babel/core": "^7.11.6",
-    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.0",
+    "@babel/cli": "^7.16.0",
+    "@babel/core": "^7.16.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.16.5",
+    "@babel/plugin-transform-runtime": "^7.16.5",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
-    "babel-loader": "^8.0.6",
+    "babel-loader": "^8.2.3",
     "copy-webpack-plugin": "^6.0.2",
-    "css-loader": "^3.4.2",
+    "css-loader": "^5.2.7",
     "del": "^5.1.0",
     "getopts": "^2.2.5",
     "pegjs": "0.10.0",

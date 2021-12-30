@@ -98,8 +98,6 @@ it('builds a generated plugin into a viable archive', async () => {
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
-     │ warn worker stderr Browserslist: caniuse-lite is outdated. Please run:
-     │ warn worker stderr npx browserslist@latest --update-db
      │ succ 1 bundles compiled successfully after <time>
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
