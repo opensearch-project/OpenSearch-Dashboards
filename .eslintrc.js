@@ -447,7 +447,6 @@ module.exports = {
       files: [
         'packages/osd-ui-framework/**/*.test.js',
         'packages/osd-ui-framework/doc_site/**/*.js',
-        'packages/osd-ui-framework/generator-kui/**/*.js',
         'packages/osd-ui-framework/Gruntfile.js',
         'packages/osd-opensearch/src/**/*.js',
         'packages/osd-interpreter/tasks/**/*.js',
