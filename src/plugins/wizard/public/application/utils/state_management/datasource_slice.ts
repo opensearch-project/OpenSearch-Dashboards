@@ -30,11 +30,14 @@ export const slice = createSlice({
       state.indexPattern = action.payload;
       state.visualizableFields = action.payload.fields.filter(isVisualizable);
     },
+    setSearchField: (state, action: PayloadAction<string>) => {
+      state.searchField = action.payload;
+    },
   },
 });
 
 export const { reducer } = slice;
-export const { setIndexPattern } = slice.actions;
+export const { setIndexPattern, setSearchField } = slice.actions;
 
 // TODO: Temporary validate function
 // Need to identify how to get fieldCounts to use the standard filter and group functions

@@ -33,7 +33,7 @@ const META_FIELDS: string[] = [
 export const FieldSelector = () => {
   const indexFields = useTypedSelector((state) => state.dataSource.visualizableFields);
   const [filteredFields, setFilteredFields] = useState(indexFields);
-  const [fieldSearchValue, setFieldSearchValue] = useState('');
+  const fieldSearchValue = useTypedSelector((state) => state.dataSource.searchField);
 
   useEffect(() => {
     const filteredSubset = indexFields.filter((field) =>
@@ -58,15 +58,11 @@ export const FieldSelector = () => {
     }
   );
 
-  const onChangeFieldSearch = useCallback((field: string) => {
-    setFieldSearchValue(field);
-  }, []);
-
   return (
     <div className="wizFieldSelector">
       <div>
         <form>
-          <FieldSearch onChange={onChangeFieldSearch} value={fieldSearchValue} />
+          <FieldSearch value={fieldSearchValue} />
         </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">

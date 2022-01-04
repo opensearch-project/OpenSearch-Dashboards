@@ -32,13 +32,10 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { setSearchField } from '../../utils/state_management/datasource_slice';
+import { useTypedDispatch } from '../../utils/state_management';
 
 export interface Props {
-  /**
-   * triggered on input of user into search field
-   */
-  onChange: (field: string) => void;
-
   /**
    * the input value of the user
    */
@@ -49,10 +46,12 @@ export interface Props {
  * Component is Wizard's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function FieldSearch({ onChange, value }: Props) {
+export function FieldSearch({ value }: Props) {
   const searchPlaceholder = i18n.translate('wizard.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
+
+  const dispatch = useTypedDispatch();
 
   return (
     <React.Fragment>
@@ -63,7 +62,7 @@ export function FieldSearch({ onChange, value }: Props) {
             data-test-subj="fieldFilterSearchInput"
             compressed
             fullWidth
-            onChange={(event) => onChange(event.currentTarget.value)}
+            onChange={(event) => dispatch(setSearchField(event.currentTarget.value))}
             placeholder={searchPlaceholder}
             value={value}
           />
