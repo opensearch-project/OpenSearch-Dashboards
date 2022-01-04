@@ -3,16 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
-import {
-  EuiFormLabel,
-  EuiFlexItem,
-  EuiAccordion,
-  EuiSpacer,
-  EuiNotificationBadge,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useCallback, useState, useEffect } from 'react';
+import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
+import { FieldSearch } from './field_search';
 
 import {
   IndexPatternField,
@@ -39,7 +32,19 @@ const META_FIELDS: string[] = [
 
 export const FieldSelector = () => {
   const indexFields = useTypedSelector((state) => state.dataSource.visualizableFields);
-  const fields = indexFields?.reduce<IFieldCategories>(
+  const [filteredFields, setFilteredFields] = useState(indexFields);
+  const fieldSearchValue = useTypedSelector((state) => state.dataSource.searchField);
+
+  useEffect(() => {
+    const filteredSubset = indexFields.filter((field) =>
+      field.displayName.includes(fieldSearchValue)
+    );
+
+    setFilteredFields(filteredSubset);
+    return;
+  }, [indexFields, fieldSearchValue]);
+
+  const fields = filteredFields?.reduce<IFieldCategories>(
     (fieldGroups, currentField) => {
       const category = getFieldCategory(currentField);
       fieldGroups[category].push(currentField);
@@ -56,7 +61,9 @@ export const FieldSelector = () => {
   return (
     <div className="wizFieldSelector">
       <div>
-        <EuiFormLabel>TODO: Search goes here</EuiFormLabel>
+        <form>
+          <FieldSearch value={fieldSearchValue} />
+        </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">
         <FieldGroup
