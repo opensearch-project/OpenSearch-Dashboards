@@ -52,11 +52,11 @@ export const osdTestConfig = new (class OsdTestConfig {
       const testOpenSearchDashboardsUrl = url.parse(process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
       return {
         protocol: testOpenSearchDashboardsUrl.protocol?.slice(0, -1),
-        hostname: testOpenSearchDashboardsUrl.hostname,
+        hostname: testOpenSearchDashboardsUrl.hostname ?? undefined,
         port: testOpenSearchDashboardsUrl.port
           ? parseInt(testOpenSearchDashboardsUrl.port, 10)
           : undefined,
-        auth: testOpenSearchDashboardsUrl.auth,
+        auth: testOpenSearchDashboardsUrl.auth ?? undefined,
         username: testOpenSearchDashboardsUrl.auth?.split(':')[0],
         password: testOpenSearchDashboardsUrl.auth?.split(':')[1],
       };

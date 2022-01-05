@@ -107,7 +107,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
