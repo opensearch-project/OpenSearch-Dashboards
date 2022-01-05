@@ -70,8 +70,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('@osd/optimizer/postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('@osd/optimizer/postcss.config.js'),
               },
             },
           },
