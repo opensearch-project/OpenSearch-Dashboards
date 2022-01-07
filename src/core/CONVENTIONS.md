@@ -32,7 +32,7 @@ Definition of done for a feature:
 ## Technical Conventions
 ### Plugin Structure
 
-All OpenSearch Dashboards plugins built at Elastic should follow the same structure.
+All OpenSearch Dashboards plugins should follow the same structure.
 
 ```
 my_plugin/
