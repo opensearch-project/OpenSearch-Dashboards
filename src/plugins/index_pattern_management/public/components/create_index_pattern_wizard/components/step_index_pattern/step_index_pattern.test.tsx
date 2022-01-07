@@ -213,9 +213,9 @@ describe('StepIndexPattern', () => {
     // Ensure it works in the other code flow too (the other early return)
 
     // Provide `opensearch` so we do not auto append * and enter our other code flow
-    instance.onQueryChanged({ target: { value: 'opensearch' } } as React.ChangeEvent<
-      HTMLInputElement
-    >);
+    instance.onQueryChanged({
+      target: { value: 'opensearch' },
+    } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'o';
     await new Promise((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
