@@ -81,6 +81,14 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
+const ELASTIC_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+`;
+
 const SAFER_LODASH_SET_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
@@ -163,6 +171,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -198,6 +207,7 @@ module.exports = {
           'error',
           {
             licenses: [
+              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -220,6 +230,7 @@ module.exports = {
           {
             licenses: [
               OSS_HEADER,
+              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -243,6 +254,7 @@ module.exports = {
           {
             licenses: [
               OSS_HEADER,
+              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
