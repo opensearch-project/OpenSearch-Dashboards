@@ -3,32 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-disable */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable no-undef */
 import {
   MiscUtils,
   CommonUI,
-  LoginPage,
 } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 
 const miscUtils = new MiscUtils(cy);
 const commonUI = new CommonUI(cy);
-const loginPage = new LoginPage(cy);
 
 describe('check dashboards filter and query', () => {
   beforeEach(() => {
     miscUtils.visitPage('app/dashboards#');
-    loginPage.enterUserName('admin');
-    loginPage.enterPassword('admin');
-    loginPage.submit();
   });
 
   afterEach(() => {
     cy.clearCookies();
-  });
-
-  it('tenant-switch-modal page should show and be clicked', () => {
-    cy.get('[data-test-subj="tenant-switch-modal"]');
-    cy.get('[data-test-subj="confirm"]').click();
   });
 
   describe('osx filter and query should work in [Logs] Web Traffic dashboards', () => {

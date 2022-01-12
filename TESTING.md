@@ -53,13 +53,13 @@ Say that you would want to debug a test in CI group 1, you can run the following
 This will print off an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
 
 ### Backwards Compatibility tests
-To run all the backwards compatibility tests on vanilla OpenSearch Dashboards:
+To run all the backwards compatibility tests on OpenSearch Dashboards without security:
 
 `yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz]`
 
-To run all the backwards compatibility tests on bundled dashboards, pass the bundle parameter to the test:
+To run all the backwards compatibility tests on OpenSearch Dashboards with security, pass the security parameter to the test:
 
-`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -b true`
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -s true`
 
 To run specific versions' backwards compatibility tests, pass the versions to the test:
 
