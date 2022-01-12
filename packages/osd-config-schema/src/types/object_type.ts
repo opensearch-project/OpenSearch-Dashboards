@@ -59,7 +59,9 @@ type RequiredProperties<Base extends Props> = Pick<
 // this might not have perfect _rendering_ output, but it will be typed.
 export type ObjectResultType<P extends Props> = Readonly<
   { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
-    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
+    {
+      [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
+    }
 >;
 
 type DefinedProperties<Base extends NullableProps> = Pick<
@@ -70,7 +72,9 @@ type DefinedProperties<Base extends NullableProps> = Pick<
 >;
 
 type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> &
-  { [K in keyof DefinedProperties<NP>]: NP[K] };
+  {
+    [K in keyof DefinedProperties<NP>]: NP[K];
+  };
 
 type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
   ExtendedProps<P, NP>
