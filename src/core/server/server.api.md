@@ -5,7 +5,7 @@
 ```ts
 
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
@@ -129,16 +129,16 @@ import { RecursiveReadonly } from '@osd/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
-import { Request } from 'hapi';
-import { ResponseObject } from 'hapi';
-import { ResponseToolkit } from 'hapi';
+import { Request } from '@hapi/hapi';
+import { ResponseObject } from '@hapi/hapi';
+import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@osd/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { ShallowPromise } from '@osd/utility-types';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
@@ -162,7 +162,7 @@ import { Type } from '@osd/config-schema';
 import { TypeOf } from '@osd/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
-import { Url } from 'url';
+import { URL } from 'url';
 
 // @public
 export interface AppCategory {
@@ -1236,7 +1236,7 @@ export type LegacyOpenSearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'lo
 };
 
 // @public
-export interface LegacyOpenSearchError extends Boom {
+export interface LegacyOpenSearchError extends Boom.Boom {
     // (undocumented)
     [code]?: string;
 }
@@ -1479,7 +1479,7 @@ export class OpenSearchDashboardsRequest<Params = unknown, Query = unknown, Body
     readonly route: RecursiveReadonly<OpenSearchDashboardsRequestRoute<Method>>;
     // (undocumented)
     readonly socket: IOpenSearchDashboardsSocket;
-    readonly url: Url;
+    readonly url: URL;
     readonly uuid: string;
     }
 

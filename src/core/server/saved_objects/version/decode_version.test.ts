@@ -25,7 +25,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { decodeVersion } from './decode_version';
 

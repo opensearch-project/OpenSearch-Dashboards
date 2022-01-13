@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams } from './query_params';

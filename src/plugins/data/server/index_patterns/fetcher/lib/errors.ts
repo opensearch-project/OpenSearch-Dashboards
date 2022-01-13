@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 
 const ERR_OPENSEARCH_INDEX_NOT_FOUND = 'index_not_found_exception';

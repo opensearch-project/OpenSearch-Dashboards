@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerWrapper } from './router';
 
 export const wrapErrors: RequestHandlerWrapper = (handler) => {
@@ -42,7 +42,7 @@ export const wrapErrors: RequestHandlerWrapper = (handler) => {
         return response.customError({
           body: e.output.payload,
           statusCode: e.output.statusCode,
-          headers: e.output.headers,
+          headers: e.output.headers as { [key: string]: string },
         });
       }
       throw e;

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   OpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,

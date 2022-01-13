@@ -30,8 +30,8 @@
  * GitHub history for details.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
-import Boom from 'boom';
+import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
+import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@osd/config-schema';
 import { Logger } from '../../logging';
@@ -57,7 +57,10 @@ interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
+  handler: (
+    req: Request,
+    responseToolkit: ResponseToolkit
+  ) => Promise<ResponseObject | Boom.Boom<any>>;
 }
 
 /**

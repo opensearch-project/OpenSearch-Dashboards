@@ -32,7 +32,7 @@
 
 import { parse } from 'url';
 import { trim } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export function shortUrlAssertValid(url: string) {
   const { protocol, hostname, pathname } = parse(

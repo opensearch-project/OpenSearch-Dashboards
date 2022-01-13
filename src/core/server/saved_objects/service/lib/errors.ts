@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
@@ -57,7 +57,7 @@ const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
-export interface DecoratedError extends Boom {
+export interface DecoratedError extends Boom.Boom {
   [code]?: string;
 }
 

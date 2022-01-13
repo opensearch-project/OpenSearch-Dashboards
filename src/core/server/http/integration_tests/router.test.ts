@@ -29,8 +29,9 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+
 import { Stream } from 'stream';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@osd/config-schema';
 
@@ -782,7 +783,7 @@ describe('Response factory', () => {
       await supertest(innerServer.listener).get('/').expect(200);
     });
 
-    it('supports answering with Stream', async () => {
+    it('supports answering with Stream (without custom Content-Type)', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
@@ -803,14 +804,40 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
+      expect(result.text).toBe(undefined);
+      expect(result.body.toString()).toBe('abc');
+      expect(result.header['content-type']).toBe('application/octet-stream');
+    });
+
+    it('supports answering with Stream (with custom Content-Type)', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, (context, req, res) => {
+        const stream = new Stream.Readable({
+          read() {
+            this.push('a');
+            this.push('b');
+            this.push('c');
+            this.push(null);
+          },
+        });
+        return res.ok({
+          body: stream,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      });
+      await server.start();
+      const result = await supertest(innerServer.listener).get('/').expect(200);
+
       expect(result.text).toBe('abc');
-      expect(result.header['content-type']).toBe(undefined);
+      expect(result.header['content-type']).toBe('text/plain; charset=utf-8');
     });
 
     it('supports answering with chunked Stream', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const stream = new Stream.PassThrough();
         stream.write('a');
@@ -819,12 +846,14 @@ describe('Response factory', () => {
           stream.write('c');
           stream.end();
         }, 100);
-
-        return res.ok({ body: stream });
+        return res.ok({
+          body: stream,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toBe('abc');
@@ -834,7 +863,6 @@ describe('Response factory', () => {
     it('supports answering with Buffer', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const buffer = Buffer.alloc(1028, '.');
 
@@ -845,9 +873,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
       expect(result.header['content-encoding']).toBe('binary');
@@ -858,10 +884,8 @@ describe('Response factory', () => {
     it('supports answering with Buffer text', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const buffer = Buffer.from('abc');
-
         return res.ok({
           body: buffer,
           headers: {
@@ -869,9 +893,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
       expect(result.text).toBe('abc');
@@ -882,7 +904,6 @@ describe('Response factory', () => {
     it('supports configuring standard headers', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({
           body: 'value',
@@ -891,9 +912,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
@@ -903,7 +922,6 @@ describe('Response factory', () => {
     it('supports configuring non-standard headers', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({
           body: 'value',
@@ -913,9 +931,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
@@ -926,7 +942,6 @@ describe('Response factory', () => {
     it('accepted headers are case-insensitive.', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({
           body: 'value',
@@ -935,9 +950,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.header.etag).toBe('1234');
@@ -946,7 +959,6 @@ describe('Response factory', () => {
     it('accept array of headers', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({
           body: 'value',
@@ -955,9 +967,7 @@ describe('Response factory', () => {
           },
         });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.header['set-cookie']).toEqual(['foo', 'bar']);
@@ -966,15 +976,12 @@ describe('Response factory', () => {
     it('throws if given invalid json object as response payload', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const payload: any = { key: {} };
         payload.key.payload = payload;
         return res.ok({ body: payload });
       });
-
       await server.start();
-
       await supertest(innerServer.listener).get('/').expect(500);
 
       // error happens within hapi when route handler already finished execution.
@@ -984,13 +991,10 @@ describe('Response factory', () => {
     it('200 OK with body', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({ body: { key: 'value' } });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.body).toEqual({ key: 'value' });
@@ -1000,13 +1004,10 @@ describe('Response factory', () => {
     it('202 Accepted with body', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.accepted({ body: { location: 'somewhere' } });
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(202);
 
       expect(result.body).toEqual({ location: 'somewhere' });
@@ -1016,13 +1017,10 @@ describe('Response factory', () => {
     it('204 No content', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.noContent();
       });
-
       await server.start();
-
       const result = await supertest(innerServer.listener).get('/').expect(204);
 
       expect(result.noContent).toBe(true);

@@ -29,7 +29,9 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Request } from 'hapi';
+
+import { URL, format as formatUrl } from 'url';
+import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
@@ -88,6 +90,7 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
+  const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
   return OpenSearchDashboardsRequest.from<P, Q, B>(
     createRawRequestMock({
@@ -99,15 +102,11 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
       payload: body,
       path,
       method,
-      url: {
-        path,
-        pathname: path,
-        query: queryString,
-        search: queryString ? `?${queryString}` : queryString,
-      },
+      url,
       route: {
         settings: {
           tags: routeTags,
+          // @ts-expect-error According to types/hapi__hapi `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v20.2.1/lib/route.js#L134)
           auth: routeAuthRequired,
           app: opensearchDashboardsRouteOptions,
         },
@@ -141,6 +140,13 @@ interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 
 function createRawRequestMock(customization: DeepPartial<Request> = {}) {
+  const pathname = customization.url?.pathname || '/';
+  const path = `${pathname}${customization.url?.search || ''}`;
+  const url = new URL(
+    formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
+    'http://localhost'
+  );
+
   return merge(
     {},
     {
@@ -149,14 +155,12 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
         isAuthenticated: true,
       },
       headers: {},
-      path: '/',
+      path,
       route: { settings: {} },
-      url: {
-        href: '/',
-      },
+      url,
       raw: {
         req: {
-          url: '/',
+          url: path,
           socket: {},
         },
       },
