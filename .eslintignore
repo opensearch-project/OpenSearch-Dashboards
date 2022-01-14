@@ -31,5 +31,4 @@ target
 /packages/osd-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /packages/osd-ui-framework/dist
 /packages/osd-ui-framework/doc_site/build
-/packages/osd-ui-framework/generator-kui/*/templates/
 /packages/osd-ui-shared-deps/flot_charts
