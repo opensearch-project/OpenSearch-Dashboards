@@ -26,7 +26,7 @@
  */
 
 import v8 from 'v8';
-import { Bench } from 'hoek';
+import { Bench } from '@hapi/hoek';
 import { OpsProcessMetrics, MetricsCollector } from './types';
 
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics> {

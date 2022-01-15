@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 
 const code = Symbol('OpenSearchError');
@@ -43,7 +43,7 @@ enum ErrorCode {
  * @deprecated. The new opensearch client doesn't wrap errors anymore.
  * @public
  * */
-export interface LegacyOpenSearchError extends Boom {
+export interface LegacyOpenSearchError extends Boom.Boom {
   [code]?: string;
 }
 
@@ -99,7 +99,7 @@ export class LegacyOpenSearchErrorHelpers {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
     const wwwAuthHeader = get(error, 'body.error.header[WWW-Authenticate]') as string;
 
-    decoratedError.output.headers['WWW-Authenticate'] =
+    (decoratedError.output.headers as { [key: string]: string })['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
 
     return decoratedError;

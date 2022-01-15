@@ -111,7 +111,7 @@ jobs:
       - name: Run integration tests
         if: steps.integration_tests_results.outputs.integration_tests_results != 'success'
         id: integration-tests
-        run: node --no-deprecation scripts/jest_integration --ci --colors --max-old-space-size=5120 
+        run: node scripts/jest_integration --ci --colors --max-old-space-size=5120 
 
       # Set cache if linter, unit tests, and integration tests were successful then the job will be marked successful
       # Sets individual results to empower re-runs of the same build without re-running successful steps.

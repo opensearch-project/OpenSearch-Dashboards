@@ -11,7 +11,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transpo
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { Assign } from '@osd/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'opensearch-dashboards/public';
 import { CoreStart } from 'opensearch-dashboards/public';

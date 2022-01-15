@@ -695,8 +695,8 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 });
 
 describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
-  let innerServerListener: Server;
   let configWithBasePath: HttpConfig;
+  let innerServerListener: Server;
 
   beforeEach(async () => {
     configWithBasePath = {
@@ -1224,7 +1224,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: { body: schema.any() },
+          validate: { body: schema.maybe(schema.any()) },
         },
         (context, req, res) => {
           return res.ok({
@@ -1257,7 +1257,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: { body: schema.any() },
+          validate: { body: schema.maybe(schema.any()) },
           options: { timeout: { idleSocket: 12000 } },
         },
         (context, req, res) => {

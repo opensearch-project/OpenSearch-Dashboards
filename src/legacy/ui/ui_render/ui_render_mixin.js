@@ -31,7 +31,7 @@
  */
 
 import { createHash } from 'crypto';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@osd/i18n';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';

@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Lifecycle, Request, ResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
@@ -213,8 +213,7 @@ export function adoptToHapiAuthFormat(
 
         return hapiResponseAdapter.handle(
           lifecycleResponseFactory.redirected({
-            // hapi doesn't accept string[] as a valid header
-            headers: result.headers as any,
+            headers: result.headers,
           })
         );
       }

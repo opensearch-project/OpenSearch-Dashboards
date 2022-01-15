@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
