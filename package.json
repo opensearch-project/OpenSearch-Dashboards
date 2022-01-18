@@ -188,6 +188,7 @@
     "mustache": "^2.3.2",
     "node-fetch": "^2.6.1",
     "node-forge": "^0.10.0",
+    "node-gyp": "8.2.0",
     "p-map": "^4.0.0",
     "pegjs": "0.10.0",
     "proxy-from-env": "1.0.0",
