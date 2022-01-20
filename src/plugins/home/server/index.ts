@@ -39,7 +39,7 @@ import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
-    disableWelcomeScreen: false,
+    disableWelcomeScreen: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
