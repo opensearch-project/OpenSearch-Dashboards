@@ -97,6 +97,7 @@ export function getTableVisTypeDefinition(
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
           }),
+          max: 3,
           aggFilter: ['!filter'],
         },
         {
