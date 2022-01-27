@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { errors as opensearchErrors } from '@elastic/elasticsearch';
+import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 import { get } from 'lodash';
 
 const responseErrors = {

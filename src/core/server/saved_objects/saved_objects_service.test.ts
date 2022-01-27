@@ -38,7 +38,7 @@ import {
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@osd/config-schema';
-import { errors as opensearchErrors } from '@elastic/elasticsearch';
+import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';

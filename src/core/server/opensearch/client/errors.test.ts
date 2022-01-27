@@ -34,8 +34,8 @@ import {
   ResponseError,
   ConnectionError,
   ConfigurationError,
-} from '@elastic/elasticsearch/lib/errors';
-import { ApiResponse } from '@elastic/elasticsearch';
+} from '@opensearch-project/opensearch/lib/errors';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { isResponseError, isUnauthorizedError } from './errors';
 
 const createApiResponseError = ({

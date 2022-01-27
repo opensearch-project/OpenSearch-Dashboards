@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { errors } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from './mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';

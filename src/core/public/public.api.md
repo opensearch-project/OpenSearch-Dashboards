@@ -5,7 +5,7 @@
 ```ts
 
 import { Action } from 'history';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@opensearch-project/opensearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { ConfigPath } from '@osd/config';
 import { EnvironmentMode } from '@osd/config';
@@ -17,7 +17,7 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { OpenSearchDashboardsClient } from '@opensearch-project/opensearch/api/opensearch_dashboards';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@osd/logging';
@@ -33,9 +33,9 @@ import React from 'react';
 import { RecursiveReadonly } from '@osd/utility-types';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@osd/utility-types';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@opensearch-project/opensearch/lib/Transport';
+import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Transport';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { Type } from '@osd/config-schema';
 import { TypeOf } from '@osd/config-schema';
 import { UnregisterCallback } from 'history';
