@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@opensearch-project/opensearch/lib/Transport';
 
 import { OpenSearchClient } from '../../../opensearch/';
 import { retryCallCluster } from '../../../opensearch/client/retry_call_cluster';

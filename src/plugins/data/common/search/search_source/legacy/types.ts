@@ -31,7 +31,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers, SearchRequest } from '../fetch';
 
