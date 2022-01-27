@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 
 export type UnauthorizedError = ResponseError & {
   statusCode: 401;

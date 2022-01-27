@@ -32,7 +32,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 

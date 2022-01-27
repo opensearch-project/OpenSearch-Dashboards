@@ -56,7 +56,7 @@ export class SavedObjectTypeRegistry {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
     }
-    this.types.set(type.name, deepFreeze(type));
+    this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
   }
 
   /**

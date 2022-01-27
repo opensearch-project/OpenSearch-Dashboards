@@ -42,7 +42,7 @@ import { errors as opensearchErrors } from 'elasticsearch';
 import { LegacyOpenSearchErrorHelpers } from '../../opensearch/legacy';
 
 import { opensearchClientMock } from '../../opensearch/client/mocks';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import * as osdTestServer from '../../../test_helpers/osd_server';
 import { InternalOpenSearchServiceStart } from '../../opensearch';
 

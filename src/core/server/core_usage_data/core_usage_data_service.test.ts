@@ -89,7 +89,6 @@ describe('CoreUsageDataService', () => {
               'docs.count': 10,
               'docs.deleted': 10,
               'store.size': 1000,
-              'pri.store.size': 2000,
             },
           ],
         } as any);
@@ -98,7 +97,6 @@ describe('CoreUsageDataService', () => {
             {
               name: '.kibana_1',
               'docs.count': 20,
-              'docs.deleted': 20,
               'store.size': 2000,
               'pri.store.size': 4000,
             },
@@ -221,13 +219,13 @@ describe('CoreUsageDataService', () => {
                     "alias": ".kibana_task_manager",
                     "docsCount": 10,
                     "docsDeleted": 10,
-                    "primaryStoreSizeBytes": 2000,
+                    "primaryStoreSizeBytes": 0,
                     "storeSizeBytes": 1000,
                   },
                   Object {
                     "alias": ".kibana_task_manager",
                     "docsCount": 20,
-                    "docsDeleted": 20,
+                    "docsDeleted": 0,
                     "primaryStoreSizeBytes": 4000,
                     "storeSizeBytes": 2000,
                   },

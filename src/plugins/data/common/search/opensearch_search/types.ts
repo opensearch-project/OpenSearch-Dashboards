@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { SearchResponse } from 'elasticsearch';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
+import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 
 export const OPENSEARCH_SEARCH_STRATEGY = 'opensearch';

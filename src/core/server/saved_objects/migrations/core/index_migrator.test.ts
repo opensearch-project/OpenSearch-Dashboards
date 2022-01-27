@@ -26,6 +26,7 @@
  */
 
 import _ from 'lodash';
+import type { opensearchtypes } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -454,23 +455,29 @@ function withIndex(
     opensearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
-    })
+    } as opensearchtypes.ReindexResponse)
   );
   client.tasks.get.mockReturnValue(
-    opensearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+    opensearchClientMock.createSuccessTransportRequestPromise({
+      completed: true,
+    } as opensearchtypes.TaskGetResponse)
   );
   client.search.mockReturnValue(
-    opensearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+    opensearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)
   );
   client.bulk.mockReturnValue(
-    opensearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+    opensearchClientMock.createSuccessTransportRequestPromise({
+      items: [] as any[],
+    } as opensearchtypes.BulkResponse)
   );
   client.count.mockReturnValue(
     opensearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
-    })
+    } as opensearchtypes.CountResponse)
   );
+  // @ts-expect-error error is due to type {} is not compatible with type 'ScrollResponse<unknown>'
+  // this setting is fine for test purpose
   client.scroll.mockImplementation(() => {
     if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);

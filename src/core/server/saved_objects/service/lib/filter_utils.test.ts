@@ -48,7 +48,7 @@ const mockMappings = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -92,7 +92,7 @@ const mockMappings = {
       },
     },
   },
-};
+} as const;
 
 describe('Filter Utils', () => {
   describe('#validateConvertFilterToKueryNode', () => {
