@@ -32,11 +32,11 @@
 
 const { NativeRealm } = require('./native_realm');
 
-jest.genMockFromModule('@elastic/elasticsearch');
-jest.mock('@elastic/elasticsearch');
+jest.genMockFromModule('@opensearch-project/opensearch');
+jest.mock('@opensearch-project/opensearch');
 
 const { ToolingLog } = require('@osd/dev-utils');
-const { Client } = require('@elastic/elasticsearch');
+const { Client } = require('@opensearch-project/opensearch');
 
 const mockClient = {
   xpack: {

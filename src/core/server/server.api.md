@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@opensearch-project/opensearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -23,7 +23,7 @@ import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { CliArgs } from '@osd/config';
 import { Client } from 'elasticsearch';
-import { ClientOptions } from '@elastic/elasticsearch';
+import { ClientOptions } from '@opensearch-project/opensearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
 import { ClusterHealthParams } from 'elasticsearch';
@@ -100,7 +100,7 @@ import { IngestDeletePipelineParams } from 'elasticsearch';
 import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { OpenSearchDashboardsClient } from '@opensearch-project/opensearch/api/opensearch_dashboards';
 import { Logger } from '@osd/logging';
 import { LoggerFactory } from '@osd/logging';
 import { LogLevel } from '@osd/logging';
@@ -155,9 +155,9 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@opensearch-project/opensearch/lib/Transport';
+import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Transport';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { Type } from '@osd/config-schema';
 import { TypeOf } from '@osd/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
@@ -1414,7 +1414,7 @@ export interface OnPreRoutingToolkit {
 }
 
 // @public
-export type OpenSearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
+export type OpenSearchClient = Omit<OpenSearchDashboardsClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
     transport: {
         request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
     };

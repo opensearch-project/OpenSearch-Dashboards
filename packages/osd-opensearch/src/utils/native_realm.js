@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-const { Client } = require('@elastic/elasticsearch');
+const { Client } = require('@opensearch-project/opensearch');
 const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');

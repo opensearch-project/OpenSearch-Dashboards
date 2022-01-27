@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 
 /**
  *

@@ -33,7 +33,7 @@ import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
 import {

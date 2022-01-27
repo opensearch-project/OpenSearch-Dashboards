@@ -5,7 +5,7 @@
 ```ts
 
 import { $Values } from '@osd/utility-types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@opensearch-project/opensearch';
 import { Assign } from '@osd/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { ConfigDeprecationProvider } from '@osd/config';
@@ -42,12 +42,12 @@ import { RequestHandlerContext } from 'src/core/server';
 import { RequestStatistics } from 'src/plugins/inspector/common';
 import { SavedObject } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
+import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { ShardsResponse } from 'elasticsearch';
 import { ToastInputFields } from 'src/core/public/notifications';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { Type } from '@osd/config-schema';
 import { TypeOf } from '@osd/config-schema';
 import { Unit } from '@elastic/datemath';
