@@ -30,13 +30,13 @@
  * GitHub history for details.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@opensearch-project/opensearch/api/kibana';
 import type {
   ApiResponse,
   TransportRequestOptions,
   TransportRequestParams,
   TransportRequestPromise,
-} from '@elastic/elasticsearch/lib/Transport';
+} from '@opensearch-project/opensearch/lib/Transport';
 
 /**
  * Client used to query the opensearch cluster.

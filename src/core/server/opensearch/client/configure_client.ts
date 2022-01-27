@@ -31,8 +31,8 @@
  */
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client } from '@elastic/elasticsearch';
-import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import { Client } from '@opensearch-project/opensearch';
+import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 
 import { Logger } from '../../logging';
 import { parseClientOptions, OpenSearchClientConfig } from './client_config';

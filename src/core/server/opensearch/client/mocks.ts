@@ -29,8 +29,8 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Client, ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { Client, ApiResponse } from '@opensearch-project/opensearch';
+import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { OpenSearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
@@ -63,7 +63,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   };
 
   const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
-    // the @elastic/elasticsearch::Client uses prototypical inheritance
+    // the @opensearch-project/opensearch::Client uses prototypical inheritance
     // so we have to crawl up the prototype chain and get all descriptors
     // to find everything that we should be mocking
     const descriptors = getAllPropertyDescriptors(obj);

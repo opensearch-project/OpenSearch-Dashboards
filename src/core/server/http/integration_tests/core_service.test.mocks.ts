@@ -51,8 +51,8 @@ jest.doMock('elasticsearch', () => {
 });
 
 export const MockOpenSearchClient = jest.fn();
-jest.doMock('@elastic/elasticsearch', () => {
-  const real = jest.requireActual('@elastic/elasticsearch');
+jest.doMock('@opensearch-project/opensearch', () => {
+  const real = jest.requireActual('@opensearch-project/opensearch');
   return {
     ...real,
     Client: MockOpenSearchClient,
