@@ -87,6 +87,7 @@ describe('Flyout', () => {
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
       search,
+      maxImportFileSize: 10 * 1024 * 1024,
     };
   });
 
@@ -127,6 +128,33 @@ describe('Flyout', () => {
     expect(component.state('file')).toBe(mockFile);
     component.find('EuiFilePicker').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
+  });
+
+  it('should handle exceed max import file size', async () => {
+    const component = shallowRender(defaultProps);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component.state('file')).toBe(undefined);
+    component.find('EuiFilePicker').simulate('change', [
+      {
+        ...mockFile,
+        size: defaultProps.maxImportFileSize + 1 * 1024 * 1024,
+      },
+    ]);
+    component.update();
+    expect(component.state('fileSizeExceeded')).toBe(true);
+    component.find('EuiFilePicker').simulate('change', [
+      {
+        ...mockFile,
+        size: defaultProps.maxImportFileSize,
+      },
+    ]);
+    component.update();
+    expect(component.state('fileSizeExceeded')).toBe(false);
   });
 
   it('should handle invalid files', async () => {

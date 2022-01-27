@@ -32,3 +32,4 @@
 
 export const PER_PAGE_SETTING = 'savedObjects:perPage';
 export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
+export const MAX_IMPORT_FILE_SIZE = 'savedObjects:maxImportFileSize';

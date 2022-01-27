@@ -34,9 +34,17 @@ import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
-import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
+import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING, MAX_IMPORT_FILE_SIZE } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
+  [MAX_IMPORT_FILE_SIZE]: {
+    name: i18n.translate('savedObjects.advancedSettings.maxImportFileSize', {
+      defaultMessage: 'set max import file size',
+    }),
+    value: 10 * 1024 * 1024,
+    type: 'number',
+    schema: schema.number(),
+  },
   [PER_PAGE_SETTING]: {
     name: i18n.translate('savedObjects.advancedSettings.perPageTitle', {
       defaultMessage: 'Objects per page',

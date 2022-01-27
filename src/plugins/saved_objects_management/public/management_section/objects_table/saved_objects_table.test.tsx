@@ -63,6 +63,7 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 
+const maxImportFileSize = 10 * 1024 * 1024;
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
 const allSavedObjects = [
@@ -145,6 +146,7 @@ describe('SavedObjectsTable', () => {
     });
 
     defaultProps = {
+      maxImportFileSize,
       allowedTypes,
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),

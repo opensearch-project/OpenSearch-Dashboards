@@ -214,6 +214,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "name": "foo.ndjson",
             "path": "/home/foo.ndjson",
           },
+          "fileSizeExceeded": false,
           "importCount": 0,
           "importMode": Object {
             "createNewCopies": false,
@@ -629,6 +630,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={false}
           fill={true}
           isLoading={false}
           onClick={[Function]}

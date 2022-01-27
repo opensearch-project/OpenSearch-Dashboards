@@ -98,6 +98,7 @@ interface ExportAllOption {
 
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
+  maxImportFileSize: number;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -524,6 +525,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
+        maxImportFileSize={this.props.maxImportFileSize}
         overlays={this.props.overlays}
         search={this.props.search}
       />

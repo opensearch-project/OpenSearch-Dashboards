@@ -61,6 +61,7 @@ const SavedObjectsTablePage = ({
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+  const maxImportFileSize = coreStart.uiSettings.get<number>('savedObjects:maxImportFileSize');
 
   useEffect(() => {
     setBreadcrumbs([
@@ -76,6 +77,7 @@ const SavedObjectsTablePage = ({
   return (
     <SavedObjectsTable
       allowedTypes={allowedTypes}
+      maxImportFileSize={maxImportFileSize}
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
       columnRegistry={columnRegistry}

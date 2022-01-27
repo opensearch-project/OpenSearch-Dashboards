@@ -87,6 +87,7 @@ const OVERWRITE_ALL_DEFAULT = true;
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   allowedTypes: string[];
+  maxImportFileSize: number;
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
@@ -112,6 +113,7 @@ export interface FlyoutState {
   loadingMessage?: string;
   isLegacyFile: boolean;
   status: string;
+  fileSizeExceeded: boolean;
 }
 
 interface ConflictingRecord {
@@ -148,6 +150,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       loadingMessage: undefined,
       isLegacyFile: false,
       status: 'idle',
+      fileSizeExceeded: false,
     };
   }
 
@@ -173,7 +176,22 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return;
     }
     const file = files[0];
+    if (file.size > this.props.maxImportFileSize) {
+      this.setState({
+        fileSizeExceeded: true,
+        status: 'error',
+        error: getErrorMessage({
+          message: `You have exceeded ${
+            this.props.maxImportFileSize / (1024 * 1024)
+          }mb import limitation`,
+        }),
+      });
+      return;
+    }
     this.setState({
+      fileSizeExceeded: false,
+      status: 'idle',
+      error: undefined,
       file,
       isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',
     });
@@ -816,6 +834,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           fill
           isLoading={status === 'loading'}
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={this.state.fileSizeExceeded}
         >
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
