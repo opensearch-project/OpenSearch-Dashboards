@@ -66,4 +66,30 @@ describe('NodeVersionValidator', function () {
       done();
     });
   });
+
+  it('should run the script WITHOUT error when only the patch version is different', function (done) {
+    var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
+    var major = matches[1];
+    var minor = matches[2];
+    var patch = parseInt(matches[3]) + 1; // change patch version to be higher than required
+
+    var processVersionOverwrite =
+      "Object.defineProperty(process, 'version', { value: '" +
+      'v' +
+      major +
+      '.' +
+      minor +
+      '.' +
+      patch +
+      "', writable: true });";
+    var command =
+      'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
+
+    exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
+      expect(error).toBeNull();
+      expect(stderr).toBeDefined();
+      expect(stderr).toHaveLength(0);
+      done();
+    });
+  });
 });
