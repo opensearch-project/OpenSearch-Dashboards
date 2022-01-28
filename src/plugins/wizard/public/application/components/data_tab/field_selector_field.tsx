@@ -31,20 +31,31 @@
  */
 
 import React, { useState } from 'react';
+import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { IndexPattern } from 'src/plugins/data/common';
 import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldButton, FieldIcon } from '../../../../../opensearch_dashboards_react/public';
-import { useDrag } from '../../utils/drag_drop/drag_drop_context';
+import { FieldDetails } from './types';
+import { useDrag } from '../../utils/drag_drop';
 
 import './field_selector_field.scss';
+import { WizardFieldDetails } from './field_details';
 
 export interface FieldSelectorFieldProps {
   field: IndexPatternField;
+  indexPattern: IndexPattern | null;
+  getDetails: (field: IndexPatternField) => FieldDetails;
 }
 
 // TODO:
 // 1. Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
 // 2. Add popover for fields stats from discover as well
-export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
+export const FieldSelectorField = ({
+  field,
+  indexPattern,
+  getDetails,
+}: FieldSelectorFieldProps) => {
   const [infoIsOpen, setOpen] = useState(false);
   const [dragProps] = useDrag(field, `dataPlane`);
 
@@ -70,16 +81,36 @@ export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
   );
 
   return (
-    <FieldButton
-      size="s"
-      className="wizFieldSelectorField"
-      isActive={infoIsOpen}
-      onClick={togglePopover}
-      dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={<FieldIcon type={field.type} scripted={field.scripted} />}
-      // fieldAction={actionButton}
-      fieldName={fieldName}
-      {...dragProps}
-    />
+    <EuiPopover
+      ownFocus
+      display="block"
+      button={
+        <FieldButton
+          size="s"
+          className="wizFieldSelectorField"
+          isActive={infoIsOpen}
+          onClick={togglePopover}
+          dataTestSubj={`field-${field.name}-showDetails`}
+          fieldIcon={<FieldIcon type={field.type} scripted={field.scripted} />}
+          // fieldAction={actionButton}
+          fieldName={fieldName}
+          {...dragProps}
+        />
+      }
+      isOpen={infoIsOpen}
+      closePopover={() => setOpen(false)}
+      anchorPosition="rightUp"
+      panelClassName="wizardItem__fieldPopoverPanel"
+    >
+      <EuiPopoverTitle>
+        {' '}
+        {i18n.translate('wizard.fieldChooser.wizardField.fieldTopValuesLabel', {
+          defaultMessage: 'Top 5 values',
+        })}
+      </EuiPopoverTitle>
+      {infoIsOpen && (
+        <WizardFieldDetails field={field} indexPattern={indexPattern} details={getDetails(field)} />
+      )}
+    </EuiPopover>
   );
 };

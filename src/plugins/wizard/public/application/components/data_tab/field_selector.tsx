@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
 import { FieldSearch } from './field_search';
-
 import {
   IndexPatternField,
   OPENSEARCH_FIELD_TYPES,
@@ -16,6 +15,7 @@ import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
 import { useTypedSelector } from '../../utils/state_management';
+import { getDetails } from './lib/get_details';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -84,31 +84,46 @@ interface FieldGroupProps {
   id: string;
 }
 
-const FieldGroup = ({ fields, header, id }: FieldGroupProps) => (
-  <>
-    <EuiAccordion
-      id={id}
-      buttonContent={
-        <EuiTitle size="xxxs">
-          <span>{header}</span>
-        </EuiTitle>
-      }
-      extraAction={
-        <EuiNotificationBadge color="subdued" size="m">
-          {fields?.length || 0}
-        </EuiNotificationBadge>
-      }
-      initialIsOpen
-    >
-      {fields?.map((field, i) => (
-        <EuiFlexItem key={i}>
-          <FieldSelectorField field={field} />
-        </EuiFlexItem>
-      ))}
-    </EuiAccordion>
-    <EuiSpacer size="s" />
-  </>
-);
+const FieldGroup = ({ fields, header, id }: FieldGroupProps) => {
+  const indexPattern = useTypedSelector((state) => state.dataSource.indexPattern);
+
+  const hits: Array<Record<string, any>> = [];
+  const columns: string[] = [];
+  const getDetailsByField = useCallback(
+    (ipField: IndexPatternField) => getDetails(ipField, hits, columns, indexPattern),
+    [columns, hits, indexPattern]
+  );
+
+  return (
+    <>
+      <EuiAccordion
+        id={id}
+        buttonContent={
+          <EuiTitle size="xxxs">
+            <span>{header}</span>
+          </EuiTitle>
+        }
+        extraAction={
+          <EuiNotificationBadge color="subdued" size="m">
+            {fields?.length || 0}
+          </EuiNotificationBadge>
+        }
+        initialIsOpen
+      >
+        {fields?.map((field, i) => (
+          <EuiFlexItem key={i}>
+            <FieldSelectorField
+              field={field}
+              indexPattern={indexPattern}
+              getDetails={getDetailsByField}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiAccordion>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
 
 function getFieldCategory(field: IndexPatternField): keyof IFieldCategories {
   if (META_FIELDS.includes(field.name)) return 'meta';
