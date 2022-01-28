@@ -44,6 +44,7 @@ import {
 } from './opensearch_opensearch_dashboards_version_compatability';
 import { Logger } from '../../logging';
 import type { OpenSearchClient } from '../client';
+import { ApiResponse } from '@opensearch-project/opensearch';
 
 /**
  * Checks if all nodes in the cluster have the same cluster id node attribute
@@ -63,7 +64,7 @@ export const getNodeId = async (
   try {
     const state = await internalClient.cluster.state({
       filter_path: [`nodes.*.attributes.${healthcheckAttributeName}`],
-    });
+    }) as ApiResponse;
     /* Aggregate different cluster_ids from the OpenSearch nodes
      * if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
      * Using _cluster/state/nodes to retrieve the cluster_id of each node from master node which is considered to be a lightweight operation
@@ -97,7 +98,7 @@ export interface PollOpenSearchNodesVersionOptions {
 interface NodeInfo {
   version: string;
   ip: string;
-  http: {
+  http?: {
     publish_address: string;
   };
   name: string;
@@ -115,6 +116,7 @@ export interface NodesVersionCompatibility {
   incompatibleNodes: NodeInfo[];
   warningNodes: NodeInfo[];
   opensearchDashboardsVersion: string;
+  nodesInfoRequestError?: Error;
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
@@ -225,8 +227,8 @@ export const pollOpenSearchNodesVersion = ({
               })
             ).pipe(
               map(({ body }) => body),
-              catchError((_err: any) => {
-                return of({ nodes: {} });
+              catchError((nodesInfoRequestError: any) => {
+                return of({ nodes: {}, nodesInfoRequestError});
               })
             )
           )
@@ -238,8 +240,8 @@ export const pollOpenSearchNodesVersion = ({
           })
         ).pipe(
           map(({ body }) => body),
-          catchError((_err) => {
-            return of({ nodes: {} });
+          catchError((nodesInfoRequestError: any) => {
+            return of({ nodes: {}, nodesInfoRequestError });
           })
         );
       }

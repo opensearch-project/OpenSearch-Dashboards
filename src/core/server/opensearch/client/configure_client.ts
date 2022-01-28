@@ -31,7 +31,7 @@
  */
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client } from '@opensearch-project/opensearch';
+import { Client } from '@opensearch-project/opensearch/api/new';
 import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 
 import { Logger } from '../../logging';

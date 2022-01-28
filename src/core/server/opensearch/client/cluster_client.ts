@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Client } from '@opensearch-project/opensearch';
+import { Client } from '@opensearch-project/opensearch/api/new';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isOpenSearchDashboardsRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';

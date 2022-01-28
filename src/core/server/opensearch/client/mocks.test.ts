@@ -54,7 +54,6 @@ describe('Mocked client', () => {
   });
 
   it('nested level API methods should be mocked', () => {
-    expectMocked(client.asyncSearch.get);
     expectMocked(client.nodes.info);
   });
 

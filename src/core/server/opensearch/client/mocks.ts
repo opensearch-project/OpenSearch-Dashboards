@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Client, ApiResponse } from '@opensearch-project/opensearch';
+import { Client, ApiResponse } from '@opensearch-project/opensearch/api/new';
 import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { OpenSearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
@@ -176,9 +176,9 @@ const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPro
   return promise as MockedTransportRequestPromise<never>;
 };
 
-function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+function createApiResponse<TResponse = Record<string, any>>(opts: Partial<ApiResponse> = {}): ApiResponse<TResponse> {
   return {
-    body: {},
+    body: {} as any,
     statusCode: 200,
     headers: {},
     warnings: [],
