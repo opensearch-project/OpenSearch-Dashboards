@@ -31,3 +31,4 @@
  */
 
 export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';
+export const VISUALIZE_DISABLE_BUCKET_AGG_SETTING = 'visualize:disableBucketAggSettings';

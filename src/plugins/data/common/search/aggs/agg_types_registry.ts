@@ -30,6 +30,9 @@
  * GitHub history for details.
  */
 
+import { IUiSettingsClient as IUiSettingsClientPublic } from 'src/core/public';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { IUiSettingsClient as IUiSettingsClientServer } from 'src/core/server';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 import { AggTypesDependencies } from './agg_types';
@@ -46,6 +49,10 @@ export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
 export interface AggTypesRegistryStart {
   get: (id: string) => BucketAggType<any> | MetricAggType<any>;
   getAll: () => { buckets: Array<BucketAggType<any>>; metrics: Array<MetricAggType<any>> };
+}
+
+export interface AggTypesRegistryStartDependencies {
+  uiSettings: IUiSettingsClientPublic | IUiSettingsClientServer;
 }
 
 export class AggTypesRegistry {
@@ -81,7 +88,13 @@ export class AggTypesRegistry {
     };
   };
 
-  start = () => {
+  start = ({ uiSettings }: AggTypesRegistryStartDependencies) => {
+    const disabledBucketAgg = uiSettings.get('visualize:disableBucketAggSettings');
+
+    for (const k of this.bucketAggs.keys()) {
+      if (disabledBucketAgg.includes(k)) this.bucketAggs.delete(k);
+    }
+
     return {
       get: (name: string) => {
         return this.bucketAggs.get(name) || this.metricAggs.get(name);
