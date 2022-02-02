@@ -54,17 +54,22 @@ import {
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { stringify } from 'query-string';
+import rison from 'rison-node';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
+import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
+import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
   setDocViewsRegistry,
+  setDocViewsLinksRegistry,
   setUrlTracker,
   setAngularModule,
   setServices,
@@ -102,6 +107,10 @@ export interface DiscoverSetup {
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+  };
+
+  docViewsLinks: {
+    addDocViewLink(docViewLinkRaw: DocViewLink): void;
   };
 }
 
@@ -171,6 +180,7 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
+  private docViewsLinksRegistry: DocViewsLinksRegistry | null = null;
   private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
@@ -205,12 +215,51 @@ export class DiscoverPlugin
       order: 10,
       component: DocViewTable,
     });
+
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
       component: JsonCodeBlock,
+    });
+
+    this.docViewsLinksRegistry = new DocViewsLinksRegistry();
+    setDocViewsLinksRegistry(this.docViewsLinksRegistry);
+
+    this.docViewsLinksRegistry.addDocViewLink({
+      label: 'View surrounding documents',
+      generateUrlFn: (renderProps: any) => {
+        const globalFilters: any = getServices().filterManager.getGlobalFilters();
+        const appFilters: any = getServices().filterManager.getAppFilters();
+
+        const hash = stringify(
+          url.encodeQuery({
+            _g: rison.encode({
+              filters: globalFilters || [],
+            }),
+            _a: rison.encode({
+              columns: renderProps.columns,
+              filters: (appFilters || []).map(opensearchFilters.disableFilter),
+            }),
+          }),
+          { encode: false, sort: false }
+        );
+
+        return `#/context/${encodeURIComponent(renderProps.indexPattern.id)}/${encodeURIComponent(
+          renderProps.hit._id
+        )}?${hash}`;
+      },
+      order: 1,
+    });
+
+    this.docViewsLinksRegistry.addDocViewLink({
+      label: 'View single document',
+      generateUrlFn: (renderProps) =>
+        `#/doc/${renderProps.indexPattern.id}/${renderProps.hit._index}?id=${encodeURIComponent(
+          renderProps.hit._id
+        )}`,
+      order: 2,
     });
 
     const {

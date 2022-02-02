@@ -1,0 +1,21 @@
+.osdDocViewerLinks {
+    .euiListGroup {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        display: inline;
+
+        .euiListGroupItem {
+        float: left;
+        padding: 0;
+        margin: 0 5px;
+        display: inline-block;
+
+        a {
+            padding: 0;
+            margin: 0;
+        }
+        }
+    }
+}

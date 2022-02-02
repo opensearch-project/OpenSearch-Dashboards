@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Render <DocViewerLink/> with 2 different links 1`] = `
+<div
+  className="osdDocViewerLinks"
+>
+  <EuiListGroup
+    listItems={
+      Array [
+        Object {
+          "generateUrlFn": [Function],
+          "href": "aaa",
+          "label": "generateUrlFn link",
+          "order": 10,
+        },
+        Object {
+          "href": "bbb",
+          "label": "href link",
+          "order": 20,
+        },
+      ]
+    }
+  />
+</div>
+`;
