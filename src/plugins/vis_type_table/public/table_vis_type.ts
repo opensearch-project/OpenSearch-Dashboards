@@ -45,6 +45,10 @@ export function getTableVisTypeDefinition(
   core: CoreSetup,
   context: PluginInitializerContext
 ): BaseVisTypeOptions {
+  const tableBucketAggAmounts = core.uiSettings.get('visualize:aggAmounts').table.bucket;
+  const maxBucket = tableBucketAggAmounts.max;
+  const minBucket = tableBucketAggAmounts.min;
+
   return {
     name: 'table',
     title: i18n.translate('visTypeTable.tableVisTitle', {
@@ -97,7 +101,8 @@ export function getTableVisTypeDefinition(
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
           }),
-          max: 3,
+          ...(maxBucket ? { max: maxBucket } : {}),
+          ...(minBucket ? { min: minBucket } : {}),
           aggFilter: ['!filter'],
         },
         {

@@ -45,6 +45,7 @@ import {
 import {
   VISUALIZE_ENABLE_LABS_SETTING,
   VISUALIZE_DISABLE_BUCKET_AGG_SETTING,
+  VISUALIZE_AGG_AMOUNTS,
 } from '../common/constants';
 
 import { visualizationSavedObjectType } from './saved_objects';
@@ -68,6 +69,28 @@ export class VisualizationsPlugin
     core.savedObjects.registerType(visualizationSavedObjectType);
 
     core.uiSettings.register({
+      [VISUALIZE_AGG_AMOUNTS]: {
+        name: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsTitle', {
+          defaultMessage: "Set visualizations' aggregations amounts limitation",
+        }),
+        value: {},
+        description: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsText', {
+          defaultMessage: `Allows users to set visualizations' aggregations amounts limitation per .`,
+        }),
+        category: ['visualization'],
+        schema: schema.object({
+          table: schema.maybe(
+            schema.object({
+              bucket: schema.maybe(
+                schema.object({
+                  max: schema.maybe(schema.number()),
+                  min: schema.maybe(schema.number()),
+                })
+              ),
+            })
+          ),
+        }),
+      },
       [VISUALIZE_ENABLE_LABS_SETTING]: {
         name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
           defaultMessage: 'Enable experimental visualizations',
