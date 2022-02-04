@@ -95,7 +95,7 @@ export default {
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
-    '<rootDir>/packages/osd-ui-framework/(dist|doc_site|generator-kui)/',
+    '<rootDir>/packages/osd-ui-framework/(dist|doc_site)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
