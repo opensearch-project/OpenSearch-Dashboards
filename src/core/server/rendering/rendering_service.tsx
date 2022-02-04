@@ -53,6 +53,12 @@ import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config'
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
+/**
+ * Magic constants for the specific mime types
+ * @see https://en.wikipedia.org/wiki/List_of_file_signatures
+ */
+const MIME_MAGIC = ['<svg', 'GIF8', '‰PNG'];
+
 /** @internal */
 export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
@@ -261,28 +267,28 @@ export class RenderingService {
     opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
   ): Promise<BrandingValidation> => {
     const branding = opensearchDashboardsConfig.branding;
-    const isLogoDefaultValid = await this.isUrlValid(branding.logo.defaultUrl, 'logo default');
+    const isLogoDefaultValid = await this.isResourceValid(branding.logo.defaultUrl, 'logo default');
 
     const isLogoDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.logo.darkModeUrl, 'logo darkMode')
+      ? await this.isResourceValid(branding.logo.darkModeUrl, 'logo darkMode')
       : false;
 
-    const isMarkDefaultValid = await this.isUrlValid(branding.mark.defaultUrl, 'mark default');
+    const isMarkDefaultValid = await this.isResourceValid(branding.mark.defaultUrl, 'mark default');
 
     const isMarkDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.mark.darkModeUrl, 'mark darkMode')
+      ? await this.isResourceValid(branding.mark.darkModeUrl, 'mark darkMode')
       : false;
 
-    const isLoadingLogoDefaultValid = await this.isUrlValid(
+    const isLoadingLogoDefaultValid = await this.isResourceValid(
       branding.loadingLogo.defaultUrl,
       'loadingLogo default'
     );
 
     const isLoadingLogoDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
+      ? await this.isResourceValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
       : false;
 
-    const isFaviconValid = await this.isUrlValid(branding.faviconUrl, 'favicon');
+    const isFaviconValid = await this.isResourceValid(branding.faviconUrl, 'favicon');
 
     const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
@@ -305,6 +311,25 @@ export class RenderingService {
 
     return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
   }
+
+  /**
+   * Validation function for resources provided for the branding.
+   * Checks if it`s a base64 encoded resource is it`s not check it as URL
+   *
+   * @param {string} resource
+   * @param {string} configName
+   * @returns {boolean} indicate if the provided resource can be used in the system
+   */
+  public isResourceValid = async (resource: string, configName?: string): Promise<boolean> => {
+    if (resource.trim().startsWith('data:image')) {
+      const buff = Buffer.from(resource.replace(/^data:image\/.*;base64,/, ''), 'base64');
+      const extractedBytes = buff.subarray(0, 4).toString();
+      if (MIME_MAGIC.includes(extractedBytes)) {
+        return true;
+      }
+    }
+    return this.isUrlValid(resource, configName);
+  };
 
   /**
    * Validation function for URLs. Use Axios to call URL and check validity.

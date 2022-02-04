@@ -137,6 +137,29 @@ describe('RenderingService', () => {
     });
   });
 
+  describe('isResourceValid()', () => {
+    it('checks valid URL', async () => {
+      const result = await service.isResourceValid(
+        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
+        'config'
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('checks valid SVG', async () => {
+      const result = await service.isResourceValid(
+        'data:image/svg+xml;base64,CjxpbWcgc3R5bGU9IndpZHRoOiAxMDAlOyBoZWlnaHQ6IGF1dG87IGZsb2F0OiBsZWZ0O2JhY2tncm91bmQtaW1hZ2U6IG5vbmU7IiBzcmM9Ii8vcGljLm9ubGluZXdlYmZvbnRzLmNvbS9zdmcvaW1nXzIzOTMwOC5wbmciIGFsdD0iU2VsZWN0IFNtYWxsIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCI+CiAg',
+        'config'
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('checks invalid resource', async () => {
+      const result = await service.isResourceValid('some garbage', 'config');
+      expect(result).toEqual(false);
+    });
+  });
+
   describe('isUrlValid()', () => {
     it('checks valid SVG URL', async () => {
       const result = await service.isUrlValid(
