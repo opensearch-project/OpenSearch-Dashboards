@@ -411,7 +411,7 @@
     "listr": "^0.14.1",
     "load-grunt-config": "^3.0.1",
     "load-json-file": "^6.2.0",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "mocha": "^7.2.0",
     "mock-fs": "^4.12.0",
     "monaco-editor": "~0.17.0",
