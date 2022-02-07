@@ -30,6 +30,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -184,6 +185,19 @@ export class DashboardListing extends React.Component {
         }),
         dataType: 'string',
         sortable: true,
+      },
+      {
+        field: `updated_at`,
+        name: i18n.translate('dashboard.listing.table.columnUpdatedAtName', {
+          defaultMessage: 'Updated at',
+        }),
+        dataType: 'date',
+        sortable: true,
+        description: i18n.translate('dashboard.listing.table.columnUpdatedAtDescription', {
+          defaultMessage: 'Updated at of the saved object',
+        }),
+        ['data-test-subj']: 'updated-at',
+        render: (updatedAt) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
       },
     ];
     return tableColumns;

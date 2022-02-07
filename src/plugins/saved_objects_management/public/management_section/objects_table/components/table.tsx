@@ -30,6 +30,7 @@
 
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
+import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -250,6 +251,20 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      {
+        field: `updated_at`,
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnUpdatedAtName', {
+          defaultMessage: 'Updated at',
+        }),
+        dataType: 'date',
+        sortable: true,
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.table.columnUpdatedAtDescription',
+          { defaultMessage: 'Updated at of the saved object' }
+        ),
+        'data-test-subj': 'updated-at',
+        render: (updatedAt: string) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...columnRegistry.getAll().map((column) => {
         return {

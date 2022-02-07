@@ -36,6 +36,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
+import moment from 'moment';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -143,6 +144,19 @@ export const getTableColumns = (application: ApplicationStart, history: History)
     }),
     sortable: true,
     render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
+  },
+  {
+    field: `updated_at`,
+    name: i18n.translate('visualize.listing.table.columnUpdatedAtName', {
+      defaultMessage: 'Updated at',
+    }),
+    dataType: 'date',
+    sortable: true,
+    description: i18n.translate('visualize.listing.table.columnUpdatedAtDescription', {
+      defaultMessage: 'Updated at of the saved object',
+    }),
+    ['data-test-subj']: 'updated-at',
+    render: (updatedAt: string) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
   },
 ];
 
