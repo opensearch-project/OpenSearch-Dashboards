@@ -376,7 +376,6 @@ module.exports = {
      */
     {
       files: [
-        '**/*.stories.tsx',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
