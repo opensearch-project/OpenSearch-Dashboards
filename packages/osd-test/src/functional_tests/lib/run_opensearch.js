@@ -39,8 +39,6 @@ import { resolve } from 'path';
 import { OPENSEARCH_DASHBOARDS_ROOT } from './paths';
 import { createLegacyOpenSearchTestCluster } from '../../legacy_opensearch';
 
-import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
-
 export async function runOpenSearch({ config, options }) {
   const { log, opensearchFrom } = options;
   const ssl = config.get('opensearchTestCluster.ssl');
@@ -51,9 +49,7 @@ export async function runOpenSearch({ config, options }) {
 
   const cluster = createLegacyOpenSearchTestCluster({
     port: config.get('servers.opensearch.port'),
-    password: isSecurityEnabled
-      ? DEFAULT_SUPERUSER_PASS
-      : config.get('servers.opensearch.password'),
+    password: isSecurityEnabled ? 'changethispassword' : config.get('servers.opensearch.password'),
     license,
     log,
     basePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
@@ -66,22 +62,5 @@ export async function runOpenSearch({ config, options }) {
 
   await cluster.start();
 
-  if (isSecurityEnabled) {
-    await setupUsers({
-      log,
-      opensearchPort: config.get('servers.opensearch.port'),
-      updates: [config.get('servers.opensearch'), config.get('servers.opensearchDashboards')],
-      protocol: config.get('servers.opensearch').protocol,
-      caPath: getRelativeCertificateAuthorityPath(config.get('osdTestServer.serverArgs')),
-    });
-  }
-
   return cluster;
-}
-
-function getRelativeCertificateAuthorityPath(opensearchConfig = []) {
-  const caConfig = opensearchConfig.find(
-    (config) => config.indexOf('--opensearch.ssl.certificateAuthorities') === 0
-  );
-  return caConfig ? caConfig.split('=')[1] : undefined;
 }
