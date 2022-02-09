@@ -3,11 +3,12 @@
 
 name: Build and test
 
+# trigger on every commit push and PR for all branches except feature branches
 on:
   push:
-    branches: [ main ]
+    branches: [ '**', '!feature/**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ '**', '!feature/**' ]
 
 env:
   CACHE_NAME: osd-node-modules
@@ -64,7 +65,7 @@ jobs:
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/setup-node@v2
         with:
-          node-version: "14.18.2"
+          node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -161,7 +162,7 @@ jobs:
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         uses: actions/setup-node@v2
         with:
-          node-version: "14.18.2"
+          node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
