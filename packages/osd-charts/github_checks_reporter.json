@@ -1,8 +1,0 @@
-{
-  "appId": 26774,
-  "envVars": {
-    "appKey": "KIBANA_CI_REPORTER_KEY",
-    "repoSlug": "PR_GH_REPO",
-    "commitSha": "PR_ACT_COMMIT"
-  }
-}
