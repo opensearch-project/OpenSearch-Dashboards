@@ -46,14 +46,14 @@ run(
     await del(TARGET_BUILD_DIR);
 
     const cwd = ROOT_DIR;
-    const env = { ...process.env };
+    const env = { ...process.env, dev: !!flags.dev, prod: !flags.dev };
     if (supportsColor.stdout) {
       env.FORCE_COLOR = 'true';
     }
 
     await procRunner.run('worker', {
       cmd: 'webpack',
-      args: ['--config', WEBPACK_CONFIG_PATH, flags.dev ? '--env.dev' : '--env.prod'],
+      args: ['--config', WEBPACK_CONFIG_PATH],
       wait: true,
       env,
       cwd,

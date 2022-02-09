@@ -32,6 +32,6 @@
     "supports-color": "^7.0.0",
     "url-loader": "^2.2.0",
     "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^4.9.2"
   }
 }
