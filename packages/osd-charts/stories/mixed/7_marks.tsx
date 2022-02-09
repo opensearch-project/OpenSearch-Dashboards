@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -22,8 +33,8 @@ import { number, boolean, text } from '@storybook/addon-knobs';
 import numeral from 'numeral';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
-import { getRandomNumberGenerator } from '../../packages/charts/src/mocks/utils';
+import { AreaSeries, Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { getRandomNumberGenerator } from '../../src/mocks/utils';
 
 const getRandomNumber = getRandomNumberGenerator();
 const data1 = new Array(100).fill(0).map((_, x) => ({

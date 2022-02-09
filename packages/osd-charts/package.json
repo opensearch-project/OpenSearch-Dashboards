@@ -1,36 +1,31 @@
 {
-  "name": "elastic-charts-mono",
-  "description": "Mono repo for @elastic/charts",
+  "name": "@elastic/charts",
+  "description": "Elastic-Charts data visualization library",
+  "version": "31.1.0",
   "author": "Elastic DataVis",
   "license": "Apache-2.0",
-  "private": "true",
-  "repository": "git@github.com:elastic/elastic-charts.git",
-  "workspaces": [
-    "packages/*"
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "./dist/**/*"
   ],
   "scripts": {
-    "prepack": "echo 'This package is not published, see pacakges/*' && exit 1",
-    "autoprefix:css": "lerna run --loglevel=silent --scope @elastic/charts autoprefix:css",
-    "api:check": "lerna run --loglevel=silent --scope @elastic/charts api:check",
-    "api:check:local": "lerna run --loglevel=silent --scope @elastic/charts api:check:local",
-    "api:extract": "lerna run --loglevel=silent --scope @elastic/charts api:extract",
-    "backport": "backport",
-    "build": "lerna run --loglevel=silent --scope @elastic/charts build",
-    "build:ts": "lerna run --loglevel=silent --scope @elastic/charts build:ts",
-    "build:css": "lerna run --loglevel=silent --scope @elastic/charts build:css",
-    "build:clean": "lerna run --loglevel=silent --scope @elastic/charts build:clean",
-    "build:compile": "lerna run --loglevel=silent --scope @elastic/charts build:compile",
-    "build:sass": "lerna run --loglevel=silent --scope @elastic/charts build:sass",
-    "build:check": "lerna run --loglevel=silent --scope @elastic/charts build:check",
-    "build:watch": "lerna run --loglevel=silent --scope @elastic/charts build:watch",
-    "concat:sass": "lerna run --loglevel=silent --scope @elastic/charts concat:sass",
-    "cz": "git-cz",
+    "autoprefix:css": "echo 'Autoprefixing...' && yarn postcss dist/*.css --no-map --use autoprefixer -d dist",
+    "build": "yarn build:ts && yarn build:css",
+    "build:ts": "yarn build:clean && yarn build:compile && yarn build:check",
+    "build:css": "yarn build:sass && yarn autoprefix:css && yarn concat:sass",
+    "build:clean": "echo 'Cleaning dist...' && rm -rf ./dist",
+    "build:compile": "echo 'Compiling...' && tsc -p ./tsconfig.json && tsc -p ./tsconfig.nocomments.json",
+    "build:sass": "echo 'Building sass...' && node-sass src/theme_light.scss dist/theme_light.css --output-style compressed && node-sass src/theme_dark.scss dist/theme_dark.css --output-style compressed && node-sass src/theme_only_light.scss dist/theme_only_light.css --output-style compressed && node-sass src/theme_only_dark.scss dist/theme_only_dark.css --output-style compressed",
+    "build:check": "echo 'Type checking dist...' && tsc -p ./tsconfig.check.json",
+    "build:watch": "echo 'Watching build...' && yarn build:clean && yarn build:css && tsc -p ./tsconfig.json -w",
+    "concat:sass": "echo 'Concat SASS...' && node scripts/concat_sass.js",
     "lint": "NODE_ENV=production eslint --quiet --ext .tsx,.ts,.js .",
     "lint:fix": "yarn lint --fix",
     "prettier:check": "prettier --check \"**/*.{json,html,css,scss}\"",
     "playground": "cd playground && webpack serve",
     "pq": "pretty-quick",
-    "semantic-release": "semantic-release",
     "start": "yarn storybook",
     "start-docs": "start-storybook -p 8001 -c storybook-docs --ci",
     "storybook": "VRT=true start-storybook -s ./public -p 9001 -c storybook --ci --no-version-updates",
@@ -51,8 +46,7 @@
     "test:integration:server": "cd integration/server && RNG_SEED='elastic-charts' webpack serve --content-base integration/server",
     "typecheck:src": "lerna run --loglevel=silent --scope @elastic/charts typecheck",
     "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
-    "ts:prune": "ts-prune",
-    "link:kibana": "node ./packages/link_kibana"
+    "ts:prune": "ts-prune"
   },
   "dependencies": {
     "@popperjs/core": "^2.4.0",
@@ -150,7 +144,6 @@
     "eslint": "^7.17.0",
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-elastic-charts": "link:./packages/eslint-plugin-elastic-charts",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-file-header": "^0.0.1",
     "eslint-plugin-header": "^3.1.0",
@@ -163,7 +156,6 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-unicorn": "^25.0.1",
     "html-webpack-plugin": "^4.5.2",
-    "husky": "^4.3.6",
     "jest": "^26.6.3",
     "jest-canvas-mock": "^2.3.1",
     "jest-extended": "^0.11.5",
@@ -171,8 +163,6 @@
     "jest-matcher-utils": "^26.6.2",
     "jest-puppeteer": "^4.4.0",
     "jest-puppeteer-docker": "^1.4.2",
-    "lerna": "^4.0.0",
-    "link-kibana": "link:./packages/link_kibana",
     "lint-staged": "^10.5.3",
     "lodash": "^4.17.15",
     "lorem-ipsum": "^2.0.3",
@@ -208,6 +198,16 @@
     "webpack-cli": "^4.6.0",
     "webpack-dev-server": "^3.11.2"
   },
+  "peerDependencies": {
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.32",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "ie 11"
+  ],
   "engines": {
     "node": ">=10",
     "yarn": ">=1"

@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,12 +30,12 @@
 
 module.exports = {
   testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
-  roots: ['<rootDir>/packages/charts/src'],
+  roots: ['<rootDir>/src'],
   preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/scripts/setup_enzyme.ts', '<rootDir>/scripts/custom_matchers.ts'],
   coveragePathIgnorePatterns: [
-    '<rootDir>/packages/charts/src/mocks',
-    '<rootDir>/packages/charts/src/utils/d3-delaunay',
+    '<rootDir>/src/mocks',
+    '<rootDir>/src/utils/d3-delaunay',
     '/node_modules/',
   ],
   clearMocks: true,

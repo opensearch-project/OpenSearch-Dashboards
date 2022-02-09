@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -21,7 +32,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { boolean, text } from '@storybook/addon-knobs';
 import React, { FC } from 'react';
 
-import { Chart, Settings, Axis, Position } from '../../packages/charts/src';
+import { Chart, Settings, Axis, Position } from '../../src';
 
 const NoResults: FC<{ msg: string }> = ({ msg }) => (
   <EuiFlexItem>

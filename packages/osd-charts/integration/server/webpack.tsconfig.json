@@ -5,6 +5,6 @@
     "target": "ES5",
     "module": "ESNext"
   },
-  "include": ["../../packages/charts/src/**/*", "./**/*"],
+  "include": ["../../src/**/*", "./**/*"],
   "exclude": ["../../**/*.test.*"]
 }

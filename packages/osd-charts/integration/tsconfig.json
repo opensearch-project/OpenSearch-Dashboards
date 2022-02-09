@@ -1,4 +1,4 @@
 {
-  "extends": "../tsconfig",
+  "extends": "../tsconfig.base.json",
   "include": ["./**/*", "../**/*.d.ts", "../scripts/custom_matchers.ts"]
 }

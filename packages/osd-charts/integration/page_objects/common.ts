@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -22,7 +33,7 @@ import Url from 'url';
 import { JSDOM } from 'jsdom';
 import { AXNode } from 'puppeteer';
 
-import { DRAG_DETECTION_TIMEOUT } from '../../packages/charts/src/state/reducers/interactions';
+import { DRAG_DETECTION_TIMEOUT } from '../../src/state/reducers/interactions';
 // @ts-ignore
 import { port, hostname, debug, isLegacyVRTServer } from '../config';
 import { toMatchImageSnapshot } from '../jest_env_setup';

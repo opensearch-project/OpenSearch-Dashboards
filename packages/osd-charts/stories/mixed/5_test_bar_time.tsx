@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,8 +31,8 @@
 import { DateTime } from 'luxon';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../packages/charts/src';
-import { timeFormatter } from '../../packages/charts/src/utils/data/formatters';
+import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { timeFormatter } from '../../src/utils/data/formatters';
 
 export const Example = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });

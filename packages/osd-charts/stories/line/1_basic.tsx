@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,8 +31,8 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, LineSeries, ScaleType } from '../../packages/charts/src';
-import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
+import { Chart, LineSeries, ScaleType } from '../../src';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const toggleSpec = boolean('toggle line spec', true);

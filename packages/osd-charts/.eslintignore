@@ -15,7 +15,7 @@ license_header.js
 .git
 
 # Compiled source
-packages/charts/src/utils/d3-delaunay
+src/utils/d3-delaunay
 **/dist
 
 # auto generated directories

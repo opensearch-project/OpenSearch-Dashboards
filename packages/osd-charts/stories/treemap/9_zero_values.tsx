@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,12 +30,12 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../packages/charts/src';
-import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
-import { arrayToLookup, hueInterpolator } from '../../packages/charts/src/common/color_calcs';
-import { mocks } from '../../packages/charts/src/mocks/hierarchical';
-import { productDimension } from '../../packages/charts/src/mocks/hierarchical/dimension_codes';
-import { palettes } from '../../packages/charts/src/mocks/hierarchical/palettes';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
+import { config } from '../../src/chart_types/partition_chart/layout/config';
+import { arrayToLookup, hueInterpolator } from '../../src/common/color_calcs';
+import { mocks } from '../../src/mocks/hierarchical';
+import { productDimension } from '../../src/mocks/hierarchical/dimension_codes';
+import { palettes } from '../../src/mocks/hierarchical/palettes';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);

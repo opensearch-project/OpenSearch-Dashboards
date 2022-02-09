@@ -1,24 +1,16 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": false,
-    "sourceMap": true,
-    "preserveConstEnums": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "module": "CommonJS",
-    "target": "es5",
-    "lib": ["esnext", "dom"],
-    "moduleResolution": "node",
-    "jsx": "react",
-    "allowJs": false,
-    "skipLibCheck": true,
-    "downlevelIteration": true,
-    "stripInternal": true,
-    "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "./**/*.d.ts", "./scripts/custom_matchers.ts"]
+    "outDir": "dist",
+    "noUnusedLocals": true,
+    "removeComments": false
   },
-  "exclude": ["**/tmp", "**/dist"]
+  "files": [],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": ["**/*.test.*", "**/__mocks__",
+    "src/mocks/**/*",
+    "src/utils/data_samples/**/*"
+  ]
 }

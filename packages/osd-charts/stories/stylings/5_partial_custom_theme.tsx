@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,8 +31,8 @@
 import { color } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../packages/charts/src';
-import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
+import { Axis, BarSeries, Chart, PartialTheme, Position, ScaleType, Settings } from '../../src';
+import { SeededDataGenerator } from '../../src/mocks/utils';
 
 const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);

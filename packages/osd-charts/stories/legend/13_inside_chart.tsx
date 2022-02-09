@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -33,9 +44,9 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   LayoutDirection,
-} from '../../packages/charts/src';
-import { SeededDataGenerator } from '../../packages/charts/src/mocks/utils';
-import { KIBANA_METRICS } from '../../packages/charts/src/utils/data_samples/test_dataset_kibana';
+} from '../../src';
+import { SeededDataGenerator } from '../../src/mocks/utils';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { switchTheme } from '../../storybook/theme_service';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 

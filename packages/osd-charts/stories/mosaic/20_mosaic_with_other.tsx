@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -28,8 +39,8 @@ import {
   Partition,
   PartitionLayout,
   ShapeTreeNode,
-} from '../../packages/charts/src';
-import { config } from '../../packages/charts/src/chart_types/partition_chart/layout/config';
+} from '../../src';
+import { config } from '../../src/chart_types/partition_chart/layout/config';
 import { countryLookup } from '../utils/utils';
 
 const categoricalColors = ['rgb(110,110,110)', 'rgb(123,123,123)', 'darkgrey', 'lightgrey'];

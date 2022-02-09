@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -31,9 +42,9 @@ import {
   RecursivePartial,
   ScaleType,
   Settings,
-} from '../../packages/charts/src';
-import { Config } from '../../packages/charts/src/chart_types/heatmap/layout/types/config_types';
-import { SWIM_LANE_DATA } from '../../packages/charts/src/utils/data_samples/test_anomaly_swim_lane';
+} from '../../src';
+import { Config } from '../../src/chart_types/heatmap/layout/types/config_types';
+import { SWIM_LANE_DATA } from '../../src/utils/data_samples/test_anomaly_swim_lane';
 
 export const Example = () => {
   const [selection, setSelection] = useState<{ x: (string | number)[]; y: (string | number)[] } | undefined>();
