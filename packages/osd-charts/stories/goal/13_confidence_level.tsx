@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,11 +30,11 @@
 
 import React from 'react';
 
-import { Chart, Goal } from '../../packages/charts/src';
-import { config } from '../../packages/charts/src/chart_types/goal_chart/layout/config/config';
-import { BandFillColorAccessorInput } from '../../packages/charts/src/chart_types/goal_chart/specs';
-import { GoalSubtype } from '../../packages/charts/src/chart_types/goal_chart/specs/constants';
-import { Color } from '../../packages/charts/src/utils/common';
+import { Chart, Goal } from '../../src';
+import { config } from '../../src/chart_types/goal_chart/layout/config/config';
+import { BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { GoalSubtype } from '../../src/chart_types/goal_chart/specs/constants';
+import { Color } from '../../src/utils/common';
 
 const subtype = GoalSubtype.Goal;
 

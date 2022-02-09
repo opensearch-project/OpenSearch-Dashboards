@@ -1,4 +1,4 @@
 {
-  "extends": "./tsconfig.json",
-  "include": ["packages/charts/src/**/*", "scripts/setup_enzyme.ts", "scripts/custom_matchers.ts"]
+  "extends": "./tsconfig.base.json",
+  "include": ["src/**/*", "scripts/setup_enzyme.ts", "scripts/custom_matchers.ts"]
 }

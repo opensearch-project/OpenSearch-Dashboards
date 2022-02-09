@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,9 +30,9 @@
 
 /* eslint-disable import/no-unresolved */
 // @ts-ignore
-import themeDark from '../packages/charts/src/theme_dark.scss?lazy';
+import themeDark from '../src/theme_dark.scss?lazy';
 // @ts-ignore
-import themeLight from '../packages/charts/src/theme_light.scss?lazy';
+import themeLight from '../src/theme_light.scss?lazy';
 /* eslint-enable */
 
 export function switchTheme(theme: string) {

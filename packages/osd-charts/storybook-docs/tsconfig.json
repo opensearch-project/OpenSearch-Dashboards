@@ -1,5 +1,6 @@
 {
-  "extends": "../tsconfig",
-  "include": ["../packages/charts/src/**/*", "../stories/**/*", "./**/*", "config.ts"],
+  "extends": "../tsconfig.base.json",
+  "include": [
+    "../src/**/*", "../stories/**/*", "./**/*", "config.ts"],
   "exclude": ["../**/*.test.*"]
 }

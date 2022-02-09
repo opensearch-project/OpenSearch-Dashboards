@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,8 +31,8 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, PrimitiveValue, Settings } from '../../packages/charts/src';
-import data from '../../packages/charts/src/mocks/hierarchical/cpu_profile_tree_mock.json';
+import { Chart, Datum, Partition, PartitionLayout, PrimitiveValue, Settings } from '../../src';
+import data from '../../src/mocks/hierarchical/cpu_profile_tree_mock.json';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { config } from '../utils/hierarchical_input_utils';
 import { discreteColor, viridis18 as palette } from '../utils/utils';

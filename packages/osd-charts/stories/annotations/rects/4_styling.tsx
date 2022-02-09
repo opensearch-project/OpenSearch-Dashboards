@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,9 +31,9 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings } from '../../../packages/charts/src';
-import { Icon } from '../../../packages/charts/src/components/icons/icon';
-import { Position } from '../../../packages/charts/src/utils/common';
+import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings } from '../../../src';
+import { Icon } from '../../../src/components/icons/icon';
+import { Position } from '../../../src/utils/common';
 import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {

@@ -1,3 +1,14 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 module.exports = {
   parser: '@typescript-eslint/parser',
   extends: [
@@ -319,7 +330,7 @@ module.exports = {
     'import/resolver': {
       node: {
         extensions: ['.mjs', '.js', '.json', '.ts', '.d.ts', '.tsx'],
-        moduleDirectory: ['node_modules', 'packages/charts/src/'],
+        moduleDirectory: ['node_modules', 'src/'],
       },
     },
     react: {
@@ -328,7 +339,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['packages/charts/src/**/*.{ts?(x),js}'],
+      files: ['src/**/*.{ts?(x),js}'],
       rules: {
         /*
          * Custom elastic-charts rules
@@ -349,11 +360,11 @@ module.exports = {
                 'error',
                 {
                   zones: [
-                    { target: './packages/charts/src', from: './packages/charts/src/index.ts' },
+                    { target: './src', from: './src/index.ts' },
                     {
-                      target: './packages/charts/src',
+                      target: './src',
                       from: './',
-                      except: ['./packages/charts/src', 'node_modules'],
+                      except: ['./src', 'node_modules'],
                     },
                   ],
                 },
@@ -432,7 +443,7 @@ module.exports = {
       },
     },
     {
-      files: ['*.test.ts?(x)', '**/__mocks__/**/*.ts?(x)', 'packages/charts/src/mocks/**'],
+      files: ['*.test.ts?(x)', '**/__mocks__/**/*.ts?(x)', 'src/mocks/**'],
       rules: {
         'elastic-charts/require-release-tag': 0,
         'elastic-charts/require-tsdocs': 0,

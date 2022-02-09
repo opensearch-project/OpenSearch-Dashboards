@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -34,9 +45,9 @@ import {
   AreaSeries,
   BubbleSeries,
   TooltipStickTo,
-} from '../../packages/charts/src';
-import { TooltipType } from '../../packages/charts/src/specs/constants';
-import { VerticalAlignment, HorizontalAlignment } from '../../packages/charts/src/utils/common';
+} from '../../src';
+import { TooltipType } from '../../src/specs/constants';
+import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/common';
 
 export const getPositiveNumberKnob = (name: string, value: number, groupId?: string) =>
   number(name, value, { min: 0 }, groupId);
