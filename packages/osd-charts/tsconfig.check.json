@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "removeComments": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "rootDir": "dist"
+  },
+  "files": [],
+  "include": ["dist"]
+}

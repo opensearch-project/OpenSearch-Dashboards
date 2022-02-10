@@ -1,0 +1,67 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
+
+process.env.RNG_SEED = 'jest-unit-tests';
+
+declare global {
+  interface Window {
+    /**
+     * ResizeObserverMock override
+     */
+    ResizeObserver: typeof ResizeObserverMock;
+  }
+}
+
+/**
+ * Mocking RAF and ResizeObserver to missing RAF and RO in jsdom
+ */
+
+window.requestAnimationFrame = (callback) => {
+  callback(0);
+  return 0;
+};
+
+type ResizeObserverMockCallback = (entries: Array<{ contentRect: { width: number; height: number } }>) => void;
+class ResizeObserverMock {
+  callback: ResizeObserverMockCallback;
+
+  constructor(callback: ResizeObserverMockCallback) {
+    this.callback = callback;
+  }
+
+  observe() {
+    this.callback([{ contentRect: { width: 200, height: 200 } }]);
+  }
+
+  unobserve() {}
+
+  disconnect() {}
+}
+
+window.ResizeObserver = ResizeObserverMock;
+
+// Some tests will fail due to undefined Path2D, this mock doesn't create issues on test env
+class Path2D {}
+// @ts-ignore
+window.Path2D = Path2D;

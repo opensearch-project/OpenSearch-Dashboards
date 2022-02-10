@@ -1,0 +1,1269 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Rendering points - line Multi series line chart - linear can render first spec points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        10,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 50,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        5,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 5,
+    },
+    "x": 100,
+    "y": 75,
+  },
+]
+`;
+
+exports[`Rendering points - line Multi series line chart - linear can render second spec points 1`] = `
+Array [
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        20,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 20,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        10,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 10,
+    },
+    "x": 100,
+    "y": 50,
+  },
+]
+`;
+
+exports[`Rendering points - line Multi series line chart - ordinal can render first spec points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        10,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 50,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        5,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 5,
+    },
+    "x": 50,
+    "y": 75,
+  },
+]
+`;
+
+exports[`Rendering points - line Multi series line chart - ordinal can render second spec points 1`] = `
+Array [
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        20,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 20,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        10,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 10,
+    },
+    "x": 50,
+    "y": 50,
+  },
+]
+`;
+
+exports[`Rendering points - line Multi series line chart - time can render first spec points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546300800000,
+        10,
+      ],
+      "mark": null,
+      "x": 1546300800000,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 50,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546387200000,
+        5,
+      ],
+      "mark": null,
+      "x": 1546387200000,
+      "y": 5,
+    },
+    "x": 100,
+    "y": 75,
+  },
+]
+`;
+
+exports[`Rendering points - line Multi series line chart - time can render second spec points 1`] = `
+Array [
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546300800000,
+        20,
+      ],
+      "mark": null,
+      "x": 1546300800000,
+      "y": 20,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "blue",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{point2}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "point2",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 255,
+          "g": 0,
+          "opacity": 1,
+          "r": 0,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546387200000,
+        10,
+      ],
+      "mark": null,
+      "x": 1546387200000,
+      "y": 10,
+    },
+    "x": 100,
+    "y": 50,
+  },
+]
+`;
+
+exports[`Rendering points - line Removing out-of-domain points should render 3 points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{__global__}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        0,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 0,
+    },
+    "x": 0,
+    "y": 99.5,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{__global__}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        1,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 1,
+    },
+    "x": 50,
+    "y": 0,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{__global__}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        2,
+        10,
+      ],
+      "mark": null,
+      "x": 2,
+      "y": 10,
+    },
+    "x": 100,
+    "y": -900,
+  },
+]
+`;
+
+exports[`Rendering points - line Single series line chart - linear Can render two points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        10,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        5,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 5,
+    },
+    "x": 100,
+    "y": 50,
+  },
+]
+`;
+
+exports[`Rendering points - line Single series line chart - ordinal Can render two points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        0,
+        10,
+      ],
+      "mark": null,
+      "x": 0,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 25,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1,
+        5,
+      ],
+      "mark": null,
+      "x": 1,
+      "y": 5,
+    },
+    "x": 50,
+    "y": 50,
+  },
+]
+`;
+
+exports[`Rendering points - line Single series line chart - time Can render two points 1`] = `
+Array [
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546300800000,
+        10,
+      ],
+      "mark": null,
+      "x": 1546300800000,
+      "y": 10,
+    },
+    "x": 0,
+    "y": 0,
+  },
+  Object {
+    "color": "red",
+    "orphan": false,
+    "panel": Object {
+      "height": 100,
+      "left": 0,
+      "top": 0,
+      "width": 100,
+    },
+    "radius": 2,
+    "seriesIdentifier": Object {
+      "key": "groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}",
+      "seriesKeys": Array [
+        1,
+      ],
+      "smHorizontalAccessorValue": undefined,
+      "smVerticalAccessorValue": undefined,
+      "specId": "spec_1",
+      "splitAccessors": Map {},
+      "yAccessor": 1,
+    },
+    "style": Object {
+      "fill": Object {
+        "color": Object {
+          "b": 255,
+          "g": 255,
+          "opacity": 1,
+          "r": 255,
+        },
+      },
+      "shape": "circle",
+      "stroke": Object {
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "opacity": 1,
+          "r": 255,
+        },
+        "width": 1,
+      },
+    },
+    "transform": Object {
+      "x": 0,
+      "y": 0,
+    },
+    "value": Object {
+      "accessor": "y1",
+      "datum": Array [
+        1546387200000,
+        5,
+      ],
+      "mark": null,
+      "x": 1546387200000,
+      "y": 5,
+    },
+    "x": 100,
+    "y": 50,
+  },
+]
+`;

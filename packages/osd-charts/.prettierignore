@@ -1,0 +1,9 @@
+*.md
+*.mdx
+.out/
+.idea/
+.vscode/
+.temp/
+**/dist/
+coverage/
+**/tmp/
