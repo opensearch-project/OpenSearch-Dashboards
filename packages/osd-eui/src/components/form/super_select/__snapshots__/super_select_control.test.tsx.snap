@@ -1,0 +1,344 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiSuperSelectControl is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-label="aria-label"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl testClass1 testClass2"
+        data-test-subj="test subject string"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props compressed is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl euiSuperSelectControl--compressed"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props disabled options are rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props empty value option is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props fullWidth is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout euiFormControlLayout--fullWidth"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl euiSuperSelectControl--fullWidth"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props isInvalid is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl euiSuperSelectControl-isInvalid"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props isLoading is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value=""
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: , is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl euiSuperSelectControl-isLoading"
+        type="button"
+      />
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiLoadingSpinner euiLoadingSpinner--medium"
+        />
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`EuiSuperSelectControl props value option is rendered 1`] = `
+Array [
+  <input
+    type="hidden"
+    value="1"
+  />,
+  <div
+    class="euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper"
+    >
+      <span
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        Select an option: Option #1, is selected
+      </span>
+      <button
+        aria-haspopup="true"
+        aria-labelledby="undefined generated-id"
+        class="euiSuperSelectControl"
+        type="button"
+      >
+        Option #1
+      </button>
+      <div
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+]
+`;

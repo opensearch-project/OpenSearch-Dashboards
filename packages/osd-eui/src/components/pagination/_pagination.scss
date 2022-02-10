@@ -1,0 +1,24 @@
+.euiPagination {
+  display: flex;
+  align-items: center;
+
+  &__compressedText {
+    // sass-lint:disable-block no-important
+    display: inline-flex;
+    align-items: center;
+    line-height: 1 !important; // Override EuiText line-height
+
+    > *:first-child {
+      margin-right: $euiSizeXS;
+    }
+
+    > *:last-child {
+      margin-left: $euiSizeXS;
+    }
+  }
+}
+
+.euiPagination__list {
+  display: flex;
+  align-items: baseline;
+}

@@ -1,0 +1,286 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { TokenProps } from './token';
+
+export type EuiTokenMapType =
+  | 'tokenAnnotation'
+  | 'tokenArray'
+  | 'tokenBoolean'
+  | 'tokenClass'
+  | 'tokenConstant'
+  | 'tokenElement'
+  | 'tokenEnum'
+  | 'tokenEnumMember'
+  | 'tokenEvent'
+  | 'tokenException'
+  | 'tokenField'
+  | 'tokenFile'
+  | 'tokenFunction'
+  | 'tokenInterface'
+  | 'tokenKey'
+  | 'tokenMethod'
+  | 'tokenModule'
+  | 'tokenNamespace'
+  | 'tokenNull'
+  | 'tokenNumber'
+  | 'tokenObject'
+  | 'tokenOperator'
+  | 'tokenPackage'
+  | 'tokenParameter'
+  | 'tokenProperty'
+  | 'tokenRepo'
+  | 'tokenString'
+  | 'tokenStruct'
+  | 'tokenDate'
+  | 'tokenIP'
+  | 'tokenNested'
+  | 'tokenAlias'
+  | 'tokenShape'
+  | 'tokenGeo'
+  | 'tokenRange'
+  | 'tokenSymbol'
+  | 'tokenVariable'
+  | 'tokenBinary'
+  | 'tokenJoin'
+  | 'tokenPercolator'
+  | 'tokenFlattened'
+  | 'tokenRankFeature'
+  | 'tokenRankFeatures'
+  | 'tokenKeyword'
+  | 'tokenCompletionSuggester'
+  | 'tokenDenseVector'
+  | 'tokenText'
+  | 'tokenTokenCount'
+  | 'tokenSearchType'
+  | 'tokenHistogram';
+
+/**
+ * Most of the style combinations for tokens are semi-arbitrary. However, there was an effort
+ * to use the square shape for more common token types like string and number. Reserving the
+ * circle shape for more uncommon token types so they grab attention.
+ */
+
+export const TOKEN_MAP: {
+  [mapType in EuiTokenMapType]: Omit<TokenProps, 'iconType'>;
+} = {
+  tokenClass: {
+    shape: 'circle',
+    color: 'euiColorVis1',
+  },
+  tokenProperty: {
+    shape: 'circle',
+    color: 'euiColorVis2',
+  },
+  tokenEnum: {
+    shape: 'circle',
+    color: 'euiColorVis3',
+  },
+  tokenVariable: {
+    shape: 'circle',
+    color: 'euiColorVis7',
+  },
+  tokenMethod: {
+    shape: 'square',
+    color: 'euiColorVis2',
+  },
+  tokenAnnotation: {
+    shape: 'square',
+    color: 'euiColorVis5',
+  },
+  tokenException: {
+    shape: 'circle',
+    color: 'euiColorVis0',
+  },
+  tokenInterface: {
+    shape: 'circle',
+    color: 'euiColorVis9',
+  },
+  tokenParameter: {
+    shape: 'square',
+    color: 'euiColorVis4',
+  },
+  tokenField: {
+    shape: 'circle',
+    color: 'euiColorVis0',
+  },
+  tokenElement: {
+    shape: 'square',
+    color: 'euiColorVis3',
+  },
+  tokenFunction: {
+    shape: 'circle',
+    color: 'euiColorVis2',
+  },
+  tokenBoolean: {
+    shape: 'square',
+    color: 'euiColorVis7',
+  },
+  tokenString: {
+    shape: 'square',
+    color: 'euiColorVis1',
+  },
+  tokenArray: {
+    shape: 'square',
+    color: 'euiColorVis7',
+  },
+  tokenNumber: {
+    shape: 'square',
+    color: 'euiColorVis0',
+  },
+  tokenConstant: {
+    shape: 'circle',
+    color: 'euiColorVis0',
+  },
+  tokenObject: {
+    shape: 'circle',
+    color: 'euiColorVis3',
+  },
+  tokenEvent: {
+    shape: 'circle',
+    color: 'euiColorVis4',
+  },
+  tokenKey: {
+    shape: 'circle',
+    color: 'euiColorVis5',
+  },
+  tokenNull: {
+    shape: 'square',
+    color: 'euiColorVis2',
+  },
+  tokenStruct: {
+    shape: 'square',
+    color: 'euiColorVis0',
+  },
+  tokenPackage: {
+    shape: 'square',
+    color: 'euiColorVis0',
+  },
+  tokenOperator: {
+    shape: 'circle',
+    color: 'euiColorVis4',
+  },
+  tokenEnumMember: {
+    shape: 'square',
+    color: 'euiColorVis7',
+  },
+  tokenRepo: {
+    shape: 'rectangle',
+    color: 'euiColorVis1',
+    fill: 'dark',
+  },
+  tokenSymbol: {
+    shape: 'rectangle',
+    color: 'euiColorVis0',
+    fill: 'dark',
+  },
+  tokenFile: {
+    shape: 'rectangle',
+    color: 'gray',
+    fill: 'dark',
+  },
+  tokenNamespace: {
+    shape: 'square',
+    color: 'euiColorVis1',
+  },
+  tokenModule: {
+    shape: 'square',
+    color: 'euiColorVis4',
+  },
+  tokenDate: {
+    shape: 'square',
+    color: 'euiColorVis6',
+  },
+  tokenGeo: {
+    shape: 'square',
+    color: 'euiColorVis5',
+  },
+  tokenIP: {
+    shape: 'square',
+    color: 'euiColorVis9',
+  },
+  tokenShape: {
+    shape: 'circle',
+    color: 'euiColorVis8',
+  },
+  tokenRange: {
+    shape: 'circle',
+    color: 'euiColorVis4',
+  },
+  tokenNested: {
+    shape: 'circle',
+    color: 'euiColorVis2',
+  },
+  tokenAlias: {
+    shape: 'circle',
+    color: 'euiColorVis3',
+  },
+  tokenBinary: {
+    shape: 'square',
+    color: 'euiColorVis4',
+  },
+  tokenJoin: {
+    shape: 'square',
+    color: 'euiColorVis5',
+  },
+  tokenPercolator: {
+    shape: 'square',
+    color: 'euiColorVis6',
+  },
+  tokenFlattened: {
+    shape: 'square',
+    color: 'euiColorVis7',
+  },
+  tokenRankFeature: {
+    shape: 'square',
+    color: 'euiColorVis8',
+  },
+  tokenRankFeatures: {
+    shape: 'square',
+    color: 'euiColorVis3',
+  },
+  tokenKeyword: {
+    shape: 'square',
+    color: 'euiColorVis9',
+  },
+  tokenCompletionSuggester: {
+    shape: 'square',
+    color: 'euiColorVis1',
+  },
+  tokenDenseVector: {
+    shape: 'square',
+    color: 'euiColorVis2',
+  },
+  tokenText: {
+    shape: 'square',
+    color: 'euiColorVis3',
+  },
+  tokenTokenCount: {
+    shape: 'square',
+    color: 'euiColorVis4',
+  },
+  tokenSearchType: {
+    shape: 'square',
+    color: 'euiColorVis5',
+  },
+  tokenHistogram: {
+    shape: 'square',
+    color: 'euiColorVis6',
+  },
+};

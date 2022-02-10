@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiHeaderLink can render as specific color 1`] = `
+<button
+  class="euiButtonEmpty euiButtonEmpty--danger euiHeaderLink"
+  type="button"
+>
+  <span
+    class="euiButtonContent euiButtonEmpty__content"
+  >
+    <span
+      class="euiButtonEmpty__text"
+    />
+  </span>
+</button>
+`;
+
+exports[`EuiHeaderLink is rendered 1`] = `
+<button
+  aria-label="aria-label"
+  class="euiButtonEmpty euiButtonEmpty--text euiHeaderLink testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="button"
+>
+  <span
+    class="euiButtonContent euiButtonEmpty__content"
+  >
+    <span
+      class="euiButtonEmpty__text"
+    />
+  </span>
+</button>
+`;
+
+exports[`EuiHeaderLink is rendered as active 1`] = `
+<button
+  class="euiButtonEmpty euiButtonEmpty--primary euiHeaderLink euiHeaderLink-isActive"
+  type="button"
+>
+  <span
+    class="euiButtonContent euiButtonEmpty__content"
+  >
+    <span
+      class="euiButtonEmpty__text"
+    />
+  </span>
+</button>
+`;
