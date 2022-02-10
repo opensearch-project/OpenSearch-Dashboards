@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,6 +30,7 @@
 
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiObserver } from '../observer';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 export interface EuiResizeObserverProps {
   /**
@@ -28,8 +40,6 @@ export interface EuiResizeObserverProps {
   onResize: (dimensions: { height: number; width: number }) => void;
 }
 
-const hasResizeObserver =
-  typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined';
 export class EuiResizeObserver extends EuiObserver<EuiResizeObserverProps> {
   name = 'EuiResizeObserver';
 
@@ -68,11 +78,8 @@ const makeResizeObserver = (
   node: Element,
   callback: ResizeObserverCallback
 ) => {
-  let observer;
-  if (hasResizeObserver) {
-    observer = new window.ResizeObserver(callback);
-    observer.observe(node);
-  }
+  const observer = new ResizeObserver(callback);
+  observer.observe(node);
   return observer;
 };
 

@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,17 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
-
-// If you want to know why these mocks are created,
-// please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('resize-observer-polyfill');
-import ResizeObserver from 'resize-observer-polyfill';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 class MockElement {
   public clientWidth: number;

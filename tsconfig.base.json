@@ -55,7 +55,8 @@
       "jest",
       "react",
       "flot",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@types/resize-observer-browser"
     ]
   }
 }

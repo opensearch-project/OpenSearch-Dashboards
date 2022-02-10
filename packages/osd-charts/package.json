@@ -49,6 +49,7 @@
     "ts:prune": "ts-prune"
   },
   "dependencies": {
+    "@juggle/resize-observer": "^3.3.1",
     "@popperjs/core": "^2.4.0",
     "chroma-js": "^2.1.0",
     "classnames": "2.2.6",
@@ -65,7 +66,6 @@
     "react-redux": "^7.2.1",
     "redux": "^4.0.5",
     "reselect": "^4.0.0",
-    "resize-observer-polyfill": "^1.5.1",
     "ts-debounce": "^3.0.0",
     "utility-types": "^3.10.0",
     "uuid": "^8.3.2"
@@ -122,6 +122,7 @@
     "@types/puppeteer": "^5.4.2",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
+    "@types/resize-observer-browser": "^0.1.5",
     "@types/seedrandom": "^2.4.28",
     "@types/storybook__addon-info": "^5.2.1",
     "@types/url-parse": "^1.4.3",

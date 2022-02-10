@@ -6,7 +6,6 @@
   "main": "lib",
   "module": "es",
   "types": "eui.d.ts",
-  "docker_image": "node:10",
   "sideEffects": [
     "*.css",
     "*.scss"
@@ -49,6 +48,7 @@
     "test-staged"
   ],
   "dependencies": {
+    "@juggle/resize-observer": "^3.3.1",
     "@types/chroma-js": "^2.0.0",
     "@types/lodash": "^4.14.170",
     "@types/numeral": "^0.0.28",
