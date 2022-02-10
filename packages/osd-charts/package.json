@@ -46,7 +46,8 @@
     "test:integration:server": "cd integration/server && RNG_SEED='elastic-charts' webpack serve --content-base integration/server",
     "typecheck:src": "lerna run --loglevel=silent --scope @elastic/charts typecheck",
     "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
-    "ts:prune": "ts-prune"
+    "ts:prune": "ts-prune",
+    "osd:bootstrap": "yarn build"
   },
   "dependencies": {
     "@juggle/resize-observer": "^3.3.1",
