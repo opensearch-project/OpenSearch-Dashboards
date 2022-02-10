@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,18 +28,13 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -70,7 +68,7 @@ export class MetricPanelConfig extends Component {
       (model.background_color_rules && model.background_color_rules.length === 0)
     ) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }],
+        background_color_rules: [{ id: uuidv1() }],
       });
     }
   }

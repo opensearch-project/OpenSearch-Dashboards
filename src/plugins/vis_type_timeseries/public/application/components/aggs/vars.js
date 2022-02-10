@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
@@ -40,7 +38,7 @@ import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 
-export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
+export const newVariable = (opts) => ({ id: uuidv1(), name: '', field: '', ...opts });
 
 export class CalculationVars extends Component {
   constructor(props) {

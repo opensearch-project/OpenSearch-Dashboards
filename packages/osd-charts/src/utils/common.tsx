@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,7 +30,7 @@
 
 import React, { ComponentType, isValidElement, ReactNode } from 'react';
 import { $Values, isPrimitive } from 'utility-types';
-import { v1 as uuidV1 } from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { AdditiveNumber } from './accessor';
@@ -205,8 +216,8 @@ export const getRadians = (angle: number) => (angle * Math.PI) / 180;
  * @internal
  */
 export function htmlIdGenerator(idPrefix?: string) {
-  const prefix = idPrefix || `i${uuidV1()}`;
-  return (suffix?: string) => `${prefix}_${suffix || uuidV1()}`;
+  const prefix = idPrefix || `i${uuidv1()}`;
+  return (suffix?: string) => `${prefix}_${suffix || uuidv1()}`;
 }
 
 /**

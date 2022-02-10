@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,13 +28,8 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { URL } from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Request, RouteOptionsApp, RequestApplicationState } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
@@ -216,9 +214,9 @@ export class OpenSearchDashboardsRequest<
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // OpenSearchDashboardsRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    this.id = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestId ?? uuid.v4();
+    this.id = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestId ?? uuidv4();
     this.uuid =
-      (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
+      (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuidv4();
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });

@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,15 +28,10 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -311,7 +309,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
-        requestUuid: uuid.v4(),
+        requestUuid: uuidv4(),
       } as OpenSearchDashboardsRequestState;
       return responseToolkit.continue;
     });

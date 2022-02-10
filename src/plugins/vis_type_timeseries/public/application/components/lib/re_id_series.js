@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,19 +28,14 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import _ from 'lodash';
 
 export const reIdSeries = (source) => {
   const series = _.cloneDeep(source);
-  series.id = uuid.v1();
+  series.id = uuidv1();
   series.metrics.forEach((metric) => {
-    const id = uuid.v1();
+    const id = uuidv1();
     const metricId = metric.id;
     metric.id = id;
     if (series.terms_order_by === metricId) series.terms_order_by = id;
@@ -48,7 +46,7 @@ export const reIdSeries = (source) => {
         r.variables
           .filter((v) => v.field === metricId)
           .forEach((v) => {
-            v.id = uuid.v1();
+            v.id = uuidv1();
             v.field = id;
           });
       });

@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
@@ -38,7 +36,7 @@ import { OSD_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { IconSelect } from './icon_select/icon_select';
 import { YesNo } from './yes_no';
 import { QueryBarWrapper } from './query_bar_wrapper';
@@ -60,7 +58,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 function newAnnotation() {
   return {
-    id: uuid.v1(),
+    id: uuidv1(),
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',

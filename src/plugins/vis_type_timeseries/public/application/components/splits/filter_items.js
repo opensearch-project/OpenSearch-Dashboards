@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,18 +28,13 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
@@ -72,7 +70,7 @@ class FilterItemsUi extends Component {
 
     const newFilter = () => ({
       color: this.props.model.color,
-      id: uuid.v1(),
+      id: uuidv1(),
       filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);

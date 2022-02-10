@@ -209,7 +209,7 @@
     "tinymath": "1.2.1",
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
-    "uuid": "3.3.2",
+    "uuid": "^8.3.2",
     "whatwg-fetch": "^3.0.0",
     "yauzl": "^2.10.0"
   },
@@ -325,7 +325,7 @@
     "@types/testing-library__react-hooks": "^3.4.0",
     "@types/tough-cookie": "^4.0.1",
     "@types/type-detect": "^4.0.1",
-    "@types/uuid": "^3.4.4",
+    "@types/uuid": "^8.3.4",
     "@types/vinyl": "^2.0.4",
     "@types/vinyl-fs": "^2.4.11",
     "@types/webpack": "^4.41.31",

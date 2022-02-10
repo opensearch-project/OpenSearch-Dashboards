@@ -85,7 +85,7 @@
     "unified": "^9.2.0",
     "unist-util-visit": "^2.0.3",
     "url-parse": "^1.5.0",
-    "uuid": "^8.3.0",
+    "uuid": "^8.3.2",
     "vfile": "^4.2.0"
   },
   "devDependencies": {
@@ -115,7 +115,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/tabbable": "^3.1.0",
     "@types/url-parse": "^1.4.3",
-    "@types/uuid": "^8.3.0",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "argparse": "^2.0.1",
