@@ -7,7 +7,7 @@ module.exports = {
   "presets": [
     ["@babel/env", {
       // `targets` property set via `.browserslistrc`
-      "useBuiltIns": process.env.NO_COREJS_POLYFILL ? false : "usage",
+      "useBuiltIns": "entry",
       "corejs": 3,
       "modules": process.env.BABEL_MODULES ? process.env.BABEL_MODULES === 'false' ? false : process.env.BABEL_MODULES : "commonjs" // babel's default is commonjs
     }],

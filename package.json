@@ -109,6 +109,8 @@
       "**/grunt-*",
       "**/grunt-*/**",
       "@elastic/eui/rehype-react",
+      "@elastic/eui/remark-parse",
+      "@elastic/eui/remark-parse/**",
       "@elastic/eui/remark-rehype",
       "@elastic/eui/remark-rehype/**"
     ]

@@ -35,7 +35,8 @@
     "yo-doc": "yo ./generator-eui/app/documentation.js",
     "release": "node ./scripts/release.js",
     "postinstall": "node ./scripts/postinstall.js",
-    "version": "node ./scripts/update-changelog-version.js"
+    "version": "node ./scripts/update-changelog-version.js",
+    "osd:bootstrap": "yarn build"
   },
   "repository": {
     "type": "git",
