@@ -32,7 +32,7 @@
     "core-js": "^3.6.5",
     "css-loader": "^5.2.7",
     "expose-loader": "^0.7.5",
-    "file-loader": "^4.2.0",
+    "file-loader": "^6.1.0",
     "grunt": "^1.4.1",
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",

@@ -29,7 +29,7 @@
     "sass-loader": "^10.2.0",
     "style-loader": "^2.0.0",
     "supports-color": "^7.0.0",
-    "url-loader": "^2.2.0",
+    "url-loader": "^4.1.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.10"
   }
