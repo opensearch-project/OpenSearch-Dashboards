@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import {
   CoreSetup,
@@ -121,4 +121,4 @@ export default class OsdServer {
 }
 
 // Re-export commonly used hapi types.
-export { Server, Request, ResponseToolkit } from 'hapi';
+export { Server, Request, ResponseToolkit } from '@hapi/hapi';

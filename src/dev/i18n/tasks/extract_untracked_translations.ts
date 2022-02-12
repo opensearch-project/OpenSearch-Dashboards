@@ -61,7 +61,6 @@ export async function extractUntrackedMessagesTask({
     '**/__fixtures__/**',
     '**/packages/osd-i18n/**',
     '**/packages/osd-plugin-generator/template/**',
-    '**/packages/osd-ui-framework/generator-kui/**',
     '**/target/**',
     '**/test/**',
     '**/scripts/**',

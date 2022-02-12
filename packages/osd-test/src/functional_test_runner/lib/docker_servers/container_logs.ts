@@ -48,8 +48,8 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
   const logLine$ = new Rx.Subject<string>();
 
   Rx.merge(
-    observeLines(logsProc.stdout).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))),
-    observeLines(logsProc.stderr).pipe(tap((line) => log.error(`[docker:${name}] ${line}`)))
+    observeLines(logsProc.stdout!).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))),
+    observeLines(logsProc.stderr!).pipe(tap((line) => log.error(`[docker:${name}] ${line}`)))
   ).subscribe(logLine$);
 
   return logLine$.asObservable();

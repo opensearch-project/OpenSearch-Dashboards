@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
+import { postSnapshot } from '@percy/sdk-utils';
 import { Test } from 'mocha';
 
 import testSubjSelector from '@osd/test-subj-selector';

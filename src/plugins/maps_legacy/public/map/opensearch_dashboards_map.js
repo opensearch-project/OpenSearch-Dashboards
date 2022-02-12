@@ -611,7 +611,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
         this.emit('baseLayer:loading');
       });
       baseLayer.on('tileerror', () => {
-        if (baseLayer._url.includes('search-services.aws.a2z.com')) {
+        if (settings.options.showRegionBlockedWarning) {
           createRegionBlockedWarning();
         }
       });

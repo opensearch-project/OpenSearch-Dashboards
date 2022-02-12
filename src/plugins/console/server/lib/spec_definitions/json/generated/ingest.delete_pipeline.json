@@ -10,6 +10,6 @@
     "patterns": [
       "_ingest/pipeline/{id}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/delete-pipeline-api.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/delete-pipeline-api.html"
   }
 }

@@ -70,7 +70,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.opensearch.org/downloads/beats/auditbeat',
+          linkUrl: 'https://opensearch.org/docs/latest/downloads/beats/auditbeat',
         },
       }),
     },
@@ -91,7 +91,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
       textPost: i18n.translate('home.tutorials.common.auditbeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
-          linkUrl: 'https://www.opensearch.org/downloads/beats/auditbeat',
+          linkUrl: 'https://opensearch.org/docs/latest/downloads/beats/auditbeat',
         },
       }),
     },
@@ -113,7 +113,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
           values: {
             folderPath: '`C:\\Program Files`',
             guideLinkUrl: '{config.docs.beats.auditbeat}/auditbeat-installation-configuration.html',
-            auditbeatLinkUrl: 'https://www.opensearch.org/downloads/beats/auditbeat',
+            auditbeatLinkUrl: 'https://opensearch.org/docs/latest/downloads/beats/auditbeat',
             directoryName: 'auditbeat-{config.opensearchDashboards.version}-windows',
           },
         }

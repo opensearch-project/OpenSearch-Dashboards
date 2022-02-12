@@ -40,8 +40,10 @@ jest.mock('../../../opensearch_dashboards_services', () => {
     getServices: () => ({
       docLinks: {
         links: {
-          query: {
-            luceneQuerySyntax: 'documentation-link',
+          opensearch: {
+            queryDSL: {
+              base: 'documentation-link',
+            },
           },
         },
       },

@@ -40,6 +40,30 @@ describe('DocLinksService#start()', () => {
     const service = new DocLinksService();
     const api = service.start({ injectedMetadata });
     expect(api.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(api.links.opensearchDashboards).toEqual('https://opensearch.org/docs/dashboards/');
+    expect(api.links.opensearchDashboards.introduction).toEqual(
+      'https://opensearch.org/docs/test-branch/dashboards/index/'
+    );
+  });
+
+  it('templates the doc links with the main branch from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getOpenSearchDashboardsBranch.mockReturnValue('main');
+    const service = new DocLinksService();
+    const api = service.start({ injectedMetadata });
+    expect(api.DOC_LINK_VERSION).toEqual('latest');
+    expect(api.links.opensearchDashboards.introduction).toEqual(
+      'https://opensearch.org/docs/latest/dashboards/index/'
+    );
+  });
+
+  it('templates the doc links with the release branch from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getOpenSearchDashboardsBranch.mockReturnValue('1.1');
+    const service = new DocLinksService();
+    const api = service.start({ injectedMetadata });
+    expect(api.DOC_LINK_VERSION).toEqual('1.1');
+    expect(api.links.opensearchDashboards.introduction).toEqual(
+      'https://opensearch.org/docs/1.1/dashboards/index/'
+    );
   });
 });

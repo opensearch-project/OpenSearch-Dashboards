@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import OsdServer from '../osd_server';
 
 /**

@@ -33,7 +33,6 @@
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import semver from 'semver';
 import vfs from 'vinyl-fs';
 import { transformFileWithBabel, transformFileStream } from '@osd/dev-utils';
 
@@ -51,17 +50,12 @@ export async function writeServerFiles({
 }: BuildContext) {
   log.info('copying server source into the build and converting with babel');
 
-  const OPENSEARCH_DASHBOARDS_VERSION_79 = semver.satisfies(opensearchDashboardsVersion, '~7.9.0');
-
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
     vfs.src(
       [
         'opensearch_dashboards.json',
-        // always copy over the package.json file if we're building for 7.9
-        ...(OPENSEARCH_DASHBOARDS_VERSION_79 ? ['package.json'] : []),
-        // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in opensearch_dashboards.json manifest
-        ...(OPENSEARCH_DASHBOARDS_VERSION_79 || plugin.manifest.server
+        ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
               'tsconfig.json',
@@ -86,7 +80,7 @@ export async function writeServerFiles({
     ),
 
     // add opensearchDashboardsVersion to opensearch_dashboards.json files and opensearchDashboards.version to package.json files
-    // we don't check for `opensearchDashboards.version` in 7.10+ but the plugin helpers can still be used
+    // we don't check for `opensearchDashboards.version` in 1.0+ but the plugin helpers can still be used
     // to build plugins for older OpenSearch Dashboards versions so we do our best to support those needs by
     // setting the property if the package.json file is encountered
     transformFileStream((file) => {

@@ -11,7 +11,7 @@ const Demo: React.FC<Props> = ({ name, punctuation }) =>
   <div>Hello, {name}{punctuation}</div>;
 
 const store = createStateContainer({ userName: 'John' });
-const { Provider, connect } = createStateContainerReactHelpers(store);
+const { Provider, connect } = createStateContainerReactHelpers<typeof store>();
 
 const mapStateToProps = ({ userName }) => ({ name: userName });
 const DemoConnected = connect<Props, 'name'>(mapStateToProps)(Demo);

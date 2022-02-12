@@ -227,7 +227,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         <EmptyIndexPatternPrompt
           canSave={canSave}
           creationOptions={creationOptions}
-          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
+          docLinksIndexPatternIntro={docLinks.links.noDocumentation.indexPatterns.introduction}
           setBreadcrumbs={setBreadcrumbs}
         />
       );

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Request, ResponseToolkit, Server } from 'hapi';
+import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
 
 import { Logger } from '../logging';

@@ -24,6 +24,6 @@
       "{indices}/_settings/{name}",
       "_settings/{name}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-get-settings.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-get-settings.html"
   }
 }

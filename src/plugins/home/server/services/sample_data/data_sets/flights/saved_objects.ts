@@ -277,8 +277,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Markdown Instructions',
       }),
       visState:
-      //'{"title":"[Flights] Markdown Instructions","type":"markdown","params":{"fontSize":10,"openLinksInNewTab":true,"markdown":"### Sample Flight data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://www.opensearch.org/guide/en/kibana/current/index.html)."},"aggs":[]}',
-        '{"title":"[Flights] Markdown Instructions","type":"markdown","params":{"fontSize":10,"openLinksInNewTab":true,"markdown":"### Sample Flight data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://github.com/opensearch-project)."},"aggs":[]}',
+        '{"title":"[Flights] Markdown Instructions","type":"markdown","params":{"fontSize":10,"openLinksInNewTab":true,"markdown":"### Sample Flight data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://opensearch.org/docs/latest/dashboards/index/)."},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,

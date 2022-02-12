@@ -7,6 +7,6 @@
     "patterns": [
       "_scripts/painless/_execute"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/painless/master/painless-execute-api.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/painless/master/painless-execute-api.html"
   }
 }

@@ -99,7 +99,7 @@ If a plugin is disbled, all of its documents are retained in the OpenSearch Dash
 OpenSearch Dashboards index migrations expose a few config settings which might be tweaked:
 
 - `migrations.scrollDuration` - The
-  [scroll](https://www.opensearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html#scroll-search-context)
+  [scroll](https://opensearch.org/docs/latest/opensearch/rest-api/scroll/)
   value used to read batches of documents from the source index. Defaults to
   `15m`.
 - `migrations.batchSize` - The number of documents to read / transform / write

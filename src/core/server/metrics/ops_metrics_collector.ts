@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { Server as HapiServer } from 'hapi';
+import { Server as HapiServer } from '@hapi/hapi';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,

@@ -377,7 +377,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   painlessLink: (
                     <EuiLink
                       target="_blank"
-                      href={this.context.services.docLinks.links.scriptedFields.painless}
+                      href={
+                        this.context.services.docLinks.links.noDocumentation.scriptedFields.painless
+                      }
                     >
                       <FormattedMessage
                         id="indexPatternManagement.warningLabel.painlessLinkLabel"

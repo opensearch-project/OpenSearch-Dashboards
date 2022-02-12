@@ -34,7 +34,7 @@ import { CoreStart, CoreSetup } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
 import { Subscription } from 'rxjs';
 import { navigateToDefaultApp } from './navigate_to_default_app';
-import { createLegacyUrlForwardApp } from './forward_app';
+import { createLegacyUrlForwardApp, createLegacyUrlForwardCurrentApp } from './forward_app';
 import { navigateToLegacyOpenSearchDashboardsUrl } from './forward_app/navigate_to_legacy_opensearch_dashboards_url';
 
 export interface ForwardDefinition {
@@ -50,6 +50,7 @@ export class UrlForwardingPlugin {
 
   public setup(core: CoreSetup<{}, UrlForwardingStart>) {
     core.application.register(createLegacyUrlForwardApp(core, this.forwardDefinitions));
+    core.application.register(createLegacyUrlForwardCurrentApp(core, this.forwardDefinitions));
     return {
       /**
        * Forwards URLs within the legacy `opensearchDashboards` app to a new platform application.

@@ -53,7 +53,10 @@ const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">
 
 function getProps(
   props?: Partial<DashboardViewportProps>
-): { props: DashboardViewportProps; options: DashboardContainerOptions } {
+): {
+  props: DashboardViewportProps;
+  options: DashboardContainerOptions;
+} {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,

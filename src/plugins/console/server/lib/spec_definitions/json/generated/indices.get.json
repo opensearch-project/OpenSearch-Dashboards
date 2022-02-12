@@ -22,6 +22,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-get-index.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/get-index/"
   }
 }

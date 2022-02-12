@@ -51,9 +51,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',
           values: {
             cellDimensionsLink:
-              // TODO: [RENAMEME] Need prod urls.
-              // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-              `<a href="https://opensearch.org/docs/dashboards/maptiles"
+              `<a href="https://opensearch.org/docs/latest/dashboards/maptiles"
             target="_blank" rel="noopener">` +
               i18n.translate(
                 'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',

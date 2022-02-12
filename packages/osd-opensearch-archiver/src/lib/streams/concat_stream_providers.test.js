@@ -69,11 +69,14 @@ describe('concatStreamProviders() helper', () => {
       `"foo"`
     );
     expect(errorListener.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    [Error: foo],
-  ],
-]
-`);
+      Array [
+        Array [
+          [Error: foo],
+        ],
+        Array [
+          [Error: foo],
+        ],
+      ]
+    `);
   });
 });

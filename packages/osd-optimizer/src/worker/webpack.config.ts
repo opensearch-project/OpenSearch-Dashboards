@@ -160,22 +160,22 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@osd/optimizer/postcss.config.js'),
+                    postcssOptions: {
+                      config: require.resolve('@osd/optimizer/postcss.config.js'),
                     },
                   },
                 },
                 {
                   loader: 'sass-loader',
                   options: {
-                    prependData(loaderContext: webpack.loader.LoaderContext) {
+                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
                           `src/core/public/core_app/styles/_globals_${theme}.scss`
                         )
-                      )};\n`;
+                      )};\n${content}`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),

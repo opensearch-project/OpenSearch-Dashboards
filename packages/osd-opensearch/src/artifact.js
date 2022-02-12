@@ -89,6 +89,11 @@ function shouldUseUnverifiedSnapshot() {
   return !!process.env.OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED;
 }
 
+// Setting this flag provides an easy way to skip comparing the checksum
+function skipVerifyChecksum() {
+  return !!process.env.OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM;
+}
+
 async function fetchSnapshotManifest(url, log) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
@@ -327,7 +332,9 @@ exports.Artifact = class Artifact {
         return;
       }
 
-      await this._verifyChecksum(artifactResp);
+      if (!skipVerifyChecksum()) {
+        await this._verifyChecksum(artifactResp);
+      }
 
       // cache the etag for future downloads
       cache.writeMeta(dest, { etag: artifactResp.etag });

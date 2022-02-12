@@ -102,6 +102,7 @@ export const EditIndexPattern = withRouter(
       savedObjects,
       chrome,
       data,
+      docLinks,
     } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
@@ -231,9 +232,7 @@ export const EditIndexPattern = withRouter(
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
               <EuiLink
-                // TODO: [RENAMEME] Need prod urls.
-                // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/335#issuecomment-868294864
-                href="https://opensearch.org/docs/opensearch/index-templates"
+                href={docLinks.links.opensearch.indexTemplates.base}
                 target="_blank"
                 external
               >

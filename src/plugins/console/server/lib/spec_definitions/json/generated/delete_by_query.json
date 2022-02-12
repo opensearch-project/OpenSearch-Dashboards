@@ -57,6 +57,6 @@
       "{indices}/_delete_by_query",
       "{indices}/{type}/_delete_by_query"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/delete-by-query/"
   }
 }

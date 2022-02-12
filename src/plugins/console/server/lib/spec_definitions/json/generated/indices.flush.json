@@ -21,6 +21,6 @@
       "_flush",
       "{indices}/_flush"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-flush.html"
+    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-flush.html"
   }
 }

@@ -6,21 +6,23 @@ Overview
   - [Unit tests](#unit-tests)
   - [Integration tests](#integration-tests)
   - [Functional tests](#functional-tests)
+  - [Backwards Compatibility tests](#backwards-compatibility-tests)
 - [Continuous Integration](#continuous-integration)
 - [Environment misc](#environment-misc) 
 - [Misc](#misc) 
 
 # General information
-OpenSearch Dashboards uses [Jest](https://jestjs.io/) for unit and integration tests and [Selenium](https://www.selenium.dev/) for functional tests.
+OpenSearch Dashboards uses [Jest](https://jestjs.io/) for unit and integration tests, [Selenium](https://www.selenium.dev/) for functional tests, and [Cypress](https://www.cypress.io/) for backwards compatibility tests.
 
-In general, we recommend three tiers of tests:
+In general, we recommend four tiers of tests:
 * Unit tests: Unit tests: small and modular tests that utilize mocks for external dependencies.
 * Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, OpenSearch API calls, calling other plugin). 
 * End-to-end tests (e2e): functional tests that verify behavior in a web browser.
+* Backwards Compatibility tests: cypress tests that verify any changes are backwards compatible with previous versions.
 
 # Requirements
 * Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-    * `nvm install v10.24.1`
+    * `nvm install v14.18.2`
     * `npm install -g yarn`
 
 # Running tests
@@ -48,7 +50,26 @@ To debug functional tests:
 Say that you would want to debug a test in CI group 1, you can run the following command in your environment:
 `node --debug-brk --inspect scripts/functional_tests.js --config test/functional/config.js --include ciGroup1 --debug`
 
-This will print of an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
+This will print off an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
+
+### Backwards Compatibility tests
+To run all the backwards compatibility tests on vanilla OpenSearch Dashboards:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz]`
+
+To run all the backwards compatibility tests on bundled dashboards, pass the bundle parameter to the test:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -b true`
+
+To run specific versions' backwards compatibility tests, pass the versions to the test:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -v "[test versions]"`
+
+### Additional checks
+Make sure you run lint checker before submitting a pull request. To run lint checker:
+`node scripts/precommit_hook.js --fix`
+
+Please ensure that you don't introduce any broken links accidently. For any intentional broken link (e.g. dummy url in unit test), you can add it to [lycheeexclude](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.lycheeexclude) allow list specifically. 
 
 # Continuous Integration
 Automated testing is provided with Jenkins for Continuous Integration. Jenkins enables developers to build, deploy, and automate projects and provides us to run groups of tests quickly. CI groups are ran from the [Jenkinsfile](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/Jenkinsfile). 
@@ -65,4 +86,3 @@ Although Jest is the standard for this project, there are a few Mocha tests that
 `yarn test:mocha`
 
 However, these tests will eventually be migrated. Please avoid writing new Mocha tests. For further questions or to check the status please see this [issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/215).
-

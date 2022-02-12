@@ -84,7 +84,7 @@ export default {
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
-  coverageReporters: ['html', 'text'],
+  coverageReporters: ['html', 'text', 'text-summary'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: [
     '__fixtures__/',
@@ -95,7 +95,7 @@ export default {
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
-    '<rootDir>/packages/osd-ui-framework/(dist|doc_site|generator-kui)/',
+    '<rootDir>/packages/osd-ui-framework/(dist|doc_site)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
@@ -107,7 +107,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

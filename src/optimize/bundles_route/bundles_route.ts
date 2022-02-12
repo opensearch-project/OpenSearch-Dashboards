@@ -32,7 +32,7 @@
 
 import { extname, join } from 'path';
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 
 import { createDynamicAssetResponse } from './dynamic_asset_response';

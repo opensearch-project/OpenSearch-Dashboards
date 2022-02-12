@@ -34,9 +34,9 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import Accept from 'accept';
-import Boom from 'boom';
-import Hapi from 'hapi';
+import Accept from '@hapi/accept';
+import Boom from '@hapi/boom';
+import Hapi from '@hapi/hapi';
 
 import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';

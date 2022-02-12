@@ -20,6 +20,6 @@
     "patterns": [
       "{indices}/_close"
     ],
-    "documentation": "https://www.opensearch.org/guide/en/elasticsearch/reference/master/indices-open-close.html"
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/close-index/"
   }
 }

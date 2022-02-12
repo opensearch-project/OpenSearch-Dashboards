@@ -32,7 +32,7 @@
 
 import expect from '@osd/expect';
 import { errors as opensearchErrors } from 'elasticsearch';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import {
   isOpenSearchIndexNotFoundError,

@@ -37,9 +37,10 @@ import { setFormatService } from '../services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
 
+const describeif = process.env.SKIP_BAD_APPLES === 'true' ? describe.skip : describe;
 const seedColors = ['#00a69b', '#57c17b', '#6f87d8', '#663db8', '#bc52bc', '#9e3533', '#daa05d'];
 
-describe('TagCloudVisualizationTest', () => {
+describeif('TagCloudVisualizationTest', () => {
   let domNode;
   let visParams;
   let SVGElementGetBBoxSpyInstance;

@@ -30,9 +30,6 @@
  * GitHub history for details.
  */
 
-import { readFileSync } from 'fs';
-import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
-
 export function takePercySnapshot(show, hide) {
   if (!window.PercyAgent) {
     return false;
@@ -120,7 +117,5 @@ export function takePercySnapshot(show, hide) {
 }
 
 export const takePercySnapshotWithAgent = `
-  ${readFileSync(agentJsFilename(), 'utf8')}
-
   return (${takePercySnapshot.toString()}).apply(null, arguments);
 `;

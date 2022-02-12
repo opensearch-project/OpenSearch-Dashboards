@@ -61,10 +61,6 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
-  // Storybook has predetermined filesnames
-  '**/preview-body.html',
-  '**/preview-head.html',
-
   // filename required by api-extractor
   'api-documenter.json',
 
@@ -104,7 +100,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/osd-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',

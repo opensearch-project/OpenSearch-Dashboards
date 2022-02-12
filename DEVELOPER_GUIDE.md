@@ -1,4 +1,4 @@
-<p align="center"><img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg" height="64px"/></p>
+<p align="center"><img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/></p>
 <h1 align="center">OpenSearch Dashboards Developer Guide</h1>
 
 This guide applies to all development within the OpenSearch Dashboards project and is recommended for the development of all OpenSearch Dashboards plugins.
@@ -23,7 +23,7 @@ If you would like to install and run this project, please see the [Downloads Pag
 #### Prerequisites
 
 You need to have an OpenSearch server up and running to be able to run OpenSearch
-Dashboards. The easiest way to do it is [using Docker](https://opensearch.org/docs/opensearch/install/docker).
+Dashboards. The easiest way to do it is [using Docker](https://opensearch.org/docs/latest/opensearch/install/docker).
 
 We recommend using [Node Version Manager](https://github.com/nvm-sh/nvm) to install
 the node version we need.

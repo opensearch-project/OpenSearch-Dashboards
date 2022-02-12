@@ -107,7 +107,7 @@ export interface UsageStatsPayload extends BasicStatsPayload {
   collectionSource: string;
 }
 
-// From https://www.opensearch.org/guide/en/elasticsearch/reference/current/get-license.html
+// From https://opensearch.org/docs/latest/#get-involved
 export interface OpenSearchLicense {
   status: string;
   uid: string;
