@@ -115,7 +115,7 @@
   "dependencies": {
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@elastic/eui": "29.3.2",
+    "@elastic/eui": "34.6.0",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "^2.5.0",
     "@elastic/request-crypto": "2.0.0",
@@ -219,7 +219,7 @@
     "@babel/register": "^7.16.5",
     "@babel/types": "^7.16.0",
     "@elastic/apm-rum": "^5.6.1",
-    "@elastic/charts": "23.2.2",
+    "@elastic/charts": "31.1.0",
     "@elastic/ems-client": "7.10.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",

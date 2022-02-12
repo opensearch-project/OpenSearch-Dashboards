@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
@@ -158,7 +157,7 @@ export function ActionBar({
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow displayOnly>
+            <EuiFormRow display={'center'}>
               {isSuccessor ? (
                 <FormattedMessage
                   id="discover.context.olderDocumentsDescription"

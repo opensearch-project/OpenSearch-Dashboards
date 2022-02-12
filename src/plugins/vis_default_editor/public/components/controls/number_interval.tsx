@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { get } from 'lodash';
@@ -123,7 +121,7 @@ function NumberIntervalParamEditor({
 
   return (
     <EuiFormRow
-      compressed
+      display={'rowCompressed'}
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}

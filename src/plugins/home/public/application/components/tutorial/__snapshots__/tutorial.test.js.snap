@@ -4,7 +4,9 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
 <EuiPage
   restrictWidth={1200}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    component="main"
+  >
     <div>
       <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
@@ -50,7 +52,9 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
 <EuiPage
   restrictWidth={1200}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    component="main"
+  >
     <div>
       <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
@@ -70,6 +74,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             <EuiButtonGroup
               color="primary"
               idSelected="onPrem"
+              legend="Instructions Type"
               onChange={[Function]}
               options={
                 Array [
@@ -125,7 +130,9 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
 <EuiPage
   restrictWidth={1200}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    component="main"
+  >
     <div>
       <InjectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"

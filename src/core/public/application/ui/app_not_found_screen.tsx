@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,18 +28,13 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export const AppNotFound = () => (
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
         <EuiEmptyPrompt
           iconType="alert"

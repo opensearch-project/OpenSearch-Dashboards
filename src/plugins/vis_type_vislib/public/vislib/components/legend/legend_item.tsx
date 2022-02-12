@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
@@ -43,7 +41,7 @@ import {
   EuiButtonEmpty,
   EuiPopoverProps,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
 import { legendColors, LegendItem } from './models';
@@ -87,7 +85,7 @@ const VisLegendItemComponent = ({
     }
   };
 
-  const filterOptions: EuiButtonGroupOption[] = [
+  const filterOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'filterIn',
       label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {

@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
@@ -39,7 +37,7 @@ import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   HistogramBarSeries,
@@ -336,7 +334,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         />
         <LineAnnotation
           id="line-annotation"
-          domainType={AnnotationDomainTypes.XDomain}
+          domainType={AnnotationDomainType.XDomain}
           dataValues={lineAnnotationData}
           hideTooltips={true}
           style={lineAnnotationStyle}

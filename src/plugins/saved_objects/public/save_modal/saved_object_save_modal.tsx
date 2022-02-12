@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import {
   htmlIdGenerator,
   EuiButton,
@@ -42,7 +41,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -101,80 +99,71 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     const duplicateWarningId = generateId();
 
     return (
-      <EuiOverlayMask>
-        <form onSubmit={this.onFormSubmit}>
-          <EuiModal
-            data-test-subj="savedObjectSaveModal"
-            className="osdSavedObjectSaveModal"
-            onClose={this.props.onClose}
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="savedObjects.saveModal.saveTitle"
-                  defaultMessage="Save {objectType}"
-                  values={{ objectType: this.props.objectType }}
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        className="osdSavedObjectSaveModal"
+        onClose={this.props.onClose}
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="savedObjects.saveModal.saveTitle"
+              defaultMessage="Save {objectType}"
+              values={{ objectType: this.props.objectType }}
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-            <EuiModalBody>
-              {this.renderDuplicateTitleCallout(duplicateWarningId)}
+        <EuiModalBody>
+          {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
-              <EuiForm>
-                {!this.props.showDescription && this.props.description && (
-                  <EuiText size="s" color="subdued">
-                    {this.props.description}
-                  </EuiText>
-                )}
+          <EuiForm component="form" onSubmit={this.onFormSubmit} id="savedObjectSaveModalForm">
+            {!this.props.showDescription && this.props.description && (
+              <EuiText size="s" color="subdued">
+                {this.props.description}
+              </EuiText>
+            )}
 
-                <EuiSpacer />
+            <EuiSpacer />
 
-                {this.renderCopyOnSave()}
+            {this.renderCopyOnSave()}
 
-                <EuiFormRow
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="savedObjects.saveModal.titleLabel"
-                      defaultMessage="Title"
-                    />
-                  }
-                >
-                  <EuiFieldText
-                    fullWidth
-                    autoFocus
-                    data-test-subj="savedObjectTitle"
-                    value={title}
-                    onChange={this.onTitleChange}
-                    isInvalid={
-                      (!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0
-                    }
-                    aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
-                  />
-                </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />
+              }
+            >
+              <EuiFieldText
+                fullWidth
+                autoFocus
+                data-test-subj="savedObjectTitle"
+                value={title}
+                onChange={this.onTitleChange}
+                isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+                aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
+              />
+            </EuiFormRow>
 
-                {this.renderViewDescription()}
+            {this.renderViewDescription()}
 
-                {typeof this.props.options === 'function'
-                  ? this.props.options(this.state)
-                  : this.props.options}
-              </EuiForm>
-            </EuiModalBody>
+            {typeof this.props.options === 'function'
+              ? this.props.options(this.state)
+              : this.props.options}
+          </EuiForm>
+        </EuiModalBody>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
-                <FormattedMessage
-                  id="savedObjects.saveModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
+        <EuiModalFooter>
+          <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+            <FormattedMessage
+              id="savedObjects.saveModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-              {this.renderConfirmButton()}
-            </EuiModalFooter>
-          </EuiModal>
-        </form>
-      </EuiOverlayMask>
+          {this.renderConfirmButton()}
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 
@@ -279,6 +268,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         isLoading={isLoading}
         isDisabled={title.length === 0}
         type="submit"
+        form="savedObjectSaveModalForm"
       >
         {confirmLabel}
       </EuiButton>

@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import React from 'react';
@@ -60,7 +58,7 @@ describe('ColorPicker', () => {
     const props = { ...defaultProps, value: '#68BC00' };
     component = mount(<ColorPicker {...props} />);
     component.find('.tvbColorPicker button').simulate('click');
-    const input = findTestSubject(component, 'topColorPickerInput');
+    const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('#68BC00');
   });
 
@@ -68,7 +66,7 @@ describe('ColorPicker', () => {
     const props = { ...defaultProps, value: 'rgba(85,66,177,1)' };
     component = mount(<ColorPicker {...props} />);
     component.find('.tvbColorPicker button').simulate('click');
-    const input = findTestSubject(component, 'topColorPickerInput');
+    const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('85,66,177,1');
   });
 

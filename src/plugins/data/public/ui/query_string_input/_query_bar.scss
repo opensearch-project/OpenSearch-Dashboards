@@ -1,3 +1,14 @@
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 .osdQueryBar__wrap {
   max-width: 100%;
   z-index: $euiZContentMenu;
@@ -61,7 +72,6 @@
     // sass-lint:disable-block no-important
     flex-grow: 0 !important;
     flex-basis: auto !important;
-    margin-right: -$euiSizeXS !important;
 
     &.osdQueryBar__datePickerWrapper-isHidden {
       width: 0;

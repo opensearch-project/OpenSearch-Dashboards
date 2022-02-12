@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import React, { useCallback } from 'react';
 import { EuiPanel, EuiTitle, EuiColorPicker, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -127,7 +126,7 @@ function ThresholdPanel({
               defaultMessage: 'Line color',
             })}
             fullWidth
-            compressed
+            display={'rowCompressed'}
           >
             <EuiColorPicker
               compressed
