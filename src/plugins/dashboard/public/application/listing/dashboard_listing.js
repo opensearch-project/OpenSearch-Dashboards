@@ -189,12 +189,12 @@ export class DashboardListing extends React.Component {
       {
         field: `updated_at`,
         name: i18n.translate('dashboard.listing.table.columnUpdatedAtName', {
-          defaultMessage: 'Updated at',
+          defaultMessage: 'Last updated',
         }),
         dataType: 'date',
         sortable: true,
         description: i18n.translate('dashboard.listing.table.columnUpdatedAtDescription', {
-          defaultMessage: 'Updated at of the saved object',
+          defaultMessage: 'Last update of the saved object',
         }),
         ['data-test-subj']: 'updated-at',
         render: (updatedAt) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),

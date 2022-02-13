@@ -33,7 +33,7 @@ import { SimpleSavedObject } from './simple_saved_object';
 import { httpServiceMock } from '../http/http_service.mock';
 
 describe('SavedObjectsClient', () => {
-  const updatedAt = new Date().toString();
+  const updatedAt = new Date().toISOString();
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',

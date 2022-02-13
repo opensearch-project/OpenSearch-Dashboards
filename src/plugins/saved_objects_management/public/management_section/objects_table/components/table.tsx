@@ -255,13 +255,13 @@ export class Table extends PureComponent<TableProps, TableState> {
       {
         field: `updated_at`,
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnUpdatedAtName', {
-          defaultMessage: 'Updated at',
+          defaultMessage: 'Last updated',
         }),
         dataType: 'date',
         sortable: true,
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnUpdatedAtDescription',
-          { defaultMessage: 'Updated at of the saved object' }
+          { defaultMessage: 'Last update of the saved object' }
         ),
         'data-test-subj': 'updated-at',
         render: (updatedAt: string) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
