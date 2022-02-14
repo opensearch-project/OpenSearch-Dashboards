@@ -115,7 +115,7 @@ export class SavedObjectLoader {
     id: string;
     updated_at?: string;
   }) {
-    hit.attributes.updated_at = hit.updated_at;
+    hit.attributes.updated_at = hit?.updated_at ?? hit.attributes._updatedAt;
     return this.mapHitSource(hit.attributes, hit.id);
   }
 

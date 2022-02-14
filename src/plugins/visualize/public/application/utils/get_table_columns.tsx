@@ -37,6 +37,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import moment from 'moment';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -92,7 +93,11 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
   return icon;
 };
 
-export const getTableColumns = (application: ApplicationStart, history: History) => [
+export const getTableColumns = (
+  application: ApplicationStart,
+  history: History,
+  uiSettings: IUiSettingsClient
+) => [
   {
     field: 'title',
     name: i18n.translate('visualize.listing.table.titleColumnName', {
@@ -156,7 +161,8 @@ export const getTableColumns = (application: ApplicationStart, history: History)
       defaultMessage: 'Last update of the saved object',
     }),
     ['data-test-subj']: 'updated-at',
-    render: (updatedAt: string) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
+    render: (updatedAt: string) =>
+      updatedAt && moment(updatedAt).format(uiSettings.get('dateFormat:scaled')[3][1]),
   },
 ];
 

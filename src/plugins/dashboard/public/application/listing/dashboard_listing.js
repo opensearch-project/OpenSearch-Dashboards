@@ -162,6 +162,7 @@ export class DashboardListing extends React.Component {
   }
 
   getTableColumns() {
+    const [, dateFormat] = this.props.core.uiSettings.get('dateFormat:scaled')[3];
     const tableColumns = [
       {
         field: 'title',
@@ -197,7 +198,7 @@ export class DashboardListing extends React.Component {
           defaultMessage: 'Last update of the saved object',
         }),
         ['data-test-subj']: 'updated-at',
-        render: (updatedAt) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
+        render: (updatedAt) => updatedAt && moment(updatedAt).format(dateFormat),
       },
     ];
     return tableColumns;

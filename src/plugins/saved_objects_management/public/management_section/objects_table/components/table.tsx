@@ -81,6 +81,7 @@ export interface TableProps {
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  dateFormat: string;
 }
 
 interface TableState {
@@ -173,6 +174,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      dateFormat,
     } = this.props;
 
     const pagination = {
@@ -264,7 +266,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           { defaultMessage: 'Last update of the saved object' }
         ),
         'data-test-subj': 'updated-at',
-        render: (updatedAt: string) => updatedAt && moment(updatedAt).format('MMM DD YYYY'),
+        render: (updatedAt: string) => updatedAt && moment(updatedAt).format(dateFormat),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...columnRegistry.getAll().map((column) => {
         return {
