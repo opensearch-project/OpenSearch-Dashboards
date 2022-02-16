@@ -44,9 +44,7 @@ describe('AggTypesRegistry', () => {
   const uiSettings: any = {
     get: jest
       .fn()
-      .mockImplementation(
-        (key) => key === 'visualize:disableBucketAggSettings' && ['significant_terms']
-      ),
+      .mockImplementation((key) => key === 'visualize:disableBucketAgg' && ['significant_terms']),
   };
 
   beforeEach(() => {

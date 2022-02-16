@@ -46,7 +46,6 @@ import {
   VISUALIZE_ENABLE_LABS_SETTING,
   VISUALIZE_DISABLE_BUCKET_AGG_SETTING,
 } from '../common/constants';
-import { BUCKET_TYPES } from '../../data/common/search/aggs/buckets';
 
 import { visualizationSavedObjectType } from './saved_objects';
 
