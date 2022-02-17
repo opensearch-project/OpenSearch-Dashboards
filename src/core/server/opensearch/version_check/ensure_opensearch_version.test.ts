@@ -169,7 +169,7 @@ describe('pollOpenSearchNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => createOpenSearchError(error));
   };
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
