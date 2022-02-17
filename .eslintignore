@@ -1,5 +1,4 @@
 **/*.js.snap
-**/graphql/types.ts
 /.opensearch
 /.chromium
 /build

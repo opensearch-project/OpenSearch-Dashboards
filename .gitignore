@@ -59,10 +59,6 @@ apm.tsconfig.json
 ## when switching from master or 7.x branches
 snapshots.js
 
-# release notes script output
-report.csv
-report.asciidoc
-
 # TS incremental build cache
 *.tsbuildinfo
 
