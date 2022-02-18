@@ -48,7 +48,6 @@ exports.help = (defaults = {}) => {
       --install-path    Installation path, defaults to 'source' within base-path
       --data-archive    Path to zip or tarball containing an OpenSearch data directory to seed the cluster with.
       --password        Sets password for opensearch user [default: ${password}]
-      --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on OpenSearch
       -E                Additional key=value settings to pass to OpenSearch
 
