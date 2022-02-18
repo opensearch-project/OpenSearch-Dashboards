@@ -32,11 +32,11 @@
 
 import path from 'path';
 
-export const OPENSEARCH_DASHBOARDS_ARCHIVE_PATH = path.resolve(
+const OPENSEARCH_DASHBOARDS_ARCHIVE_PATH = path.resolve(
   __dirname,
   '../../../functional/fixtures/opensearch_archiver/dashboard/current/opensearch_dashboards'
 );
-export const DATA_ARCHIVE_PATH = path.resolve(
+const DATA_ARCHIVE_PATH = path.resolve(
   __dirname,
   '../../../functional/fixtures/opensearch_archiver/dashboard/current/data'
 );

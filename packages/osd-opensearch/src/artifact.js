@@ -185,10 +185,10 @@ async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
 
   // [RENAMEME] Need replacement for other platforms.
   // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
-  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const platform = process.platform === 'win32' ? 'windows' : 'linux';
   const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
   if (platform !== 'linux') {
-    throw createCliError(`Snapshots are only available for Linux`);
+    throw createCliError(`Snapshots are only available for linux and unix like operating systems`);
   }
 
   const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-SNAPSHOT`;
