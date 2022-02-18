@@ -37,13 +37,7 @@ const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { OPENSEARCH_BIN } = require('./paths');
-const {
-  log: defaultLog,
-  parseOpenSearchLog,
-  extractConfigFiles,
-  decompress,
-  NativeRealm,
-} = require('./utils');
+const { log: defaultLog, parseOpenSearchLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
@@ -191,14 +185,13 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     await Promise.race([
-      // wait for native realm to be setup and opensearch to be started
+      // wait for opensearch to be started
       Promise.all([
         first(this._process.stdout, (data) => {
           if (/started/.test(data)) {
             return true;
           }
         }),
-        this._nativeRealmSetup,
       ]),
 
       // await the outcome of the process in case it exits before starting
@@ -218,12 +211,6 @@ exports.Cluster = class Cluster {
    */
   async run(installPath, options = {}) {
     this._exec(installPath, options);
-
-    // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch((error) => {
-      this._log.error(error);
-      this.stop();
-    });
 
     // await the final outcome of the process
     await this._outcome;
@@ -312,28 +299,6 @@ exports.Cluster = class Cluster {
         ...(options.opensearchEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    // parse log output to find http port
-    const httpPort = first(this._process.stdout, (data) => {
-      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
-
-      if (match) {
-        return match[1];
-      }
-    });
-
-    // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async (port) => {
-      const caCert = await this._caCertPromise;
-      const nativeRealm = new NativeRealm({
-        port,
-        caCert,
-        log: this._log,
-        opensearchPassword: options.password,
-        ssl: this._ssl,
-      });
-      await nativeRealm.setPasswords(options);
     });
 
     // parse and forward opensearch stdout to the log
