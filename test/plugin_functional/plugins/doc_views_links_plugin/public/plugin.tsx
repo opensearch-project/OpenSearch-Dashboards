@@ -23,13 +23,13 @@ function MyHit(props: { index: string }) {
 export class DocViewsLinksPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { discover }: { discover: DiscoverSetup }) {
     discover.docViewsLinks.addDocViewLink({
-      href: 'http://locationHref',
+      href: 'http://some-url/',
       order: 1,
       label: 'href doc view link',
     });
 
     discover.docViewsLinks.addDocViewLink({
-      generateUrlFn: (props) => 'http://locationHref',
+      generateUrlFn: (props) => 'http://some-url/',
       order: 2,
       label: 'generateUrlFn doc view link',
     });

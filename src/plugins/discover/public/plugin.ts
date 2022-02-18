@@ -368,6 +368,9 @@ export class DiscoverPlugin
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
+      docViewsLinks: {
+        addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
+      },
     };
   }
 
