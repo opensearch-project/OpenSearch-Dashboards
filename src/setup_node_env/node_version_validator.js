@@ -41,7 +41,9 @@ var isVersionValid = requiredVersionMajorMinor === currentVersion.match(/^v(\d+\
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid) {
   var errorMessage =
-    'OpenSearch Dashboards does not support the current Node.js version ' +
+    'OpenSearch Dashboards was built with ' +
+    requiredVersion +
+    ' and does not support the current Node.js version ' +
     currentVersion +
     '. Please use Node.js ~v' +
     requiredVersionMajorMinor +
