@@ -45,9 +45,9 @@ export function getTableVisTypeDefinition(
   core: CoreSetup,
   context: PluginInitializerContext
 ): BaseVisTypeOptions {
-  const tableBucketAggAmounts = core.uiSettings.get('visualize:aggAmounts').table.bucket;
-  const maxBucket = tableBucketAggAmounts.max;
-  const minBucket = tableBucketAggAmounts.min;
+  const tableBucketAggAmounts = core.uiSettings.get('visualize:aggAmounts')?.table?.bucket;
+  const maxBucket = tableBucketAggAmounts?.max;
+  const minBucket = tableBucketAggAmounts?.min;
 
   return {
     name: 'table',

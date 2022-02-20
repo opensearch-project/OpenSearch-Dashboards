@@ -49,5 +49,6 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./self_changing_vis'));
+    loadTestFile(require.resolve('./table_vis'));
   });
 }

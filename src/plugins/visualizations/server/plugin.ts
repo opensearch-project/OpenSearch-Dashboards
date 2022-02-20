@@ -70,26 +70,23 @@ export class VisualizationsPlugin
 
     core.uiSettings.register({
       [VISUALIZE_AGG_AMOUNTS]: {
+        // currently only supports dataTable vis
         name: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsTitle', {
-          defaultMessage: "Set visualizations' aggregations amounts limitation",
+          defaultMessage: `Set bucket's aggregation min, max level limitation`,
         }),
-        value: {},
+        value: JSON.stringify({
+          table: {
+            bucket: {
+              max: 3,
+            },
+          },
+        }),
         description: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsText', {
-          defaultMessage: `Allows users to set visualizations' aggregations amounts limitation per .`,
+          defaultMessage: `Allows users to set bucket's aggregation level limitation,
+            using the min ,max properties`,
         }),
         category: ['visualization'],
-        schema: schema.object({
-          table: schema.maybe(
-            schema.object({
-              bucket: schema.maybe(
-                schema.object({
-                  max: schema.maybe(schema.number()),
-                  min: schema.maybe(schema.number()),
-                })
-              ),
-            })
-          ),
-        }),
+        schema: schema.string(),
       },
       [VISUALIZE_ENABLE_LABS_SETTING]: {
         name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
