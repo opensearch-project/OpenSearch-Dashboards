@@ -52,11 +52,11 @@ const applyOpenSearchDeprecations = (
   _config[path] = settings;
   const migrated = applyDeprecations(
     _config,
-    deprecations.map((deprecation) => ({
+    deprecations.map((deprecation: any) => ({
       deprecation,
       path,
     })),
-    (msg) => deprecationMessages.push(msg)
+    (msg: any) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,
