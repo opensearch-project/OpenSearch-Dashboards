@@ -17,7 +17,7 @@ angular.module('myDocViewLink', []).directive('myHit', () => ({
 }));
 
 function MyHit(props: { index: string }) {
-  return <h1 data-test-subj="generateurlcb-docviewlink">{props.index}</h1>;
+  return <h1 data-test-subj="generateUrlCb-docviewlink">{props.index}</h1>;
 }
 
 export class DocViewsLinksPlugin implements Plugin<void, void> {
@@ -29,9 +29,9 @@ export class DocViewsLinksPlugin implements Plugin<void, void> {
     });
 
     discover.docViewsLinks.addDocViewLink({
-      generateurlcb: () => 'http://some-url/',
+      generateUrlCb: () => 'http://some-url/',
       order: 2,
-      label: 'generateurlcb doc view link',
+      label: 'generateUrlCb doc view link',
     });
   }
 

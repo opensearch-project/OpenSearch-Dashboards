@@ -8,9 +8,9 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
     listItems={
       Array [
         Object {
-          "generateurlcb": [Function],
+          "generateUrlCb": [Function],
           "href": "aaa",
-          "label": "generateurlcb link",
+          "label": "generateUrlCb link",
           "order": 10,
         },
         Object {

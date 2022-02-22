@@ -33,7 +33,7 @@ beforeEach(() => {
 
 test('Render <DocViewerLink/> with 2 different links', () => {
   const registry = getDocViewsLinksRegistry();
-  registry.addDocViewLink({ order: 10, label: 'generateurlcb link', generateurlcb: () => 'aaa' });
+  registry.addDocViewLink({ order: 10, label: 'generateUrlCb link', generateUrlCb: () => 'aaa' });
   registry.addDocViewLink({ order: 20, label: 'href link', href: 'bbb' });
 
   const renderProps = { hit: {} } as DocViewLinkRenderProps;

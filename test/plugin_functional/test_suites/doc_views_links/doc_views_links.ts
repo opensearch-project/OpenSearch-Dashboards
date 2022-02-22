@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('should show href doc views link', async () => {
       const hrefLink = await find.byLinkText('href doc view link');
-      await find.byLinkText('generateurlcb doc view link');
+      await find.byLinkText('generateUrlCb doc view link');
 
       expect(await hrefLink.isDisplayed()).to.be(true);
     });
@@ -32,9 +32,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await browser.getCurrentUrl()).to.eql('http://some-url/');
     });
 
-    it('should render react doc view', async () => {
-      const generateurlcbLink = await find.byLinkText('generateurlcb doc view link');
-      await generateurlcbLink.click();
+    it('should render generateUrlCb doc view link', async () => {
+      const generateUrlCbLink = await find.byLinkText('generateUrlCb doc view link');
+      await generateUrlCbLink.click();
       expect(await browser.getCurrentUrl()).to.eql('http://some-url/');
     });
   });
