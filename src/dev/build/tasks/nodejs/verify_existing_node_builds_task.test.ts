@@ -67,6 +67,11 @@ async function setup(actualShaSums?: Record<string, string>) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetPlatforms: {
+      linux: false,
+      linuxArm: false,
+      darwin: false,
+    },
   });
 
   getNodeShasums.mockReturnValue(

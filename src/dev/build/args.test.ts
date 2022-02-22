@@ -46,9 +46,11 @@ it('build dist for current platform, without packages, by default', () => {
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -72,9 +74,11 @@ it('build dist for linux x64 platform, without packages, if --linux is passed', 
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -98,9 +102,11 @@ it('build dist for linux arm64 platform, without packages, if --linux-arm is pas
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -124,9 +130,11 @@ it('build dist for darwin x64 platform, without packages, if --darwin is passed'
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -150,9 +158,11 @@ it('builds packages if --all-platforms is passed', () => {
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": true,
         "createDebPackage": true,
         "createDockerPackage": true,
         "createDockerUbiPackage": true,
+        "createRpmArmPackage": true,
         "createRpmPackage": true,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -176,9 +186,11 @@ it('limits packages if --rpm passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": true,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -202,9 +214,11 @@ it('limits packages if --deb passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": true,
         "createDockerPackage": false,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -229,9 +243,11 @@ it('limits packages if --docker passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": true,
         "createDockerUbiPackage": true,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
@@ -256,9 +272,11 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     Object {
       "buildOptions": Object {
         "createArchives": true,
+        "createDebArmPackage": false,
         "createDebPackage": false,
         "createDockerPackage": true,
         "createDockerUbiPackage": false,
+        "createRpmArmPackage": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
         "isRelease": false,
