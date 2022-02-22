@@ -13,7 +13,11 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
   const listItems = getDocViewsLinksRegistry()
     .getDocViewsLinksSorted()
     .map((item) => {
-      item.href = item.generateurlcb ? item.generateurlcb(renderProps) : item.href;
+      if (item.generateurlcb) {
+        item.href = item.generateurlcb(renderProps);
+        delete item.generateurlcb;
+      }
+
       return item;
     });
 
