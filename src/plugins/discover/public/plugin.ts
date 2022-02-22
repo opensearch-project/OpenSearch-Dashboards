@@ -229,7 +229,7 @@ export class DiscoverPlugin
 
     this.docViewsLinksRegistry.addDocViewLink({
       label: 'View surrounding documents',
-      generateUrlFn: (renderProps: any) => {
+      generateurlfn: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
 
@@ -255,7 +255,7 @@ export class DiscoverPlugin
 
     this.docViewsLinksRegistry.addDocViewLink({
       label: 'View single document',
-      generateUrlFn: (renderProps) =>
+      generateurlfn: (renderProps) =>
         `#/doc/${renderProps.indexPattern.id}/${renderProps.hit._index}?id=${encodeURIComponent(
           renderProps.hit._id
         )}`,

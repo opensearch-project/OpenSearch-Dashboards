@@ -13,7 +13,7 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
   const listItems = getDocViewsLinksRegistry()
     .getDocViewsLinksSorted()
     .map((item) => {
-      item.href = item.generateUrlFn ? item.generateUrlFn(renderProps) : item.href;
+      item.href = item.generateurlfn ? item.generateurlfn(renderProps) : item.href;
       return item;
     });
 

@@ -17,7 +17,7 @@ angular.module('myDocViewLink', []).directive('myHit', () => ({
 }));
 
 function MyHit(props: { index: string }) {
-  return <h1 data-test-subj="generateUrlFn-docviewlink">{props.index}</h1>;
+  return <h1 data-test-subj="generateurlfn-docviewlink">{props.index}</h1>;
 }
 
 export class DocViewsLinksPlugin implements Plugin<void, void> {
@@ -29,9 +29,9 @@ export class DocViewsLinksPlugin implements Plugin<void, void> {
     });
 
     discover.docViewsLinks.addDocViewLink({
-      generateUrlFn: (props) => 'http://some-url/',
+      generateurlfn: () => 'http://some-url/',
       order: 2,
-      label: 'generateUrlFn doc view link',
+      label: 'generateurlfn doc view link',
     });
   }
 

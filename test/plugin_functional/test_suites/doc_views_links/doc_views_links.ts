@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('should show href doc views link', async () => {
       const hrefLink = await find.byLinkText('href doc view link');
-      await find.byLinkText('generateUrlFn doc view link');
+      await find.byLinkText('generateurlfn doc view link');
+
       expect(await hrefLink.isDisplayed()).to.be(true);
     });
 
@@ -32,8 +33,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('should render react doc view', async () => {
-      const generateUrlFnLink = await find.byLinkText('generateUrlFn doc view link');
-      await generateUrlFnLink.click();
+      const generateurlfnLink = await find.byLinkText('generateurlfn doc view link');
+      await generateurlfnLink.click();
       expect(await browser.getCurrentUrl()).to.eql('http://some-url/');
     });
   });
