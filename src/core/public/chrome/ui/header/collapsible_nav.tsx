@@ -142,10 +142,14 @@ export function CollapsibleNav({
 
   const DEFAULT_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_default_mode.svg`;
   const DARKMODE_OPENSEARCH_MARK = `${branding.assetFolderUrl}/opensearch_mark_dark_mode.svg`;
+  const DEFAULT_DASHBOARDS_TITLE = 'OpenSearch Dashboards';
+  const DEFAULT_PLUGINS_TITLE = 'OpenSearch Plugins';
 
   const darkMode = branding.darkMode;
   const markDefault = branding.mark?.defaultUrl;
   const markDarkMode = branding.mark?.darkModeUrl;
+  const dashboards = branding.sideBarDescription?.dashboards;
+  const plugins = branding.sideBarDescription?.plugins;
 
   /**
    * Use branding configurations to check which URL to use for rendering
@@ -174,6 +178,23 @@ export function CollapsibleNav({
    */
   const customSideMenuLogo = () => {
     return darkMode ? customSideMenuLogoDarkMode() : customSideMenuLogoDefaultMode();
+  };
+
+  /**
+   * Render custom dashboards title
+   *
+   * @returns a valid title
+   */
+  const customDashboardsDescription = () => {
+    return dashboards ?? DEFAULT_DASHBOARDS_TITLE;
+  };
+  /**
+   * Render custom plugins title
+   *
+   * @returns a valid title
+   */
+  const customPluginsDescription = () => {
+    return plugins ?? DEFAULT_PLUGINS_TITLE;
   };
 
   return (
@@ -312,14 +333,25 @@ export function CollapsibleNav({
         {/* OpenSearchDashboards, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
+          const isDashboardTitle = category.id === 'opensearchDashboards';
+          const isPluginsTitle = category.id === 'opensearch';
           const opensearchLinkLogo =
             category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
+          const sideBarMenuTitle = () => {
+            if (isDashboardTitle) {
+              return customDashboardsDescription();
+            } else if (isPluginsTitle) {
+              return customPluginsDescription();
+            } else {
+              return category.label;
+            }
+          };
 
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={opensearchLinkLogo}
-              title={category.label}
+              title={sideBarMenuTitle()}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}

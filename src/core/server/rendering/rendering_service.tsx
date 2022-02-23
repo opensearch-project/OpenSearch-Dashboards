@@ -52,6 +52,7 @@ import {
 import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
+const DEFAULT_PLUGINS_DESCRIPTION = 'OpenSearch Plugins';
 
 /** @internal */
 export class RenderingService {
@@ -139,6 +140,10 @@ export class RenderingService {
               },
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
+              sideBarDescription: {
+                dashboards: brandingAssignment.dashboardDescription,
+                plugins: brandingAssignment.pluginsDescription,
+              },
             },
           },
         };
@@ -233,6 +238,14 @@ export class RenderingService {
       ? branding.applicationTitle
       : DEFAULT_TITLE;
 
+    // assign sidebar description text based on brandingValidation function result
+    const dashboardDescription = brandingValidation.isDashboardsDescriptionValid
+      ? branding.sideBarDescription.dashboards
+      : DEFAULT_TITLE;
+    const pluginsDescription = brandingValidation.isPluginsDescriptionValid
+      ? branding.sideBarDescription.plugins
+      : DEFAULT_PLUGINS_DESCRIPTION;
+
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
       logoDarkmode,
@@ -242,6 +255,8 @@ export class RenderingService {
       loadingLogoDarkmode,
       favicon,
       applicationTitle,
+      dashboardDescription,
+      pluginsDescription,
     };
 
     return brandingAssignment;
@@ -286,6 +301,16 @@ export class RenderingService {
 
     const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
+    const isDashboardsDescriptionValid = this.isTitleValid(
+      branding.sideBarDescription.dashboards,
+      'dashboard'
+    );
+
+    const isPluginsDescriptionValid = this.isTitleValid(
+      branding.sideBarDescription.plugins,
+      'plugins'
+    );
+
     const brandingValidation: BrandingValidation = {
       isLogoDefaultValid,
       isLogoDarkmodeValid,
@@ -295,6 +320,8 @@ export class RenderingService {
       isLoadingLogoDarkmodeValid,
       isFaviconValid,
       isTitleValid,
+      isDashboardsDescriptionValid,
+      isPluginsDescriptionValid,
     };
 
     return brandingValidation;

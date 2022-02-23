@@ -83,6 +83,14 @@ export const config = {
       applicationTitle: schema.string({
         defaultValue: '',
       }),
+      sideBarDescription: schema.object({
+        dashboards: schema.string({
+          defaultValue: '',
+        }),
+        plugins: schema.string({
+          defaultValue: '',
+        }),
+      }),
     }),
   }),
   deprecations,

@@ -135,6 +135,8 @@ export interface BrandingValidation {
   isLoadingLogoDarkmodeValid: boolean;
   isFaviconValid: boolean;
   isTitleValid: boolean;
+  isDashboardsDescriptionValid: boolean;
+  isPluginsDescriptionValid: boolean;
 }
 
 /**
@@ -151,4 +153,6 @@ export interface BrandingAssignment {
   loadingLogoDarkmode?: string;
   favicon?: string;
   applicationTitle?: string;
+  dashboardDescription?: string;
+  pluginsDescription?: string;
 }

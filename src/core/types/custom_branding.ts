@@ -59,4 +59,9 @@ export interface Branding {
   faviconUrl?: string;
   /** Application title that will replace the default opensearch dashboard string */
   applicationTitle?: string;
+  /** Side bar menu title that will replace the default opensearch dashboards and opensearch plugins string */
+  sideBarDescription?: {
+    dashboards?: string;
+    plugins?: string;
+  };
 }

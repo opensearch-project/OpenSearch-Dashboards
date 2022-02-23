@@ -41,11 +41,14 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     { notifications, getStartServices, http }: CoreSetup,
     { devTools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
+    const injectedMetadata = JSON.parse(
+      document.querySelector('osd-injected-metadata')!.getAttribute('data')!
+    );
     if (home) {
       home.featureCatalogue.register({
         id: 'console',
         title: i18n.translate('console.devToolsTitle', {
-          defaultMessage: 'Interact with the OpenSearch API',
+          defaultMessage: `Interact with the ${injectedMetadata.branding.applicationTitle} API`,
         }),
         description: i18n.translate('console.devToolsDescription', {
           defaultMessage: 'Skip cURL and use a JSON interface to work with your data in Console.',
