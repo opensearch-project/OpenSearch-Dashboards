@@ -50,17 +50,17 @@ export async function i18nMixin(
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
-      glob: `*/${I18N_RC}`,
+      glob: `**/${I18N_RC}`,
     }),
     ...(config.get('plugins.paths') as string[]).map((cwd) =>
       getTranslationPaths({ cwd, glob: I18N_RC })
     ),
     ...(config.get('plugins.scanDirs') as string[]).map((cwd) =>
-      getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })
+      getTranslationPaths({ cwd, glob: `**/${I18N_RC}` })
     ),
     getTranslationPaths({
       cwd: fromRoot('../opensearch-dashboards-extra'),
-      glob: `*/${I18N_RC}`,
+      glob: `**/${I18N_RC}`,
     }),
   ]);
 
