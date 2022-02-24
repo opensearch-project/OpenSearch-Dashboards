@@ -42,7 +42,10 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import {
+  VISUALIZE_ENABLE_LABS_SETTING,
+  VISUALIZE_DISABLE_BUCKET_AGG_SETTING,
+} from '../common/constants';
 
 import { visualizationSavedObjectType } from './saved_objects';
 
@@ -76,6 +79,18 @@ export class VisualizationsPlugin
         }),
         category: ['visualization'],
         schema: schema.boolean(),
+      },
+      [VISUALIZE_DISABLE_BUCKET_AGG_SETTING]: {
+        name: i18n.translate('visualizations.advancedSettings.visualizeDisableBucketAgg', {
+          defaultMessage: 'Disable visualizations bucket aggregation types',
+        }),
+        value: [],
+        description: i18n.translate('visualizations.advancedSettings.visualizeDisableBucketAgg', {
+          defaultMessage: `A comma-separated list of bucket aggregations' names. e.g. significant_terms, terms.
+            Deactivates the specified bucket aggregations from visualizations.`,
+        }),
+        category: ['visualization'],
+        schema: schema.arrayOf(schema.string()),
       },
     });
 
