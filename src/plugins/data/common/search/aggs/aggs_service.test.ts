@@ -57,6 +57,7 @@ describe('Aggs service', () => {
     };
     startDeps = {
       getConfig: jest.fn(),
+      uiSettings: { get: jest.fn().mockImplementation(() => []) } as any,
     };
   });
 

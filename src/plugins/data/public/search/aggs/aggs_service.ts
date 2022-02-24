@@ -109,6 +109,7 @@ export class AggsService {
 
   public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+      uiSettings,
       getConfig: this.getConfig!,
     });
 

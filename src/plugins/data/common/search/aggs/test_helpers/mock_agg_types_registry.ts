@@ -93,7 +93,9 @@ export function mockAggTypesRegistry(deps?: AggTypesDependencies): AggTypesRegis
   aggTypes.buckets.forEach(({ name, fn }) => registrySetup.registerBucket(name, fn));
   aggTypes.metrics.forEach(({ name, fn }) => registrySetup.registerMetric(name, fn));
 
-  const registryStart = registry.start();
+  const registryStart = registry.start({
+    uiSettings: { get: jest.fn().mockImplementation(() => []) } as any,
+  });
 
   // initialize each agg type and store in memory
   registryStart.getAll().buckets.forEach((type) => {

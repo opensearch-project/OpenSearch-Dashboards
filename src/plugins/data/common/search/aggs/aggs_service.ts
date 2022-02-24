@@ -31,6 +31,9 @@
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import { IUiSettingsClient as IUiSettingsClientPublic } from 'src/core/public';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { IUiSettingsClient as IUiSettingsClientServer } from 'src/core/server';
 import { UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';
 import {
@@ -63,6 +66,7 @@ export interface AggsCommonSetupDependencies {
 /** @internal */
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
+  uiSettings: IUiSettingsClientPublic | IUiSettingsClientServer;
 }
 
 /**
@@ -90,8 +94,8 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
+  public start({ getConfig, uiSettings }: AggsCommonStartDependencies): AggsCommonStart {
+    const aggTypesStart = this.aggTypesRegistry.start({ uiSettings });
 
     return {
       calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
