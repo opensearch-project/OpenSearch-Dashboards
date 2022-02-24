@@ -53,11 +53,13 @@ opensearch.ssl.verificationMode: none
 ### Run Opensearch
 
 You need to have an OpenSearch server up and running to be able to run OpenSearch
-Dashboards. In a separate terminal you can run the latest nightly build using
+Dashboards. In a separate terminal you can run the latest snapshot built using:
 
 ```bash
 $ yarn opensearch snapshot 
 ```
+
+**Warning:** Starting the Dashboards instance before or during the initialization of the OpenSearch Server can cause Dashboards to sometimes misbehave. Ensure that the OpenSearch server instance is up and running first before starting up the Dashboards dev server from the next step.
 
 ### Run OpenSearch Dashboards
 
