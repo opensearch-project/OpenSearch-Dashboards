@@ -41,15 +41,20 @@ describe('AggTypesRegistry', () => {
   let registry: AggTypesRegistry;
   let setup: AggTypesRegistrySetup;
   let start: ReturnType<AggTypesRegistry['start']>;
+  const uiSettings: any = {
+    get: jest
+      .fn()
+      .mockImplementation((key) => key === 'visualize:disableBucketAgg' && ['significant_terms']),
+  };
 
   beforeEach(() => {
     registry = new AggTypesRegistry();
     setup = registry.setup();
-    start = registry.start();
   });
 
   it('registerBucket adds new buckets', () => {
     setup.registerBucket('terms', bucketType);
+    start = registry.start({ uiSettings });
     expect(start.getAll().buckets).toEqual([bucketType]);
   });
 
@@ -69,6 +74,7 @@ describe('AggTypesRegistry', () => {
 
   it('registerMetric adds new metrics', () => {
     setup.registerMetric('count', metricType);
+    start = registry.start({ uiSettings });
     expect(start.getAll().metrics).toEqual([metricType]);
   });
 
@@ -89,6 +95,7 @@ describe('AggTypesRegistry', () => {
   it('gets either buckets or metrics by id', () => {
     setup.registerBucket('terms', bucketType);
     setup.registerMetric('count', metricType);
+    start = registry.start({ uiSettings });
     expect(start.get('terms')).toEqual(bucketType);
     expect(start.get('count')).toEqual(metricType);
   });
@@ -96,9 +103,27 @@ describe('AggTypesRegistry', () => {
   it('getAll returns all buckets and metrics', () => {
     setup.registerBucket('terms', bucketType);
     setup.registerMetric('count', metricType);
+    start = registry.start({ uiSettings });
     expect(start.getAll()).toEqual({
       buckets: [bucketType],
       metrics: [metricType],
     });
+  });
+
+  it('getAll returns all buckets besides disabled bucket type', () => {
+    const termsBucket = () => ({ name: 'terms', type: 'buckets' } as BucketAggType<any>);
+    const histogramBucket = () => ({ name: 'histogram', type: 'buckets' } as BucketAggType<any>);
+    const significantTermsBucket = () =>
+      ({ name: 'significant_terms', type: 'buckets' } as BucketAggType<any>);
+    setup.registerBucket('terms', termsBucket);
+    setup.registerBucket('histogram', histogramBucket);
+    setup.registerBucket('significant_terms', significantTermsBucket);
+    start = registry.start({ uiSettings });
+
+    expect(start.getAll()).toEqual({
+      buckets: [termsBucket, histogramBucket],
+      metrics: [],
+    });
+    expect(start.get('significant_terms')).toEqual(undefined);
   });
 });
