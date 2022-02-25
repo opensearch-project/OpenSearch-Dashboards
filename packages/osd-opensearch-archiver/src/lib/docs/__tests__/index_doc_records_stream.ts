@@ -43,7 +43,19 @@ const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {
     const { index, type, id, source } = record.value;
 
-    return [...acc, { index: { _index: index, _type: type, _id: id } }, source];
+    return [
+      ...acc,
+      {
+        index: {
+          _index: index,
+          // TODO: verify this is no longer needed from legacy migrations
+          // Removed in: https://github.com/opensearch-project/OpenSearch/pull/2239
+          // _type: type,
+          _id: id,
+        },
+      },
+      source,
+    ];
   }, [] as any[]);
 };
 
