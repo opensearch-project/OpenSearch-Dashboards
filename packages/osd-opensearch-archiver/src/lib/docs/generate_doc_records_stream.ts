@@ -87,7 +87,9 @@ export function createGenerateDocRecordsStream({
                 // always rewrite the .kibana_* index to .kibana_1 so that
                 // when it is loaded it can skip migration, if possible
                 index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
-                type: hit._type,
+                // TODO: verify this is no longer needed from legacy migrations
+                // Removed in: https://github.com/opensearch-project/OpenSearch/pull/2239
+                // type: hit._type,
                 id: hit._id,
                 source: hit._source,
               },
