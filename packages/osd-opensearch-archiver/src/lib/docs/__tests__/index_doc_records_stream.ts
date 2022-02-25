@@ -41,7 +41,7 @@ import { createStubStats, createStubClient, createPersonDocRecords } from './stu
 
 const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {
-    const { index, type, id, source } = record.value;
+    const { index, id, source } = record.value;
 
     return [
       ...acc,
