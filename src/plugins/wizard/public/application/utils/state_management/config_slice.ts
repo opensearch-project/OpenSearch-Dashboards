@@ -4,59 +4,52 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IndexPatternField } from '../../../../../data/public';
+import { WizardServices } from '../../../types';
+import { CONTAINER_ID } from '../../contributions/containers/config_panel';
 
-interface ConfigSections {
-  [id: string]: {
-    title: string;
-    fields: IndexPatternField[];
-  };
+interface ConfigItems {
+  [id: string]: any;
 }
 interface ConfigState {
-  configSections: ConfigSections;
+  items: ConfigItems;
 }
 
-// TODO: Temp. Remove once visualizations can be refgistered and editor configs can be passed along
-// TODO: this is a placeholder while the config section is iorned out
 const initialState: ConfigState = {
-  configSections: {
-    x: {
-      title: 'X Axis',
-      fields: [],
-    },
-    y: {
-      title: 'Y Axis',
-      fields: [],
-    },
-  },
+  items: {},
 };
 
-interface SectionField {
-  sectionId: string;
-  field: IndexPatternField;
+export const getPreloadedState = async ({ types }: WizardServices): Promise<ConfigState> => {
+  const preloadedState = { ...initialState };
+
+  const defaultVisualizationType = types.all()[0];
+
+  if (defaultVisualizationType) {
+    preloadedState.items = defaultVisualizationType.contributions.items?.[CONTAINER_ID].filter(
+      ({ id }) => !!id
+    ).reduce((acc, { id }) => ({ ...acc, [id]: [] }), {});
+  }
+
+  return preloadedState;
+};
+
+interface UpdateConfigPayload {
+  id: string;
+  itemState: any;
 }
 
 export const slice = createSlice({
   name: 'configuration',
   initialState,
   reducers: {
-    addConfigSectionField: (state, action: PayloadAction<SectionField>) => {
-      const { field, sectionId } = action.payload;
-      if (state.configSections[sectionId]) {
-        state.configSections[sectionId].fields.push(field);
-      }
-    },
-    removeConfigSectionField: (state, action: PayloadAction<SectionField>) => {
-      const { field, sectionId } = action.payload;
-      if (state.configSections[sectionId]) {
-        const fieldIndex = state.configSections[sectionId].fields.findIndex(
-          (configField) => configField === field
-        );
-        if (fieldIndex !== -1) state.configSections[sectionId].fields.splice(fieldIndex, 1);
+    updateConfigItemState: (state, action: PayloadAction<UpdateConfigPayload>) => {
+      const { id, itemState } = action.payload;
+
+      if (state.items[id]) {
+        state.items[id] = itemState;
       }
     },
   },
 });
 
 export const { reducer } = slice;
-export const { addConfigSectionField, removeConfigSectionField } = slice.actions;
+export const { updateConfigItemState } = slice.actions;

@@ -7,10 +7,10 @@ import type { TypeServiceSetup } from '../services/type_service';
 import { createBarChartConfig } from './bar_chart';
 import { createPieChartConfig } from './pie_chart';
 
-export function registerDefaultTypes(typeServieSetup: TypeServiceSetup) {
+export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup) {
   const visualizationTypes = [createBarChartConfig, createPieChartConfig];
 
   visualizationTypes.forEach((createTypeConfig) => {
-    typeServieSetup.createVisualizationType(createTypeConfig());
+    typeServiceSetup.createVisualizationType(createTypeConfig());
   });
 }

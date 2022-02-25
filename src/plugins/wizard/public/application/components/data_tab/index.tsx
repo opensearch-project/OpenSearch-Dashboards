@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { FieldSelector } from './field_selector';
-import { ConfigPanel } from './config_panel';
+import { ConfigPanel } from '../../contributions/containers/config_panel';
 
 import './index.scss';
 

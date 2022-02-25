@@ -85,29 +85,27 @@ interface FieldGroupProps {
 }
 
 const FieldGroup = ({ fields, header, id }: FieldGroupProps) => (
-  <>
-    <EuiAccordion
-      id={id}
-      buttonContent={
-        <EuiTitle size="xxxs">
-          <span>{header}</span>
-        </EuiTitle>
-      }
-      extraAction={
-        <EuiNotificationBadge color="subdued" size="m">
-          {fields?.length || 0}
-        </EuiNotificationBadge>
-      }
-      initialIsOpen
-    >
-      {fields?.map((field, i) => (
-        <EuiFlexItem key={i}>
-          <FieldSelectorField field={field} />
-        </EuiFlexItem>
-      ))}
-    </EuiAccordion>
-    <EuiSpacer size="s" />
-  </>
+  <EuiAccordion
+    id={id}
+    className="wizFieldSelector__fieldGroup"
+    buttonContent={
+      <EuiTitle size="xxxs">
+        <span>{header}</span>
+      </EuiTitle>
+    }
+    extraAction={
+      <EuiNotificationBadge color="subdued" size="m">
+        {fields?.length || 0}
+      </EuiNotificationBadge>
+    }
+    initialIsOpen
+  >
+    {fields?.map((field, i) => (
+      <EuiFlexItem key={i}>
+        <FieldSelectorField field={field} />
+      </EuiFlexItem>
+    ))}
+  </EuiAccordion>
 );
 
 function getFieldCategory(field: IndexPatternField): keyof IFieldCategories {

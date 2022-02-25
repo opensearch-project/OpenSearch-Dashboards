@@ -5,8 +5,8 @@
   grid-gap: $euiSizeM;
   padding: $euiSizeM;
   background-color: $euiColorEmptyShade;
-}
 
-.wizWorkspace__empty {
-  height: 100%;
+  &__empty {
+    height: 100%;
+  }
 }
