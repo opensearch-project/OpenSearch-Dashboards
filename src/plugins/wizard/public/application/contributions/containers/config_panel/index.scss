@@ -1,0 +1,34 @@
+.wizConfig {
+  background: $euiColorLightestShade;
+  border-left: $euiBorderThin;
+  position: relative;
+  overflow-x: hidden;
+
+  &__section {
+    width: 100%;
+    transition: transform $euiAnimSpeedNormal 0s $euiAnimSlightResistance;
+  }
+
+  &__title {
+    padding: $euiSizeS;
+    padding-bottom: 0;
+
+    &.showDivider {
+      border-bottom: 1px solid $euiColorLightShade;
+    }
+  }
+
+  &__content {
+    padding: $euiSizeS;
+  }
+
+  &--secondary {
+    position: absolute;
+    top: 0;
+    left: 100%;
+  }
+
+  &.showSecondary > .wizConfig__section {
+    transform: translateX(-100%);
+  }
+}

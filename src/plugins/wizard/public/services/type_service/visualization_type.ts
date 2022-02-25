@@ -20,7 +20,7 @@ export interface VisualizationTypeOptions {
       //   render: (schemas: ContainerSchema[]) => {}; // recieves an array of items to render within the container
     };
     items?: {
-      'container-name': any[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
+      [container: string]: any[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
       //   'container-name': ContainerSchema[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
     };
   };

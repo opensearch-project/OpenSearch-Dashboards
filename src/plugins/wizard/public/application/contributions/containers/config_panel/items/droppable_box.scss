@@ -1,0 +1,36 @@
+.dropBox {
+  margin-top: $euiSize;
+  border-bottom: $euiBorderThin;
+  padding-bottom: $euiSize;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__container {
+    display: grid;
+    grid-gap: $euiSizeXS;
+    padding: $euiSizeS;
+    background-color: #E9EDF3;
+    border-radius: $euiBorderRadius;
+  }
+
+  &__field {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-gap: $euiSizeS;
+    padding: $euiSizeS $euiSizeM;
+    align-items: center;
+
+
+  }
+
+  &__dropTarget {
+    color: $euiColorDarkShade;
+    grid-template-columns: 1fr auto;
+  }
+}
