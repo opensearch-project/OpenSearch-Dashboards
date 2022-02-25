@@ -50,7 +50,7 @@ opensearch.password: "admin" # Default password on the docker image
 opensearch.ssl.verificationMode: none
 ```
 
-### Run Opensearch
+### Run OpenSearch
 
 You need to have an OpenSearch server up and running to be able to run OpenSearch
 Dashboards. In a separate terminal you can run the latest snapshot built using:
