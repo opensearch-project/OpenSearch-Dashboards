@@ -129,7 +129,7 @@ jobs:
       # - if: steps.integration-tests.outcome == 'success' || steps.integration-tests.outcome == 'skipped'
       #   run: echo "::set-output name=integration_tests_results::success" > integration_tests_results
   functional-tests:
-    needs: [ build-lint-test ]
+    # needs: [ build-lint-test ]
     runs-on: ubuntu-latest
     name: Run functional tests
     strategy: 
