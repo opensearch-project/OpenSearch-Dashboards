@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -45,7 +43,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
@@ -257,42 +254,40 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="opensearch-dashboards-react.tableListView.listing.deleteSelectedConfirmModal.title"
-              defaultMessage="Delete {itemCount} {entityName}?"
-              values={{
-                itemCount: this.state.selectedIds.length,
-                entityName:
-                  this.state.selectedIds.length === 1
-                    ? this.props.entityName
-                    : this.props.entityNamePlural,
-              }}
-            />
-          }
-          buttonColor="danger"
-          onCancel={this.closeDeleteModal}
-          onConfirm={this.deleteSelectedItems}
-          cancelButtonText={
-            <FormattedMessage
-              id="opensearch-dashboards-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={deleteButton}
-          defaultFocusedButton="cancel"
-        >
-          <p>
-            <FormattedMessage
-              id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
-              defaultMessage="You can't recover deleted {entityNamePlural}."
-              values={{ entityNamePlural: this.props.entityNamePlural }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="opensearch-dashboards-react.tableListView.listing.deleteSelectedConfirmModal.title"
+            defaultMessage="Delete {itemCount} {entityName}?"
+            values={{
+              itemCount: this.state.selectedIds.length,
+              entityName:
+                this.state.selectedIds.length === 1
+                  ? this.props.entityName
+                  : this.props.entityNamePlural,
+            }}
+          />
+        }
+        buttonColor="danger"
+        onCancel={this.closeDeleteModal}
+        onConfirm={this.deleteSelectedItems}
+        cancelButtonText={
+          <FormattedMessage
+            id="opensearch-dashboards-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={deleteButton}
+        defaultFocusedButton="cancel"
+      >
+        <p>
+          <FormattedMessage
+            id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
+            defaultMessage="You can't recover deleted {entityNamePlural}."
+            values={{ entityNamePlural: this.props.entityNamePlural }}
+          />
+        </p>
+      </EuiConfirmModal>
     );
   }
 
@@ -566,6 +561,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         restrictWidth
       >
         <EuiPageBody
+          component="main"
           aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
         >
           {this.renderPageContent()}

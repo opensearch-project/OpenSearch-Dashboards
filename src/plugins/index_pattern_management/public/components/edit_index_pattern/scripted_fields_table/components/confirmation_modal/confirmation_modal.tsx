@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,13 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
 
@@ -65,15 +64,13 @@ export const DeleteScritpedFieldConfirmationModal = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={hideDeleteConfirmationModal}
-        onConfirm={deleteField}
-        cancelButtonText={cancelButtonText}
-        confirmButtonText={confirmButtonText}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-      />
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={hideDeleteConfirmationModal}
+      onConfirm={deleteField}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={confirmButtonText}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+    />
   );
 };

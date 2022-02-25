@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,15 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
-  EuiOverlayMask,
   EuiModal,
   EuiButton,
   EuiModalHeader,
@@ -232,37 +229,35 @@ export function SaveQueryForm({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={onClose} initialFocus="[name=title]">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-              defaultMessage: 'Save query',
-            })}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <EuiModal onClose={onClose} initialFocus="[name=title]">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+            defaultMessage: 'Save query',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>{saveQueryForm}</EuiModalBody>
+      <EuiModalBody>{saveQueryForm}</EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
-            {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
+          {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
 
-          <EuiButton
-            onClick={onClickSave}
-            fill
-            data-test-subj="savedQueryFormSaveButton"
-            disabled={hasErrors || !enabledSaveButton}
-          >
-            {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+        <EuiButton
+          onClick={onClickSave}
+          fill
+          data-test-subj="savedQueryFormSaveButton"
+          disabled={hasErrors || !enabledSaveButton}
+        >
+          {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
+            defaultMessage: 'Save',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }

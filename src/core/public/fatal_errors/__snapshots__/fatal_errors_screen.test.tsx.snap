@@ -8,7 +8,9 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
     }
   }
 >
-  <EuiPageBody>
+  <EuiPageBody
+    component="main"
+  >
     <EuiPageContent
       horizontalPosition="center"
       verticalPosition="center"

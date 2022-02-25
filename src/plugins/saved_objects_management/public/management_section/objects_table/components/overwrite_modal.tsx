@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,19 +28,8 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React, { useState, Fragment, ReactNode } from 'react';
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EUI_MODAL_CONFIRM_BUTTON,
-  EuiText,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiText, EuiSuperSelect, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { FailedImportConflict } from '../../../lib/resolve_import_errors';
@@ -122,29 +114,27 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
           }
         );
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
-          defaultMessage: 'Overwrite {type}?',
-          values: { type },
-        })}
-        cancelButtonText={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.cancelButtonText',
-          { defaultMessage: 'Skip' }
-        )}
-        confirmButtonText={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.overwriteButtonText',
-          { defaultMessage: 'Overwrite' }
-        )}
-        buttonColor="danger"
-        onCancel={() => onFinish(false)}
-        onConfirm={() => onFinish(true, destinationId)}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        maxWidth="500px"
-      >
-        <p>{bodyText}</p>
-        {selectControl}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
+        defaultMessage: 'Overwrite {type}?',
+        values: { type },
+      })}
+      cancelButtonText={i18n.translate(
+        'savedObjectsManagement.objectsTable.overwriteModal.cancelButtonText',
+        { defaultMessage: 'Skip' }
+      )}
+      confirmButtonText={i18n.translate(
+        'savedObjectsManagement.objectsTable.overwriteModal.overwriteButtonText',
+        { defaultMessage: 'Overwrite' }
+      )}
+      buttonColor="danger"
+      onCancel={() => onFinish(false)}
+      onConfirm={() => onFinish(true, destinationId)}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      maxWidth="500px"
+    >
+      <p>{bodyText}</p>
+      {selectControl}
+    </EuiConfirmModal>
   );
 };

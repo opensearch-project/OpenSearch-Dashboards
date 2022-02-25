@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,13 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { Tutorial } from './tutorial';
 
@@ -146,7 +145,8 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('button#onPremElasticCloud').closest('div').find('input').simulate('change');
+    const input = findTestSubject(component, 'onPremElasticCloud');
+    input.simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });

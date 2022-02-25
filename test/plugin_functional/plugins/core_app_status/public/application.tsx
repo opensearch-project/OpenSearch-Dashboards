@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
@@ -48,7 +46,7 @@ import { AppMountParameters } from 'opensearch-dashboards/public';
 
 const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>
-    <EuiPageBody data-test-subj="appStatusApp">
+    <EuiPageBody component="main" data-test-subj="appStatusApp">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

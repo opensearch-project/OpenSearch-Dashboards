@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -39,7 +37,7 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
@@ -164,7 +162,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}

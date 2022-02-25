@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import _ from 'lodash';
@@ -255,6 +253,9 @@ class TutorialUi extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               options={radioButtons}
+              legend={i18n.translate('home.tutorial.instructionsTypeLegend', {
+                defaultMessage: 'Instructions Type',
+              })}
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
               color="primary"
@@ -419,7 +420,7 @@ class TutorialUi extends React.Component {
 
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>{content}</EuiPageBody>
+        <EuiPageBody component="main">{content}</EuiPageBody>
       </EuiPage>
     );
   }

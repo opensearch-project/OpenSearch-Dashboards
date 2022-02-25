@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,20 +28,8 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React, { useCallback, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonToggle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { useDebounce } from 'react-use';
@@ -65,7 +56,9 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
-  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(e.target.checked), []);
+  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(!autoApplyEnabled), [
+    autoApplyEnabled,
+  ]);
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
   useDebounce(
@@ -144,8 +137,8 @@ function DefaultEditorControls({
             defaultMessage: 'Auto updates the visualization on every change.',
           })}
         >
-          <EuiButtonToggle
-            label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
+          <EuiButton
+            aria-label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
               defaultMessage: 'Auto apply editor changes',
             })}
             className="visEditorSidebar__autoApplyButton"
@@ -153,9 +146,8 @@ function DefaultEditorControls({
             fill={autoApplyEnabled}
             iconType="refresh"
             isSelected={autoApplyEnabled}
-            onChange={toggleAutoApply}
+            onClick={toggleAutoApply}
             size="s"
-            isIconOnly
           />
         </EuiToolTip>
       )}

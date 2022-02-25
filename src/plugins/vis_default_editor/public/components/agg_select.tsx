@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import { get, has } from 'lodash';
 import React, { useEffect, useCallback, useState } from 'react';
 
@@ -89,15 +88,15 @@ function DefaultEditorAggSelect({
   }
 
   const helpLink = value && aggHelpLink && (
-    <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
-      <EuiText size="xs">
+    <EuiText size="xs">
+      <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
         <FormattedMessage
           id="visDefaultEditor.aggSelect.helpLinkLabel"
           defaultMessage="{aggTitle} help"
           values={{ aggTitle: value ? value.title : '' }}
         />
-      </EuiText>
-    </EuiLink>
+      </EuiLink>
+    </EuiText>
   );
 
   const errors = aggError ? [aggError] : [];
@@ -153,7 +152,7 @@ function DefaultEditorAggSelect({
       error={errors}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      compressed
+      display={'rowCompressed'}
     >
       <EuiComboBox
         placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {

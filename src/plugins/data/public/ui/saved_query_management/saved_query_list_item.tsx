@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,12 +28,7 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-import { EuiListGroupItem, EuiConfirmModal, EuiOverlayMask, EuiIconTip } from '@elastic/eui';
+import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 
 import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
@@ -138,36 +136,34 @@ export const SavedQueryListItem = ({
       />
 
       {showDeletionConfirmationModal && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
-              defaultMessage: 'Delete "{savedQueryName}"?',
-              values: {
-                savedQueryName: savedQuery.attributes.title,
-              },
-            })}
-            confirmButtonText={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            cancelButtonText={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            onConfirm={() => {
-              onDelete(savedQuery);
-              setShowDeletionConfirmationModal(false);
-            }}
-            buttonColor="danger"
-            onCancel={() => {
-              setShowDeletionConfirmationModal(false);
-            }}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
+            defaultMessage: 'Delete "{savedQueryName}"?',
+            values: {
+              savedQueryName: savedQuery.attributes.title,
+            },
+          })}
+          confirmButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          cancelButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          onConfirm={() => {
+            onDelete(savedQuery);
+            setShowDeletionConfirmationModal(false);
+          }}
+          buttonColor="danger"
+          onCancel={() => {
+            setShowDeletionConfirmationModal(false);
+          }}
+        />
       )}
     </Fragment>
   );

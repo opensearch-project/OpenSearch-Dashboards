@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import {
@@ -115,7 +114,7 @@ export function DashboardEmptyScreen({
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
       <EuiPage className="dshStartScreen" restrictWidth="500px">
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiPageContent
             verticalPosition="center"
             horizontalPosition="center"

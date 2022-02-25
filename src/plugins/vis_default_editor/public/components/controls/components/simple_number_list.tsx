@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
@@ -117,7 +115,7 @@ function SimpleNumberList({
       id={`${aggParam.name}-${agg.id}}`}
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
-      compressed
+      display={'rowCompressed'}
     >
       <>
         {numbers.map((number, arrayIndex) => (

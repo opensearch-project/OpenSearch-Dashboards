@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { History } from 'history';
@@ -52,7 +50,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="barAppHome">
+  <EuiPageBody component="main" data-test-subj="barAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -78,7 +76,7 @@ const PageB = ({ location }: RouteComponentProps) => {
   new URLSearchParams(location.search).forEach((value, key) => searchParams.push([key, value]));
 
   return (
-    <EuiPageBody data-test-subj="barAppPageB">
+    <EuiPageBody component="main" data-test-subj="barAppPageB">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

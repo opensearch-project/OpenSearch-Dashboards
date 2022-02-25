@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
@@ -204,6 +203,7 @@ export function DiscoverLegacy({
                   />
                 </div>
               )}
+              {/* Todo: fix size */}
               <EuiButtonIcon
                 iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
                 iconSize="m"
@@ -213,7 +213,7 @@ export function DiscoverLegacy({
                 aria-controls="discover-sidebar"
                 aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
-                className="dscCollapsibleSidebar__collapseButton"
+                className="dscCollapsibleSidebar__collapseButton euiButtonIcon--SizeUnset"
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>
