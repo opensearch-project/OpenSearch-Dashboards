@@ -50,7 +50,9 @@ export function createIndexDocRecordsStream(
         {
           [operation]: {
             _index: doc.index,
-            _type: doc.type,
+            // TODO: verify no BWC issues here
+            // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+            // _type: doc.type,
             _id: doc.id,
           },
         },

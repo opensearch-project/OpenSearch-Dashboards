@@ -41,9 +41,21 @@ import { createStubStats, createStubClient, createPersonDocRecords } from './stu
 
 const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {
-    const { index, type, id, source } = record.value;
+    const { index, id, source } = record.value;
 
-    return [...acc, { index: { _index: index, _type: type, _id: id } }, source];
+    return [
+      ...acc,
+      {
+        index: {
+          _index: index,
+          // TODO: verify no BWC issues here
+          // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+          // _type: type,
+          _id: id,
+        },
+      },
+      source,
+    ];
   }, [] as any[]);
 };
 
