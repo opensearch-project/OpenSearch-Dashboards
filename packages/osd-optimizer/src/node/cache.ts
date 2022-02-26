@@ -178,7 +178,7 @@ export class Cache {
     this.debug(`ERROR/${type}`, db, `${String(key)}: ${error.stack}`);
     process.stderr.write(
       chalk.red(
-        `[@kbn/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
+        `[@osd/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
       )
     );
   }
