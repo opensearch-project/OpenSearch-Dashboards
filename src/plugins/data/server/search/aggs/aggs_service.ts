@@ -32,11 +32,7 @@
 
 import { pick } from 'lodash';
 
-import {
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -52,7 +48,6 @@ import { AggsSetup, AggsStart } from './types';
 /** @internal */
 export interface AggsSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
-  uiSettings: UiSettingsServiceSetup;
 }
 
 /** @internal */
