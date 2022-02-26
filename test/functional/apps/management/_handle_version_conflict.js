@@ -66,7 +66,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await opensearch.update({
         index: '.kibana',
-        type: '_doc',
+        // TODO: verify no BWC issues here
+        // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+        // type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
@@ -93,7 +95,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setFieldFormat('url');
       const response = await opensearch.update({
         index: '.kibana',
-        type: '_doc',
+        // TODO: verify no BWC issues here
+        // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+        // type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
