@@ -41,11 +41,13 @@ export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
 };
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);
 export const mockStop = jest.fn();
+export const mockIsResourceValid = jest.fn();
 export const mockIsUrlValid = jest.fn();
 export const mockIsTitleValid = jest.fn();
 export const mockRenderingService: jest.Mocked<IRenderingService> = {
   setup: mockSetup,
   stop: mockStop,
+  isResourceValid: mockIsResourceValid,
   isUrlValid: mockIsUrlValid,
   isTitleValid: mockIsTitleValid,
 };
