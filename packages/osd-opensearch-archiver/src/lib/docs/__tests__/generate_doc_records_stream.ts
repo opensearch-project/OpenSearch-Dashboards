@@ -137,7 +137,9 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         type: 'doc',
         value: {
           index: '.opensearch_dashboards_1',
-          type: undefined,
+          // TODO: verify no BWC issues here
+          // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+          // type: undefined,
           id: 1,
           source: undefined,
         },
@@ -146,7 +148,9 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         type: 'doc',
         value: {
           index: 'foo',
-          type: undefined,
+          // TODO: verify no BWC issues here
+          // Removed: https://github.com/opensearch-project/OpenSearch/pull/2239
+          // type: undefined,
           id: 2,
           source: undefined,
         },
