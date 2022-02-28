@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
       await addButtonSelector.click();
       await splitRowsAggragationSelector.click();
       await addButtonSelector.click();
-      expect(splitRowsAggragationSelector.getAttribute('disabled')).to.eql(true);
+      expect(splitRowsAggragationSelector.getAttribute('disabled')).to.eql(false);
 
       await PageObjects.header.clickStackManagement();
       await PageObjects.settings.clickOpenSearchDashboardsSettings();

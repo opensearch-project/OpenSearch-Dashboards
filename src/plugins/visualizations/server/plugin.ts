@@ -76,9 +76,7 @@ export class VisualizationsPlugin
         }),
         value: JSON.stringify({
           table: {
-            bucket: {
-              max: 3,
-            },
+            bucket: {},
           },
         }),
         description: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsText', {
