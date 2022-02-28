@@ -7,7 +7,9 @@ import expect from '@osd/expect';
 import { VISUALIZE_AGG_AMOUNTS } from '../../../../src/plugins/visualizations/common/constants';
 
 export default function ({ getService, getPageObjects }) {
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'settings', 'header']);
 
   describe('self changing vis', function describeIndexTests() {
@@ -28,25 +30,24 @@ export default function ({ getService, getPageObjects }) {
       await addButtonSelector.click();
       splitRowsAggragationSelector = await testSubjects.find('visEditorAdd_buckets_Split rows');
       await splitRowsAggragationSelector.click();
+      await PageObjects.visEditor.selectAggregation('Geohash');
       await addButtonSelector.click();
       await splitRowsAggragationSelector.click();
+      await PageObjects.visEditor.selectAggregation('Geohash');
       await addButtonSelector.click();
-      expect(splitRowsAggragationSelector.getAttribute('disabled')).to.eql(false);
 
-      await PageObjects.header.clickStackManagement();
-      await PageObjects.settings.clickOpenSearchDashboardsSettings();
-      await PageObjects.settings.setAdvancedSettingsInput(
-        VISUALIZE_AGG_AMOUNTS,
-        `{"table":{"bucket":{"max":1}}}`
-      );
+      expect(await splitRowsAggragationSelector.getAttribute('disabled')).to.not.equal('true');
 
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('table');
-      await indexPatternSelector.click();
+      await opensearchDashboardsServer.uiSettings.update({
+        [VISUALIZE_AGG_AMOUNTS]: JSON.stringify({ table: { bucket: { max: 1 } } }),
+      });
+      await browser.refresh();
       await addButtonSelector.click();
       await splitRowsAggragationSelector.click();
+      await PageObjects.visEditor.selectAggregation('Geohash');
       await addButtonSelector.click();
-      expect(splitRowsAggragationSelector.getAttribute('disabled')).to.not.equal(true);
+
+      expect(await splitRowsAggragationSelector.getAttribute('disabled')).to.equal('true');
     });
   });
 }

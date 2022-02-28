@@ -79,6 +79,7 @@ export class VisualizationsPlugin
             bucket: {},
           },
         }),
+        type: 'json',
         description: i18n.translate('visualizations.advancedSettings.visualizeAggAmountsText', {
           defaultMessage: `Allows users to set bucket's aggregation level limitation,
             using the min ,max properties`,
