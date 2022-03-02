@@ -16,17 +16,24 @@ import {
   WizardPluginSetupDependencies,
   WizardPluginStartDependencies,
   WizardServices,
+  WizardSetup,
 } from './types';
 import { PLUGIN_NAME } from '../common';
+import { TypeService } from './services/type_service';
+import { getPreloadedStore } from './application/utils/state_management';
 
 export class WizardPlugin
-  implements Plugin<void, void, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
+  implements
+    Plugin<WizardSetup, void, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
+  private typeService = new TypeService();
+
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<WizardPluginStartDependencies>,
     { visualizations }: WizardPluginSetupDependencies
   ) {
+    const typeService = this.typeService;
     // Register the plugin to core
     core.application.register({
       id: 'wizard',
@@ -39,6 +46,9 @@ export class WizardPlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { data, savedObjects, navigation } = pluginsStart;
 
+        const { registerDefaultTypes } = await import('./visualizations');
+        registerDefaultTypes(typeService.setup());
+
         const services: WizardServices = {
           ...coreStart,
           toastNotifications: coreStart.notifications.toasts,
@@ -46,16 +56,20 @@ export class WizardPlugin
           savedObjectsPublic: savedObjects,
           navigation,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          types: typeService.start(),
         };
 
         // make sure the index pattern list is up to date
         data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
+        // TODO: Add the redirect
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
+        const store = await getPreloadedStore(services);
+
         // Render the application
-        return renderApp(params, services);
+        return renderApp(params, services, store);
       },
     });
 
@@ -72,6 +86,10 @@ export class WizardPlugin
       aliasApp: 'wizard',
       aliasPath: '#/',
     });
+
+    return {
+      ...typeService.setup(),
+    };
   }
 
   public start(core: CoreStart) {}

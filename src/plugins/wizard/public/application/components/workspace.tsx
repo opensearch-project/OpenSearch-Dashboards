@@ -3,8 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { FC } from 'react';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiPopover,
+} from '@elastic/eui';
+import React, { FC, useState, useMemo } from 'react';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WizardServices } from '../../types';
+import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
+import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 
 import './workspace.scss';
 
@@ -13,10 +27,7 @@ export const Workspace: FC = ({ children }) => {
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
         <EuiFlexItem grow={false}>
-          {/* TODO: This is the temporary view of the selected chard, should be replaced by dropdown */}
-          <EuiButton iconType="visBarVertical" disabled>
-            Bar
-          </EuiButton>
+          <TypeSelectorPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">
@@ -33,5 +44,70 @@ export const Workspace: FC = ({ children }) => {
         )}
       </EuiPanel>
     </section>
+  );
+};
+
+const TypeSelectorPopover = () => {
+  const [isPopoverOpen, setPopover] = useState(false);
+  const { activeVisualization: activeVisualizationId } = useTypedSelector(
+    (state) => state.visualization
+  );
+  const {
+    services: { types },
+  } = useOpenSearchDashboards<WizardServices>();
+  const dispatch = useTypedDispatch();
+
+  // TODO: Error if no active visualization
+  const activeVisualization = types.get(activeVisualizationId || '');
+  const visualizationTypes = types.all();
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        title: 'Chart types',
+        items: visualizationTypes.map(
+          ({ name, title, icon, description }): EuiContextMenuPanelItemDescriptor => ({
+            name: title,
+            icon: <EuiIcon type={icon} />,
+            onClick: () => {
+              closePopover();
+              dispatch(setActiveVisualization(name));
+            },
+            toolTipContent: description,
+            toolTipPosition: 'right',
+          })
+        ),
+      },
+    ],
+    [dispatch, visualizationTypes]
+  );
+
+  const button = (
+    <EuiButton iconType={activeVisualization?.icon} onClick={onButtonClick}>
+      {activeVisualization?.title}
+    </EuiButton>
+  );
+
+  return (
+    <EuiPopover
+      id="contextMenuExample"
+      ownFocus
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };
