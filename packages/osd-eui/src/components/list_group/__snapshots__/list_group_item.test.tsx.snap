@@ -1,0 +1,452 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiListGroupItem is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props color ghost is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem--ghost"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props color inherit is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props color primary is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem--primary"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props color subdued is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem--subdued"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props color text is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem--text"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props extraAction can be disabled 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-hasExtraAction"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+  <button
+    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiListGroupItem__extraAction"
+    disabled=""
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="euiButtonIcon__icon"
+      color="inherit"
+      data-euiicon-type="empty"
+    />
+  </button>
+</li>
+`;
+
+exports[`EuiListGroupItem props extraAction is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-hasExtraAction"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+  <button
+    aria-label="label"
+    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiListGroupItem__extraAction euiListGroupItem__extraAction-alwaysShow"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="euiButtonIcon__icon"
+      color="inherit"
+      data-euiicon-type="empty"
+    />
+  </button>
+</li>
+`;
+
+exports[`EuiListGroupItem props href and onClick is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isClickable"
+>
+  <a
+    class="euiListGroupItem__button"
+    href="#"
+    rel="noreferrer"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title=""
+    />
+  </a>
+</li>
+`;
+
+exports[`EuiListGroupItem props href is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isClickable"
+>
+  <a
+    class="euiListGroupItem__button"
+    href="#"
+    rel="noreferrer"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </a>
+</li>
+`;
+
+exports[`EuiListGroupItem props href is rendered with rel 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isClickable"
+>
+  <a
+    class="euiListGroupItem__button"
+    href="#"
+    rel="noreferrer"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </a>
+</li>
+`;
+
+exports[`EuiListGroupItem props icon is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__icon"
+    />
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props iconType is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__icon"
+      color="inherit"
+      data-euiicon-type="empty"
+    />
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props isActive is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isActive"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props isDisabled is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isDisabled"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props onClick is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isClickable"
+>
+  <button
+    class="euiListGroupItem__button"
+    type="button"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </button>
+</li>
+`;
+
+exports[`EuiListGroupItem props size l is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--large"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props size m is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props size s is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--small"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props size xs is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--xSmall"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem props wrapText is rendered 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem--wrapText"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__label"
+    >
+      Label
+    </span>
+  </span>
+</li>
+`;
+
+exports[`EuiListGroupItem renders a disabled button even if provided an href 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isDisabled euiListGroupItem-isClickable"
+>
+  <button
+    class="euiListGroupItem__button"
+    disabled=""
+    type="button"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </button>
+</li>
+`;
+
+exports[`EuiListGroupItem renders a disabled button even if provided an href 2`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium euiListGroupItem-isDisabled euiListGroupItem-isClickable"
+>
+  <button
+    class="euiListGroupItem__button"
+    disabled=""
+    type="button"
+  >
+    <span
+      class="euiListGroupItem__label"
+      title="Label"
+    >
+      Label
+    </span>
+  </button>
+</li>
+`;
+
+exports[`EuiListGroupItem throws a warning if both iconType and icon are provided but still renders 1`] = `
+<li
+  class="euiListGroupItem euiListGroupItem--medium"
+>
+  <span
+    class="euiListGroupItem__text"
+  >
+    <span
+      class="euiListGroupItem__icon"
+      color="inherit"
+      data-euiicon-type="empty"
+    />
+    <span
+      class="euiListGroupItem__label"
+      title=""
+    />
+  </span>
+</li>
+`;

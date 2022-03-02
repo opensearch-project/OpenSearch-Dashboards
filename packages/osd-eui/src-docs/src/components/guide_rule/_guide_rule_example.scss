@@ -1,0 +1,24 @@
+.guideRule__example {
+  .guideRule__example__panel {
+    border-bottom: 2px solid;
+
+    &--flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+  }
+}
+
+.guideRule__example--do {
+  .guideRule__example__panel {
+    border-bottom-color: $euiColorSuccess;
+  }
+}
+
+.guideRule__example--dont {
+  .guideRule__example__panel {
+    border-bottom-color: $euiColorDanger;
+  }
+}
+

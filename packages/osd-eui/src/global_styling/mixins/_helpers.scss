@@ -1,0 +1,128 @@
+// Helper mixins
+
+// Useful border shade when dealing with images of unknown color.
+@mixin innerBorder($type: 'dark', $borderRadius: 0, $alpha: .1) {
+  $color: rgba($euiColorDarkestShade, $alpha);
+
+  @if $type == 'light' {
+    $color: rgba($euiColorEmptyShade, $alpha);
+  }
+
+  position: relative;
+
+  &:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: $borderRadius;
+    content: '';
+    pointer-events: none;
+    border: 1px solid $color;
+  }
+}
+
+// Set scroll bar appearance on Chrome (and firefox).
+@mixin euiScrollBar($thumbColor: $euiColorDarkShade, $trackBackgroundColor: transparent) {
+  // Firefox's scrollbar coloring cascades, but the sizing does not,
+  // so it's being added to this mixin for allowing support wherever custom scrollbars are
+  // sass-lint:disable-block no-misspelled-properties
+  scrollbar-width: thin;
+
+  // sass-lint:disable-block no-vendor-prefixes
+  &::-webkit-scrollbar {
+    width: $euiScrollBar;
+    height: $euiScrollBar;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparentize($thumbColor, .5);
+    border: $euiScrollBarCorner solid $trackBackgroundColor;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: $trackBackgroundColor;
+  }
+}
+
+/**
+ * 1. Focus rings shouldn't be visible on scrollable regions, but a11y requires them to be focusable.
+ *    Browser's supporting `:focus-visible` will still show outline on keyboard focus only.
+ *    Others like Safari, won't show anything at all.
+ * 2. Force the `:focus-visible` when the `tabindex=0` (is tabbable)
+ */
+
+// Just overflow and scrollbars
+@mixin euiYScroll {
+  @include euiScrollBar;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &:focus {
+    outline: none; /* 1 */
+  }
+
+  &[tabindex='0']:focus:focus-visible {
+    outline-style: auto; /* 2 */
+  }
+}
+
+@mixin euiXScroll {
+  @include euiScrollBar;
+  overflow-x: auto;
+
+  &:focus {
+    outline: none; /* 1 */
+  }
+
+  &[tabindex='0']:focus:focus-visible {
+    outline-style: auto; /* 2 */
+  }
+}
+
+// The full overflow with shadow
+@mixin euiYScrollWithShadows {
+  @include euiYScroll;
+  @include euiOverflowShadow('y');
+}
+
+@mixin euiXScrollWithShadows {
+  @include euiXScroll;
+  @include euiOverflowShadow('x');
+}
+
+// Hiding elements offscreen to only be read by screen reader
+@mixin euiScreenReaderOnly {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+// Specifically target IE11, but not Edge.
+@mixin internetExplorerOnly {
+  // sass-lint:disable-block no-vendor-prefixes
+  @media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
+    @content;
+  }
+}
+
+// Doesn't have reduced motion turned on
+@mixin euiCanAnimate {
+  @media screen and (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+// Does have reduced motion turned on
+@mixin euiCantAnimate {
+  @media screen and (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

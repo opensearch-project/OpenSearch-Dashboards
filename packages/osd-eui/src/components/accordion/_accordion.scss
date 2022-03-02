@@ -1,0 +1,114 @@
+.euiAccordion__triggerWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.euiAccordion__button {
+  @include euiFontSize;
+  text-align: left;
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  &:focus {
+    .euiAccordion__iconWrapper {
+      @include euiAccordionIconFocus;
+      outline: none; // The `outline` gets applied to the whole button, we don't need a second one on the icon
+    }
+  }
+}
+
+.euiAccordion__buttonReverse {
+  // Puts the arrow on the right
+  flex-direction: row-reverse;
+  justify-content: space-between;
+
+  .euiAccordion__iconWrapper {
+    @include euiAccordionIconMargin(right);
+  }
+}
+
+.euiAccordion__iconWrapper {
+  @include size($euiSize);
+  @include euiAccordionIconMargin;
+  border-radius: $euiBorderRadius;
+  flex-shrink: 0;
+
+  // Nested to override EuiIcon
+  .euiAccordion__icon {
+    vertical-align: top;
+    transition: transform $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
+
+  .euiAccordion__icon-isOpen {
+    transform: rotate(90deg);
+  }
+}
+
+.euiAccordion__iconButton {
+  @include euiAccordionIconMargin(right);
+
+  &:focus {
+    @include euiAccordionIconFocus;
+  }
+}
+
+.euiAccordion__optionalAction {
+  flex-shrink: 0;
+}
+
+.euiAccordion__childWrapper {
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translatez(0);
+  // sass-lint:disable-block indentation
+  transition:
+    height $euiAnimSpeedNormal $euiAnimSlightResistance,
+    opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+
+  &:focus {
+    outline: none; // Hide focus ring because of `tabindex=-1` on Safari
+  }
+}
+
+$paddingSizes: (
+  xs: $euiSizeXS,
+  s: $euiSizeS,
+  m: $euiSize,
+  l: $euiSizeL,
+  xl: $euiSizeXL,
+);
+
+// Create button modifiers based upon the map.
+@each $name, $size in $paddingSizes {
+  .euiAccordion__padding--#{$name} {
+    padding: $size;
+  }
+}
+
+.euiAccordion.euiAccordion-isOpen {
+  .euiAccordion__childWrapper {
+    visibility: visible;
+    opacity: 1;
+    height: auto;
+  }
+}
+
+.euiAccordion__children-isLoading {
+  line-height: $euiLineHeight;
+  display: flex;
+  align-items: center;
+
+  .euiAccordion__spinner {
+    margin-right: $euiSizeXS;
+  }
+}
