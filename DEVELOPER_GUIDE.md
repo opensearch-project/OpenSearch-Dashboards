@@ -74,7 +74,7 @@ access it.
 
 ### Building the artifacts
 
-To build the artifacts for all supported platforms,  run the following:
+To build the artifacts for all supported platforms, run the following:
 
 ```
 yarn build --skip-os-packages
@@ -86,7 +86,36 @@ If you want to build a specific platform, pass the platform flag after `yarn bui
 yarn build-platform --darwin
 ```
 
-You could pass one or multiple flags. If you don't pass any flag, `yarn build-platform` will use your local environment. Currenly we only support `darwin` (darwin x64), `linux` (linux x64) and `linux-arm` (linux arm64).  
+You could pass one or multiple flags. If you don't pass any flag, `yarn build-platform` will build an artifact based on your local environment. 
+
+Currently, the supported flags for this script are:
+* `darwin` (builds Darwin x64)
+* `linux` (builds Linux x64)
+* `linux-arm` (builds Linux ARM64).  
+
+If you would like to build only a DEB x64 artifact, run the following:
+
+```
+yarn build --deb --skip-archives
+```
+
+If you would like to build only a DEB ARM64 artifact, run the following:
+
+```
+yarn build --deb-arm --skip-archives
+```
+
+If you would like to build only a RPM x64 artifact, run the following:
+
+```
+yarn build --rpm --skip-archives
+```
+
+If you would like to build only a RPM ARM64 artifact, run the following:
+
+```
+yarn build --rpm-arm --skip-archives
+```
 
 ### Building the Docker Image
 

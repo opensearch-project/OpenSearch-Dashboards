@@ -62,6 +62,11 @@ async function setup() {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetPlatforms: {
+      linux: false,
+      linuxArm: false,
+      darwin: false,
+    },
   });
 
   return { config };

@@ -58,6 +58,11 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetPlatforms: {
+      linux: false,
+      linuxArm: false,
+      darwin: false,
+    },
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
