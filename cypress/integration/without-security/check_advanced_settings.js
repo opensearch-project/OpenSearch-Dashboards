@@ -3,21 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-disable */
-import {
-  MiscUtils,
-  LoginPage,
-} from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
+import { MiscUtils } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
 
 const miscUtils = new MiscUtils(cy);
-const loginPage = new LoginPage(cy);
 
 describe('verify the advanced settings are saved', () => {
   beforeEach(() => {
     miscUtils.visitPage('app/management/opensearch-dashboards/settings');
-    loginPage.enterUserName('admin');
-    loginPage.enterPassword('admin');
-    loginPage.submit();
   });
 
   it('the dark mode is on', () => {

@@ -3,21 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-disable */
-import { MiscUtils, CommonUI } from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
-  
+import {
+  MiscUtils,
+  CommonUI,
+} from '@opensearch-dashboards-test/opensearch-dashboards-test-library';
+
 const miscUtils = new MiscUtils(cy);
 const commonUI = new CommonUI(cy);
-  
+
 describe('check dashboards filter and query', () => {
   beforeEach(() => {
     miscUtils.visitPage('app/dashboards#');
   });
-  
+
   afterEach(() => {
     cy.clearCookies();
   });
-  
+
   describe('osx filter and query should work in [Logs] Web Traffic dashboards', () => {
     beforeEach(() => {
       cy.get('[data-test-subj="dashboardListingTitleLink-[Logs]-Web-Traffic"]').click();
@@ -25,7 +27,7 @@ describe('check dashboards filter and query', () => {
         .invoke('attr', 'title')
         .should('eq', '[Logs] Web Traffic');
     });
-  
+
     it('osx filter and query should exist and be named correctly', () => {
       cy.get('[data-test-subj="saved-query-management-popover-button"]').click();
       cy.get('[data-test-subj="saved-query-management-popover"]')
@@ -47,20 +49,20 @@ describe('check dashboards filter and query', () => {
         .should('have.text', 'is');
       cy.get('[data-test-subj="filterParams"]').find('input').should('have.value', 'osx');
     });
-  
+
     it('osx filter and query should function correctly', () => {
       cy.get('[data-test-subj="saved-query-management-popover-button"]').click();
       cy.get('[data-test-subj="saved-query-management-popover"]')
         .find('[class="osdSavedQueryListItem__labelText"]')
         .should('have.text', 'test-query')
         .click();
-      commonUI.setDateRange('Dec 1, 2021 @ 00:00:00.000', 'Jan 1, 2021 @ 00:00:00.000');  
-        
+      commonUI.setDateRange('Dec 1, 2021 @ 00:00:00.000', 'Jan 1, 2021 @ 00:00:00.000');
+
       //[Logs] vistor chart should show osx 100%
       cy.get('[data-title="[Logs] Visitors by OS"]')
         .find('[class="label"]')
         .should('have.text', 'osx (100%)');
-        
+
       //[Logs] Response chart should show 200 label
       cy.get('[data-title="[Logs] Response Codes Over Time + Annotations"]')
         .find('[title="200"]')
