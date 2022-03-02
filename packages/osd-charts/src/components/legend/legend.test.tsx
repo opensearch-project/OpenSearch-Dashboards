@@ -1,0 +1,310 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { mount, ReactWrapper } from 'enzyme';
+import React, { Component } from 'react';
+
+import { SeededDataGenerator } from '../../mocks/utils';
+import { ScaleType } from '../../scales/constants';
+import { Settings, BarSeries, LegendColorPicker } from '../../specs';
+import { Chart } from '../chart';
+import { Legend } from './legend';
+import { LegendListItem } from './legend_item';
+
+const dg = new SeededDataGenerator();
+
+describe('Legend', () => {
+  it('shall render the all the series names', () => {
+    const wrapper = mount(
+      <Chart>
+        <Settings showLegend showLegendExtra />
+        <BarSeries
+          id="areas"
+          name="area"
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          splitSeriesAccessors={[2]}
+          data={[
+            [0, 123, 'group0'],
+            [0, 123, 'group1'],
+            [0, 123, 'group2'],
+            [0, 123, 'group3'],
+          ]}
+        />
+      </Chart>,
+    );
+    const legendWrapper = wrapper.find(Legend);
+    expect(legendWrapper.exists).toBeTruthy();
+    const legendItems = legendWrapper.find(LegendListItem);
+    expect(legendItems.exists).toBeTruthy();
+    expect(legendItems).toHaveLength(4);
+    legendItems.forEach((legendItem, i) => {
+      // the legend item shows also the value as default parameter
+      expect(legendItem.text()).toBe(`group${i}123`);
+    });
+  });
+  it('shall render the all the series names without the data value', () => {
+    const wrapper = mount(
+      <Chart>
+        <Settings showLegend showLegendExtra={false} />
+        <BarSeries
+          id="areas"
+          name="area"
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          splitSeriesAccessors={[2]}
+          data={[
+            [0, 123, 'group0'],
+            [0, 123, 'group1'],
+            [0, 123, 'group2'],
+            [0, 123, 'group3'],
+          ]}
+        />
+      </Chart>,
+    );
+    const legendWrapper = wrapper.find(Legend);
+    expect(legendWrapper.exists).toBeTruthy();
+    const legendItems = legendWrapper.find(LegendListItem);
+    expect(legendItems.exists).toBeTruthy();
+    expect(legendItems).toHaveLength(4);
+    legendItems.forEach((legendItem, i) => {
+      // the legend item shows also the value as default parameter
+      expect(legendItem.text()).toBe(`group${i}`);
+    });
+  });
+  it('shall call the over and out listeners for every list item', () => {
+    const onLegendItemOver = jest.fn();
+    const onLegendItemOut = jest.fn();
+    const numberOfSeries = 4;
+    const data = dg.generateGroupedSeries(10, numberOfSeries, 'split');
+    const wrapper = mount(
+      <Chart>
+        <Settings showLegend showLegendExtra onLegendItemOver={onLegendItemOver} onLegendItemOut={onLegendItemOut} />
+        <BarSeries
+          id="areas"
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data={data}
+        />
+      </Chart>,
+    );
+    const legendWrapper = wrapper.find(Legend);
+    expect(legendWrapper.exists).toBeTruthy();
+    const legendItems = legendWrapper.find(LegendListItem);
+    expect(legendItems.exists).toBeTruthy();
+    legendItems.forEach((legendItem, i) => {
+      legendItem.simulate('mouseenter');
+      expect(onLegendItemOver).toBeCalledTimes(i + 1);
+      legendItem.simulate('mouseleave');
+      expect(onLegendItemOut).toBeCalledTimes(i + 1);
+    });
+  });
+  it('shall call click listener for every list item', () => {
+    const onLegendItemClick = jest.fn();
+    const numberOfSeries = 4;
+    const data = dg.generateGroupedSeries(10, numberOfSeries, 'split');
+    const wrapper = mount(
+      <Chart>
+        <Settings showLegend showLegendExtra onLegendItemClick={onLegendItemClick} />
+        <BarSeries
+          id="areas"
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data={data}
+        />
+      </Chart>,
+    );
+    const legendWrapper = wrapper.find(Legend);
+    expect(legendWrapper.exists).toBeTruthy();
+    const legendItems = legendWrapper.find(LegendListItem);
+    expect(legendItems.exists).toBeTruthy();
+    expect(legendItems).toHaveLength(4);
+    legendItems.forEach((legendItem, i) => {
+      // the click is only enabled on the title
+      legendItem.find('.echLegendItem__label').simulate('click');
+      expect(onLegendItemClick).toBeCalledTimes(i + 1);
+    });
+  });
+
+  describe('#legendColorPicker', () => {
+    class LegendColorPickerMock extends Component<
+      { onLegendItemClick: () => void; customColor: string },
+      { colors: string[] }
+    > {
+      state = {
+        colors: ['red'],
+      };
+
+      data = dg.generateGroupedSeries(10, 4, 'split');
+
+      legendColorPickerFn: LegendColorPicker = ({ onClose }) => (
+        <div id="colorPicker">
+          <span>Custom Color Picker</span>
+          <button
+            id="change"
+            type="button"
+            onClick={() => {
+              this.setState<any>({ colors: [this.props.customColor] });
+              onClose();
+            }}
+          >
+            {this.props.customColor}
+          </button>
+          <button id="close" type="button" onClick={onClose}>
+            close
+          </button>
+        </div>
+      );
+
+      render() {
+        return (
+          <Chart>
+            <Settings
+              showLegend
+              onLegendItemClick={this.props.onLegendItemClick}
+              legendColorPicker={this.legendColorPickerFn}
+            />
+            <BarSeries
+              id="areas"
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              splitSeriesAccessors={['g']}
+              color={this.state.colors}
+              data={this.data}
+            />
+          </Chart>
+        );
+      }
+    }
+
+    let wrapper: ReactWrapper;
+    const customColor = '#0c7b93';
+    const onLegendItemClick = jest.fn();
+
+    beforeEach(() => {
+      wrapper = mount(<LegendColorPickerMock customColor={customColor} onLegendItemClick={onLegendItemClick} />);
+    });
+
+    const clickFirstColor = () => {
+      const legendWrapper = wrapper.find(Legend);
+      expect(legendWrapper.exists).toBeTruthy();
+      const legendItems = legendWrapper.find(LegendListItem);
+      expect(legendItems.exists).toBeTruthy();
+      expect(legendItems).toHaveLength(4);
+      legendItems.first().find('.echLegendItem__color').simulate('click');
+    };
+
+    it('should render colorPicker when color is clicked', () => {
+      clickFirstColor();
+      expect(wrapper.find('#colorPicker').debug()).toMatchSnapshot();
+      expect(
+        wrapper
+          .find(LegendListItem)
+          .map((e) => e.debug())
+          .join(''),
+      ).toMatchSnapshot();
+    });
+
+    it('should match snapshot after onChange is called', () => {
+      clickFirstColor();
+      wrapper.find('#change').simulate('click').first();
+
+      expect(
+        wrapper
+          .find(LegendListItem)
+          .map((e) => e.debug())
+          .join(''),
+      ).toMatchSnapshot();
+    });
+
+    it('should set isOpen to false after onChange is called', () => {
+      clickFirstColor();
+      wrapper.find('#change').simulate('click').first();
+      expect(wrapper.find('#colorPicker').exists()).toBe(false);
+    });
+
+    it('should set color after onChange is called', () => {
+      clickFirstColor();
+      wrapper.find('#change').simulate('click').first();
+      const dot = wrapper.find('.echLegendItem__color svg');
+      expect(dot.exists(`[color="${customColor}"]`)).toBe(true);
+    });
+
+    it('should match snapshot after onClose is called', () => {
+      clickFirstColor();
+      wrapper.find('#close').simulate('click').first();
+      expect(
+        wrapper
+          .find(LegendListItem)
+          .map((e) => e.debug())
+          .join(''),
+      ).toMatchSnapshot();
+    });
+
+    it('should set isOpen to false after onClose is called', () => {
+      clickFirstColor();
+      wrapper.find('#close').simulate('click').first();
+      expect(wrapper.find('#colorPicker').exists()).toBe(false);
+    });
+
+    it('should call click listener for every list item', () => {
+      const legendWrapper = wrapper.find(Legend);
+      expect(legendWrapper.exists).toBeTruthy();
+      const legendItems = legendWrapper.find(LegendListItem);
+      expect(legendItems.exists).toBeTruthy();
+      expect(legendItems).toHaveLength(4);
+      legendItems.forEach((legendItem, i) => {
+        // toggle click is only enabled on the title
+        legendItem.find('.echLegendItem__label').simulate('click');
+        expect(onLegendItemClick).toBeCalledTimes(i + 1);
+      });
+    });
+  });
+  describe('disable toggle and click for one legend item', () => {
+    it('should not be able to click or focus if there is only one legend item in total legend items', () => {
+      const onLegendItemClick = jest.fn();
+      const data = [{ x: 2, y: 5 }];
+      const wrapper = mount(
+        <Chart>
+          <Settings showLegend showLegendExtra onLegendItemClick={onLegendItemClick} />
+          <BarSeries id="areas" xScaleType={ScaleType.Linear} yScaleType={ScaleType.Linear} data={data} />
+        </Chart>,
+      );
+      const legendItems = wrapper.find(LegendListItem);
+      expect(legendItems.length).toBe(1);
+      legendItems.forEach((legendItem) => {
+        // the click is only enabled on the title
+        legendItem.find('.echLegendItem__label').simulate('click');
+        expect(onLegendItemClick).toBeCalledTimes(0);
+      });
+    });
+  });
+});

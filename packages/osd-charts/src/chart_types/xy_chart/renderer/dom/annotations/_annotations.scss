@@ -1,0 +1,33 @@
+.echAnnotation {
+  position: absolute;
+  user-select: none;
+  font-size: $euiFontSizeXS;
+  font-weight: $euiFontWeightBold;
+
+  &__tooltip {
+    @include euiToolTipStyle;
+    @include euiFontSizeXS;
+    padding: 0;
+    transition: opacity $euiAnimSpeedNormal;
+    pointer-events: none;
+    user-select: none;
+    max-width: 256px;
+  }
+
+  &__header {
+    @include euiToolTipTitle;
+    padding: $euiSizeXS ($euiSizeXS * 2);
+  }
+
+  &__details {
+    padding: $euiSizeXS ($euiSizeXS * 2);
+  }
+
+  &__icon {
+    position: relative;
+  }
+
+  &__body {
+    white-space: nowrap;
+  }
+}

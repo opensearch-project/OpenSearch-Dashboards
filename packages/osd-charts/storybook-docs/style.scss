@@ -1,0 +1,48 @@
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+.story-chart {
+  box-sizing: border-box;
+  background: white;
+  height: 350px;
+}
+.story-chart-dark {
+  box-sizing: border-box;
+  background: #1a1b20;
+}
+#root {
+  background-color: blanchedalmond;
+}
+#story-root {
+  padding: 20px;
+  width: 100%;
+  height: 400px;
+  position: relative;
+  box-sizing: border-box;
+}
+#story-root + div table {
+  border: 1px solid gray;
+}
+#story-root + div table th {
+  border: 1px solid gray;
+  padding: 5px;
+}
+#story-root + div table td {
+  border: 1px solid gray;
+  padding: 5px;
+}
+.Pane.vertical.Pane1 {
+  background: red;
+}
+
+canvas {
+  height: 350px;
+}

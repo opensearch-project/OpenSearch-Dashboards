@@ -1,0 +1,42 @@
+.echLegend {
+  .echLegendList {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  &--horizontal {
+    .echLegendList {
+      grid-column-gap: $echLegendColumnGap;
+      grid-row-gap: $echLegendRowGap;
+      margin-top: $echLegendRowGap;
+      margin-bottom: $echLegendRowGap;
+    }
+  }
+
+  &--top,
+  &--left {
+    order: 0;
+  }
+
+  &--bottom,
+  &--right {
+    order: 1;
+  }
+
+  &--debug {
+    background: rgba(238, 130, 238, 0.2);
+    position: relative;
+  }
+
+  .echLegendListContainer {
+    @include euiYScrollWithShadows;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    :focus {
+      @include euiFocusRing;
+      background-color: $euiFocusBackgroundColor;
+      border-radius: $euiBorderRadius / 2;
+    }
+  }
+}

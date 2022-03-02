@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "target": "es5",
+    "resolveJsonModule": true
+  },
+  "include": [
+    "../src/**/*", "./**/*", "../**/*.d.ts", "../scripts/custom_matchers.ts"],
+  "exclude": ["../**/*.test.*"]
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noUnusedLocals": true,
+    "removeComments": false
+  },
+  "files": [],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": ["**/*.test.*", "**/__mocks__",
+    "src/mocks/**/*",
+    "src/utils/data_samples/**/*"
+  ]
+}

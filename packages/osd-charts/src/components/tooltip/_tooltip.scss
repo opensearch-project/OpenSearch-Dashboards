@@ -1,0 +1,69 @@
+.echTooltip {
+  @include euiToolTipStyle;
+  @include euiFontSizeXS;
+  padding: 0;
+  transition: opacity $euiAnimSpeedNormal;
+  pointer-events: none;
+  user-select: none;
+  max-width: 256px;
+
+  &__list {
+    padding: $euiSizeXS;
+  }
+
+  &__header {
+    @include euiToolTipTitle;
+    margin-bottom: 0;
+    padding: $euiSizeXS ($euiSizeXS * 2);
+  }
+
+  &__item {
+    display: flex;
+    min-width: 1px;
+
+    &--container {
+      display: flex;
+      flex: 1 1 auto;
+      padding: 3px;
+      padding-left: 0;
+      min-width: 1px;
+    }
+
+    &--backgroundColor {
+      position: relative;
+      width: $euiSizeXS;
+      margin-right: 3px;
+      flex-shrink: 0;
+    }
+
+    &--color {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  }
+
+  &__label {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    min-width: 1px;
+    flex: 1 1 auto;
+  }
+
+  &__value {
+    font-weight: $euiFontWeightBold;
+    text-align: right;
+    font-feature-settings: 'tnum';
+    margin-left: $euiSizeS;
+  }
+
+  &__rowHighlighted {
+    background-color: transparentize($euiColorGhost, 0.9);
+  }
+
+  &--hidden {
+    opacity: 0;
+  }
+}

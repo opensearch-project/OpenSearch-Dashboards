@@ -1,0 +1,18 @@
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+@import '../../../node_modules/@elastic/eui/src/themes/eui/eui_colors_light';
+
+@import 'eui_imports';
+@import '../../../node_modules/@elastic/eui/src/global_styling/reset/index';
+
+// Components
+@import 'components/index';
