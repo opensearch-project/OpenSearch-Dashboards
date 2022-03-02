@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@osd/dev-utils": "1.0.0",
-    "ejs": "^3.1.5",
+    "ejs": "^3.1.6",
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",
@@ -19,7 +19,7 @@
     "vinyl-fs": "^3.0.3"
   },
   "devDependencies": {
-    "@types/ejs": "^3.0.4",
+    "@types/ejs": "^3.1.0",
     "@types/prettier": "^2.0.2",
     "@types/inquirer": "^7.3.1"
   }
