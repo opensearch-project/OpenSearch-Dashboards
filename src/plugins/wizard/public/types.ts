@@ -10,6 +10,9 @@ import { DashboardStart } from 'src/plugins/dashboard/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
+
+export type WizardSetup = TypeServiceSetup;
 
 export interface WizardPluginSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -28,4 +31,5 @@ export interface WizardServices extends CoreStart {
   savedObjectsPublic: SavedObjectsStart;
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  types: TypeServiceStart;
 }

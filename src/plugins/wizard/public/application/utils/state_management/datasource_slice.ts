@@ -5,6 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { IndexPattern } from 'src/plugins/data/common';
+import { WizardServices } from '../../../types';
 
 import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../data/public';
 
@@ -20,6 +21,18 @@ const initialState: DataSourceState = {
   indexPattern: null,
   visualizableFields: [],
   searchField: '',
+};
+
+export const getPreloadedState = async ({ data }: WizardServices): Promise<DataSourceState> => {
+  const preloadedState = { ...initialState };
+
+  const defaultIndexPattern = await data.indexPatterns.getDefault();
+  if (defaultIndexPattern) {
+    preloadedState.indexPattern = defaultIndexPattern;
+    preloadedState.visualizableFields = defaultIndexPattern.fields.filter(isVisualizable);
+  }
+
+  return preloadedState;
 };
 
 export const slice = createSlice({
