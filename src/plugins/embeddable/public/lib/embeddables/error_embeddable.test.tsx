@@ -34,9 +34,7 @@ import { waitFor, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 
-const testif = process.env.SKIP_BAD_APPLES === 'true' ? test.skip : test;
-
-testif('ErrorEmbeddable renders an embeddable', async () => {
+test('ErrorEmbeddable renders an embeddable', async () => {
   const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
 
@@ -45,7 +43,7 @@ testif('ErrorEmbeddable renders an embeddable', async () => {
   expect(getByText(/some error occurred/i)).toBeVisible();
 });
 
-testif('ErrorEmbeddable renders an embeddable with markdown message', async () => {
+test('ErrorEmbeddable renders an embeddable with markdown message', async () => {
   const error = '[some link](http://localhost:5601/takeMeThere)';
   const embeddable = new ErrorEmbeddable(error, { id: '123', title: 'Error' });
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
