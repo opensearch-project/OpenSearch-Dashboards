@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="215px" height="174px" viewBox="0 0 215 174" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>elastic-chart logo</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#00BFB3" transform="translate(191.500000, 87.000000) scale(-1, 1) translate(-191.500000, -87.000000) " x="168" y="0" width="47" height="174" rx="8"></rect>
+        <rect fill="#FEC514" transform="translate(134.500000, 105.500000) scale(-1, 1) translate(-134.500000, -105.500000) " x="111" y="37" width="47" height="137" rx="8"></rect>
+        <rect fill="#1BA9F5" transform="translate(79.500000, 135.000000) scale(-1, 1) translate(-79.500000, -135.000000) " x="57" y="96" width="45" height="78" rx="8"></rect>
+        <rect fill="#F04E98" transform="translate(23.500000, 148.000000) scale(-1, 1) translate(-23.500000, -148.000000) " x="0" y="122" width="47" height="52" rx="8"></rect>
+    </g>
+</svg>

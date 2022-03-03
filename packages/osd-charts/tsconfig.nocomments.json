@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "removeComments": true,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "files": []
+}

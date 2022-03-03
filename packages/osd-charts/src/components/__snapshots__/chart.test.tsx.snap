@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chart should render the legend name test 1`] = `
+"<Chart size={{...}} id=\\"chart1\\" renderer=\\"canvas\\">
+  <Provider store={{...}}>
+    <div className=\\"echChart\\" style={{...}}>
+      <Connect(ChartBackground)>
+        <ChartBackground backgroundColor=\\"transparent\\" dispatch={[Function: dispatch]}>
+          <div className=\\"echChartBackground\\" style={{...}} />
+        </ChartBackground>
+      </Connect(ChartBackground)>
+      <Connect(ChartStatusComponent)>
+        <ChartStatusComponent chartId=\\"chart1\\" rendered={true} renderedCount={1} onRenderChange={[undefined]} debugState={{...}} dispatch={[Function: dispatch]}>
+          <div className=\\"echChartStatus\\" data-ech-render-complete={true} data-ech-render-count={1} data-ech-debug-state={{...}} />
+        </ChartStatusComponent>
+      </Connect(ChartStatusComponent)>
+      <Connect(Resizer)>
+        <Resizer resizeDebounce={10} updateParentDimensions={[Function (anonymous)]}>
+          <div className=\\"echChartResizer\\" />
+        </Resizer>
+      </Connect(Resizer)>
+      <Connect(LegendComponent)>
+        <LegendComponent debug={true} chartDimensions={{...}} containerDimensions={{...}} chartTheme={{...}} size={{...}} items={{...}} extraValues={{...}} config={{...}} onToggleDeselectSeriesAction={[Function (anonymous)]} onItemOutAction={[Function (anonymous)]} onItemOverAction={[Function (anonymous)]} clearTemporaryColors={[Function (anonymous)]} setTemporaryColor={[Function (anonymous)]} setPersistedColor={[Function (anonymous)]}>
+          <div className=\\"echLegend echLegend--debug echLegend--vertical echLegend--right echLegend--top\\" style={{...}}>
+            <div style={{...}} className=\\"echLegendListContainer\\">
+              <ul style={{...}} className=\\"echLegendList\\">
+                <LegendItem item={{...}} positionConfig={{...}} totalItems={1} extraValues={{...}} showExtra={false} onMouseOut={[undefined]} onMouseOver={[undefined]} onClick={[undefined]} clearTemporaryColorsAction={[Function (anonymous)]} setPersistedColorAction={[Function (anonymous)]} setTemporaryColorAction={[Function (anonymous)]} mouseOutAction={[Function (anonymous)]} mouseOverAction={[Function (anonymous)]} toggleDeselectSeriesAction={[Function (anonymous)]} colorPicker={[undefined]} action={[undefined]}>
+                  <li className=\\"echLegendItem echLegendItem--vertical\\" onMouseEnter={[Function (anonymous)]} onMouseLeave={[Function (anonymous)]} style={[undefined]} data-ech-series-name=\\"test\\">
+                    <div className=\\"background\\" />
+                    <ForwardRef color=\\"#1EA593\\" seriesName=\\"test\\" isSeriesHidden={false} hasColorPicker={false} onClick={[undefined]}>
+                      <div className=\\"echLegendItem__color\\" title=\\"series color\\">
+                        <Icon type=\\"dot\\" color=\\"#1EA593\\" aria-label=\\"series color: #1EA593\\">
+                          <DotIcon className=\\"echIcon\\" color=\\"#1EA593\\" tabIndex={[undefined]} focusable=\\"false\\" aria-label=\\"series color: #1EA593\\">
+                            <svg width={16} height={16} viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" className=\\"echIcon\\" color=\\"#1EA593\\" tabIndex={[undefined]} focusable=\\"false\\" aria-label=\\"series color: #1EA593\\">
+                              <circle cx={8} cy={8} r={4} />
+                            </svg>
+                          </DotIcon>
+                        </Icon>
+                      </div>
+                    </ForwardRef>
+                    <Label label=\\"test\\" isToggleable={false} onClick={[undefined]} isSeriesHidden={false}>
+                      <div className=\\"echLegendItem__label\\" title=\\"test\\" onClick={[undefined]}>
+                        test
+                      </div>
+                    </Label>
+                  </li>
+                </LegendItem>
+              </ul>
+            </div>
+          </div>
+        </LegendComponent>
+      </Connect(LegendComponent)>
+      <ErrorBoundary>
+        <Connect(SpecsParserComponent)>
+          <SpecsParserComponent specParsed={[Function (anonymous)]} specUnmounted={[Function (anonymous)]}>
+            <Connect(SpecInstance) debug={true} rendering=\\"svg\\" showLegend={true}>
+              <SpecInstance debug={true} rendering=\\"svg\\" showLegend={true} upsertSpec={[Function (anonymous)]} removeSpec={[Function (anonymous)]} id=\\"__global__settings___\\" chartType=\\"global\\" specType=\\"settings\\" rotation={0} animateData={true} resizeDebounce={10} tooltip={{...}} pointerUpdateTrigger=\\"x\\" externalPointerEvents={{...}} hideDuplicateAxes={false} baseTheme={{...}} brushAxis=\\"x\\" minBrushDelta={2} ariaUseDefaultSummary={true} ariaLabelHeadingLevel=\\"p\\" showLegendExtra={false} legendMaxDepth={Infinity} legendPosition=\\"right\\" />
+            </Connect(SpecInstance)>
+            <Connect(SpecInstance) id=\\"test\\" data={{...}}>
+              <SpecInstance id=\\"test\\" data={{...}} upsertSpec={[Function (anonymous)]} removeSpec={[Function (anonymous)]} chartType=\\"xy_axis\\" specType=\\"series\\" seriesType=\\"bar\\" groupId=\\"__global__\\" xScaleType=\\"ordinal\\" yScaleType=\\"linear\\" xAccessor=\\"x\\" yAccessors={{...}} hideInLegend={false} enableHistogramMode={false} />
+            </Connect(SpecInstance)>
+          </SpecsParserComponent>
+        </Connect(SpecsParserComponent)>
+        <div className=\\"echContainer\\">
+          <Connect(ChartContainer) getChartContainerRef={[Function (anonymous)]} forwardStageRef={{...}}>
+            <ChartContainer getChartContainerRef={[Function (anonymous)]} forwardStageRef={{...}} status=\\"Initialized\\" initialized={true} isChartEmpty={false} pointerCursor=\\"default\\" isBrushingAvailable={false} isBrushing={false} internalChartRenderer={[Function (anonymous)]} settings={{...}} onPointerMove={[Function (anonymous)]} onMouseUp={[Function (anonymous)]} onMouseDown={[Function (anonymous)]} onKeyPress={[Function (anonymous)]}>
+              <div className=\\"echChartPointerContainer\\" style={{...}} onMouseMove={[Function (anonymous)]} onMouseLeave={[Function (anonymous)]} onMouseDown={[Function (anonymous)]} onMouseUp={[Function (anonymous)]}>
+                <Connect(Crosshair)>
+                  <Crosshair theme={{...}} chartRotation={0} cursorPosition={[undefined]} cursorCrossLinePosition={[undefined]} tooltipType=\\"vertical\\" fromExternalEvent={[undefined]} zIndex={0} dispatch={[Function: dispatch]} />
+                </Connect(Crosshair)>
+                <Connect(XYChart) forwardCanvasRef={{...}}>
+                  <XYChart forwardCanvasRef={{...}} initialized={true} isChartEmpty={false} debug={true} geometries={{...}} geometriesIndex={{...}} theme={{...}} chartContainerDimensions={{...}} highlightedLegendItem={[undefined]} rotation={0} renderingArea={{...}} chartTransform={{...}} axesSpecs={{...}} perPanelAxisGeoms={{...}} perPanelGridLines={{...}} axesStyles={{...}} annotationDimensions={{...}} annotationSpecs={{...}} panelGeoms={{...}} a11ySettings={{...}} onChartRendered={[Function (anonymous)]}>
+                    <figure aria-labelledby={[undefined]} aria-describedby=\\"chart1--defaultSummary\\">
+                      <canvas className=\\"echCanvasRenderer\\" width={150} height={200} style={{...}} role=\\"presentation\\" />
+                    </figure>
+                    <Connect(ScreenReaderSummaryComponent)>
+                      <ScreenReaderSummaryComponent chartTypeDescription=\\"bar chart\\" a11ySettings={{...}} goalChartData={{...}} goalChartLabels={{...}} dispatch={[Function: dispatch]}>
+                        <div className=\\"echScreenReaderOnly\\">
+                          <ScreenReaderLabel label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} goalChartLabels={{...}} />
+                          <ScreenReaderDescription label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} />
+                          <ScreenReaderTypes label={[undefined]} labelId={[undefined]} labelHeadingLevel=\\"p\\" description={[undefined]} descriptionId=\\"chart1--defaultSummary\\" defaultSummaryId=\\"chart1--defaultSummary\\" tableCaption={[undefined]} chartTypeDescription=\\"bar chart\\" goalChartData={{...}}>
+                            <dl>
+                              <dt>
+                                Chart type:
+                              </dt>
+                              <dd id=\\"chart1--defaultSummary\\">
+                                bar chart
+                              </dd>
+                            </dl>
+                          </ScreenReaderTypes>
+                        </div>
+                      </ScreenReaderSummaryComponent>
+                    </Connect(ScreenReaderSummaryComponent)>
+                  </XYChart>
+                </Connect(XYChart)>
+                <Connect(Tooltip) getChartContainerRef={[Function (anonymous)]}>
+                  <Tooltip getChartContainerRef={[Function (anonymous)]} visible={false} zIndex={0} info={{...}} position={{...}} headerFormatter={[undefined]} settings={{...}} rotation={0} chartId=\\"chart1\\" backgroundColor=\\"transparent\\" onPointerMove={[Function (anonymous)]} />
+                </Connect(Tooltip)>
+                <Connect(Annotations) getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}}>
+                  <Annotations getChartContainerRef={[Function (anonymous)]} chartAreaRef={{...}} isChartEmpty={false} chartDimensions={{...}} annotationDimensions={{...}} annotationSpecs={{...}} tooltipState={{...}} chartId=\\"chart1\\" zIndex={0} onPointerMove={[Function (anonymous)]} onDOMElementLeave={[Function (anonymous)]} onDOMElementEnter={[Function (anonymous)]}>
+                    <AnnotationTooltip chartId=\\"chart1\\" zIndex={0} state={{...}} chartRef={{...}} onScroll={[Function (anonymous)]} />
+                  </Annotations>
+                </Connect(Annotations)>
+                <Connect(Highlighter)>
+                  <Highlighter initialized={true} chartId=\\"chart1\\" zIndex={0} highlightedGeometries={{...}} chartTransform={{...}} chartDimensions={{...}} chartRotation={0} dispatch={[Function: dispatch]}>
+                    <svg className=\\"echHighlighter\\" style={{...}}>
+                      <defs>
+                        <clipPath id=\\"echHighlighterClipPath__chart1\\">
+                          <rect x=\\"0\\" y=\\"0\\" width={130} height={180} />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </Highlighter>
+                </Connect(Highlighter)>
+                <Connect(BrushTool)>
+                  <BrushTool initialized={true} projectionContainer={{...}} mainProjectionArea={{...}} isBrushAvailable={false} isBrushing={false} brushArea={{...}} zIndex={0} dispatch={[Function: dispatch]} />
+                </Connect(BrushTool)>
+              </div>
+            </ChartContainer>
+          </Connect(ChartContainer)>
+        </div>
+      </ErrorBoundary>
+    </div>
+  </Provider>
+</Chart>"
+`;

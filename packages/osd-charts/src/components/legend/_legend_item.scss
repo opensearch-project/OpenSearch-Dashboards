@@ -1,0 +1,106 @@
+$legendItemVerticalPadding: $echLegendRowGap / 2;
+$legendItemHeight: #{$euiFontSizeXS * $euiLineHeight};
+
+.echLegendItem {
+  color: $euiTextColor;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+
+  > *:not(.background) {
+    // euiPopover adds a div with height of 19px otherwise
+    height: $legendItemHeight; // prevents color dot from shifting
+    margin-left: $euiSizeXS;
+
+    &:last-child:not(.echLegendItem__extra) {
+      margin-right: $euiSizeXS;
+    }
+  }
+
+  &:not(&--hidden) {
+    .echLegendItem__color--changable {
+      cursor: pointer;
+    }
+  }
+
+  &:hover .background {
+    background-color: $euiColorLightestShade;
+  }
+
+  .background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  &__action {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: calc(#{$legendItemHeight} + #{$euiSizeXS * 2});
+
+    .euiPopover,
+    .euiPopover__anchor,
+    .euiPopover__anchor > *:first-child {
+      // makes custom buttons in eui popover take full action size
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  &__color {
+    display: flex;
+    line-height: 1.5;
+    align-items: center;
+  }
+
+  &__label {
+    @include euiFontSizeXS;
+    @include euiTextTruncate;
+    flex: 1 1 auto;
+    text-align: left;
+    vertical-align: baseline;
+    letter-spacing: unset;
+    align-items: center;
+
+    &--clickable {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__extra {
+    @include euiFontSizeXS;
+    text-align: right;
+    flex: 0 0 auto;
+    margin-left: $euiSizeXS;
+    font-feature-settings: 'tnum';
+    letter-spacing: unset;
+  }
+
+  &--vertical {
+    padding-top: $legendItemVerticalPadding / 2;
+    padding-bottom: $legendItemVerticalPadding / 2;
+
+    &:first-of-type {
+      margin-top: $legendItemVerticalPadding / 2;
+    }
+
+    .background {
+      margin-top: $legendItemVerticalPadding / 2;
+      margin-bottom: $legendItemVerticalPadding / 2;
+    }
+  }
+
+  &--hidden {
+    color: $euiColorDarkShade;
+  }
+}

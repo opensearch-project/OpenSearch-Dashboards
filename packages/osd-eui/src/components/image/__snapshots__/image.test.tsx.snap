@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiImage is rendered 1`] = `
+<figure
+  class="euiImage testClass1 testClass2 euiImage--large"
+>
+  <img
+    alt="alt"
+    aria-label="aria-label"
+    class="euiImage__img"
+    data-test-subj="test subject string"
+    src="/cat.jpg"
+  />
+</figure>
+`;
+
+exports[`EuiImage is rendered and allows full screen 1`] = `
+<figure
+  class="euiImage euiImage--allowFullScreen testClass1 testClass2 euiImage--large"
+>
+  <button
+    aria-label="Open full screen alt image"
+    class="euiImage__button euiImage__button--fullWidth"
+    data-test-subj="activateFullScreenButton"
+    type="button"
+  >
+    <img
+      alt="alt"
+      aria-label="aria-label"
+      class="euiImage__img"
+      data-test-subj="test subject string"
+      src="/cat.jpg"
+    />
+    <span
+      class="euiImage__icon"
+      color="ghost"
+      data-euiicon-type="fullScreen"
+    />
+  </button>
+</figure>
+`;
+
+exports[`EuiImage is rendered with a float 1`] = `
+<figure
+  class="euiImage euiImage--floatLeft euiImage--original"
+>
+  <img
+    alt="alt"
+    class="euiImage__img"
+    src="/cat.jpg"
+  />
+</figure>
+`;
+
+exports[`EuiImage is rendered with a margin 1`] = `
+<figure
+  class="euiImage euiImage--marginLarge euiImage--original"
+>
+  <img
+    alt="alt"
+    class="euiImage__img"
+    src="/cat.jpg"
+  />
+</figure>
+`;
+
+exports[`EuiImage is rendered with a node as the caption 1`] = `
+<figure
+  class="euiImage euiImage--original"
+>
+  <img
+    alt="alt"
+    class="euiImage__img"
+    src="/cat.jpg"
+  />
+  <figcaption
+    class="euiImage__caption"
+  >
+    <span>
+      caption
+    </span>
+  </figcaption>
+</figure>
+`;
+
+exports[`EuiImage is rendered with custom size 1`] = `
+<figure
+  class="euiImage"
+>
+  <img
+    alt="alt"
+    class="euiImage__img"
+    src="/cat.jpg"
+    style="max-width:50px;max-height:50px;width:auto"
+  />
+</figure>
+`;
+
+exports[`EuiImage is rendered with src 1`] = `
+<figure
+  class="euiImage euiImage--floatLeft euiImage--original"
+>
+  <img
+    alt="alt"
+    class="euiImage__img"
+    src="/cat.jpg"
+  />
+</figure>
+`;

@@ -1,0 +1,22 @@
+# Force include
+!.*.js
+!packages/charts/.*.js
+
+# Ignore
+wiki
+**/node_modules
+coverage
+license_header.js
+
+# Editor configs
+.vscode
+
+# Hidden directories
+.git
+
+# Compiled source
+src/utils/d3-delaunay
+**/dist
+
+# auto generated directories
+**/tmp

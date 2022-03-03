@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiStepsHorizontal is rendered 1`] = `
+<ol
+  aria-label="aria-label"
+  class="euiStepsHorizontal testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <li
+    class="euiStepHorizontal__item"
+  >
+    <button
+      class="euiStepHorizontal euiStepHorizontal-isComplete"
+      title="Step 1: Completed Step 1 is complete"
+    >
+      <span
+        class="euiStepNumber euiStepNumber--complete euiStepHorizontal__number"
+      >
+        <span
+          aria-label="Step 1 is complete"
+          class="euiStepNumber__icon"
+          data-euiicon-type="check"
+        />
+      </span>
+      <span
+        class="euiStepHorizontal__title"
+      >
+        Completed Step 1
+      </span>
+    </button>
+  </li>
+  <li
+    aria-current="step"
+    class="euiStepHorizontal__item"
+  >
+    <button
+      class="euiStepHorizontal euiStepHorizontal-isSelected"
+      title="Step 2: Selected Step 2"
+    >
+      <span
+        class="euiStepNumber euiStepHorizontal__number"
+      >
+        <span
+          class="euiScreenReaderOnly"
+        >
+          Step 2
+        </span>
+        <span
+          aria-hidden="true"
+          class="euiStepNumber__number"
+        >
+          2
+        </span>
+      </span>
+      <span
+        class="euiStepHorizontal__title"
+      >
+        Selected Step 2
+      </span>
+    </button>
+  </li>
+  <li
+    class="euiStepHorizontal__item"
+  >
+    <button
+      class="euiStepHorizontal euiStepHorizontal-isIncomplete"
+      title="Step 3: Incomplete Step 3 is incomplete"
+    >
+      <span
+        class="euiStepNumber euiStepNumber--incomplete euiStepHorizontal__number"
+      >
+        <span
+          class="euiScreenReaderOnly"
+        >
+          Step 3 is incomplete
+        </span>
+        <span
+          aria-hidden="true"
+          class="euiStepNumber__number"
+        >
+          3
+        </span>
+      </span>
+      <span
+        class="euiStepHorizontal__title"
+      >
+        Incomplete Step 3
+      </span>
+    </button>
+  </li>
+  <li
+    class="euiStepHorizontal__item"
+  >
+    <button
+      class="euiStepHorizontal euiStepHorizontal-isIncomplete euiStepHorizontal-isDisabled"
+      disabled=""
+      title="Step 4: Disabled Step 4 is disabled"
+    >
+      <span
+        class="euiStepNumber euiStepNumber--disabled euiStepHorizontal__number"
+      >
+        <span
+          class="euiScreenReaderOnly"
+        >
+          Step 4 is disabled
+        </span>
+        <span
+          aria-hidden="true"
+          class="euiStepNumber__number"
+        >
+          4
+        </span>
+      </span>
+      <span
+        class="euiStepHorizontal__title"
+      >
+        Disabled Step 4
+      </span>
+    </button>
+  </li>
+</ol>
+`;

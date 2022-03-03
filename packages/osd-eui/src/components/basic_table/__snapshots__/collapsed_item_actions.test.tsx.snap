@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CollapsedItemActions render 1`] = `
+<div
+  class="euiPopover euiPopover--anchorLeftCenter"
+  id="id-actions"
+>
+  <div
+    class="euiPopover__anchor"
+  >
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        aria-label="All actions"
+        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+        data-test-subj="euiCollapsedItemActionsButton"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="boxesHorizontal"
+        />
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`CollapsedItemActions render with href and _target provided 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiI18n
+      default="All actions"
+      token="euiCollapsedItemActions.allActions"
+    >
+      [Function]
+    </EuiI18n>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="id-actions"
+  isOpen={true}
+  ownFocus={true}
+  panelPaddingSize="none"
+  popoverRef={[Function]}
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={
+      Array [
+        <EuiContextMenuItem
+          disabled={false}
+          onClick={[Function]}
+        >
+          default1
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          onClick={[Function]}
+        >
+          <div />
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          disabled={false}
+          href="https://www.elastic.co/"
+          onClick={[Function]}
+          target="_blank"
+        >
+          default2
+        </EuiContextMenuItem>,
+      ]
+    }
+  />
+</EuiPopover>
+`;

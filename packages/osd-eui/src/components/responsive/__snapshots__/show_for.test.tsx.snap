@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiShowFor l is rendered 1`] = `null`;
+
+exports[`EuiShowFor m is rendered 1`] = `null`;
+
+exports[`EuiShowFor never renders for "none" 1`] = `null`;
+
+exports[`EuiShowFor renders 1`] = `
+<span>
+  Child
+</span>
+`;
+
+exports[`EuiShowFor renders for "all" 1`] = `
+<span>
+  Child
+</span>
+`;
+
+exports[`EuiShowFor renders for multiple breakpoints 1`] = `
+<span>
+  Child
+</span>
+`;
+
+exports[`EuiShowFor s is rendered 1`] = `
+<span>
+  Child
+</span>
+`;
+
+exports[`EuiShowFor xl is rendered 1`] = `null`;
+
+exports[`EuiShowFor xs is rendered 1`] = `null`;

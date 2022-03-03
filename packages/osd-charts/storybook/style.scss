@@ -1,0 +1,102 @@
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+@import '../../../node_modules/@elastic/eui/src/theme_light.scss';
+
+html {
+  background-color: white;
+}
+
+#root {
+  z-index: 200;
+  position: relative;
+}
+
+.story-chart {
+  box-sizing: border-box;
+  background: white;
+}
+
+.story-chart-dark {
+  box-sizing: border-box;
+  background: #1a1b20;
+}
+
+.echInvisible {
+  visibility: hidden;
+}
+
+#story-root {
+  padding: 20px;
+  width: 100%;
+  height: 400px;
+  position: relative;
+  z-index: 500;
+  box-sizing: border-box;
+  background-color: blanchedalmond;
+}
+
+html.disable-animations {
+  *,
+  *::after,
+  *::before {
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+    animation-delay: -0.0001s !important;
+    animation-duration: 0s !important;
+    animation-play-state: paused !important;
+    caret-color: transparent !important;
+  }
+
+  .echLegend .echLegendListContainer :focus {
+    animation-duration: 0s !important; // remove focus animation but keep border
+  }
+
+  .euiSaturation:focus .euiSaturation__indicator {
+    animation: none !important; // fix color picker dot
+  }
+}
+
+#story-root + div table {
+  border: 1px solid gray;
+}
+
+#story-root + div table th {
+  border: 1px solid gray;
+  padding: 5px;
+}
+
+#story-root + div table td {
+  border: 1px solid gray;
+  padding: 5px;
+}
+
+.Pane.vertical.Pane1 {
+  background: red;
+}
+
+html.echVisualTesting {
+  background-color: blanchedalmond;
+
+  #root > div:not(#story-root) {
+    display: none;
+  }
+
+  #root {
+    padding-top: 200px;
+    padding-bottom: 200px;
+  }
+}
+
+// for using EuiWrappingPopover in stories
+.euiPopover__anchor {
+  width: 100%;
+}

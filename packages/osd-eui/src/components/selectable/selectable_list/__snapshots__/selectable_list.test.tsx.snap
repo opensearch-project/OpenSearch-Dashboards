@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EuiSelectableListItem is rendered 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props activeOptionIndex 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props allowExclusions 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props bordered 1`] = `
+<div
+  class="euiSelectableList euiSelectableList-bordered testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props height is forced 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props height is full 1`] = `
+<div
+  class="euiSelectableList euiSelectableList-fullHeight testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;height:0;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props renderOption 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props rowHeight 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props searchValue 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props searchValue 2`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props showIcons can be turned off 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props singleSelection can be forced so that at least one must be selected 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props singleSelection can be turned on 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;
+
+exports[`EuiSelectableListItem props visibleOptions 1`] = `
+<div
+  class="euiSelectableList testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    style="overflow:visible;width:0"
+  />
+</div>
+`;

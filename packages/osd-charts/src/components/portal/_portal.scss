@@ -1,0 +1,15 @@
+[id^='echTooltipPortal'] {
+  pointer-events: none;
+}
+
+[id^='echAnchor'] {
+  position: absolute;
+  pointer-events: none;
+}
+
+.echTooltipPortal__invisible {
+  position: fixed;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}

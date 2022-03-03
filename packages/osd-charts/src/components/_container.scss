@@ -1,0 +1,34 @@
+.echChart {
+  position: relative;
+  display: flex;
+  height: 100%;
+
+  &--column {
+    flex-direction: column;
+  }
+}
+
+.echContainer {
+  flex: 1;
+  position: relative;
+}
+
+.echChartPointerContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.echChartResizer {
+  z-index: -10000000;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+}
