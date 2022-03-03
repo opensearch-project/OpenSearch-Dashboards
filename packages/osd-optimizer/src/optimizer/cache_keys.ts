@@ -39,7 +39,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@osd/utils';
 import stripAnsi from 'strip-ansi';
 
-import jestDiff from 'jest-diff';
+import { diff } from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
 import { ascending, CacheableWorkerConfig } from '../common';
 
@@ -62,11 +62,11 @@ export function diffCacheKey(expected?: unknown, actual?: unknown) {
     return;
   }
 
-  return reformatJestDiff(jestDiff(expectedJson, actualJson));
+  return reformatJestDiff(diff(expectedJson, actualJson));
 }
 
-export function reformatJestDiff(diff: string | null) {
-  const diffLines = diff?.split('\n') || [];
+export function reformatJestDiff(jestDiff: string | null) {
+  const diffLines = jestDiff?.split('\n') || [];
 
   if (
     diffLines.length < 4 ||

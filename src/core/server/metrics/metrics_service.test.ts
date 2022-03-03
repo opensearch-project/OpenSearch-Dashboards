@@ -31,6 +31,7 @@
  */
 
 import moment from 'moment';
+import { setImmediate } from 'timers';
 
 import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
@@ -48,7 +49,8 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
+    setImmediate(() => {});
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },

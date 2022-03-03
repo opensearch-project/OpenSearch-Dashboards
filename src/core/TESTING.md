@@ -783,17 +783,15 @@ describe('saved query service', () => {
       expect(response).toBe(mockReturnValue);
     });
 
-    it('should reject with an error when saved objects client errors', async (done) => {
+    it('should reject with an error when saved objects client errors', (done) => {
       mockSavedObjectsClient.create.mockRejectedValue(new Error('timeout'));
 
-      try {
-        await savedQueryService.saveQuery(savedQueryAttributes);
-      } catch (err) {
+      savedQueryService.saveQuery(savedQueryAttributes).catch((err) => {
         expect(err).toMatchInlineSnapshot(
           `[Error: Unable to create saved query, please try again.]`
         );
         done();
-      }
+      });
     });
   });
 });

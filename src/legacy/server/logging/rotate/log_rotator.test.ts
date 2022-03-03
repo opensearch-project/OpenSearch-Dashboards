@@ -259,7 +259,7 @@ describe('LogRotator', () => {
         ({
           on: jest.fn((ev: string) => {
             if (ev === 'error') {
-              jest.runTimersToTime(15000);
+              jest.advanceTimersByTime(15000);
             }
           }),
           close: jest.fn(),

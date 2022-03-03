@@ -83,7 +83,7 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should return undefined for none matching', async (done) => {
+    test('should return undefined for none matching', (done) => {
       const wrongFilter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },

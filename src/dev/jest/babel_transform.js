@@ -30,9 +30,7 @@
  * GitHub history for details.
  */
 
-const babelJest = require('babel-jest');
-
-module.exports = babelJest.createTransformer({
+module.exports = require('babel-jest').default.createTransformer({
   presets: [
     [
       require.resolve('@osd/babel-preset/node_preset'),

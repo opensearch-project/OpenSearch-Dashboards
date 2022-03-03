@@ -77,7 +77,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async (done) => {
+test('Updates the embeddable title when given', async () => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();
@@ -94,7 +94,6 @@ test('Updates the embeddable title when given', async (done) => {
     if (containerClone.getOutput().embeddableLoaded[embeddable.id]) {
       expect(embeddable.getInput().title).toBe('What is up?');
       subscription.unsubscribe();
-      done();
     }
   });
 });

@@ -31,7 +31,7 @@
  */
 
 import React from 'react';
-import { wait } from '@testing-library/dom';
+import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 import {
   HelloWorldEmbeddable,
@@ -60,7 +60,7 @@ describe('<EmbeddableRenderer/>', () => {
       <EmbeddableRenderer factory={getFactory()} input={{ id: 'hello' }} />
     );
     expect(getByTestId('embedSpinner')).toBeInTheDocument();
-    await wait(() => !queryByTestId('embedSpinner')); // wait until spinner disappears
+    await waitFor(() => !queryByTestId('embedSpinner')); // wait until spinner disappears
     expect(getByTestId('helloWorldEmbeddable')).toBeInTheDocument();
   });
 });
