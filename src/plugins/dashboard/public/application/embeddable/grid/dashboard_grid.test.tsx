@@ -181,7 +181,7 @@ test('DashboardGrid renders expanded panel', () => {
   ).toBeUndefined();
 });
 
-test('DashboardGrid unmount unsubscribes', async (done) => {
+test('DashboardGrid unmount unsubscribes', (done) => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <OpenSearchDashboardsContextProvider services={options}>

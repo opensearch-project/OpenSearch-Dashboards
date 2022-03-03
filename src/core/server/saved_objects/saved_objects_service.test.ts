@@ -214,7 +214,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('waits for all opensearch nodes to be compatible before running migrations', async (done) => {
+    it('waits for all opensearch nodes to be compatible before running migrations', (done) => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -227,20 +227,21 @@ describe('SavedObjectsService', () => {
         warningNodes: [],
         opensearchDashboardsVersion: '8.0.0',
       });
-      await soService.setup(setupDeps);
-      soService.start(createStartDeps());
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.opensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
-        NodesVersionCompatibility
-      >).next({
-        isCompatible: true,
-        incompatibleNodes: [],
-        warningNodes: [],
-        opensearchDashboardsVersion: '8.0.0',
-      });
-      setImmediate(() => {
-        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
+      soService.setup(setupDeps).then(() => {
+        soService.start(createStartDeps());
+        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
+        ((setupDeps.opensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
+          NodesVersionCompatibility
+        >).next({
+          isCompatible: true,
+          incompatibleNodes: [],
+          warningNodes: [],
+          opensearchDashboardsVersion: '8.0.0',
+        });
+        setImmediate(() => {
+          expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+          done();
+        });
       });
     });
 

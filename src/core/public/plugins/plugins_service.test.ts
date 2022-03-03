@@ -31,6 +31,7 @@
  */
 
 import { omit, pick } from 'lodash';
+import { setImmediate } from 'timers';
 
 import {
   MockedPluginInitializer,
@@ -268,7 +269,8 @@ describe('PluginsService', () => {
     describe('timeout', () => {
       const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
+        setImmediate(() => {});
       });
       afterAll(() => {
         jest.useRealTimers();

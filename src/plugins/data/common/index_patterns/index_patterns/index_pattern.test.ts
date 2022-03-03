@@ -233,7 +233,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
-    test('can restore from spec', async () => {
+    test('can restore from spec', () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as FieldFormat;

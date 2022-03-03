@@ -63,7 +63,7 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
-test('DashboardContainer initializes embeddables', async (done) => {
+test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({

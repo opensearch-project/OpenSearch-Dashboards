@@ -29,6 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+import { setImmediate } from 'timers';
 
 import { CoreSetup } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
@@ -41,7 +42,8 @@ let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
-jest.useFakeTimers();
+jest.useFakeTimers('legacy');
+setImmediate(() => {});
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
@@ -82,7 +84,7 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Should throw SearchTimeoutError on server timeout AND show toast', async (done) => {
+    test('Should throw SearchTimeoutError on server timeout AND show toast', async () => {
       const mockResponse: any = {
         result: 500,
         body: {
@@ -100,11 +102,10 @@ describe('SearchInterceptor', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(SearchTimeoutError);
         expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-        done();
       }
     });
 
-    test('Search error should be debounced', async (done) => {
+    test('Search error should be debounced', async () => {
       const mockResponse: any = {
         result: 500,
         body: {
@@ -123,12 +124,11 @@ describe('SearchInterceptor', () => {
           await searchInterceptor.search(mockRequest).toPromise();
         } catch (e2) {
           expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-          done();
         }
       }
     });
 
-    test('Should throw Painless error on server error with OSS format', async (done) => {
+    test('Should throw Painless error on server error with OSS format', async () => {
       const mockResponse: any = {
         result: 500,
         body: {
@@ -157,7 +157,6 @@ describe('SearchInterceptor', () => {
         await response.toPromise();
       } catch (e) {
         expect(e).toBeInstanceOf(PainlessError);
-        done();
       }
     });
 
@@ -191,7 +190,7 @@ describe('SearchInterceptor', () => {
       await flushPromises();
     });
 
-    test('Immediately aborts if passed an aborted abort signal', async (done) => {
+    test('Immediately aborts if passed an aborted abort signal', (done) => {
       const abort = new AbortController();
       const mockRequest: IOpenSearchSearchRequest = {
         params: {},

@@ -32,7 +32,7 @@
 
 import Path from 'path';
 
-import jestDiff from 'jest-diff';
+import { diff } from 'jest-diff';
 import { REPO_ROOT } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
@@ -187,7 +187,7 @@ describe('diffCacheKey()', () => {
 
 describe('reformatJestDiff()', () => {
   it('reformats large jestDiff output to focus on the changed lines', () => {
-    const diff = jestDiff(
+    const jestDiff = diff(
       {
         a: ['1', '1', '1', '1', '1', '1', '1', '2', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
       },
@@ -196,7 +196,7 @@ describe('reformatJestDiff()', () => {
       }
     );
 
-    expect(reformatJestDiff(diff)).toMatchInlineSnapshot(`
+    expect(reformatJestDiff(jestDiff)).toMatchInlineSnapshot(`
       "[32m- Expected[39m
       [31m+ Received[39m
 

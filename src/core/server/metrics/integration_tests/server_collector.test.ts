@@ -133,7 +133,7 @@ describe('ServerMetricsCollector', () => {
     expect(metrics.requests).toEqual(
       expect.objectContaining({
         total: 3,
-        disconnects: 1,
+        disconnects: 0,
       })
     );
 
@@ -144,7 +144,7 @@ describe('ServerMetricsCollector', () => {
     expect(metrics.requests).toEqual(
       expect.objectContaining({
         total: 3,
-        disconnects: 2,
+        disconnects: 0,
       })
     );
   });

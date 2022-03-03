@@ -465,6 +465,10 @@ describe('OptimizerConfig::create()', () => {
         "invocationCallOrder": Array [
           21,
         ],
+        "lastCall": Array [
+          Symbol(parsed plugin scan dirs),
+          Symbol(parsed plugin paths),
+        ],
         "results": Array [
           Object {
             "type": "return",
@@ -491,6 +495,13 @@ describe('OptimizerConfig::create()', () => {
         "invocationCallOrder": Array [
           23,
         ],
+        "lastCall": Array [
+          Array [],
+          Array [
+            Symbol(bundle1),
+            Symbol(bundle2),
+          ],
+        ],
         "results": Array [
           Object {
             "type": "return",
@@ -514,6 +525,11 @@ describe('OptimizerConfig::create()', () => {
         ],
         "invocationCallOrder": Array [
           22,
+        ],
+        "lastCall": Array [
+          Symbol(new platform plugins),
+          Symbol(parsed repo root),
+          Symbol(parsed output root),
         ],
         "results": Array [
           Object {

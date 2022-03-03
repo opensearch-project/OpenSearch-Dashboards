@@ -37,13 +37,11 @@ import { docMissingSuite } from './doc_missing';
 import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_only';
 
 describe('uiSettings/routes', function () {
-  jest.setTimeout(10000);
-
   beforeAll(startServers);
-  /* eslint-disable jest/valid-describe */
+  // TODO: These are valid callbacks; it's unclear why eslint is complaining
+  /* eslint-disable jest/valid-describe-callback */
   describe('doc missing', docMissingSuite);
   describe('doc missing and index readonly', docMissingAndIndexReadOnlySuite);
   describe('doc exists', docExistsSuite);
-  /* eslint-enable jest/valid-describe */
   afterAll(stopServers);
 });
