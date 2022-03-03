@@ -36,11 +36,20 @@ import expiry from 'expiry-js';
 
 import { fromRoot } from '../../core/server/utils';
 
+const LATEST_PLUGIN_BASE_URL =
+  'https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards';
+
 function generateUrls({ version, plugin }) {
-  return [
-    plugin,
-    `https://artifacts.opensearch.org/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
-  ];
+  return [plugin, generatePluginUrl(version, plugin)];
+}
+
+function generatePluginUrl(version, plugin) {
+  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  if (platform !== 'linux') {
+    throw new Error('Plugins are only available for Linux');
+  }
+  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
 }
 
 export function parseMilliseconds(val) {
