@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,13 +28,8 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { EventEmitter } from 'events';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';
 
@@ -66,7 +64,7 @@ class RequestAdapter extends EventEmitter {
       name,
       startTime: Date.now(),
       status: RequestStatus.PENDING,
-      id: params.id ?? uuid(),
+      id: params.id ?? uuidv4(),
     };
     this.requests.set(req.id, req);
     this._onChange();

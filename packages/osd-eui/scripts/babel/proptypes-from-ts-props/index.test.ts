@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -20,10 +31,14 @@
 
 const path = require('path');
 const core = require('@babel/core');
+
+const packageRoot = path.join(__dirname, '../../..');
+const locProptypesFromTSProps = path.join(packageRoot, 'scripts/babel/proptypes-from-ts-props');
+
 const babelOptions = {
   babelrc: false,
   presets: ['@babel/typescript'],
-  plugins: ['./scripts/babel/proptypes-from-ts-props'],
+  plugins: [locProptypesFromTSProps],
   filename: 'somefile.tsx',
 };
 const babelPlugin = require('./index');
@@ -1762,7 +1777,7 @@ const FooComponent: React.SFC<{foo: Foo, bar?: Bar} & CommonProps> = () => {
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -1809,7 +1824,7 @@ const FooComponent: React.SFC<{foo: Foo, bar?: Bar} & CommonProps> = () => {
                 filename: 'foo.tsx',
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -1868,7 +1883,7 @@ const FooComponent: React.SFC<CommonProps & FooProps> = () => {
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -1915,7 +1930,7 @@ const FooComponent: React.SFC<CommonProps & FooProps> = () => {
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -1974,7 +1989,7 @@ const FooComponent: React.SFC<Foo> = () => {
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -2026,7 +2041,7 @@ const FooComponent: React.SFC<{foo: keyof typeof commonKeys, bar?: commonKeyType
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -2069,7 +2084,7 @@ const FooComponent: React.SFC<{foo: Foo}> = () => {
                 ...babelOptions,
                 plugins: [
                   [
-                    './scripts/babel/proptypes-from-ts-props',
+                    locProptypesFromTSProps,
                     {
                       fs: {
                         existsSync: () => true,
@@ -2589,7 +2604,7 @@ export { Foo, A } from './foo';
           ...babelOptions,
           plugins: [
             [
-              './scripts/babel/proptypes-from-ts-props',
+              locProptypesFromTSProps,
               {
                 fs: {
                   existsSync: () => true,
@@ -2622,7 +2637,7 @@ export { Foo as Bar, A as B } from './foo';
           ...babelOptions,
           plugins: [
             [
-              './scripts/babel/proptypes-from-ts-props',
+              locProptypesFromTSProps,
               {
                 fs: {
                   existsSync: () => true,

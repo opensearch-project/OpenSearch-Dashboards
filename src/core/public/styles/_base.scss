@@ -1,4 +1,4 @@
-/*!
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -62,14 +62,4 @@ $euiCollapsibleNavWidth: $euiSize * 20;
 
 .euiBody--collapsibleNavIsDocked .euiBottomBar {
   margin-left: $euiCollapsibleNavWidth;
-}
-
-/*
- Override for default size and style of EuiButtonIcon
- Todo: Address via size prop after folding EUI in
- */
-.euiButtonIcon.euiButtonIcon--SizeUnset {
-  height: auto;
-  width: auto;
-  padding: 4px;
 }

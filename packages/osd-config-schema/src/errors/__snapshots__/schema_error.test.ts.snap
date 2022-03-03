@@ -2,6 +2,7 @@
 
 exports[`includes stack 1`] = `
 "Error: test
+    at new SchemaError (packages/osd-config-schema/src/errors/schema_error.ts:37:5)
     at Object.<anonymous> (packages/osd-config-schema/src/errors/schema_error.test.ts:57:11)
     at new Promise (<anonymous>)"
 `;

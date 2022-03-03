@@ -1,15 +1,29 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "./",
+    "module": "esnext",
     "outDir": "dist",
-    "noUnusedLocals": true,
-    "removeComments": false
+    "sourceMap": false,
+    "removeComments": false,
+
+    "allowJs": false,
+    "preserveSymlinks": true,
+
+    "typeRoots": ["./node_modules/@types", "./**/*.d.ts", "./scripts/custom_matchers.ts"],
+    "types": [
+      "jest",
+      "node",
+      "resize-observer-browser"
+    ]
   },
   "files": [],
   "include": [
     "src/**/*"
   ],
-  "exclude": ["**/*.test.*", "**/__mocks__",
+  "exclude": [
+    "**/*.test.*",
+    "**/__mocks__",
     "src/mocks/**/*",
     "src/utils/data_samples/**/*"
   ]

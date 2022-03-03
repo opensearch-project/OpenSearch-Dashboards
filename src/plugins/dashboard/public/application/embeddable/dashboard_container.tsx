@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,18 +28,13 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UiActionsStart } from '../../ui_actions_plugin';
 import {
   Container,
@@ -152,7 +150,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const originalPanelState = {
       type: PLACEHOLDER_EMBEDDABLE,
       explicitInput: {
-        id: uuid.v4(),
+        id: uuidv4(),
         disabledActions: [
           'ACTION_CUSTOMIZE_PANEL',
           'CUSTOM_TIME_RANGE',
@@ -189,7 +187,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     const finalPanels = { ...this.input.panels };
     delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuidv4();
     finalPanels[newPanelId] = {
       ...previousPanelState,
       ...newPanelState,
@@ -219,7 +217,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: uuidv4(),
         },
       });
     } else {

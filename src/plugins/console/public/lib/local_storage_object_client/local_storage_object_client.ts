@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,12 +28,7 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ObjectStorage, IdObject } from '../../../common/types';
 import { Storage } from '../../services';
 
@@ -42,7 +40,7 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
   }
 
   async create(obj: Omit<O, 'id'>): Promise<O> {
-    const id = uuid.v4();
+    const id = uuidv4();
     const newObj = { id, ...obj } as O;
     this.client.set(`${this.prefix}_${id}`, newObj);
     return newObj;

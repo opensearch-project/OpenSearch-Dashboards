@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,17 +28,12 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -47,7 +45,7 @@ import {
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return _.assign({ id: uuidv1(), mode: 'line', shade: 0.2 }, opts);
 };
 
 class PercentilesUi extends Component {

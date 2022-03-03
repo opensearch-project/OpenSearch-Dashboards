@@ -1,3 +1,14 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 const findup = require('findup');
 const resolve = require('resolve');
 const fs = require('fs');
@@ -97,57 +108,62 @@ const generator = dtsGenerator({
 // 2. replace any import("src/...") declarations to import("@elastic/eui/src/...")
 // 3. replace any import("./...") declarations to import("@elastic/eui/src/...)
 // 4. generate & add EuiTokenObject
-generator.then(() => {
-  const defsFilePath = path.resolve(baseDir, 'eui.d.ts');
+generator
+  .then(() => {
+    const defsFilePath = path.resolve(baseDir, 'eui.d.ts');
 
-  fs.writeFileSync(
-    defsFilePath,
-    fs
-      .readFileSync(defsFilePath)
-      .toString()
-      .replace(/\/\/\/\W+<reference.*/g, '') // 1.
-      .replace(/import\("src\/(.*?)"\)/g, 'import("@elastic/eui/src/$1")') // 2.
-      .replace(
-        // start 3.
-        // find any singular `declare module { ... }` block
-        // {.*?^} matches anything until a } starts a new line (via `m` regex option, and `s` is dotall)
-        //
-        // aren't regex really bad for this? Yes.
-        // However, @babel/preset-typescript doesn't understand some syntax generated in eui.d.ts
-        // and the tooling around typescript's parsing & code generation is lacking and undocumented
-        // so... because this works with the guarantee that the newline-brace combination matches a module...
-        /declare module '(.*?)' {.*?^}/gms,
-        (module, moduleName) => {
-          // `moduleName` is the namespace for this ambient module
-          return module.replace(
-            // replace relative imports by attaching them to the module's namespace
-            /import\("([.]{1,2}\/.*?)"\)/g,
-            (importStatement, importPath) => {
-              let target = path.join(path.dirname(moduleName), importPath);
+    fs.writeFileSync(
+      defsFilePath,
+      fs
+        .readFileSync(defsFilePath)
+        .toString()
+        .replace(/\/\/\/\W+<reference.*/g, '') // 1.
+        .replace(/import\("src\/(.*?)"\)/g, 'import("@elastic/eui/src/$1")') // 2.
+        .replace(
+          // start 3.
+          // find any singular `declare module { ... }` block
+          // {.*?^} matches anything until a } starts a new line (via `m` regex option, and `s` is dotall)
+          //
+          // aren't regex really bad for this? Yes.
+          // However, @babel/preset-typescript doesn't understand some syntax generated in eui.d.ts
+          // and the tooling around typescript's parsing & code generation is lacking and undocumented
+          // so... because this works with the guarantee that the newline-brace combination matches a module...
+          /declare module '(.*?)' {.*?^}/gms,
+          (module, moduleName) => {
+            // `moduleName` is the namespace for this ambient module
+            return module.replace(
+              // replace relative imports by attaching them to the module's namespace
+              /import\("([.]{1,2}\/.*?)"\)/g,
+              (importStatement, importPath) => {
+                let target = path.join(path.dirname(moduleName), importPath);
 
-              // if the target resolves to an orphaned index.ts file, remap to '@elastic/eui'
-              const filePath = target.replace('@elastic/eui', baseDir);
-              const filePathTs = `${filePath}.ts`;
-              const filePathTsx = `${filePath}.tsx`;
-              const filePathResolvedToIndex = path.join(filePath, 'index.ts');
-              if (
-                // fs.existsSync(filePath) === false && // target file doesn't exist
-                fs.existsSync(filePathTs) === false && // target file (.ts) doesn't exist
-                fs.existsSync(filePathTsx) === false && // target file (.tsx) doesn't exist
-                fs.existsSync(filePathResolvedToIndex) && // and it resolves to an index.ts
-                hasParentIndex(filePathResolvedToIndex) === false // does not get exported at a higher level
-              ) {
-                target = '@elastic/eui';
+                // if the target resolves to an orphaned index.ts file, remap to '@elastic/eui'
+                const filePath = target.replace('@elastic/eui', baseDir);
+                const filePathTs = `${filePath}.ts`;
+                const filePathTsx = `${filePath}.tsx`;
+                const filePathResolvedToIndex = path.join(filePath, 'index.ts');
+                if (
+                  // fs.existsSync(filePath) === false && // target file doesn't exist
+                  fs.existsSync(filePathTs) === false && // target file (.ts) doesn't exist
+                  fs.existsSync(filePathTsx) === false && // target file (.tsx) doesn't exist
+                  fs.existsSync(filePathResolvedToIndex) && // and it resolves to an index.ts
+                  hasParentIndex(filePathResolvedToIndex) === false // does not get exported at a higher level
+                ) {
+                  target = '@elastic/eui';
+                }
+
+                return `import ("${target}")`;
               }
-
-              return `import ("${target}")`;
-            }
-          );
-        }
-      ) // end 3.
-      .replace(/$/, `\n\n${buildEuiTokensObject()}`) // 4.
-  );
-});
+            );
+          }
+        ) // end 3.
+        .replace(/$/, `\n\n${buildEuiTokensObject()}`) // 4.
+    );
+  })
+  .catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
 
 /** For step 4 **/
 // i18ntokens.json is generated as the first step in the build and can be relied upon here

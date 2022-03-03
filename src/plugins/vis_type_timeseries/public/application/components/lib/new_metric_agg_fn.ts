@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,17 +28,12 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { MetricsItemsSchema } from '../../../../common/types';
 
 export const newMetricAggFn = (): MetricsItemsSchema => {
   return {
-    id: uuid.v1(),
+    id: uuidv1(),
     type: 'count',
   };
 };

@@ -197,6 +197,14 @@ Even though this file is generated we commit it to OpenSearch Dashboards , becau
 _before_ dependencies are fetched (as this is the tool actually responsible for
 fetching dependencies).
 
+### Memory problems during bootstrap
+
+Calls to the `osd:bootstrap` scripts for the included projects are parallelized and if a script 
+runs out of memory, bootstrapping could fail. One way to prevent this failure is to prevent 
+a package from being batched by adding `"batch": false` to the root of the `package.json` of the
+package. Another way is to set the `NODE_OPTIONS: '--max-old-space-size=4096'` on the environment
+running the script. 
+
 ## Technical decisions
 
 ### Why our own tool?

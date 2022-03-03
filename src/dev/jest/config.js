@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
@@ -97,6 +95,16 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/osd-ui-framework/(dist|doc_site)/',
     '<rootDir>/packages/osd-pm/dist/',
+    '<rootDir>/packages/osd-eui/(dist|es|lib|types|test-env)/',
+    '<rootDir>/packages/osd-charts/(dist|integration)/',
+    /* EUI & Charts have their own tests that pass on their own but fail inside
+     * `packages`. For now, they are disabled.
+     *
+     * ToDo: Modify EUI and Charts tests to let succeed when run within `packages`
+     *       and remove thee next 2 rules.
+     */
+    '<rootDir>/packages/osd-eui/',
+    '<rootDir>/packages/osd-charts/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
   transform: {

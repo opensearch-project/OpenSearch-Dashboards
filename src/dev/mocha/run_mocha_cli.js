@@ -93,7 +93,7 @@ export function runMochaCli() {
             'src/**/public/**',
             '**/_*.{js,ts,tsx}',
             '**/*.test.*',
-            'packages/**/target/**',
+            'packages/**/node_modules/**',
           ],
         }
       )

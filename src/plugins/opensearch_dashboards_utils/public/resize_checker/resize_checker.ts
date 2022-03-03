@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { EventEmitter } from 'events';
 import { isEqual } from 'lodash';
-import ResizeObserver from 'resize-observer-polyfill';
+import ResizeObserver from '@4lolo/resize-observer-polyfill';
 
 function getSize(el: HTMLElement): [number, number] {
   return [el.clientWidth, el.clientHeight];

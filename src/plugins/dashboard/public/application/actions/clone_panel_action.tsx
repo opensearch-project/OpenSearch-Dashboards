@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
@@ -141,7 +139,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       type: embeddableType,
       explicitInput: {
         ...panelToClone.explicitInput,
-        id: uuid.v4(),
+        id: uuidv4(),
       },
     };
     let newTitle: string = '';

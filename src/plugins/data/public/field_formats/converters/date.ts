@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { i18n } from '@osd/i18n';
 import { memoize, noop } from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { FieldFormat, OSD_FIELD_TYPES, FIELD_FORMAT_IDS } from '../../../common';
 import { TextContextTypeConvert } from '../../../common/field_formats/types';
 

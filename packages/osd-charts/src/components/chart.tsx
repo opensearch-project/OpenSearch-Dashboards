@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -21,7 +32,7 @@ import classNames from 'classnames';
 import React, { createRef } from 'react';
 import { Provider } from 'react-redux';
 import { createStore, Store, Unsubscribe, StoreEnhancer, applyMiddleware, Middleware } from 'redux';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { LegendPositionConfig, PointerEvent } from '../specs';
 import { SpecsParser } from '../specs/specs_parser';
@@ -88,7 +99,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     this.chartContainerRef = createRef();
     this.chartStageRef = createRef();
 
-    const id = props.id ?? uuid.v4();
+    const id = props.id ?? uuidv4();
     const storeReducer = chartStoreReducer(id);
     const enhancer = getMiddlware(id);
     this.chartStore = createStore(storeReducer, enhancer);

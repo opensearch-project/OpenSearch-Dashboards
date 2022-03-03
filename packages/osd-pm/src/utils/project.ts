@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import fs from 'fs';
@@ -89,6 +87,7 @@ export class Project {
 
   public isWorkspaceRoot = false;
   public isWorkspaceProject = false;
+  public cannotBeBatched = false;
 
   constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
@@ -106,6 +105,8 @@ export class Project {
       ...this.productionDependencies,
     };
     this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
+    // Explicitly expect a boolean false to avoid batching this during bootstrapping
+    this.cannotBeBatched = this.json?.batch === false;
 
     this.scripts = this.json.scripts || {};
   }

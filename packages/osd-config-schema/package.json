@@ -16,7 +16,7 @@
   "peerDependencies": {
     "lodash": "^4.17.21",
     "joi": "^13.5.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.1",
     "type-detect": "^4.0.8"
   }
 }

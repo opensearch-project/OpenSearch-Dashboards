@@ -58,7 +58,7 @@ const BarChart = {
   bars: PropTypes.shape({
     fill: PropTypes.number,
     lineWidth: PropTypes.number,
-    show: PropTypes.boolean,
+    show: PropTypes.bool,
   }).isRequired,
 };
 

@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { appendIconComponentCache } from '../node_modules/@elastic/eui/es/components/icon/icon';
+import { appendIconComponentCache } from '../../../node_modules/@elastic/eui/es/components/icon/icon';
 
 /**
  * Loads nessecery icons to prevent loading vrt diff

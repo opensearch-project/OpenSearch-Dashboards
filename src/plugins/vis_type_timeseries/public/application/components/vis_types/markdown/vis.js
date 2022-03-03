@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,10 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { get } from 'lodash';
 import { Markdown } from '../../../../../../opensearch_dashboards_react/public';
 
@@ -47,7 +46,7 @@ export function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
-  const markdownElementId = getMarkdownId(uuid.v1());
+  const markdownElementId = getMarkdownId(uuidv1());
 
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };

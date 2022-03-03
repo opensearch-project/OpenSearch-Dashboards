@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,12 +28,7 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-import moment from 'moment';
+import moment from 'moment-timezone';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 

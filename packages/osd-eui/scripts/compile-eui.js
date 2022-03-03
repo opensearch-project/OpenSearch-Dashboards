@@ -1,4 +1,15 @@
 /*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -39,7 +50,7 @@ function compileLib() {
   // Run all code (com|trans)pilation through babel (ESNext JS & TypeScript)
 
   execSync(
-    'babel --quiet --out-dir=es --extensions .js,.ts,.tsx --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts,**/*.testenv.js,**/*.testenv.tsx,**/*.testenv.ts" src',
+    'NODE_OPTIONS=--max-old-space-size=6144 babel --quiet --out-dir=es --extensions .js,.ts,.tsx --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts,**/*.testenv.js,**/*.testenv.tsx,**/*.testenv.ts,eui.d.ts" src',
     {
       env: {
         ...process.env,
@@ -50,7 +61,7 @@ function compileLib() {
   );
 
   execSync(
-    'babel --quiet --out-dir=lib --extensions .js,.ts,.tsx --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts,**/*.testenv.js,**/*.testenv.tsx,**/*.testenv.ts" src',
+    'NODE_OPTIONS=--max-old-space-size=6144 babel --quiet --out-dir=lib --extensions .js,.ts,.tsx --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts,**/*.testenv.js,**/*.testenv.tsx,**/*.testenv.ts" src',
     {
       env: {
         ...process.env,
@@ -60,7 +71,7 @@ function compileLib() {
   );
 
   execSync(
-    'babel --quiet --out-dir=test-env --extensions .js,.ts,.tsx --config-file="./.babelrc-test-env.js" --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts" src',
+    'NODE_OPTIONS=--max-old-space-size=8192 babel --quiet --out-dir=test-env --extensions .js,.ts,.tsx --config-file="./.babelrc-test-env.js" --ignore "**/webpack.config.js,**/*.test.js,**/*.test.ts,**/*.test.tsx,**/*.d.ts" src',
     {
       env: {
         ...process.env,
@@ -107,7 +118,7 @@ function compileBundle() {
   shell.mkdir('-p', 'dist');
 
   console.log('Building bundle...');
-  execSync('webpack --config=src/webpack.config.js', {
+  execSync('NODE_OPTIONS=--max-old-space-size=8192 webpack --config=src/webpack.config.js', {
     stdio: 'inherit',
     env: {
       ...process.env,
@@ -159,7 +170,7 @@ function compileBundle() {
 
   console.log('Building chart theme module...');
   execSync(
-    'webpack src/themes/charts/themes.ts -o dist/eui_charts_theme.js --output-library-target="commonjs" --config=src/webpack.config.js',
+    'webpack --config=src/themes/charts/webpack.config.js',
     {
       stdio: 'inherit',
     }

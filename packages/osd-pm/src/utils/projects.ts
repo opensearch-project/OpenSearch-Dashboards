@@ -179,13 +179,19 @@ export function topologicallyBatchProjects(
   while (projectsLeftToBatch.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
-    const batch = [];
+    const batch: Project[] = [];
     for (const projectName of projectsLeftToBatch) {
+      const projectToBatch = projectsToBatch.get(projectName)!;
+      // If we need to avoid batching and the current `batch` is already populated, break to start a new `batch`
+      if (projectToBatch.cannotBeBatched && batch.length > 0) break;
+
       const projectDeps = projectGraph.get(projectName)!;
       const needsDependenciesBatched = projectDeps.some((dep) => projectsLeftToBatch.has(dep.name));
 
       if (!needsDependenciesBatched) {
-        batch.push(projectsToBatch.get(projectName)!);
+        batch.push(projectToBatch);
+        // If we need to avoid batching, break here so we don't add anything else to the current `batch`
+        if (projectToBatch.cannotBeBatched) break;
       }
     }
 

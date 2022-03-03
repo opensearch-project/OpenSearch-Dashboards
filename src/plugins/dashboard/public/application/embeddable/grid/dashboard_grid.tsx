@@ -78,7 +78,7 @@ function ResponsiveGrid({
   size: { width: number };
   isViewMode: boolean;
   layout: Layout[];
-  onLayoutChange: () => void;
+  onLayoutChange: (layout: PanelLayout[]) => void;
   children: JSX.Element[];
   maximizedPanelId: string;
   useMargins: boolean;
@@ -306,7 +306,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         isViewMode={isViewMode}
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={this.state.expandedPanelId}
+        maximizedPanelId={this.state.expandedPanelId || ''}
         useMargins={this.state.useMargins}
       >
         {this.renderPanels()}

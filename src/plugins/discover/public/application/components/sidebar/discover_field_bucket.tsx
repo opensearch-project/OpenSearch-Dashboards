@@ -93,6 +93,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             <div>
               <EuiButtonIcon
                 iconSize="s"
+                size="auto"
                 iconType="plusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
                 aria-label={addLabel}
@@ -105,10 +106,10 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                   paddingTop: 0,
                   paddingBottom: 0,
                 }}
-                className={'euiButtonIcon--SizeUnset'}
               />
               <EuiButtonIcon
                 iconSize="s"
+                size="auto"
                 iconType="minusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '-')}
                 aria-label={removeLabel}
@@ -121,7 +122,6 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                   paddingRight: 2,
                   paddingLeft: 2,
                 }}
-                className={'euiButtonIcon--SizeUnset'}
               />
             </div>
           </EuiFlexItem>

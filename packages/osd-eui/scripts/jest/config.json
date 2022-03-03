@@ -45,6 +45,6 @@
     "^.+\\.(js|tsx?)$": "babel-jest"
   },
   "snapshotSerializers": [
-    "<rootDir>/node_modules/enzyme-to-json/serializer"
+    "<rootDir>/../../node_modules/enzyme-to-json/serializer"
   ]
 }

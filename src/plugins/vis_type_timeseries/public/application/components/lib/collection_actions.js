@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,9 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
+import { v1 as uuidv1 } from 'uuid';
 
-import uuid from 'uuid';
-
-const newFn = () => ({ id: uuid.v1() });
+const newFn = () => ({ id: uuidv1() });
 
 export function handleChange(props, doc) {
   const { model, name } = props;

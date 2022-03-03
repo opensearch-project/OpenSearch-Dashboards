@@ -203,17 +203,16 @@ export function DiscoverLegacy({
                   />
                 </div>
               )}
-              {/* Todo: fix size */}
               <EuiButtonIcon
                 iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
                 iconSize="m"
-                size="s"
+                size="auto"
                 onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                 data-test-subj="collapseSideBarButton"
                 aria-controls="discover-sidebar"
                 aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
-                className="dscCollapsibleSidebar__collapseButton euiButtonIcon--SizeUnset"
+                className="dscCollapsibleSidebar__collapseButton"
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>

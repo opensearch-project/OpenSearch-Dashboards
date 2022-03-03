@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import d3 from 'd3';
@@ -59,7 +57,7 @@ describe('timeTicks', () => {
         moment.tz.setDefault(tz);
       });
 
-      it('should return nice daily ticks', () => {
+      it(`should return nice daily ticks in ${tz}`, () => {
         scale.domain([
           moment('2019-04-04 00:00:00').valueOf(),
           moment('2019-04-08 00:00:00').valueOf(),
@@ -76,7 +74,7 @@ describe('timeTicks', () => {
         ]);
       });
 
-      it('should return nice hourly ticks', () => {
+      it(`should return nice hourly ticks in ${tz}`, () => {
         scale.domain([
           moment('2019-04-04 00:00:00').valueOf(),
           moment('2019-04-04 04:00:00').valueOf(),
@@ -93,7 +91,7 @@ describe('timeTicks', () => {
         ]);
       });
 
-      it('should return nice yearly ticks', () => {
+      it(`should return nice yearly ticks in ${tz}`, () => {
         scale.domain([
           moment('2010-04-04 00:00:00').valueOf(),
           moment('2019-04-04 04:00:00').valueOf(),
@@ -114,7 +112,7 @@ describe('timeTicks', () => {
         ]);
       });
 
-      it('should return nice yearly ticks from leap year to leap year', () => {
+      it(`should return nice yearly ticks from leap year to leap year in ${tz}`, () => {
         scale.domain([
           moment('2016-02-29 00:00:00').valueOf(),
           moment('2020-04-29 00:00:00').valueOf(),

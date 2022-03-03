@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,14 +28,8 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { i18n } from '@osd/i18n';
-import _ from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import {
@@ -101,7 +98,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput, id: uuidv4() },
     };
     dashboard.replacePanel(panelToReplace, newPanel);
   }

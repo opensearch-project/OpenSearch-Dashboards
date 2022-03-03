@@ -31,7 +31,9 @@ const scssLoaders = [
   {
     loader: 'postcss-loader',
     options: {
-      plugins: [require('autoprefixer')],
+      postcssOptions: {
+        plugins: [require('autoprefixer')],
+      },
     },
   },
   'sass-loader',
@@ -53,7 +55,7 @@ module.exports = async ({ config }) => {
         numCyclesDetected = 0;
       },
       onDetected({ paths, compilation }) {
-        if (!/^node_modules\/.+/.test(paths[0])) {
+        if (!/node_modules\/.+/.test(paths[0])) {
           numCyclesDetected++;
           compilation.warnings.push(new Error(paths.join(' -> ')));
         }
@@ -92,7 +94,11 @@ module.exports = async ({ config }) => {
   });
 
   // Replace default css rules with nonce
-  config.module.rules = config.module.rules.filter(({ test }) => !test.test('.css'));
+  config.module.rules = config.module.rules.filter(({ test }) => {
+    return Array.isArray(test)
+    ? !test.some(t => t.test('.css'))
+    : !test.test('.css')
+  });
   config.module.rules.push({
     test: /\.css$/,
     use: [
@@ -113,7 +119,7 @@ module.exports = async ({ config }) => {
 
   config.module.rules.push({
     test: /\.scss$/,
-    include: [path.resolve(__dirname, '../storybook'), path.resolve(__dirname, '../node_modules/@elastic')],
+    include: [path.resolve(__dirname, '../storybook'), path.resolve(__dirname, '../../../node_modules/@elastic')],
     use: [
       {
         loader: 'style-loader',
