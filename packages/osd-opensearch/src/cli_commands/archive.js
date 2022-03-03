@@ -48,7 +48,6 @@ exports.help = (defaults = {}) => {
       --base-path       Path containing cache/installations [default: ${basePath}]
       --install-path    Installation path, defaults to 'source' within base-path
       --password        Sets password for opensearch user [default: ${password}]
-      --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on OpenSearch
       -E                Additional key=value settings to pass to OpenSearch
 
