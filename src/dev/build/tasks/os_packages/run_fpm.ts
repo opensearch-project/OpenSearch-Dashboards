@@ -36,10 +36,14 @@ export async function runFpm(
   log: ToolingLog,
   build: Build,
   type: 'rpm' | 'deb',
+  arch: 'x64' | 'arm64',
   pkgSpecificFlags: string[]
 ) {
-  const linux = config.getPlatform('linux', 'x64');
+  const linux = config.getPlatform('linux', arch);
   const version = config.getBuildVersion();
+  const fileName = config.resolveFromTarget(
+    arch === 'arm64' ? `NAME-${version}-arm64.${type}` : `NAME-${version}-ARCH.TYPE`
+  );
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 
@@ -61,7 +65,7 @@ export async function runFpm(
     // the filtered package version, which would have dashes replaced with
     // underscores
     '--package',
-    config.resolveFromTarget(`NAME-${version}-ARCH.TYPE`),
+    fileName,
 
     // input type
     '-s',

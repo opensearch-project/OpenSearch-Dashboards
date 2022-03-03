@@ -35,7 +35,9 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   createArchives: boolean;
   createRpmPackage: boolean;
+  createRpmArmPackage: boolean;
   createDebPackage: boolean;
+  createDebArmPackage: boolean;
   createDockerPackage: boolean;
   createDockerUbiPackage: boolean;
   versionQualifier: string | undefined;
@@ -107,9 +109,17 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --deb or --skip-os-packages
     await run(Tasks.CreateDebPackage);
   }
+  if (options.createDebArmPackage) {
+    // control w/ --deb-arm or --skip-os-packages
+    await run(Tasks.CreateDebArmPackage);
+  }
   if (options.createRpmPackage) {
     // control w/ --rpm or --skip-os-packages
     await run(Tasks.CreateRpmPackage);
+  }
+  if (options.createRpmArmPackage) {
+    // control w/ --rpm-arm or --skip-os-packages
+    await run(Tasks.CreateRpmArmPackage);
   }
   if (options.createDockerPackage) {
     // control w/ --docker or --skip-docker-ubi or --skip-os-packages

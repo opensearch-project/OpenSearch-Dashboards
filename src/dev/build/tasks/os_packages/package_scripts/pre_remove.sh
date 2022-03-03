@@ -2,8 +2,8 @@
 set -e
 
 echo -n "Stopping OpenSearch Dashboards service..."
-if command -v systemctl >/dev/null && systemctl is-active opensearch_dashboards.service >/dev/null; then
-    systemctl --no-reload stop opensearch_dashboards.service
+if command -v systemctl >/dev/null && systemctl is-active opensearch-dashboards.service >/dev/null; then
+    systemctl --no-reload stop opensearch-dashboards.service
 elif [ -x /etc/init.d/opensearch-dashboards ]; then
     if command -v invoke-rc.d >/dev/null; then
         invoke-rc.d opensearch-dashboards stop
