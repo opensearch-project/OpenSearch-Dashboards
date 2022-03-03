@@ -8,12 +8,13 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
     listItems={
       Array [
         Object {
-          "generateUrlCb": [Function],
+          "data-test-subj": "docTableRowAction",
           "href": "aaa",
           "label": "generateUrlCb link",
           "order": 10,
         },
         Object {
+          "data-test-subj": "docTableRowAction",
           "href": "bbb",
           "label": "href link",
           "order": 20,
