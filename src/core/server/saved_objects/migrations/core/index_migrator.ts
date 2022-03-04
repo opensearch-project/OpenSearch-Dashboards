@@ -169,7 +169,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name })));
+  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
 }
 
 /**
@@ -207,6 +207,7 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
+      // @ts-expect-error @opensearch-project/opensearch _source is optional
       await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
     );
   }

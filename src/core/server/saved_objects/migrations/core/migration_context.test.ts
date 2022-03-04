@@ -50,7 +50,7 @@ describe('disableUnknownTypeMappingFields', () => {
         },
       },
     },
-  };
+  } as const;
   const activeMappings = {
     _meta: {
       migrationMappingPropertyHashes: {
@@ -65,7 +65,7 @@ describe('disableUnknownTypeMappingFields', () => {
         },
       },
     },
-  };
+  } as const;
   const targetMappings = disableUnknownTypeMappingFields(activeMappings, sourceMappings);
 
   it('disables complex field mappings from unknown types in the source mappings', () => {

@@ -2060,38 +2060,6 @@ export interface SavedObjectsClientWrapperOptions {
     typeRegistry: ISavedObjectTypeRegistry;
 }
 
-// @public
-export interface SavedObjectsComplexFieldMapping {
-    // (undocumented)
-    doc_values?: boolean;
-    dynamic?: false | 'strict';
-    // (undocumented)
-    enabled?: boolean;
-    // (undocumented)
-    properties: SavedObjectsMappingProperties;
-    // (undocumented)
-    type?: string;
-}
-
-// @public
-export interface SavedObjectsCoreFieldMapping {
-    // (undocumented)
-    doc_values?: boolean;
-    // (undocumented)
-    fields?: {
-        [subfield: string]: {
-            type: string;
-            ignore_above?: number;
-        };
-    };
-    // (undocumented)
-    index?: boolean;
-    // (undocumented)
-    null_value?: number | boolean | string;
-    // (undocumented)
-    type: string;
-}
-
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
@@ -2210,7 +2178,9 @@ export interface SavedObjectsExportResultDetails {
 }
 
 // @public
-export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
+export type SavedObjectsFieldMapping = opensearchtypes.MappingProperty & {
+    dynamic?: false | 'strict';
+};
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
