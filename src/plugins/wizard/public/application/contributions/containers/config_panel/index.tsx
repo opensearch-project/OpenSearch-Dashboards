@@ -3,103 +3,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiForm, EuiIcon } from '@elastic/eui';
-import React, { useState } from 'react';
-import {
-  CONTAINER_ID,
-  DroppableBoxContribution,
-  TitleItemContribution,
-  ItemContribution,
-} from './types';
+import { EuiForm } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { useVisualizationType } from '../../../utils/use';
-
+import { DroppableBoxContribution, MainItemContribution, TitleItemContribution } from './items';
 import './index.scss';
-import { DroppableBox } from './items/droppable_box';
-import { SuperSelectField } from '../common/items/super_select_field';
-import { Title } from './title';
-import { useDropBox } from './items/use';
+import { ITEM_TYPES } from './items';
+import { useTypedSelector } from '../../../utils/state_management';
+import { mapItemToPanelComponents } from './utils/item_to_panel';
 
-const DEFAULT_ITEMS: ItemContribution[] = [
-  {
-    type: 'title',
-    title: 'Configuration',
-  },
-];
+const CONTAINER_ID = 'config-panel';
+const DEFAULT_ITEMS: MainItemContribution[] = [getTitleContribution()];
 
 export function ConfigPanel() {
-  const [showSecondary, setShowSecondary] = useState(false);
   const {
     contributions: { items },
   } = useVisualizationType();
+  const activeItem = useTypedSelector((state) => state.config.activeItem);
 
-  const hydratedItems = [...(items?.[CONTAINER_ID] ?? []), ...DEFAULT_ITEMS];
+  const hydratedItems: MainItemContribution[] = [
+    ...(items?.[CONTAINER_ID] ?? []),
+    ...DEFAULT_ITEMS,
+  ];
+  const activeDropbox = hydratedItems.find(
+    (item: MainItemContribution) => item.type === ITEM_TYPES.DROPBOX && item?.id === activeItem?.id
+  ) as DroppableBoxContribution | undefined;
 
-  const { title, droppableBoxes } = getMainPanelData(hydratedItems);
+  const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
+  const secondaryPanel = useMemo(
+    () =>
+      activeDropbox
+        ? mapItemToPanelComponents(
+            [getTitleContribution(activeDropbox.label), ...activeDropbox.items],
+            true
+          )
+        : null,
+    [activeDropbox]
+  );
 
   return (
-    <EuiForm className={`wizConfig ${showSecondary ? 'showSecondary' : ''}`}>
-      <div className="wizConfig__section">
-        <Title title={title} />
-        <div className="wizConfig__content">
-          {droppableBoxes.map((props, index) => (
-            <StatefulDroppableBox key={index} {...props} />
-          ))}
-        </div>
-      </div>
-      <div className="wizConfig__section wizConfig--secondary">
-        <Title
-          title="Test Stuff"
-          icon={<EuiIcon type="arrowLeft" onClick={() => setShowSecondary(false)} />}
-          showDivider
-        />
-        <div className="wizConfig__content">
-          <SuperSelectField
-            label="Test dropdown"
-            options={[
-              {
-                value: 'option_one',
-                inputDisplay: 'Option One',
-                'data-test-subj': 'option one',
-              },
-            ]}
-          />
-        </div>
-      </div>
+    <EuiForm className={`wizConfig ${activeItem ? 'showSecondary' : ''}`}>
+      <div className="wizConfig__section">{mainPanel}</div>
+      <div className="wizConfig__section wizConfig--secondary">{secondaryPanel}</div>
     </EuiForm>
   );
 }
 
-function getMainPanelData(items: ItemContribution[]) {
-  const titleContribution: TitleItemContribution = items.filter(
-    ({ type }) => type === 'title'
-  )[0] as TitleItemContribution;
-
-  const droppableBoxContributions: DroppableBoxContribution[] = items.filter(
-    ({ type }) => type === 'droppable_box'
-  ) as DroppableBoxContribution[];
-
-  const droppableBoxes = droppableBoxContributions.map(({ label, id, limit }) => ({
-    id,
-    label,
-    limit,
-  }));
-
+function getTitleContribution(title?: string): TitleItemContribution {
   return {
-    title: titleContribution.title,
-    droppableBoxes,
+    type: ITEM_TYPES.TITLE,
+    title: [title, 'Configuration'].join(' '),
   };
 }
 
-interface DroppableBoxProps {
-  id: string;
-  label: string;
-  limit?: number;
-}
-
-const StatefulDroppableBox = ({ id, ...props }: DroppableBoxProps) => {
-  const droppableHookProps = useDropBox(id);
-
-  return <DroppableBox {...props} {...droppableHookProps} />;
-};
-
-export { CONTAINER_ID, TitleItemContribution, ItemContribution, DEFAULT_ITEMS };
+export { CONTAINER_ID, DEFAULT_ITEMS };
+export * from './items';

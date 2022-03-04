@@ -9,18 +9,20 @@ import React from 'react';
 import { FieldIconProps, FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { useDrop } from '../../../../utils/drag_drop';
 import { FieldDragDataType } from '../../../../utils/drag_drop/types';
+import { DroppableBoxContribution } from './types';
 
 import './droppable_box.scss';
+import { useDropBox } from './use';
 
-export interface DropboxFields {
+interface DropboxField {
   label: string;
   icon: FieldIconProps['type'];
   id: string;
 }
 
-export interface DroppableBoxProps {
+interface DroppableBoxProps {
   label: string;
-  fields: DropboxFields[];
+  fields: DropboxField[];
   limit?: number;
   onAddField: () => void;
   onEditField: (id: string) => void;
@@ -28,7 +30,7 @@ export interface DroppableBoxProps {
   onDropField: (data: FieldDragDataType['value']) => void;
 }
 
-export const DroppableBox = ({
+const DroppableBoxComponent = ({
   label: boxLabel,
   fields,
   onAddField,
@@ -79,3 +81,11 @@ export const DroppableBox = ({
     </EuiFormRow>
   );
 };
+
+const DroppableBox = React.memo((dropBox: DroppableBoxContribution) => {
+  const props = useDropBox(dropBox);
+
+  return <DroppableBoxComponent {...props} />;
+});
+
+export { DroppableBox, DroppableBoxComponent, DroppableBoxProps, DropboxField };

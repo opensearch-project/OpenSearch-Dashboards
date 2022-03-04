@@ -31,16 +31,14 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { InputContribution } from './types';
 
-interface Props {
-  label: string;
-  options: EuiSuperSelectProps<any>['options'];
-  idAria?: string;
-  [key: string]: any;
+interface InputProps extends Omit<InputContribution, 'type'> {
+  value: string;
 }
 
-export const SuperSelectField = ({ label, options, ...rest }: Props) => {
+export const TextInput = ({ label, onChange, value, ...rest }: InputProps) => {
   // const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -52,14 +50,15 @@ export const SuperSelectField = ({ label, options, ...rest }: Props) => {
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiSuperSelect
+      <EuiFieldText
         fullWidth
-        onChange={(value) => {
+        onChange={(event) => {
+          onChange?.(event.target.value);
           // field.setValue(value);
         }}
         // isInvalid={isInvalid}
-        data-test-subj="select"
-        options={options}
+        value={value || ''}
+        data-test-subj="text_input"
       />
     </EuiFormRow>
   );
