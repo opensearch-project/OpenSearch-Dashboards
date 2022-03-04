@@ -37,8 +37,6 @@ import { runCommand } from './run';
 import { Project } from './utils/project';
 import { log } from './utils/log';
 
-const testif = process.env.SKIP_BAD_APPLES === 'true' ? test.skip : test;
-
 log.setLogLevel('silent');
 
 const rootPath = resolve(`${__dirname}/utils/__fixtures__/opensearch-dashboards`);
@@ -72,14 +70,14 @@ beforeEach(() => {
   };
 });
 
-testif('passes all found projects to the command if no filter is specified', async () => {
+test('passes all found projects to the command if no filter is specified', async () => {
   await runCommand(command, config);
 
   expect(command.run).toHaveBeenCalledTimes(1);
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('excludes project if single `exclude` filter is specified', async () => {
+test('excludes project if single `exclude` filter is specified', async () => {
   await runCommand(command, {
     ...config,
     options: { exclude: 'foo' },
@@ -89,7 +87,7 @@ testif('excludes project if single `exclude` filter is specified', async () => {
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('excludes projects if multiple `exclude` filter are specified', async () => {
+test('excludes projects if multiple `exclude` filter are specified', async () => {
   await runCommand(command, {
     ...config,
     options: { exclude: ['foo', 'bar', 'baz'] },
@@ -99,7 +97,7 @@ testif('excludes projects if multiple `exclude` filter are specified', async () 
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('includes single project if single `include` filter is specified', async () => {
+test('includes single project if single `include` filter is specified', async () => {
   await runCommand(command, {
     ...config,
     options: { include: 'foo' },
@@ -109,7 +107,7 @@ testif('includes single project if single `include` filter is specified', async 
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('includes only projects specified in multiple `include` filters', async () => {
+test('includes only projects specified in multiple `include` filters', async () => {
   await runCommand(command, {
     ...config,
     options: { include: ['foo', 'bar', 'baz'] },
@@ -119,7 +117,7 @@ testif('includes only projects specified in multiple `include` filters', async (
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('respects both `include` and `exclude` filters if specified at the same time', async () => {
+test('respects both `include` and `exclude` filters if specified at the same time', async () => {
   await runCommand(command, {
     ...config,
     options: { include: ['foo', 'bar', 'baz'], exclude: 'bar' },
@@ -129,7 +127,7 @@ testif('respects both `include` and `exclude` filters if specified at the same t
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-testif('does not run command if all projects are filtered out', async () => {
+test('does not run command if all projects are filtered out', async () => {
   const mockProcessExit = jest.spyOn(process, 'exit').mockReturnValue(undefined as never);
 
   await runCommand(command, {
