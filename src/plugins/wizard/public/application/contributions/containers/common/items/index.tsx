@@ -4,6 +4,6 @@
  */
 
 export * from './types';
-export * from './droppable_box';
-export { Title } from './title';
-export { FormField } from './form_field';
+
+export { Select } from './select';
+export { TextInput } from './text_input';
