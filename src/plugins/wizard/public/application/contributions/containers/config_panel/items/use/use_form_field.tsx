@@ -8,8 +8,8 @@ import produce from 'immer';
 import { useState, useCallback } from 'react';
 import { updateConfigItemState } from '../../../../../utils/state_management/config_slice';
 import { useTypedSelector, useTypedDispatch } from '../../../../../utils/state_management';
-import { DropBoxState, INITIAL_STATE as INITIAL_DROPBOX_STATE } from './use_dropbox';
-import { FieldContributions } from '../types';
+import { INITIAL_STATE as INITIAL_DROPBOX_STATE } from './use_dropbox';
+import { FieldContributions, DropboxState } from '../types';
 
 interface FieldProps {
   onChange: Function;
@@ -19,7 +19,7 @@ interface FieldProps {
 export const useFormField = (id: string, onChange: FieldContributions['onChange']): FieldProps => {
   const activeDropbox = useTypedSelector((state) => state.config.activeItem);
   const { items } = useTypedSelector((state) => state.config);
-  const dropBoxState: DropBoxState =
+  const dropboxState: DropboxState =
     activeDropbox?.id && items[activeDropbox.id] ? items[activeDropbox.id] : INITIAL_DROPBOX_STATE;
   const dispatch = useTypedDispatch();
   const [value, setValue] = useState<any>();
@@ -33,7 +33,7 @@ export const useFormField = (id: string, onChange: FieldContributions['onChange'
         return;
       }
 
-      const newDropboxState = produce(dropBoxState, (draftState) => {
+      const newDropboxState = produce(dropboxState, (draftState) => {
         // For new fields
         if (!activeDropbox.fieldName) {
           set(draftState, `draft.${id}`, newValue);
@@ -49,13 +49,13 @@ export const useFormField = (id: string, onChange: FieldContributions['onChange'
         })
       );
     },
-    [activeDropbox, dispatch, dropBoxState, id, onChange]
+    [activeDropbox, dispatch, dropboxState, id, onChange]
   );
 
   const formFieldValue = activeDropbox
     ? activeDropbox.fieldName
-      ? dropBoxState.fields[activeDropbox.fieldName][id]
-      : dropBoxState.draft?.[id]
+      ? dropboxState.fields[activeDropbox.fieldName][id]
+      : dropboxState.draft?.[id]
     : value;
 
   return {

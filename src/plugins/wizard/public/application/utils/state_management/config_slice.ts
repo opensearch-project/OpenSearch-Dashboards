@@ -7,11 +7,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 import {
   CONTAINER_ID,
-  DropboxField,
+  DropboxState,
   ITEM_TYPES,
   MainItemContribution,
 } from '../../contributions/containers/config_panel';
-import { DropBoxState } from '../../contributions/containers/config_panel/items/use/use_dropbox';
 
 export interface ActiveItem {
   id: string;
@@ -68,12 +67,12 @@ export const slice = createSlice({
         // Handle saving new field data from dropbox
         if (state.activeItem && state.activeItem.type === ITEM_TYPES.DROPBOX) {
           const dropboxId = state.activeItem.id;
-          const dropboxState: DropBoxState = state.items[dropboxId] ?? {};
+          const dropboxState: DropboxState = state.items[dropboxId] ?? {};
           const fieldName = dropboxState.draft?.field;
 
           if (fieldName) {
             // Get new field
-            const newField: DropBoxState['fields'][0] = {
+            const newField: DropboxState['fields'][0] = {
               ...dropboxState.draft,
             };
             state.items[dropboxId].fields[fieldName] = newField;

@@ -6,21 +6,15 @@
 import { EuiButtonIcon, EuiPanel, EuiText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { FieldIconProps, FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
+import { FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { useDrop } from '../../../../utils/drag_drop';
 import { FieldDragDataType } from '../../../../utils/drag_drop/types';
-import { DroppableBoxContribution } from './types';
+import { DropboxContribution, DropboxField } from './types';
 
-import './droppable_box.scss';
-import { useDropBox } from './use';
+import './dropbox.scss';
+import { useDropbox } from './use';
 
-interface DropboxField {
-  label: string;
-  icon: FieldIconProps['type'];
-  id: string;
-}
-
-interface DroppableBoxProps {
+interface DropboxProps {
   label: string;
   fields: DropboxField[];
   limit?: number;
@@ -30,7 +24,7 @@ interface DroppableBoxProps {
   onDropField: (data: FieldDragDataType['value']) => void;
 }
 
-const DroppableBoxComponent = ({
+const DropboxComponent = ({
   label: boxLabel,
   fields,
   onAddField,
@@ -38,7 +32,7 @@ const DroppableBoxComponent = ({
   onDropField,
   onEditField,
   limit = 1,
-}: DroppableBoxProps) => {
+}: DropboxProps) => {
   const [dropProps, { isValidDropTarget }] = useDrop('field-data', onDropField);
 
   return (
@@ -82,10 +76,10 @@ const DroppableBoxComponent = ({
   );
 };
 
-const DroppableBox = React.memo((dropBox: DroppableBoxContribution) => {
-  const props = useDropBox(dropBox);
+const Dropbox = React.memo((dropBox: DropboxContribution) => {
+  const props = useDropbox(dropBox);
 
-  return <DroppableBoxComponent {...props} />;
+  return <DropboxComponent {...props} />;
 });
 
-export { DroppableBox, DroppableBoxComponent, DroppableBoxProps, DropboxField };
+export { Dropbox, DropboxComponent, DropboxProps };

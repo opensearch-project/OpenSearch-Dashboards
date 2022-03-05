@@ -4,6 +4,6 @@
  */
 
 export * from './types';
-export * from './droppable_box';
+export * from './dropbox';
 export { Title } from './title';
 export { FormField } from './form_field';

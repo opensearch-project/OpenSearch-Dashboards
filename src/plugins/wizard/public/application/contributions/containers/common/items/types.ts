@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiFieldTextProps, EuiSuperSelectProps } from '@elastic/eui';
 import { WizardServices } from 'src/plugins/wizard/public';
 import { RootState } from '../../../../utils/state_management';
 
@@ -19,24 +19,14 @@ export const ItemTypes = {
   ...ITEM_TYPES,
 };
 
-export interface InitProps {
-  state: {
-    root: RootState;
-    parent: any;
-  };
-  services: WizardServices;
-  intialValue: any;
-}
-
-export interface SelectContribution {
+export interface SelectContribution<T extends string> {
   type: ITEM_TYPES.SELECT;
   id: string;
   label: string;
   options:
-    | EuiSuperSelectProps<string>['options']
-    | ((state: RootState, services: WizardServices) => EuiSuperSelectProps<string>['options']);
+    | EuiSuperSelectProps<T>['options']
+    | ((state: RootState, services: WizardServices) => EuiSuperSelectProps<T>['options']);
   onChange?: (option: string) => void;
-  init: (props: InitProps) => any;
   'data-test-subj'?: string;
   idAria?: string;
 }
@@ -46,9 +36,8 @@ export interface InputContribution {
   id: string;
   label: string;
   onChange?: (value: string) => void;
-  init: (props: InitProps) => any;
   'data-test-subj'?: string;
   idAria?: string;
 }
 
-export type CommonItemContribution = SelectContribution | InputContribution;
+export type CommonItemContribution = SelectContribution<string> | InputContribution;

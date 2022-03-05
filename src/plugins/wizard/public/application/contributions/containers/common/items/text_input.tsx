@@ -34,7 +34,7 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { InputContribution } from './types';
 
-interface InputProps extends Omit<InputContribution, 'type'> {
+interface InputProps extends Omit<InputContribution<unknown>, 'type'> {
   value: string;
 }
 

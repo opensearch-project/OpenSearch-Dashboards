@@ -37,7 +37,7 @@ import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboa
 import { useTypedSelector } from '../../../../utils/state_management';
 import { SelectContribution } from './types';
 
-interface SelectProps extends Omit<SelectContribution, 'type'> {
+interface SelectProps extends Omit<SelectContribution<unknown>, 'type'> {
   value: string;
 }
 
