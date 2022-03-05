@@ -5,44 +5,36 @@
 
 import produce from 'immer';
 import { useCallback, useMemo } from 'react';
+import { IndexPatternField } from 'src/plugins/data/common';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
 import {
   setActiveItem,
   updateConfigItemState,
 } from '../../../../../utils/state_management/config_slice';
-import { ITEM_TYPES } from '../types';
-import { DroppableBoxProps, DropboxField } from '../droppable_box';
-import { DroppableBoxContribution } from '../types';
-export interface DropBoxState {
-  fields: {
-    [fieldId: string]: {
-      [itemId: string]: any;
-    };
-  };
-  draft?: {
-    [itemId: string]: any;
-  };
-}
+import { DropboxContribution, DropboxState, ITEM_TYPES, DropboxField } from '../types';
+import { DropboxProps } from '../dropbox';
 
-export const INITIAL_STATE = {
+export const INITIAL_STATE: DropboxState = {
   fields: {},
 };
 
-export const useDropBox = (dropbox: DroppableBoxContribution): DroppableBoxProps => {
-  const { id: droppableBoxId, label, limit } = dropbox;
+export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
+  const { id: droppableBoxId, label, limit, display, onDrop } = dropbox;
   const dispatch = useTypedDispatch();
   const { items, availableFields } = useTypedSelector((state) => ({
     items: state.config.items,
     availableFields: state.dataSource.visualizableFields,
   }));
-  const dropboxState: DropBoxState = items[droppableBoxId] ?? INITIAL_STATE;
-  const fields: DropboxField[] = useMemo(
+  const dropboxState: DropboxState = items[droppableBoxId] ?? INITIAL_STATE;
+  const displayFields: DropboxField[] = useMemo(
     () =>
       availableFields
         .filter(({ name }) => dropboxState.fields.hasOwnProperty(name))
-        .map(({ name, displayName, type }) => ({ icon: type, id: name, label: displayName })),
-    [availableFields, dropboxState.fields]
+        .map((indexField) =>
+          display ? display(indexField, dropboxState) : getDefaultDisplay(indexField)
+        ),
+    [availableFields, display, dropboxState]
   );
 
   // Event handlers for each dropbox action type
@@ -54,17 +46,26 @@ export const useDropBox = (dropbox: DroppableBoxContribution): DroppableBoxProps
         fieldName: undefined,
       })
     );
-
-    // setSecondaryMenu(SecondaryMenu);
   }, [dispatch, droppableBoxId]);
 
-  const onEditField = useCallback(() => {}, []);
+  const onEditField = useCallback(
+    (fieldName) => {
+      dispatch(
+        setActiveItem({
+          id: droppableBoxId,
+          type: ITEM_TYPES.DROPBOX,
+          fieldName,
+        })
+      );
+    },
+    [dispatch, droppableBoxId]
+  );
 
   const onDeleteField = useCallback(
-    (fieldId) => {
-      if (fields.find(({ id }) => id === fieldId)) {
+    (fieldName) => {
+      if (displayFields.find(({ id }) => id === fieldName)) {
         const newState = produce(dropboxState, (draft) => {
-          delete draft.fields?.[fieldId];
+          delete draft.fields?.[fieldName];
         });
         dispatch(
           updateConfigItemState({
@@ -74,7 +75,7 @@ export const useDropBox = (dropbox: DroppableBoxContribution): DroppableBoxProps
         );
       }
     },
-    [fields, dropboxState, dispatch, droppableBoxId]
+    [displayFields, dropboxState, dispatch, droppableBoxId]
   );
 
   const onDropField = useCallback(
@@ -82,9 +83,12 @@ export const useDropBox = (dropbox: DroppableBoxContribution): DroppableBoxProps
       if (!data) return;
 
       const { name: fieldName } = data;
+      const indexField = availableFields.find(({ name }) => name === fieldName);
+
+      if (!indexField) return;
 
       const newState = produce(dropboxState, (draft) => {
-        draft.fields[fieldName] = {};
+        draft.fields[fieldName] = onDrop?.(indexField) ?? {};
       });
 
       dispatch(
@@ -94,16 +98,22 @@ export const useDropBox = (dropbox: DroppableBoxContribution): DroppableBoxProps
         })
       );
     },
-    [dropboxState, dispatch, droppableBoxId]
+    [dropboxState, dispatch, droppableBoxId, onDrop, availableFields]
   );
 
   return {
     label,
     limit,
-    fields,
+    fields: displayFields,
     onAddField,
     onEditField,
     onDeleteField,
     onDropField,
   };
 };
+
+const getDefaultDisplay = (indexField: IndexPatternField): DropboxField => ({
+  icon: indexField.type,
+  id: indexField.name,
+  label: indexField.displayName,
+});

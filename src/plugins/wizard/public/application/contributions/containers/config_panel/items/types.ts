@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IndexPatternField } from 'src/plugins/data/common';
+import { FieldIconProps } from '../../../../../../../opensearch_dashboards_react/public';
 import { SelectContribution, InputContribution } from '../../common/items';
 
 /**
@@ -18,8 +20,8 @@ export const ItemTypes = {
   ...ITEM_TYPES,
 };
 
-export type FieldContributions = SelectContribution | InputContribution;
-export type MainItemContribution = TitleItemContribution | DroppableBoxContribution;
+export type FieldContributions = SelectContribution<string> | InputContribution;
+export type MainItemContribution = TitleItemContribution | DropboxContribution;
 export type SecondaryItemContribution = TitleItemContribution | FieldContributions;
 
 export interface TitleItemContribution {
@@ -27,10 +29,31 @@ export interface TitleItemContribution {
   title: string;
 }
 
-export interface DroppableBoxContribution {
+export interface DropboxField {
+  label: string;
+  icon: FieldIconProps['type'];
+  id: string;
+}
+export interface DropboxFieldState {
+  [itemId: string]: any;
+}
+export interface DropboxState {
+  fields: {
+    [fieldName: string]: DropboxFieldState;
+  };
+  draft?: DropboxFieldState;
+}
+
+export interface DropboxContribution {
   type: ITEM_TYPES.DROPBOX;
   id: string;
   label: string;
   limit?: number;
   items: SecondaryItemContribution[];
+  //
+  display?: (indexField: IndexPatternField, state: DropboxState) => DropboxField;
+  onDrop?: (
+    field: IndexPatternField,
+    initialValue?: DropboxFieldState
+  ) => DropboxFieldState | undefined;
 }

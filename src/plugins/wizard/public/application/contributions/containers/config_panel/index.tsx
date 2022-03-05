@@ -6,7 +6,7 @@
 import { EuiForm } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useVisualizationType } from '../../../utils/use';
-import { DroppableBoxContribution, MainItemContribution, TitleItemContribution } from './items';
+import { DropboxContribution, MainItemContribution, TitleItemContribution } from './items';
 import './index.scss';
 import { ITEM_TYPES } from './items';
 import { useTypedSelector } from '../../../utils/state_management';
@@ -27,7 +27,7 @@ export function ConfigPanel() {
   ];
   const activeDropbox = hydratedItems.find(
     (item: MainItemContribution) => item.type === ITEM_TYPES.DROPBOX && item?.id === activeItem?.id
-  ) as DroppableBoxContribution | undefined;
+  ) as DropboxContribution | undefined;
 
   const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
   const secondaryPanel = useMemo(

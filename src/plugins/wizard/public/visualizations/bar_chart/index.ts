@@ -6,6 +6,7 @@
 import { ItemTypes } from '../../application/contributions/constants';
 import {
   CONTAINER_ID as CONFIG_PANEL_ID,
+  DropboxContribution,
   MainItemContribution as ConfigPanelItem,
 } from '../../application/contributions/containers/config_panel';
 import { VisualizationTypeOptions } from '../../services/type_service/visualization_type';
@@ -16,53 +17,8 @@ export const createBarChartConfig = (): VisualizationTypeOptions => {
       type: ItemTypes.TITLE,
       title: 'Bar Chart Configuration',
     },
-    {
-      type: ItemTypes.DROPBOX,
-      id: 'x_axis',
-      label: 'X Axis',
-      items: [
-        {
-          type: ItemTypes.SELECT,
-          id: 'field',
-          label: 'Select a Field',
-          options: (state) => {
-            return state.dataSource.visualizableFields.map((field) => ({
-              value: field.name,
-              inputDisplay: field.displayName,
-            }));
-          },
-          init: (props) => {},
-        },
-        {
-          type: ItemTypes.SELECT,
-          id: 'aggregation',
-          label: 'Select a Function',
-          options: (state, services) => {
-            const { config } = state;
-            // config.items[]
-            const { buckets } = services.data.search.aggs.types.getAll();
-            return buckets.map(({ name, title, type }) => ({
-              value: name,
-              inputDisplay: title,
-            }));
-          },
-          init: (props) => {},
-        },
-        {
-          type: ItemTypes.INPUT,
-          id: 'label',
-          label: 'Name',
-          init: () => {},
-        },
-      ],
-    },
-    {
-      type: ItemTypes.DROPBOX,
-      id: 'y_axis',
-      label: 'Y Axis',
-      limit: 2,
-      items: [],
-    },
+    createDropboxContribution('x_axis', 'X Axis'),
+    createDropboxContribution('y_axis', 'Y Axis', { limit: 2 }),
   ];
 
   return {
@@ -77,3 +33,65 @@ export const createBarChartConfig = (): VisualizationTypeOptions => {
     },
   };
 };
+
+const createDropboxContribution = (
+  id: string,
+  label: string,
+  props?: Pick<DropboxContribution, 'limit'>
+): DropboxContribution => ({
+  type: ItemTypes.DROPBOX,
+  id,
+  label,
+  items: [
+    {
+      type: ItemTypes.SELECT,
+      id: 'field',
+      label: 'Select a Field',
+      options: (state) => {
+        return state.dataSource.visualizableFields.map((field) => ({
+          value: field.name,
+          inputDisplay: field.displayName,
+        }));
+      },
+    },
+    {
+      type: ItemTypes.SELECT,
+      id: 'aggregation',
+      label: 'Select a Function',
+      options: (state, services) => {
+        const { config } = state;
+        // config.items[]
+        const { buckets } = services.data.search.aggs.types.getAll();
+        return buckets.map(({ name, title, type }) => ({
+          value: name,
+          inputDisplay: title,
+        }));
+      },
+    },
+    {
+      type: ItemTypes.INPUT,
+      id: 'label',
+      label: 'Name',
+    },
+  ],
+  display: (indexField, dropboxState) => {
+    const dropboxField = {
+      id: indexField.name,
+      icon: indexField.type,
+      label: indexField.displayName,
+    };
+    if (dropboxState.fields[indexField.name]?.label) {
+      dropboxField.label = dropboxState.fields[indexField.name].label;
+    }
+
+    return dropboxField;
+  },
+  onDrop: (indexField, initialValue) => {
+    if (initialValue) return initialValue;
+
+    return {
+      label: indexField.displayName,
+    };
+  },
+  ...props,
+});

@@ -7,7 +7,7 @@ import React from 'react';
 import { ItemTypes } from '../../../constants';
 import {
   Title,
-  DroppableBox,
+  Dropbox,
   FormField,
   MainItemContribution,
   SecondaryItemContribution,
@@ -40,7 +40,7 @@ export const mapItemToPanelComponents = (
           return <Title key={index} {...item} isSecondary={isSecondary} />;
 
         case ItemTypes.DROPBOX:
-          return <DroppableBox key={index} {...item} />;
+          return <Dropbox key={index} {...item} />;
 
         case ItemTypes.SELECT:
         case ItemTypes.INPUT:

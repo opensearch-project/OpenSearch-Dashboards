@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { TitleItemContribution } from './types';
-import { useTypedDispatch, useTypedSelector } from '../../../../utils/state_management';
+import { useTypedDispatch } from '../../../../utils/state_management';
 import { setActiveItem } from '../../../../utils/state_management/config_slice';
 
 export interface TitleProps {
