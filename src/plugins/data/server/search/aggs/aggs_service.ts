@@ -86,7 +86,10 @@ export class AggsService {
           return uiSettingsCache[key];
         };
 
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({ getConfig });
+        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+          getConfig,
+          uiSettings: uiSettingsClient,
+        });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
