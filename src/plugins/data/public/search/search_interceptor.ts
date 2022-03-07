@@ -127,6 +127,9 @@ export class SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
+    if (searchRequest.params?.dataSource) {
+      console.log(searchRequest);
+    }
     const path = trimEnd(
       `/internal/search/${strategy || OPENSEARCH_SEARCH_STRATEGY}/${id || ''}`,
       '/'

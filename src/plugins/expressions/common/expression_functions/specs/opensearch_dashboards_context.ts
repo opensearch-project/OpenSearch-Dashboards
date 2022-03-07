@@ -40,6 +40,7 @@ interface Arguments {
   filters?: string | null;
   timeRange?: string | null;
   savedSearchId?: string | null;
+  dataSource?: string | null;
 }
 
 export type ExpressionFunctionOpenSearchDashboardsContext = ExpressionFunctionDefinition<
@@ -98,12 +99,18 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
         }
       ),
     },
+    dataSource: {
+      types: ['string', 'null'],
+      default: null,
+      help: 'help info',
+    },
   },
 
   async fn(input, args, { getSavedObject }) {
     const timeRange = getParsedValue(args.timeRange, input?.timeRange);
     let queries = mergeQueries(input?.query, getParsedValue(args?.q, []));
     let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
+    const dataSource = args.dataSource || undefined;
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
@@ -132,6 +139,7 @@ export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDa
       query: queries,
       filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
       timeRange,
+      dataSource,
     };
   },
 };

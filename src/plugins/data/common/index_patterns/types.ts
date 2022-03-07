@@ -51,6 +51,7 @@ export interface IIndexPattern {
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ) => FieldFormat;
+  dataSource: string | undefined;
 }
 
 export interface IndexPatternAttributes {

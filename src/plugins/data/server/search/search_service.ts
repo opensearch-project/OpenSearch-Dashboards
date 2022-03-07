@@ -73,6 +73,7 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+import { extOpensearchSearchStrategyProvider } from './opensearch_search/ext_opensearch_search_strategy';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -122,6 +123,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategy(
       OPENSEARCH_SEARCH_STRATEGY,
       opensearchSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage
+      )
+    );
+
+    this.registerSearchStrategy(
+      'ext-opensearch',
+      extOpensearchSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage

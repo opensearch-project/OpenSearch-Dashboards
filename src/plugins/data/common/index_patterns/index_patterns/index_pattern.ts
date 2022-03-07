@@ -91,6 +91,7 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  public dataSource: string | undefined;
 
   constructor({
     spec = {},
@@ -130,6 +131,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
+    this.dataSource = 'dummy-data-source';
   }
 
   /**

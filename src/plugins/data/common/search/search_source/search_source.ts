@@ -143,6 +143,7 @@ export class SearchSource {
   public history: SearchRequest[] = [];
   private fields: SearchSourceFields;
   private readonly dependencies: SearchSourceDependencies;
+  public dataSource?: string;
 
   constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
     this.fields = fields;
@@ -281,6 +282,9 @@ export class SearchSource {
     this.history = [searchRequest];
 
     let response;
+    // if (options.externalDataSource) {
+    //   response = await this.fetchSearchFromExternalDataSource(searchRequest, options);
+    // } else 
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
@@ -337,7 +341,23 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
+    return search({ params, indexType: searchRequest.indexType, dataSource: this.dataSource }, options).then(({ rawResponse }) =>
+      onResponse(searchRequest, rawResponse)
+    );
+  }
+
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private fetchSearchFromExternalDataSource(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { search, getConfig, onResponse } = this.dependencies;
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      getConfig,
+    });
+
+    return search({ params, indexType: searchRequest.indexType, dataSource: searchRequest.dataSoruce }, options).then(({ rawResponse }) =>
       onResponse(searchRequest, rawResponse)
     );
   }
@@ -474,6 +494,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    // searchRequest.dataSource = this.dataSource;
 
     const computedFields = index ? index.getComputedFields() : {};
 

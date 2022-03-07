@@ -97,4 +97,5 @@ export interface ExecutionContextSearch {
   filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;
+  dataSource?: string;
 }

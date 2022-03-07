@@ -44,6 +44,12 @@ export interface ISearchOptions {
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  /**
+   * Indicates if this search is to be executed against an data source other than the
+   * saved object data store.
+   */
+  externalDataSource?: boolean;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

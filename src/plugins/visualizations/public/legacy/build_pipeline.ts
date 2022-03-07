@@ -406,7 +406,11 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { uiState, title } = vis;
 
   // context
-  let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
+  let pipeline = `opensearchDashboards | opensearch_dashboards_context `;;
+  if (indexPattern?.dataSource) {
+    pipeline += prepareString('dataSource', indexPattern?.dataSource);
+  }
+
   if (query) {
     pipeline += prepareJson('query', query);
   }
