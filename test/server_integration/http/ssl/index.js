@@ -37,5 +37,13 @@ export default function ({ getService }) {
     it('handles requests using ssl', async () => {
       await supertest.get('/').expect(302);
     });
+
+    it('handles UI requests using ssl', async () => {
+      await supertest.get('ui/').expect(302);
+    });
+
+    it('handles UI assests requests using ssl', async () => {
+      await supertest.get('ui/assets').expect(302);
+    });
   });
 }
