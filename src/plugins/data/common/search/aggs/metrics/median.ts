@@ -60,10 +60,10 @@ export const getMedianMetricAgg = () => {
         name: 'field',
         type: 'field',
         filterFieldTypes: [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.DATE, OSD_FIELD_TYPES.HISTOGRAM],
-        write(agg, output) {
-          output.params.field = agg.getParam('field').name;
-          output.params.percents = [50];
-        },
+      },
+      {
+        name: 'percents',
+        default: [50],
       },
     ],
     getValue(agg, bucket) {
