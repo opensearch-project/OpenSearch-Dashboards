@@ -228,7 +228,9 @@ export class DiscoverPlugin
     setDocViewsLinksRegistry(this.docViewsLinksRegistry);
 
     this.docViewsLinksRegistry.addDocViewLink({
-      label: 'View surrounding documents',
+      label: i18n.translate('discover.docTable.tableRow.viewSurroundingDocumentsLinkText', {
+        defaultMessage: 'View surrounding documents',
+      }),
       generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
@@ -257,7 +259,9 @@ export class DiscoverPlugin
     });
 
     this.docViewsLinksRegistry.addDocViewLink({
-      label: 'View single document',
+      label: i18n.translate('discover.docTable.tableRow.viewSingleDocumentLinkText', {
+        defaultMessage: 'View single document',
+      }),
       generateCb: (renderProps) => ({
         url: `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index
