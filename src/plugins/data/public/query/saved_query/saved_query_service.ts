@@ -30,6 +30,7 @@
  * GitHub history for details.
  */
 
+import { isObject } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 
@@ -143,20 +144,24 @@ export const createSavedQueryService = (
     id: string;
     attributes: SerializedSavedQueryAttributes;
   }) => {
-    let queryString;
+    const queryString = savedQuery.attributes.query.query;
+    let parsedQuery;
     try {
-      queryString = JSON.parse(savedQuery.attributes.query.query);
+      parsedQuery = JSON.parse(queryString);
+      parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
     } catch (error) {
-      queryString = savedQuery.attributes.query.query;
+      parsedQuery = queryString;
     }
+
     const savedQueryItems: SavedQueryAttributes = {
       title: savedQuery.attributes.title || '',
       description: savedQuery.attributes.description || '',
       query: {
-        query: queryString,
+        query: parsedQuery,
         language: savedQuery.attributes.query.language,
       },
     };
+
     if (savedQuery.attributes.filters) {
       savedQueryItems.filters = savedQuery.attributes.filters;
     }
