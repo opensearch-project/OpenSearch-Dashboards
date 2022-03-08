@@ -38,6 +38,9 @@ import { parseMilliseconds, parse } from './settings';
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
 
+const ORIGINAL_PLATFORM = process.platform;
+const ORIGINAL_ARCHITECTURE = process.arch;
+
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 describe('parseMilliseconds function', function () {
@@ -62,6 +65,17 @@ describe('parse function', function () {
   const defaultOptions = { pluginDir: fromRoot('plugins') };
   const osdPackage = { version: 1234 };
 
+  afterAll(() => {
+    Object.defineProperties(process, {
+      platform: {
+        value: ORIGINAL_PLATFORM,
+      },
+      arch: {
+        value: ORIGINAL_ARCHITECTURE,
+      },
+    });
+  });
+
   it('produces expected defaults', function () {
     expect(parse(command, { ...defaultOptions }, osdPackage)).toMatchInlineSnapshot(`
       Object {
@@ -74,7 +88,7 @@ describe('parse function', function () {
         "timeout": 0,
         "urls": Array [
           "plugin name",
-          "https://artifacts.opensearch.org/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
+          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/linux/x64/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
         ],
         "version": 1234,
         "workingPath": <absolute path>/plugins/.plugin.installing,
@@ -101,7 +115,49 @@ describe('parse function', function () {
         "timeout": 0,
         "urls": Array [
           "plugin name",
-          "https://artifacts.opensearch.org/downloads/kibana-plugins/plugin name/plugin name-1234.zip",
+          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/linux/x64/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
+        ],
+        "version": 1234,
+        "workingPath": <absolute path>/plugins/.plugin.installing,
+      }
+    `);
+  });
+
+  it('should throw when on a non-Linux platform', function () {
+    Object.defineProperties(process, {
+      platform: {
+        value: 'win32',
+      },
+      arch: {
+        value: ORIGINAL_ARCHITECTURE,
+      },
+    });
+    expect(() => parse(command, { ...defaultOptions }, osdPackage)).toThrow(
+      'Plugins are only available for Linux'
+    );
+  });
+
+  it('should not throw when on a non-x64 arch', function () {
+    Object.defineProperties(process, {
+      platform: {
+        value: ORIGINAL_PLATFORM,
+      },
+      arch: {
+        value: 'arm64',
+      },
+    });
+    expect(parse(command, { ...defaultOptions }, osdPackage)).toMatchInlineSnapshot(`
+      Object {
+        "config": "",
+        "plugin": "plugin name",
+        "pluginDir": <absolute path>/plugins,
+        "quiet": false,
+        "silent": false,
+        "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
+        "timeout": 0,
+        "urls": Array [
+          "plugin name",
+          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/linux/arm64/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
         ],
         "version": 1234,
         "workingPath": <absolute path>/plugins/.plugin.installing,
