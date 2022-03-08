@@ -91,7 +91,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     toasts: getServices().core.notifications.toasts,
   });
   this.state = { ...appState.getState() };
-  this.anchorId = $routeParams.id;
+  this.anchorId = decodeURIComponent($routeParams.id);
   this.indexPattern = indexPattern;
   filterManager.setFilters(_.cloneDeep(getFilters()));
   startStateSync();
