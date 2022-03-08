@@ -126,6 +126,8 @@ export async function runFpm(
     `usr/share/opensearch-dashboards/config`,
     '--exclude',
     `usr/share/opensearch-dashboards/data`,
+    '--exclude',
+    `usr/share/opensearch-dashboards/assets`,
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,

@@ -89,6 +89,7 @@ export class CoreApp {
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+    coreSetup.http.registerStaticDir('/ui/assets/{path*}', fromRoot('assets'));
 
     coreSetup.http.registerStaticDir(
       '/node_modules/@osd/ui-framework/dist/{path*}',
