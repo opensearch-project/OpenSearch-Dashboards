@@ -168,6 +168,7 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
+
     it('should throw an error if the saved query does not have a title', async () => {
       let error = null;
       try {
@@ -178,6 +179,7 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
   });
+
   describe('findSavedQueries', function () {
     it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
@@ -215,6 +217,7 @@ describe('saved query service', () => {
       });
       expect(response.queries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
+
     it('should find and return parsed filters and timefilters items', async () => {
       const serializedSavedQueryAttributesWithFilters = {
         ...savedQueryAttributesWithFilters,
@@ -230,6 +233,7 @@ describe('saved query service', () => {
         { id: 'foo', attributes: savedQueryAttributesWithFilters },
       ]);
     });
+
     it('should return an array of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -249,6 +253,7 @@ describe('saved query service', () => {
         ])
       );
     });
+
     it('should accept perPage and page properties', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [
@@ -286,6 +291,124 @@ describe('saved query service', () => {
           },
         ])
       );
+    });
+
+    it('should correctly parse a json query string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query:
+              '{ "email": [{"type": "work","address":"work@***.com" }, {"type": "home", "address":"home@***.com"}]}',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual({
+        email: [
+          { type: 'work', address: 'work@***.com' },
+          { type: 'home', address: 'home@***.com' },
+        ],
+      });
+    });
+
+    it('should correctly parse a json object', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: {
+              email: [
+                { type: 'work', address: 'work@***.com' },
+                { type: 'home', address: 'home@***.com' },
+              ],
+            },
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual({
+        email: [
+          { type: 'work', address: 'work@***.com' },
+          { type: 'home', address: 'home@***.com' },
+        ],
+      });
+    });
+
+    it('should handle null string with single quote', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'null',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual('null');
+    });
+
+    it('should handle null string with double quote', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'null',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual('null');
+    });
+
+    it('should handle null quoted string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '"null"',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual('"null"');
+    });
+
+    it('should not lose double quotes', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '"Men\'s Shoes"',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('foo');
+      expect(response.attributes.query.query).toEqual('"Men\'s Shoes"');
     });
   });
 
