@@ -10,7 +10,12 @@ import { IndexPattern } from '../../../../data/public';
 export interface DocViewLink extends EuiListGroupItemProps {
   href?: string;
   order: number;
-  generateUrlCb?(renderProps: any): string;
+  generateCb?(
+    renderProps: any
+  ): {
+    url: string;
+    hide?: boolean;
+  };
 }
 
 export interface DocViewLinkRenderProps {

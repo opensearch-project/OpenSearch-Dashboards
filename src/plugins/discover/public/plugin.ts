@@ -229,7 +229,7 @@ export class DiscoverPlugin
 
     this.docViewsLinksRegistry.addDocViewLink({
       label: 'View surrounding documents',
-      generateUrlCb: (renderProps: any) => {
+      generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
 
@@ -246,19 +246,23 @@ export class DiscoverPlugin
           { encode: false, sort: false }
         );
 
-        return `#/context/${encodeURIComponent(renderProps.indexPattern.id)}/${encodeURIComponent(
-          renderProps.hit._id
-        )}?${hash}`;
+        return {
+          url: `#/context/${encodeURIComponent(renderProps.indexPattern.id)}/${encodeURIComponent(
+            renderProps.hit._id
+          )}?${hash}`,
+          hide: !renderProps.indexPattern.isTimeBased(),
+        };
       },
       order: 1,
     });
 
     this.docViewsLinksRegistry.addDocViewLink({
       label: 'View single document',
-      generateUrlCb: (renderProps) =>
-        `#/doc/${renderProps.indexPattern.id}/${renderProps.hit._index}?id=${encodeURIComponent(
-          renderProps.hit._id
-        )}`,
+      generateCb: (renderProps) => ({
+        url: `#/doc/${renderProps.indexPattern.id}/${
+          renderProps.hit._index
+        }?id=${encodeURIComponent(renderProps.hit._id)}`,
+      }),
       order: 2,
     });
 

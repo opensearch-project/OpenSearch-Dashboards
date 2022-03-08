@@ -2,23 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import angular from 'angular';
-import React from 'react';
 import { Plugin, CoreSetup } from 'opensearch-dashboards/public';
 import { DiscoverSetup } from '../../../../../src/plugins/discover/public';
-
-angular.module('myDocViewLink', []).directive('myHit', () => ({
-  restrict: 'E',
-  scope: {
-    hit: '=hit',
-  },
-  template: '<h1 data-test-subj="href-docviewlink">{{hit._index}}</h1>',
-}));
-
-function MyHit(props: { index: string }) {
-  return <h1 data-test-subj="generateUrlCb-docviewlink">{props.index}</h1>;
-}
 
 export class DocViewsLinksPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { discover }: { discover: DiscoverSetup }) {
@@ -29,9 +14,20 @@ export class DocViewsLinksPlugin implements Plugin<void, void> {
     });
 
     discover.docViewsLinks.addDocViewLink({
-      generateUrlCb: () => 'http://some-url/',
+      generateCb: () => ({
+        url: 'http://some-url/',
+      }),
       order: 2,
-      label: 'generateUrlCb doc view link',
+      label: 'generateCb doc view link',
+    });
+
+    discover.docViewsLinks.addDocViewLink({
+      generateCb: () => ({
+        url: 'http://some-url/',
+        hide: true,
+      }),
+      order: 3,
+      label: 'generateCbHidden doc view link',
     });
   }
 

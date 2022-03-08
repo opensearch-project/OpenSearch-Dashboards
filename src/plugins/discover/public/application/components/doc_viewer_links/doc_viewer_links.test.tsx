@@ -33,8 +33,32 @@ beforeEach(() => {
 
 test('Render <DocViewerLink/> with 2 different links', () => {
   const registry = getDocViewsLinksRegistry();
-  registry.addDocViewLink({ order: 10, label: 'generateUrlCb link', generateUrlCb: () => 'aaa' });
+  registry.addDocViewLink({
+    order: 10,
+    label: 'generateCb link',
+    generateCb: () => ({
+      url: 'aaa',
+    }),
+  });
   registry.addDocViewLink({ order: 20, label: 'href link', href: 'bbb' });
+
+  const renderProps = { hit: {} } as DocViewLinkRenderProps;
+
+  const wrapper = shallow(<DocViewerLinks {...renderProps} />);
+
+  expect(wrapper).toMatchSnapshot();
+});
+
+test('Dont Render <DocViewerLink/> if generateCb.hide', () => {
+  const registry = getDocViewsLinksRegistry();
+  registry.addDocViewLink({
+    order: 10,
+    label: 'generateCb link',
+    generateCb: () => ({
+      url: 'aaa',
+      hide: true,
+    }),
+  });
 
   const renderProps = { hit: {} } as DocViewLinkRenderProps;
 

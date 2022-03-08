@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Dont Render <DocViewerLink/> if generateCb.hide 1`] = `
+<div
+  className="osdDocViewerLinks"
+>
+  <EuiListGroup
+    listItems={Array []}
+  />
+</div>
+`;
+
 exports[`Render <DocViewerLink/> with 2 different links 1`] = `
 <div
   className="osdDocViewerLinks"
@@ -10,7 +20,7 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
         Object {
           "data-test-subj": "docTableRowAction",
           "href": "aaa",
-          "label": "generateUrlCb link",
+          "label": "generateCb link",
           "order": 10,
         },
         Object {

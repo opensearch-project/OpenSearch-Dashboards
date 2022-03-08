@@ -12,12 +12,13 @@ import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_ty
 export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
   const listItems = getDocViewsLinksRegistry()
     .getDocViewsLinksSorted()
+    .filter((item) => !(item.generateCb && item.generateCb(renderProps)?.hide))
     .map((item) => {
-      const { generateUrlCb, href, ...props } = item;
+      const { generateCb, href, ...props } = item;
       const listItem: EuiListGroupItemProps = {
         'data-test-subj': 'docTableRowAction',
         ...props,
-        href: generateUrlCb ? generateUrlCb(renderProps) : href,
+        href: generateCb ? generateCb(renderProps).url : href,
       };
 
       return listItem;
