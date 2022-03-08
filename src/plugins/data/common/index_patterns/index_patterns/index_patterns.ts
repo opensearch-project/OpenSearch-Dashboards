@@ -118,7 +118,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'data_source'],
       perPage: 10000,
     });
   }
@@ -356,6 +356,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        dataSource,
       },
     } = savedObject;
 
@@ -375,6 +376,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      dataSource,
     };
   };
 

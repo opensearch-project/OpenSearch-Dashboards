@@ -131,7 +131,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
-    this.dataSource = 'dummy-data-source';
+    this.dataSource = spec.dataSource; // 'dummy-data-source';
   }
 
   /**
