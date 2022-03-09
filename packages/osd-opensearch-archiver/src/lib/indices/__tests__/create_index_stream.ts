@@ -125,7 +125,6 @@ describe('opensearchArchiver: createCreateIndexStream()', () => {
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
         method: 'PUT',
         index: 'index',
-        include_type_name: false,
         body: {
           settings: undefined,
           mappings: undefined,
