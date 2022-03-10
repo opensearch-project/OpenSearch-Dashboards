@@ -32,5 +32,16 @@
   &__dropTarget {
     color: $euiColorDarkShade;
     grid-template-columns: 1fr auto;
+
+    &.validField {
+      // TODO: Temporary styles
+      background-color: #ebf5eb; 
+
+      &.canDrop {
+        background-color: #cce5cc;
+        border: 1px dashed #8bc34a;
+      }
+    }
+
   }
 }

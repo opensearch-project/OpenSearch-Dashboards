@@ -3,27 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, DragEvent, FC, ReactNode, useContext, useState } from 'react';
+import React, {
+  createContext,
+  DragEvent,
+  FC,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { DragDataType } from './types';
 
 // TODO: Replace any with corret type
 // TODO: Split into separate files
 interface IDragDropContext {
-  data?: DragDataType;
+  data: DragDataType;
   setData?: (data: DragDataType) => void;
   isDragging: boolean;
   setIsDragging?: any;
 }
 
-const defaultContextProps = {
+const EMPTY_DATA: DragDataType = {
+  namespace: null,
+  value: null,
+};
+
+const defaultContextProps: IDragDropContext = {
   isDragging: false,
+  data: EMPTY_DATA,
 };
 
 const DragDropContext = createContext<IDragDropContext>(defaultContextProps);
 
 const DragDropProvider: FC<ReactNode> = ({ children }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [data, setData] = useState<DragDataType>();
+  const [data, setData] = useState<DragDataType>(EMPTY_DATA);
   return (
     <DragDropContext.Provider
       value={{
@@ -60,25 +74,25 @@ function useDrag(dragData: DragDataType) {
   return [dragElementProps];
 }
 
-interface IDropAttributes {
+export interface IDropAttributes {
   onDragOver: (event: DragEvent) => void;
   onDrop: (event: DragEvent) => void;
   onDragEnter: (event: DragEvent) => void;
   onDragLeave: (event: DragEvent) => void;
 }
 
-interface IDropState {
+export interface IDropState {
   isDragging: boolean;
   canDrop: boolean;
   isValidDropTarget: boolean;
-  dragData: any;
+  dragData: DragDataType['value'];
 }
 const useDrop = (
   namespace: DragDataType['namespace'],
   onDropCallback: (data: DragDataType['value']) => void
 ): [IDropAttributes, IDropState] => {
   const { data, isDragging, setIsDragging, setData } = useDragDropContext();
-  const [canDrop, setCanDrop] = useState(false);
+  const [canDrop, setCanDrop] = useState(0);
 
   const dropAttributes: IDropAttributes = {
     onDragOver: (event) => {
@@ -86,7 +100,8 @@ const useDrop = (
     },
     onDrop: (event) => {
       setIsDragging(false);
-      onDropCallback(data!.value);
+      setCanDrop(0);
+      onDropCallback(data.value);
       setData!({
         namespace: null,
         value: null,
@@ -94,20 +109,25 @@ const useDrop = (
     },
     onDragEnter: (event) => {
       if (data?.namespace === namespace) {
-        setCanDrop(true);
+        setCanDrop((state) => state + 1);
       }
     },
     onDragLeave: (event) => {
-      setCanDrop(false);
+      setCanDrop((state) => state - 1);
     },
   };
+
+  useEffect(() => {
+    if (!isDragging) setCanDrop(0);
+  }, [isDragging]);
+
   return [
     dropAttributes,
     {
       isDragging,
-      canDrop,
+      canDrop: canDrop > 0,
       isValidDropTarget: isDragging && data?.namespace === namespace,
-      dragData: data?.value,
+      dragData: data.value,
     },
   ];
 };
