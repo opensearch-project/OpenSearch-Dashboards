@@ -19,6 +19,11 @@ export const createBarChartConfig = (): VisualizationTypeOptions => {
     },
     createDropboxContribution('x_axis', 'X Axis'),
     createDropboxContribution('y_axis', 'Y Axis', { limit: 2 }),
+    // {
+    //   type: ItemTypes.INPUT,
+    //   id: 'testLabel',
+    //   label: 'Test Label',
+    // },
   ];
 
   return {
@@ -43,17 +48,6 @@ const createDropboxContribution = (
   id,
   label,
   items: [
-    {
-      type: ItemTypes.SELECT,
-      id: 'field',
-      label: 'Select a Field',
-      options: (state) => {
-        return state.dataSource.visualizableFields.map((field) => ({
-          value: field.name,
-          inputDisplay: field.displayName,
-        }));
-      },
-    },
     {
       type: ItemTypes.SELECT,
       id: 'aggregation',
@@ -90,7 +84,7 @@ const createDropboxContribution = (
     if (initialValue) return initialValue;
 
     return {
-      label: indexField.displayName,
+      // label: indexField.displayName,
     };
   },
   ...props,

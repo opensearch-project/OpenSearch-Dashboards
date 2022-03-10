@@ -21,7 +21,7 @@ export const mapItemToPanelComponents = (
 
   const [title, ...panelComponents] = items
     .filter((item) => {
-      //   Ensure unique item ID
+      // Ensure unique item ID
       const id = item.type !== ItemTypes.TITLE ? item.id : 'title';
       if (uniqueDict[id]) return false;
 
@@ -40,11 +40,11 @@ export const mapItemToPanelComponents = (
           return <Title key={index} {...item} isSecondary={isSecondary} />;
 
         case ItemTypes.DROPBOX:
-          return <Dropbox key={index} {...item} />;
+          return <Dropbox key={item.id} {...item} />;
 
         case ItemTypes.SELECT:
         case ItemTypes.INPUT:
-          return <FormField key={index} {...item} />;
+          return <FormField key={item.id} {...item} />;
 
         default:
           break;

@@ -5,12 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
-import {
-  CONTAINER_ID,
-  DropboxState,
-  ITEM_TYPES,
-  MainItemContribution,
-} from '../../contributions/containers/config_panel';
+import { CONTAINER_ID, MainItemContribution } from '../../contributions/containers/config_panel';
 
 export interface ActiveItem {
   id: string;
@@ -18,7 +13,7 @@ export interface ActiveItem {
   fieldName?: string;
 }
 
-interface ConfigState {
+export interface ConfigState {
   items: {
     [id: string]: any;
   };
@@ -63,24 +58,6 @@ export const slice = createSlice({
     setActiveItem: (state, { payload }: PayloadAction<ActiveItem | null>) => {
       // On closing secondary menu
       if (!payload) {
-        // TODO: Make this more generic
-        // Handle saving new field data from dropbox
-        if (state.activeItem && state.activeItem.type === ITEM_TYPES.DROPBOX) {
-          const dropboxId = state.activeItem.id;
-          const dropboxState: DropboxState = state.items[dropboxId] ?? {};
-          const fieldName = dropboxState.draft?.field;
-
-          if (fieldName) {
-            // Get new field
-            const newField: DropboxState['fields'][0] = {
-              ...dropboxState.draft,
-            };
-            state.items[dropboxId].fields[fieldName] = newField;
-          }
-
-          delete dropboxState.draft;
-        }
-
         state.activeItem = null;
         return;
       }
