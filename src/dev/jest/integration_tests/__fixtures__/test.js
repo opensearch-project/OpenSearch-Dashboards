@@ -30,6 +30,9 @@
  * GitHub history for details.
  */
 
-it('fails', () => {
+it('fails', (done) => {
+  setTimeout(() => {
+    done();
+  }, 200);
   throw new Error('failure');
 });
