@@ -3,25 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonIcon, EuiPanel, EuiText, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import { EuiButtonIcon, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
-import { useDrop } from '../../../../utils/drag_drop';
-import { FieldDragDataType } from '../../../../utils/drag_drop/types';
-import { DropboxContribution, DropboxField } from './types';
-
+import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
 import './dropbox.scss';
+import { DropboxContribution, DropboxField } from './types';
 import { useDropbox } from './use';
 
-interface DropboxProps {
+interface DropboxProps extends IDropState {
   label: string;
   fields: DropboxField[];
   limit?: number;
   onAddField: () => void;
   onEditField: (id: string) => void;
   onDeleteField: (id: string) => void;
-  onDropField: (data: FieldDragDataType['value']) => void;
+  dropProps: IDropAttributes;
 }
 
 const DropboxComponent = ({
@@ -29,12 +26,12 @@ const DropboxComponent = ({
   fields,
   onAddField,
   onDeleteField,
-  onDropField,
   onEditField,
   limit = 1,
+  isValidDropTarget,
+  canDrop,
+  dropProps,
 }: DropboxProps) => {
-  const [dropProps, { isValidDropTarget }] = useDrop('field-data', onDropField);
-
   return (
     <EuiFormRow label={boxLabel} className="dropBox" fullWidth>
       <div className="dropBox__container">
@@ -58,9 +55,9 @@ const DropboxComponent = ({
         {fields.length < limit && (
           <EuiPanel
             className={`dropBox__field dropBox__dropTarget ${
-              isValidDropTarget && 'validDropTarget'
-            }`}
-            {...dropProps}
+              isValidDropTarget ? 'validField' : ''
+            } ${canDrop ? 'canDrop' : ''}`}
+            {...(isValidDropTarget && dropProps)}
           >
             <EuiText size="s">Click or drop to add</EuiText>
             <EuiButtonIcon

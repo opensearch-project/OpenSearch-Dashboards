@@ -50,10 +50,9 @@ export interface DropboxContribution {
   label: string;
   limit?: number;
   items: SecondaryItemContribution[];
-  //
+  // Define how the IndexPatternField should be displayed on the dropbox
   display?: (indexField: IndexPatternField, state: DropboxState) => DropboxField;
-  onDrop?: (
-    field: IndexPatternField,
-    initialValue?: DropboxFieldState
-  ) => DropboxFieldState | undefined;
+  // Defines how the initial state of a field should be set when a field is dropped onto it
+  onDrop?: (field: IndexPatternField) => DropboxFieldState;
+  isDroppable?: (field: IndexPatternField) => boolean;
 }

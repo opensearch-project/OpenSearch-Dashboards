@@ -14,13 +14,14 @@ import {
 } from '../../../../../utils/state_management/config_slice';
 import { DropboxContribution, DropboxState, ITEM_TYPES, DropboxField } from '../types';
 import { DropboxProps } from '../dropbox';
+import { useDrop } from '../../../../../utils/drag_drop';
 
 export const INITIAL_STATE: DropboxState = {
   fields: {},
 };
 
 export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
-  const { id: droppableBoxId, label, limit, display, onDrop } = dropbox;
+  const { id: droppableBoxId, label, limit, display, onDrop, isDroppable } = dropbox;
   const dispatch = useTypedDispatch();
   const { items, availableFields } = useTypedSelector((state) => ({
     items: state.config.items,
@@ -83,9 +84,11 @@ export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
       if (!data) return;
 
       const { name: fieldName } = data;
-      const indexField = availableFields.find(({ name }) => name === fieldName);
+      const indexField = getIndexPatternField(fieldName, availableFields);
 
       if (!indexField) return;
+
+      if (isDroppable && !isDroppable(indexField)) return;
 
       const newState = produce(dropboxState, (draft) => {
         draft.fields[fieldName] = onDrop?.(indexField) ?? {};
@@ -98,8 +101,23 @@ export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
         })
       );
     },
-    [dropboxState, dispatch, droppableBoxId, onDrop, availableFields]
+    [availableFields, isDroppable, dropboxState, dispatch, droppableBoxId, onDrop]
   );
+
+  const [dropProps, { isValidDropTarget, dragData, ...dropState }] = useDrop(
+    'field-data',
+    onDropField
+  );
+
+  const isValidDropField = useMemo(() => {
+    if (!dragData) return false;
+
+    const indexField = getIndexPatternField(dragData.name, availableFields);
+
+    if (!indexField) return false;
+
+    return isValidDropTarget && (isDroppable?.(indexField) ?? true);
+  }, [availableFields, dragData, isDroppable, isValidDropTarget]);
 
   return {
     label,
@@ -108,7 +126,10 @@ export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
     onAddField,
     onEditField,
     onDeleteField,
-    onDropField,
+    ...dropState,
+    dragData,
+    isValidDropTarget: isValidDropField,
+    dropProps,
   };
 };
 
@@ -117,3 +138,6 @@ const getDefaultDisplay = (indexField: IndexPatternField): DropboxField => ({
   id: indexField.name,
   label: indexField.displayName,
 });
+
+const getIndexPatternField = (indexFieldName: string, availableFields: IndexPatternField[]) =>
+  availableFields.find(({ name }) => name === indexFieldName);
