@@ -21,7 +21,7 @@ export const ItemTypes = {
 };
 
 export type FieldContributions = SelectContribution<string> | InputContribution;
-export type MainItemContribution = TitleItemContribution | DropboxContribution;
+export type MainItemContribution = TitleItemContribution | DropboxContribution | FieldContributions;
 export type SecondaryItemContribution = TitleItemContribution | FieldContributions;
 
 export interface TitleItemContribution {
