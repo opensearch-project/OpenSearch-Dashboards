@@ -3,80 +3,90 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import produce from 'immer';
 import { useCallback, useMemo } from 'react';
 import { IndexPatternField } from 'src/plugins/data/common';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
 import {
+  addInstance,
   setActiveItem,
-  updateConfigItemState,
+  updateInstance,
 } from '../../../../../utils/state_management/config_slice';
-import { DropboxContribution, DropboxState, ITEM_TYPES, DropboxField } from '../types';
+import {
+  DropboxContribution,
+  DropboxState,
+  ITEM_TYPES,
+  DropboxDisplay,
+  DropboxFieldProps,
+} from '../types';
 import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
 
+type DropboxInstanceState = DropboxState['instances'][number];
+
 export const INITIAL_STATE: DropboxState = {
-  fields: {},
+  instances: [],
 };
 
-export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
-  const { id: droppableBoxId, label, limit, display, onDrop, isDroppable } = dropbox;
+export const useDropbox = (dropboxContribution: DropboxContribution): DropboxProps => {
+  const { id: dropboxId, label, limit, display, onDrop, isDroppable } = dropboxContribution;
   const dispatch = useTypedDispatch();
   const { items, availableFields } = useTypedSelector((state) => ({
     items: state.config.items,
     availableFields: state.dataSource.visualizableFields,
   }));
-  const dropboxState: DropboxState = items[droppableBoxId] ?? INITIAL_STATE;
-  const displayFields: DropboxField[] = useMemo(
-    () =>
-      availableFields
-        .filter(({ name }) => dropboxState.fields.hasOwnProperty(name))
-        .map((indexField) =>
-          display ? display(indexField, dropboxState) : getDefaultDisplay(indexField)
-        ),
-    [availableFields, display, dropboxState]
+  const configItemState = items[dropboxId];
+  const dropboxState =
+    !configItemState || typeof configItemState === 'string' ? INITIAL_STATE : configItemState;
+  const filterPatrialInstances = useCallback(
+    ({ properties }: DropboxInstanceState) => !!properties.fieldName,
+    []
+  );
+  const mapInstanceToFieldDisplay = useCallback(
+    ({ id, properties }: DropboxInstanceState): DropboxDisplay => {
+      const indexPatternField = availableFields.find(({ name }) => name === properties.fieldName);
+
+      if (!indexPatternField) throw new Error('Field to display missing in available fields');
+
+      return getDisplayField(id, indexPatternField, properties, display);
+    },
+    [availableFields, display]
+  );
+
+  const displayFields: DropboxDisplay[] = useMemo(
+    () => dropboxState.instances.filter(filterPatrialInstances).map(mapInstanceToFieldDisplay),
+    [dropboxState.instances, filterPatrialInstances, mapInstanceToFieldDisplay]
   );
 
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {
-    dispatch(
-      setActiveItem({
-        id: droppableBoxId,
-        type: ITEM_TYPES.DROPBOX,
-        fieldName: undefined,
-      })
-    );
-  }, [dispatch, droppableBoxId]);
+    dispatch(addInstance(dropboxId, ITEM_TYPES.DROPBOX));
+  }, [dispatch, dropboxId]);
 
   const onEditField = useCallback(
-    (fieldName) => {
+    (instanceId) => {
       dispatch(
         setActiveItem({
-          id: droppableBoxId,
+          id: dropboxId,
           type: ITEM_TYPES.DROPBOX,
-          fieldName,
+          instanceId,
         })
       );
     },
-    [dispatch, droppableBoxId]
+    [dispatch, dropboxId]
   );
 
   const onDeleteField = useCallback(
-    (fieldName) => {
-      if (displayFields.find(({ id }) => id === fieldName)) {
-        const newState = produce(dropboxState, (draft) => {
-          delete draft.fields?.[fieldName];
-        });
-        dispatch(
-          updateConfigItemState({
-            id: droppableBoxId,
-            itemState: newState,
-          })
-        );
-      }
+    (instanceId) => {
+      dispatch(
+        updateInstance({
+          id: dropboxId,
+          instanceId,
+          instanceState: null,
+        })
+      );
     },
-    [displayFields, dropboxState, dispatch, droppableBoxId]
+    [dispatch, dropboxId]
   );
 
   const onDropField = useCallback(
@@ -90,18 +100,14 @@ export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
 
       if (isDroppable && !isDroppable(indexField)) return;
 
-      const newState = produce(dropboxState, (draft) => {
-        draft.fields[fieldName] = onDrop?.(indexField) ?? {};
-      });
+      const newState: DropboxFieldProps = {
+        ...onDrop?.(indexField),
+        fieldName,
+      };
 
-      dispatch(
-        updateConfigItemState({
-          id: droppableBoxId,
-          itemState: newState,
-        })
-      );
+      dispatch(addInstance(dropboxId, ITEM_TYPES.DROPBOX, false, newState));
     },
-    [availableFields, isDroppable, dropboxState, dispatch, droppableBoxId, onDrop]
+    [availableFields, isDroppable, onDrop, dispatch, dropboxId]
   );
 
   const [dropProps, { isValidDropTarget, dragData, ...dropState }] = useDrop(
@@ -133,11 +139,29 @@ export const useDropbox = (dropbox: DropboxContribution): DropboxProps => {
   };
 };
 
-const getDefaultDisplay = (indexField: IndexPatternField): DropboxField => ({
-  icon: indexField.type,
-  id: indexField.name,
-  label: indexField.displayName,
-});
+const getDisplayField = (
+  instanceId: string,
+  indexField: IndexPatternField,
+  properties: DropboxFieldProps,
+  display: DropboxContribution['display']
+): DropboxDisplay => {
+  let displayField: DropboxDisplay = {
+    id: instanceId,
+    icon: indexField.type,
+    label: indexField.displayName,
+  };
+  if (display) {
+    const { icon, label } = display(indexField, properties);
+
+    displayField = {
+      ...displayField,
+      icon,
+      label,
+    };
+  }
+
+  return displayField;
+};
 
 const getIndexPatternField = (indexFieldName: string, availableFields: IndexPatternField[]) =>
   availableFields.find(({ name }) => name === indexFieldName);

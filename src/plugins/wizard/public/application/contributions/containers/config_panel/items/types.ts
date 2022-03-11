@@ -29,19 +29,14 @@ export interface TitleItemContribution {
   title: string;
 }
 
-export interface DropboxField {
+export interface DropboxDisplay {
   label: string;
   icon: FieldIconProps['type'];
   id: string;
 }
-export interface DropboxFieldState {
+export interface DropboxFieldProps {
+  fieldName?: string;
   [itemId: string]: any;
-}
-export interface DropboxState {
-  fields: {
-    [fieldName: string]: DropboxFieldState;
-  };
-  draft?: DropboxFieldState;
 }
 
 export interface DropboxContribution {
@@ -51,8 +46,22 @@ export interface DropboxContribution {
   limit?: number;
   items: SecondaryItemContribution[];
   // Define how the IndexPatternField should be displayed on the dropbox
-  display?: (indexField: IndexPatternField, state: DropboxState) => DropboxField;
+  display?: (
+    indexField: IndexPatternField,
+    state: DropboxFieldProps
+  ) => Pick<DropboxDisplay, 'icon' | 'label'>;
   // Defines how the initial state of a field should be set when a field is dropped onto it
-  onDrop?: (field: IndexPatternField) => DropboxFieldState;
+  onDrop?: (field: IndexPatternField) => DropboxFieldProps;
   isDroppable?: (field: IndexPatternField) => boolean;
 }
+
+export interface InstanceState<T> {
+  instances: Array<{
+    id: string;
+    properties: T;
+  }>;
+}
+
+export type DropboxState = InstanceState<DropboxFieldProps>;
+export type InstanceItemStates = DropboxState;
+export type ConfigItemState = InstanceItemStates | string | undefined;

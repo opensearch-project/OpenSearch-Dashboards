@@ -70,12 +70,12 @@ const createDropboxContribution = (
   ],
   display: (indexField, dropboxState) => {
     const dropboxField = {
-      id: indexField.name,
       icon: indexField.type,
       label: indexField.displayName,
     };
-    if (dropboxState.fields[indexField.name]?.label) {
-      dropboxField.label = dropboxState.fields[indexField.name].label;
+
+    if (dropboxState?.label) {
+      dropboxField.label = dropboxState.label;
     }
 
     return dropboxField;

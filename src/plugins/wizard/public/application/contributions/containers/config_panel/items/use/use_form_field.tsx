@@ -4,111 +4,74 @@
  */
 
 import produce from 'immer';
-import { useCallback } from 'react';
-import { Dispatch } from '@reduxjs/toolkit';
+import { useCallback, useMemo } from 'react';
 import {
   ConfigState,
-  setActiveItem,
   updateConfigItemState,
+  updateInstance,
 } from '../../../../../utils/state_management/config_slice';
 import { useTypedSelector, useTypedDispatch } from '../../../../../utils/state_management';
-import { INITIAL_STATE as INITIAL_DROPBOX_STATE } from './use_dropbox';
-import { FieldContributions, DropboxState, ITEM_TYPES } from '../types';
+import { FieldContributions } from '../types';
 
-export const INDEX_FIELD_KEY = 'index_field';
+export const INDEX_FIELD_KEY = 'fieldName';
 
 interface FieldProps {
   onChange: Function;
   value: string;
 }
 
-// TODO: Currently this only supports formfields created inn the main npanel or as a child of dropbox fields.
-// We should be able to use these with other fields that support child components too
 export const useFormField = (id: string, onChange: FieldContributions['onChange']): FieldProps => {
-  const activeItem = useTypedSelector((state) => state.config.activeItem);
   const configState = useTypedSelector((state) => state.config);
-  const { items } = configState;
+  const { activeItem, items } = configState;
   const dispatch = useTypedDispatch();
+
+  const instanceState = useMemo(() => getInstanceState(configState) ?? {}, [configState]);
 
   const handleChange = useCallback(
     (newValue: string) => {
       onChange?.(newValue);
 
       // is a MainPanel field value
-      if (!activeItem) return dispatchUpdateConfig(id, newValue, dispatch);
-
-      const dropboxState: DropboxState =
-        activeItem?.id && items[activeItem.id] ? items[activeItem.id] : INITIAL_DROPBOX_STATE;
-
-      if (id === INDEX_FIELD_KEY) {
-        // Transfer state between indexFields
-        if (activeItem.fieldName) {
-          const newDropboxState = produce(dropboxState, (draftState) => {
-            const indexFieldName = activeItem.fieldName!;
-            // For new fields
-            if (!draftState.fields[indexFieldName]) {
-              draftState.fields[indexFieldName] = {};
-            }
-            draftState.fields[newValue] = { ...draftState.fields[indexFieldName] };
-            delete draftState.fields[indexFieldName];
-          });
-
-          dispatchUpdateConfig(activeItem.id, newDropboxState, dispatch);
-        }
-
+      if (!activeItem) {
         dispatch(
-          setActiveItem({
-            id: activeItem.id,
-            type: ITEM_TYPES.DROPBOX,
-            fieldName: newValue,
+          updateConfigItemState({
+            id,
+            itemState: newValue,
           })
         );
         return;
       }
 
-      const newDropboxState = produce(dropboxState, (draftState) => {
-        const indexFieldName = activeItem.fieldName ?? '';
-        if (!draftState.fields[indexFieldName]) {
-          draftState.fields[indexFieldName] = {};
-        }
-        draftState.fields[indexFieldName][id] = newValue;
+      const newInstanceState = produce(instanceState, (draftState) => {
+        draftState[id] = newValue;
       });
 
-      dispatchUpdateConfig(activeItem.id, newDropboxState, dispatch);
+      dispatch(
+        updateInstance({
+          id: activeItem.id,
+          instanceId: activeItem.instanceId,
+          instanceState: newInstanceState,
+        })
+      );
     },
-    [activeItem, dispatch, id, items, onChange]
+    [activeItem, dispatch, id, instanceState, onChange]
   );
 
   return {
-    value: mapStateToValue(id, configState),
+    value: activeItem ? instanceState[id] : items[id],
     onChange: handleChange,
   };
 };
 
-function mapStateToValue(id: string, { items, activeItem }: ConfigState): string {
-  // main panel item
-  if (!activeItem) return items[id];
+function getInstanceState({ items, activeItem }: ConfigState) {
+  const { id: parentItemId, instanceId } = activeItem ?? {};
+  const configItem = items[parentItemId ?? ''];
 
-  // Dropbox
-  if (activeItem.type === ITEM_TYPES.DROPBOX) {
-    const dropboxState: DropboxState = items[activeItem.id] ?? INITIAL_DROPBOX_STATE;
-    if (!activeItem.fieldName) return '';
+  if (!configItem || typeof configItem === 'string') return;
 
-    if (id === INDEX_FIELD_KEY) {
-      return activeItem.fieldName;
-    }
+  const instanceItem = configItem.instances.find(({ id }) => id === instanceId);
 
-    return dropboxState.fields[activeItem.fieldName]?.[id] ?? '';
-  }
+  if (!instanceItem) return;
 
-  throw new Error(`Secondary Item type ${activeItem.type} not yet supported`);
-}
-
-function dispatchUpdateConfig(id: string, itemState: DropboxState | string, dispatch: Dispatch) {
-  dispatch(
-    updateConfigItemState({
-      id,
-      itemState,
-    })
-  );
+  return instanceItem.properties;
 }
