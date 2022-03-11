@@ -28,6 +28,7 @@ export function ConfigPanel() {
     contributions: { items },
   } = useVisualizationType();
   const activeItem = useTypedSelector((state) => state.config.activeItem);
+  const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
 
   const hydratedItems: MainItemContribution[] = [
     ...(items?.[CONTAINER_ID] ?? []),
@@ -54,13 +55,18 @@ export function ConfigPanel() {
         getFieldSelectorContribution(),
       ];
 
-      if (activeItem.fieldName) {
+      if (!configItemState || typeof configItemState === 'string') return;
+
+      const dropboxFieldInstance = configItemState.instances.find(
+        ({ id }) => id === activeItem.instanceId
+      );
+      if (dropboxFieldInstance && dropboxFieldInstance.properties.fieldName) {
         itemsToRender = [...itemsToRender, ...activeDropboxContribution.items];
       }
 
       return mapItemToPanelComponents(itemsToRender, true);
     }
-  }, [activeItem, hydratedItems]);
+  }, [activeItem, configItemState, hydratedItems]);
 
   return (
     <EuiForm className={`wizConfig ${activeItem ? 'showSecondary' : ''}`}>

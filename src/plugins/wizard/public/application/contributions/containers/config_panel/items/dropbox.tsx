@@ -8,12 +8,12 @@ import React from 'react';
 import { FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
 import './dropbox.scss';
-import { DropboxContribution, DropboxField } from './types';
+import { DropboxContribution, DropboxDisplay } from './types';
 import { useDropbox } from './use';
 
 interface DropboxProps extends IDropState {
   label: string;
-  fields: DropboxField[];
+  fields: DropboxDisplay[];
   limit?: number;
   onAddField: () => void;
   onEditField: (id: string) => void;
