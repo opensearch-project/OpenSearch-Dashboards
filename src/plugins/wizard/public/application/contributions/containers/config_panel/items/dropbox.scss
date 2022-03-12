@@ -25,8 +25,15 @@
     grid-gap: $euiSizeS;
     padding: $euiSizeS $euiSizeM;
     align-items: center;
+  }
 
+  &__draggable {
+    padding: 2px 0;
+  }
 
+  &__field_text {
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__dropTarget {
@@ -34,12 +41,13 @@
     grid-template-columns: 1fr auto;
 
     &.validField {
-      // TODO: Temporary styles
-      background-color: #ebf5eb; 
+      background-color: #A8D9E7; 
+      border-color: #A8D9E7;
 
       &.canDrop {
-        background-color: #cce5cc;
-        border: 1px dashed #8bc34a;
+        background-color: rgba(0, 161, 201, 0.3);
+        border-color: #006BB4;
+        border-style: dashed;
       }
     }
 

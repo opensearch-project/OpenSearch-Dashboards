@@ -18,7 +18,7 @@ export const createBarChartConfig = (): VisualizationTypeOptions => {
       title: 'Bar Chart Configuration',
     },
     createDropboxContribution('x_axis', 'X Axis', {}),
-    createDropboxContribution('y_axis', 'Y Axis', { limit: 2 }),
+    createDropboxContribution('y_axis', 'Y Axis', { limit: 5 }),
     // {
     //   type: ItemTypes.INPUT,
     //   id: 'testLabel',
@@ -85,8 +85,8 @@ const createDropboxContribution = (
       // label: indexField.displayName,
     };
   },
-  isDroppable: (indexField) => {
-    return indexField.displayName === 'geo.srcdest';
-  },
+  // isDroppable: (indexField) => {
+  //   return indexField.displayName === 'geo.srcdest';
+  // },
   ...props,
 });
