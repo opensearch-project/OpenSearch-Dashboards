@@ -13,7 +13,8 @@ import {
   MainItemContribution,
 } from '../../contributions/containers/config_panel';
 
-// TODO: Move this into contributions and register the slice from there fro better code splitting
+// TODO: Move this into contributions and register the slice from there for better code splitting
+// TODO: Reorganize slice for better readability
 export interface ActiveItem {
   id: string;
   type: MainItemContribution['type'];
@@ -60,6 +61,11 @@ interface UpdateInstancePayload {
   id: string;
   instanceId: string;
   instanceState: any;
+}
+
+interface ReorderInstancePayload {
+  id: string;
+  reorderedInstanceIds: string[];
 }
 
 export const slice = createSlice({
@@ -141,8 +147,30 @@ export const slice = createSlice({
 
       configItem.instances[instanceIndex].properties = instanceState;
     },
+    reorderInstances: (state, action: PayloadAction<ReorderInstancePayload>) => {
+      const { id: parentItemId, reorderedInstanceIds } = action.payload;
+
+      if (!state.items.hasOwnProperty(parentItemId)) return;
+
+      // Typescript complains if we use state.items[parentItemId] directly since it cannot resolve the type correctly
+      const configItem = state.items[parentItemId];
+      if (!configItem || typeof configItem === 'string') return;
+
+      const orderDict: { [id: string]: number } = {};
+      reorderedInstanceIds.forEach((instanceId, index) => {
+        orderDict[instanceId] = index;
+      });
+
+      configItem.instances.sort((a, b) => orderDict[a.id] - orderDict[b.id]);
+    },
   },
 });
 
 export const { reducer } = slice;
-export const { updateConfigItemState, setActiveItem, addInstance, updateInstance } = slice.actions;
+export const {
+  updateConfigItemState,
+  setActiveItem,
+  addInstance,
+  updateInstance,
+  reorderInstances,
+} = slice.actions;

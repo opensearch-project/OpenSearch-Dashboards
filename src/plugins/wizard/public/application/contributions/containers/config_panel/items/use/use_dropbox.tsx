@@ -9,6 +9,7 @@ import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
 import {
   addInstance,
+  reorderInstances,
   setActiveItem,
   updateInstance,
 } from '../../../../../utils/state_management/config_slice';
@@ -110,6 +111,18 @@ export const useDropbox = (dropboxContribution: DropboxContribution): DropboxPro
     [availableFields, isDroppable, onDrop, dispatch, dropboxId]
   );
 
+  const onReorderField = useCallback(
+    (reorderedInstanceIds: string[]) => {
+      dispatch(
+        reorderInstances({
+          id: dropboxId,
+          reorderedInstanceIds,
+        })
+      );
+    },
+    [dispatch, dropboxId]
+  );
+
   const [dropProps, { isValidDropTarget, dragData, ...dropState }] = useDrop(
     'field-data',
     onDropField
@@ -126,12 +139,14 @@ export const useDropbox = (dropboxContribution: DropboxContribution): DropboxPro
   }, [availableFields, dragData, isDroppable, isValidDropTarget]);
 
   return {
+    id: dropboxId,
     label,
     limit,
     fields: displayFields,
     onAddField,
     onEditField,
     onDeleteField,
+    onReorderField,
     ...dropState,
     dragData,
     isValidDropTarget: isValidDropField,
