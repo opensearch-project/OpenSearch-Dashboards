@@ -76,6 +76,7 @@
   },
   "resolutions": {
     "**/@types/node": "^14.17.32",
+    "**/ansi-regex": "^5.0.1",
     "**/front-matter": "^4.0.2",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
