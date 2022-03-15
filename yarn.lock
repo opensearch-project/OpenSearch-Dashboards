@@ -2365,7 +2365,7 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@opensearch-project/opensearch@^1.0.2":
+"@opensearch-project/opensearch@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-1.1.0.tgz#8b3c8b4cbcea01755ba092d2997bf0b4ca7f22f7"
   integrity sha512-1TDw92JL8rD1b2QGluqBsIBLIiD5SGciIpz4qkrGAe9tcdfQ1ptub5e677rhWl35UULSjr6hP8M6HmISZ/M5HQ==
