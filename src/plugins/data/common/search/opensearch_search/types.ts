@@ -59,6 +59,7 @@ export type ISearchRequestParams<T = Record<string, any>> = {
 export interface IOpenSearchSearchRequest
   extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
   indexType?: string;
+  dataSource?: string;
 }
 
 export type IOpenSearchSearchResponse<Source = any> = IOpenSearchDashboardsSearchResponse<

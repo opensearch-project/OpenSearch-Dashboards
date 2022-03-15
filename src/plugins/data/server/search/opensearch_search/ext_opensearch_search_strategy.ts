@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
+import { SharedGlobalConfig, Logger, SavedObject } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
@@ -71,13 +71,24 @@ export const extOpensearchSearchStrategyProvider = (
       });
 
       try {
+        // logger.info(JSON.stringify(params));
+        // logger.info(JSON.stringify(request.dataSource));
+        const dataSource = request.dataSource ? await context.core.savedObjects.client.get('data-source', request.dataSource) : undefined;
+        logger.info(JSON.stringify(dataSource));
+        const dataSourceObj = dataSource!.attributes as any;
+        const url = dataSourceObj.endpoint.url;
+        const username = dataSourceObj.endpoint.credentials.username;
+        const password = dataSourceObj.endpoint.credentials.password;
+        // logger.info(JSON.stringify(url));
+        // logger.info(JSON.stringify(username));
+        // logger.info(JSON.stringify(password));
         // TODO: use OpenSearchService to initialize and manage client
         // TODO: get endpoint and credentials from saved objects
         const client = new Client({
-          node: 'https://search-self-managed-710-7od7jzuh22y2zitbg7nx6lxymq.us-west-2.es.amazonaws.com/',
+          node: url,
           auth: {
-            username: 'admin',
-            password: 'Admin_123',
+            username,
+            password,
           }
         });
         const promise = shimAbortSignal(

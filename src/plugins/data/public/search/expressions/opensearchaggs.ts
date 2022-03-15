@@ -282,6 +282,15 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
+    
+    // TODO: Index pattern has data source info, so not necessarily to pass
+    // data source id using expression pipeline.
+    // Need to figure out which approach is better.
+
+
+    // console.log('--------');
+    // console.log(input);
+    // console.log(input.dataSource);
 
     const handleRequestFn = indexPattern.dataSource ? handleOpenSearchDataSourceRequest : handleCourierRequest;
     const response = await handleRequestFn({

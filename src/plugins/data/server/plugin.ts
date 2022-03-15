@@ -43,6 +43,7 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';
+import { DataSourcesService, DataSourcesServiceStart } from './data_sources/data_sources_service';
 
 export interface DataEnhancements {
   search: SearchEnhancements;
@@ -61,6 +62,7 @@ export interface DataPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   indexPatterns: IndexPatternsServiceStart;
+  dataSources: DataSourcesServiceStart;
 }
 
 export interface DataPluginSetupDependencies {
@@ -84,6 +86,7 @@ export class DataServerPlugin
   private readonly dqlTelemetryService: DqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
   private readonly indexPatterns = new IndexPatternsService();
+  private readonly dataSources = new DataSourcesService()
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
@@ -105,6 +108,7 @@ export class DataServerPlugin
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.dqlTelemetryService.setup(core, { usageCollection });
+    this.dataSources.setup(core);
 
     core.uiSettings.register(getUiSettings());
 
@@ -128,11 +132,15 @@ export class DataServerPlugin
       fieldFormats,
       logger: this.logger.get('indexPatterns'),
     });
+    const dataSources = this.dataSources.start(core, {
+      logger: this.logger.get('dataSources'),
+    });
 
     return {
       fieldFormats,
       indexPatterns,
       search: this.searchService.start(core, { fieldFormats, indexPatterns }),
+      dataSources,
     };
   }
 
