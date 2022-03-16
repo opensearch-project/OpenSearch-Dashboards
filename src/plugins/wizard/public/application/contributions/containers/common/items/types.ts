@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFieldTextProps, EuiSuperSelectProps } from '@elastic/eui';
+import { EuiSuperSelectProps } from '@elastic/eui';
 import { WizardServices } from 'src/plugins/wizard/public';
 import { RootState } from '../../../../utils/state_management';
 
@@ -15,7 +15,7 @@ export enum ITEM_TYPES {
   INPUT = 'input',
 }
 
-export const ItemTypes = {
+export const CommonItemTypes = {
   ...ITEM_TYPES,
 };
 

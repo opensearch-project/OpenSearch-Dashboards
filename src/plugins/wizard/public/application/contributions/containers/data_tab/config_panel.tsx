@@ -18,7 +18,7 @@ import { mapItemToPanelComponents } from './utils/item_to_panel';
 import { ItemTypes } from '../../constants';
 import { SelectContribution } from '../common/items';
 import { INDEX_FIELD_KEY } from './items/use/use_form_field';
-import { CONTAINER_ID } from '.';
+import { DATA_TAB_ID } from '.';
 import './config_panel.scss';
 
 const DEFAULT_ITEMS: MainItemContribution[] = [getTitleContribution()];
@@ -30,10 +30,7 @@ export function ConfigPanel() {
   const activeItem = useTypedSelector((state) => state.config.activeItem);
   const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
 
-  const hydratedItems: MainItemContribution[] = [
-    ...(items?.[CONTAINER_ID] ?? []),
-    ...DEFAULT_ITEMS,
-  ];
+  const hydratedItems: MainItemContribution[] = [...(items?.[DATA_TAB_ID] ?? []), ...DEFAULT_ITEMS];
 
   const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
   const secondaryPanel = useMemo(() => {
@@ -92,5 +89,3 @@ function getFieldSelectorContribution(): SelectContribution<string> {
     },
   };
 }
-
-export { CONTAINER_ID };

@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import {
-  CONTAINER_ID as DATA_TAB_ID,
-  DataTab,
-} from '../../application/contributions/containers/data_tab';
-import {
-  CONTAINER_ID as STYLE_TAB_ID,
-  StyleTab,
-} from '../../application/contributions/containers/style_tab';
+import { DATA_TAB_ID, DataTab, STYLE_TAB_ID, StyleTab } from '../../application/contributions';
 import {
   ContainerLocationContribution,
   ContainerLocations,

@@ -9,7 +9,7 @@ import { FieldSelector } from './field_selector';
 import './index.scss';
 import { ConfigPanel } from './config_panel';
 
-export const CONTAINER_ID = 'data_tab';
+export const DATA_TAB_ID = 'data_tab';
 
 export const DataTab = () => {
   return (

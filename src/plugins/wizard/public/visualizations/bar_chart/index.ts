@@ -5,10 +5,10 @@
 
 import { ItemTypes } from '../../application/contributions/constants';
 import {
-  CONTAINER_ID as CONFIG_PANEL_ID,
+  DATA_TAB_ID,
   DropboxContribution,
   MainItemContribution as ConfigPanelItem,
-} from '../../application/contributions/containers/data_tab';
+} from '../../application/contributions';
 import { VisualizationTypeOptions } from '../../services/type_service';
 
 export const createBarChartConfig = (): VisualizationTypeOptions => {
@@ -33,7 +33,7 @@ export const createBarChartConfig = (): VisualizationTypeOptions => {
     description: 'This is a bar chart',
     contributions: {
       items: {
-        [CONFIG_PANEL_ID]: configPanelItems,
+        [DATA_TAB_ID]: configPanelItems,
       },
     },
   };
