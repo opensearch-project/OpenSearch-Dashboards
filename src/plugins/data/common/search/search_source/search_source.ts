@@ -282,12 +282,21 @@ export class SearchSource {
     this.history = [searchRequest];
 
     let response;
-    // if (options.externalDataSource) {
-    //   response = await this.fetchSearchFromExternalDataSource(searchRequest, options);
-    // } else 
+
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
+      // zengyan NOTE: batch search will issue `_msearch` requests to OpenSearch, which is not likely to work with
+      // multiple data sources. maybe deprecate this, or simply disable it when multiple data source is
+      // supported?
+      // zengyan NOTE: Kibana is going to remove it: https://github.com/elastic/kibana/issues/55140
     } else {
+      if (this.dataSource) { // TODO: check if this applies to `legacyFetch`, if so, move up out side of outer if block
+        options = {
+          ...options,
+          strategy: 'ext-opensearch',
+          externalDataSource: true,
+        }
+      }
       response = await this.fetchSearch(searchRequest, options);
     }
 
@@ -342,22 +351,6 @@ export class SearchSource {
     });
 
     return search({ params, indexType: searchRequest.indexType, dataSource: this.dataSource }, options).then(({ rawResponse }) =>
-      onResponse(searchRequest, rawResponse)
-    );
-  }
-
-  /**
-   * Run a search using the search service
-   * @return {Promise<SearchResponse<unknown>>}
-   */
-  private fetchSearchFromExternalDataSource(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { search, getConfig, onResponse } = this.dependencies;
-
-    const params = getSearchParamsFromRequest(searchRequest, {
-      getConfig,
-    });
-
-    return search({ params, indexType: searchRequest.indexType, dataSource: searchRequest.dataSoruce }, options).then(({ rawResponse }) =>
       onResponse(searchRequest, rawResponse)
     );
   }

@@ -413,7 +413,7 @@ const handleOpenSearchDataSourceRequest = async ({
   request.stats(getRequestInspectorStats(requestSearchSource));
 
   try {
-    const response = await requestSearchSource.fetch({ abortSignal, strategy: 'ext-opensearch', externalDataSource: true });
+    const response = await requestSearchSource.fetch({ abortSignal /*, strategy: 'ext-opensearch', externalDataSource: true */});
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
