@@ -16,7 +16,7 @@ export enum ITEM_TYPES {
   TITLE = 'title',
 }
 
-export const ItemTypes = {
+export const DataTabItemTypes = {
   ...ITEM_TYPES,
 };
 

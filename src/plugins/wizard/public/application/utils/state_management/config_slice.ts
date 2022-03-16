@@ -8,10 +8,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 import {
   ConfigItemState,
-  CONTAINER_ID,
+  DATA_TAB_ID,
   InstanceState,
   MainItemContribution,
-} from '../../contributions/containers/data_tab';
+} from '../../contributions';
 
 // TODO: Move this into contributions and register the slice from there for better code splitting
 // TODO: Reorganize slice for better readability
@@ -39,7 +39,7 @@ export const getPreloadedState = async ({ types }: WizardServices): Promise<Conf
   const defaultVisualizationType = types.all()[0];
 
   if (defaultVisualizationType) {
-    preloadedState.items = defaultVisualizationType.contributions.items?.[CONTAINER_ID].filter(
+    preloadedState.items = defaultVisualizationType.contributions.items?.[DATA_TAB_ID].filter(
       ({ id }) => !!id
     ).reduce((acc, { id, type }) => ({ ...acc, [id]: null }), {});
   }
