@@ -6,14 +6,13 @@
   }
 }
 
-input[type='radio'],
-input[type='checkbox'],
+input[type="radio"],
+input[type="checkbox"],
 .radio,
 .checkbox {
   &[disabled],
   fieldset[disabled] & {
     cursor: default;
-    opacity: .8;
+    opacity: 0.8;
   }
 }
-

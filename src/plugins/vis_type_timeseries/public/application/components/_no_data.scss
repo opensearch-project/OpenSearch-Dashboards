@@ -8,10 +8,12 @@
 
   // Calculate colors similar to EuiCallout
   $tempBackgroundColor: tintOrShade($euiColorPrimary, 90%, 70%);
+
   background-color: $tempBackgroundColor;
 
   .tvbNoData__title {
-    @include euiTitle('xs');
+    @include euiTitle("xs");
+
     color: makeHighContrastColor($euiColorPrimary, $tempBackgroundColor);
   }
 }

@@ -19,6 +19,7 @@
 .dshLayout--editing {
   .react-resizable-handle {
     @include size($euiSizeL);
+
     z-index: $euiZLevel1; /* 1 */
     right: 0;
     bottom: 0;
@@ -31,7 +32,7 @@
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
  * otherwise the height is set inline.
  */
- .dshLayout-isMaximizedPanel {
+.dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
   width: 100%;
   position: absolute !important; /* 1 */
@@ -66,7 +67,8 @@
   /**
    * Disable transitions from the library on each grid element.
    */
-   transition: none;
+  transition: none;
+
   /**
     * Copy over and overwrite the fill color with EUI color mixin (for theming)
     */
@@ -94,7 +96,9 @@
 
   &.react-draggable-dragging {
     transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
+
     @include euiBottomShadowLarge;
+
     border-radius: $euiBorderRadius; // keeps shadow within bounds
   }
 
@@ -109,7 +113,7 @@
 
 // When in view-mode only, and on tiny mobile screens, just stack each of the grid-items
 
-@include euiBreakpoint('xs', 's') {
+@include euiBreakpoint("xs", "s") {
   .dshLayout--viewing {
     .react-grid-item {
       position: static !important;

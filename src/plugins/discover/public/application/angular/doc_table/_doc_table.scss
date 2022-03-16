@@ -3,6 +3,7 @@
  */
 doc-table {
   @include euiScrollBar;
+
   overflow: auto;
   flex: 1 1 100%;
   flex-direction: column; /* 1 */

@@ -1,0 +1,19 @@
+extends:
+  - stylelint-config-standard-scss
+rules:
+  # while we still use node-sass, only legacy rgb() notation is allowed
+  color-function-notation: "legacy"
+  # recommended to turn off descending specificity since we use a lot of nesting:
+  # https://stylelint.io/user-guide/rules/list/no-descending-specificity/
+  no-descending-specificity: null
+  # need to use global function/value names from EUI
+  function-name-case: null
+  value-keyword-case: null
+  scss/no-global-function-names: null
+  # camelCase names
+  keyframes-name-pattern: "^[a-z][a-zA-Z0-9_-]+$"
+  selector-class-pattern: "^[a-z][a-zA-Z0-9_-]+$"
+  selector-id-pattern: "^[a-z][a-zA-Z0-9_-]+$"
+  scss/at-mixin-pattern: "^[a-z][a-zA-Z0-9_-]+$"
+  scss/at-function-pattern: "^[a-z][a-zA-Z0-9_-]+$"
+  scss/dollar-variable-pattern: "^[a-z][a-zA-Z0-9_-]+$"

@@ -10,14 +10,14 @@
 
 .guideDemo__highlightGrid {
   .kuiFlexItem {
-    background: transparentize($euiColorPrimary, .9);
+    background: transparentize($euiColorPrimary, 0.9);
     padding: 16px;
   }
 }
 
 .guideDemo__highlightGridWrap {
   .kuiFlexItem div {
-    background: transparentize($euiColorPrimary, .9);
+    background: transparentize($euiColorPrimary, 0.9);
     padding: 16px;
   }
 }

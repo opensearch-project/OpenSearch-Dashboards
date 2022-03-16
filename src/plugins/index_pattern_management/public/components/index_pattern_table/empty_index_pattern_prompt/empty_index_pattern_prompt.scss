@@ -1,23 +1,24 @@
-@import '../../../variables';
-@import '../../../templates';
+@import "../../../variables";
+@import "../../../templates";
 
 .inpEmptyIndexPatternPrompt {
   // override EUI specificity
-  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
+  max-width: $inpEmptyStateMaxWidth !important;
 }
 
 .inpEmptyIndexPatternPrompt__footer {
   @extend %inp-empty-state-footer;
+
   // override EUI specificity
-  align-items: baseline !important;  // sass-lint:disable-line no-important
+  align-items: baseline !important;
 }
 
 .inpEmptyIndexPatternPrompt__title {
   // override EUI specificity
-  width: auto !important; // sass-lint:disable-line no-important
+  width: auto !important;
 }
 
-@include euiBreakpoint('xs', 's') {
+@include euiBreakpoint("xs", "s") {
   .inpEmptyIndexPatternPrompt__illustration > svg {
     width: $euiSize * 12;
     height: auto;

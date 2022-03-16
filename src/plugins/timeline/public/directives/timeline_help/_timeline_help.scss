@@ -1,7 +1,7 @@
 .timHelp {
   // EUITODO: Make .euiText > code background transparent
   code {
-    background-color: transparentize($euiTextColor, .9);
+    background-color: transparentize($euiTextColor, 0.9);
   }
 }
 
@@ -20,6 +20,5 @@
  */
 .timHelp__functionsTableRow:hover,
 .timHelp__functionDetailsTable {
-  // sass-lint:disable-block no-important
   background-color: $euiColorLightestShade !important; /* 1 */
 }

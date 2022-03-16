@@ -19,7 +19,7 @@
   left: 0;
 }
 
-@include euiBreakpoint('xs', 's', 'm') {
+@include euiBreakpoint("xs", "s", "m") {
   .timExpressionInput__editor {
     flex: auto;
     height: $euiSize * 15;

@@ -33,6 +33,7 @@
 
 .kuiTableHeaderCell {
   @include tableCell;
+
   line-height: $kuiLineHeight;
   color: $tableHeaderTextColor;
 }
@@ -102,28 +103,29 @@
 
 .kuiTableRowCell {
   @include tableCell;
+
   color: $kuiFontColor;
   border-top: $kuiBorderThin;
   vertical-align: middle;
 }
 
-  /**
+/**
    * 1. Vertically align all children.
    * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
    *    the padding was on the cell, the ellipsis would be cropped.
    * 3. Truncate content with an ellipsis.
    */
-  .kuiTableRowCell__liner {
-    padding: $tableCellPadding; /* 2 */
-    line-height: $kuiLineHeight; /* 1 */
-    overflow: hidden; /* 3 */
-    text-overflow: ellipsis; /* 3 */
-    white-space: nowrap; /* 3 */
+.kuiTableRowCell__liner {
+  padding: $tableCellPadding; /* 2 */
+  line-height: $kuiLineHeight; /* 1 */
+  overflow: hidden; /* 3 */
+  text-overflow: ellipsis; /* 3 */
+  white-space: nowrap; /* 3 */
 
-    & > * {
-      vertical-align: middle; /* 1 */
-    }
+  & > * {
+    vertical-align: middle; /* 1 */
   }
+}
 
 .kuiTableRowCell--wrap {
   .kuiTableRowCell__liner {

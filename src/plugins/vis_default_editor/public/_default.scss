@@ -2,7 +2,7 @@
   flex: 1 1 auto;
   display: flex;
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     flex-direction: column;
   }
 }
@@ -18,12 +18,12 @@
   position: relative;
   flex-shrink: 0;
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     // If we are on a small screen we force the editor to take 100% width.
     width: 100% !important;
   }
 
-  @include euiBreakpoint('l', 'xl') {
+  @include euiBreakpoint("l", "xl") {
     max-width: 75%;
   }
 }
@@ -37,7 +37,7 @@
     display: none;
   }
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     height: $euiSizeXXL; // Just enough room for the collapse button
     width: 100% !important;
   }
@@ -55,7 +55,8 @@
 
 .visEditor__resizer {
   @include osdResizer($euiSizeM);
-  @include euiBreakpoint('xs', 's', 'm') {
+
+  @include euiBreakpoint("xs", "s", "m") {
     display: none;
   }
 }
@@ -73,7 +74,7 @@
   flex: 1 1 auto; // Fixes IE bug: the editor overflows a visualization on small screens
   overflow: hidden;
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     // If we are on a small screen we force the visualization to take 100% width.
     width: 100% !important;
   }

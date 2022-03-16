@@ -3,10 +3,11 @@
 /**
  * Needs to correspond with the react root nested inside angular.
  */
- #dashboardViewport {
+#dashboardViewport {
   flex: 1;
   display: flex;
   flex-direction: column;
+
   [data-reactroot] {
     flex: 1;
   }

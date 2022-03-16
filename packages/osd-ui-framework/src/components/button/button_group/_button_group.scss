@@ -23,10 +23,7 @@
   }
 
   > .kuiButton:only-child {
-    border-top-right-radius: $kuiBorderRadius;
-    border-bottom-right-radius: $kuiBorderRadius;
-    border-top-left-radius: $kuiBorderRadius;
-    border-bottom-left-radius: $kuiBorderRadius;
+    border-radius: $kuiBorderRadius $kuiBorderRadius $kuiBorderRadius $kuiBorderRadius;
   }
 
   .kuiButton + .kuiButton {
