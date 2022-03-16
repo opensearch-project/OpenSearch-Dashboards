@@ -60,7 +60,6 @@ jobs:
         run: yarn test:jest_integration:ci
 
   functional-tests:
-    needs: [ build-lint-test ]
     runs-on: ubuntu-latest
     name: Run functional tests
     strategy: 
@@ -68,10 +67,6 @@ jobs:
         group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
-
-      - name: Get the cached tests results 
-        id: ftr_tests_results
-        run: cat ftr_tests_results 2>/dev/null || echo 'default'
 
       - name: Checkout code
         uses: actions/checkout@v2
