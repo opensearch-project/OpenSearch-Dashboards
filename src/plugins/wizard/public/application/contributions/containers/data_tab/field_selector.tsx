@@ -11,11 +11,11 @@ import {
   IndexPatternField,
   OPENSEARCH_FIELD_TYPES,
   OSD_FIELD_TYPES,
-} from '../../../../../data/public';
+} from '../../../../../../data/public';
 import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
-import { useTypedSelector } from '../../utils/state_management';
+import { useTypedSelector } from '../../../utils/state_management';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];

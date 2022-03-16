@@ -11,7 +11,7 @@ import {
   CONTAINER_ID,
   InstanceState,
   MainItemContribution,
-} from '../../contributions/containers/config_panel';
+} from '../../contributions/containers/data_tab';
 
 // TODO: Move this into contributions and register the slice from there for better code splitting
 // TODO: Reorganize slice for better readability

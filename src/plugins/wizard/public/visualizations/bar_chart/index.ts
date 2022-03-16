@@ -8,8 +8,8 @@ import {
   CONTAINER_ID as CONFIG_PANEL_ID,
   DropboxContribution,
   MainItemContribution as ConfigPanelItem,
-} from '../../application/contributions/containers/config_panel';
-import { VisualizationTypeOptions } from '../../services/type_service/visualization_type';
+} from '../../application/contributions/containers/data_tab';
+import { VisualizationTypeOptions } from '../../services/type_service';
 
 export const createBarChartConfig = (): VisualizationTypeOptions => {
   const configPanelItems: ConfigPanelItem[] = [

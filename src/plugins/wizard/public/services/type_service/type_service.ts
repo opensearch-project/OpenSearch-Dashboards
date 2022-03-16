@@ -30,7 +30,8 @@
  * GitHub history for details.
  */
 
-import { VisualizationType, VisualizationTypeOptions } from './visualization_type';
+import { VisualizationTypeOptions } from './types';
+import { VisualizationType } from './visualization_type';
 
 /**
  * Vis Types Service

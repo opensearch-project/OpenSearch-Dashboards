@@ -1,4 +1,4 @@
-@import "util";
+@import "../util";
 
 .wizSidenav {
   @include scrollNavParent(auto 1fr);

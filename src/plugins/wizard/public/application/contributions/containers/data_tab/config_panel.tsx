@@ -11,16 +11,16 @@ import {
   MainItemContribution,
   SecondaryItemContribution,
   TitleItemContribution,
+  ITEM_TYPES,
 } from './items';
-import './index.scss';
-import { ITEM_TYPES } from './items';
 import { useTypedSelector } from '../../../utils/state_management';
 import { mapItemToPanelComponents } from './utils/item_to_panel';
 import { ItemTypes } from '../../constants';
 import { SelectContribution } from '../common/items';
 import { INDEX_FIELD_KEY } from './items/use/use_form_field';
+import { CONTAINER_ID } from '.';
+import './config_panel.scss';
 
-const CONTAINER_ID = 'config-panel';
 const DEFAULT_ITEMS: MainItemContribution[] = [getTitleContribution()];
 
 export function ConfigPanel() {
@@ -37,9 +37,7 @@ export function ConfigPanel() {
 
   const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
   const secondaryPanel = useMemo(() => {
-    if (!activeItem) {
-      return;
-    }
+    if (!activeItem || !configItemState || typeof configItemState === 'string') return;
 
     // Generate each secondary panel base on active item type
     if (activeItem.type === ITEM_TYPES.DROPBOX) {
@@ -54,8 +52,6 @@ export function ConfigPanel() {
         getTitleContribution(activeDropboxContribution.label),
         getFieldSelectorContribution(),
       ];
-
-      if (!configItemState || typeof configItemState === 'string') return;
 
       const dropboxFieldInstance = configItemState.instances.find(
         ({ id }) => id === activeItem.instanceId
@@ -97,5 +93,4 @@ function getFieldSelectorContribution(): SelectContribution<string> {
   };
 }
 
-export { CONTAINER_ID, DEFAULT_ITEMS };
-export * from './items';
+export { CONTAINER_ID };
