@@ -1,5 +1,5 @@
 // Default styles for Markdown element
-//
+// --------
 // 1. Links
 // 2. Headings
 // 3. Images
@@ -18,7 +18,6 @@ $osdDefaultFontSize: 14px;
 }
 
 .osdMarkdown__body {
-
   // Font size variables
   $osdMarkdownFontSizeS: canvasToEm(12px);
   $osdMarkdownFontSize: canvasToEm(14px);
@@ -34,14 +33,14 @@ $osdDefaultFontSize: 14px;
   $osdMarkdownSizeXXS: canvasToEm(4px);
 
   // Grayscale variables
-  $osdMarkdownAlphaLightestShade: rgba($euiColorFullShade,.05);
-  $osdMarkdownAlphaLightShade: rgba($euiColorFullShade,.15);
-  $osdMarkdownAlphaDarkShade: rgba($euiColorFullShade,.65);
+  $osdMarkdownAlphaLightestShade: rgba($euiColorFullShade, 0.05);
+  $osdMarkdownAlphaLightShade: rgba($euiColorFullShade, 0.15);
+  $osdMarkdownAlphaDarkShade: rgba($euiColorFullShade, 0.65);
 
   // Reverse grayscale for opposite of theme
-  $osdMarkdownAlphaLightestShadeReversed: rgba($euiColorEmptyShade,.05);
-  $osdMarkdownAlphaLightShadeReversed: rgba($euiColorEmptyShade,.15);
-  $osdMarkdownAlphaDarkShadeReversed: rgba($euiColorEmptyShade,.65);
+  $osdMarkdownAlphaLightestShadeReversed: rgba($euiColorEmptyShade, 0.05);
+  $osdMarkdownAlphaLightShadeReversed: rgba($euiColorEmptyShade, 0.15);
+  $osdMarkdownAlphaDarkShadeReversed: rgba($euiColorEmptyShade, 0.65);
 
   &--reversed {
     color: $euiColorLightestShade;
@@ -104,12 +103,14 @@ $osdDefaultFontSize: 14px;
 
   h1 {
     font-size: $osdMarkdownFontSizeXXL;
+    /* stylelint-disable-next-line number-max-precision */
     line-height: 1.333333em;
     font-weight: 300;
   }
 
   h2 {
     font-size: $osdMarkdownFontSizeXL;
+    /* stylelint-disable-next-line number-max-precision */
     line-height: 1.428571em;
     font-weight: 300;
   }
@@ -128,12 +129,14 @@ $osdDefaultFontSize: 14px;
 
   h5 {
     font-size: $osdMarkdownFontSize;
+    /* stylelint-disable-next-line number-max-precision */
     line-height: 1.142857em;
     font-weight: 700;
   }
 
   h6 {
     font-size: $osdMarkdownFontSizeS;
+    /* stylelint-disable-next-line number-max-precision */
     line-height: 1.333333em;
     font-weight: 700;
     text-transform: uppercase;
@@ -151,6 +154,7 @@ $osdDefaultFontSize: 14px;
     padding: 0 1em;
     border-left: $osdMarkdownSizeXXS solid $osdMarkdownAlphaLightShade;
   }
+
   &--reversed blockquote {
     border-left-color: $osdMarkdownAlphaLightShadeReversed;
   }
@@ -165,6 +169,7 @@ $osdDefaultFontSize: 14px;
     background-color: $osdMarkdownAlphaLightShade;
     border: 0;
   }
+
   &--reversed hr {
     background-color: $osdMarkdownAlphaLightShadeReversed;
   }
@@ -191,6 +196,7 @@ $osdDefaultFontSize: 14px;
   ul {
     list-style-type: disc;
   }
+
   ol {
     list-style-type: decimal;
   }
@@ -215,6 +221,7 @@ $osdDefaultFontSize: 14px;
     margin-left: 0;
   }
 
+  /* stylelint-disable-next-line no-duplicate-selectors */
   ul,
   ol {
     padding-left: $osdMarkdownSizeL;
@@ -245,6 +252,7 @@ $osdDefaultFontSize: 14px;
     border-spacing: 0;
     border-collapse: collapse;
   }
+
   &--reversed table {
     border-left-color: $osdMarkdownAlphaLightShadeReversed;
   }
@@ -264,6 +272,7 @@ $osdDefaultFontSize: 14px;
       border-right: 1px solid $osdMarkdownAlphaLightShade;
     }
   }
+
   &--reversed table th,
   &--reversed table td {
     border-color: $osdMarkdownAlphaLightShadeReversed;
@@ -273,6 +282,7 @@ $osdDefaultFontSize: 14px;
     background-color: transparent;
     border-top: 1px solid $osdMarkdownAlphaLightShade;
   }
+
   &--reversed table tr {
     border-top-color: $osdMarkdownAlphaLightShadeReversed;
   }
@@ -281,7 +291,7 @@ $osdDefaultFontSize: 14px;
   code,
   pre {
     margin-bottom: $osdMarkdownSizeXS;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
     font-size: $osdMarkdownFontSizeS;
   }
 
@@ -291,6 +301,7 @@ $osdDefaultFontSize: 14px;
     background-color: $osdMarkdownAlphaLightestShade;
     border-radius: $osdMarkdownSizeXXS;
   }
+
   &--reversed code {
     background-color: $osdMarkdownAlphaLightestShadeReversed;
   }
@@ -305,11 +316,13 @@ $osdDefaultFontSize: 14px;
     padding: $osdMarkdownSize;
     overflow: auto;
     font-size: $osdMarkdownFontSizeS;
+    /* stylelint-disable-next-line number-max-precision */
     line-height: 1.333333em;
     background-color: $osdMarkdownAlphaLightestShade;
     border-radius: $osdMarkdownSizeXXS;
     word-wrap: normal;
   }
+
   &--reversed pre {
     background-color: $osdMarkdownAlphaLightestShadeReversed;
   }

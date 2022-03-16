@@ -1,6 +1,4 @@
-//
 // LAYOUT
-//
 
 .visEditorSidebar {
   min-width: $vis-editor-sidebar-min-width;
@@ -13,6 +11,7 @@
 
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
+
   max-width: 100%;
 }
 
@@ -23,9 +22,10 @@
     flex-grow: 0;
   }
 
-  @include euiBreakpoint('l', 'xl') {
+  @include euiBreakpoint("l", "xl") {
     @include flex-parent(1, 1, 1px);
     @include euiScrollBar;
+
     overflow: auto;
   }
 }
@@ -34,9 +34,7 @@
   display: none;
 }
 
-//
 // NAVIGATION
-//
 
 .visEditorSidebar__titleContainer {
   padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
@@ -52,9 +50,7 @@
   flex-grow: 0;
 }
 
-//
 // SECTIONS
-//
 
 .visEditorSidebar__section {
   background-color: $euiColorEmptyShade;
@@ -76,9 +72,7 @@
   margin-bottom: $euiSizeM;
 }
 
-//
 // FORMS
-//
 
 .visEditorSidebar__formRow {
   display: flex;

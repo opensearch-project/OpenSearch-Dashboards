@@ -5,6 +5,7 @@
 .embPanel {
   .osdDocTable__container {
     @include euiScrollBar; /* 2 */
+
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }

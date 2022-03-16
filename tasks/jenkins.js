@@ -33,7 +33,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'run:eslint',
-    'run:sasslint',
+    'run:stylelint',
     'run:checkTsProjects',
     'run:checkDocApiChanges',
     'run:typeCheck',

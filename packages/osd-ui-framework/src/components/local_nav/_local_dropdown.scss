@@ -55,35 +55,35 @@
   margin-bottom: 6px;
 }
 
-  /**
+/**
    * 1. Override inherited styles.
    */
-  .kuiLocalDropdownHeader__label {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 0; /* 1 */
-    color: $localNavTextColor;
+.kuiLocalDropdownHeader__label {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 0; /* 1 */
+  color: $localNavTextColor;
+}
+
+.kuiLocalDropdownHeader__actions {
+  display: flex;
+}
+
+.kuiLocalDropdownHeader__action {
+  color: $kuiLinkColor;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+
+  & + & {
+    margin-left: 10px;
   }
 
-  .kuiLocalDropdownHeader__actions {
-    display: flex;
+  &:hover,
+  &:active {
+    color: $kuiLinkColor-isHover;
   }
-
-  .kuiLocalDropdownHeader__action {
-    color: $kuiLinkColor;
-    font-size: 12px;
-    text-decoration: none;
-    cursor: pointer;
-
-    & + & {
-      margin-left: 10px;
-    }
-
-    &:hover,
-    &:active {
-      color: $kuiLinkColor-isHover;
-    }
-  }
+}
 
 .kuiLocalDropdownInput {
   display: block;

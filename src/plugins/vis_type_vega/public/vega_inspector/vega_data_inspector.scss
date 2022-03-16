@@ -8,11 +8,11 @@
   display: flex;
   flex-direction: column;
 
-  [role='tablist'] {
+  [role="tablist"] {
     flex-shrink: 0;
   }
 
-  [role='tabpanel'] {
+  [role="tabpanel"] {
     flex-grow: 1;
   }
 }

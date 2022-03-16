@@ -22,39 +22,39 @@
   }
 }
 
-  .guideCodeViewer__header {
-    padding: 0 20px 6px;
-    line-height: $guideLineHeight;
-    border-bottom: $euiBorderThin;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
+.guideCodeViewer__header {
+  padding: 0 20px 6px;
+  line-height: $guideLineHeight;
+  border-bottom: $euiBorderThin;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
 
-  .guideCodeViewer__closeButton {
-    position: absolute;
-    top: 0;
-    right: 10px;
-    cursor: pointer;
-    padding: 10px;
-    border-radius: 3px;
-    color: $guideTextColor;
+.guideCodeViewer__closeButton {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 3px;
+  color: $guideTextColor;
 
-    &:hover {
-      color: $guideLinkHoverColor;
-    }
+  &:hover {
+    color: $guideLinkHoverColor;
   }
+}
 
-  .guideCodeViewer__title {
-    padding: 0 20px 6px;
-    border-bottom: $euiBorderThin;
-    line-height: $guideLineHeight;
-    font-size: 14px;
-  }
+.guideCodeViewer__title {
+  padding: 0 20px 6px;
+  border-bottom: $euiBorderThin;
+  line-height: $guideLineHeight;
+  font-size: 14px;
+}
 
-  .guideCodeViewer__content {
-    margin: 0 0 16px;
-  }
+.guideCodeViewer__content {
+  margin: 0 0 16px;
+}
 
 // HLJS
 
@@ -64,7 +64,7 @@
   color: $euiColorDarkShade;
   font-size: 14px;
   line-height: 1.3;
-  font-family: 'Ubuntu Mono', monospace;
+  font-family: "Ubuntu Mono", monospace;
 }
 
 .hljs-keyword {

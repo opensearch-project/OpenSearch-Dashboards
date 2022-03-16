@@ -1,6 +1,7 @@
 .visTooltip,
 .visTooltip__sizingClone {
-  @include euiToolTipStyle('s');
+  @include euiToolTipStyle("s");
+
   visibility: hidden;
   pointer-events: none;
   position: fixed;

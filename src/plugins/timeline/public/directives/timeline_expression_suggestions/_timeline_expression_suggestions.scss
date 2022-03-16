@@ -1,9 +1,9 @@
 .timSuggestions {
   @include euiBottomShadowMedium;
+
   background-color: $euiColorLightestShade;
   color: $euiTextColor;
   border: $euiBorderThin;
-  // sass-lint:disable-block no-important
   border-radius: 0 0 $euiBorderRadius $euiBorderRadius !important;
   z-index: $euiZLevel9;
   max-height: $euiSizeXL * 10;
