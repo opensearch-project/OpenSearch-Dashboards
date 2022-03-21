@@ -127,7 +127,7 @@ export function TopAggregateParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      compressed
+      display={'rowCompressed'}
     >
       <EuiSelect
         options={options}

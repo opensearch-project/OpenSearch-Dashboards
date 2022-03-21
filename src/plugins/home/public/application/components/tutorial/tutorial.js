@@ -253,6 +253,9 @@ class TutorialUi extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               options={radioButtons}
+              legend={i18n.translate('home.tutorial.instructionsTypeLegend', {
+                defaultMessage: 'Instructions Type',
+              })}
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
               color="primary"
@@ -417,7 +420,7 @@ class TutorialUi extends React.Component {
 
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>{content}</EuiPageBody>
+        <EuiPageBody component="main">{content}</EuiPageBody>
       </EuiPage>
     );
   }

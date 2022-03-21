@@ -212,7 +212,7 @@ export function DiscoverLegacy({
                 aria-controls="discover-sidebar"
                 aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
-                className="dscCollapsibleSidebar__collapseButton"
+                className="dscCollapsibleSidebar__collapseButton euiButtonIcon--auto"
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>

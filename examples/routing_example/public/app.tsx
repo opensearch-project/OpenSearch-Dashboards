@@ -57,7 +57,7 @@ function RoutingExplorer({
 }: Props) {
   return (
     <EuiPage>
-      <EuiPageBody>
+      <EuiPageBody component="main">
         <EuiPageContent>
           <EuiPageContentHeader>
             <EuiText>

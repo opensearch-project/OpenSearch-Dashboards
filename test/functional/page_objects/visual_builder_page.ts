@@ -554,7 +554,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
       log.debug(`Check color picker popup is present`);
-      await testSubjects.existOrFail('colorPickerPopover', { timeout: 5000 });
+      await testSubjects.existOrFail('euiColorPickerPopover', { timeout: 5000 });
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {

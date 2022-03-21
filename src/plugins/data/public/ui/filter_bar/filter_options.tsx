@@ -177,7 +177,6 @@ class FilterOptionsUI extends Component<Props, State> {
         }
         anchorPosition="rightUp"
         panelPaddingSize="none"
-        withTitle
         repositionOnScroll
       >
         <EuiPopoverTitle>

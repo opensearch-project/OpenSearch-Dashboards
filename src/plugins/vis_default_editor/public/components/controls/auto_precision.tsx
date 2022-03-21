@@ -40,7 +40,7 @@ function AutoPrecisionParamEditor({ value = false, setValue }: AggParamEditorPro
   });
 
   return (
-    <EuiFormRow compressed>
+    <EuiFormRow display={'rowCompressed'}>
       <EuiSwitch
         compressed={true}
         label={label}

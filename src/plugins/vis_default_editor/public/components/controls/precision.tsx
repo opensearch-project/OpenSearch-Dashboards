@@ -48,7 +48,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
   }
 
   return (
-    <EuiFormRow label={label} compressed>
+    <EuiFormRow label={label} display={'rowCompressed'}>
       <EuiRange
         min={1}
         max={services.uiSettings.get('visualization:tileMap:maxPrecision')}

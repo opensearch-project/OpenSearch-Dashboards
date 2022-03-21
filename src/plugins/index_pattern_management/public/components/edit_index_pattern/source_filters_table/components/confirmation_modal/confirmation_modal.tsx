@@ -32,7 +32,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 interface DeleteFilterConfirmationModalProps {
   filterToDeleteValue: string;
@@ -48,35 +48,33 @@ export const DeleteFilterConfirmationModal = ({
   onDeleteFilter,
 }: DeleteFilterConfirmationModalProps) => {
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
-            defaultMessage="Delete source filter '{value}'?"
-            values={{
-              value: filterToDeleteValue,
-            }}
-          />
-        }
-        onCancel={onCancelConfirmationModal}
-        onConfirm={onDeleteFilter}
-        cancelButtonText={
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.source.deleteFilter.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        buttonColor="danger"
-        confirmButtonText={
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.source.deleteFilter.deleteButtonLabel"
-            defaultMessage="Delete"
-          />
-        }
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-      />
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
+          defaultMessage="Delete source filter '{value}'?"
+          values={{
+            value: filterToDeleteValue,
+          }}
+        />
+      }
+      onCancel={onCancelConfirmationModal}
+      onConfirm={onDeleteFilter}
+      cancelButtonText={
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.source.deleteFilter.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      buttonColor="danger"
+      confirmButtonText={
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.source.deleteFilter.deleteButtonLabel"
+          defaultMessage="Delete"
+        />
+      }
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+    />
   );
 };
 

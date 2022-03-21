@@ -126,7 +126,7 @@ export function ListContainerExample({
   };
 
   return (
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

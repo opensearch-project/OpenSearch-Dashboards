@@ -30,6 +30,7 @@
 
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { Tutorial } from './tutorial';
 
@@ -144,7 +145,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('button#onPremElasticCloud').closest('div').find('input').simulate('change');
+    findTestSubject(component, 'onPremElasticCloud').simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });

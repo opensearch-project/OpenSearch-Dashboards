@@ -87,7 +87,6 @@ export function QueryLanguageSwitcher(props: Props) {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
-      withTitle
       repositionOnScroll
     >
       <EuiPopoverTitle>

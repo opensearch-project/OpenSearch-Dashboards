@@ -1,3 +1,14 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 // Charts themes available app-wide
 @import '@elastic/charts/dist/theme';
 @import '@elastic/eui/src/themes/charts/theme';
@@ -6,6 +17,7 @@
 @import '@elastic/eui/src/components/collapsible_nav/variables';
 
 // Application Layout
+$euiCollapsibleNavWidth: $euiSize * 20;
 
 .application,
 .app-container {
@@ -50,4 +62,9 @@
 
 .euiBody--collapsibleNavIsDocked .euiBottomBar {
   margin-left: $euiCollapsibleNavWidth;
+}
+
+.euiButtonIcon.euiButtonIcon--auto {
+  height: auto;
+  width: auto;
 }

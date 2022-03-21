@@ -50,7 +50,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="fooAppHome">
+  <EuiPageBody component="main" data-test-subj="fooAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -72,7 +72,7 @@ const Home = () => (
 );
 
 const PageA = () => (
-  <EuiPageBody data-test-subj="fooAppPageA">
+  <EuiPageBody component="main" data-test-subj="fooAppPageA">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">

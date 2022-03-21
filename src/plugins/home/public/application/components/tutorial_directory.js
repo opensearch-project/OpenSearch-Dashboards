@@ -263,7 +263,7 @@ class TutorialDirectoryUi extends React.Component {
   render() {
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
+        <EuiPageBody component="main">
           {this.renderHeader()}
           <EuiSpacer size="m" />
           <EuiTabs>{this.renderTabs()}</EuiTabs>

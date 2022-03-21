@@ -53,7 +53,7 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
 
   return (
     <EuiPage style={{ minHeight: '100%' }} data-test-subj="appRenderErrorPageContent">
-      <EuiPageBody>
+      <EuiPageBody component="main">
         <EuiPageContent verticalPosition="center" horizontalPosition="center">
           <EuiEmptyPrompt
             iconType="alert"

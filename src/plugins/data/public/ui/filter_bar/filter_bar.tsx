@@ -129,7 +129,6 @@ function FilterBarUI(props: Props) {
           isOpen={isAddFilterPopoverOpen}
           closePopover={() => setIsAddFilterPopoverOpen(false)}
           anchorPosition="downLeft"
-          withTitle
           panelPaddingSize="none"
           ownFocus={true}
           initialFocus=".globalFilterEditor__fieldInput input"

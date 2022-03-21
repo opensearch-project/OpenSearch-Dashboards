@@ -81,7 +81,13 @@ function RequiredNumberInputOption<ParamName extends string>({
   );
 
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>
+    <EuiFormRow
+      label={label}
+      error={error}
+      isInvalid={isInvalid}
+      fullWidth
+      display={'rowCompressed'}
+    >
       <EuiFieldNumber
         compressed
         fullWidth

@@ -46,7 +46,7 @@ import { AppMountParameters } from 'opensearch-dashboards/public';
 
 const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>
-    <EuiPageBody data-test-subj="appStatusApp">
+    <EuiPageBody component="main" data-test-subj="appStatusApp">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

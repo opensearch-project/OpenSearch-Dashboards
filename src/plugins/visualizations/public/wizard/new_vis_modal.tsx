@@ -30,7 +30,7 @@
 
 import React from 'react';
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
@@ -129,7 +129,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         </EuiModal>
       );
 
-    return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
+    return selectionModal;
   }
 
   private onCloseModal = () => {

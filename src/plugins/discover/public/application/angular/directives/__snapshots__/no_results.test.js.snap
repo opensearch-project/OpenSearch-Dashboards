@@ -18,9 +18,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="help"
           />
           <span
@@ -48,6 +49,16 @@ Array [
             target="_blank"
           >
             Query String syntax
+            <span
+              aria-label="External link"
+              class="euiLink__externalIcon"
+              data-euiicon-type="popout"
+            />
+            <span
+              class="euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
           </a>
           . Here are some examples of how you can search for web server logs that have been parsed into a few fields.
         </p>
@@ -185,9 +196,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="help"
           />
           <span

@@ -59,10 +59,9 @@ interface State {
 }
 
 export class ValidatedDualRange extends Component<Props> {
-  static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean } = {
+  static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean } = {
     allowEmptyRange: true,
     fullWidth: false,
-    compressed: false,
   };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
@@ -108,7 +107,6 @@ export class ValidatedDualRange extends Component<Props> {
 
   render() {
     const {
-      compressed,
       fullWidth,
       label,
       formRowDisplay,
@@ -120,7 +118,6 @@ export class ValidatedDualRange extends Component<Props> {
 
     return (
       <EuiFormRow
-        compressed={compressed}
         fullWidth={fullWidth}
         isInvalid={!this.state.isValid}
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
@@ -128,7 +125,7 @@ export class ValidatedDualRange extends Component<Props> {
         display={formRowDisplay}
       >
         <EuiDualRange
-          compressed={compressed}
+          compressed={formRowDisplay === 'rowCompressed'}
           fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}

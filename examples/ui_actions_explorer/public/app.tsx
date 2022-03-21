@@ -60,7 +60,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
   const [confirmationText, setConfirmationText] = useState('');
   return (
     <EuiPage>
-      <EuiPageBody>
+      <EuiPageBody component="main">
         <EuiPageHeader>Ui Actions Explorer</EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>

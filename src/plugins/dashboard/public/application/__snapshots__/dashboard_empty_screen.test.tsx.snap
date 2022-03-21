@@ -275,16 +275,18 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
               }
             }
           >
-            <EuiPageBody>
+            <EuiPageBody
+              component="main"
+            >
               <main
-                className="euiPageBody"
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -295,16 +297,18 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""
@@ -674,6 +678,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
             >
               <EuiButtonDisplay
                 aria-label="Create new visualization button"
+                baseClassName="euiButton"
                 data-test-subj="addVisualizationButton"
                 disabled={false}
                 element="button"
@@ -688,6 +693,11 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                   className="euiButton euiButton--primary euiButton--small"
                   data-test-subj="addVisualizationButton"
                   disabled={false}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
                   type="button"
                 >
                   <EuiButtonContent
@@ -705,11 +715,13 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                     >
                       <EuiIcon
                         className="euiButtonContent__icon"
+                        color="inherit"
                         size="m"
                         type="plusInCircle"
                       >
-                        <div
+                        <span
                           className="euiButtonContent__icon"
+                          color="inherit"
                           data-euiicon-type="plusInCircle"
                           size="m"
                         />
@@ -992,16 +1004,18 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
               }
             }
           >
-            <EuiPageBody>
+            <EuiPageBody
+              component="main"
+            >
               <main
-                className="euiPageBody"
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -1012,16 +1026,18 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""

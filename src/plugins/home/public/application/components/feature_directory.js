@@ -142,7 +142,7 @@ export class FeatureDirectory extends React.Component {
   render() {
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiTitle size="l">
             <h1>
               <FormattedMessage id="home.directory.directoryTitle" defaultMessage="Directory" />

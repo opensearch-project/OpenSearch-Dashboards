@@ -50,7 +50,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="barAppHome">
+  <EuiPageBody component="main" data-test-subj="barAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -76,7 +76,7 @@ const PageB = ({ location }: RouteComponentProps) => {
   new URLSearchParams(location.search).forEach((value, key) => searchParams.push([key, value]));
 
   return (
-    <EuiPageBody data-test-subj="barAppPageB">
+    <EuiPageBody component="main" data-test-subj="barAppPageB">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

@@ -70,7 +70,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagClou
       <ValidatedDualRange
         allowEmptyRange={false}
         aria-label={fontSizeRangeLabel}
-        compressed={true}
+        formRowDisplay={'rowCompressed'}
         fullWidth={true}
         label={fontSizeRangeLabel}
         max={100}

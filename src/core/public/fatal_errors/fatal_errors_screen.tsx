@@ -99,7 +99,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
   public render() {
     return (
       <EuiPage style={{ minHeight: '100vh' }}>
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiPageContent verticalPosition="center" horizontalPosition="center">
             <EuiEmptyPrompt
               iconType="alert"

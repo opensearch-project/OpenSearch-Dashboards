@@ -155,7 +155,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             isOpen={isPerPageControlOpen}
             closePopover={this.closePerPageControl}
             panelPaddingSize="none"
-            withTitle
           >
             <EuiContextMenuPanel items={items} />
           </EuiPopover>

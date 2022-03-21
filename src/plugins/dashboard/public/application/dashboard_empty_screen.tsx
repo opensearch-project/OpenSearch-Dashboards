@@ -114,7 +114,7 @@ export function DashboardEmptyScreen({
   const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
     return (
       <EuiPage className="dshStartScreen" restrictWidth="500px">
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiPageContent
             verticalPosition="center"
             horizontalPosition="center"

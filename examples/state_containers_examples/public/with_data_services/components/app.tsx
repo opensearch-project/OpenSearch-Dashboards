@@ -114,7 +114,7 @@ const App = ({ navigation, data, history, osdUrlStateStorage }: StateDemoAppDeps
             showSaveQuery={true}
           />
           <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
+            <EuiPageBody component="main">
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>

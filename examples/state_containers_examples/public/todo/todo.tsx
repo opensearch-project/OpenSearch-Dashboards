@@ -287,7 +287,7 @@ export const TodoAppPage: React.FC<{
     <Router history={props.history}>
       <GlobalStateHelpers.Provider value={globalStateContainer}>
         <Provider value={container}>
-          <EuiPageBody>
+          <EuiPageBody component="main">
             <EuiPageHeader>
               <EuiPageHeaderSection>
                 <EuiTitle size="l">

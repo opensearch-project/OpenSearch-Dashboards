@@ -63,7 +63,7 @@ function PercentilesEditor({
       fullWidth={true}
       id={`visEditorPercentileLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
-      compressed
+      display={'rowCompressed'}
     >
       <NumberList
         labelledbyId={`visEditorPercentileLabel${agg.id}-legend`}

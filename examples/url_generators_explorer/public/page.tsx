@@ -46,7 +46,7 @@ interface PageProps {
 
 export function Page({ title, children }: PageProps) {
   return (
-    <EuiPageBody data-test-subj="searchTestPage">
+    <EuiPageBody component="main" data-test-subj="searchTestPage">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

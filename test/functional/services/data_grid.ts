@@ -46,14 +46,20 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
       const columns = $('.euiDataGridHeaderCell__content')
         .toArray()
         .map((cell) => $(cell).text());
-      const rows = $.findTestSubjects('dataGridRow')
+
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text())
-        );
+        .forEach((cell) => {
+          const cCell = $(cell);
+          if (cCell.hasClass('euiDataGridRowCell--firstColumn')) {
+            rows.push([]);
+            rowIdx = rows.length - 1;
+          }
+
+          rows[rowIdx].push(cCell.find('.euiDataGridRowCell__truncate').text());
+        });
 
       return {
         columns,
