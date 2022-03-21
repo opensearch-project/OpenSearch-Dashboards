@@ -107,11 +107,12 @@ export const BootstrapCommand: ICommand = {
     await parallelizeBatches(batchedProjects, async (project) => {
       const cache = caches.get(project);
       if (cache && !cache.valid) {
+        const _t = Date.now();
         log.info(`[${project.name}] running [osd:bootstrap] script`);
         cache.file.delete();
         await project.runScriptStreaming('osd:bootstrap');
         cache.file.write();
-        log.success(`[${project.name}] bootstrap complete`);
+        log.success(`[${project.name}] bootstrap complete (${Date.now() - _t}ms)`);
       }
     });
   },

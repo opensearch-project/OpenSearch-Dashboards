@@ -26,7 +26,7 @@ import { MutableRefObject, Ref, useCallback } from 'react';
  * This hook handles setting multiple `ref`s of any available `ref` type
  * in a single callback function.
  */
-export const useCombinedRefs = <T>(
+export const useCombinedRefs = <T,>(
   refs: Array<Ref<T> | MutableRefObject<T | undefined> | undefined>
 ) => {
   return useCallback(

@@ -19,7 +19,7 @@
 
 import { EuiComboBoxOptionOption } from './types';
 
-export const flattenOptionGroups = <T>(
+export const flattenOptionGroups = <T,>(
   optionsOrGroups: Array<EuiComboBoxOptionOption<T>>
 ) => {
   return optionsOrGroups.reduce(
@@ -38,7 +38,7 @@ export const flattenOptionGroups = <T>(
   );
 };
 
-export const getSelectedOptionForSearchValue = <T>(
+export const getSelectedOptionForSearchValue = <T,>(
   searchValue: string,
   selectedOptions: Array<EuiComboBoxOptionOption<T>>,
   optionKey?: string
@@ -51,7 +51,7 @@ export const getSelectedOptionForSearchValue = <T>(
   );
 };
 
-const collectMatchingOption = <T>(
+const collectMatchingOption = <T,>(
   accumulator: Array<EuiComboBoxOptionOption<T>>,
   option: EuiComboBoxOptionOption<T>,
   selectedOptions: Array<EuiComboBoxOptionOption<T>>,
@@ -86,7 +86,7 @@ const collectMatchingOption = <T>(
   }
 };
 
-export const getMatchingOptions = <T>(
+export const getMatchingOptions = <T,>(
   options: Array<EuiComboBoxOptionOption<T>>,
   selectedOptions: Array<EuiComboBoxOptionOption<T>>,
   searchValue: string,

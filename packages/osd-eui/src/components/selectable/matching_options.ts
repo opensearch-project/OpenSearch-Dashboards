@@ -19,7 +19,7 @@
 
 import { EuiSelectableOption } from './selectable_option';
 
-const getSearchableLabel = <T>(
+const getSearchableLabel = <T,>(
   option: EuiSelectableOption<T>,
   normalize: boolean = true
 ): string => {
@@ -27,7 +27,7 @@ const getSearchableLabel = <T>(
   return normalize ? searchableLabel.trim().toLowerCase() : searchableLabel;
 };
 
-const getSelectedOptionForSearchValue = <T>(
+const getSelectedOptionForSearchValue = <T,>(
   searchValue: string,
   selectedOptions: Array<EuiSelectableOption<T>>
 ) => {
@@ -37,7 +37,7 @@ const getSelectedOptionForSearchValue = <T>(
   );
 };
 
-const collectMatchingOption = <T>(
+const collectMatchingOption = <T,>(
   accumulator: Array<EuiSelectableOption<T>>,
   option: EuiSelectableOption<T>,
   normalizedSearchValue: string,
@@ -74,7 +74,7 @@ const collectMatchingOption = <T>(
   }
 };
 
-export const getMatchingOptions = <T>(
+export const getMatchingOptions = <T,>(
   /**
    * All available options to match against
    */

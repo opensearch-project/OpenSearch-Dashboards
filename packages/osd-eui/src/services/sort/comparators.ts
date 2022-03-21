@@ -63,11 +63,11 @@ export const Comparators = Object.freeze({
     };
   },
 
-  reverse: <T>(comparator: Comparator<T>): Comparator<T> => {
+  reverse: <T,>(comparator: Comparator<T>): Comparator<T> => {
     return (v1, v2) => comparator(v2, v1);
   },
 
-  value<T>(
+  value<T,>(
     valueCallback: (value: T) => Primitive,
     comparator?: Comparator
   ): Comparator<T> {
@@ -79,7 +79,7 @@ export const Comparators = Object.freeze({
     };
   },
 
-  property<T>(prop: string, comparator?: Comparator): Comparator<T> {
+  property<T,>(prop: string, comparator?: Comparator): Comparator<T> {
     return this.value((value) => get(value, prop), comparator);
   },
 });

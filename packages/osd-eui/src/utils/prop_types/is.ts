@@ -19,7 +19,7 @@
 
 import { isNil } from '../../services/predicate';
 
-export const is = <T>(expectedValue: any) => {
+export const is = <T,>(expectedValue: any) => {
   const validator = (props: T, propName: keyof T, componentName: string) => {
     const compName = componentName || 'ANONYMOUS';
     const value = props[propName];

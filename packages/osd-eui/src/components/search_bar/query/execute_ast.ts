@@ -61,7 +61,7 @@ interface Explain {
   operator?: any; // It's not really worth specifying this at the moment
 }
 
-const defaultIsClauseMatcher = <T>(
+const defaultIsClauseMatcher = <T,>(
   item: T,
   clause: IsClause,
   explain?: Explain[]
@@ -76,7 +76,7 @@ const defaultIsClauseMatcher = <T>(
   return hit;
 };
 
-const fieldClauseMatcher = <T>(
+const fieldClauseMatcher = <T,>(
   item: T,
   field: string,
   clauses: FieldClause[] = [],
@@ -115,7 +115,7 @@ const extractStringFieldsFromItem = (item: any) => {
   }, [] as string[]);
 };
 
-const termClauseMatcher = <T>(
+const termClauseMatcher = <T,>(
   item: T,
   fields: string[] | undefined,
   clauses: TermClause[] = [],
@@ -226,7 +226,7 @@ interface Options {
   explain?: boolean;
 }
 
-export function executeAst<T>(
+export function executeAst<T,>(
   ast: _AST,
   items: T[],
   options: Options = {}

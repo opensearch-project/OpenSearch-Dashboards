@@ -50,15 +50,15 @@ export class Random {
     return min + delta;
   };
 
-  oneOf = <T>(values: T[]): T => {
+  oneOf = <T,>(values: T[]): T => {
     return values[Math.floor(this.rand() * values.length)];
   };
 
-  oneToOne = <T>(values: T[], index: number): T => {
+  oneToOne = <T,>(values: T[], index: number): T => {
     return values[index];
   };
 
-  setOf = <T>(
+  setOf = <T,>(
     values: T[],
     options: { min?: number; max?: number } = {}
   ): T[] => {
