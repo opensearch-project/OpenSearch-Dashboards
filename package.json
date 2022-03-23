@@ -428,7 +428,7 @@
     "resize-observer-polyfill": "^1.5.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
-    "simple-git": "1.116.0",
+    "simple-git": "^3.4.0",
     "sinon": "^7.4.2",
     "strip-ansi": "^6.0.0",
     "supertest": "^6.2.2",
