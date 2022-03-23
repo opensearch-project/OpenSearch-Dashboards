@@ -307,8 +307,6 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,

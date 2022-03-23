@@ -122,10 +122,12 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
                 index,
                 this.opensearchDashboardsConfig!.index
               ),
-              docsCount: stats['docs.count'],
-              docsDeleted: stats['docs.deleted'],
-              storeSizeBytes: stats['store.size'],
-              primaryStoreSizeBytes: stats['pri.store.size'],
+              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+              primaryStoreSizeBytes: stats['pri.store.size']
+                ? parseInt(stats['pri.store.size'], 10)
+                : 0,
             };
           });
       })

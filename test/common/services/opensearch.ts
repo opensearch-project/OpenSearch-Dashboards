@@ -32,7 +32,7 @@
 
 import { format as formatUrl } from 'url';
 import fs from 'fs';
-import { Client } from '@elastic/elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { CA_CERT_PATH } from '@osd/dev-utils';
 
 import { FtrProviderContext } from '../ftr_provider_context';

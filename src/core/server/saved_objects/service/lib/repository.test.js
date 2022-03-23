@@ -3352,6 +3352,7 @@ describe('SavedObjectsRepository', () => {
           id: '6.0.0-alpha1',
           ...mockTimestampFields,
           version: mockVersion,
+          references: [],
           attributes: {
             buildNum: 8468,
             defaultIndex: 'logstash-*',

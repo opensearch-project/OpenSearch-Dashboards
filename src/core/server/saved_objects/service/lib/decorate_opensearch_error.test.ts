@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { errors as opensearchErrors } from '@elastic/elasticsearch';
+import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { decorateOpenSearchError } from './decorate_opensearch_error';
 import { SavedObjectsErrorHelpers } from './errors';

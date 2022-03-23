@@ -24,7 +24,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@opensearch-project/opensearch/lib/Transport';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 

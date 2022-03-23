@@ -81,7 +81,8 @@ describe('OpenSearchDashboardsMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         opensearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          // @ts-expect-error assign the type to CatTemplatesResponse for test purpose
+          { templates: [] } as CatTemplatesResponse,
           { statusCode: 404 }
         )
       );
@@ -105,7 +106,8 @@ describe('OpenSearchDashboardsMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         opensearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          // @ts-expect-error assign the type to CatTemplatesResponse for test purpose
+          { templates: [] } as CatTemplatesResponse,
           { statusCode: 404 }
         )
       );
