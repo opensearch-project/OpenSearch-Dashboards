@@ -83,11 +83,11 @@ describe('getHelp()', () => {
         node scripts/foo --bar --baz
 
         Some thing that we wrote to help us execute things.
-
+        
         Example:
-
+        
           foo = bar = baz
-
+        
           Are you getting it?
 
         Options:
@@ -123,11 +123,11 @@ describe('getCommandLevelHelp()', () => {
         node node_modules/jest-worker/build/workers/processChild.js foo [...names]
 
         Some thing that we wrote to help us execute things.
-
+        
         Example:
-
+        
           foo = bar = baz
-
+        
           Are you getting it?
 
         Command-specific options:
@@ -176,25 +176,25 @@ describe('getHelpForAllCommands()', () => {
         Commands:
           foo [...names]
             Some thing that we wrote to help us execute things.
-
+            
             Example:
-
+            
               foo = bar = baz
-
+            
               Are you getting it?
-
+          
             Options:
               --foo              Some flag
               --bar              Another flag
                                   Secondary info
               --baz, -b          Hey hello
-
+            
           bar [...names]
             Some other thing that we wrote to help us execute things.
-
+          
             Options:
               --baz, -b          Hey hello
-
+            
 
         Global options:
           --global-flag      some flag that applies to all commands
