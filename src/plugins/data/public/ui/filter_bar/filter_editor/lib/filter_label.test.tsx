@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import React from 'react';
 import FilterLabel from './filter_label';
 import { render } from '@testing-library/react';
@@ -46,7 +44,7 @@ test('alias', () => {
   const { container } = render(<FilterLabel filter={filter} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       geo.coordinates in US
     </div>
   `);
@@ -67,7 +65,7 @@ test('negated alias', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
     </div>
@@ -91,10 +89,10 @@ test('alias with warning status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
       >
@@ -121,10 +119,10 @@ test('alias with error status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
       >
@@ -138,9 +136,9 @@ test('warning', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Warning'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
       >
@@ -154,9 +152,9 @@ test('error', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Error'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
+
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
       >

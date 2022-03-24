@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { createMemoryHistory, History } from 'history';
@@ -98,11 +96,11 @@ describe('url overflow detection', () => {
     const unmount = mountToast(element);
     expect(element).toMatchInlineSnapshot(`
       <div>
-        Either enable the 
+        Either enable the
         <code>
           state:storeInSessionStorage
         </code>
-         option in 
+         option in
         <a
           href="/test-123/app/management/opensearch-dashboards/settings"
         >

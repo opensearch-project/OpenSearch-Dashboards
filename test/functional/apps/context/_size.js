@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_DEFAULT_CONTEXT_SIZE = 2;

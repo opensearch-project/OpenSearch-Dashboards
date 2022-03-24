@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
@@ -37,10 +35,10 @@ import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 import { isValidConfig } from './helpers/graphite_helper';
 
-const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. 
+const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file.
 You can always enable the default allowlist configuration.`;
 
-const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. 
+const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid.
 Please update your config from OpenSearch Dashboards's Advanced Setting.`;
 
 export default new Datasource('graphite', {

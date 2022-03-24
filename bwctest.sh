@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# The OpenSearch Contributors require contributions made to
+# this file be licensed under the Apache-2.0 license or a
+# compatible open source license.
+#
+# Any modifications Copyright OpenSearch Contributors. See
+# GitHub history for details.
+#
+
 set -e
 
 # TODO: Update to include all known BWC of data
@@ -44,10 +55,10 @@ while getopts ":h:b:p:s:c:o:d:" arg; do
             ;;
         o)
             OPENSEARCH=$OPTARG
-            ;;    
+            ;;
         d)
             DASHBOARDS=$OPTARG
-            ;;     
+            ;;
         :)
             echo "-${OPTARG} requires an argument"
             usage
@@ -74,7 +85,7 @@ if [ -z "$OPENSEARCH" ]; then
     # Expected to be arch.tar.gz
     DOTS="${DASH_ARR[4]}"
     IFS='.' read -ra DOTS_ARR <<< "$DOTS"
-    
+
     VERSION="${DASH_ARR[2]}"
     PLATFORM="${DASH_ARR[3]}"
     ARCH="${DOTS_ARR[0]}"
