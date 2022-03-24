@@ -13,7 +13,7 @@
 
 set -e
 
-DEFAULT_VERSIONS="osd-1.1.0,odfe-1.13.2"
+DEFAULT_VERSIONS="osd-1.1.0,odfe-1.13.2,odfe-0.10.0"
 
 function usage() {
     echo ""
@@ -91,5 +91,7 @@ if [ -z "$OPENSEARCH" ]; then
 
     OPENSEARCH="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/$PLATFORM/$ARCH/dist/opensearch/opensearch-$VERSION-$PLATFORM-$ARCH.tar.gz"
 fi
+
+# CI=1
 
 source scripts/bwctest_osd.sh -b $BIND_ADDRESS -p $BIND_PORT -s $SECURITY_ENABLED -c $CREDENTIAL -o $OPENSEARCH -d $DASHBOARDS -v $DEFAULT_VERSIONS
