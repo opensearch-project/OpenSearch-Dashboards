@@ -29,6 +29,10 @@ import os from 'os';
 import execa from 'execa';
 
 export async function getBuildNumber() {
+  if ('BUILD_NUMBER' in process.env) {
+    return parseFloat(process.env.BUILD_NUMBER as string);
+  }
+
   if (/^win/.test(os.platform())) {
     // Windows does not have the wc process and `find /C /V ""` does not consistently work
     const log = await execa('git', ['log', '--format="%h"']);
