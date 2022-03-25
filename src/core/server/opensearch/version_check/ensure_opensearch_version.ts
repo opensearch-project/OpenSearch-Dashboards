@@ -63,6 +63,7 @@ export const getNodeId = async (
 ): Promise<string | null> => {
   try {
     const state = (await internalClient.cluster.state({
+      metric: 'nodes',
       filter_path: [`nodes.*.attributes.${healthcheckAttributeName}`],
     })) as ApiResponse;
     /* Aggregate different cluster_ids from the OpenSearch nodes
@@ -223,6 +224,7 @@ export const pollOpenSearchNodesVersion = ({
             from(
               internalClient.nodes.info<NodesInfo>({
                 node_id: nodeId,
+                metric: 'process',
                 filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
               })
             ).pipe(
