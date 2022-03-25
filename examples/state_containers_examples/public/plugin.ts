@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -23,11 +26,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '../../../src/core/public';
@@ -124,7 +122,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       appId: PLUGIN_ID,
       title: 'Sync state from a query bar with the url',
       description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from opensearch_dashboards_utils to
-      show a query bar that stores state in the url and is kept in  sync. 
+      show a query bar that stores state in the url and is kept in  sync.
       `,
       links: [
         {
