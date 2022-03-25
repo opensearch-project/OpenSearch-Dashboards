@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,11 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 import { KnownTypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 
 /**
@@ -48,9 +46,9 @@ export type ArgumentType<T> =
  * representation of the type.
  */
 // prettier-ignore
-type ArrayTypeToArgumentString<T> = 
-  T extends Array<infer ElementType> ? TypeString<ElementType> : 
-  T extends null ? 'null' : 
+type ArrayTypeToArgumentString<T> =
+  T extends Array<infer ElementType> ? TypeString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /**
@@ -58,9 +56,9 @@ type ArrayTypeToArgumentString<T> =
  * string-based representation of the return type.
  */
 // prettier-ignore
-type UnresolvedTypeToArgumentString<T> = 
-  T extends (...args: any) => infer ElementType ? TypeString<ElementType> : 
-  T extends null ? 'null' : 
+type UnresolvedTypeToArgumentString<T> =
+  T extends (...args: any) => infer ElementType ? TypeString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /**
@@ -68,10 +66,10 @@ type UnresolvedTypeToArgumentString<T> =
  * string-based representation of the return type.
  */
 // prettier-ignore
-type UnresolvedArrayTypeToArgumentString<T> = 
+type UnresolvedArrayTypeToArgumentString<T> =
   T extends Array<(...args: any) => infer ElementType> ? TypeString<ElementType> :
-  T extends (...args: any) => infer ElementType ? ArrayTypeToArgumentString<ElementType> : 
-  T extends null ? 'null' : 
+  T extends (...args: any) => infer ElementType ? ArrayTypeToArgumentString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /** A type containing properties common to all Function Arguments. */

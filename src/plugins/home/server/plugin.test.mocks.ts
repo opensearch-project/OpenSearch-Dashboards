@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,10 +28,6 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
 import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
 import { sampleDataRegistryMock } from './services/sample_data/sample_data_registry.mock';
 

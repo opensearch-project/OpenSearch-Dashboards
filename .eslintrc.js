@@ -4,6 +4,9 @@
  * The OpenSearch Contributors require contributions made to
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 
 /*
@@ -25,15 +28,10 @@
  * under the License.
  */
 
-/*
- * Modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
 /**
- * For new files created by OpenSearch Contributers
+ * For new files created by OpenSearch Contributors
  */
-const OSD_HEADER = `
+const OSD_NEW_HEADER = `
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
@@ -41,19 +39,22 @@ const OSD_HEADER = `
 `;
 
 /**
- * For files that modify or use code with an exsting OSS header
+ * For modified and modified files with external open source code
  */
-const OSS_HEADER = `
+const OSD_HEADER = `
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a 
+ * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 `;
 
-const OSS_MODIFIED_HEADER = `
+const OSD_BAD_HEADER = `
 /*
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
@@ -164,7 +165,7 @@ module.exports = {
         '@osd/eslint/require-license-header': [
           'error',
           {
-            licenses: [OSD_HEADER, OSS_HEADER],
+            licenses: [OSD_NEW_HEADER, OSD_HEADER],
           },
         ],
         '@osd/eslint/disallow-license-headers': [
@@ -172,6 +173,7 @@ module.exports = {
           {
             licenses: [
               ELASTIC_LICENSE_HEADER,
+              OSD_BAD_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -208,6 +210,9 @@ module.exports = {
           {
             licenses: [
               ELASTIC_LICENSE_HEADER,
+              OSD_BAD_HEADER,
+              OSD_NEW_HEADER,
+              OSD_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -229,12 +234,13 @@ module.exports = {
           'error',
           {
             licenses: [
-              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OSD_BAD_HEADER,
+              OSD_NEW_HEADER,
+              OSD_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
-              OSS_MODIFIED_HEADER,
             ],
           },
         ],
@@ -253,12 +259,13 @@ module.exports = {
           'error',
           {
             licenses: [
-              OSS_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OSD_BAD_HEADER,
+              OSD_NEW_HEADER,
+              OSD_HEADER,
               APACHE_2_0_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
-              OSS_MODIFIED_HEADER,
             ],
           },
         ],
