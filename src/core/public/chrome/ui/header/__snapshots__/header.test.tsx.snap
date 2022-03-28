@@ -5606,6 +5606,7 @@ exports[`Header renders 1`] = `
         isDocked={true}
         isOpen={false}
         onClose={[Function]}
+        outsideClickCloses={false}
       >
         <EuiFlyout
           aria-label="Primary"
@@ -5616,7 +5617,7 @@ exports[`Header renders 1`] = `
           hideCloseButton={true}
           id="mockId"
           onClose={[Function]}
-          outsideClickCloses={true}
+          outsideClickCloses={false}
           ownFocus={true}
           paddingSize="none"
           pushMinBreakpoint="l"

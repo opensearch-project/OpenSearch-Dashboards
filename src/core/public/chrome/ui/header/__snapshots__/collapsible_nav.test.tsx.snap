@@ -367,6 +367,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -377,7 +378,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -2243,6 +2244,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
     isDocked={false}
     isOpen={false}
     onClose={[Function]}
+    outsideClickCloses={false}
   />
 </CollapsibleNav>
 `;
@@ -2488,6 +2490,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
     isDocked={false}
     isOpen={false}
     onClose={[Function]}
+    outsideClickCloses={false}
   />
 </CollapsibleNav>
 `;
@@ -2733,6 +2736,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
     isDocked={true}
     isOpen={false}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -2743,7 +2747,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       hideCloseButton={true}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -3413,6 +3417,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -3423,7 +3428,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -4567,6 +4572,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -4577,7 +4583,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -5719,6 +5725,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -5729,7 +5736,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -6874,6 +6881,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -6884,7 +6892,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
@@ -8026,6 +8034,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
+    outsideClickCloses={false}
   >
     <EuiFlyout
       aria-label="Primary"
@@ -8036,7 +8045,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
-      outsideClickCloses={true}
+      outsideClickCloses={false}
       ownFocus={true}
       paddingSize="none"
       pushMinBreakpoint="l"
