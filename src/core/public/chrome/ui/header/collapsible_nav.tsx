@@ -184,6 +184,7 @@ export function CollapsibleNav({
       isOpen={isNavOpen}
       isDocked={isLocked}
       onClose={closeNav}
+      outsideClickCloses={false}
     >
       {customNavLink && (
         <Fragment>
