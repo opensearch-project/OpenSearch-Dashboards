@@ -51,7 +51,7 @@ interface Props {
 
 export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
   return (
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

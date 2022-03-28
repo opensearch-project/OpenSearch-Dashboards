@@ -108,10 +108,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
+      // The radio input cannot be clicked directly because it is not interactable
       const radioBtn = await find.byCssSelector(
-        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
+        `[data-test-subj="visEditorSplitBy"] [title="${direction}"] input`
       );
-      await radioBtn.click();
+      const label = await radioBtn.findByXpath('.//ancestor::label');
+      await label.click();
     }
 
     public async clickAddDateRange() {
@@ -345,10 +347,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleAutoMode() {
-      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
-      // passing the data-test-subj attribute to a checkbox
-      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
-      // await testSubjects.click('visualizeEditorAutoButton');
+      await testSubjects.click('visualizeEditorAutoButton');
     }
 
     public async isApplyEnabled() {

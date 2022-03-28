@@ -120,7 +120,7 @@ function TimelineInterval({ value, setValue, setValidity }: TimelineIntervalProp
 
   return (
     <EuiFormRow
-      compressed
+      display={'rowCompressed'}
       fullWidth
       helpText={i18n.translate('timeline.vis.selectIntervalHelpText', {
         defaultMessage:

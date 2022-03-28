@@ -31,7 +31,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@osd/i18n';
-import { EuiModal, EuiConfirmModal, EuiOverlayMask, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -150,13 +150,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <EuiOverlayMask>
-            <i18n.Context>
-              <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
-              </EuiModal>
-            </i18n.Context>
-          </EuiOverlayMask>,
+          <i18n.Context>
+            <EuiModal {...options} onClose={() => modal.close()}>
+              <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
+            </EuiModal>
+          </i18n.Context>,
           targetDomElement
         );
 
@@ -212,11 +210,9 @@ export class ModalService {
           };
 
           render(
-            <EuiOverlayMask>
-              <i18n.Context>
-                <EuiConfirmModal {...props} />
-              </i18n.Context>
-            </EuiOverlayMask>,
+            <i18n.Context>
+              <EuiConfirmModal {...props} />
+            </i18n.Context>,
             targetDomElement
           );
         });

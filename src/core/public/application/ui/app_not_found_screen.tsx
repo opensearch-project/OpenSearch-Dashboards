@@ -34,7 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 export const AppNotFound = () => (
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
         <EuiEmptyPrompt
           iconType="alert"

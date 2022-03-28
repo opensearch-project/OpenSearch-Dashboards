@@ -41,7 +41,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
     <I18nProvider>
       <EuiPage>
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt
               iconType="discoverApp"

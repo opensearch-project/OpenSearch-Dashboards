@@ -90,7 +90,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
   }, [isValid, setMultipleValidity]);
 
   return (
-    <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth compressed>
+    <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth display={'rowCompressed'}>
       <>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>

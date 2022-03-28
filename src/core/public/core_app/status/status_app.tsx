@@ -102,7 +102,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
 
     return (
       <EuiPage className="stsPage" data-test-subj="statusPageRoot">
-        <EuiPageBody restrictWidth>
+        <EuiPageBody component="main" restrictWidth>
           <ServerStatus name={name} serverState={serverState} />
 
           <EuiSpacer />

@@ -224,7 +224,7 @@ export const SearchExamplesApp = ({
             indexPatterns={indexPattern ? [indexPattern] : undefined}
           />
           <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
+            <EuiPageBody component="main">
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>

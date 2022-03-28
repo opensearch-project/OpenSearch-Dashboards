@@ -58,7 +58,7 @@ export const Routes: React.FC<{}> = () => {
   const query = useQuery();
 
   return (
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageContent>
         <EuiPageContentBody>
           <Switch>

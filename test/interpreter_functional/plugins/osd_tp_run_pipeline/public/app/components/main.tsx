@@ -107,7 +107,7 @@ class Main extends React.Component<{}, State> {
 
     return (
       <EuiPage>
-        <EuiPageBody>
+        <EuiPageBody component="main">
           <EuiPageContent data-test-subj="pluginContent">
             <EuiPageContentHeader>runPipeline tests are running ...</EuiPageContentHeader>
             <div data-test-subj="pluginChart" ref={this.chartRef} style={pStyle} />

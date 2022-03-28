@@ -141,7 +141,7 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          compressed
+          display={'rowCompressed'}
         >
           <EuiFieldText
             value={customLabel}

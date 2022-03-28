@@ -138,7 +138,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
   });
 
   return (
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

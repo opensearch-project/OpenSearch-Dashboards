@@ -44,7 +44,7 @@ export interface PageProps {
 
 export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
   return (
-    <EuiPageBody>
+    <EuiPageBody component="main">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">

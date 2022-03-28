@@ -100,7 +100,6 @@ export class ShareMenuManager {
           isOpen={true}
           closePopover={this.onClose}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="downLeft"
         >
           <ShareContextMenu

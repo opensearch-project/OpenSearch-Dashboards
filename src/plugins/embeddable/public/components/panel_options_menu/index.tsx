@@ -94,7 +94,6 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
       data-test-subj={open ? 'embeddablePanelContextMenuOpen' : 'embeddablePanelContextMenuClosed'}
-      withTitle
     >
       <EuiContextMenu initialPanelId="mainMenu" panels={panelDescriptor ? [panelDescriptor] : []} />
     </EuiPopover>

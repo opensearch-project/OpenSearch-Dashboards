@@ -83,7 +83,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
 
   public render() {
     return (
-      <EuiPageBody>
+      <EuiPageBody component="main">
         <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="l">

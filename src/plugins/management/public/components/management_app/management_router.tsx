@@ -48,7 +48,7 @@ interface ManagementRouterProps {
 export const ManagementRouter = memo(
   ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => (
     <Router history={history}>
-      <EuiPageBody restrictWidth={false} className="mgtPage__body">
+      <EuiPageBody component="main" restrictWidth={false} className="mgtPage__body">
         <Switch>
           {sections.map((section) =>
             section

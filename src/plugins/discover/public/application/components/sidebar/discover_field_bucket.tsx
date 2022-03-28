@@ -105,6 +105,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                   paddingTop: 0,
                   paddingBottom: 0,
                 }}
+                className={'euiButtonIcon--auto'}
               />
               <EuiButtonIcon
                 iconSize="s"
@@ -120,6 +121,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                   paddingRight: 2,
                   paddingLeft: 2,
                 }}
+                className={'euiButtonIcon--auto'}
               />
             </div>
           </EuiFlexItem>

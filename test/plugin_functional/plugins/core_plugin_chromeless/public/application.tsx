@@ -46,7 +46,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="chromelessAppHome">
+  <EuiPageBody component="main" data-test-subj="chromelessAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">

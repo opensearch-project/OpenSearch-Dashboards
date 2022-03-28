@@ -176,7 +176,7 @@ function TimeIntervalParamEditor({
 
   return (
     <EuiFormRow
-      compressed
+      display={'rowCompressed'}
       error={error}
       fullWidth={true}
       helpText={helpText}

@@ -115,7 +115,7 @@ function SimpleNumberList({
       id={`${aggParam.name}-${agg.id}}`}
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
-      compressed
+      display={'rowCompressed'}
     >
       <>
         {numbers.map((number, arrayIndex) => (

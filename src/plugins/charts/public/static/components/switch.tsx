@@ -52,7 +52,7 @@ function SwitchOption<ParamName extends string>({
   setValue,
 }: SwitchOptionProps<ParamName>) {
   return (
-    <EuiFormRow fullWidth={true} compressed={true}>
+    <EuiFormRow fullWidth={true} display={'rowCompressed'}>
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
           compressed={true}

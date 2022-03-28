@@ -111,7 +111,7 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
 
   return (
     <EuiPage>
-      <EuiPageBody>
+      <EuiPageBody component="main">
         <EuiPageHeader>Access links explorer</EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>

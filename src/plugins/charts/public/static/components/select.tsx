@@ -62,7 +62,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
 
   return (
     <EuiFormRow
-      compressed
+      display={'rowCompressed'}
       fullWidth
       helpText={helpText}
       id={id}

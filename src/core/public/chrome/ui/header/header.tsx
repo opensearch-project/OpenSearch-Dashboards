@@ -106,7 +106,7 @@ export function Header({
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
-  const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
