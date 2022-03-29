@@ -27,7 +27,6 @@ export const TextInput = ({ label, onChange, value, ...rest }: InputProps) => {
         fullWidth
         onChange={(event) => {
           onChange?.(event.target.value);
-          // field.setValue(value);
         }}
         // isInvalid={isInvalid}
         value={value || ''}

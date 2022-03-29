@@ -36,7 +36,6 @@ export const Select = ({ label, options, onChange, value, ...rest }: SelectProps
         fullWidth
         onChange={(newValue) => {
           onChange?.(newValue);
-          // field.setValue(value);
         }}
         // isInvalid={isInvalid}
         valueOfSelected={value || ''}
