@@ -1,0 +1,7 @@
+@import "../util";
+
+.wizDataTab {
+  @include scrollNavParent;
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
