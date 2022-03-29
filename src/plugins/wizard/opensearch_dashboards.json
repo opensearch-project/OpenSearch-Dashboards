@@ -1,0 +1,17 @@
+{
+  "id": "wizard",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "navigation",
+    "data",
+    "opensearchDashboardsReact",
+    "savedObjects",
+    "embeddable",
+    "dashboard",
+    "visualizations"
+  ],
+  "optionalPlugins": []
+}
