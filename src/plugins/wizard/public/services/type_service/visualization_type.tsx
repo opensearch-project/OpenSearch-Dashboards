@@ -52,10 +52,6 @@ export class VisualizationType implements IVisualizationType {
       const typedLocation = location as ContainerLocations;
       const vizContainers = containers?.[typedLocation];
 
-      // if (!vizContainers || vizContainers.length === 0) {
-      //   return (uiContainers[typedLocation] = DEFAULT_CONTAINERS[typedLocation]);
-      // }
-
       const mergedContainers = mergeArrays(
         DEFAULT_CONTAINERS[typedLocation],
         vizContainers || [],

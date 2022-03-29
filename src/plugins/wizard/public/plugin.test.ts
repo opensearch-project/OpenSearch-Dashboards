@@ -1,0 +1,44 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { coreMock, savedObjectsServiceMock } from '../../../core/public/mocks';
+import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
+import { dataPluginMock } from '../../../plugins/data/public/mocks';
+import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
+import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
+import { visualizationsPluginMock } from '../../../plugins/visualizations/public/mocks';
+import { WizardPlugin } from './plugin';
+
+describe('WizardPlugin', () => {
+  describe('setup', () => {
+    it('initializes the plugin correctly and registers it as an alias vizualization', () => {
+      const plugin = new WizardPlugin(coreMock.createPluginInitializerContext());
+      const pluginStartContract = {
+        data: dataPluginMock.createStartContract(),
+        savedObject: savedObjectsServiceMock.createStartContract(),
+        navigation: navigationPluginMock.createStartContract(),
+        dashboard: dashboardPluginMock.createStartContract(),
+      };
+      const coreSetup = coreMock.createSetup({
+        pluginStartContract,
+      }) as any;
+      const setupDeps = {
+        visualizations: visualizationsPluginMock.createSetupContract(),
+        embeddable: embeddablePluginMock.createSetupContract(),
+      };
+
+      const setup = plugin.setup(coreSetup, setupDeps);
+      expect(setup).toHaveProperty('createVisualizationType');
+      expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
+        // TODO: Update this once the properties are final
+        expect.objectContaining({
+          name: 'wizard',
+          title: 'Wizard',
+          aliasPath: '#/',
+        })
+      );
+    });
+  });
+});
