@@ -278,7 +278,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       >
         <VisTypeIcon
           icon={visType.type.icon === 'visTimeline' ? 'visTimelion' : visType.type.icon}
-          image={'image' in visType.type ? visType.type.image : 'visTimelion'}
+          image={'image' in visType.type ? visType.type.image : undefined}
         />
       </EuiKeyPadMenuItem>
     );

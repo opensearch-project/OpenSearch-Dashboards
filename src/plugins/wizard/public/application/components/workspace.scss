@@ -1,0 +1,12 @@
+.wizWorkspace {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-area: workspace;
+  grid-gap: $euiSizeM;
+  padding: $euiSizeM;
+  background-color: $euiColorEmptyShade;
+}
+
+.wizWorkspace__empty {
+  height: 100%;
+}
