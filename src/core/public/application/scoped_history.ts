@@ -54,7 +54,8 @@ import {
  * @public
  */
 export class ScopedHistory<HistoryLocationState = unknown>
-  implements History<HistoryLocationState> {
+  implements History<HistoryLocationState>
+{
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
    * been left.
@@ -111,7 +112,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   public get location() {
     this.verifyActive();
-    return this.stripBasePath(this.parentHistory.location);
+    return this.stripBasePath(this.parentHistory.location as Location<HistoryLocationState>);
   }
 
   /**
@@ -336,7 +337,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
       }
 
       [...this.listeners].forEach((listener) => {
-        listener(this.stripBasePath(location), action);
+        listener(this.stripBasePath(location as Location<HistoryLocationState>), action);
       });
     });
   }
