@@ -59,7 +59,9 @@ import { SharePluginStart } from '../../share/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
+  http: any;
   uiSettings: IUiSettingsClient;
+  notifications: any;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
   BaseMapsVisualization: any;
@@ -111,8 +113,11 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
       // ideally constrain regionmap config updates to occur only from this plugin
       ...mapsLegacy.config.regionmap,
     };
+
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
+      http: core.http,
       uiSettings: core.uiSettings,
+      notifications: core.notifications,
       regionmapsConfig: config as RegionMapsConfig,
       getServiceSettings: mapsLegacy.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),

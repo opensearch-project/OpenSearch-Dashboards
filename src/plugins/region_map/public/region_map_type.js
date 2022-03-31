@@ -28,17 +28,17 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
+import { CustomVectorUpload } from './components/custom_vector_upload';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
+  const { http, uiSettings, notifications, regionmapsConfig, getServiceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
 
   return {
@@ -66,9 +66,25 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionsTemplate: (props) => (
-        <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
-      ),
+      optionTabs: [
+        {
+          name: 'options',
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.optionTabs.optionsTitle', {
+            defaultMessage: 'Layer Options',
+          }),
+          editor: RegionMapOptions,
+        },
+        {
+          name: 'controls',
+          title: i18n.translate(
+            'regionMap.mapVis.regionMapEditorConfig.controlTabs.controlsTitle',
+            {
+              defaultMessage: 'Import Vector Map',
+            }
+          ),
+          editor: CustomVectorUpload,
+        },
+      ],
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
@@ -113,6 +129,8 @@ provided base maps, or add your own. Darker colors represent higher values.',
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
+      vis.http = http;
+      vis.notifications = notifications;
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
