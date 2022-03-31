@@ -42,17 +42,16 @@ export interface BfetchDeps {
   explorer: ExplorerService;
 }
 
-export const mount = (
-  coreSetup: CoreSetup<BfetchExplorerStartPlugins>,
-  explorer: ExplorerService
-) => async ({ appBasePath, element }: AppMountParameters) => {
-  const [core, plugins] = await coreSetup.getStartServices();
-  const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
-  const reactElement = (
-    <OpenSearchDashboardsContextProvider services={deps}>
-      <App />
-    </OpenSearchDashboardsContextProvider>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
-};
+export const mount =
+  (coreSetup: CoreSetup<BfetchExplorerStartPlugins>, explorer: ExplorerService) =>
+  async ({ appBasePath, element }: AppMountParameters) => {
+    const [core, plugins] = await coreSetup.getStartServices();
+    const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
+    const reactElement = (
+      <OpenSearchDashboardsContextProvider services={deps}>
+        <App />
+      </OpenSearchDashboardsContextProvider>
+    );
+    render(reactElement, element);
+    return () => unmountComponentAtNode(element);
+  };
