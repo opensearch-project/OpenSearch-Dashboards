@@ -73,6 +73,8 @@ export class RenderingService {
       this.coreContext.configService.atPath<HttpConfigType>('server').pipe(first()).toPromise(),
     ]);
 
+    this.setupHttpAgent(serverConfig as HttpConfigType);
+
     return {
       render: async (
         request,
@@ -93,8 +95,6 @@ export class RenderingService {
         const darkMode = settings.user?.['theme:darkMode']?.userValue
           ? Boolean(settings.user['theme:darkMode'].userValue)
           : false;
-
-        this.setupHttpAgent(serverConfig as HttpConfigType);
 
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
@@ -167,7 +167,8 @@ export class RenderingService {
    * @param {Readonly<HttpConfigType>} httpConfig
    */
   private setupHttpAgent(httpConfig: Readonly<HttpConfigType>) {
-    if (httpConfig.ssl?.enabled) {
+    if (!httpConfig.ssl?.enabled) return;
+    try {
       const sslConfig = new SslConfig(httpConfig.ssl);
       this.httpsAgent = new HttpsAgent({
         ca: sslConfig.certificateAuthorities,
@@ -176,6 +177,8 @@ export class RenderingService {
         passphrase: sslConfig.keyPassphrase,
         rejectUnauthorized: false,
       });
+    } catch (e) {
+      this.logger.get('branding').error('HTTP agent failed to setup for SSL.');
     }
   }
 
