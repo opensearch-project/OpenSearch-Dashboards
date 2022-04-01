@@ -15674,8 +15674,8 @@ re-reselect@^3.4.0:
 
 re2@^1.15.4:
   version "1.15.4"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.4.tgz#7bf29290bdde963014e77bd2c2e799a6d788386e"
-  integrity "sha1-L/w+SJT7YEMDk0WZeBl2SL4BoKk= sha512-7w3K+Daq/JjbX/dz5voMt7B9wlprVBQnMiypyCojAZ99kcAL+3LiJ5uBoX/u47l8eFTVq3Wj+V0pmvU+CT8tOg=="
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.4.tgz#2ffc3e4894fb60430393459978197648be01a0a9"
+  integrity sha512-7w3K+Daq/JjbX/dz5voMt7B9wlprVBQnMiypyCojAZ99kcAL+3LiJ5uBoX/u47l8eFTVq3Wj+V0pmvU+CT8tOg==
   dependencies:
     install-artifact-from-github "^1.0.2"
     nan "^2.14.1"
