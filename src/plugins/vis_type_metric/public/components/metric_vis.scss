@@ -8,14 +8,14 @@
 .mtrVis {
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 .mtrVis__value {
   @include euiTextTruncate;
+
   font-weight: $euiFontWeightBold;
 }
 
@@ -33,7 +33,8 @@
   transition: transform $euiAnimSpeedNormal $euiAnimSlightResistance;
   transform: translate(0, 0);
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     box-shadow: none;
     transform: translate(0, -2px);
   }

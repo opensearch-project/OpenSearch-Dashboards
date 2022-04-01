@@ -58,7 +58,7 @@ module.exports = function (grunt) {
     grunt.task.run(
       [
         !grunt.option('quick') && 'run:eslint',
-        !grunt.option('quick') && 'run:sasslint',
+        !grunt.option('quick') && 'run:stylelint',
         !grunt.option('quick') && 'run:checkTsProjects',
         !grunt.option('quick') && 'run:checkDocApiChanges',
         !grunt.option('quick') && 'run:typeCheck',

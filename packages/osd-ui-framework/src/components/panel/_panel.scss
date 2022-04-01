@@ -1,5 +1,6 @@
 .kuiPanel {
   @include euiBottomShadowSmall;
+
   background-color: $euiColorEmptyShade;
   border: $euiBorderThin;
   border-radius: $euiBorderRadius;
@@ -44,14 +45,14 @@
   border-bottom: $kuiBorderThin;
 }
 
-  /**
+/**
    * 1. This way we can use h1, h2, etc.
    */
-  .kuiPanelHeader__title {
-    font-size: $kuiTitleFontSize;
-    line-height: $kuiLineHeight;
-    margin: 0; /* 1 */
-  }
+.kuiPanelHeader__title {
+  font-size: $kuiTitleFontSize;
+  line-height: $kuiLineHeight;
+  margin: 0; /* 1 */
+}
 
 /**
  * 1. Undo what barSection mixin does.

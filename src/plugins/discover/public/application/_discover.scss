@@ -10,6 +10,7 @@
     position: relative;
   }
 }
+
 discover-app {
   flex-grow: 1;
 }
@@ -25,12 +26,13 @@ discover-app {
   padding-left: $euiSizeXL;
   padding-right: $euiSizeS;
   z-index: 1;
-  @include euiBreakpoint('xs', 's', 'm') {
+
+  @include euiBreakpoint("xs", "s", "m") {
     padding-left: $euiSizeS;
   }
 }
 
-@include euiPanel('.dscWrapper__content');
+@include euiPanel(".dscWrapper__content");
 
 .dscWrapper__content {
   padding-top: $euiSizeXS;
@@ -71,7 +73,6 @@ discover-app {
   left: 0;
   z-index: 20;
   padding-top: $euiSizeM;
-
   opacity: 0.75;
   text-align: center;
   background-color: transparent;
@@ -96,7 +97,7 @@ discover-app {
 
 .dscResults {
   h3 {
-    margin: -20px 0 10px 0;
+    margin: -20px 0 10px;
     text-align: center;
   }
 }
@@ -136,20 +137,21 @@ discover-app {
     z-index: -1;
     min-height: $euiSizeM;
     min-width: $euiSizeM;
-    padding: $euiSizeXS * .5;
+    padding: $euiSizeXS * 0.5;
   }
 
   &.closed {
     width: 0 !important;
     border-right-width: 0;
     border-left-width: 0;
+
     .dscCollapsibleSidebar__collapseButton {
       right: -$euiSizeL + 4;
     }
   }
 }
 
-@include euiBreakpoint('xs', 's', 'm') {
+@include euiBreakpoint("xs", "s", "m") {
   .dscCollapsibleSidebar {
     &.closed {
       display: none;

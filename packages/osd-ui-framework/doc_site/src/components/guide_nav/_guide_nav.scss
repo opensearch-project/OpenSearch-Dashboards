@@ -16,10 +16,12 @@
     height 0.3s ease,
     box-shadow 0.3s linear;
   overflow: hidden;
+
   @include euiBottomShadowMedium;
 
   &.is-guide-nav-open {
     height: 100%;
+
     @include euiBottomShadow;
   }
 
@@ -28,69 +30,69 @@
   }
 }
 
-  .guideNav__showButton {
-    position: fixed;
-    z-index: 9999;
-    top: 5px;
-    right: 5px;
-    font-size: 10px;
-    opacity: 0;
-    transition: opacity $guideChromeTransition;
+.guideNav__showButton {
+  position: fixed;
+  z-index: 9999;
+  top: 5px;
+  right: 5px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity $guideChromeTransition;
 
-    .is-chrome-hidden & {
-      opacity: 1;
-    }
+  .is-chrome-hidden & {
+    opacity: 1;
+  }
+}
+
+.guideNav__header {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 20px;
+}
+
+.guideNav__menu {
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 3px;
+
+  &.is-menu-button-pinned,
+  &:hover {
+    background-color: rgb(black, 0.05);
   }
 
-  .guideNav__header {
-    position: relative;
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    height: 60px;
-    padding: 0 20px;
+  &:active {
+    background-color: rgb(black, 0.2);
+    box-shadow: inset 0 2px 8px rgb(black, 0.1);
   }
+}
 
-    .guideNav__menu {
-      cursor: pointer;
-      margin-right: 10px;
-      padding: 10px;
-      border-radius: 3px;
+.guideNav__title {
+  color: $guideTextColor;
+  text-decoration: none;
+  font-size: 18px;
+}
 
-      &.is-menu-button-pinned,
-      &:hover {
-        background-color: rgba(black, 0.05);
-      }
+.guideNav__version {
+  margin-left: 10px;
+  font-weight: 300;
+  font-size: 14px;
+}
 
-      &:active {
-        background-color: rgba(black, 0.2);
-        box-shadow: inset 0 2px 8px rgba(black, 0.1);
-      }
-    }
-
-    .guideNav__title {
-      color: $guideTextColor;
-      text-decoration: none;
-      font-size: 18px;
-    }
-
-    .guideNav__version {
-      margin-left: 10px;
-      font-weight: 300;
-      font-size: 14px;
-    }
-
-    // TODO: [RENAMEME] replacement background-image might be needed
-    .guideNav__opensearchLogo {
-      position: absolute;
-      background-image: url("images/react-logo.svg");
-      width: 106px;
-      height: 36px;
-      background-repeat: no-repeat;
-      background-size: contain;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+// TODO: [RENAMEME] replacement background-image might be needed
+.guideNav__opensearchLogo {
+  position: absolute;
+  background-image: url("images/react-logo.svg");
+  width: 106px;
+  height: 36px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .guideNavSearch {
   margin: 0 20px;
@@ -111,6 +113,7 @@
  */
 .guideNavItemsContainer {
   @include scrollbar;
+
   display: flex;
   overflow: auto;
   min-height: calc(100vh - #{$guideNavHeight + 40px}); /* 1 */
@@ -118,9 +121,8 @@
 
 .guideNavItems {
   display: flex;
-  flex-direction: column;
+  flex-flow: column wrap;
   align-items: flex-start;
-  flex-wrap: wrap;
   align-content: flex-start;
 }
 
@@ -147,23 +149,23 @@
   align-items: center;
 }
 
-  .guideNavItem__link {
-    color: $guideTextColor;
-    text-decoration: none;
+.guideNavItem__link {
+  color: $guideTextColor;
+  text-decoration: none;
 
-    &:hover {
-      color: $guideLinkHoverColor;
-    }
+  &:hover {
+    color: $guideLinkHoverColor;
   }
+}
 
-  .guideNavItem__reactLogo {
-    margin-left: 10px;
-    background-image: url("images/react-logo.svg");
-    width: 24px;
-    height: 22px;
-    background-repeat: no-repeat;
-    background-size: contain;
-  }
+.guideNavItem__reactLogo {
+  margin-left: 10px;
+  background-image: url("images/react-logo.svg");
+  width: 24px;
+  height: 22px;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
 
 .guideNavNoItems {
   color: rgba($guideTextColor, 0.5);
@@ -179,7 +181,6 @@
 
 .guideNavPaginationButton {
   appearance: none;
-  border: none;
   line-height: 10px;
   padding: 4px 20px;
   color: $guideLinkHoverColor;

@@ -16,7 +16,10 @@
 
   &:not(.globalFilterItem-isDisabled) {
     @include euiFormControlDefaultShadow;
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $osdGlobalFilterItemBorderColor; // Make the actual border more visible
+
+    box-shadow:
+      #{$euiFormControlBoxShadow},
+      inset 0 0 0 1px $osdGlobalFilterItemBorderColor; // Make the actual border more visible
   }
 
   &:focus-within {
@@ -32,7 +35,8 @@
   font-style: italic;
 }
 
-.globalFilterItem-isError, .globalFilterItem-isWarning {
+.globalFilterItem-isError,
+.globalFilterItem-isWarning {
   text-decoration: none;
 
   .globalFilterLabel__value {
@@ -56,7 +60,7 @@
   position: relative;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     bottom: 0;

@@ -19,7 +19,7 @@
 
     .ace_gutter-active-line,
     .ace_marker-layer .ace_active-line {
-      background-color: transparentize($euiColorLightShade, .3);
+      background-color: transparentize($euiColorLightShade, 0.3);
     }
 
     .ace_snippet-marker {
@@ -29,7 +29,14 @@
     }
 
     .ace_indent-guide {
-      background: linear-gradient(to left, $euiColorMediumShade 0%, $euiColorMediumShade 1px, transparent 1px, transparent 100%);
+      background:
+        linear-gradient(
+          to left,
+          $euiColorMediumShade 0%,
+          $euiColorMediumShade 1px,
+          transparent 1px,
+          transparent 100%
+        );
     }
 
     .ace_search {
@@ -45,13 +52,13 @@
     }
 
     .ace_method {
-      color: makeHighContrastColor(#DD0A73, $aceBackground);
+      color: makeHighContrastColor(#dd0a73, $aceBackground);
     }
 
     .ace_url,
     .ace_start_triple_quote,
     .ace_end_triple_quote {
-      color: makeHighContrastColor(#00A69B, $aceBackground);
+      color: makeHighContrastColor(#00a69b, $aceBackground);
     }
 
     .ace_multi_string {
@@ -71,7 +78,7 @@
     }
 
     .ace_fold {
-      background-color: #6B72E6;
+      background-color: #6b72e6;
     }
 
     .ace_cursor {
@@ -84,7 +91,7 @@
 
     .ace_storage,
     .ace_keyword {
-      color: makeHighContrastColor(#0079A5, $aceBackground);
+      color: makeHighContrastColor(#0079a5, $aceBackground);
     }
 
     .ace_constant {
@@ -104,8 +111,8 @@
     }
 
     .ace_invalid {
-      background-color: euiCallOutColor('danger', 'background');
-      color: euiCallOutColor('danger', 'foreground');
+      background-color: euiCallOutColor("danger", "background");
+      color: euiCallOutColor("danger", "foreground");
     }
 
     .ace_support.ace_function {
@@ -134,7 +141,7 @@
     }
 
     .ace_comment.ace_doc {
-      color: makeHighContrastColor(#0079A5, $aceBackground);
+      color: makeHighContrastColor(#0079a5, $aceBackground);
     }
 
     .ace_comment.ace_doc.ace_tag {
@@ -142,11 +149,11 @@
     }
 
     .ace_constant.ace_numeric {
-      color: makeHighContrastColor(#0079A5, $aceBackground);
+      color: makeHighContrastColor(#0079a5, $aceBackground);
     }
 
     .ace_variable {
-      color: makeHighContrastColor(#0079A5, $aceBackground);
+      color: makeHighContrastColor(#0079a5, $aceBackground);
     }
 
     .ace_xml-pe {
@@ -154,7 +161,7 @@
     }
 
     .ace_entity.ace_name.ace_function {
-      color: makeHighContrastColor(#0000A2, $aceBackground);
+      color: makeHighContrastColor(#0000a2, $aceBackground);
     }
 
     .ace_heading {

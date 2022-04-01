@@ -1,9 +1,9 @@
-@import '../../../variables';
-@import '../../../templates';
+@import "../../../variables";
+@import "../../../templates";
 
 .inpEmptyState {
   // override EUI specificity
-  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
+  max-width: $inpEmptyStateMaxWidth !important;
 }
 
 .inpEmptyState__cardGrid {

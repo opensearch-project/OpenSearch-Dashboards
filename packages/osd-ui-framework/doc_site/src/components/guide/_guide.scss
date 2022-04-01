@@ -64,25 +64,25 @@ html {
   background-color: $euiColorEmptyShade;
 }
 
-  .guideContentPage__hint {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    max-width: 260px;
-    max-height: 500px;
-    padding: 30px;
-    margin: 20px;
-    border-radius: 4px;
-    background-color: $euiColorLightestShade;
-    line-height: $guideLineHeight;
-  }
+.guideContentPage__hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 260px;
+  max-height: 500px;
+  padding: 30px;
+  margin: 20px;
+  border-radius: 4px;
+  background-color: $euiColorLightestShade;
+  line-height: $guideLineHeight;
+}
 
-  .guideContentPage__content {
-    width: 100%;
-    max-width: 800px;
-    padding: 30px 60px;
-  }
+.guideContentPage__content {
+  width: 100%;
+  max-width: 800px;
+  padding: 30px 60px;
+}
 
 .guideHintArrow {
   position: absolute;

@@ -11,7 +11,9 @@
 // EUITODO: Add this
 @mixin opensearchDashboardsCircleLogo() {
   display: inline-block;
+
   @include size($euiSizeXXL * 2);
+
   line-height: $euiSizeXXL * 2;
   text-align: center;
   background-color: $euiColorEmptyShade;
@@ -34,9 +36,9 @@
   margin: 0;
   user-select: none;
 
-  @if ($direction == horizontal) {
+  @if $direction == horizontal {
     width: $size;
-  } @else if ($direction == vertical) {
+  } @else if $direction == vertical {
     height: $size;
     width: 100%;
   } @else {
@@ -61,9 +63,9 @@
     width: 100%;
     height: 100%;
 
-    @if ($direction == horizontal) {
+    @if $direction == horizontal {
       cursor: ew-resize;
-    } @else if ($direction == vertical) {
+    } @else if $direction == vertical {
       cursor: ns-resize;
     }
   }
@@ -89,6 +91,7 @@
     z-index: 1;
     width: 310px;
     height: 477px;
+    /* stylelint-disable-next-line function-url-quotes */
     content: url(lightOrDarkTheme('~core_app_image_assets/bg_top_branded.svg', '~core_app_image_assets/bg_top_branded_dark.svg'));
   }
 
@@ -99,6 +102,7 @@
     z-index: 1;
     width: 313px;
     height: 461px;
+    /* stylelint-disable-next-line function-url-quotes */
     content: url(lightOrDarkTheme('~core_app_image_assets/bg_bottom_branded.svg', '~core_app_image_assets/bg_bottom_branded_dark.svg'));
   }
 

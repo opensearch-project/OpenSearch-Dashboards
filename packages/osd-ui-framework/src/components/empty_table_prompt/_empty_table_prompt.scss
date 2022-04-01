@@ -5,12 +5,12 @@
   padding: 30px;
 }
 
-  .kuiEmptyTablePrompt__message {
-    font-size: $kuiTitleFontSize;
-    color: $kuiSubduedTextColor;
-    line-height: $kuiLineHeight;
-  }
+.kuiEmptyTablePrompt__message {
+  font-size: $kuiTitleFontSize;
+  color: $kuiSubduedTextColor;
+  line-height: $kuiLineHeight;
+}
 
-  .kuiEmptyTablePrompt__actions {
-    margin-top: 10px;
-  }
+.kuiEmptyTablePrompt__actions {
+  margin-top: 10px;
+}

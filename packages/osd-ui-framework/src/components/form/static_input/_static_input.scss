@@ -3,7 +3,9 @@
  */
 .kuiStaticInput {
   width: $kuiFormFieldDefaultWidth;
+
   @include formControlBase;
+
   border: 1px solid transparent; /* 1 */
   background-color: transparent;
 }
