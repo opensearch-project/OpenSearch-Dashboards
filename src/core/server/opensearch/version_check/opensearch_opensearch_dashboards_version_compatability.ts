@@ -110,6 +110,7 @@ function legacyVersionCompatibleWithOpenSearchDashboards(
     legacyVersionNumbers.major === 7 &&
     legacyVersionNumbers.minor === 10 &&
     legacyVersionNumbers.patch === 2 &&
-    opensearchDashboardsVersionNumbers.major === 1
+    (opensearchDashboardsVersionNumbers.major === 1 ||
+      opensearchDashboardsVersionNumbers.major === 2)
   );
 }
