@@ -10,6 +10,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
+  EuiSelect,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -20,7 +21,8 @@ import { ReactExpressionRenderer } from '../../../../src/plugins/expressions/pub
 
 export function RenderTab() {
   const [value, setValue] = useState('OpenSearch Dashboards');
-  const expressionString = `avatar name="${value}" size="xl"`;
+  const [size, setSize] = useState('xl');
+  const expressionString = `avatar name="${value}" size="${size}"`;
 
   return (
     <>
@@ -45,11 +47,32 @@ export function RenderTab() {
       <EuiSpacer />
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate('expressionsExample.tab.demo2.input', {
-            defaultMessage: 'Expression Input',
+          label={i18n.translate('expressionsExample.tab.demo2.name', {
+            defaultMessage: 'Expression Argument (name)',
           })}
         >
           <EuiFieldText value={value} onChange={(e) => setValue(String(e.target.value))} />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('expressionsExample.tab.demo2.size', {
+            defaultMessage: 'Expression Argument (size)',
+          })}
+        >
+          <EuiSelect
+            options={[
+              {
+                text: 'xl',
+              },
+              {
+                text: 'l',
+              },
+              {
+                text: 's',
+              },
+            ]}
+            value={size}
+            onChange={(e) => setSize(String(e.target.value))}
+          />
         </EuiFormRow>
       </EuiForm>
       <EuiSpacer />

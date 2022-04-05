@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from '../../../src/core/public';
+import { CoreStart, NotificationsStart } from '../../../src/core/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
@@ -26,4 +26,5 @@ export interface ExpressionsExampleStartDependencies {
 
 export interface ExpressionsExampleServices extends CoreStart {
   expressions: ExpressionsStart;
+  notifications: NotificationsStart;
 }

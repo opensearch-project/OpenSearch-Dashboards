@@ -23,6 +23,7 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 
 import { BasicTab } from './basic_tab';
 import { RenderTab } from './render_tab';
+import { ActionsTab } from './actions_tab';
 
 interface ExpressionsExampleAppDeps {
   basename: string;
@@ -38,7 +39,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
         id: 'demo1',
         name: (
           <FormattedMessage
-            id="expressionsExample.demo1TabTitle"
+            id="expressionsExample.demo1.TabTitle"
             defaultMessage="{name}"
             values={{ name: 'Basic' }}
           />
@@ -47,15 +48,25 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
       },
       {
         id: 'demo2',
-
         name: (
           <FormattedMessage
-            id="expressionsExample.demo2TabTitle"
+            id="expressionsExample.demo2.TabTitle"
             defaultMessage="{name}"
             values={{ name: 'Rendering' }}
           />
         ),
         content: <RenderTab />,
+      },
+      {
+        id: 'demo3',
+        name: (
+          <FormattedMessage
+            id="expressionsExample.demo3.TabTitle"
+            defaultMessage="{name}"
+            values={{ name: 'Handlers' }}
+          />
+        ),
+        content: <ActionsTab />,
       },
     ],
     []

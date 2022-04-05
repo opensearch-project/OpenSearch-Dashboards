@@ -19,7 +19,14 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 
-import { sleep, square, avatar, avatarFn } from '../common/expression_functions';
+import {
+  sleep,
+  square,
+  avatar,
+  avatarFn,
+  quickFormFn,
+  quickFormRenderer,
+} from '../common/expression_functions';
 
 export class ExpressionsExamplePlugin
   implements Plugin<ExpressionsExamplePluginSetup, ExpressionsExamplePluginStart> {
@@ -42,8 +49,8 @@ export class ExpressionsExamplePlugin
       },
     });
 
-    const expressionFunctions = [sleep, square, avatarFn];
-    const expressionRenderers = [avatar];
+    const expressionFunctions = [sleep, square, avatarFn, quickFormFn];
+    const expressionRenderers = [avatar, quickFormRenderer];
 
     expressionFunctions.forEach((createExpressionFunction) => {
       expressions.registerFunction(createExpressionFunction);

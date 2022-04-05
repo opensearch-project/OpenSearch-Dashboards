@@ -15,7 +15,7 @@ export const renderApp = (
   { navigation, expressions }: ExpressionsExampleStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
-  const services = { expressions };
+  const services = { expressions, notifications };
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <ExpressionsExampleApp
