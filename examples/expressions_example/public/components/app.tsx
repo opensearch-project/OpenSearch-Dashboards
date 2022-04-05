@@ -15,6 +15,7 @@ import {
   EuiPageContentHeader,
   EuiPageHeader,
   EuiTitle,
+  EuiText,
   EuiTabbedContent,
 } from '@elastic/eui';
 
@@ -24,6 +25,7 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import { BasicTab } from './basic_tab';
 import { RenderTab } from './render_tab';
 import { ActionsTab } from './actions_tab';
+import { PlaygroundTab } from './playground_tab';
 
 interface ExpressionsExampleAppDeps {
   basename: string;
@@ -36,7 +38,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
   const tabs = useMemo(
     () => [
       {
-        id: 'demo1',
+        id: 'demo-1',
         name: (
           <FormattedMessage
             id="expressionsExample.demo1.TabTitle"
@@ -47,7 +49,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
         content: <BasicTab />,
       },
       {
-        id: 'demo2',
+        id: 'demo-2',
         name: (
           <FormattedMessage
             id="expressionsExample.demo2.TabTitle"
@@ -58,7 +60,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
         content: <RenderTab />,
       },
       {
-        id: 'demo3',
+        id: 'demo-3',
         name: (
           <FormattedMessage
             id="expressionsExample.demo3.TabTitle"
@@ -67,6 +69,17 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
           />
         ),
         content: <ActionsTab />,
+      },
+      {
+        id: 'demo-4',
+        name: (
+          <FormattedMessage
+            id="expressionsExample.demo4.TabTitle"
+            defaultMessage="{name}"
+            values={{ name: 'Playground' }}
+          />
+        ),
+        content: <PlaygroundTab />,
       },
     ],
     []
@@ -91,17 +104,17 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
               </EuiPageHeader>
               <EuiPageContent>
                 <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
+                  <EuiText>
+                    <p>
                       <FormattedMessage
                         id="expressionsExample.congratulationsTitle"
-                        defaultMessage="Lets take a quick look at what we can do with expressions"
+                        defaultMessage="Lets look at some of the ways we can run expressions"
                       />
-                    </h2>
-                  </EuiTitle>
+                    </p>
+                  </EuiText>
                 </EuiPageContentHeader>
                 <EuiPageContentBody>
-                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} />
+                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[3]} />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>

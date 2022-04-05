@@ -11,8 +11,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSelect,
-  EuiText,
-  EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -27,23 +26,17 @@ export function RenderTab() {
   return (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="expressionsExample.tab.demo2.title"
-            defaultMessage="{name}"
-            values={{ name: 'Using expressions to render content' }}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="expressionsExample.tab.demo2.description"
-            defaultMessage="Lets render an avatar using the name we provide"
-          />
-        </p>
-      </EuiText>
+      <EuiCallOut
+        title={i18n.translate('expressionsExample.tab.demo2.title', {
+          defaultMessage: 'Using expressions to render content',
+        })}
+        iconType="gear"
+      >
+        <FormattedMessage
+          id="expressionsExample.tab.demo2.description"
+          defaultMessage="Lets render an avatar using the arguments we provide"
+        />
+      </EuiCallOut>
       <EuiSpacer />
       <EuiForm>
         <EuiFormRow

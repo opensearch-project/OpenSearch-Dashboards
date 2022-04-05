@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCodeBlock, EuiFormLabel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, EuiFormLabel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback } from 'react';
 import { ReactExpressionRenderer } from '../../../../src/plugins/expressions/public';
@@ -26,23 +27,17 @@ export function ActionsTab() {
   return (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="expressionsExample.tab.demo3.title"
-            defaultMessage="{name}"
-            values={{ name: 'Expression handlers' }}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="expressionsExample.tab.demo3.description"
-            defaultMessage="Using expression handlers to trigger actions"
-          />
-        </p>
-      </EuiText>
+      <EuiCallOut
+        title={i18n.translate('expressionsExample.tab.demo3.title', {
+          defaultMessage: 'Expression handlers',
+        })}
+        iconType="gear"
+      >
+        <FormattedMessage
+          id="expressionsExample.tab.demo3.description"
+          defaultMessage="Using expression handlers to trigger a toast"
+        />
+      </EuiCallOut>
       <EuiSpacer />
       <EuiFormLabel>
         <FormattedMessage

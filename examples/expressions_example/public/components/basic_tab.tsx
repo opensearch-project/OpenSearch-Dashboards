@@ -10,14 +10,12 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiStat,
-  EuiText,
-  EuiTitle,
-  EuiHorizontalRule,
   EuiFormLabel,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { ExpressionsExampleServices } from '../types';
 
@@ -44,24 +42,18 @@ export function BasicTab() {
   return (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="expressionsExample.tab.demo1.title"
-            defaultMessage="{name}"
-            values={{ name: 'Running a simple expression' }}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="expressionsExample.tab.demo1.description"
-            defaultMessage="Lets run a simple expression that squares a number we input after a delay of 2 seconds"
-          />
-        </p>
-      </EuiText>
-      <EuiHorizontalRule />
+      <EuiCallOut
+        title={i18n.translate('expressionsExample.tab.demo1.title', {
+          defaultMessage: 'Running a simple expression',
+        })}
+        iconType="gear"
+      >
+        <FormattedMessage
+          id="expressionsExample.tab.demo1.description"
+          defaultMessage="Lets run a simple expression that squares a number we input after a delay of 2 seconds"
+        />
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiForm>
         <EuiFormRow
           label={i18n.translate('expressionsExample.tab.demo1.input', {
