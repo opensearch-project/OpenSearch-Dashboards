@@ -49,6 +49,9 @@ export const configSchema = schema.object({
       }),
     }),
   }),
+  searchUsageTelemetry: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -165,3 +165,7 @@
 # Set the value of this setting to true to capture region blocked warnings and errors 
 # for your map rendering services.
 # map.showRegionBlockedWarning: false
+
+# Set the value of this setting to false to suppress search usage telemetry
+# for reducing the load of OpenSearch cluster.
+data.searchUsageTelemetry.enabled: false
