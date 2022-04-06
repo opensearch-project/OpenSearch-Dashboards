@@ -126,7 +126,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
                   </EuiText>
                 </EuiPageContentHeader>
                 <EuiPageContentBody>
-                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[4]} />
+                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>

@@ -12,6 +12,7 @@ import {
   EuiStat,
   EuiFormLabel,
   EuiCallOut,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -23,21 +24,41 @@ export function BasicTab() {
   const {
     services: { expressions },
   } = useOpenSearchDashboards<ExpressionsExampleServices>();
-  const [value, setValue] = useState(2);
+  const [input, setInput] = useState(2);
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<unknown>(
     i18n.translate('expressionsExample.tab.demo1.loading', {
       defaultMessage: 'Still sleeping',
     })
   );
-  const expressionString = `sleep time=2000 | square`;
+  const expression = `sleep time=2000 | square`;
 
   useEffect(() => {
-    const execution = expressions.execute(expressionString, value);
-    execution.getData().then((data) => {
-      setResult(data);
-    });
-    return () => execution.cancel();
-  }, [expressionString, expressions, value]);
+    let isMounted = true;
+
+    try {
+      setLoading(true);
+      const execution = expressions.execute(expression, input);
+      execution.getData().then((data: any) => {
+        if (!isMounted) return;
+
+        const value =
+          data?.type === 'error'
+            ? `Error: ${data?.error?.message ?? 'Something went wrong'}`
+            : data;
+
+        setLoading(false);
+        setResult(String(value));
+      });
+    } catch (error) {
+      setLoading(false);
+      setResult(String(error));
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [expressions, input, expression]);
 
   return (
     <>
@@ -60,7 +81,7 @@ export function BasicTab() {
             defaultMessage: 'Expression Input',
           })}
         >
-          <EuiFieldNumber value={value} onChange={(e) => setValue(Number(e.target.value))} />
+          <EuiFieldNumber value={input} onChange={(e) => setInput(Number(e.target.value))} />
         </EuiFormRow>
       </EuiForm>
       <EuiSpacer />
@@ -70,7 +91,10 @@ export function BasicTab() {
           defaultMessage="Expression that we are running"
         />
       </EuiFormLabel>
-      <EuiCodeBlock>{expressionString}</EuiCodeBlock>
+      <EuiCodeBlock>
+        {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+        {expression}
+      </EuiCodeBlock>
       <EuiSpacer />
       <EuiStat
         title={result}

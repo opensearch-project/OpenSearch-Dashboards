@@ -63,8 +63,10 @@ export function PlaygroundSection({
             ? `Error: ${data?.error?.message ?? 'Something went wrong'}`
             : data;
 
+        const parsedValue = typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
+
         setLoading(false);
-        setResult(String(value));
+        setResult(parsedValue);
       });
     } catch (error) {
       setLoading(false);
