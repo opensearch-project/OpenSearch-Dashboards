@@ -14,11 +14,16 @@ import {
   EuiFieldText,
   EuiTitle,
   EuiProgress,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useState } from 'react';
-import { ReactExpressionRenderer } from '../../../../src/plugins/expressions/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ReactExpressionRenderer,
+  ExpressionRenderError,
+  IInterpreterRenderHandlers,
+} from '../../../../src/plugins/expressions/public';
 import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { ExpressionsExampleServices } from '../types';
 
@@ -77,7 +82,7 @@ export function PlaygroundSection({
         <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         {/* Rendered the input field only for non renderable expressions */}
         {!renderType && (
           <>
@@ -113,7 +118,18 @@ export function PlaygroundSection({
           />
         </EuiFormLabel>
         {renderType ? (
-          <ReactExpressionRenderer expression={expression} />
+          <>
+            <EuiCallOut
+              title={i18n.translate('expressionsExample.tab.demo4.renderLoop', {
+                defaultMessage:
+                  'If the render is stuck in an infinite loading loop. Check your console to see if there in an error parsing the expression',
+              })}
+              color="warning"
+              iconType="help"
+            />
+            <EuiSpacer />
+            <ReactExpressionRenderer expression={expression} />
+          </>
         ) : (
           <EuiCodeBlock>
             {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
