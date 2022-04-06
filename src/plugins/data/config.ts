@@ -48,9 +48,9 @@ export const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
-  }),
-  searchUsageTelemetry: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    usageTelemetry: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
