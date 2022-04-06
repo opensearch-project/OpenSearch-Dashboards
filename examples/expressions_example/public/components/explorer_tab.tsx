@@ -12,31 +12,32 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiBasicTable,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useMemo, useState } from 'react';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { ExpressionsExampleServices } from '../types';
 import { ExplorerSection } from './explorer_section';
 
+interface ExpressionFunctionItem {
+  name: string;
+  type: string;
+  help: string;
+}
+
 export function ExplorerTab() {
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
   const {
     services: { expressions },
   } = useOpenSearchDashboards<ExpressionsExampleServices>();
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
 
   const functions = expressions.getFunctions();
-
-  const sections = useMemo(
-    () =>
-      Object.values(functions)
-        .filter((fn) => fn.name.includes(search))
-        .filter((fn) => (filter === 'all' ? true : fn.type === filter))
-        .map((fn) => <ExplorerSection key={fn.name} fn={fn} />),
-    [filter, functions, search]
-  );
 
   const types = useMemo(() => {
     const allTypes = new Set(Object.values(functions).map((fn) => fn.type));
@@ -47,6 +48,30 @@ export function ExplorerTab() {
 
     return [...allTypes].map((type) => ({ text: type }));
   }, [functions]);
+
+  const items = useMemo<ExpressionFunctionItem[]>(
+    () =>
+      Object.values(functions)
+        .filter((fn) => fn.name.includes(search))
+        .filter((fn) => (filter === 'all' ? true : fn.type === filter))
+        .map((fn) => ({
+          name: fn.name,
+          type: fn.type,
+          help: fn.help,
+        })),
+    [filter, functions, search]
+  );
+
+  const toggleDetails = (item: ExpressionFunctionItem) => {
+    const { name: id } = item;
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[id]) {
+      delete itemIdToExpandedRowMapValues[id];
+    } else {
+      itemIdToExpandedRowMapValues[id] = <ExplorerSection fn={functions[id]} />;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   return (
     <>
@@ -96,7 +121,43 @@ export function ExplorerTab() {
       </EuiForm>
       <EuiSpacer />
 
-      {sections}
+      <EuiBasicTable
+        itemId="name"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable={true}
+        columns={[
+          {
+            field: 'name',
+            name: 'Name',
+            sortable: true,
+          },
+          {
+            field: 'type',
+            name: 'Type',
+            sortable: true,
+          },
+          {
+            field: 'help',
+            name: 'Help',
+            truncateText: true,
+          },
+          {
+            align: RIGHT_ALIGNMENT,
+            width: '40px',
+            isExpander: true,
+            render: (item) => (
+              <EuiButtonIcon
+                onClick={() => toggleDetails(item)}
+                aria-label={itemIdToExpandedRowMap[item.name] ? 'Collapse' : 'Expand'}
+                iconType={itemIdToExpandedRowMap[item.name] ? 'arrowUp' : 'arrowDown'}
+              />
+            ),
+          },
+        ]}
+        items={items}
+      />
+
+      {/* {sections} */}
     </>
   );
 }

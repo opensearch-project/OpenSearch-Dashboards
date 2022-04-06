@@ -21,7 +21,7 @@ export const quickFormFn = (): ExpressionFunctionDefinition<
   name: 'quick-form',
   type: 'render',
   help: i18n.translate('expressionsExample.function.avatar.help', {
-    defaultMessage: 'Avatar expression function',
+    defaultMessage: 'Render a simple form that sends the value back as an event on click',
   }),
   args: {
     label: {

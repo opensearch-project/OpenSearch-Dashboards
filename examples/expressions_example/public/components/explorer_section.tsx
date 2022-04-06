@@ -37,28 +37,8 @@ export function ExplorerSection({ fn }: Props) {
 
   return (
     <EuiPanel className="explorer_section">
-      <EuiTitle size="s">
-        <h2>{fn.name}</h2>
-      </EuiTitle>
-      <EuiText color="subdued">
-        <p>
-          {fn.help}
-          {fn.type && (
-            <span className="explorer_section_type eui-displayBlock">
-              <EuiBadge>
-                {i18n.translate('expressionsExample.tab.explorer.section.type', {
-                  defaultMessage: 'Type',
-                })}
-              </EuiBadge>
-              <code>{fn.type}</code>
-            </span>
-          )}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
       {/* arguments */}
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
             id="expressionsExample.tab.explorer.section.arguments"
