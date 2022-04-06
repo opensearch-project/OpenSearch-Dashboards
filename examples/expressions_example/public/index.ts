@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './index.scss';
+
 import { ExpressionsExamplePlugin } from './plugin';
 
 // This exports static code and TypeScript types,

@@ -26,6 +26,7 @@ import { BasicTab } from './basic_tab';
 import { RenderTab } from './render_tab';
 import { ActionsTab } from './actions_tab';
 import { PlaygroundTab } from './playground_tab';
+import { ExplorerTab } from './explorer_tab';
 
 interface ExpressionsExampleAppDeps {
   basename: string;
@@ -71,15 +72,26 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
         content: <ActionsTab />,
       },
       {
-        id: 'demo-4',
+        id: 'playground',
         name: (
           <FormattedMessage
-            id="expressionsExample.demo4.TabTitle"
+            id="expressionsExample.playground.TabTitle"
             defaultMessage="{name}"
             values={{ name: 'Playground' }}
           />
         ),
         content: <PlaygroundTab />,
+      },
+      {
+        id: 'explorer',
+        name: (
+          <FormattedMessage
+            id="expressionsExample.explorer.TabTitle"
+            defaultMessage="{name}"
+            values={{ name: 'Explorer' }}
+          />
+        ),
+        content: <ExplorerTab />,
       },
     ],
     []
@@ -114,7 +126,7 @@ export const ExpressionsExampleApp = ({ basename }: ExpressionsExampleAppDeps) =
                   </EuiText>
                 </EuiPageContentHeader>
                 <EuiPageContentBody>
-                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[3]} />
+                  <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[4]} />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>
