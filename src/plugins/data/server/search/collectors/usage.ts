@@ -50,7 +50,7 @@ export function usageProvider(
         .create<ConfigSchema>()
         .pipe(first())
         .toPromise();
-      if (config.search.usageTelemetry.enabled) {
+      if (config?.search?.usageTelemetry?.enabled) {
         const repository = await core
           .getStartServices()
           .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
