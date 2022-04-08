@@ -34,5 +34,17 @@ export function getServices(http: any): Services {
         return e;
       }
     },
+    getCustomIndices: async () => {
+      try {
+        const response = await http.post('../api/geospatial/_indices', {
+          body: JSON.stringify({
+            index: '*-map',
+          }),
+        });
+        return response;
+      } catch (e) {
+        return e;
+      }
+    },
   };
 }

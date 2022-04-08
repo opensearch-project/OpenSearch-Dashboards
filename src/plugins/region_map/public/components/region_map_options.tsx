@@ -28,14 +28,27 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiCheckableCard,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTextColor,
+  EuiComboBox,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
 import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
+import { Services, getServices } from '../services';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -53,8 +66,14 @@ export type RegionMapOptionsProps = {
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
   const { getServiceSettings, stateParams, vis, setValue } = props;
-  const { vectorLayers } = vis.type.editorConfig.collections;
+  const services = getServices(props.vis.http);
+
+  const vectorLayers = vis.type.editorConfig.collections.vectorLayers;
+  const customVectorLayers = vis.type.editorConfig.collections.customVectorLayers;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
+  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
+    customVectorLayers,
+  ]);
   const fieldOptions = useMemo(
     () =>
       ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
@@ -85,6 +104,18 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     [vectorLayers, setEmsHotLink, setValue]
   );
 
+  const setCustomLayer = useCallback(
+    async (paramName: 'selectedCustomLayer', value: VectorLayer['layerId']) => {
+      const newLayer = customVectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
+
+      if (newLayer) {
+        setValue(paramName, newLayer);
+        setValue('selectedJoinField', newLayer.fields[0]);
+      }
+    },
+    [customVectorLayers, setValue]
+  );
+
   const setField = useCallback(
     (paramName: 'selectedJoinField', value: FileLayerField['name']) => {
       if (stateParams.selectedLayer) {
@@ -97,6 +128,68 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     [setValue, stateParams.selectedLayer]
   );
 
+  const [radio, setRadio] = useState('default');
+  const [selectedOptions, setSelected] = useState([]);
+  const [isInvalid, setInvalid] = useState(false);
+
+  const isValid = (value) => {
+    // Only allow letters. No spaces, numbers, or special characters.
+    return value.match(/^[a-zA-Z]+$/) !== null;
+  };
+
+  const onCreateOption = (searchValue) => {
+    if (!isValid(searchValue)) {
+      // Return false to explicitly reject the user's input.
+      return false;
+    }
+
+    const newOption = {
+      label: searchValue,
+    };
+
+    // Select the option.
+    setSelected([...selectedOptions, newOption]);
+  };
+
+  const onSearchChange = (searchValue) => {
+    if (!searchValue) {
+      setInvalid(false);
+
+      return;
+    }
+
+    setInvalid(!isValid(searchValue));
+  };
+
+  const onChange = (selectedOption) => {
+    setSelected(selectedOption);
+    setInvalid(false);
+  };
+
+  const setLayerChosenByUser = useCallback(
+    async (layerType) => {
+      const serviceSettings = await getServiceSettings();
+      // const emsHotLink = await serviceSettings.getEMSHotLink(layer);
+
+      setValue('layerChosenByUser', layerType);
+    },
+    [setValue, getServiceSettings]
+  );
+
+  const selectDefaultVectorMap = useCallback(() => {
+    setRadio('default');
+    setLayerChosenByUser('default');
+    document.getElementById('customMapSelection').style.display = 'none';
+    document.getElementById('defaultMapSelection').style.display = 'block';
+  }, [setRadio, setLayerChosenByUser]);
+
+  const selectCustomVectorMap = useCallback(() => {
+    setRadio('custom');
+    setLayerChosenByUser('custom');
+    document.getElementById('defaultMapSelection').style.display = 'none';
+    document.getElementById('customMapSelection').style.display = 'block';
+  }, [setRadio, setLayerChosenByUser]);
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -108,30 +201,98 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
-        <SelectOption
-          id="regionMapOptionsSelectLayer"
-          label={i18n.translate('regionMap.visParams.vectorMapLabel', {
-            defaultMessage: 'Vector map',
-          })}
-          options={vectorLayerOptions}
-          paramName="selectedLayer"
-          value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}
-          setValue={setLayer}
-        />
+        <EuiText size="xs">
+          <strong>
+            <EuiTextColor color="default">Choose a vector map layer</EuiTextColor>
+          </strong>
+        </EuiText>
+        <EuiSpacer size="m" />
 
-        <SelectOption
-          id="regionMapOptionsSelectJoinField"
-          label={i18n.translate('regionMap.visParams.joinFieldLabel', {
-            defaultMessage: 'Join field',
-          })}
-          options={fieldOptions}
-          paramName="selectedJoinField"
-          value={stateParams.selectedJoinField && stateParams.selectedJoinField.name}
-          setValue={setField}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCheckableCard
+              id="defaultVectorMap"
+              label="Default vector map"
+              name="defaultVectorMap"
+              value="default"
+              checked={radio === 'default'}
+              onChange={() => selectDefaultVectorMap()}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCheckableCard
+              id="customVectorMap"
+              label="Uploaded custom map"
+              name="customVectorMap"
+              value="custom"
+              checked={radio === 'custom'}
+              onChange={() => selectCustomVectorMap()}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
+        <EuiFlexGroup id="defaultMapSelection" direction="column">
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsSelectLayer"
+              label={i18n.translate('regionMap.visParams.vectorMapLabel', {
+                defaultMessage: 'Vector map',
+              })}
+              options={vectorLayerOptions}
+              paramName="selectedLayer"
+              value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}
+              setValue={setLayer}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsSelectJoinField"
+              label={i18n.translate('regionMap.visParams.joinFieldLabel', {
+                defaultMessage: 'Join field',
+              })}
+              options={fieldOptions}
+              paramName="selectedJoinField"
+              value={stateParams.selectedJoinField && stateParams.selectedJoinField.name}
+              setValue={setField}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup id="customMapSelection" direction="column" style={{ display: 'none' }}>
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsCustomSelectLayer"
+              label="Vector map"
+              options={customVectorLayerOptions}
+              paramName="selectedCustomLayer"
+              value={stateParams.selectedCustomLayer && stateParams.selectedCustomLayer.layerId}
+              setValue={setCustomLayer}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>
+                <EuiTextColor color="default">Join field</EuiTextColor>
+              </strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiComboBox
+              noSuggestions
+              placeholder="Enter a single field to join"
+              singleSelection={{ asPlainText: true }}
+              selectedOptions={selectedOptions}
+              onCreateOption={onCreateOption}
+              onChange={onChange}
+              onSearchChange={onSearchChange}
+              isInvalid={isInvalid}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
         <SwitchOption
           label={i18n.translate('regionMap.visParams.displayWarningsLabel', {
             defaultMessage: 'Display warnings',

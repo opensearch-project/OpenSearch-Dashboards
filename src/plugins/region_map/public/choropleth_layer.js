@@ -90,7 +90,8 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     meta,
     layerConfig,
     serviceSettings,
-    leaflet
+    leaflet,
+    layerChosenByUser
   ) {
     super();
     this._serviceSettings = serviceSettings;
@@ -105,6 +106,7 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._layerName = name;
     this._layerConfig = layerConfig;
     this._leaflet = leaflet;
+    this._layerChosenByUser = layerChosenByUser;
 
     // eslint-disable-next-line no-undef
     this._leafletLayer = this._leaflet.geoJson(null, {
@@ -139,7 +141,193 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._isJoinValid = false;
     this._whenDataLoaded = new Promise(async (resolve) => {
       try {
-        const data = await this._makeJsonAjaxCall();
+        let data;
+        alert('_layerChosenByUser');
+        console.log(this._layerChosenByUser);
+        if (this._layerChosenByUser === 'default') {
+          alert('wuhoo party by default!');
+          data = await this._makeJsonAjaxCall();
+        } else if (this._layerChosenByUser === 'custom') {
+          alert('wuhoo party by custom!');
+          // data = await this._makeJsonAjaxCall();
+          data = {
+            name: 'CL',
+            type: 'FeatureCollection',
+            features: [
+              {
+                geometry: {
+                  coordinates: [
+                    [
+                      [-69.51009, -17.50659],
+                      [-69.50611, -17.58513],
+                      [-69.49712, -17.6214],
+                      [-69.47578, -17.65241],
+                      [-69.39478, -17.72114],
+                      [-69.35941, -17.75938],
+                      [-69.33424, -17.80579],
+                      [-69.32765, -17.84155],
+                      [-69.32687, -17.91513],
+                      [-69.31786, -17.95162],
+                      [-69.30241, -17.97621],
+                      [-69.29003, -17.97663],
+                      [-69.2776, -17.96753],
+                      [-69.26205, -17.96402],
+                      [-69.24189, -17.98676],
+                      [-69.23481, -17.99296],
+                      [-69.22779, -17.99554],
+                      [-69.20417, -18.00112],
+                      [-69.17389, -18.0189],
+                      [-69.15771, -18.02572],
+                      [-69.14084, -18.03078],
+                      [-69.11988, -18.02985],
+                      [-69.10418, -18.02376],
+                      [-69.09206, -18.02334],
+                      [-69.08228, -18.03908],
+                      [-69.08172, -18.03998],
+                      [-69.08921, -18.08308],
+                      [-69.12593, -18.11109],
+                      [-69.15544, -18.14024],
+                      [-69.1412, -18.18685],
+                      [-69.11066, -18.21796],
+                      [-69.10035, -18.23429],
+                      [-69.09694, -18.25754],
+                      [-69.09684, -18.26798],
+                      [-69.09575, -18.27676],
+                      [-69.08102, -18.31914],
+                      [-69.07929, -18.32803],
+                      [-69.08188, -18.38249],
+                      [-69.07782, -18.39882],
+                      [-69.0417, -18.45774],
+                      [-69.03439, -18.4783],
+                      [-69.0349, -18.50104],
+                      [-69.04165, -18.54889],
+                      [-69.04284, -18.60047],
+                      [-69.03384, -18.64945],
+                      [-69.01015, -18.68976],
+                      [-69.00348, -18.70268],
+                      [-69.00111, -18.71622],
+                      [-69.00317, -18.72955],
+                      [-69.01054, -18.74299],
+                      [-69.01067, -18.74371],
+                      [-69.01054, -18.74454],
+                      [-69.01015, -18.74526],
+                      [-68.95465, -18.85699],
+                      [-68.95145, -18.86732],
+                      [-68.95178, -18.88934],
+                      [-68.95984, -18.90784],
+                      [-68.98961, -18.94649],
+                      [-68.99043, -18.9465],
+                      [-69.02542, -18.98819],
+                      [-69.05627, -19.0191],
+                      [-69.07834, -19.04995],
+                      [-69.13565, -19.08964],
+                      [-69.19298, -19.10286],
+                      [-69.2459, -19.09403],
+                      [-69.29881, -19.08964],
+                      [-69.34292, -19.06757],
+                      [-69.40023, -19.05434],
+                      [-69.46198, -19.03233],
+                      [-69.55898, -19.02788],
+                      [-69.58986, -19.0191],
+                      [-69.62954, -19.00142],
+                      [-69.66042, -18.98819],
+                      [-69.71334, -18.98819],
+                      [-69.78829, -18.98819],
+                      [-69.85444, -19.00142],
+                      [-69.90294, -19.02349],
+                      [-69.96027, -19.03233],
+                      [-70.01319, -19.04556],
+                      [-70.06611, -19.06757],
+                      [-70.1146, -19.10726],
+                      [-70.16752, -19.12932],
+                      [-70.21163, -19.15578],
+                      [-70.26955, -19.17111],
+                      [-70.27033, -19.17148],
+                      [-70.27721, -19.16611],
+                      [-70.28087, -19.16041],
+                      [-70.2753, -19.13307],
+                      [-70.27473, -19.12282],
+                      [-70.27741, -19.10898],
+                      [-70.31273, -19.02191],
+                      [-70.3138, -19.00708],
+                      [-70.30896, -18.97147],
+                      [-70.32012, -18.94428],
+                      [-70.33016, -18.87921],
+                      [-70.34519, -18.83936],
+                      [-70.3531, -18.79705],
+                      [-70.3566, -18.77337],
+                      [-70.35424, -18.76312],
+                      [-70.34293, -18.73594],
+                      [-70.34293, -18.70827],
+                      [-70.34154, -18.69647],
+                      [-70.33617, -18.67571],
+                      [-70.33617, -18.66351],
+                      [-70.33922, -18.65399],
+                      [-70.34805, -18.64332],
+                      [-70.35045, -18.63633],
+                      [-70.33525, -18.61758],
+                      [-70.33886, -18.57822],
+                      [-70.3343, -18.54599],
+                      [-70.32543, -18.52402],
+                      [-70.3225, -18.51336],
+                      [-70.32287, -18.50213],
+                      [-70.32836, -18.48008],
+                      [-70.32934, -18.47186],
+                      [-70.30637, -18.46055],
+                      [-70.30356, -18.44544],
+                      [-70.31371, -18.43011],
+                      [-70.32592, -18.41375],
+                      [-70.34948, -18.38318],
+                      [-70.37009, -18.3627],
+                      [-70.39258, -18.33956],
+                      [-70.3947, -18.33775],
+                      [-70.36939, -18.32473],
+                      [-70.31789, -18.32122],
+                      [-70.21087, -18.33124],
+                      [-70.15907, -18.32597],
+                      [-70.13416, -18.31894],
+                      [-70.06323, -18.2807],
+                      [-70.03936, -18.27305],
+                      [-70.01001, -18.27264],
+                      [-69.98779, -18.26427],
+                      [-69.97034, -18.25063],
+                      [-69.9228, -18.19647],
+                      [-69.88345, -18.1636],
+                      [-69.86534, -18.14459],
+                      [-69.84358, -18.11317],
+                      [-69.7831, -17.9816],
+                      [-69.77989, -17.96258],
+                      [-69.78237, -17.94387],
+                      [-69.79061, -17.92475],
+                      [-69.81278, -17.88827],
+                      [-69.81816, -17.87142],
+                      [-69.8201, -17.8461],
+                      [-69.82904, -17.80383],
+                      [-69.84609, -17.7691],
+                      [-69.85756, -17.73417],
+                      [-69.84984, -17.69159],
+                      [-69.81805, -17.65914],
+                      [-69.77581, -17.65697],
+                      [-69.72904, -17.66327],
+                      [-69.6839, -17.65604],
+                      [-69.63832, -17.62606],
+                      [-69.51009, -17.50659],
+                    ],
+                  ],
+                  type: 'Polygon',
+                },
+                properties: {
+                  iso_3166_2: 'CL-AP',
+                  label_en: 'Arica y Parinacota Region',
+                  label_es: 'Región de Arica y Parinacota',
+                },
+                type: 'Feature',
+              },
+            ],
+          };
+        } else {
+          return;
+        }
         let featureCollection;
         let formatType;
         if (typeof format === 'string') {
@@ -152,6 +340,8 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
 
         if (formatType === 'geojson') {
           featureCollection = data;
+          console.log('fetaureCollection');
+          console.log(featureCollection);
         } else if (formatType === 'topojson') {
           const features = _.get(data, 'objects.' + meta.feature_collection_path);
           featureCollection = topojson.feature(data, features); //conversion to geojson
@@ -298,7 +488,8 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
     meta,
     layerConfig,
     serviceSettings,
-    leaflet
+    leaflet,
+    layerChosenByUser
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -308,7 +499,8 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
       meta,
       layerConfig,
       serviceSettings,
-      leaflet
+      leaflet,
+      layerChosenByUser
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
@@ -333,6 +525,10 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
 
   whenDataLoaded() {
     return this._whenDataLoaded;
+  }
+
+  setLayerChosenByUser(layerChosenByUser) {
+    this._layerChosenByUser = layerChosenByUser;
   }
 
   setMetrics(metrics, fieldFormatter, metricTitle) {
@@ -501,6 +697,9 @@ function makeColorDarker(color) {
 }
 
 function getMinMax(data) {
+  alert(data);
+  console.log('data');
+  console.log(data);
   let min = data[0].value;
   let max = data[0].value;
   for (let i = 1; i < data.length; i += 1) {

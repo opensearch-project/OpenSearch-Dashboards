@@ -91,6 +91,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
+        customVectorLayers: [],
         tmsLayers: [],
       },
       schemas: new Schemas([
@@ -132,6 +133,8 @@ provided base maps, or add your own. Darker colors represent higher values.',
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
+      console.log('tmslayers: ');
+      console.log(tmsLayers);
       vis.http = http;
       vis.notifications = notifications;
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
@@ -142,15 +145,54 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const vectorLayers = regionmapsConfig.layers.map(
         mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
       );
+      const customVectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
+      );
+      console.log('vectorLayers');
+      console.log(vectorLayers);
+      console.log('customVectorLayers');
+      console.log(customVectorLayers);
+
       let selectedLayer = vectorLayers[0];
+      let selectedCustomLayer = customVectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
       if (regionmapsConfig.includeOpenSearchMapsService) {
         const layers = await serviceSettings.getFileLayers();
+        console.log('layers');
+        console.log(layers);
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
             (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
+        console.log('newLayers');
+        console.log(newLayers);
+
+        const customLayers = [
+          {
+            attribution:
+              '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
+            created_at: '2017-04-26T17:12:15.978370',
+            fields: [
+              { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 Code' },
+              { type: 'name', name: 'label_en', description: 'Name (en)' },
+            ],
+            format: 'geojson',
+            id: 'usa-county-map',
+            meta: undefined,
+            name: 'usa-county-map',
+            origin: 'user-upload',
+          },
+        ];
+        console.log('customLayers');
+        console.log(customLayers);
+        const newCustomLayers = customLayers;
+        // .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
+        // .filter(
+        //   (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
+        // );
+        console.log('newCustomLayers');
+        console.log(newCustomLayers);
 
         // backfill v1 manifest for now
         newLayers.forEach((layer) => {
@@ -161,9 +203,28 @@ provided base maps, or add your own. Darker colors represent higher values.',
           }
         });
 
+        newCustomLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+            layer.isEMS = false;
+            layer.layerId = 'custom_upload.usa-county-map';
+          }
+        });
+
         vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+        vis.type.editorConfig.collections.customVectorLayers = [
+          ...customVectorLayers,
+          ...newCustomLayers,
+        ];
 
         [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        [selectedCustomLayer] = vis.type.editorConfig.collections.customVectorLayers;
+
+        vis.params.selectedCustomLayer = selectedCustomLayer;
+        console.log(vis.params);
+
         selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
         if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
@@ -175,6 +236,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vis.params.selectedLayer = selectedLayer;
         vis.params.selectedJoinField = selectedJoinField;
       }
+      vis.params.layerChosenByUser = 'default';
 
       return vis;
     },
