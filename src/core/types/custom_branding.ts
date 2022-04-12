@@ -57,4 +57,9 @@ export interface Branding {
   faviconUrl?: string;
   /** Application title that will replace the default opensearch dashboard string */
   applicationTitle?: string;
+  /** Custom nav bar header colors */
+  colors?: {
+    headerBackgroundColor?: string;
+    headerLinkColor?: string;
+  };
 }

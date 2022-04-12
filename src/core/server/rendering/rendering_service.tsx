@@ -148,6 +148,10 @@ export class RenderingService {
               },
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
+              colors: {
+                headerBackgroundColor: brandingAssignment.headerBackgroundColor,
+                headerLinkColor: brandingAssignment.headerLinkColor,
+              },
             },
           },
         };
@@ -265,6 +269,15 @@ export class RenderingService {
       ? branding.applicationTitle
       : DEFAULT_TITLE;
 
+    // assign theme colors based on brandingValidation function result
+    const headerBackgroundColor = brandingValidation.isHeaderColorValid
+      ? branding.colors.headerBackgroundColor
+      : undefined;
+
+    const headerLinkColor = brandingValidation.isLinkColorValid
+      ? branding.colors.headerLinkColor
+      : undefined;
+
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
       logoDarkmode,
@@ -274,6 +287,8 @@ export class RenderingService {
       loadingLogoDarkmode,
       favicon,
       applicationTitle,
+      headerBackgroundColor,
+      headerLinkColor,
     };
 
     return brandingAssignment;
@@ -318,6 +333,16 @@ export class RenderingService {
 
     const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
+    const isHeaderColorValid = this.isColorValid(
+      branding.colors.headerBackgroundColor,
+      'header background color'
+    );
+
+    const isLinkColorValid = this.isColorValid(
+      branding.colors.headerLinkColor,
+      'header link color'
+    );
+
     const brandingValidation: BrandingValidation = {
       isLogoDefaultValid,
       isLogoDarkmodeValid,
@@ -327,6 +352,8 @@ export class RenderingService {
       isLoadingLogoDarkmodeValid,
       isFaviconValid,
       isTitleValid,
+      isHeaderColorValid,
+      isLinkColorValid,
     };
 
     return brandingValidation;
@@ -388,6 +415,25 @@ export class RenderingService {
         .error(
           `${configName} config is not found or invalid. Title length should be between 1 to 36 characters. Using default title.`
         );
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Validation function for HEX colors.
+   *
+   * @param {string} color code
+   * @param {string} configName
+   * @returns {boolean} indicate if the color code is valid/invalid
+   */
+  public isColorValid = (color: string, configName?: string): boolean => {
+    const validColor = /^(#[0-9a-f]{3}|#([0-9a-f]{2}){2,4}|rgb\((-?\d+\s*,\s*){2}(-?\d+\s*)\)|rgb\((-?\d+%\s*,\s*){2}(-?\d+%\s*)\)|)$/i;
+    if (!color) {
+      return false;
+    }
+    if (color.match(validColor) === null) {
+      this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
       return false;
     }
     return true;

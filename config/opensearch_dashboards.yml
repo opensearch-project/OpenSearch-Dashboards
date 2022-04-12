@@ -35,7 +35,7 @@
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
-#  
+# 
 # It requires the user to create an OpenSearch node attribute with the same name as the value used in the setting
 # This node attribute should assign all nodes of the same cluster an integer value that increments with each new cluster that is spun up
 # e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id: 
@@ -161,6 +161,9 @@
     # darkModeUrl: ""
   # faviconUrl: ""
   # applicationTitle: ""
+  # colors:
+    # headerBackgroundColor: ""
+    # headerLinkColor: ""
 
 # Set the value of this setting to true to capture region blocked warnings and errors 
 # for your map rendering services.

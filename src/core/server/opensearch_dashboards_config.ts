@@ -81,6 +81,14 @@ export const config = {
       applicationTitle: schema.string({
         defaultValue: '',
       }),
+      colors: schema.object({
+        headerBackgroundColor: schema.string({
+          defaultValue: '',
+        }),
+        headerLinkColor: schema.string({
+          defaultValue: '',
+        }),
+      }),
     }),
   }),
   deprecations,

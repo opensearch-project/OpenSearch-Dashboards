@@ -184,4 +184,31 @@ describe('RenderingService', () => {
       expect(result).toEqual(false);
     });
   });
+
+  describe('isColorValid()', () => {
+    it('checks valid HEX color code', async () => {
+      const result = await service.isColorValid('#000000', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks valid 3 digit HEX color code', async () => {
+      const result = await service.isColorValid('#000', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks valid RGB color code', async () => {
+      const result = await service.isColorValid('rgb(0, 0, 0)', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks valid RGB color code with percentages', async () => {
+      const result = await service.isColorValid('rgb(0%, 0%, 0%)', 'config');
+      expect(result).toEqual(true);
+    });
+
+    it('checks invalid color code', async () => {
+      const result = await service.isColorValid('invalid', 'config');
+      expect(result).toEqual(false);
+    });
+  });
 });

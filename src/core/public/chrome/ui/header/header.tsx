@@ -62,6 +62,7 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
+import { CustomHeader } from './branding/opensearch_dashboards_custom_header';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -114,7 +115,7 @@ export function Header({
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
-          <EuiHeader
+          <CustomHeader
             theme="dark"
             position="fixed"
             sections={[
@@ -157,6 +158,7 @@ export function Header({
                 borders: 'none',
               },
             ]}
+            branding={branding}
           />
 
           <EuiHeader position="fixed">

@@ -245,6 +245,10 @@ export default () =>
         }),
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
+        colors: Joi.object({
+          headerBackgroundColor: Joi.any().default(''),
+          headerLinkColor: Joi.any().default(''),
+        }),
       }),
     }).default(),
 

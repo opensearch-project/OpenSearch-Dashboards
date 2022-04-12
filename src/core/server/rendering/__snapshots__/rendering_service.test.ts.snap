@@ -8,6 +8,7 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "colors": Object {},
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -59,6 +60,7 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "colors": Object {},
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -110,6 +112,7 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "colors": Object {},
     "darkMode": true,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -165,6 +168,7 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/ui/default_branding",
+    "colors": Object {},
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -216,6 +220,7 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "colors": Object {},
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
