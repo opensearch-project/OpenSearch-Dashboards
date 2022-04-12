@@ -79,7 +79,7 @@ done
 if [ -z "$OPENSEARCH" ]; then
     IFS='/' read -ra SLASH_ARR <<< "$DASHBOARDS"
     # Expected to be opensearch-x.y.z-platform-arch.tar.gz
-    [[ "$DASHBOARDS" == *"Playground"* ]] && TARBALL="${SLASH_ARR[13]}" || TARBALL="${SLASH_ARR[12]}"
+    [[ "$DASHBOARDS" == *"Playground"* ]] && TARBALL="${SLASH_ARR[14]}" || TARBALL="${SLASH_ARR[13]}"
     IFS='-' read -ra DASH_ARR <<< "$TARBALL"
     # Expected to be arch.tar.gz
     DOTS="${DASH_ARR[4]}"
@@ -89,7 +89,7 @@ if [ -z "$OPENSEARCH" ]; then
     PLATFORM="${DASH_ARR[3]}"
     ARCH="${DOTS_ARR[0]}"
 
-    OPENSEARCH="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/$PLATFORM/$ARCH/dist/opensearch/opensearch-$VERSION-$PLATFORM-$ARCH.tar.gz"
+    OPENSEARCH="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/$PLATFORM/$ARCH/tar/dist/opensearch/opensearch-$VERSION-$PLATFORM-$ARCH.tar.gz"
 fi
 
 # CI=1
