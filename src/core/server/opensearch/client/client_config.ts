@@ -53,6 +53,9 @@ export type OpenSearchClientConfig = Pick<
   | 'username'
   | 'password'
 > & {
+  memoryCircuitBreaker?:
+    | OpenSearchConfig['memoryCircuitBreaker']
+    | ClientOptions['memoryCircuitBreaker'];
   pingTimeout?: OpenSearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: OpenSearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<OpenSearchConfig['ssl']>;
@@ -75,12 +78,14 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
       ...config.customHeaders,
     },
   };
-
-  if (config.pingTimeout != null) {
-    clientOptions.pingTimeout = getDurationAsMs(config.pingTimeout);
+  if (config.memoryCircuitBreaker != null) {
+    clientOptions.memoryCircuitBreaker = config.memoryCircuitBreaker;
   }
   if (config.requestTimeout != null) {
     clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
+  }
+  if (config.pingTimeout != null) {
+    clientOptions.pingTimeout = getDurationAsMs(config.pingTimeout);
   }
   if (config.sniffInterval != null) {
     clientOptions.sniffInterval =

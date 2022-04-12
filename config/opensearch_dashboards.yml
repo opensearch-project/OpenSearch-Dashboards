@@ -76,6 +76,15 @@
 # must be a positive integer.
 #opensearch.requestTimeout: 30000
 
+# Enables the memory circuit breaker that prevents heap out of memory errors for large query responses.
+# If enabled, we will provide additional check to prevent potential out of memory error in @openserach-project/opensearch.
+# The default threshold is based on the `max-old-space-size` of NodeJS. It is configurable by tuning `opensearch.memoryCircuitBreaker.maxPercentage`.
+#opensearch.memoryCircuitBreaker.enabled: false
+
+# The pecentage of maximum heap allowed for processing response. The default value of the pecentage is `1.0`. The valid input range should be [0, 1] inclusively.
+# For reference, the `threshold of memoryCircuitBreaker` = `max-old-space-size of NodeJS` * `opensearch.memoryCircuitBreaker.maxPercentage`
+#opensearch.memoryCircuitBreaker.maxPercentage: 1.0
+
 # List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
 #opensearch.requestHeadersWhitelist: [ authorization ]
