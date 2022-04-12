@@ -11,8 +11,8 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "1.1.0",
-  "branch": "main",
+  "version": "1.1.1",
+  "branch": "1.1",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
