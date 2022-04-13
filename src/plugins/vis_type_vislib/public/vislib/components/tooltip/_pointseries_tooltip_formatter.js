@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -57,7 +56,7 @@ export function pointSeriesTooltipFormatter() {
       let label = currentSeries.label;
 
       // For stacked charts the y axis data is only available in the raw table
-      const tableColumns = get(datum, 'yRaw.table.columns');
+      const tableColumns = datum?.yRaw?.table?.columns;
       if (tableColumns && tableColumns.length > 2) {
         const yColumn = datum.yRaw.column ? tableColumns[datum.yRaw.column] : {};
         label = yColumn.name || label;
