@@ -30,7 +30,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useUrlTracker } from './use_url_tracker';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 import { createMemoryHistory } from 'history';
 
 describe('useUrlTracker', () => {

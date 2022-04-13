@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 import { CustomLogo } from './opensearch_dashboards_custom_logo';
 
 describe('Header logo ', () => {

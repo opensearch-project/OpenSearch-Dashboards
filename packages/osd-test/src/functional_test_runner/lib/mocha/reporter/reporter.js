@@ -34,12 +34,11 @@ import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@osd/dev-utils';
 import moment from 'moment';
 
-import { setupJUnitReportGeneration } from '../../../../../../../src/dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
-import { recordLog, snapshotLogsForRunnable } from '../../../../../../../src/dev/mocha/log_cache';
+import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');

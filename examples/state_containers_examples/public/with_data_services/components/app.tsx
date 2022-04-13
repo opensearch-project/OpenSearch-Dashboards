@@ -191,6 +191,7 @@ function useGlobalStateSyncing(
   }, [query, osdUrlStateStorage]);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 function useAppStateSyncing<AppState extends QueryState>(
   appStateContainer: BaseStateContainer<AppState>,
   query: DataPublicPluginStart['query'],

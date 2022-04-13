@@ -36,7 +36,7 @@ import { StylesService } from './styles_service';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 
 describe('StylesService', () => {
-  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
+  const flushPromises = () => new Promise<void>((resolve) => setTimeout(resolve, 100));
   const getDisableAnimationsTag = () => document.querySelector('style#disableAnimationsCss')!;
 
   afterEach(() => getDisableAnimationsTag().remove());

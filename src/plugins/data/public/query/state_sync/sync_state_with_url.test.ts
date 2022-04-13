@@ -40,7 +40,7 @@ import {
   Storage,
 } from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';

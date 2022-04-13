@@ -36,7 +36,6 @@ import { Project } from './project';
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'opensearch-dashboards/test' }),
-  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
 
   // NOTE: using glob.sync rather than glob-all or globby

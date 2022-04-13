@@ -31,7 +31,7 @@
 import moment from 'moment';
 import React from 'react';
 import { Overview } from './overview';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({

@@ -30,7 +30,7 @@ import { BundleRefModule } from './bundle_ref_module';
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
 
 function safeStat(path: string): Promise<Fs.Stats | undefined> {
-  return new Promise((resolve, reject) => {
+  return new Promise<Fs.Stats | undefined>((resolve, reject) => {
     Fs.stat(path, (error, stat) => {
       if (error?.code === 'ENOENT') {
         resolve(undefined);

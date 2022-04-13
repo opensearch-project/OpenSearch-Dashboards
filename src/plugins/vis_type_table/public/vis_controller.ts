@@ -80,7 +80,7 @@ export function getTableVisualizationControllerClass(
       getOpenSearchDashboardsLegacy().loadFontAwesome();
       await this.initLocalAngular();
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise<void>(async (resolve, reject) => {
         if (!this.$rootScope) {
           const $injector = this.getInjector();
           this.$rootScope = $injector.get('$rootScope');

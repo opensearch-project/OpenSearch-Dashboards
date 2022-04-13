@@ -65,7 +65,7 @@ it('waits for promise to resolve before tearing down proc', async () => {
   let teardownSpy;
 
   await withProcRunner(new ToolingLog(), async (proc) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
     teardownSpy = jest.spyOn(proc, 'teardown');
   });
 
@@ -79,7 +79,7 @@ it('waits for promise to reject before tearing down proc and rejecting with the 
 
   await expect(
     withProcRunner(new ToolingLog(), async (proc) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise<void>((resolve) => setTimeout(resolve, 500));
       teardownSpy = jest.spyOn(proc, 'teardown');
       throw error;
     })

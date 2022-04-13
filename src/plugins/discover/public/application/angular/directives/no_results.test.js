@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@osd/test/jest';
 
 import { DiscoverNoResults } from './no_results';
 

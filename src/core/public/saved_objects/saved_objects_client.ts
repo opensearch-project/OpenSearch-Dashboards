@@ -385,7 +385,7 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<SimpleSavedObject<T>>((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
     });

@@ -41,7 +41,7 @@ export const sleep: ExpressionFunctionDefinition<'sleep', any, { time: number },
   },
   help: '',
   fn: async (input, args, context) => {
-    await new Promise((r) => setTimeout(r, args.time));
+    await new Promise<void>((r) => setTimeout(r, args.time));
     return input;
   },
 };

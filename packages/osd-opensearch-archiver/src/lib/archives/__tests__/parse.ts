@@ -80,7 +80,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
 
       it('provides each JSON object as soon as it is parsed', async () => {
         let onReceived: (resolved: any) => void;
-        const receivedPromise = new Promise((resolve) => (onReceived = resolve));
+        const receivedPromise = new Promise<void>((resolve) => (onReceived = resolve));
         const input = new PassThrough();
         const check = new Transform({
           writableObjectMode: true,

@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { OverviewPageHeader } from './overview_page_header';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 import { NewVisHelp } from './new_vis_help';
 
 describe('NewVisHelp', () => {

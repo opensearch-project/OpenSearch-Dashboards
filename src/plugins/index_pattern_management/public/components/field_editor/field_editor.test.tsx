@@ -141,7 +141,7 @@ describe('FieldEditor', () => {
       mockContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -170,7 +170,7 @@ describe('FieldEditor', () => {
       mockContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -200,7 +200,7 @@ describe('FieldEditor', () => {
       mockContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -217,7 +217,7 @@ describe('FieldEditor', () => {
       mockContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
@@ -242,7 +242,7 @@ describe('FieldEditor', () => {
       mockContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();

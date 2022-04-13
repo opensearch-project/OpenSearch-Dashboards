@@ -134,7 +134,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   setFilterableLabels = (items: LegendItem[]): Promise<void> =>
-    new Promise(async (resolve) => {
+    new Promise<void>(async (resolve) => {
       const filterableLabels = new Set<string>();
       items.forEach(async (item) => {
         const canFilter = await this.canFilter(item);
@@ -266,7 +266,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           type="button"
           onClick={this.toggleLegend}
           className={classNames('visLegend__toggle osd-resetFocusState', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'visLegend__toggle--isOpen': open,
           })}
           aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {

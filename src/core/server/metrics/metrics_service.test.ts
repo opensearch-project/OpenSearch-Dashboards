@@ -101,7 +101,7 @@ describe('MetricsService', () => {
       const nextEmission = async () => {
         jest.advanceTimersByTime(testInterval);
         await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
+        await new Promise<void>((resolve) => process.nextTick(resolve));
       };
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
@@ -135,7 +135,7 @@ describe('MetricsService', () => {
       const nextEmission = async () => {
         jest.advanceTimersByTime(testInterval);
         const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
+        await new Promise<void>((resolve) => process.nextTick(resolve));
         return emission;
       };
 

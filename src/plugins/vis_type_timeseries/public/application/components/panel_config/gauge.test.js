@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 
 jest.mock('../lib/get_default_query_language', () => ({
   getDefaultQueryLanguage: () => 'kuery',

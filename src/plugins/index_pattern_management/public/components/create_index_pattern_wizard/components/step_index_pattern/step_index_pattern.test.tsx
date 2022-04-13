@@ -99,7 +99,7 @@ describe('StepIndexPattern', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     await component.update();
 
@@ -123,7 +123,7 @@ describe('StepIndexPattern', () => {
     instance.onQueryChanged({ target: { value: '?' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
     expect({
@@ -146,7 +146,7 @@ describe('StepIndexPattern', () => {
     instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -200,7 +200,7 @@ describe('StepIndexPattern', () => {
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'o';
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
 
     // Honesty, the state would match the result of the `k` query but
     // it's hard to mock this in tests but if remove our fix
@@ -215,7 +215,7 @@ describe('StepIndexPattern', () => {
       target: { value: 'opensearch' },
     } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'o';
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
   });
 

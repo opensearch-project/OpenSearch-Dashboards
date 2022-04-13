@@ -31,7 +31,6 @@
 import _ from 'lodash';
 import rison from 'rison-node';
 import savedObjectFinderTemplate from './saved_object_finder.html';
-import { keyMap } from './key_map';
 import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
@@ -176,8 +175,8 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
 
           //key handler for the filter text box
           self.filterKeyDown = function ($event) {
-            switch (keyMap[$event.keyCode]) {
-              case 'enter':
+            switch ($event.keyCode) {
+              case 13: // enter
                 if (self.hitCount !== 1) return;
 
                 const hit = self.hits[0];
@@ -191,8 +190,8 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
 
           //key handler for the list items
           self.hitKeyDown = function ($event, page, paginate) {
-            switch (keyMap[$event.keyCode]) {
-              case 'tab':
+            switch ($event.keyCode) {
+              case 9: // tab
                 if (!self.selector.enabled) break;
 
                 self.selector.index = -1;
@@ -208,7 +207,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
 
                 $event.preventDefault();
                 break;
-              case 'down':
+              case 40: // down
                 if (!self.selector.enabled) break;
 
                 if (self.selector.index + 1 < page.length) {
@@ -216,7 +215,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
                 }
                 $event.preventDefault();
                 break;
-              case 'up':
+              case 38: // up
                 if (!self.selector.enabled) break;
 
                 if (self.selector.index > 0) {
@@ -224,7 +223,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
                 }
                 $event.preventDefault();
                 break;
-              case 'right':
+              case 39: // right
                 if (!self.selector.enabled) break;
 
                 if (page.number < page.count) {
@@ -234,7 +233,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
                 }
                 $event.preventDefault();
                 break;
-              case 'left':
+              case 37: // left
                 if (!self.selector.enabled) break;
 
                 if (page.number > 1) {
@@ -244,13 +243,13 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
                 }
                 $event.preventDefault();
                 break;
-              case 'escape':
+              case 27: // escape
                 if (!self.selector.enabled) break;
 
                 $input.focus();
                 $event.preventDefault();
                 break;
-              case 'enter':
+              case 13: // enter
                 if (!self.selector.enabled) break;
 
                 const hitIndex = (page.number - 1) * paginate.perPage + self.selector.index;
@@ -260,7 +259,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
                 self.onChoose(hit, $event);
                 $event.preventDefault();
                 break;
-              case 'shift':
+              case 16: // shift
                 break;
               default:
                 $input.focus();

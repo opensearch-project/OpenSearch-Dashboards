@@ -191,7 +191,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       return;
     }
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
         if (areSomeFieldValidating) {

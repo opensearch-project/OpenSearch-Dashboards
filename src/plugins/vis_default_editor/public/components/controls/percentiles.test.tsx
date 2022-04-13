@@ -32,7 +32,7 @@ import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from 'src/plugins/data/public';
 import { mount } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 import { PercentilesEditor } from './percentiles';
 import { EditorVisState } from '../sidebar/state/reducers';
 

@@ -33,7 +33,7 @@ import { mockCreateWriteStream } from './file_appender.test.mocks';
 import { LogRecord, LogLevel } from '@osd/logging';
 import { FileAppender } from './file_appender';
 
-const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const tickMs = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 beforeEach(() => {
   mockCreateWriteStream.mockReset();

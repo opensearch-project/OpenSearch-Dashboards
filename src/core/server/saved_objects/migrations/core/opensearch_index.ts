@@ -219,7 +219,7 @@ export async function migrationsUpToDate(
       throw e;
     }
 
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise<void>((r) => setTimeout(r, 1000));
 
     return await migrationsUpToDate(client, index, migrationVersion, retryCount - 1);
   }
@@ -374,7 +374,7 @@ async function reindex(
   let completed = false;
 
   while (!completed) {
-    await new Promise((r) => setTimeout(r, pollInterval));
+    await new Promise<void>((r) => setTimeout(r, pollInterval));
 
     const { body } = await client.tasks.get({
       task_id: String(task),

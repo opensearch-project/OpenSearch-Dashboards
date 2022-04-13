@@ -31,7 +31,7 @@
 import React from 'react';
 import { Header } from '../header';
 import { mount } from 'enzyme';
-import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from '@osd/test/jest';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { DocLinksStart } from 'opensearch-dashboards/public';

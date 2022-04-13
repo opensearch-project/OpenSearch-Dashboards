@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@osd/test/jest';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,

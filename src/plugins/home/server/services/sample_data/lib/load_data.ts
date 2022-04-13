@@ -35,7 +35,7 @@ import { createUnzip } from 'zlib';
 const BULK_INSERT_SIZE = 500;
 
 export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) {
-  return new Promise((resolve, reject) => {
+  return new Promise<number>((resolve, reject) => {
     let count: number = 0;
     let docs: any[] = [];
     let isPaused: boolean = false;

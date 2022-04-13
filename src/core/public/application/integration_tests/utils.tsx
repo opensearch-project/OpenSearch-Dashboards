@@ -43,7 +43,7 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
-    new Promise(async (resolve) => {
+    new Promise<Dom>(async (resolve) => {
       if (dom) {
         await act(async () => {
           dom.update();

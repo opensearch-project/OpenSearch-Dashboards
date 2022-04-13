@@ -85,7 +85,7 @@ export class LegacyCoreEditor implements CoreEditor {
   // dirty check for tokenizer state, uses a lot less cycles
   // than listening for tokenizerUpdate
   waitForLatestTokens(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const session = this.editor.getSession();
       const checkInterval = 25;
 
@@ -250,7 +250,7 @@ export class LegacyCoreEditor implements CoreEditor {
 
   private forceRetokenize() {
     const session = this.editor.getSession();
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       // force update of tokens, but not on this thread to allow for ace rendering.
       setTimeout(function () {
         let i;

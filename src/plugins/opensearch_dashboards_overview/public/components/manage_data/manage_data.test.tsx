@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { ManageData } from './manage_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 const mockFeatures = [

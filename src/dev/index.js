@@ -28,6 +28,6 @@
  * under the License.
  */
 
-export { createAutoJUnitReporter, setupJUnitReportGeneration } from './mocha';
+export { createAutoJUnitReporter, setupJUnitReportGeneration } from '@osd/test';
 
 export { generateNoticeFromSource } from './notice';

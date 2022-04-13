@@ -15,8 +15,5 @@
     "utils/**/*",
     "index.ts",
     "typings.ts"
-  ],
-  "references": [
-    { "path": "../test_utils/" }
   ]
 }

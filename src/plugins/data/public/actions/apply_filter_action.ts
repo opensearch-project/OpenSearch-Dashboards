@@ -81,7 +81,7 @@ export function createFilterAction(
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise<Filter[]>((resolve) => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(

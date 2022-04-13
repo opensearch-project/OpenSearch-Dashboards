@@ -7,7 +7,7 @@ import React from 'react';
 import { injectedMetadataServiceMock } from '../../../public/mocks';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { Template } from './template';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@osd/test/jest';
 
 const http = httpServiceMock.createStartContract();
 const injectedMetadata = injectedMetadataServiceMock.createSetupContract();

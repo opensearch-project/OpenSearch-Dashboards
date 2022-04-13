@@ -167,7 +167,7 @@ export class ModalService {
           this.cleanupDom();
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
           let resolved = false;
           const closeModal = (confirmed: boolean) => {
             resolved = true;

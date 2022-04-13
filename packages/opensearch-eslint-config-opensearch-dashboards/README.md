@@ -10,7 +10,7 @@ in your `.eslintrc`:
 ```javascript
 {
   extends: [
-    '@elastic/eslint-config-kibana'
+    '@osd/eslint-config-opensearch-dashboards'
   ]
 }
 ```
@@ -18,14 +18,14 @@ in your `.eslintrc`:
 ## Optional jest config
 
 If the project uses the [jest test runner](https://facebook.github.io/jest/), 
-the `@elastic/eslint-config-kibana/jest` config can be extended as well to use 
+the `@osd/eslint-config-opensearch-dashboards/jest` config can be extended as well to use 
 `eslint-plugin-jest` and add settings specific to it:
 
 ```javascript
 {
   extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest'
+    '@osd/eslint-config-opensearch-dashboards',
+    '@osd/eslint-config-opensearch-dashboards/jest'
   ]
 }
 ```

@@ -115,7 +115,7 @@ describe('CollectorSet', () => {
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: () => new Promise((_resolve, reject) => reject()),
+          fetch: () => new Promise<void>((_resolve, reject) => reject()),
           isReady: () => true,
         })
       );

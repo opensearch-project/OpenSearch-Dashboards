@@ -32,7 +32,7 @@ import { Transform } from 'stream';
 import { createReduceStream, createPromiseFromStreams, createListStream } from './index';
 
 const promiseFromEvent = (name: string, emitter: Transform) =>
-  new Promise((resolve) => emitter.on(name, () => resolve(name)));
+  new Promise<string>((resolve) => emitter.on(name, () => resolve(name)));
 
 describe('reduceStream', () => {
   test('calls the reducer for each item provided', async () => {

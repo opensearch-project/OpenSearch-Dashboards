@@ -104,7 +104,7 @@ describe('timeouts', () => {
   test('closes sockets on timeout', async () => {
     const router = new Router('', logger.get(), enhanceWithContext);
     router.get({ path: '/a', validate: false }, async (context, req, res) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 2000));
       return res.ok({});
     });
     router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));

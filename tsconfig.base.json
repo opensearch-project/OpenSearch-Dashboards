@@ -7,9 +7,6 @@
       "opensearch-dashboards/public": ["src/core/public"],
       "opensearch-dashboards/server": ["src/core/server"],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "test_utils/*": [
-        "src/test_utils/public/*"
-      ],
       "fixtures/*": ["src/fixtures/*"],
       "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"]
     },

@@ -449,7 +449,7 @@ describe('setup', () => {
   });
   it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
-    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise<void>((i) => i));
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -487,7 +487,7 @@ describe('start', () => {
   it('throws timeout error if "start" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
-    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
+    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise<void>((i) => i));
 
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));

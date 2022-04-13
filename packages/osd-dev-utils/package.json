@@ -17,7 +17,6 @@
     "@osd/utils": "1.0.0",
     "axios": "^0.21.4",
     "chalk": "^4.1.0",
-    "cheerio": "0.22.0",
     "dedent": "^0.7.0",
     "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
@@ -37,6 +36,7 @@
     "@osd/expect": "1.0.0",
     "@types/vinyl": "^2.0.4",
     "chance": "1.0.18",
-    "typescript": "4.0.2"
+    "cheerio": "^1.0.0-rc.10",
+    "typescript": "4.1.6"
   }
 }

@@ -115,7 +115,7 @@ Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
 module.exports = {
   root: true,
 
-  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
+  extends: ['@osd/eslint-config-opensearch-dashboards', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**

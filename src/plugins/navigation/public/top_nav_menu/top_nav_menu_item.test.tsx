@@ -31,7 +31,7 @@
 import React from 'react';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 
 describe('TopNavMenu', () => {
   const ensureMenuItemDisabled = (data: TopNavMenuData) => {

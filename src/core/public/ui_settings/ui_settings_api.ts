@@ -81,7 +81,7 @@ export class UiSettingsApi {
           if (error) {
             reject(error);
           } else {
-            resolve(resp);
+            resolve(resp!);
           }
         },
       };

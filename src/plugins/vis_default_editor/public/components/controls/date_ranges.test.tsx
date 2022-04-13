@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 import { DateRangesParamEditor } from './date_ranges';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { docLinksServiceMock } from '../../../../../core/public/mocks';

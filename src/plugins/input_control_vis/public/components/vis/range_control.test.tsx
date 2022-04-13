@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@osd/test/jest';
 
 import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';

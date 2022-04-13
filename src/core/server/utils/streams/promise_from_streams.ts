@@ -73,7 +73,7 @@ export async function createPromiseFromStreams<T>(streams: [Readable, ...Writabl
     );
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     // @ts-expect-error 'pipeline' doesn't support variable length of arguments
     pipeline(...streams, (err) => {
       if (err) return reject(err);

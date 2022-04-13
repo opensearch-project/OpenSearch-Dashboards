@@ -32,7 +32,7 @@ import {
   createSessionStorageStateStorage,
   ISessionStorageStateStorage,
 } from './create_session_storage_state_storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 
 describe('SessionStorageStateStorage', () => {
   let browserStorage: StubBrowserStorage;

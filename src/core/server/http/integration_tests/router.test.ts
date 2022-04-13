@@ -317,7 +317,7 @@ describe('Options', () => {
 
   describe('timeout', () => {
     const writeBodyCharAtATime = (request: supertest.Test, body: string, interval: number) => {
-      return new Promise((resolve, reject) => {
+      return new Promise<any>((resolve, reject) => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
@@ -478,7 +478,7 @@ describe('Options', () => {
             },
           },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise<void>((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
           }
         );
@@ -503,7 +503,7 @@ describe('Options', () => {
             },
           },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 10));
+            await new Promise<void>((resolve) => setTimeout(resolve, 10));
             return res.ok({});
           }
         );

@@ -30,7 +30,7 @@
 
 import { Defer } from './defer';
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
+const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 1));
 
 describe('new Defer()', () => {
   test('has .promise Promise object', () => {

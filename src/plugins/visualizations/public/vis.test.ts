@@ -35,7 +35,7 @@ jest.mock('./services', () => {
     constructor() {}
 
     render(): Promise<void> {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         resolve();
       });
     }

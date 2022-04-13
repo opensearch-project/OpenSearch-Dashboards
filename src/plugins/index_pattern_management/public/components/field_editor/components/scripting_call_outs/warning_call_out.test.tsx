@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from '@osd/test/jest';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';

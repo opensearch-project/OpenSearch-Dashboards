@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl, wrapWithIntl } from '@osd/test/jest';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';

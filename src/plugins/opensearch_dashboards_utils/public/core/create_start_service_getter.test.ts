@@ -38,7 +38,7 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise((r) => setTimeout(r, 1));
+    await new Promise<void>((r) => setTimeout(r, 1));
 
     expect(() => start()).toThrowErrorMatchingInlineSnapshot(
       `"Trying to access start services before start."`
@@ -53,14 +53,14 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise((r) => setTimeout(r, 1));
+    await new Promise<void>((r) => setTimeout(r, 1));
 
     expect(() => start()).toThrow();
 
-    await new Promise((r) => setTimeout(r, 1));
+    await new Promise<void>((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
-    await new Promise((r) => process.nextTick(r)); // Allow the current event loop to finish
+    await new Promise<void>((r) => process.nextTick(r)); // Allow the current event loop to finish
 
     expect(start()).toEqual({
       core,
@@ -77,10 +77,10 @@ describe('createStartServicesGetter', () => {
     const accessor: StartServicesAccessor = async () => await future.promise;
     const start = createStartServicesGetter(accessor);
 
-    await new Promise((r) => setTimeout(r, 1));
+    await new Promise<void>((r) => setTimeout(r, 1));
     future.resolve([core, plugins, self]);
     await future.promise;
-    await new Promise((r) => process.nextTick(r)); // Allow the current event loop to finish
+    await new Promise<void>((r) => process.nextTick(r)); // Allow the current event loop to finish
 
     expect(start()).toEqual({
       core,

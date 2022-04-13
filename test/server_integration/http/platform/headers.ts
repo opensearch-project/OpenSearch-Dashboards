@@ -30,12 +30,10 @@
 
 import Http from 'http';
 import Url from 'url';
+import getUrl from '@osd/test/jest';
 import { FtrProviderContext } from '../../services/types';
 
-// @ts-ignore
-import getUrl from '../../../../src/test_utils/get_url';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;
 
 // eslint-disable-next-line import/no-default-export
@@ -52,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       function performRequest() {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           const req = Http.request(
             {
               protocol,

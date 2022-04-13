@@ -5,17 +5,20 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
-    "osd:bootstrap": "yarn build",
-    "osd:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "osd:bootstrap": "node scripts/build --source-maps",
+    "osd:watch": "node scripts/build --watch --source-maps"
   },
   "opensearchDashboards": {
     "devOnly": true
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
+    "@jest/reporters": "^27.5.1",
+    "@jest/types": "^27.5.1",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
+    "@osd/i18n": "1.0.0",
     "@osd/utils": "1.0.0",
     "@types/joi": "^13.4.2",
     "@types/lodash": "^4.14.170",
@@ -28,11 +31,14 @@
     "chalk": "^4.1.0",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
+    "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
     "getopts": "^2.2.5",
     "glob": "^7.1.7",
+    "globby": "^8.0.1",
     "joi": "^13.5.2",
     "lodash": "^4.17.21",
+    "mustache": "^2.3.2",
     "parse-link-header": "^2.0.0",
     "rxjs": "^6.5.5",
     "strip-ansi": "^6.0.0",

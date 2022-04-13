@@ -40,7 +40,7 @@ export function preventParallelCalls<C extends void, A, R>(
     private reject!: (error: Error) => void;
 
     constructor(private readonly context: C, private readonly arg: A) {
-      this.promise = new Promise((resolve, reject) => {
+      this.promise = new Promise<R>((resolve, reject) => {
         this.resolve = resolve;
         this.reject = reject;
       });

@@ -63,7 +63,7 @@ export function sendRequestToOpenSearch(
   args: OpenSearchRequestArgs
 ): Promise<OpenSearchRequestResult[]> {
   const requests = args.requests.slice();
-  return new Promise((resolve, reject) => {
+  return new Promise<OpenSearchRequestResult[]>((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
     const results: OpenSearchRequestResult[] = [];
     if (reqId !== CURRENT_REQ_ID) {

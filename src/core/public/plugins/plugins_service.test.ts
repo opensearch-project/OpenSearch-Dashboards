@@ -265,7 +265,7 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+      const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
       beforeAll(() => {
         jest.useFakeTimers('legacy');
         setImmediate(() => {});
@@ -278,7 +278,7 @@ describe('PluginsService', () => {
         mockPluginInitializers.set(
           'pluginA',
           jest.fn(() => ({
-            setup: jest.fn(() => new Promise((i) => i)),
+            setup: jest.fn(() => new Promise<void>((i) => i)),
             start: jest.fn(() => ({ value: 1 })),
             stop: jest.fn(),
           }))

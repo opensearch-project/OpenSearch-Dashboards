@@ -275,9 +275,9 @@ describe('Execution', () => {
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null);
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 1));
+      await new Promise<void>((r) => setTimeout(r, 1));
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 11));
+      await new Promise<void>((r) => setTimeout(r, 11));
       expect(execution.state.get().result).toBe(null);
     });
   });

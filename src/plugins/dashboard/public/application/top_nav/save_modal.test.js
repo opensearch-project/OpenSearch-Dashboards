@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@osd/test/jest';
 
 jest.mock('../../../../saved_objects/public', () => ({
   SavedObjectSaveModal: () => null,

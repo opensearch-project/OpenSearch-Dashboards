@@ -534,7 +534,7 @@ test('Panel removed from input state', async () => {
   };
 
   container.updateInput(newInput);
-  await new Promise((r) => setTimeout(r, 1));
+  await new Promise<void>((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeUndefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
@@ -565,7 +565,7 @@ test('Panel added to input state', async () => {
   );
 
   container2.updateInput(container.getInput());
-  await new Promise((r) => setTimeout(r, 1));
+  await new Promise<void>((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeDefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBe(true);

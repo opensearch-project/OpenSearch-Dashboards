@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
 // @ts-ignore

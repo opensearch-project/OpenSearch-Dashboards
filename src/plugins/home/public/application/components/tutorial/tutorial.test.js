@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@osd/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { Tutorial } from './tutorial';

@@ -98,7 +98,7 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
       },
       async (context, req, res) => {
         if (req.body?.responseDelay) {
-          await new Promise((resolve) => setTimeout(resolve, req.body!.responseDelay));
+          await new Promise<void>((resolve) => setTimeout(resolve, req.body!.responseDelay));
         }
         return res.ok({});
       }
@@ -123,7 +123,7 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
       },
       async (context, req, res) => {
         if (req.body?.responseDelay) {
-          await new Promise((resolve) => setTimeout(resolve, req.body!.responseDelay));
+          await new Promise<void>((resolve) => setTimeout(resolve, req.body!.responseDelay));
         }
         return res.ok({});
       }

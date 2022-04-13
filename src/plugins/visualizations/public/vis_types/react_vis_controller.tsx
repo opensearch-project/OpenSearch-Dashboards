@@ -40,7 +40,7 @@ export class ReactVisController implements VisualizationController {
   public render(visData: any, visParams: any): Promise<void> {
     const I18nContext = getI18n().Context;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (!this.vis.type || !this.vis.type.visConfig || !this.vis.type.visConfig.component) {
         reject('Missing component for ReactVisType');
       }

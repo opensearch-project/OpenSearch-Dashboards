@@ -313,7 +313,7 @@ describe('PluginStatusService', () => {
       const subscription = service
         .getDependenciesStatus$('b')
         .subscribe((status) => statusUpdates.push(status));
-      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+      const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
       pluginA$.next(degraded);
       pluginA$.next(available);

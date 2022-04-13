@@ -33,17 +33,17 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
-import { getUniqueJunitReportPath } from '@osd/test';
+import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../xml';
+import { escapeCdata } from './xml';
 
 const dateNow = Date.now.bind(Date);
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
-    rootDirectory = dirname(require.resolve('../../../package.json')),
+    rootDirectory = dirname(require.resolve('../../../../package.json')),
     getTestMetadata = () => ({}),
   } = options;
 

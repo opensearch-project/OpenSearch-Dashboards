@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
@@ -48,7 +48,7 @@ describe('HeaderActionMenu', () => {
   });
 
   const refresh = () => {
-    new Promise(async (resolve) => {
+    new Promise<ReactWrapper<{}, {}, Component<{}, {}, any>>>(async (resolve) => {
       if (component) {
         act(() => {
           component.update();

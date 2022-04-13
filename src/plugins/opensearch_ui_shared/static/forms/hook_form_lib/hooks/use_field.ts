@@ -129,6 +129,7 @@ export const useField = <T, FormType = FormData, I = T>(
   };
 
   const formatInputValue = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     <T>(inputValue: unknown): T => {
       const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 

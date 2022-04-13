@@ -36,8 +36,8 @@ import { parseMilliseconds, parse } from './settings';
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
 
-const ORIGINAL_PLATFORM = process.platform;
-const ORIGINAL_ARCHITECTURE = process.arch;
+const ORIGINAL_PLATFORM = 'linux';
+const ORIGINAL_ARCHITECTURE = 'x64';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -63,7 +63,7 @@ describe('parse function', function () {
   const defaultOptions = { pluginDir: fromRoot('plugins') };
   const osdPackage = { version: 1234 };
 
-  afterAll(() => {
+  beforeAll(() => {
     Object.defineProperties(process, {
       platform: {
         value: ORIGINAL_PLATFORM,

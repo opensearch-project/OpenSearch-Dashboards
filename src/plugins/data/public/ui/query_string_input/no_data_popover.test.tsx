@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@osd/test/jest';
 import { NoDataPopover } from './no_data_popover';
 import { EuiTourStep } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';

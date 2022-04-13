@@ -39,7 +39,7 @@ import {
 } from './flyout.test.mocks';
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@osd/test/jest';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
@@ -92,7 +92,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -103,7 +103,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -131,7 +131,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -185,7 +185,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -223,7 +223,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -243,7 +243,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       expect(resolveImportErrorsMock).toMatchSnapshot();
     });
   });
@@ -349,7 +349,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -404,7 +404,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -424,7 +424,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       expect(resolveIndexPatternConflictsMock).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
@@ -450,7 +450,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -469,7 +469,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
 
       expect(component.state('error')).toMatchInlineSnapshot(
         `"The file could not be processed due to error: \\"foobar\\""`

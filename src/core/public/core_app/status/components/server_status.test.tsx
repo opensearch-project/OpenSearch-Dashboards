@@ -31,7 +31,7 @@
 import React from 'react';
 import { ServerStatus } from './server_status';
 import { FormattedStatus } from '../lib';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 
 const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
   id: 'green',

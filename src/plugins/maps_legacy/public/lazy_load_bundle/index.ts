@@ -41,7 +41,7 @@ export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyM
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
+  loadModulesPromise = new Promise<LazyLoadedMapsLegacyModules>(async (resolve) => {
     const { OpenSearchDashboardsMap, L, ServiceSettings } = await import('./lazy');
 
     resolve({

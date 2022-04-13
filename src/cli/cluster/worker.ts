@@ -149,7 +149,7 @@ export class Worker extends EventEmitter {
       this.processBinder.destroy();
 
       // wait until the cluster reports this fork has exited, then resolve
-      await new Promise((resolve) => this.once('fork:exit', resolve));
+      await new Promise<void>((resolve) => this.once('fork:exit', resolve));
     }
   }
 
@@ -201,7 +201,7 @@ export class Worker extends EventEmitter {
     if (this.fork) {
       // once "exit" event is received with 0 status, start() is called again
       this.shutdown();
-      await new Promise((cb) => this.once('online', cb));
+      await new Promise<void>((cb) => this.once('online', cb));
       return;
     }
 
@@ -227,6 +227,6 @@ export class Worker extends EventEmitter {
     this.processBinder.on('exit', () => this.shutdown());
 
     // wait for the fork to report it is online before resolving
-    await new Promise((cb) => this.once('fork:online', cb));
+    await new Promise<void>((cb) => this.once('fork:online', cb));
   }
 }

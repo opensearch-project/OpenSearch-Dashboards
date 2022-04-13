@@ -223,7 +223,7 @@ export async function getFileHash(path: string, algo: string) {
 
   const hash = createHash(algo);
   const readStream = fs.createReadStream(path);
-  await new Promise((res, rej) => {
+  await new Promise<void>((res, rej) => {
     readStream
       .on('data', (chunk) => hash.update(chunk))
       .on('error', rej)

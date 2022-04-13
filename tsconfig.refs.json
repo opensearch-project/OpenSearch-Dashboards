@@ -1,7 +1,6 @@
 {
   "include": [],
   "references": [
-    { "path": "./src/test_utils/tsconfig.json" },
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/opensearch_dashboards_utils/tsconfig.json" },
     { "path": "./src/plugins/opensearch_dashboards_react/tsconfig.json" },

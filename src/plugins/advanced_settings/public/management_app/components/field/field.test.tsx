@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@osd/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../core/public';

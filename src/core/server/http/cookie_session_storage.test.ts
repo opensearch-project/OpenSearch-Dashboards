@@ -117,7 +117,7 @@ const userData = { id: '42' };
 const sessionDurationMs = 1000;
 const path = '/';
 const sessVal = () => ({ value: userData, expires: Date.now() + sessionDurationMs, path });
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',

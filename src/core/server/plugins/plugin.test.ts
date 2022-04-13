@@ -325,7 +325,7 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
     setup: jest.fn(),
     start: async () => {
       // delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise<void>((resolve) => setTimeout(resolve, 10));
       expect(startDependenciesResolved).toBe(false);
       return pluginStartContract;
     },

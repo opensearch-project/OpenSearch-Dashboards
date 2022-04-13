@@ -63,7 +63,7 @@ async function withTimeout(
   try {
     await Promise.race([
       attempt(),
-      new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), ms)),
+      new Promise<void>((_, reject) => setTimeout(() => reject(TIMEOUT), ms)),
     ]);
   } catch (error) {
     if (error === TIMEOUT) {

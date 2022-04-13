@@ -33,7 +33,7 @@ import { parallelizeBatches } from './parallelize';
 // As promises resolve async, we use this helper to wait for all promises that
 // have been resolved to complete (aka call `then`).
 const tick = () =>
-  new Promise((resolve) => {
+  new Promise<void>((resolve) => {
     setTimeout(resolve, 0);
   });
 
@@ -136,7 +136,7 @@ test('rejects if any promise rejects', async () => {
 function createPromiseWithResolve() {
   let resolve: (val?: any) => void;
   let reject: (err?: any) => void;
-  const promise = new Promise((res, rej) => {
+  const promise = new Promise<void>((res, rej) => {
     resolve = res;
     reject = rej;
   });

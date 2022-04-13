@@ -79,7 +79,7 @@ const callAPI = async (
 
   const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
   try {
-    return await new Promise((resolve, reject) => {
+    return await new Promise<void>((resolve, reject) => {
       const request = api.call(apiContext, clientParams);
       if (options.signal) {
         options.signal.addEventListener('abort', () => {

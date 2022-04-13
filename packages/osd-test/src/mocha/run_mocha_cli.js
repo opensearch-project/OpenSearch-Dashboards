@@ -52,7 +52,7 @@ export function runMochaCli() {
   process.argv.push('--globals', '__core-js_shared__,core,_, ');
 
   // ensure that mocha requires the setup_node_env script
-  process.argv.push('--require', require.resolve('../../setup_node_env'));
+  process.argv.push('--require', require.resolve('../../../../src/setup_node_env'));
 
   // set default test timeout
   if (opts.timeout == null && !opts['no-timeouts']) {

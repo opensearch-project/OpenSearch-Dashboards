@@ -38,7 +38,7 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@osd/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -91,7 +91,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
 
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
-  await new Promise((r) => setTimeout(r, 1));
+  await new Promise<void>((r) => setTimeout(r, 1));
 
   const ids = Object.keys(container.getInput().panels);
   const embeddableId = ids[0];

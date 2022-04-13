@@ -36,7 +36,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@osd/expect';
-import { getUniqueJunitReportPath } from '@osd/test';
+import { getUniqueJunitReportPath } from '../../report_path';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 

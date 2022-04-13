@@ -28,51 +28,14 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-import getUrl from '../get_url';
+export function test(value: any) {
+  return value && value.__reactMount__;
+}
 
-describe('getUrl', function () {
-  it('should convert to a url', function () {
-    const url = getUrl(
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
-      {
-        pathname: 'foo',
-      }
-    );
-
-    expect(url).to.be('http://localhost/foo');
-  });
-
-  it('should convert to a url with port', function () {
-    const url = getUrl(
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: 9220,
-      },
-      {
-        pathname: 'foo',
-      }
-    );
-
-    expect(url).to.be('http://localhost:9220/foo');
-  });
-
-  it('should convert to a secure hashed url', function () {
-    expect(
-      getUrl(
-        {
-          protocol: 'https',
-          hostname: 'localhost',
-        },
-        {
-          pathname: 'foo',
-          hash: 'bar',
-        }
-      )
-    ).to.be('https://localhost/foo#bar');
-  });
-});
+export function print(value: any, serialize: any) {
+  // there is no proper way to correctly indent multiline values
+  // so the trick here is to use the Object representation and rewriting the root object name
+  return serialize({
+    reactNode: value.__reactMount__,
+  }).replace('Object', 'MountPoint');
+}

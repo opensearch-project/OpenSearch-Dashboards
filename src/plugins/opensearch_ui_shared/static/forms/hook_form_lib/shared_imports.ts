@@ -28,6 +28,6 @@
  * under the License.
  */
 
-export { registerTestBed, TestBed } from '../../../../../test_utils/public/testbed';
+export { registerTestBed, TestBed } from '@osd/test/jest';
 
-export { getRandomString } from '../../../../../test_utils/public/helpers';
+export { getRandomString } from '@osd/test/jest';

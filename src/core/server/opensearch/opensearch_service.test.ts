@@ -45,7 +45,7 @@ import { opensearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>
-  await new Promise((resolve) => setTimeout(resolve, durationMs));
+  await new Promise<void>((resolve) => setTimeout(resolve, durationMs));
 
 let opensearchService: OpenSearchService;
 const configService = configServiceMock.create();

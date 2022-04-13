@@ -34,7 +34,7 @@ import { act } from 'react-dom/test-utils';
 import { MountPoint } from 'opensearch-dashboards/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@osd/test/jest';
 
 const dataShim = {
   ui: {

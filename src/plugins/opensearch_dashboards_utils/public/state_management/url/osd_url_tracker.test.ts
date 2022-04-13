@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 import { createMemoryHistory, History } from 'history';
 import { createOsdUrlTracker, OsdUrlTracker } from './osd_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';

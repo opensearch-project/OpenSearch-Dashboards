@@ -31,7 +31,7 @@
 import { throwError, of } from 'rxjs';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
@@ -72,7 +72,7 @@ beforeEach(() => {
 
 const waitForPromises = async () =>
   act(async () => {
-    await new Promise((resolve) => setTimeout(resolve));
+    await new Promise<void>((resolve) => setTimeout(resolve));
   });
 
 /**

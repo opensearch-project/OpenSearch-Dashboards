@@ -55,7 +55,7 @@ export async function fetchSoon(
  * @return Promise<any> A promise that resolves with the result of executing the function
  */
 function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
-  return new Promise((resolve) => {
+  return new Promise<T>((resolve) => {
     setTimeout(() => resolve(fn()), ms);
   });
 }

@@ -30,7 +30,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 
 import { ErrorToast } from './error_toast';
 

@@ -40,7 +40,7 @@ export async function getServiceSettings(): Promise<IServiceSettings> {
     return loadPromise;
   }
 
-  loadPromise = new Promise(async (resolve) => {
+  loadPromise = new Promise<IServiceSettings>(async (resolve) => {
     const modules = await lazyLoadMapsLegacyModules();
     const config = getMapsLegacyConfig();
     // @ts-expect-error

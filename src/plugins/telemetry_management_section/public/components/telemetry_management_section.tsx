@@ -258,7 +258,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { telemetryService, toasts } = this.props;
     const newOptInValue = !this.state.enabled;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       this.setState(
         {
           processing: true,

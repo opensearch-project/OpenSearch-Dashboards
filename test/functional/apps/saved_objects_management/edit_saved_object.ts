@@ -31,7 +31,7 @@
 import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const opensearchArchiver = getService('opensearchArchiver');

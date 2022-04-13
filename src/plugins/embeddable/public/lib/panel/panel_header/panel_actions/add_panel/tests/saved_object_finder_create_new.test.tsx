@@ -32,7 +32,7 @@ import React from 'react';
 import { SavedObjectFinderCreateNew } from '../saved_object_finder_create_new';
 import { shallow } from 'enzyme';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 
 describe('SavedObjectFinderCreateNew', () => {
   test('renders correctly with no items', () => {

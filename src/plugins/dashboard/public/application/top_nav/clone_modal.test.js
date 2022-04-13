@@ -30,7 +30,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@osd/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { DashboardCloneModal } from './clone_modal';

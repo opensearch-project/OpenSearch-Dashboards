@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@osd/test/jest';
 
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';

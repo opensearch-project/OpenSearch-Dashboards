@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { TimeField } from '../time_field';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@osd/test/jest';
 
 describe('TimeField', () => {
   it('should render normally', () => {

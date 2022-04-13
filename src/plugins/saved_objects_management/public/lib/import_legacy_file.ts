@@ -29,7 +29,7 @@
  */
 
 export async function importLegacyFile(file: File) {
-  return new Promise((resolve, reject) => {
+  return new Promise<any>((resolve, reject) => {
     const fr = new FileReader();
     fr.onload = (event) => {
       const result = event.target!.result as string;

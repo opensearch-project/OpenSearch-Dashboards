@@ -32,7 +32,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';

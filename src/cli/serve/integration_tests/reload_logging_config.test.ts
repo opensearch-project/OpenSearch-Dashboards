@@ -104,7 +104,7 @@ describe('Server logging configuration', function () {
 
   afterEach(async () => {
     if (child !== undefined) {
-      const exitPromise = new Promise((resolve) => child?.once('exit', resolve));
+      const exitPromise = new Promise<void>((resolve) => child?.once('exit', resolve));
       child.kill('SIGKILL');
       await exitPromise;
     }
@@ -133,7 +133,7 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
@@ -204,7 +204,7 @@ describe('Server logging configuration', function () {
           configFilePath,
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 

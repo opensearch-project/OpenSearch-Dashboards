@@ -41,7 +41,7 @@ import {
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@osd/test/jest';
 import {
   httpServiceMock,
   overlayServiceMock,
@@ -222,7 +222,7 @@ describe('SavedObjectsTable', () => {
     const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -236,7 +236,7 @@ describe('SavedObjectsTable', () => {
     const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -266,7 +266,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -309,7 +309,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -331,7 +331,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -345,7 +345,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -375,7 +375,7 @@ describe('SavedObjectsTable', () => {
       });
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -403,7 +403,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -417,7 +417,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -433,7 +433,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -446,7 +446,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -485,7 +485,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender();
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -509,7 +509,7 @@ describe('SavedObjectsTable', () => {
       ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -544,7 +544,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
+      await new Promise<void>((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 

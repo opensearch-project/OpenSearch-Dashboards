@@ -84,7 +84,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
 
       getOpenSearchDashboardsLegacy().loadFontAwesome();
 
-      return new Promise(async (resolve) => {
+      return new Promise<void>(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }

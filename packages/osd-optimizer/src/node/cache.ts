@@ -214,7 +214,9 @@ export class Cache {
             }
           } else {
             // delay a smidge to allow other things to happen before the next batch of checks
-            promises.add(new Promise((resolve) => setTimeout(resolve, 1)));
+            promises.add(
+              new Promise<void>((resolve) => setTimeout(resolve, 1))
+            );
           }
 
           invalidKeys.length = 0;

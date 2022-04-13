@@ -58,7 +58,7 @@ beforeEach(() => {
 });
 
 it('extends the context using extendContext()', async () => {
-  const context: any = await new Promise((resolve) => {
+  const context: any = await new Promise<any>((resolve) => {
     testCli.command({ name: 'foo', description: 'some command', run: resolve }).execute();
   });
 

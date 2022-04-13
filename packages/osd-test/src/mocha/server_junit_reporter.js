@@ -28,39 +28,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import url from 'url';
+// when the reporter is loaded by mocha in child process it might be before setup_node_env
+require('../../../../src/setup_node_env');
 
-/**
- * Converts a config and a pathname to a url
- * @param {object} config A url config
- *   example:
- *   {
- *      protocol: 'http',
- *      hostname: 'localhost',
- *      port: 9220,
- *      auth: opensearchDashboardsTestUser.username + ':' + opensearchDashboardsTestUser.password
- *   }
- * @param {object} app The params to append
- *   example:
- *   {
- *      pathname: 'app/opensearch-dashboards',
- *      hash: '/discover'
- *   }
- * @return {string}
- */
-
-export default function getUrl(config, app) {
-  return url.format(_.assign({}, config, app));
-}
-
-getUrl.noAuth = function getUrlNoAuth(config, app) {
-  config = _.pickBy(config, function (val, param) {
-    return param !== 'auth';
-  });
-  return getUrl(config, app);
-};
-
-getUrl.baseUrl = function getBaseUrl(config) {
-  return url.format(_.pick(config, 'protocol', 'hostname', 'port'));
-};
+module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
+  reportName: 'Server Mocha Tests',
+});

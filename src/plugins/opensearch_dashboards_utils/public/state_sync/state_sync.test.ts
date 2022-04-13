@@ -44,7 +44,7 @@ import {
   IOsdUrlStateStorage,
   ISessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@osd/test/jest';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 
@@ -195,7 +195,7 @@ describe('state_sync', () => {
     let history: History;
     let urlSyncStrategy: IOsdUrlStateStorage;
     const getCurrentUrl = () => history.createHref(history.location);
-    const tick = () => new Promise((resolve) => setTimeout(resolve));
+    const tick = () => new Promise<void>((resolve) => setTimeout(resolve));
 
     beforeEach(() => {
       container.set(defaultState);
@@ -365,7 +365,7 @@ describe('state_sync', () => {
 
 function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   defaultState: State
 ): INullableBaseStateContainer<State> {
   return {

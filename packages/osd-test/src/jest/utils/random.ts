@@ -28,9 +28,13 @@
  * under the License.
  */
 
-// when the reporter is loaded by mocha in child process it might be before setup_node_env
-require('../../setup_node_env');
+import Chance from 'chance';
 
-module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
-  reportName: 'Server Mocha Tests',
-});
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomNumber = (range: { min: number; max: number } = { min: 1, max: 20 }) =>
+  chance.integer(range);
+
+export const getRandomString = (options = {}) =>
+  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;

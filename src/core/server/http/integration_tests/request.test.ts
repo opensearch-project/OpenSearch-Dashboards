@@ -60,7 +60,7 @@ afterEach(async () => {
   await server.stop();
 });
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 describe('OpenSearchDashboardsRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {

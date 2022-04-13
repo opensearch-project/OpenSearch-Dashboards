@@ -34,7 +34,8 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '../enzyme_helpers';
-import { WithMemoryRouter, WithRoute, WithStore } from '../helpers';
+import { WithMemoryRouter, WithRoute } from '../router_helpers';
+import { WithStore } from '../redux_helpers';
 import { MemoryRouterConfig } from './types';
 
 interface Config {

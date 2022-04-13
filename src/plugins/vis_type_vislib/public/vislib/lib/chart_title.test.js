@@ -34,7 +34,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public';
+} from '@osd/test/jest';
 
 import { ChartTitle } from './chart_title';
 import { VisConfig } from './vis_config';

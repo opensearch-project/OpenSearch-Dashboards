@@ -45,7 +45,7 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
@@ -92,7 +92,7 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect disconnects requests infos', async () => {
-    const never = new Promise((resolve) => undefined);
+    const never = new Promise<void>((resolve) => undefined);
     const hitSubject = new BehaviorSubject(0);
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {

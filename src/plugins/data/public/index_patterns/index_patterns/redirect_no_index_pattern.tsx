@@ -78,5 +78,5 @@ export const onRedirectNoIndexPattern = (
   }
 
   // return never-resolving promise to stop resolving and wait for the url change
-  return new Promise(() => {});
+  return new Promise<void>(() => {});
 };

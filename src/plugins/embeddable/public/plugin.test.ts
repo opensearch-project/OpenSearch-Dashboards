@@ -102,7 +102,7 @@ test('custom embeddable factory provider test for intercepting embeddable creati
   expect(updateCount).toEqual(2);
 
   embeddable!.destroy();
-  await new Promise((resolve) => process.nextTick(resolve));
+  await new Promise<void>((resolve) => process.nextTick(resolve));
   expect(updateCount).toEqual(0);
 });
 

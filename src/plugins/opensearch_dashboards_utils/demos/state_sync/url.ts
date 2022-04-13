@@ -36,7 +36,7 @@ import {
   INullableBaseStateContainer,
 } from '../../public/state_sync';
 
-const tick = () => new Promise((resolve) => setTimeout(resolve));
+const tick = () => new Promise<void>((resolve) => setTimeout(resolve));
 
 const stateContainer = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 const { start, stop } = syncState({
@@ -67,9 +67,9 @@ export const result = Promise.resolve()
   });
 
 function withDefaultState<State extends BaseState>(
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   stateContainer: BaseStateContainer<State>,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   defaultState: State
 ): INullableBaseStateContainer<State> {
   return {

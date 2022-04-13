@@ -80,7 +80,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
           return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
         },
         checkForDuplicateTitle: (props: OnSaveProps) => {
-          return new Promise(() => {
+          return new Promise<true>(() => {
             return true;
           });
         },

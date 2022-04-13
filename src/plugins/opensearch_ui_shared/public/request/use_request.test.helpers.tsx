@@ -102,7 +102,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
 
     const httpClient = {
       post: (path: string, options: HttpFetchOptions) => {
-        return new Promise((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
           // Increase the time it takes to resolve a request so we have time to inspect the hook
           // as it goes through various states.
           setTimeout(() => {

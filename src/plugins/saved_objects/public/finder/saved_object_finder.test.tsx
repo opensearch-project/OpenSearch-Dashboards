@@ -32,7 +32,7 @@ jest.mock('lodash', () => ({
   debounce: (fn: any) => fn,
 }));
 
-const nextTick = () => new Promise((res) => process.nextTick(res));
+const nextTick = () => new Promise<void>((res) => process.nextTick(res));
 
 import {
   EuiEmptyPrompt,

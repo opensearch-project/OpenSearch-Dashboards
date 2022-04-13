@@ -31,7 +31,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert } from 'sinon';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@osd/test/jest';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 

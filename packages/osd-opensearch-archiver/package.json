@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@osd/dev-utils": "1.0.0",
+    "@osd/test": "1.0.0",
     "elasticsearch": "^16.7.0"
   },
   "devDependencies": {

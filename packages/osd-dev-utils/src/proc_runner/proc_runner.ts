@@ -148,7 +148,7 @@ export class ProcRunner {
       // processes and stopping, but consumers of run() shouldn't have to
       // prepare for that, so just return a never-resolving promise
       if (this.closing) {
-        await new Promise(noop);
+        await new Promise<void>(noop);
       }
     }
   }

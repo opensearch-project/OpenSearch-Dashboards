@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@osd/test/jest';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { Relationships, RelationshipsProps } from './relationships';
 
@@ -101,7 +101,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -168,7 +168,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -235,7 +235,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -302,7 +302,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -339,7 +339,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -408,7 +408,7 @@ describe('Relationships from legacy app', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -475,7 +475,7 @@ describe('Relationships from legacy app', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -542,7 +542,7 @@ describe('Relationships from legacy app', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -609,7 +609,7 @@ describe('Relationships from legacy app', () => {
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -646,7 +646,7 @@ describe('Relationships from legacy app', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    await new Promise<void>((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
