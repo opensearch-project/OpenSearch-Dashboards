@@ -29,6 +29,13 @@
  */
 
 import semver from 'semver';
+/**
+ * List of OpenSearch Dashboards major versions that can pull the
+ * config from a legacy version that is higher in semvar.
+ *
+ * WARNING: OpenSearchDashboards 7.x could cause conflicts.
+ */
+const osdValidMajorVersions = [1, 2];
 const rcVersionRegex = /^(\d+\.\d+\.\d+)\-rc(\d+)$/i;
 
 function extractRcNumber(version: string): [string, number] {
@@ -73,10 +80,12 @@ export function isConfigVersionUpgradeable(
   // If the saved config is from the fork and from 6.8.0 to 7.10.2 then we should be able to upgrade.
   const savedIsFromPrefork =
     semver.gte(savedReleaseVersion, '6.8.0') && semver.lte(savedReleaseVersion, '7.10.2');
-  const currentVersionIsVersion1 = semver.major(opensearchDashboardsReleaseVersion) === 1;
+  const currentVersionIsValidOSDVersion = osdValidMajorVersions.includes(
+    semver.major(opensearchDashboardsReleaseVersion)
+  );
   return (
     savedIsLessThanOpenSearchDashboards ||
     (savedIsSameAsOpenSearchDashboards && savedRcIsLessThanOpenSearchDashboards) ||
-    (savedIsFromPrefork && currentVersionIsVersion1)
+    (savedIsFromPrefork && currentVersionIsValidOSDVersion)
   );
 }
