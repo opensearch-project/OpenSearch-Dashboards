@@ -99,10 +99,10 @@ done
 
 [ -z "$BIND_ADDRESS" ] && BIND_ADDRESS="localhost"
 [ -z "$BIND_PORT" ] && BIND_PORT="5601"
-[ -z "$VERSIONS" ] && test_array=("${DEFAULT_VERSIONS[@]}") || IFS=',' read -r -a test_array <<<"$VERSIONS"
+[ -z "$VERSIONS" ] && TEST_VERSIONS=("${DEFAULT_VERSIONS[@]}") || IFS=',' read -r -a TEST_VERSIONS <<<"$VERSIONS"
 [ -z "$SECURITY_ENABLED" ] && SECURITY_ENABLED="false"
 [ $SECURITY_ENABLED == "false" ] && DASHBOARDS_TYPE="without-security" || DASHBOARDS_TYPE="with-security"
-[ $SECURITY_ENABLED == "false" ] && releases_array=() || IFS=',' read -r -a releases_array <<<"$RELEASES"
+[ $SECURITY_ENABLED == "false" ] && RELEASES_ARRAY=() || IFS=',' read -r -a RELEASES_ARRAY <<<"$RELEASES"
 [ -z "$CREDENTIAL" ] && CREDENTIAL="admin:admin"
 
 TOTAL_TEST_FAILURES=0
@@ -191,7 +191,7 @@ function run_cypress() {
     [ $IS_CORE ] && spec="$SPEC_FILES" || "$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins/*.js"
     [ $IS_CORE ] && success_msg="BWC tests for core passed ($spec)" || success_msg="BWC tests for plugin passed ($spec)"
     [ $IS_CORE ] && error_msg="BWC tests for core failed ($spec)" || error_msg="BWC tests for plugin failed ($spec)"
-    [[ ! -z $CI ]] && cypress_args="--browser chromium" || cypress_args=""
+    [ $CI == 1 ] && cypress_args="--browser chromium" || cypress_args=""
     env NO_COLOR=1 npx cypress run $cypress_args --headless --spec $spec || test_failures=$?
     [ -z $test_failures ] && test_failures=0
     [ $test_failures == 0 ] && echo $success_msg || echo "$error_msg::TEST_FAILURES: $test_failures"
@@ -222,7 +222,7 @@ function execute_tests() {
   # first run opensearch and check the status
   # second run dashboards and check the status
   # run the backwards compatibility tests
-  for version in "${test_array[@]}"
+  for version in "${TEST_VERSIONS[@]}"
   do
     # copy and un-tar data into the OpenSearch data folder
     echo "[ Setting up the OpenSearch environment for $version ]"
@@ -250,7 +250,7 @@ function execute_mismatch_tests() {
   | sed 's/[",]//g' \
   | tr -d [:space:])
 
-  for release in "${releases_array[@]}"
+  for release in "${RELEASES_ARRAY[@]}"
   do
     echo "Running tests with OpenSearch Dashboards $PACKAGE_VERSION and OpenSearch $release"
     (
@@ -265,7 +265,7 @@ function execute_mismatch_tests() {
 # setup the cypress test env
 [ ! -d "$TEST_DIR/cypress" ] && setup_cypress
 execute_tests
-(( ${#releases_array[@]} )) && execute_mismatch_tests
-echo "Completed BWC tests for $test_array [$DASHBOARDS_TYPE]"
+(( ${#RELEASES_ARRAY[@]} )) && execute_mismatch_tests
+echo "Completed BWC tests for $TEST_VERSIONS [$DASHBOARDS_TYPE]"
 echo "Total test failures: $TOTAL_TEST_FAILURES"
 exit $TOTAL_TEST_FAILURES
