@@ -29,11 +29,11 @@ opensearch_dashboards_vars=(
     opensearch.customHeaders
     opensearch.hosts
     opensearch.logQueries
-    opensearch.password
-    opensearch.requestHeadersWhitelist
     opensearch.memoryCircuitBreaker.enabled
     opensearch.memoryCircuitBreaker.maxPercentage
+    opensearch.password
     opensearch.pingTimeout
+    opensearch.requestHeadersWhitelist
     opensearch.requestTimeout
     opensearch.shardTimeout
     opensearch.sniffInterval
