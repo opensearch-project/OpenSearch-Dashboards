@@ -32,47 +32,60 @@ var exec = require('child_process').exec;
 var pkg = require('../../package.json');
 
 var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
-var INVALID_NODE_JS_VERSION = 'v0.10.0';
 
 describe('NodeVersionValidator', function () {
-  it('should run the script WITH error', function (done) {
-    var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${INVALID_NODE_JS_VERSION}', writable: true });`;
-    var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
-
-    exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
-      expect(error.code).toBe(1);
-      expect(stderr).toBeDefined();
-      expect(stderr).not.toHaveLength(0);
-      done();
-    });
+  it('should run the script WITHOUT error when the version is the same', function (done) {
+    test_validate_node_version(done, REQUIRED_NODE_JS_VERSION, false);
   });
 
-  it('should run the script WITHOUT error', function (done) {
-    var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${REQUIRED_NODE_JS_VERSION}', writable: true });`;
-    var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
-
-    exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
-      expect(error).toBeNull();
-      expect(stderr).toBeDefined();
-      expect(stderr).toHaveLength(0);
-      done();
-    });
+  it('should run the script WITHOUT error when only the patch version is higher', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(0,0,+1), false);
   });
 
-  it('should run the script WITHOUT error when only the patch version is different', function (done) {
-    var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
-    var major = matches[1];
-    var minor = matches[2];
-    var patch = parseInt(matches[3]) + 1; // change patch version to be higher than required
+  it('should run the script WITHOUT error when only the patch version is lower', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(0,0,-1), false);
+  });
 
-    var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: 'v${major}.${minor}.${patch}', writable: true });`;
-    var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
+  it('should run the script WITH error if the major version is higher', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(+1,0,0), true);
+  });
 
-    exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
-      expect(error).toBeNull();
-      expect(stderr).toBeDefined();
-      expect(stderr).toHaveLength(0);
-      done();
-    });
+  it('should run the script WITH error if the major version is lower', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(-1,0,0), true);
+  });
+
+  it('should run the script WITH error if the minor version is higher', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(0,+1,0), true);
+  });
+
+  it('should run the script WITH error if the minor version is lower', function (done) {
+    test_validate_node_version(done, required_node_version_with_diff(0,-1,0), true);
   });
 });
+
+function required_node_version_with_diff(major_diff, minor_diff, patch_diff) {
+  var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
+  var major = parseInt(matches[1]) + major_diff;
+  var minor = parseInt(matches[2]) + minor_diff;
+  var patch = parseInt(matches[3]) + patch_diff;
+
+  return `v${major}.${minor}.${patch}`;
+}
+
+function test_validate_node_version(done, version, expected_error) {
+  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${version}', writable: true });`;
+  var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
+
+  exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
+    expect(stderr).toBeDefined();
+    if (expected_error) {
+      expect(error.code).toBe(1);
+      expect(stderr).not.toHaveLength(0);
+    } else {
+      expect(error).toBeNull();
+      expect(stderr).toHaveLength(0);
+    }
+    done();
+  });
+}
+
