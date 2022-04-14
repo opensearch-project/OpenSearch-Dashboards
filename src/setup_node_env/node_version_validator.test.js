@@ -35,52 +35,58 @@ var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
 
 describe('NodeVersionValidator', function () {
   it('should run the script WITHOUT error when the version is the same', function (done) {
-    test_validate_node_version(done, REQUIRED_NODE_JS_VERSION, false);
+    testValidateNodeVersion(done, REQUIRED_NODE_JS_VERSION);
   });
 
   it('should run the script WITHOUT error when only the patch version is higher', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(0,0,+1), false);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, +1));
   });
 
   it('should run the script WITHOUT error when only the patch version is lower', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(0,0,-1), false);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, -1));
   });
 
   it('should run the script WITH error if the major version is higher', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(+1,0,0), true);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(+1, 0, 0), true);
   });
 
   it('should run the script WITH error if the major version is lower', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(-1,0,0), true);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(-1, 0, 0), true);
   });
 
   it('should run the script WITH error if the minor version is higher', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(0,+1,0), true);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true);
   });
 
   it('should run the script WITH error if the minor version is lower', function (done) {
-    test_validate_node_version(done, required_node_version_with_diff(0,-1,0), true);
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, -1, 0), true);
   });
 });
 
-function required_node_version_with_diff(major_diff, minor_diff, patch_diff) {
+function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
   var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
-  var major = parseInt(matches[1]) + major_diff;
-  var minor = parseInt(matches[2]) + minor_diff;
-  var patch = parseInt(matches[3]) + patch_diff;
+  var major = parseInt(matches[1]) + majorDiff;
+  var minor = parseInt(matches[2]) + minorDiff;
+  var patch = parseInt(matches[3]) + patchDiff;
 
   return `v${major}.${minor}.${patch}`;
 }
 
-function test_validate_node_version(done, version, expected_error) {
-  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${version}', writable: true });`;
+function testValidateNodeVersion(done, versionToTest, expectError = false) {
+  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
   var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
 
   exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
     expect(stderr).toBeDefined();
-    if (expected_error) {
+    if (expectError) {
       expect(error.code).toBe(1);
-      expect(stderr).not.toHaveLength(0);
+
+      var majorMinorVersion = REQUIRED_NODE_JS_VERSION.substring(0, REQUIRED_NODE_JS_VERSION.lastIndexOf('.'));
+      var speficicErrorMessage =
+        `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. ` +
+        `Please use Node.js ~${majorMinorVersion} or higher.\n`;
+
+      expect(stderr).toStrictEqual(speficicErrorMessage);
     } else {
       expect(error).toBeNull();
       expect(stderr).toHaveLength(0);
@@ -88,4 +94,3 @@ function test_validate_node_version(done, version, expected_error) {
     done();
   });
 }
-
