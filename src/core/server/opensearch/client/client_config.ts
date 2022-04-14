@@ -81,11 +81,11 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
   if (config.memoryCircuitBreaker != null) {
     clientOptions.memoryCircuitBreaker = config.memoryCircuitBreaker;
   }
-  if (config.requestTimeout != null) {
-    clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
-  }
   if (config.pingTimeout != null) {
     clientOptions.pingTimeout = getDurationAsMs(config.pingTimeout);
+  }
+  if (config.requestTimeout != null) {
+    clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
   }
   if (config.sniffInterval != null) {
     clientOptions.sniffInterval =

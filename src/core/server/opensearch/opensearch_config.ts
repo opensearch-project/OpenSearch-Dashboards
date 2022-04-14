@@ -253,8 +253,8 @@ export class OpenSearchConfig {
    * The `maxPercentage` field is to determine the threshold for maximum heap size for memory circuit breaker. By default the value is `1.0`.
    * The `enabled` field specifies whether the client should protect large response that can't fit into memory.
    */
-
   public readonly memoryCircuitBreaker: OpenSearchConfigType['memoryCircuitBreaker'];
+
   /**
    * Specifies whether the client should attempt to detect the rest of the cluster
    * when it is first instantiated.
