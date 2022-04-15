@@ -139,7 +139,4 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'packages/osd-ui-framework/doc_site/src/images/elastic-logo.svg',
-  'packages/osd-ui-framework/doc_site/src/images/hint-arrow.svg',
-  'packages/osd-ui-framework/doc_site/src/images/react-logo.svg',
 ];
