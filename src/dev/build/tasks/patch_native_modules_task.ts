@@ -46,6 +46,8 @@ interface Package {
     {
       url: string;
       sha256: string;
+      overriddenExtractMethod?: string;
+      overriddenDestinationPath?: string;
     }
   >;
 }
@@ -66,8 +68,11 @@ const packages: Package[] = [
         sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
       },
       'linux-arm64': {
-        url: 'https://d1v1sj258etie.cloudfront.net/node-re2/1.15.4/linux-arm64-64.gz',
-        sha256: '19fa97f39d4965276382429bcd932dd696915f711663e7cef9b0a304b3e8e6f7',
+        url:
+          'https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.15.4/linux-arm64-83.tar.gz',
+        sha256: 'f25124adc64d269a513b99abd4a5eed8d7a929db565207f8ece1f3b7b7931668',
+        overriddenExtractMethod: 'untar',
+        overriddenDestinationPath: 'node_modules/re2/build/Release',
       },
       'win32-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
@@ -103,7 +108,11 @@ async function patchModule(
   const archive = pkg.archives[platformName];
   const archiveName = path.basename(archive.url);
   const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, pkg.name, archiveName);
-  const extractPath = build.resolvePathForPlatform(platform, pkg.destinationPath);
+  const extractMethod = archive.overriddenExtractMethod || pkg.extractMethod;
+  const extractPath = build.resolvePathForPlatform(
+    platform,
+    archive.overriddenDestinationPath || pkg.destinationPath
+  );
   log.debug(`Patching ${pkg.name} binaries from ${archive.url} to ${extractPath}`);
 
   await deleteAll([extractPath], log);
@@ -114,7 +123,7 @@ async function patchModule(
     sha256: archive.sha256,
     retries: 3,
   });
-  switch (pkg.extractMethod) {
+  switch (extractMethod) {
     case 'gunzip':
       await gunzip(downloadPath, extractPath);
       break;
@@ -122,7 +131,7 @@ async function patchModule(
       await untar(downloadPath, extractPath);
       break;
     default:
-      throw new Error(`Extract method of ${pkg.extractMethod} is not supported`);
+      throw new Error(`Extract method of ${extractMethod} is not supported`);
   }
 }
 
