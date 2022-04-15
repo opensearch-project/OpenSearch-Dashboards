@@ -80,6 +80,7 @@ done
 if [ -z "$OPENSEARCH" ]; then
     IFS='/' read -ra SLASH_ARR <<< "$DASHBOARDS"
     # Expected to be opensearch-x.y.z-platform-arch.tar.gz
+    # Playground is supported path to enable sandbox testing
     [[ "$DASHBOARDS" == *"Playground"* ]] && TARBALL="${SLASH_ARR[14]}" || TARBALL="${SLASH_ARR[13]}"
     IFS='-' read -ra DASH_ARR <<< "$TARBALL"
     # Expected to be arch.tar.gz
