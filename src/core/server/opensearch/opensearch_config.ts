@@ -137,7 +137,7 @@ export const configSchema = schema.object({
   ),
 });
 
-const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRootWithoutMap }) => [
   renameFromRoot('elasticsearch.sniffOnStart', 'opensearch.sniffOnStart'),
   renameFromRoot('elasticsearch.sniffInterval', 'opensearch.sniffInterval'),
   renameFromRoot('elasticsearch.sniffOnConnectionFault', 'opensearch.sniffOnConnectionFault'),
@@ -145,6 +145,10 @@ const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
   renameFromRoot('elasticsearch.username', 'opensearch.username'),
   renameFromRoot('elasticsearch.password', 'opensearch.password'),
   renameFromRoot('elasticsearch.requestHeadersWhitelist', 'opensearch.requestHeadersWhitelist'),
+  renameFromRootWithoutMap(
+    'opensearch.requestHeadersWhitelist',
+    'opensearch.requestHeadersAllowlist'
+  ),
   renameFromRoot('elasticsearch.customHeaders', 'opensearch.customHeaders'),
   renameFromRoot('elasticsearch.shardTimeout', 'opensearch.shardTimeout'),
   renameFromRoot('elasticsearch.requestTimeout', 'opensearch.requestTimeout'),

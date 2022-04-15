@@ -441,6 +441,7 @@ describe('deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "\\"elasticsearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersWhitelist\\"",
+        "\\"opensearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersAllowlist\\"",
       ]
     `);
   });

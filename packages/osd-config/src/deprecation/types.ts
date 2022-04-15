@@ -115,6 +115,35 @@ export interface ConfigDeprecationFactory {
    */
   renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
   /**
+   * Rename a configuration property from inside a plugin's configuration path.
+   * Will log a deprecation warning if the oldKey was found and deprecation applied.
+   *
+   * @example
+   * Rename 'myplugin.oldKey' to 'myplugin.newKey'
+   * ```typescript
+   * const provider: ConfigDeprecationProvider = ({ rename }) => [
+   *   rename('oldKey', 'newKey'),
+   * ]
+   * ```
+   */
+  renameWithoutMap(oldKey: string, newKey: string): ConfigDeprecation;
+  /**
+   * Rename a configuration property from the root configuration.
+   * Will log a deprecation warning if the oldKey was found and deprecation applied.
+   *
+   * This should be only used when renaming properties from different configuration's path.
+   * To rename properties from inside a plugin's configuration, use 'rename' instead.
+   *
+   * @example
+   * Rename 'oldplugin.key' to 'newplugin.key'
+   * ```typescript
+   * const provider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+   *   renameFromRoot('oldplugin.key', 'newplugin.key'),
+   * ]
+   * ```
+   */
+  renameFromRootWithoutMap(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
+  /**
    * Remove a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
    *
