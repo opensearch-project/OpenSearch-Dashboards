@@ -187,10 +187,10 @@ function run_cypress() {
     do
       SPEC_FILES+="$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/*$test.js,"
     done
-    [ ! $IS_CORE ] && echo "Running tests from plugins"
-    [ $IS_CORE ] && spec="$SPEC_FILES" || "$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins/*.js"
-    [ $IS_CORE ] && success_msg="BWC tests for core passed ($spec)" || success_msg="BWC tests for plugin passed ($spec)"
-    [ $IS_CORE ] && error_msg="BWC tests for core failed ($spec)" || error_msg="BWC tests for plugin failed ($spec)"
+    [ $IS_CORE == false ] && echo "Running tests from plugins"
+    [ $IS_CORE == true ] && spec="$SPEC_FILES" || "$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins/*.js"
+    [ $IS_CORE == true ] && success_msg="BWC tests for core passed ($spec)" || success_msg="BWC tests for plugin passed ($spec)"
+    [ $IS_CORE == true ] && error_msg="BWC tests for core failed ($spec)" || error_msg="BWC tests for plugin failed ($spec)"
     [ $CI == 1 ] && cypress_args="--browser chromium" || cypress_args=""
     env NO_COLOR=1 npx cypress run $cypress_args --headless --spec $spec || test_failures=$?
     [ -z $test_failures ] && test_failures=0
