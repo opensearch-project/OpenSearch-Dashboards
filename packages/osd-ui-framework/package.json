@@ -42,7 +42,7 @@
     "css-loader": "^3.4.2",
     "expose-loader": "^0.7.5",
     "file-loader": "^4.2.0",
-    "grunt": "^1.4.1",
+    "grunt": "^1.5.2",
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
