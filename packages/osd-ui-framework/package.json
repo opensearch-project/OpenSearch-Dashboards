@@ -26,7 +26,7 @@
     "@elastic/eui": "34.6.0",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
-    "grunt": "^1.4.1",
+    "grunt": "^1.5.2",
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
