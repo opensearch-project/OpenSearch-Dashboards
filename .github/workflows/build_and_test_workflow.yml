@@ -83,18 +83,19 @@ jobs:
         id: linter
         run: yarn lint
 
-      # Runs unit tests while limiting workers because github actions will spawn more than it can handle and crash
-      # Continues on error but will create a comment on the pull request if this step failed.
-      - name: Run unit tests
-        if: steps.unit_tests_results.outputs.unit_tests_results != 'success'
+      - name: Run unit tests with coverage
         id: unit-tests
-        continue-on-error: true
-        run: node scripts/jest --ci --colors --maxWorkers=10
-        env:
-          SKIP_BAD_APPLES: true
+        run: yarn test:jest:ci:coverage
 
-      - run: echo Unit tests completed unsuccessfully. However, unit tests are inconsistent on the CI so please verify locally with `yarn test:jest`.
-        if: steps.unit_tests_results.outputs.unit_tests_results != 'success' && steps.unit-tests.outcome != 'success'
+      - name: Run mocha tests with coverage
+        id: mocha-tests
+        run: yarn test:mocha:coverage
+
+      - name: Upload Code Coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/opensearch-dashboards-coverage
 
       - name: Run integration tests
         if: steps.integration_tests_results.outputs.integration_tests_results != 'success'
