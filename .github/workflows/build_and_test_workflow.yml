@@ -49,13 +49,19 @@ jobs:
         id: linter
         run: yarn lint
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage
         id: unit-tests
-        run: yarn test:jest:ci
+        run: yarn test:jest:ci:coverage
 
-      - name: Run mocha tests
+      - name: Run mocha tests with coverage
         id: mocha-tests
-        run: yarn test:mocha
+        run: yarn test:mocha:coverage
+
+      - name: Upload Code Coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/opensearch-dashboards-coverage
 
       - name: Run integration tests
         id: integration-tests
