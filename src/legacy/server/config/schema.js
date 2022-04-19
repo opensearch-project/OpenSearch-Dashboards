@@ -246,8 +246,18 @@ export default () =>
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
         colors: Joi.object({
-          headerBackgroundColor: Joi.any().default(''),
-          headerLinkColor: Joi.any().default(''),
+          headerBackground: Joi.object({
+            defaultColor: Joi.any().default(''),
+            darkModeColor: Joi.any().default(''),
+          }),
+          headerLink: Joi.object({
+            defaultColor: Joi.any().default(''),
+            darkModeColor: Joi.any().default(''),
+          }),
+          headerBorder: Joi.object({
+            defaultColor: Joi.any().default(''),
+            darkModeColor: Joi.any().default(''),
+          }),
         }),
       }),
     }).default(),

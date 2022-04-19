@@ -59,7 +59,17 @@ export interface Branding {
   applicationTitle?: string;
   /** Custom nav bar header colors */
   colors?: {
-    headerBackgroundColor?: string;
-    headerLinkColor?: string;
+    headerBackground?: {
+      defaultColor?: string;
+      darkModeColor?: string;
+    };
+    headerLink?: {
+      defaultColor?: string;
+      darkModeColor?: string;
+    };
+    headerBorder?: {
+      defaultColor?: string;
+      darkModeColor?: string;
+    };
   };
 }

@@ -116,7 +116,6 @@ export function Header({
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           <CustomHeader
-            theme="dark"
             position="fixed"
             sections={[
               {

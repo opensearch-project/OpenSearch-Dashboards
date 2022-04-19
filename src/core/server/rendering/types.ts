@@ -133,8 +133,12 @@ export interface BrandingValidation {
   isLoadingLogoDarkmodeValid: boolean;
   isFaviconValid: boolean;
   isTitleValid: boolean;
-  isHeaderColorValid: boolean;
-  isLinkColorValid: boolean;
+  isHeaderColorDefaultValid: boolean;
+  isHeaderColorDarkValid: boolean;
+  isLinkColorDefaultValid: boolean;
+  isLinkColorDarkValid: boolean;
+  isBorderColorDefaultValid: boolean;
+  isBorderColorDarkValid: boolean;
 }
 
 /**
@@ -151,6 +155,10 @@ export interface BrandingAssignment {
   loadingLogoDarkmode?: string;
   favicon?: string;
   applicationTitle?: string;
-  headerBackgroundColor?: string;
-  headerLinkColor?: string;
+  headerBackgroundColorDefault?: string;
+  headerBackgroundColorDark?: string;
+  headerLinkColorDefault?: string;
+  headerLinkColorDark?: string;
+  headerBorderColorDefault?: string;
+  headerBorderColorDark?: string;
 }

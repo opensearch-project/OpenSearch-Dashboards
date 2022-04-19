@@ -149,8 +149,18 @@ export class RenderingService {
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
               colors: {
-                headerBackgroundColor: brandingAssignment.headerBackgroundColor,
-                headerLinkColor: brandingAssignment.headerLinkColor,
+                headerBackground: {
+                  defaultColor: brandingAssignment.headerBackgroundColorDefault,
+                  darkModeColor: brandingAssignment.headerBackgroundColorDark,
+                },
+                headerLink: {
+                  defaultColor: brandingAssignment.headerLinkColorDefault,
+                  darkModeColor: brandingAssignment.headerLinkColorDark,
+                },
+                headerBorder: {
+                  defaultColor: brandingAssignment.headerBorderColorDefault,
+                  darkModeColor: brandingAssignment.headerBorderColorDark,
+                },
               },
             },
           },
@@ -269,14 +279,64 @@ export class RenderingService {
       ? branding.applicationTitle
       : DEFAULT_TITLE;
 
-    // assign theme colors based on brandingValidation function result
-    const headerBackgroundColor = brandingValidation.isHeaderColorValid
-      ? branding.colors.headerBackgroundColor
+    // assign default colors based on brandingValidation function result
+    const headerBackgroundColorDefault = brandingValidation.isHeaderColorDefaultValid
+      ? branding.colors.headerBackground.defaultColor
       : undefined;
 
-    const headerLinkColor = brandingValidation.isLinkColorValid
-      ? branding.colors.headerLinkColor
+    const headerLinkColorDefault = brandingValidation.isLinkColorDefaultValid
+      ? branding.colors.headerLink.defaultColor
       : undefined;
+
+    const headerBorderColorDefault = brandingValidation.isBorderColorDefaultValid
+      ? branding.colors.headerBorder.defaultColor
+      : undefined;
+
+    // assign dark mode colors based on brandingValidation function result
+    let headerBackgroundColorDark = brandingValidation.isHeaderColorDarkValid
+      ? branding.colors.headerBackground.darkModeColor
+      : undefined;
+
+    let headerLinkColorDark = brandingValidation.isLinkColorDarkValid
+      ? branding.colors.headerLink.darkModeColor
+      : undefined;
+
+    let headerBorderColorDark = brandingValidation.isBorderColorDarkValid
+      ? branding.colors.headerBorder.darkModeColor
+      : undefined;
+
+    /**
+     * For dark mode colors, we added another validation:
+     * user can only provide a dark mode color after providing a valid default mode color,
+     * If user provides a valid dark mode color but fails to provide a valid default mode color,
+     * return undefined for the dark mode color
+     */
+    if (headerBackgroundColorDark && !headerBackgroundColorDefault) {
+      this.logger
+        .get('branding')
+        .error(
+          'Must provide a valid header background default mode color before providing a header background dark mode color'
+        );
+      headerBackgroundColorDark = undefined;
+    }
+
+    if (headerLinkColorDark && !headerLinkColorDefault) {
+      this.logger
+        .get('branding')
+        .error(
+          'Must provide a valid header link default mode color before providing a header link dark mode color'
+        );
+      headerLinkColorDark = undefined;
+    }
+
+    if (headerBorderColorDark && !headerBorderColorDefault) {
+      this.logger
+        .get('branding')
+        .error(
+          'Must provide a valid header border default mode color before providing a header border dark mode color'
+        );
+      headerBorderColorDark = undefined;
+    }
 
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
@@ -287,8 +347,12 @@ export class RenderingService {
       loadingLogoDarkmode,
       favicon,
       applicationTitle,
-      headerBackgroundColor,
-      headerLinkColor,
+      headerBackgroundColorDefault,
+      headerBackgroundColorDark,
+      headerLinkColorDefault,
+      headerLinkColorDark,
+      headerBorderColorDefault,
+      headerBorderColorDark,
     };
 
     return brandingAssignment;
@@ -333,14 +397,34 @@ export class RenderingService {
 
     const isTitleValid = this.isTitleValid(branding.applicationTitle, 'applicationTitle');
 
-    const isHeaderColorValid = this.isColorValid(
-      branding.colors.headerBackgroundColor,
-      'header background color'
+    const isHeaderColorDefaultValid = this.isColorValid(
+      branding.colors.headerBackground.defaultColor,
+      'header background color default'
     );
 
-    const isLinkColorValid = this.isColorValid(
-      branding.colors.headerLinkColor,
-      'header link color'
+    const isHeaderColorDarkValid = this.isColorValid(
+      branding.colors.headerBackground.darkModeColor,
+      'header background color dark mode'
+    );
+
+    const isLinkColorDefaultValid = this.isColorValid(
+      branding.colors.headerLink.defaultColor,
+      'header link color default'
+    );
+
+    const isLinkColorDarkValid = this.isColorValid(
+      branding.colors.headerLink.darkModeColor,
+      'header link color dark mode'
+    );
+
+    const isBorderColorDefaultValid = this.isColorValid(
+      branding.colors.headerBorder.defaultColor,
+      'header border color default'
+    );
+
+    const isBorderColorDarkValid = this.isColorValid(
+      branding.colors.headerBorder.darkModeColor,
+      'header border color dark mode'
     );
 
     const brandingValidation: BrandingValidation = {
@@ -352,8 +436,12 @@ export class RenderingService {
       isLoadingLogoDarkmodeValid,
       isFaviconValid,
       isTitleValid,
-      isHeaderColorValid,
-      isLinkColorValid,
+      isHeaderColorDefaultValid,
+      isHeaderColorDarkValid,
+      isLinkColorDefaultValid,
+      isLinkColorDarkValid,
+      isBorderColorDefaultValid,
+      isBorderColorDarkValid,
     };
 
     return brandingValidation;

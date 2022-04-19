@@ -162,8 +162,15 @@
   # faviconUrl: ""
   # applicationTitle: ""
   # colors:
-    # headerBackgroundColor: ""
-    # headerLinkColor: ""
+    # headerBackground:
+      # defaultColor: ""
+      # darkModeColor: ""
+    # headerLink:
+      # defaultColor: ""
+      # darkModeColor: ""
+    # headerBorder:
+      # defaultColor: ""
+      # darkModeColor: ""
 
 # Set the value of this setting to true to capture region blocked warnings and errors 
 # for your map rendering services.

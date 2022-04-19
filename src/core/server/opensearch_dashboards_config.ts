@@ -82,11 +82,29 @@ export const config = {
         defaultValue: '',
       }),
       colors: schema.object({
-        headerBackgroundColor: schema.string({
-          defaultValue: '',
+        headerBackground: schema.object({
+          defaultColor: schema.string({
+            defaultValue: '',
+          }),
+          darkModeColor: schema.string({
+            defaultValue: '',
+          }),
         }),
-        headerLinkColor: schema.string({
-          defaultValue: '',
+        headerLink: schema.object({
+          defaultColor: schema.string({
+            defaultValue: '',
+          }),
+          darkModeColor: schema.string({
+            defaultValue: '',
+          }),
+        }),
+        headerBorder: schema.object({
+          defaultColor: schema.string({
+            defaultValue: '',
+          }),
+          darkModeColor: schema.string({
+            defaultValue: '',
+          }),
         }),
       }),
     }),

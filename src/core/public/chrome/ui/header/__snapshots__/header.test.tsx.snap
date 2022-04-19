@@ -1669,7 +1669,19 @@ exports[`Header renders 1`] = `
     <div
       id="globalHeaderBars"
     >
-      <EuiHeader
+      <CustomHeader
+        branding={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+            "darkMode": false,
+            "logo": Object {
+              "defaultUrl": "/",
+            },
+            "mark": Object {
+              "defaultUrl": "/",
+            },
+          }
+        }
         position="fixed"
         sections={
           Array [
@@ -2776,24 +2788,14 @@ exports[`Header renders 1`] = `
             },
           ]
         }
-        theme="dark"
       >
-        <div
-          className="euiHeader euiHeader--dark euiHeader--fixed"
-        >
-          <EuiHeaderSection
-            key="items-0"
-          >
-            <div
-              className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
-            >
-              <EuiHeaderSectionItem
-                border="none"
-                key="0"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
+        <Styled(EuiHeader)
+          position="fixed"
+          sections={
+            Array [
+              Object {
+                "borders": "none",
+                "items": Array [
                   <HeaderLogo
                     branding={
                       Object {
@@ -2951,52 +2953,7 @@ exports[`Header renders 1`] = `
                       }
                     }
                     navigateToApp={[MockFunction]}
-                  >
-                    <a
-                      aria-label="Go to home page"
-                      className="logoContainer"
-                      data-test-subj="logo"
-                      href="/"
-                      onClick={[Function]}
-                    >
-                      <CustomLogo
-                        applicationTitle="OpenSearch Dashboards"
-                        darkMode={false}
-                        logo={
-                          Object {
-                            "defaultUrl": "/",
-                          }
-                        }
-                        mark={
-                          Object {
-                            "defaultUrl": "/",
-                          }
-                        }
-                      >
-                        <div
-                          className="logoContainer"
-                        >
-                          <img
-                            alt="OpenSearch Dashboards logo"
-                            className="logoImage"
-                            data-test-image-url="/"
-                            data-test-subj="customLogo"
-                            loading="lazy"
-                            src="/"
-                          />
-                        </div>
-                      </CustomLogo>
-                    </a>
-                  </HeaderLogo>
-                </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="none"
-                key="1"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
+                  />,
                   <LoadingIndicator
                     loadingCount$={
                       BehaviorSubject {
@@ -3048,38 +3005,12 @@ exports[`Header renders 1`] = `
                       }
                     }
                     showAsBar={false}
-                  >
-                    <EuiLoadingSpinner
-                      aria-hidden={true}
-                      aria-label="Loading content"
-                      className="osdLoadingIndicator-hidden"
-                      data-test-subj="globalLoadingIndicator-hidden"
-                    >
-                      <span
-                        aria-hidden={true}
-                        aria-label="Loading content"
-                        className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
-                        data-test-subj="globalLoadingIndicator-hidden"
-                      />
-                    </EuiLoadingSpinner>
-                  </LoadingIndicator>
-                </div>
-              </EuiHeaderSectionItem>
-            </div>
-          </EuiHeaderSection>
-          <EuiHeaderSection
-            key="items-1"
-          >
-            <div
-              className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
-            >
-              <EuiHeaderSectionItem
-                border="none"
-                key="0"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
+                  />,
+                ],
+              },
+              Object {
+                "borders": "none",
+                "items": Array [
                   <EuiShowFor
                     sizes={
                       Array [
@@ -3140,24 +3071,12 @@ exports[`Header renders 1`] = `
                         }
                       }
                     />
-                  </EuiShowFor>
-                </div>
-              </EuiHeaderSectionItem>
-            </div>
-          </EuiHeaderSection>
-          <EuiHeaderSection
-            key="items-2"
-          >
-            <div
-              className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
-            >
-              <EuiHeaderSectionItem
-                border="none"
-                key="0"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
+                  </EuiShowFor>,
+                ],
+              },
+              Object {
+                "borders": "none",
+                "items": Array [
                   <EuiHideFor
                     sizes={
                       Array [
@@ -3166,16 +3085,59 @@ exports[`Header renders 1`] = `
                         "xl",
                       ]
                     }
-                  />
-                </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="none"
-                key="1"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
+                  >
+                    <HeaderNavControls
+                      navControls$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                    />
+                  </EuiHideFor>,
                   <InjectIntl(HeaderHelpMenuUI)
                     helpExtension$={
                       BehaviorSubject {
@@ -3878,8 +3840,415 @@ exports[`Header renders 1`] = `
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
                     useDefaultContent={true}
-                  >
-                    <HeaderHelpMenuUI
+                  />,
+                  <HeaderNavControls
+                    navControls$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  />,
+                ],
+              },
+            ]
+          }
+          theme="default"
+        >
+          <EuiHeader
+            className="sc-bczRLJ lnGSGL"
+            position="fixed"
+            sections={
+              Array [
+                Object {
+                  "borders": "none",
+                  "items": Array [
+                    <HeaderLogo
+                      branding={
+                        Object {
+                          "applicationTitle": "OpenSearch Dashboards",
+                          "darkMode": false,
+                          "logo": Object {
+                            "defaultUrl": "/",
+                          },
+                          "mark": Object {
+                            "defaultUrl": "/",
+                          },
+                        }
+                      }
+                      forceNavigation$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": false,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                      href="/"
+                      navLinks$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [
+                            Object {
+                              "baseUrl": "",
+                              "href": "",
+                              "id": "opensearchDashboards",
+                              "title": "opensearchDashboards",
+                            },
+                          ],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                      navigateToApp={[MockFunction]}
+                    />,
+                    <LoadingIndicator
+                      loadingCount$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": 0,
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                      showAsBar={false}
+                    />,
+                  ],
+                },
+                Object {
+                  "borders": "none",
+                  "items": Array [
+                    <EuiShowFor
+                      sizes={
+                        Array [
+                          "m",
+                          "l",
+                          "xl",
+                        ]
+                      }
+                    >
+                      <HeaderNavControls
+                        navControls$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": Array [],
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                      />
+                    </EuiShowFor>,
+                  ],
+                },
+                Object {
+                  "borders": "none",
+                  "items": Array [
+                    <EuiHideFor
+                      sizes={
+                        Array [
+                          "m",
+                          "l",
+                          "xl",
+                        ]
+                      }
+                    >
+                      <HeaderNavControls
+                        navControls$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": Array [],
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                      />
+                    </EuiHideFor>,
+                    <InjectIntl(HeaderHelpMenuUI)
                       helpExtension$={
                         BehaviorSubject {
                           "_isScalar": false,
@@ -4578,301 +4947,2164 @@ exports[`Header renders 1`] = `
                           "thrownError": null,
                         }
                       }
-                      intl={
-                        Object {
-                          "defaultFormats": Object {},
-                          "defaultLocale": "en",
-                          "formatDate": [Function],
-                          "formatHTMLMessage": [Function],
-                          "formatMessage": [Function],
-                          "formatNumber": [Function],
-                          "formatPlural": [Function],
-                          "formatRelative": [Function],
-                          "formatTime": [Function],
-                          "formats": Object {
-                            "date": Object {
-                              "full": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "weekday": "long",
-                                "year": "numeric",
-                              },
-                              "long": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "year": "numeric",
-                              },
-                              "medium": Object {
-                                "day": "numeric",
-                                "month": "short",
-                                "year": "numeric",
-                              },
-                              "short": Object {
-                                "day": "numeric",
-                                "month": "numeric",
-                                "year": "2-digit",
-                              },
-                            },
-                            "number": Object {
-                              "currency": Object {
-                                "style": "currency",
-                              },
-                              "percent": Object {
-                                "style": "percent",
-                              },
-                            },
-                            "relative": Object {
-                              "days": Object {
-                                "units": "day",
-                              },
-                              "hours": Object {
-                                "units": "hour",
-                              },
-                              "minutes": Object {
-                                "units": "minute",
-                              },
-                              "months": Object {
-                                "units": "month",
-                              },
-                              "seconds": Object {
-                                "units": "second",
-                              },
-                              "years": Object {
-                                "units": "year",
-                              },
-                            },
-                            "time": Object {
-                              "full": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "long": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "medium": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                              },
-                              "short": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                              },
-                            },
-                          },
-                          "formatters": Object {
-                            "getDateTimeFormat": [Function],
-                            "getMessageFormat": [Function],
-                            "getNumberFormat": [Function],
-                            "getPluralFormat": [Function],
-                            "getRelativeFormat": [Function],
-                          },
-                          "locale": "en",
-                          "messages": Object {},
-                          "now": [Function],
-                          "onError": [Function],
-                          "textComponent": Symbol(react.fragment),
-                          "timeZone": null,
-                        }
-                      }
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
                       useDefaultContent={true}
-                    >
-                      <EuiPopover
-                        anchorPosition="downRight"
-                        button={
-                          <EuiHeaderSectionItemButton
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            onClick={[Function]}
-                          >
-                            <EuiIcon
-                              size="m"
-                              type="help"
-                            />
-                          </EuiHeaderSectionItemButton>
-                        }
-                        closePopover={[Function]}
-                        data-test-subj="helpMenuButton"
-                        display="inlineBlock"
-                        hasArrow={true}
-                        id="headerHelpMenu"
-                        isOpen={false}
-                        ownFocus={true}
-                        panelPaddingSize="m"
-                        repositionOnScroll={true}
-                      >
-                        <div
-                          className="euiPopover euiPopover--anchorDownRight"
-                          data-test-subj="helpMenuButton"
-                          id="headerHelpMenu"
-                        >
-                          <div
-                            className="euiPopover__anchor"
-                          >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
-                            >
-                              <EuiButtonEmpty
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                buttonRef={
-                                  Object {
-                                    "current": <button
-                                      aria-expanded="false"
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          <span
-                                            class="euiHeaderSectionItemButton__content"
-                                          >
-                                            <span
-                                              data-euiicon-type="help"
-                                            />
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </button>,
-                                  }
-                                }
-                                className="euiHeaderSectionItemButton"
-                                color="text"
-                                onClick={[Function]}
-                              >
-                                <button
-                                  aria-expanded={false}
-                                  aria-haspopup="true"
-                                  aria-label="Help menu"
-                                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <span
-                                          className="euiHeaderSectionItemButton__content"
-                                        >
-                                          <EuiIcon
-                                            size="m"
-                                            type="help"
-                                          >
-                                            <span
-                                              data-euiicon-type="help"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
-                                        </span>
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </EuiHeaderSectionItemButton>
-                          </div>
-                        </div>
-                      </EuiPopover>
-                    </HeaderHelpMenuUI>
-                  </InjectIntl(HeaderHelpMenuUI)>
-                </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="none"
-                key="2"
-              >
-                <div
-                  className="euiHeaderSectionItem"
-                >
-                  <HeaderNavControls
-                    navControls$={
-                      BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": Array [],
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [
-                          Subscriber {
-                            "_parentOrParents": null,
-                            "_subscriptions": Array [
-                              SubjectSubscription {
-                                "_parentOrParents": [Circular],
+                    />,
+                    <HeaderNavControls
+                      navControls$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
                                 "_subscriptions": null,
                                 "closed": false,
-                                "subject": [Circular],
-                                "subscriber": [Circular],
-                              },
-                            ],
-                            "closed": false,
-                            "destination": SafeSubscriber {
-                              "_complete": undefined,
-                              "_context": [Circular],
-                              "_error": undefined,
-                              "_next": [Function],
-                              "_parentOrParents": null,
-                              "_parentSubscriber": [Circular],
-                              "_subscriptions": null,
-                              "closed": false,
-                              "destination": Object {
-                                "closed": true,
-                                "complete": [Function],
-                                "error": [Function],
-                                "next": [Function],
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
                               },
                               "isStopped": false,
-                              "syncErrorThrowable": false,
+                              "syncErrorThrowable": true,
                               "syncErrorThrown": false,
                               "syncErrorValue": null,
                             },
-                            "isStopped": false,
-                            "syncErrorThrowable": true,
-                            "syncErrorThrown": false,
-                            "syncErrorValue": null,
-                          },
-                        ],
-                        "thrownError": null,
+                          ],
+                          "thrownError": null,
+                        }
                       }
-                    }
-                  />
+                    />,
+                  ],
+                },
+              ]
+            }
+            theme="default"
+          >
+            <div
+              className="euiHeader euiHeader--default euiHeader--fixed sc-bczRLJ lnGSGL"
+            >
+              <EuiHeaderSection
+                key="items-0"
+              >
+                <div
+                  className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+                >
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="0"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <HeaderLogo
+                        branding={
+                          Object {
+                            "applicationTitle": "OpenSearch Dashboards",
+                            "darkMode": false,
+                            "logo": Object {
+                              "defaultUrl": "/",
+                            },
+                            "mark": Object {
+                              "defaultUrl": "/",
+                            },
+                          }
+                        }
+                        forceNavigation$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": false,
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        href="/"
+                        navLinks$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": Array [
+                              Object {
+                                "baseUrl": "",
+                                "href": "",
+                                "id": "opensearchDashboards",
+                                "title": "opensearchDashboards",
+                              },
+                            ],
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        navigateToApp={[MockFunction]}
+                      >
+                        <a
+                          aria-label="Go to home page"
+                          className="logoContainer"
+                          data-test-subj="logo"
+                          href="/"
+                          onClick={[Function]}
+                        >
+                          <CustomLogo
+                            applicationTitle="OpenSearch Dashboards"
+                            darkMode={false}
+                            logo={
+                              Object {
+                                "defaultUrl": "/",
+                              }
+                            }
+                            mark={
+                              Object {
+                                "defaultUrl": "/",
+                              }
+                            }
+                          >
+                            <div
+                              className="logoContainer"
+                            >
+                              <img
+                                alt="OpenSearch Dashboards logo"
+                                className="logoImage"
+                                data-test-image-url="/"
+                                data-test-subj="customLogo"
+                                loading="lazy"
+                                src="/"
+                              />
+                            </div>
+                          </CustomLogo>
+                        </a>
+                      </HeaderLogo>
+                    </div>
+                  </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="1"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <LoadingIndicator
+                        loadingCount$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": 0,
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        showAsBar={false}
+                      >
+                        <EuiLoadingSpinner
+                          aria-hidden={true}
+                          aria-label="Loading content"
+                          className="osdLoadingIndicator-hidden"
+                          data-test-subj="globalLoadingIndicator-hidden"
+                        >
+                          <span
+                            aria-hidden={true}
+                            aria-label="Loading content"
+                            className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
+                            data-test-subj="globalLoadingIndicator-hidden"
+                          />
+                        </EuiLoadingSpinner>
+                      </LoadingIndicator>
+                    </div>
+                  </EuiHeaderSectionItem>
                 </div>
-              </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+              <EuiHeaderSection
+                key="items-1"
+              >
+                <div
+                  className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+                >
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="0"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <EuiShowFor
+                        sizes={
+                          Array [
+                            "m",
+                            "l",
+                            "xl",
+                          ]
+                        }
+                      >
+                        <HeaderNavControls
+                          navControls$={
+                            BehaviorSubject {
+                              "_isScalar": false,
+                              "_value": Array [],
+                              "closed": false,
+                              "hasError": false,
+                              "isStopped": false,
+                              "observers": Array [
+                                Subscriber {
+                                  "_parentOrParents": null,
+                                  "_subscriptions": Array [
+                                    SubjectSubscription {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "subject": [Circular],
+                                      "subscriber": [Circular],
+                                    },
+                                  ],
+                                  "closed": false,
+                                  "destination": SafeSubscriber {
+                                    "_complete": undefined,
+                                    "_context": [Circular],
+                                    "_error": undefined,
+                                    "_next": [Function],
+                                    "_parentOrParents": null,
+                                    "_parentSubscriber": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "destination": Object {
+                                      "closed": true,
+                                      "complete": [Function],
+                                      "error": [Function],
+                                      "next": [Function],
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": false,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": true,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                              ],
+                              "thrownError": null,
+                            }
+                          }
+                        />
+                      </EuiShowFor>
+                    </div>
+                  </EuiHeaderSectionItem>
+                </div>
+              </EuiHeaderSection>
+              <EuiHeaderSection
+                key="items-2"
+              >
+                <div
+                  className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+                >
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="0"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <EuiHideFor
+                        sizes={
+                          Array [
+                            "m",
+                            "l",
+                            "xl",
+                          ]
+                        }
+                      />
+                    </div>
+                  </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="1"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <InjectIntl(HeaderHelpMenuUI)
+                        helpExtension$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": undefined,
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              InnerSubscriber {
+                                "_parentOrParents": CombineLatestSubscriber {
+                                  "_parentOrParents": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "_subscriptions": Array [
+                                    [Circular],
+                                    InnerSubscriber {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": Array [
+                                        SubjectSubscription {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": null,
+                                          "closed": false,
+                                          "subject": BehaviorSubject {
+                                            "_isScalar": false,
+                                            "_value": "",
+                                            "closed": false,
+                                            "hasError": false,
+                                            "isStopped": false,
+                                            "observers": Array [
+                                              [Circular],
+                                            ],
+                                            "thrownError": null,
+                                          },
+                                          "subscriber": [Circular],
+                                        },
+                                      ],
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "index": 1,
+                                      "isStopped": false,
+                                      "outerIndex": 1,
+                                      "outerValue": undefined,
+                                      "parent": [Circular],
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                  ],
+                                  "active": 2,
+                                  "closed": false,
+                                  "destination": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "isStopped": true,
+                                  "observables": Array [
+                                    [Circular],
+                                    BehaviorSubject {
+                                      "_isScalar": false,
+                                      "_value": "",
+                                      "closed": false,
+                                      "hasError": false,
+                                      "isStopped": false,
+                                      "observers": Array [
+                                        InnerSubscriber {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": Array [
+                                            SubjectSubscription {
+                                              "_parentOrParents": [Circular],
+                                              "_subscriptions": null,
+                                              "closed": false,
+                                              "subject": [Circular],
+                                              "subscriber": [Circular],
+                                            },
+                                          ],
+                                          "closed": false,
+                                          "destination": Object {
+                                            "closed": true,
+                                            "complete": [Function],
+                                            "error": [Function],
+                                            "next": [Function],
+                                          },
+                                          "index": 1,
+                                          "isStopped": false,
+                                          "outerIndex": 1,
+                                          "outerValue": undefined,
+                                          "parent": [Circular],
+                                          "syncErrorThrowable": false,
+                                          "syncErrorThrown": false,
+                                          "syncErrorValue": null,
+                                        },
+                                      ],
+                                      "thrownError": null,
+                                    },
+                                  ],
+                                  "resultSelector": undefined,
+                                  "syncErrorThrowable": true,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                  "toRespond": 0,
+                                  "values": Array [
+                                    undefined,
+                                    "",
+                                  ],
+                                },
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "index": 1,
+                                "isStopped": false,
+                                "outerIndex": 0,
+                                "outerValue": undefined,
+                                "parent": CombineLatestSubscriber {
+                                  "_parentOrParents": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "_subscriptions": Array [
+                                    [Circular],
+                                    InnerSubscriber {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": Array [
+                                        SubjectSubscription {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": null,
+                                          "closed": false,
+                                          "subject": BehaviorSubject {
+                                            "_isScalar": false,
+                                            "_value": "",
+                                            "closed": false,
+                                            "hasError": false,
+                                            "isStopped": false,
+                                            "observers": Array [
+                                              [Circular],
+                                            ],
+                                            "thrownError": null,
+                                          },
+                                          "subscriber": [Circular],
+                                        },
+                                      ],
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "index": 1,
+                                      "isStopped": false,
+                                      "outerIndex": 1,
+                                      "outerValue": undefined,
+                                      "parent": [Circular],
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                  ],
+                                  "active": 2,
+                                  "closed": false,
+                                  "destination": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "isStopped": true,
+                                  "observables": Array [
+                                    [Circular],
+                                    BehaviorSubject {
+                                      "_isScalar": false,
+                                      "_value": "",
+                                      "closed": false,
+                                      "hasError": false,
+                                      "isStopped": false,
+                                      "observers": Array [
+                                        InnerSubscriber {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": Array [
+                                            SubjectSubscription {
+                                              "_parentOrParents": [Circular],
+                                              "_subscriptions": null,
+                                              "closed": false,
+                                              "subject": [Circular],
+                                              "subscriber": [Circular],
+                                            },
+                                          ],
+                                          "closed": false,
+                                          "destination": Object {
+                                            "closed": true,
+                                            "complete": [Function],
+                                            "error": [Function],
+                                            "next": [Function],
+                                          },
+                                          "index": 1,
+                                          "isStopped": false,
+                                          "outerIndex": 1,
+                                          "outerValue": undefined,
+                                          "parent": [Circular],
+                                          "syncErrorThrowable": false,
+                                          "syncErrorThrown": false,
+                                          "syncErrorValue": null,
+                                        },
+                                      ],
+                                      "thrownError": null,
+                                    },
+                                  ],
+                                  "resultSelector": undefined,
+                                  "syncErrorThrowable": true,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                  "toRespond": 0,
+                                  "values": Array [
+                                    undefined,
+                                    "",
+                                  ],
+                                },
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        helpSupportUrl$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": "",
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              InnerSubscriber {
+                                "_parentOrParents": CombineLatestSubscriber {
+                                  "_parentOrParents": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "_subscriptions": Array [
+                                    InnerSubscriber {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": Array [
+                                        SubjectSubscription {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": null,
+                                          "closed": false,
+                                          "subject": BehaviorSubject {
+                                            "_isScalar": false,
+                                            "_value": undefined,
+                                            "closed": false,
+                                            "hasError": false,
+                                            "isStopped": false,
+                                            "observers": Array [
+                                              [Circular],
+                                            ],
+                                            "thrownError": null,
+                                          },
+                                          "subscriber": [Circular],
+                                        },
+                                      ],
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "index": 1,
+                                      "isStopped": false,
+                                      "outerIndex": 0,
+                                      "outerValue": undefined,
+                                      "parent": [Circular],
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    [Circular],
+                                  ],
+                                  "active": 2,
+                                  "closed": false,
+                                  "destination": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "isStopped": true,
+                                  "observables": Array [
+                                    BehaviorSubject {
+                                      "_isScalar": false,
+                                      "_value": undefined,
+                                      "closed": false,
+                                      "hasError": false,
+                                      "isStopped": false,
+                                      "observers": Array [
+                                        InnerSubscriber {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": Array [
+                                            SubjectSubscription {
+                                              "_parentOrParents": [Circular],
+                                              "_subscriptions": null,
+                                              "closed": false,
+                                              "subject": [Circular],
+                                              "subscriber": [Circular],
+                                            },
+                                          ],
+                                          "closed": false,
+                                          "destination": Object {
+                                            "closed": true,
+                                            "complete": [Function],
+                                            "error": [Function],
+                                            "next": [Function],
+                                          },
+                                          "index": 1,
+                                          "isStopped": false,
+                                          "outerIndex": 0,
+                                          "outerValue": undefined,
+                                          "parent": [Circular],
+                                          "syncErrorThrowable": false,
+                                          "syncErrorThrown": false,
+                                          "syncErrorValue": null,
+                                        },
+                                      ],
+                                      "thrownError": null,
+                                    },
+                                    [Circular],
+                                  ],
+                                  "resultSelector": undefined,
+                                  "syncErrorThrowable": true,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                  "toRespond": 0,
+                                  "values": Array [
+                                    undefined,
+                                    "",
+                                  ],
+                                },
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "index": 1,
+                                "isStopped": false,
+                                "outerIndex": 1,
+                                "outerValue": undefined,
+                                "parent": CombineLatestSubscriber {
+                                  "_parentOrParents": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "_subscriptions": Array [
+                                    InnerSubscriber {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": Array [
+                                        SubjectSubscription {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": null,
+                                          "closed": false,
+                                          "subject": BehaviorSubject {
+                                            "_isScalar": false,
+                                            "_value": undefined,
+                                            "closed": false,
+                                            "hasError": false,
+                                            "isStopped": false,
+                                            "observers": Array [
+                                              [Circular],
+                                            ],
+                                            "thrownError": null,
+                                          },
+                                          "subscriber": [Circular],
+                                        },
+                                      ],
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "index": 1,
+                                      "isStopped": false,
+                                      "outerIndex": 0,
+                                      "outerValue": undefined,
+                                      "parent": [Circular],
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    [Circular],
+                                  ],
+                                  "active": 2,
+                                  "closed": false,
+                                  "destination": Subscriber {
+                                    "_parentOrParents": null,
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                    ],
+                                    "closed": false,
+                                    "destination": SafeSubscriber {
+                                      "_complete": undefined,
+                                      "_context": [Circular],
+                                      "_error": undefined,
+                                      "_next": [Function],
+                                      "_parentOrParents": null,
+                                      "_parentSubscriber": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "destination": Object {
+                                        "closed": true,
+                                        "complete": [Function],
+                                        "error": [Function],
+                                        "next": [Function],
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": false,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": false,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                  },
+                                  "isStopped": true,
+                                  "observables": Array [
+                                    BehaviorSubject {
+                                      "_isScalar": false,
+                                      "_value": undefined,
+                                      "closed": false,
+                                      "hasError": false,
+                                      "isStopped": false,
+                                      "observers": Array [
+                                        InnerSubscriber {
+                                          "_parentOrParents": [Circular],
+                                          "_subscriptions": Array [
+                                            SubjectSubscription {
+                                              "_parentOrParents": [Circular],
+                                              "_subscriptions": null,
+                                              "closed": false,
+                                              "subject": [Circular],
+                                              "subscriber": [Circular],
+                                            },
+                                          ],
+                                          "closed": false,
+                                          "destination": Object {
+                                            "closed": true,
+                                            "complete": [Function],
+                                            "error": [Function],
+                                            "next": [Function],
+                                          },
+                                          "index": 1,
+                                          "isStopped": false,
+                                          "outerIndex": 0,
+                                          "outerValue": undefined,
+                                          "parent": [Circular],
+                                          "syncErrorThrowable": false,
+                                          "syncErrorThrown": false,
+                                          "syncErrorValue": null,
+                                        },
+                                      ],
+                                      "thrownError": null,
+                                    },
+                                    [Circular],
+                                  ],
+                                  "resultSelector": undefined,
+                                  "syncErrorThrowable": true,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                  "toRespond": 0,
+                                  "values": Array [
+                                    undefined,
+                                    "",
+                                  ],
+                                },
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                        opensearchDashboardsDocLink="/docs"
+                        opensearchDashboardsVersion="1.0.0"
+                        useDefaultContent={true}
+                      >
+                        <HeaderHelpMenuUI
+                          helpExtension$={
+                            BehaviorSubject {
+                              "_isScalar": false,
+                              "_value": undefined,
+                              "closed": false,
+                              "hasError": false,
+                              "isStopped": false,
+                              "observers": Array [
+                                InnerSubscriber {
+                                  "_parentOrParents": CombineLatestSubscriber {
+                                    "_parentOrParents": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                      InnerSubscriber {
+                                        "_parentOrParents": [Circular],
+                                        "_subscriptions": Array [
+                                          SubjectSubscription {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": null,
+                                            "closed": false,
+                                            "subject": BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": "",
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                [Circular],
+                                              ],
+                                              "thrownError": null,
+                                            },
+                                            "subscriber": [Circular],
+                                          },
+                                        ],
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "index": 1,
+                                        "isStopped": false,
+                                        "outerIndex": 1,
+                                        "outerValue": undefined,
+                                        "parent": [Circular],
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                    ],
+                                    "active": 2,
+                                    "closed": false,
+                                    "destination": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": true,
+                                    "observables": Array [
+                                      [Circular],
+                                      BehaviorSubject {
+                                        "_isScalar": false,
+                                        "_value": "",
+                                        "closed": false,
+                                        "hasError": false,
+                                        "isStopped": false,
+                                        "observers": Array [
+                                          InnerSubscriber {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": Array [
+                                              SubjectSubscription {
+                                                "_parentOrParents": [Circular],
+                                                "_subscriptions": null,
+                                                "closed": false,
+                                                "subject": [Circular],
+                                                "subscriber": [Circular],
+                                              },
+                                            ],
+                                            "closed": false,
+                                            "destination": Object {
+                                              "closed": true,
+                                              "complete": [Function],
+                                              "error": [Function],
+                                              "next": [Function],
+                                            },
+                                            "index": 1,
+                                            "isStopped": false,
+                                            "outerIndex": 1,
+                                            "outerValue": undefined,
+                                            "parent": [Circular],
+                                            "syncErrorThrowable": false,
+                                            "syncErrorThrown": false,
+                                            "syncErrorValue": null,
+                                          },
+                                        ],
+                                        "thrownError": null,
+                                      },
+                                    ],
+                                    "resultSelector": undefined,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                    "toRespond": 0,
+                                    "values": Array [
+                                      undefined,
+                                      "",
+                                    ],
+                                  },
+                                  "_subscriptions": Array [
+                                    SubjectSubscription {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "subject": [Circular],
+                                      "subscriber": [Circular],
+                                    },
+                                  ],
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "index": 1,
+                                  "isStopped": false,
+                                  "outerIndex": 0,
+                                  "outerValue": undefined,
+                                  "parent": CombineLatestSubscriber {
+                                    "_parentOrParents": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "_subscriptions": Array [
+                                      [Circular],
+                                      InnerSubscriber {
+                                        "_parentOrParents": [Circular],
+                                        "_subscriptions": Array [
+                                          SubjectSubscription {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": null,
+                                            "closed": false,
+                                            "subject": BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": "",
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                [Circular],
+                                              ],
+                                              "thrownError": null,
+                                            },
+                                            "subscriber": [Circular],
+                                          },
+                                        ],
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "index": 1,
+                                        "isStopped": false,
+                                        "outerIndex": 1,
+                                        "outerValue": undefined,
+                                        "parent": [Circular],
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                    ],
+                                    "active": 2,
+                                    "closed": false,
+                                    "destination": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": true,
+                                    "observables": Array [
+                                      [Circular],
+                                      BehaviorSubject {
+                                        "_isScalar": false,
+                                        "_value": "",
+                                        "closed": false,
+                                        "hasError": false,
+                                        "isStopped": false,
+                                        "observers": Array [
+                                          InnerSubscriber {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": Array [
+                                              SubjectSubscription {
+                                                "_parentOrParents": [Circular],
+                                                "_subscriptions": null,
+                                                "closed": false,
+                                                "subject": [Circular],
+                                                "subscriber": [Circular],
+                                              },
+                                            ],
+                                            "closed": false,
+                                            "destination": Object {
+                                              "closed": true,
+                                              "complete": [Function],
+                                              "error": [Function],
+                                              "next": [Function],
+                                            },
+                                            "index": 1,
+                                            "isStopped": false,
+                                            "outerIndex": 1,
+                                            "outerValue": undefined,
+                                            "parent": [Circular],
+                                            "syncErrorThrowable": false,
+                                            "syncErrorThrown": false,
+                                            "syncErrorValue": null,
+                                          },
+                                        ],
+                                        "thrownError": null,
+                                      },
+                                    ],
+                                    "resultSelector": undefined,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                    "toRespond": 0,
+                                    "values": Array [
+                                      undefined,
+                                      "",
+                                    ],
+                                  },
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                              ],
+                              "thrownError": null,
+                            }
+                          }
+                          helpSupportUrl$={
+                            BehaviorSubject {
+                              "_isScalar": false,
+                              "_value": "",
+                              "closed": false,
+                              "hasError": false,
+                              "isStopped": false,
+                              "observers": Array [
+                                InnerSubscriber {
+                                  "_parentOrParents": CombineLatestSubscriber {
+                                    "_parentOrParents": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "_subscriptions": Array [
+                                      InnerSubscriber {
+                                        "_parentOrParents": [Circular],
+                                        "_subscriptions": Array [
+                                          SubjectSubscription {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": null,
+                                            "closed": false,
+                                            "subject": BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": undefined,
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                [Circular],
+                                              ],
+                                              "thrownError": null,
+                                            },
+                                            "subscriber": [Circular],
+                                          },
+                                        ],
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "index": 1,
+                                        "isStopped": false,
+                                        "outerIndex": 0,
+                                        "outerValue": undefined,
+                                        "parent": [Circular],
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      [Circular],
+                                    ],
+                                    "active": 2,
+                                    "closed": false,
+                                    "destination": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": true,
+                                    "observables": Array [
+                                      BehaviorSubject {
+                                        "_isScalar": false,
+                                        "_value": undefined,
+                                        "closed": false,
+                                        "hasError": false,
+                                        "isStopped": false,
+                                        "observers": Array [
+                                          InnerSubscriber {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": Array [
+                                              SubjectSubscription {
+                                                "_parentOrParents": [Circular],
+                                                "_subscriptions": null,
+                                                "closed": false,
+                                                "subject": [Circular],
+                                                "subscriber": [Circular],
+                                              },
+                                            ],
+                                            "closed": false,
+                                            "destination": Object {
+                                              "closed": true,
+                                              "complete": [Function],
+                                              "error": [Function],
+                                              "next": [Function],
+                                            },
+                                            "index": 1,
+                                            "isStopped": false,
+                                            "outerIndex": 0,
+                                            "outerValue": undefined,
+                                            "parent": [Circular],
+                                            "syncErrorThrowable": false,
+                                            "syncErrorThrown": false,
+                                            "syncErrorValue": null,
+                                          },
+                                        ],
+                                        "thrownError": null,
+                                      },
+                                      [Circular],
+                                    ],
+                                    "resultSelector": undefined,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                    "toRespond": 0,
+                                    "values": Array [
+                                      undefined,
+                                      "",
+                                    ],
+                                  },
+                                  "_subscriptions": Array [
+                                    SubjectSubscription {
+                                      "_parentOrParents": [Circular],
+                                      "_subscriptions": null,
+                                      "closed": false,
+                                      "subject": [Circular],
+                                      "subscriber": [Circular],
+                                    },
+                                  ],
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "index": 1,
+                                  "isStopped": false,
+                                  "outerIndex": 1,
+                                  "outerValue": undefined,
+                                  "parent": CombineLatestSubscriber {
+                                    "_parentOrParents": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "_subscriptions": Array [
+                                      InnerSubscriber {
+                                        "_parentOrParents": [Circular],
+                                        "_subscriptions": Array [
+                                          SubjectSubscription {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": null,
+                                            "closed": false,
+                                            "subject": BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": undefined,
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                [Circular],
+                                              ],
+                                              "thrownError": null,
+                                            },
+                                            "subscriber": [Circular],
+                                          },
+                                        ],
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "index": 1,
+                                        "isStopped": false,
+                                        "outerIndex": 0,
+                                        "outerValue": undefined,
+                                        "parent": [Circular],
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      [Circular],
+                                    ],
+                                    "active": 2,
+                                    "closed": false,
+                                    "destination": Subscriber {
+                                      "_parentOrParents": null,
+                                      "_subscriptions": Array [
+                                        [Circular],
+                                      ],
+                                      "closed": false,
+                                      "destination": SafeSubscriber {
+                                        "_complete": undefined,
+                                        "_context": [Circular],
+                                        "_error": undefined,
+                                        "_next": [Function],
+                                        "_parentOrParents": null,
+                                        "_parentSubscriber": [Circular],
+                                        "_subscriptions": null,
+                                        "closed": false,
+                                        "destination": Object {
+                                          "closed": true,
+                                          "complete": [Function],
+                                          "error": [Function],
+                                          "next": [Function],
+                                        },
+                                        "isStopped": false,
+                                        "syncErrorThrowable": false,
+                                        "syncErrorThrown": false,
+                                        "syncErrorValue": null,
+                                      },
+                                      "isStopped": false,
+                                      "syncErrorThrowable": true,
+                                      "syncErrorThrown": false,
+                                      "syncErrorValue": null,
+                                    },
+                                    "isStopped": true,
+                                    "observables": Array [
+                                      BehaviorSubject {
+                                        "_isScalar": false,
+                                        "_value": undefined,
+                                        "closed": false,
+                                        "hasError": false,
+                                        "isStopped": false,
+                                        "observers": Array [
+                                          InnerSubscriber {
+                                            "_parentOrParents": [Circular],
+                                            "_subscriptions": Array [
+                                              SubjectSubscription {
+                                                "_parentOrParents": [Circular],
+                                                "_subscriptions": null,
+                                                "closed": false,
+                                                "subject": [Circular],
+                                                "subscriber": [Circular],
+                                              },
+                                            ],
+                                            "closed": false,
+                                            "destination": Object {
+                                              "closed": true,
+                                              "complete": [Function],
+                                              "error": [Function],
+                                              "next": [Function],
+                                            },
+                                            "index": 1,
+                                            "isStopped": false,
+                                            "outerIndex": 0,
+                                            "outerValue": undefined,
+                                            "parent": [Circular],
+                                            "syncErrorThrowable": false,
+                                            "syncErrorThrown": false,
+                                            "syncErrorValue": null,
+                                          },
+                                        ],
+                                        "thrownError": null,
+                                      },
+                                      [Circular],
+                                    ],
+                                    "resultSelector": undefined,
+                                    "syncErrorThrowable": true,
+                                    "syncErrorThrown": false,
+                                    "syncErrorValue": null,
+                                    "toRespond": 0,
+                                    "values": Array [
+                                      undefined,
+                                      "",
+                                    ],
+                                  },
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                              ],
+                              "thrownError": null,
+                            }
+                          }
+                          intl={
+                            Object {
+                              "defaultFormats": Object {},
+                              "defaultLocale": "en",
+                              "formatDate": [Function],
+                              "formatHTMLMessage": [Function],
+                              "formatMessage": [Function],
+                              "formatNumber": [Function],
+                              "formatPlural": [Function],
+                              "formatRelative": [Function],
+                              "formatTime": [Function],
+                              "formats": Object {
+                                "date": Object {
+                                  "full": Object {
+                                    "day": "numeric",
+                                    "month": "long",
+                                    "weekday": "long",
+                                    "year": "numeric",
+                                  },
+                                  "long": Object {
+                                    "day": "numeric",
+                                    "month": "long",
+                                    "year": "numeric",
+                                  },
+                                  "medium": Object {
+                                    "day": "numeric",
+                                    "month": "short",
+                                    "year": "numeric",
+                                  },
+                                  "short": Object {
+                                    "day": "numeric",
+                                    "month": "numeric",
+                                    "year": "2-digit",
+                                  },
+                                },
+                                "number": Object {
+                                  "currency": Object {
+                                    "style": "currency",
+                                  },
+                                  "percent": Object {
+                                    "style": "percent",
+                                  },
+                                },
+                                "relative": Object {
+                                  "days": Object {
+                                    "units": "day",
+                                  },
+                                  "hours": Object {
+                                    "units": "hour",
+                                  },
+                                  "minutes": Object {
+                                    "units": "minute",
+                                  },
+                                  "months": Object {
+                                    "units": "month",
+                                  },
+                                  "seconds": Object {
+                                    "units": "second",
+                                  },
+                                  "years": Object {
+                                    "units": "year",
+                                  },
+                                },
+                                "time": Object {
+                                  "full": Object {
+                                    "hour": "numeric",
+                                    "minute": "numeric",
+                                    "second": "numeric",
+                                    "timeZoneName": "short",
+                                  },
+                                  "long": Object {
+                                    "hour": "numeric",
+                                    "minute": "numeric",
+                                    "second": "numeric",
+                                    "timeZoneName": "short",
+                                  },
+                                  "medium": Object {
+                                    "hour": "numeric",
+                                    "minute": "numeric",
+                                    "second": "numeric",
+                                  },
+                                  "short": Object {
+                                    "hour": "numeric",
+                                    "minute": "numeric",
+                                  },
+                                },
+                              },
+                              "formatters": Object {
+                                "getDateTimeFormat": [Function],
+                                "getMessageFormat": [Function],
+                                "getNumberFormat": [Function],
+                                "getPluralFormat": [Function],
+                                "getRelativeFormat": [Function],
+                              },
+                              "locale": "en",
+                              "messages": Object {},
+                              "now": [Function],
+                              "onError": [Function],
+                              "textComponent": Symbol(react.fragment),
+                              "timeZone": null,
+                            }
+                          }
+                          opensearchDashboardsDocLink="/docs"
+                          opensearchDashboardsVersion="1.0.0"
+                          useDefaultContent={true}
+                        >
+                          <EuiPopover
+                            anchorPosition="downRight"
+                            button={
+                              <EuiHeaderSectionItemButton
+                                aria-expanded={false}
+                                aria-haspopup="true"
+                                aria-label="Help menu"
+                                onClick={[Function]}
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="help"
+                                />
+                              </EuiHeaderSectionItemButton>
+                            }
+                            closePopover={[Function]}
+                            data-test-subj="helpMenuButton"
+                            display="inlineBlock"
+                            hasArrow={true}
+                            id="headerHelpMenu"
+                            isOpen={false}
+                            ownFocus={true}
+                            panelPaddingSize="m"
+                            repositionOnScroll={true}
+                          >
+                            <div
+                              className="euiPopover euiPopover--anchorDownRight"
+                              data-test-subj="helpMenuButton"
+                              id="headerHelpMenu"
+                            >
+                              <div
+                                className="euiPopover__anchor"
+                              >
+                                <EuiHeaderSectionItemButton
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  onClick={[Function]}
+                                >
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
+                                      Object {
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="help"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onClick={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="help"
+                                              >
+                                                <span
+                                                  data-euiicon-type="help"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </div>
+                            </div>
+                          </EuiPopover>
+                        </HeaderHelpMenuUI>
+                      </InjectIntl(HeaderHelpMenuUI)>
+                    </div>
+                  </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem
+                    border="none"
+                    key="2"
+                  >
+                    <div
+                      className="euiHeaderSectionItem"
+                    >
+                      <HeaderNavControls
+                        navControls$={
+                          BehaviorSubject {
+                            "_isScalar": false,
+                            "_value": Array [],
+                            "closed": false,
+                            "hasError": false,
+                            "isStopped": false,
+                            "observers": Array [
+                              Subscriber {
+                                "_parentOrParents": null,
+                                "_subscriptions": Array [
+                                  SubjectSubscription {
+                                    "_parentOrParents": [Circular],
+                                    "_subscriptions": null,
+                                    "closed": false,
+                                    "subject": [Circular],
+                                    "subscriber": [Circular],
+                                  },
+                                ],
+                                "closed": false,
+                                "destination": SafeSubscriber {
+                                  "_complete": undefined,
+                                  "_context": [Circular],
+                                  "_error": undefined,
+                                  "_next": [Function],
+                                  "_parentOrParents": null,
+                                  "_parentSubscriber": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "destination": Object {
+                                    "closed": true,
+                                    "complete": [Function],
+                                    "error": [Function],
+                                    "next": [Function],
+                                  },
+                                  "isStopped": false,
+                                  "syncErrorThrowable": false,
+                                  "syncErrorThrown": false,
+                                  "syncErrorValue": null,
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": true,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                            ],
+                            "thrownError": null,
+                          }
+                        }
+                      />
+                    </div>
+                  </EuiHeaderSectionItem>
+                </div>
+              </EuiHeaderSection>
             </div>
-          </EuiHeaderSection>
-        </div>
-      </EuiHeader>
+          </EuiHeader>
+        </Styled(EuiHeader)>
+      </CustomHeader>
       <EuiHeader
         position="fixed"
       >

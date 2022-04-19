@@ -8,7 +8,11 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
-    "colors": Object {},
+    "colors": Object {
+      "headerBackground": Object {},
+      "headerBorder": Object {},
+      "headerLink": Object {},
+    },
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -60,7 +64,11 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
-    "colors": Object {},
+    "colors": Object {
+      "headerBackground": Object {},
+      "headerBorder": Object {},
+      "headerLink": Object {},
+    },
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -112,7 +120,11 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
-    "colors": Object {},
+    "colors": Object {
+      "headerBackground": Object {},
+      "headerBorder": Object {},
+      "headerLink": Object {},
+    },
     "darkMode": true,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -168,7 +180,11 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/ui/default_branding",
-    "colors": Object {},
+    "colors": Object {
+      "headerBackground": Object {},
+      "headerBorder": Object {},
+      "headerLink": Object {},
+    },
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
@@ -220,7 +236,11 @@ Object {
   "branding": Object {
     "applicationTitle": "OpenSearch Dashboards",
     "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
-    "colors": Object {},
+    "colors": Object {
+      "headerBackground": Object {},
+      "headerBorder": Object {},
+      "headerLink": Object {},
+    },
     "darkMode": false,
     "loadingLogo": Object {},
     "logo": Object {},
