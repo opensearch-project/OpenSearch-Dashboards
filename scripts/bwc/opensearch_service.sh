@@ -7,6 +7,9 @@ set -e
 
 function setup_opensearch() {
   cd "$OPENSEARCH_DIR"
+  echo "network.host: 0.0.0.0" >> config/opensearch.yml
+  echo "discovery.type: single-node" >> config/opensearch.yml
+  [ $SECURITY_ENABLED == "false" ] && [ -d "plugins/opensearch-security" ] && echo "plugins.security.disabled: true" >> config/opensearch.yml
   # Required for IM
   [ -d "plugins/opensearch-index-management" ] && echo "path.repo: [/tmp]" >> config/opensearch.yml
   # Required for Alerting
@@ -14,10 +17,7 @@ function setup_opensearch() {
   # Required for SQL
   [ -d "plugins/opensearch-sql" ] && echo "script.context.field.max_compilations_rate: 1000/1m" >> config/opensearch.yml
   # Required for PA
-  [ -d "plugins/opensearch-performance-analyzer" ] && echo "webservice-bind-host = 0.0.0.0" >> plugins/opensearch-performance-analyzer/pa_config/performance-analyzer.properties
-  echo "network.host: 0.0.0.0" >> config/opensearch.yml
-  echo "discovery.type: single-node" >> config/opensearch.yml
-  [ $SECURITY_ENABLED == "false" ] && [ -d "plugins/opensearch-security" ] && echo "plugins.security.disabled: true" >> config/opensearch.yml
+  [ -d "plugins/opensearch-performance-analyzer" ] && echo "webservice-bind-host = 0.0.0.0" >> config/opensearch-performance-analyzer/performance-analyzer.properties
 }
 
 # Starts OpenSearch, if verifying a distribution it will install the certs then start.
