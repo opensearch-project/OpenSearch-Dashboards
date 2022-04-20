@@ -6,4 +6,8 @@
   .explorer_section_type > code {
     margin-left: $euiSizeXS;
   }
+
+  .playgroundRenderer {
+    height: 500px; // Visualizations require the container to have a valid width and height to render
+  }
 }

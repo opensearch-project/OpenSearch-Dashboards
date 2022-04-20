@@ -18,12 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ReactExpressionRenderer,
-  ExpressionRenderError,
-  IInterpreterRenderHandlers,
-} from '../../../../src/plugins/expressions/public';
+import React, { useEffect, useState } from 'react';
+import { ReactExpressionRenderer } from '../../../../src/plugins/expressions/public';
 import { useOpenSearchDashboards } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { ExpressionsExampleServices } from '../types';
 
@@ -130,7 +126,7 @@ export function PlaygroundSection({
               iconType="help"
             />
             <EuiSpacer />
-            <ReactExpressionRenderer expression={expression} />
+            <ReactExpressionRenderer expression={expression} className="playgroundRenderer" />
           </>
         ) : (
           <EuiCodeBlock>

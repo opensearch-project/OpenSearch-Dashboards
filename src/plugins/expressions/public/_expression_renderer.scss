@@ -8,8 +8,13 @@
 }
 
 .expExpressionRenderer__expression {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
+  overflow: auto;
+  position: relative;
+  flex: 1 1 100%;
 }
 
 .expExpressionRenderer-isEmpty,
