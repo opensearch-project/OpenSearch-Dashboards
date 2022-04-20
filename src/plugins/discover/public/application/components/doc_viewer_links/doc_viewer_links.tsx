@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './doc_viewer_links.scss';
 import React from 'react';
-import { EuiListGroup, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiListGroupItem, EuiListGroupItemProps } from '@elastic/eui';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';
 
@@ -25,8 +24,12 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     });
 
   return (
-    <div className="osdDocViewerLinks">
-      <EuiListGroup listItems={listItems} />
-    </div>
+    <EuiFlexGroup gutterSize="xs">
+      {listItems.map((item, index) => (
+        <EuiFlexItem key={index}>
+          <EuiListGroupItem {...item} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 }
