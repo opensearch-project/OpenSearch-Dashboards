@@ -78,6 +78,16 @@ export class ConsoleMenu extends Component<Props, State> {
 
   async copyText(text: string) {
     if (window.navigator?.clipboard) {
+      /**
+       * Browser Compatibility Chart
+       *
+       * Chrome: 66
+       * Edge: 79
+       * Firefox: 63
+       * Opera: 53
+       * Internet Explorer: Not supported
+       *
+       */
       await window.navigator.clipboard.writeText(text);
     }
   }
@@ -127,6 +137,7 @@ export class ConsoleMenu extends Component<Props, State> {
       <EuiContextMenuItem
         key="Copy as cURL"
         id="ConCopyAsCurl"
+        data-test-subj="copyAsCurl"
         disabled={!window.navigator?.clipboard}
         onClick={() => {
           this.closePopover();
