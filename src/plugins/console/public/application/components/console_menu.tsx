@@ -64,8 +64,8 @@ export class ConsoleMenu extends Component<Props, State> {
     });
   };
 
-  copyAsCurl() {
-    this.copyText(this.state.curlCode);
+  async copyAsCurl() {
+    await this.copyText(this.state.curlCode);
     const { addNotification } = this.props;
     if (addNotification) {
       addNotification({
@@ -76,13 +76,20 @@ export class ConsoleMenu extends Component<Props, State> {
     }
   }
 
-  copyText(text: string) {
-    const textField = document.createElement('textarea');
-    textField.innerText = text;
-    document.body.appendChild(textField);
-    textField.select();
-    document.execCommand('copy');
-    textField.remove();
+  async copyText(text: string) {
+    if (window.navigator?.clipboard) {
+      /**
+       * Browser Compatibility Chart
+       *
+       * Chrome: 66
+       * Edge: 79
+       * Firefox: 63
+       * Opera: 53
+       * Internet Explorer: Not supported
+       *
+       */
+      await window.navigator.clipboard.writeText(text);
+    }
   }
 
   onButtonClick = () => {
@@ -130,7 +137,8 @@ export class ConsoleMenu extends Component<Props, State> {
       <EuiContextMenuItem
         key="Copy as cURL"
         id="ConCopyAsCurl"
-        disabled={!document.queryCommandSupported('copy')}
+        data-test-subj="copyAsCurl"
+        disabled={!window.navigator?.clipboard}
         onClick={() => {
           this.closePopover();
           this.copyAsCurl();
