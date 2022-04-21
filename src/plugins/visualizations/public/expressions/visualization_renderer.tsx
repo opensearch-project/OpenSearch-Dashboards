@@ -30,15 +30,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { htmlIdGenerator } from '@elastic/eui';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { ExprVis } from './vis';
 import { Visualization } from '../components';
-import { VisParams, VisResponseValue } from '../types';
+import { VisParams, VisRenderValue } from '../types';
 
-const htmlId = htmlIdGenerator();
-
-export const visualization = (): ExpressionRenderDefinition<VisResponseValue> => ({
+export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => ({
   name: 'visualization',
   displayName: 'visualization',
   reuseDomNode: true,
@@ -60,13 +57,9 @@ export const visualization = (): ExpressionRenderDefinition<VisResponseValue> =>
       unmountComponentAtNode(domNode);
     });
 
-    // To remount the visualization if the expression changes
-    const id = htmlId(JSON.stringify(config));
-
     const listenOnChange = params ? params.listenOnChange : false;
     render(
       <Visualization
-        key={id}
         vis={vis}
         visData={visData}
         visParams={vis.params}

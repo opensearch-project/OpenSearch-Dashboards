@@ -71,12 +71,12 @@ export interface ISavedVis {
 
 export interface VisSavedObject extends SavedObject, ISavedVis {}
 
-export interface VisResponseValue {
+export interface VisRenderValue {
   title?: string;
   visType: string;
-  visData: object;
+  visData?: object | null;
   visConfig: {
-    type: string;
+    type?: string;
     [key: string]: any;
   };
   params?: {
