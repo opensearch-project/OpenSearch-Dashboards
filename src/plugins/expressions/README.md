@@ -5,9 +5,7 @@ string for you, as well as a series of registries for advanced users who might
 want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
 
-`Expressions` is a simple custom language designed to write a chain of functions that _pipe_ its output to the
-input of the next function. When two or more such functions are chained together, it is an expressions pipeline. Since it is a custom language, any expression can be represented as a string. Functions can be configured using arguments provided. The final output of the expression pipeline can either be rendered using
-one of the _renderers_ registered in `expressions` plugin or made to output the result of the final function in the chain.
+`Expressions` is a simple custom language designed to write a chain of functions that _pipe_ its output to the input of the next function. When two or more such functions are chained together, it is an expressions pipeline. Since it is a custom language, any expression can be represented as a string. Functions can be configured using arguments provided. The final output of the expression pipeline can either be rendered using one of the _renderers_ registered in `expressions` plugin or made to output the result of the final function in the chain.
 
 > It is not necessary to chain functions and a single function can be used in isolation.
 
@@ -34,7 +32,7 @@ Consider the example below where the expression performs the following. It takes
 sleep time=2000 | square
 ```
 
-**Note:** The above example expression functions are only available with the `--run-examples` flag
+**Note:** The above example expression function is only available with the `--run-examples` flag
 
 The whole string is an expression. `sleep` and `square` are expression functions registered with the expression plugin. `time=2000` is the argument passed to the `sleep` funciton with the value `2000`. `|` is used to denote pipe between the two functions. Every expression can take an input. In the example above, the input provided will be passed on by the sleep function to the square function.
 
@@ -49,7 +47,7 @@ const expression = `sleep time=2000 | square`;
 const execution = expressions.execute(expression, input);
 ```
 
-**Note:** The above example expression functions are only available with the `--run-examples` flag
+**Note:** The above example expression function is only available with the `--run-examples` flag
 
 ### Rendering Expressions
 
@@ -60,7 +58,7 @@ const expressionString = `avatar name="OpenSearch Dashboards" size="xl"`;
 <ReactExpressionRenderer expression={expressionString} />
 ```
 
-**Note:** The above example expression functions are only available with the `--run-examples` flag
+**Note:** The above example expression function is only available with the `--run-examples` flag
 
 ## Custom expressions
 
@@ -68,7 +66,7 @@ Users can  extend the service to incorporate their own functions, types, and ren
 
 ## Playground
 
-Working with expressions can sometimes be a little tricky. To make this easier we have an example plugin with some examples, a playground to run your own expression functions and explorer to view all the registered expression functions and their propoerties. It can be started up using the `--run-examples` flag and found under the `Developer examples` option in the main menu.
+Working with expressions can sometimes be a little tricky. To make this easier we have an example plugin with some examples, a playground to run your own expression functions and explorer to view all the registered expression functions and their properties. It can be started up using the `--run-examples` flag and found under the `Developer examples` option in the main menu.
 
 ```sh
 yarn start --run-examples

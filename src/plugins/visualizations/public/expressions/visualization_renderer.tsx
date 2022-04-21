@@ -30,10 +30,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { htmlIdGenerator } from '@elastic/eui';
 // @ts-ignore
 import { ExprVis } from './vis';
 import { Visualization } from '../components';
 import { VisParams } from '../types';
+
+const htmlId = htmlIdGenerator();
 
 export const visualization = () => ({
   name: 'visualization',
@@ -57,9 +60,13 @@ export const visualization = () => ({
       unmountComponentAtNode(domNode);
     });
 
+    // To remount the visualization if the expression changes
+    const id = htmlId(JSON.stringify(config));
+
     const listenOnChange = params ? params.listenOnChange : false;
     render(
       <Visualization
+        key={id}
         vis={vis}
         visData={visData}
         visParams={vis.params}
