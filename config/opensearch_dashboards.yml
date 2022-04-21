@@ -35,10 +35,10 @@
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
-#  
+#
 # It requires the user to create an OpenSearch node attribute with the same name as the value used in the setting
 # This node attribute should assign all nodes of the same cluster an integer value that increments with each new cluster that is spun up
-# e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id: 
+# e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id:
 # Should only be enabled if there is a corresponding node attribute created in your OpenSearch config that matches the value here
 #opensearch.optimizedHealthcheckId: "cluster_id"
 
@@ -87,7 +87,7 @@
 
 # List of OpenSearch Dashboards client-side headers to send to OpenSearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
-#opensearch.requestHeadersWhitelist: [ authorization ]
+#opensearch.requestHeadersAllowlist: [ authorization ]
 
 # Header names and values that are sent to OpenSearch. Any custom headers cannot be overwritten
 # by client-side headers, regardless of the opensearch.requestHeadersWhitelist configuration.
@@ -126,8 +126,8 @@
 # Set the allowlist to check input graphite Url. Allowlist is the default check list.
 #vis_type_timeline.graphiteAllowedUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite']
 
-# Set the blocklist to check input graphite Url. Blocklist is an IP list. 
-# Below is an example for reference 
+# Set the blocklist to check input graphite Url. Blocklist is an IP list.
+# Below is an example for reference
 # vis_type_timeline.graphiteBlockedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
@@ -159,19 +159,19 @@
 #vis_type_timeline.graphiteBlockedIPs: []
 
 # opensearchDashboards.branding:
-  # logo:
-    # defaultUrl: ""
-    # darkModeUrl: ""
-  # mark:
-    # defaultUrl: ""
-    # darkModeUrl: ""
-  # loadingLogo: 
-    # defaultUrl: ""
-    # darkModeUrl: ""
-  # faviconUrl: ""
-  # applicationTitle: ""
+# logo:
+# defaultUrl: ""
+# darkModeUrl: ""
+# mark:
+# defaultUrl: ""
+# darkModeUrl: ""
+# loadingLogo:
+# defaultUrl: ""
+# darkModeUrl: ""
+# faviconUrl: ""
+# applicationTitle: ""
 
-# Set the value of this setting to true to capture region blocked warnings and errors 
+# Set the value of this setting to true to capture region blocked warnings and errors
 # for your map rendering services.
 # map.showRegionBlockedWarning: false
 
