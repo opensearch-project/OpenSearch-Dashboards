@@ -132,9 +132,9 @@ export class ExpressionRenderHandler {
         .render(this.element, data.value, {
           ...this.handlers,
           uiState,
-        } as any);
+        });
     } catch (e) {
-      return this.handleRenderError(e);
+      return this.handleRenderError(e as Error);
     }
   };
 

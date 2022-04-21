@@ -31,18 +31,18 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { htmlIdGenerator } from '@elastic/eui';
-// @ts-ignore
+import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { ExprVis } from './vis';
 import { Visualization } from '../components';
-import { VisParams } from '../types';
+import { VisParams, VisResponseValue } from '../types';
 
 const htmlId = htmlIdGenerator();
 
-export const visualization = () => ({
+export const visualization = (): ExpressionRenderDefinition<VisResponseValue> => ({
   name: 'visualization',
   displayName: 'visualization',
   reuseDomNode: true,
-  render: async (domNode: HTMLElement, config: any, handlers: any) => {
+  render: async (domNode, config, handlers) => {
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
 

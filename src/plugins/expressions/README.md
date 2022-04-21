@@ -15,8 +15,8 @@ Below is an example of an expression that renders a metric visualization that ag
 
 ```
 opensearchDashboards
-| opensearchaggs 
-  index='d3d7af60-4c81-11e8-b3d7-01146121b73d' 
+| opensearchaggs
+  index='d3d7af60-4c81-11e8-b3d7-01146121b73d'
   aggConfigs='[{"id":"1","type":"avg","params":{"field":"AvgTicketPrice","customLabel":"Avg. Ticket Price"}}]'
 | metricVis
   metric={visdimension accessor=0 format='number'}
@@ -51,18 +51,18 @@ const execution = expressions.execute(expression, input);
 
 ### Rendering Expressions
 
-The other way an expression can be used is to render an output using one of the _renderers_ registered in `expressions` plugin. This can be done using a few ways, the easiest of which is to use the `ReactExpressionRenderer` component. 
+The other way an expression can be used is to render an output using one of the _renderers_ registered in `expressions` plugin. This can be done using a few ways, the easiest of which is to use the `ReactExpressionRenderer` component.
 
 ```jsx
 const expressionString = `avatar name="OpenSearch Dashboards" size="xl"`;
-<ReactExpressionRenderer expression={expressionString} />
+<ReactExpressionRenderer expression={expressionString} />;
 ```
 
 **Note:** The above example expression function is only available with the `--run-examples` flag
 
 ## Custom expressions
 
-Users can  extend the service to incorporate their own functions, types, and renderers. Examples of these can be found in `./examples/expressions_example/common/expression_functions` and can be registered using the `registerFunction`, `registertype` and `registerRenderer` api's from the expression setup contract.
+Users can extend the service to incorporate their own functions, types, and renderers. Examples of these can be found in `./examples/expressions_example/common/expression_functions` and can be registered using the `registerFunction`, `registertype` and `registerRenderer` api's from the expression setup contract.
 
 ## Playground
 
@@ -71,7 +71,3 @@ Working with expressions can sometimes be a little tricky. To make this easier w
 ```sh
 yarn start --run-examples
 ```
-
-
-
-
