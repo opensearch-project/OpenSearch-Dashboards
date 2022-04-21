@@ -90,7 +90,7 @@
 #opensearch.requestHeadersAllowlist: [ authorization ]
 
 # Header names and values that are sent to OpenSearch. Any custom headers cannot be overwritten
-# by client-side headers, regardless of the opensearch.requestHeadersWhitelist configuration.
+# by client-side headers, regardless of the opensearch.requestHeadersAllowlist configuration.
 #opensearch.customHeaders: {}
 
 # Time in milliseconds for OpenSearch to wait for responses from shards. Set to 0 to disable.
