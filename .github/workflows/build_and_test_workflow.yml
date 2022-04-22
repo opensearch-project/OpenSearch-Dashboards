@@ -141,10 +141,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get package version
-        run: |
-          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
-
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
@@ -156,10 +152,14 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
       - name: Run bootstrap
         run: yarn osd bootstrap
 
-      - name: Build artifact with command `${{ matrix.name }}`
+      - name: Build `${{ matrix.name }}`
         run: yarn build-platform ${{ matrix.script }} --release
 
       - uses: actions/upload-artifact@v2
