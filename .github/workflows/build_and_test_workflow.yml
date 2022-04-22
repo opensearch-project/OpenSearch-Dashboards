@@ -106,3 +106,37 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+  build-min-artifact-tests:
+    runs-on: ubuntu-latest
+    name: Build min release artifacts
+    strategy: 
+      matrix:
+        group: [ 
+          'build-platform --linux --skip-os-packages', 
+          'build-platform --linux-arm --skip-os-packages',
+          'build --rpm --skip-archives',
+          'build --rpm-arm --skip-archives',
+          'build --deb --skip-archives',
+          'build --deb-arm --skip-archives',
+        ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build artifact with command `${{ matrix.group }}`
+        run: yarn build-platform ${{ matrix.group }} --release
