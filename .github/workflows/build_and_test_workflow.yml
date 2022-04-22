@@ -162,9 +162,14 @@ jobs:
       - name: Build `${{ matrix.name }}`
         run: yarn build-platform ${{ matrix.script }} --release
 
+      - name: Copy files to temp directory
+        run: |
+          mkdir tmp-target
+          cp -R target tmp-target
+
       - uses: actions/upload-artifact@v3
         if: success()
         with:
           name: ${{ matrix.name }}
-          path: /target/opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}
+          path: /tmp-target/opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}
           retention-days: 1
