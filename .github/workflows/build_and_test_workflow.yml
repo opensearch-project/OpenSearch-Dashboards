@@ -106,3 +106,58 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+  build-min-artifact-tests:
+    runs-on: ubuntu-latest
+    name: Build min release artifacts
+    defaults:
+      run:
+        working-directory: ./artifacts
+    strategy: 
+      matrix:
+        include:
+          - name: Linux x64
+            ext: tar.gz
+            suffix: linux-x64
+            script: build-platform --linux --skip-os-packages
+          - name: Linux ARM64
+            ext: tar.gz
+            suffix: linux-arm64
+            script: build-platform --linux-arm --skip-os-packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ./artifacts
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: "./artifacts/.nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build `${{ matrix.name }}`
+        run: yarn ${{ matrix.script }} --release
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.name }}
+          path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 1
