@@ -140,3 +140,9 @@ jobs:
 
       - name: Build artifact with command `${{ matrix.group }}`
         run: yarn build-platform ${{ matrix.group }} --release
+
+      - uses: actions/upload-artifact@v1
+        if: success()
+        with:
+          path: /**/target/opensearch-dashboards-**
+          retention-days: 1
