@@ -162,7 +162,7 @@ jobs:
       - name: Build `${{ matrix.name }}`
         run: yarn build-platform ${{ matrix.script }} --release
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: success()
         with:
           name: ${{ matrix.name }}
