@@ -17,6 +17,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { Services, getServices } from '../services';
+import { FILE_PAYLOAD_SIZE, FILE_PAYLOAD_SIZE_IN_MB } from '../../common/constants/shared';
 
 export type CustomVectorUploadProps = {
   getServiceSettings: () => Promise<IServiceSettings>;
@@ -33,9 +34,6 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
   const INDEX_NAME_NOT_BEGINS_WITH_CHECK = /^[-+_.]/;
   const INDEX_NAME_BEGINS_WITH_CHECK = /^[a-z]/;
   const INDEX_NAME_NOT_ENDS_WITH_CHECK = /.*-map$/;
-
-  // File size that can be uploaded: 250 MB
-  const MAX_FILE_SIZE_IN_BYTES = 26214400;
   const MAX_LENGTH_OF_INDEX_NAME = 250;
 
   const options = [
@@ -75,17 +73,17 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
     } else {
       // check for restriction on length of the index name
       if (MAX_LENGTH_OF_INDEX_NAME < typedIndexName.length) {
-        error += ' Map name should be less than 250 characters.';
+        error += ' Map name should be less than ' + MAX_LENGTH_OF_INDEX_NAME + ' characters.\n';
       }
 
       // check for restriction on the usage of upper case characters in the index name
       if (INDEX_NAME_UPPERCASE_CHECK.test(typedIndexName)) {
-        error += ' Upper case letters are not allowed.';
+        error += ' Upper case letters are not allowed.\n';
       }
 
       // check for restriction on the usage of special characters in the index name
       if (INDEX_NAME_SPECIAL_CHARACTERS_CHECK.test(typedIndexName)) {
-        error += ' Special characters are not allowed.';
+        error += ' Special characters are not allowed.\n';
       }
 
       // check for restriction on the usage of characters at the beginning in the index name
@@ -93,28 +91,29 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
         INDEX_NAME_NOT_BEGINS_WITH_CHECK.test(typedIndexName) ||
         !INDEX_NAME_BEGINS_WITH_CHECK.test(typedIndexName)
       ) {
-        error += " Map name can't start with + , _ , - or . It should start with a-z.";
+        error += " Map name can't start with + , _ , - or . It should start with a-z.\n";
       }
 
       // check for restriction on the usage of -map in map name if entered by the user
       if (!isIndexNameWithSuffix && INDEX_NAME_NOT_ENDS_WITH_CHECK.test(typedIndexName)) {
-        error += " Map name can't end with -map";
+        error += " Map name can't end with -map.\n";
       }
     }
 
     if (error) {
       errorIndexNameDiv.textContent = error;
       return false;
-    } else {
-      errorIndexNameDiv.textContent = '';
-      return true;
     }
+    errorIndexNameDiv.textContent = '';
+    return true;
   };
 
   const validateFileSize = async (files) => {
     // check if the file size is permitted
-    if (MAX_FILE_SIZE_IN_BYTES < files[0].size) {
-      notifications.toasts.addWarning('File size should be less than 25 MB.');
+    if (FILE_PAYLOAD_SIZE < files[0].size) {
+      notifications.toasts.addDanger(
+        'File size should be less than ' + FILE_PAYLOAD_SIZE_IN_MB + ' MB.'
+      );
       return false;
     }
     return true;

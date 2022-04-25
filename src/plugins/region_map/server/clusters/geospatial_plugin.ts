@@ -6,12 +6,12 @@
 import { UPLOAD_GEOJSON_API } from '../../common/constants/shared';
 
 // eslint-disable-next-line import/no-default-export
-export default function GeoPlugin(Client, config, components) {
+export default function GeospatialPlugin(Client, config, components) {
   const ca = components.clientAction.factory;
-  Client.prototype.geo = components.clientAction.namespaceFactory();
-  const geo = Client.prototype.geo.prototype;
+  Client.prototype.geospatial = components.clientAction.namespaceFactory();
+  const geospatial = Client.prototype.geospatial.prototype;
 
-  geo.geoQuery = ca({
+  geospatial.geospatialQuery = ca({
     url: {
       fmt: `${UPLOAD_GEOJSON_API}`,
     },

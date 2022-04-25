@@ -3,6 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import createGeoCluster from './geo_cluster';
+import createGeospatialCluster from './geospatial_cluster';
 
-export { createGeoCluster };
+export { createGeospatialCluster };

@@ -10,7 +10,5 @@ export const DEFAULT_HEADERS = {
   'osd-xsrf': true,
 };
 export const CLUSTER = {
-  ADMIN: 'admin',
   GEOSPATIAL: 'opensearch_geospatial',
-  DATA: 'data',
 };

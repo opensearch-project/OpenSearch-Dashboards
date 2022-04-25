@@ -4,14 +4,16 @@
  */
 
 export default class GeospatialService {
-  constructor(esDriver) {
-    this.esDriver = esDriver;
+  constructor(driver) {
+    this.driver = driver;
   }
 
   uploadGeojson = async (context, req, res) => {
     try {
-      const { callAsCurrentUser } = await this.esDriver.asScoped(req);
-      const uploadResponse = await callAsCurrentUser('geo.geoQuery', { body: req.body });
+      const { callAsCurrentUser } = await this.driver.asScoped(req);
+      const uploadResponse = await callAsCurrentUser('geospatial.geospatialQuery', {
+        body: req.body,
+      });
       return res.ok({
         body: {
           ok: true,

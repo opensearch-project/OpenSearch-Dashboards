@@ -4,14 +4,14 @@
  */
 
 export default class OpensearchService {
-  constructor(esDriver) {
-    this.esDriver = esDriver;
+  constructor(driver) {
+    this.driver = driver;
   }
 
   getIndex = async (context, req, res) => {
     try {
       const { index } = req.body;
-      const { callAsCurrentUser } = this.esDriver.asScoped(req);
+      const { callAsCurrentUser } = this.driver.asScoped(req);
       const indices = await callAsCurrentUser('cat.indices', {
         index,
         format: 'json',

@@ -4,7 +4,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { createGeoCluster } from './clusters';
+import { createGeospatialCluster } from './clusters';
 import { GeospatialService, OpensearchService } from './services';
 import { geospatial, opensearch } from '../server/routes';
 import { getUiSettings } from './ui_settings';
@@ -18,7 +18,7 @@ export class RegionMapPlugin {
   async setup(core) {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
 
-    const geospatialClient = createGeoCluster(core, globalConfig);
+    const geospatialClient = createGeospatialCluster(core, globalConfig);
 
     // Initialize services
     const geospatialService = new GeospatialService(geospatialClient);

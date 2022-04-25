@@ -17,8 +17,7 @@
 #server.rewriteBasePath: false
 
 # The maximum payload size in bytes for incoming server requests.
-# Modified the payload limit to accommodate file payloads of max 25 MB for uploading custom geojsons in region map plugin.
-server.maxPayloadBytes: 31457280 # 30 MB
+# server.maxPayloadBytes: 1048576
 
 # The OpenSearch Dashboards server's name.  This is used for display purposes.
 #server.name: "your-hostname"
