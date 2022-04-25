@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ViewMode } from '../../embeddable_plugin';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
@@ -94,7 +95,7 @@ function getEditConfig(action: NavAction) {
   return {
     emphasize: true,
     id: 'edit',
-    iconType: 'pencil',
+    iconType: 'pencil' as EuiIconType,
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
     }),
@@ -183,7 +184,7 @@ function getAddConfig(action: NavAction) {
 function getCreateNewConfig(action: NavAction) {
   return {
     emphasize: true,
-    iconType: 'plusInCircleFilled',
+    iconType: 'plusInCircleFilled' as EuiIconType,
     id: 'addNew',
     label: i18n.translate('dashboard.topNave.addNewButtonAriaLabel', {
       defaultMessage: 'Create new',

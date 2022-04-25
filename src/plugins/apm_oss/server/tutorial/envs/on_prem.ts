@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
   createWindowsServerInstructions,
@@ -82,7 +83,7 @@ export function onPremInstructions({
             defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
             You can also migrate your 6.x data with the migration assistant found in OpenSearch Dashboards's management section.`,
           }),
-          iconType: 'alert',
+          iconType: 'alert' as EuiIconType,
         },
         instructionVariants: [
           {

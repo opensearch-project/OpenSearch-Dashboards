@@ -32,6 +32,7 @@ import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@osd/utility-types';
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -190,7 +191,7 @@ export interface App<HistoryLocationState = unknown> {
    * A EUI iconType that will be used for the app's icon. This icon
    * takes precendence over the `icon` property.
    */
-  euiIconType?: string;
+  euiIconType?: EuiIconType;
 
   /**
    * A URL to an image file used as an icon. Used as a fallback

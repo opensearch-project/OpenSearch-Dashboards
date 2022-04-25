@@ -31,6 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { IEmbeddable } from '../../../embeddables';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';
@@ -52,7 +53,7 @@ export class InspectPanelAction implements Action<ActionContext> {
     });
   }
 
-  public getIconType() {
+  public getIconType(): EuiIconType {
     return 'inspect';
   }
 

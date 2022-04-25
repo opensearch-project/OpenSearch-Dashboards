@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -64,5 +66,5 @@ export interface AppCategory {
    * If the category is only 1 item, and no icon is defined, will default to the product icon
    * Defaults to initials if no icon is defined
    */
-  euiIconType?: string;
+  euiIconType?: EuiIconType;
 }

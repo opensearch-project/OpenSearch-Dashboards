@@ -32,6 +32,7 @@ import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
 import { App } from '../../application';
 import { BehaviorSubject } from 'rxjs';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 const availableApps = new Map([
   ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],
@@ -41,7 +42,7 @@ const availableApps = new Map([
       id: 'app2',
       order: -10,
       title: 'App 2',
-      euiIconType: 'canvasApp',
+      euiIconType: 'canvasApp' as EuiIconType,
     },
   ],
   ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
@@ -200,7 +201,7 @@ describe('NavLinksService', () => {
           id: 'app2',
           order: -10,
           title: 'App 2',
-          euiIconType: 'canvasApp',
+          euiIconType: 'canvasApp' as EuiIconType,
         })
       );
       const hiddenLinkIds = await start
