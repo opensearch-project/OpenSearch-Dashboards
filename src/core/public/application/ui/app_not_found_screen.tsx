@@ -32,6 +32,10 @@ import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/e
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
+// A workaround solution
+// it should ideally be replaced by a prop `basePath` passed from the parent component for re-direct
+const baseUrl = window.location.href.split('/app')[0] || '';
+
 export const AppNotFound = () => (
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
     <EuiPageBody component="main">
@@ -53,6 +57,8 @@ export const AppNotFound = () => (
                 id="core.application.appNotFound.pageDescription"
                 defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
               />
+              <br />
+              <a href={baseUrl + '/app/home#/'}>Go to Home Page</a>
             </p>
           }
         />
