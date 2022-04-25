@@ -39,6 +39,7 @@ import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
 
 export function createRegionMapVisualization({
+  http,
   regionmapsConfig,
   uiSettings,
   BaseMapsVisualization,
@@ -55,13 +56,13 @@ export function createRegionMapVisualization({
     async render(opensearchResponse, visParams) {
       getOpenSearchDashboardsLegacy().loadFontAwesome();
       this._choroplethLayer?.setLayerChosenByUser(visParams.layerChosenByUser);
+      this._choroplethLayer?.setVisParams(visParams);
       await super.render(opensearchResponse, visParams);
-      console.log('choropleth visParams');
-      console.log(visParams);
 
       // fetches geojson data
       if (this._choroplethLayer) {
         this._choroplethLayer.setLayerChosenByUser(visParams.layerChosenByUser);
+        this._choroplethLayer.setVisParams(visParams);
         await this._choroplethLayer.whenDataLoaded();
       }
     }
@@ -84,8 +85,10 @@ export function createRegionMapVisualization({
       let selectedLayer;
       if (this._params.layerChosenByUser === 'default') {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
+        this._params.selectedJoinField = selectedLayer.fields[0];
       } else if (this._params.layerChosenByUser === 'custom') {
-        selectedLayer = await this._loadConfig(this._params.selectedCustomLayer);
+        selectedLayer = this._params.selectedCustomLayer;
+        this._params.selectedJoinField = this._params.selectedCustomJoinField;
       }
 
       if (!this._params.selectedJoinField && selectedLayer) {
@@ -124,34 +127,12 @@ export function createRegionMapVisualization({
       // These settings are stored in the URL and can be used to inject dirty display content.
 
       const { escape } = await import('lodash');
-      console.log('FILELAYERCONFIG...');
-      console.log(fileLayerConfig);
-
       if (
         fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
         (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
       ) {
-        alert('inside if');
         const serviceSettings = await getServiceSettings();
         return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
-      }
-
-      if (!fileLayerConfig.isEMS || fileLayerConfig.layerId.startsWith('custom_upload')) {
-        alert('inside !isEMS if');
-        return {
-          attribution:
-            '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
-          created_at: '2017-04-26T17:12:15.978370',
-          fields: [
-            { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 Code' },
-            { type: 'name', name: 'label_en', description: 'Name (en)' },
-          ],
-          format: 'geojson',
-          id: 'usa-county-map',
-          meta: undefined,
-          name: 'usa-county-map',
-          origin: 'user-upload',
-        };
       }
 
       //Configured in the opensearch_dashboards.yml. Needs to be resolved through the settings.
@@ -171,15 +152,17 @@ export function createRegionMapVisualization({
 
     async _updateParams() {
       await super._updateParams();
-      console.log('params from region map viz');
-      console.log(this._params);
+      this._params.layerChosenByUser =
+        document.getElementById('customMapSelection').style.display === 'block'
+          ? 'custom'
+          : 'default';
       let selectedLayer;
       if (this._params.layerChosenByUser === 'default') {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
-        console.log(selectedLayer);
-        console.log('^^^^^^^^ selected layer');
+        this._params.selectedJoinField = selectedLayer.fields[0];
       } else if (this._params.layerChosenByUser === 'custom') {
-        selectedLayer = await this._loadConfig(this._params.selectedCustomLayer);
+        selectedLayer = this._params.selectedCustomLayer;
+        this._params.selectedJoinField = this._params.selectedCustomJoinField;
       }
 
       if (!this._params.selectedJoinField && selectedLayer) {
@@ -222,9 +205,6 @@ export function createRegionMapVisualization({
     }
 
     async _updateChoroplethLayerForNewProperties(name, attribution, showAllData) {
-      console.log('show params');
-      console.log(this._params);
-
       if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(name, showAllData)) {
         return;
       }
@@ -236,7 +216,7 @@ export function createRegionMapVisualization({
       if (this._params.layerChosenByUser === 'default') {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
       } else if (this._params.layerChosenByUser === 'custom') {
-        selectedLayer = await this._loadConfig(this._params.selectedCustomLayer);
+        selectedLayer = this._params.selectedCustomLayer;
       }
       this._opensearchDashboardsMap.removeLayer(this._choroplethLayer);
 
@@ -250,7 +230,8 @@ export function createRegionMapVisualization({
           selectedLayer,
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
-          this._params.layerChosenByUser
+          this._params.layerChosenByUser,
+          http
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
@@ -263,7 +244,8 @@ export function createRegionMapVisualization({
           selectedLayer,
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
-          this._params.layerChosenByUser
+          this._params.layerChosenByUser,
+          http
         );
       }
       this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);

@@ -37,10 +37,60 @@ import { CustomVectorUpload } from './components/custom_vector_upload';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
+import { getServices } from './services';
 
 export function createRegionMapTypeDefinition(dependencies) {
   const { http, uiSettings, notifications, regionmapsConfig, getServiceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
+  const services = getServices(http);
+
+  const diffArray = (arr1, arr2) => {
+    return arr1.concat(arr2).filter((item) => !arr1.includes(item) || !arr2.includes(item));
+  };
+
+  const getCustomIndices = async () => {
+    try {
+      const result = await services.getCustomIndices();
+      return result.resp;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const getJoinFields = async (indexName) => {
+    try {
+      const result = await services.getIndexMapping(indexName);
+      const properties = diffArray(Object.keys(result.resp[indexName].mappings.properties), [
+        'location',
+      ]);
+      return properties.map(function (property) {
+        return {
+          type: property,
+          name: property,
+          description: property,
+        };
+      });
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const addSchemaToCustomLayer = async (customlayer) => {
+    const joinFields = await getJoinFields(customlayer.index);
+    const customLayerWithSchema = {
+      attribution:
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
+      created_at: '2017-04-26T17:12:15.978370',
+      format: 'geojson',
+      fields: joinFields,
+      id: customlayer.index,
+      meta: undefined,
+      name: customlayer.index,
+      origin: 'user-upload',
+    };
+
+    return customLayerWithSchema;
+  };
 
   return {
     name: 'region_map',
@@ -133,9 +183,9 @@ provided base maps, or add your own. Darker colors represent higher values.',
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
-      console.log('tmslayers: ');
-      console.log(tmsLayers);
+
       vis.http = http;
+      vis.params.http = http;
       vis.notifications = notifications;
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
@@ -148,51 +198,22 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const customVectorLayers = regionmapsConfig.layers.map(
         mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
       );
-      console.log('vectorLayers');
-      console.log(vectorLayers);
-      console.log('customVectorLayers');
-      console.log(customVectorLayers);
+      const customIndices = await getCustomIndices();
 
       let selectedLayer = vectorLayers[0];
       let selectedCustomLayer = customVectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      const selectedCustomJoinField = selectedCustomLayer ? selectedCustomLayer.fields[0] : null;
+
       if (regionmapsConfig.includeOpenSearchMapsService) {
         const layers = await serviceSettings.getFileLayers();
-        console.log('layers');
-        console.log(layers);
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
             (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
-        console.log('newLayers');
-        console.log(newLayers);
-
-        const customLayers = [
-          {
-            attribution:
-              '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
-            created_at: '2017-04-26T17:12:15.978370',
-            fields: [
-              { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 Code' },
-              { type: 'name', name: 'label_en', description: 'Name (en)' },
-            ],
-            format: 'geojson',
-            id: 'usa-county-map',
-            meta: undefined,
-            name: 'usa-county-map',
-            origin: 'user-upload',
-          },
-        ];
-        console.log('customLayers');
-        console.log(customLayers);
-        const newCustomLayers = customLayers;
-        // .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
-        // .filter(
-        //   (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
-        // );
-        console.log('newCustomLayers');
-        console.log(newCustomLayers);
+        const promises = customIndices.map(addSchemaToCustomLayer);
+        const newCustomLayers = await Promise.all(promises);
 
         // backfill v1 manifest for now
         newLayers.forEach((layer) => {
@@ -209,7 +230,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
               type: 'geojson',
             };
             layer.isEMS = false;
-            layer.layerId = 'custom_upload.usa-county-map';
+            layer.layerId = layer.origin + '.' + layer.name;
           }
         });
 
@@ -221,9 +242,8 @@ provided base maps, or add your own. Darker colors represent higher values.',
 
         [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
         [selectedCustomLayer] = vis.type.editorConfig.collections.customVectorLayers;
-
         vis.params.selectedCustomLayer = selectedCustomLayer;
-        console.log(vis.params);
+        vis.params.selectedCustomJoinField = selectedCustomJoinField;
 
         selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 

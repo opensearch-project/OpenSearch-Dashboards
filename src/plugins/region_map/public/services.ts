@@ -46,5 +46,29 @@ export function getServices(http: any): Services {
         return e;
       }
     },
+    getIndexData: async (indexName: string) => {
+      try {
+        const response = await http.post('../api/geospatial/_search', {
+          body: JSON.stringify({
+            index: indexName,
+          }),
+        });
+        return response;
+      } catch (e) {
+        return e;
+      }
+    },
+    getIndexMapping: async (indexName: string) => {
+      try {
+        const response = await http.post('../api/geospatial/_mappings', {
+          body: JSON.stringify({
+            index: indexName,
+          }),
+        });
+        return response;
+      } catch (e) {
+        return e;
+      }
+    },
   };
 }

@@ -8,6 +8,49 @@ export default class OpensearchService {
     this.esDriver = esDriver;
   }
 
+  getMappings = async (context, req, res) => {
+    try {
+      const { index } = req.body;
+      const { callAsCurrentUser } = this.esDriver.asScoped(req);
+      const mappings = await callAsCurrentUser('indices.getMapping', { index });
+      return res.ok({
+        body: {
+          ok: true,
+          resp: mappings,
+        },
+      });
+    } catch (err) {
+      return res.ok({
+        body: {
+          ok: false,
+          resp: err.message,
+        },
+      });
+    }
+  };
+
+  search = async (context, req, res) => {
+    try {
+      const { query, index, size } = req.body;
+      const params = { index, size, body: query };
+      const { callAsCurrentUser } = this.esDriver.asScoped(req);
+      const results = await callAsCurrentUser('search', params);
+      return res.ok({
+        body: {
+          ok: true,
+          resp: results,
+        },
+      });
+    } catch (err) {
+      return res.ok({
+        body: {
+          ok: false,
+          resp: err.message,
+        },
+      });
+    }
+  };
+
   getIndex = async (context, req, res) => {
     try {
       const { index } = req.body;

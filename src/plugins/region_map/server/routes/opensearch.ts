@@ -18,4 +18,28 @@ export default function (services, router) {
     },
     services.getIndex
   );
+
+  router.post(
+    {
+      path: '/api/geospatial/_search',
+      validate: {
+        body: schema.object({
+          index: schema.string(),
+        }),
+      },
+    },
+    services.search
+  );
+
+  router.post(
+    {
+      path: '/api/geospatial/_mappings',
+      validate: {
+        body: schema.object({
+          index: schema.string(),
+        }),
+      },
+    },
+    services.getMappings
+  );
 }
