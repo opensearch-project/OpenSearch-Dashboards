@@ -55,7 +55,7 @@ const readOnlyBadge = {
   tooltip: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save index patterns',
   }),
-  iconType: 'glasses' as EuiIconType,
+  iconType: 'glasses',
 };
 
 export async function mountManagementSection(

@@ -56,7 +56,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
     defaultMessage: 'Library',
   });
 
-  private icon = 'folderCheck' as EuiIconType;
+  private icon = 'folderCheck' as const;
 
   public readonly MenuItem = reactToUiComponent(() => (
     <EuiBadge

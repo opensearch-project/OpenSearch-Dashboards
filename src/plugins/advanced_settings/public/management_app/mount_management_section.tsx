@@ -36,7 +36,6 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
@@ -55,7 +54,7 @@ const readOnlyBadge = {
   tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save advanced settings',
   }),
-  iconType: 'glasses' as EuiIconType,
+  iconType: 'glasses',
 };
 
 export async function mountManagementSection(

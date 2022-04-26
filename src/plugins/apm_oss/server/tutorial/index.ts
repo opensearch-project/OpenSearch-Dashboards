@@ -29,7 +29,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';
 import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
@@ -95,7 +94,7 @@ It allows you to monitor the performance of thousands of applications in real ti
           '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
       },
     }),
-    euiIconType: 'apmApp' as EuiIconType,
+    euiIconType: 'apmApp',
     artifacts,
     onPrem: onPremInstructions(indices),
     previewImagePath: '/plugins/apmOss/assets/apm.png',

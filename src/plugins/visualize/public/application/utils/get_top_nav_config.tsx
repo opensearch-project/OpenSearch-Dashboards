@@ -33,7 +33,6 @@ import { i18n } from '@osd/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -275,7 +274,7 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: savedVis?.id && originatingApp ? undefined : ('save' as EuiIconType),
+            iconType: savedVis?.id && originatingApp ? undefined : ('save' as const),
             label:
               savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
@@ -367,7 +366,7 @@ export const getTopNavConfig = (
               defaultMessage: 'Save and return',
             }),
             emphasize: true,
-            iconType: 'checkInCircleFilled' as EuiIconType,
+            iconType: 'checkInCircleFilled' as const,
             description: i18n.translate(
               'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {

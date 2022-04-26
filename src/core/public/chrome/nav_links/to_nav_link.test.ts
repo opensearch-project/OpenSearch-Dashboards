@@ -63,7 +63,7 @@ describe('toNavLink', () => {
         title: 'title',
         order: 12,
         tooltip: 'tooltip',
-        euiIconType: 'my-icon' as EuiIconType,
+        euiIconType: 'my-icon',
       })
     );
   });
