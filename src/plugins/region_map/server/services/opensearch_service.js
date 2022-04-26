@@ -42,4 +42,26 @@ export default class OpensearchService {
       }
     }
   };
+
+  getPlugins = async (context, req, res) => {
+    try {
+      const { callAsCurrentUser } = this.driver.asScoped(req);
+      const plugins = await callAsCurrentUser('cat.plugins', {
+        format: 'json',
+      });
+      return res.ok({
+        body: {
+          ok: true,
+          resp: plugins,
+        },
+      });
+    } catch (err) {
+      return res.ok({
+        body: {
+          ok: false,
+          resp: err.message,
+        },
+      });
+    }
+  };
 }

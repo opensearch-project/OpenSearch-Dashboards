@@ -18,4 +18,12 @@ export default function (services, router) {
     },
     services.getIndex
   );
+
+  router.post(
+    {
+      path: '/api/geospatial/_plugins',
+      validate: false,
+    },
+    services.getPlugins
+  );
 }

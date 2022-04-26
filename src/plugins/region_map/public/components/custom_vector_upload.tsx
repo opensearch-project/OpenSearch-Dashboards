@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import axios from 'axios';
 import {
   EuiButton,
@@ -15,6 +15,7 @@ import {
   EuiSelect,
   EuiTextColor,
   EuiFormRow,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { Services, getServices } from '../services';
 import { FILE_PAYLOAD_SIZE, FILE_PAYLOAD_SIZE_IN_MB } from '../../common/constants/shared';
@@ -28,6 +29,7 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
   const notifications = props.vis.notifications;
   const [large, setLarge] = useState(true);
 
+  const GEOSPATIAL_PLUGIN = 'opensearch-geospatial';
   const INDEX_NAME_SUFFIX = '-map';
   const INDEX_NAME_UPPERCASE_CHECK = /[A-Z]+/;
   const INDEX_NAME_SPECIAL_CHARACTERS_CHECK = /[`!@#$%^&*()\=\[\]{};':"\\|,.<>\/?~]/;
@@ -180,108 +182,154 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
     }
   };
 
+  // Logic for implementing empty state pattern
+  // In case geospatial plugin is not installed, an empty prompt with details is shown.
+  useEffect(() => {
+    const isGeospatialPluginInstalled = async () => {
+      const result = await services.getPlugins();
+      const installedPlugins = result.resp.map((plugin) => {
+        return plugin.component;
+      });
+      if (installedPlugins.includes(GEOSPATIAL_PLUGIN)) {
+        return true;
+      }
+
+      return false;
+    };
+
+    async function getPluginInfo() {
+      const installedFlag = await Promise.resolve(isGeospatialPluginInstalled());
+      if (installedFlag) {
+        document.getElementById('uploadCustomVectorMap').style.display = 'block';
+        document.getElementById('emptyPrompt').style.display = 'none';
+      } else {
+        document.getElementById('emptyPrompt').style.display = 'block';
+        document.getElementById('uploadCustomVectorMap').style.display = 'none';
+      }
+    }
+    getPluginInfo();
+  }, [services]);
+
   return (
     <div>
-      <EuiCard textAlign="left" title="" description="" aria-label="import-vector-map-card">
-        <EuiSpacer size="s" aria-label="medium-spacer" />
+      <div style={{ display: 'none' }} id="emptyPrompt">
+        <EuiEmptyPrompt
+          iconType="popout"
+          title={<h2>Missing geospatial plugin</h2>}
+          body={
+            <Fragment>
+              <p>Install the geospatial plugin in order to upload custom vector maps.</p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton href="https://opensearch.org/docs/latest/" color="primary" fill>
+              Learn more
+            </EuiButton>
+          }
+        />
+      </div>
+      <div style={{ display: 'none' }} id="uploadCustomVectorMap">
+        <EuiCard textAlign="left" title="" description="" aria-label="import-vector-map-card">
+          <EuiSpacer size="s" aria-label="medium-spacer" />
 
-        <EuiText size="s" aria-label="upload-map-text">
-          Upload map
-        </EuiText>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
+          <EuiText size="s" aria-label="upload-map-text">
+            Upload map
+          </EuiText>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
 
-        <EuiFormRow aria-label="form-row-for-file-picker">
-          <EuiFilePicker
-            id="filePicker"
-            initialPromptText="Select or drag and drop a json file"
-            onChange={(files) => {
-              onChange(files);
-            }}
-            display={large ? 'large' : 'default'}
-            accept=".json,.geojson"
+          <EuiFormRow aria-label="form-row-for-file-picker">
+            <EuiFilePicker
+              id="filePicker"
+              initialPromptText="Select or drag and drop a json file"
+              onChange={(files) => {
+                onChange(files);
+              }}
+              display={large ? 'large' : 'default'}
+              accept=".json,.geojson"
+              required={true}
+              aria-label="geojson-file-picker"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
+
+          <EuiText size="xs" color="subdued" aria-label="geojson-file-format-text">
+            <span>
+              Formats accepted: .json, .geojson
+              <br />
+              Max size: 25 MB
+              <br />
+              Coordinates must be in EPSG:4326 coordinate reference system.
+            </span>
+          </EuiText>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
+
+          <EuiText size="s" aria-label="map-name-prefix-text">
+            Map name prefix
+          </EuiText>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
+
+          <EuiFieldText
+            placeholder="Enter a valid map name prefix"
+            value={value}
+            onChange={(e) => onTextChange(e)}
+            onBlur={(e) => validateIndexName(e?.target?.value, false)}
+            id="customIndex"
+            name="customIndex"
             required={true}
-            aria-label="geojson-file-picker"
+            label="Map name"
+            aria-label="map-name-text-field"
           />
-        </EuiFormRow>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
+          <EuiSpacer size="m" aria-label="medium-spacer" />
 
-        <EuiText size="xs" color="subdued" aria-label="geojson-file-format-text">
-          <span>
-            Formats accepted: .json, .geojson
-            <br />
-            Max size: 25 MB
-            <br />
-            Coordinates must be in EPSG:4326 coordinate reference system.
-          </span>
-        </EuiText>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
+          <EuiText size="xs" color="subdued" aria-label="map-name-guidelines-text">
+            Map name guidleines:
+            <ul>
+              <li> Map name prefix must contain 1-250 characters. </li>
+              <li> Map name prefix must start with a-z.</li>
+              <li> Valid characters are a-z, 0-9, - and _ .</li>
+              <li>
+                {' '}
+                The final map name will be the entered prefix here followed by -map as the suffix.{' '}
+              </li>
+            </ul>
+          </EuiText>
+          <EuiText size="xs" aria-label="map-name-error-text">
+            <EuiTextColor color="danger" aria-label="map-name-error-text-color">
+              <p name="errorIndexName" />
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
 
-        <EuiText size="s" aria-label="map-name-prefix-text">
-          Map name prefix
-        </EuiText>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
+          <EuiText size="s" aria-label="geodata-type-text">
+            Select a geo datatype
+          </EuiText>
+          <EuiSpacer size="m" aria-label="medium-spacer" />
 
-        <EuiFieldText
-          placeholder="Enter a valid map name prefix"
-          value={value}
-          onChange={(e) => onTextChange(e)}
-          onBlur={(e) => validateIndexName(e?.target?.value, false)}
-          id="customIndex"
-          name="customIndex"
-          required={true}
-          label="Map name"
-          aria-label="map-name-text-field"
-        />
-        <EuiSpacer size="m" aria-label="medium-spacer" />
+          <EuiSelect
+            id="selectGeoShape"
+            name="selectGeoShape"
+            options={options}
+            value={selectValue}
+            onChange={(e) => onSelectChange(e)}
+            required={true}
+            aria-label="geo-datatype-selector"
+          />
+          <EuiSpacer size="m" aria-label="medium-spacer" />
 
-        <EuiText size="xs" color="subdued" aria-label="map-name-guidelines-text">
-          Map name guidleines:
-          <ul>
-            <li> Map name prefix must contain 1-250 characters. </li>
-            <li> Map name prefix must start with a-z.</li>
-            <li> Valid characters are a-z, 0-9, - and _ .</li>
-            <li>
-              {' '}
-              The final map name will be the entered prefix here followed by -map as the suffix.{' '}
-            </li>
-          </ul>
-        </EuiText>
-        <EuiText size="xs" aria-label="map-name-error-text">
-          <EuiTextColor color="danger" aria-label="map-name-error-text-color">
-            <p name="errorIndexName" />
-          </EuiTextColor>
-        </EuiText>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
-
-        <EuiText size="s" aria-label="geodata-type-text">
-          Select a geo datatype
-        </EuiText>
-        <EuiSpacer size="m" aria-label="medium-spacer" />
-
-        <EuiSelect
-          id="selectGeoShape"
-          name="selectGeoShape"
-          options={options}
-          value={selectValue}
-          onChange={(e) => onSelectChange(e)}
-          required={true}
-          aria-label="geo-datatype-selector"
-        />
-        <EuiSpacer size="m" aria-label="medium-spacer" />
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: 0 }}>
-          <EuiButton
-            id="submitButton"
-            type="submit"
-            fill
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            aria-label="import-file-button"
-          >
-            Import file
-          </EuiButton>
-        </div>
-      </EuiCard>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: 0 }}>
+            <EuiButton
+              id="submitButton"
+              type="submit"
+              fill
+              onClick={handleSubmit}
+              isLoading={isLoading}
+              aria-label="import-file-button"
+            >
+              Import file
+            </EuiButton>
+          </div>
+        </EuiCard>
+      </div>
     </div>
   );
 }

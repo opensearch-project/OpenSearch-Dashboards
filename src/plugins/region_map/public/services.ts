@@ -34,5 +34,13 @@ export function getServices(http: any): Services {
         return e;
       }
     },
+    getPlugins: async () => {
+      try {
+        const response = await http.post('../api/geospatial/_plugins', {});
+        return response;
+      } catch (e) {
+        return e;
+      }
+    },
   };
 }
