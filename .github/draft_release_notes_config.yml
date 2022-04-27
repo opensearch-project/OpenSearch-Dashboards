@@ -1,0 +1,55 @@
+# The overall template of the release notes
+template: |
+  $CHANGES
+
+include-labels:
+  - 'v2.0.0'
+
+# Setting the formatting and sorting for the release notes body
+name-template: Version $RESOLVED_VERSION Release Notes
+change-template: "* $TITLE ([#$NUMBER](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/$NUMBER))"
+sort-by: merged_at
+sort-direction: ascending
+replacers:
+  - search: '##'
+    replace: '###'
+
+# Organizing the tagged PRs into unified categories
+categories:
+  - title: 'Features'
+    labels:
+      - 'feature'
+  - title: 'Enhancements'
+    labels:
+      - 'enhancement'
+  - title: 'Bug Fixes'
+    labels:
+      - 'bug'
+  - title: 'Infrastructure'
+    labels:
+      - 'build'
+      - 'ci'
+      - 'infra'
+      - 'test'
+      - 'test:unit'
+      - 'test:integration'
+      - 'test:bwc'
+      - 'test:functional'
+      - 'dependencies'
+      - 'github actions'
+      - 'release'
+  - title: 'Security'
+    labels:
+      - 'cve'
+  - title: 'Documentation'
+    labels:
+      - 'docs'
+  - title: 'Maintenance'
+    labels:
+      - 'version compatibility'
+      - 'maintenance'
+      - 'versioning'
+  - title: 'Refactoring'
+    labels:
+      - 'refactor'
+      - 'code quality'
