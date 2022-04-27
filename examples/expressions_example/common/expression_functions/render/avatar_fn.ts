@@ -42,7 +42,7 @@ export const avatarFn = (): ExpressionFunctionDefinition<
   fn: (input, args) => {
     return {
       type: 'render',
-      as: 'avatar',
+      as: 'avatar', // the expression renderer to use
       value: {
         name: args.name,
         size: args.size,

@@ -62,7 +62,7 @@ export {
   SavedVisState,
   ISavedVis,
   VisSavedObject,
-  VisResponseValue,
+  VisRenderValue,
 } from './types';
 export { ExprVisAPIEvents } from './expressions/vis';
 export { VisualizationListItem } from './vis_types/vis_type_alias_registry';
