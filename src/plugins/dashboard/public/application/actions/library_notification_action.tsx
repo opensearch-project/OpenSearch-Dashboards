@@ -33,6 +33,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiBadge } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   IEmbeddable,
   ViewMode,
@@ -57,7 +58,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
     defaultMessage: 'Library',
   });
 
-  private icon = 'folderCheck';
+  private icon = 'folderCheck' as const;
 
   public readonly MenuItem = reactToUiComponent(() => (
     <EuiBadge
@@ -78,7 +79,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
     return this.displayName;
   }
 
-  public getIconType({ embeddable }: LibraryNotificationActionContext) {
+  public getIconType({ embeddable }: LibraryNotificationActionContext): EuiIconType {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
