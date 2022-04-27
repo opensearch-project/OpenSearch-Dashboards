@@ -31,7 +31,9 @@
         "built_assets",
         ".eslintcache",
         ".node_binaries",
-        "src/plugins/*/target"
+        "src/plugins/*/target",
+        "src/core/target",
+        "src/test_utils/target"
       ]
     }
   },
