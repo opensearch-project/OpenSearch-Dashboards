@@ -29,6 +29,7 @@
  */
 
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
@@ -85,7 +86,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionExecutionContext<Context>): string | undefined;
+  getIconType(context: ActionExecutionContext<Context>): EuiIconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.

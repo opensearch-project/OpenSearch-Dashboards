@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 
 /**
@@ -54,7 +55,7 @@ export interface Presentable<Context extends object = object> {
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: Context): string | undefined;
+  getIconType(context: Context): EuiIconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.
