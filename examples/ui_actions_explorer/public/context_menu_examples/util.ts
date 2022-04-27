@@ -30,13 +30,14 @@
  * GitHub history for details.
  */
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action } from '../../../../src/plugins/ui_actions/public';
 
 export const sampleAction = (
   id: string,
   order: number,
   name: string,
-  icon: string,
+  icon: EuiIconType,
   grouping?: Action['grouping']
 ): Action => {
   return {

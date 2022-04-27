@@ -31,6 +31,7 @@
  */
 
 import { ScopedHistory, Capabilities } from 'opensearch-dashboards/public';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 
@@ -91,6 +92,6 @@ export interface CreateManagementItemArgs {
   title: string;
   tip?: string;
   order?: number;
-  euiIconType?: string; // takes precedence over `icon` property.
+  euiIconType?: EuiIconType; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
 }
