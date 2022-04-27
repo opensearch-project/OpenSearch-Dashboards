@@ -38,6 +38,7 @@ import {
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+import { VisRenderValue } from '../../visualizations/public';
 
 type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;
@@ -50,7 +51,7 @@ interface Arguments {
 
 type VisParams = Required<Arguments>;
 
-interface RenderValue {
+interface RenderValue extends VisRenderValue {
   visType: 'metrics';
   visData: Input;
   visConfig: VisParams;
