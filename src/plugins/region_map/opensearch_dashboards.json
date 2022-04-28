@@ -15,7 +15,8 @@
   ],
   "requiredBundles": [
     "opensearchDashboardsUtils",
-    "charts", 
-    "visDefaultEditor"
+    "charts",
+    "visDefaultEditor",
+    "opensearchDashboardsReact"
   ]
 }
