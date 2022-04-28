@@ -89,5 +89,6 @@ describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
   isUpgradeableTest('1.0.1', '1.0.0', false);
   isUpgradeableTest('7.10.2', '1.1.0', true);
   isUpgradeableTest('7.10.2', '2.0.0', true);
-  isUpgradeableTest('7.10.2', '3.0.0', false);
+  isUpgradeableTest('7.10.2', '3.0.0', true);
+  isUpgradeableTest('7.10.2', '4.0.0', false);
 });

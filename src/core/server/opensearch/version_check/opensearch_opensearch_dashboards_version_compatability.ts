@@ -45,7 +45,7 @@ interface VersionNumbers {
  *
  * WARNING: OpenSearchDashboards 7.x could cause conflicts.
  */
-const osdLegacyCompatibleMajorVersions = [1, 2];
+const osdLegacyCompatibleMajorVersions = [1, 2, 3];
 
 /**
  * Checks for the compatibilitiy between OpenSearch and OpenSearchDashboards versions

@@ -35,7 +35,7 @@ import semver from 'semver';
  *
  * WARNING: OpenSearchDashboards 7.x could cause conflicts.
  */
-const osdValidMajorVersions = [1, 2];
+const osdValidMajorVersions = [1, 2, 3];
 const rcVersionRegex = /^(\d+\.\d+\.\d+)\-rc(\d+)$/i;
 
 function extractRcNumber(version: string): [string, number] {
