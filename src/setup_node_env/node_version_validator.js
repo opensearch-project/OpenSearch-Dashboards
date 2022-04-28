@@ -35,14 +35,18 @@ var pkg = require('../../package.json');
 var currentVersion = (process && process.version) || null;
 var rawRequiredVersion = (pkg && pkg.engines && pkg.engines.node) || null;
 var requiredVersion = rawRequiredVersion ? 'v' + rawRequiredVersion : rawRequiredVersion;
-var requiredVersionMajorMinor = requiredVersion.match(/^v(\d+\.\d+)/)[1];
-var isVersionValid = requiredVersionMajorMinor === currentVersion.match(/^v(\d+\.\d+)/)[1];
+var currentVersionMajorMinorPatch = currentVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
+var requiredVersionMajorMinorPatch = requiredVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
+var isVersionValid =
+  currentVersionMajorMinorPatch[1] === requiredVersionMajorMinorPatch[1] &&
+  currentVersionMajorMinorPatch[2] === requiredVersionMajorMinorPatch[2] &&
+  parseInt(currentVersionMajorMinorPatch[3], 10) >= parseInt(requiredVersionMajorMinorPatch[3], 10);
 
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid) {
   var errorMessage =
     `OpenSearch Dashboards was built with ${requiredVersion} and does not support the current Node.js version ${currentVersion}. ` +
-    `Please use Node.js ~v${requiredVersionMajorMinor} or higher.`;
+    `Please use Node.js ${requiredVersion} or a higher patch version.`;
 
   // Actions to apply when validation fails: error report + exit.
   console.error(errorMessage);

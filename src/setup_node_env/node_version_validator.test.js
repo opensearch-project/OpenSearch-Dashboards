@@ -42,8 +42,8 @@ describe('NodeVersionValidator', function () {
     testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, +1));
   });
 
-  it('should run the script WITHOUT error when only the patch version is lower', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, -1));
+  it('should run the script WITH error if the patch version is lower', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, -1), true);
   });
 
   it('should run the script WITH error if the major version is higher', function (done) {
@@ -81,10 +81,9 @@ function testValidateNodeVersion(done, versionToTest, expectError = false) {
     if (expectError) {
       expect(error.code).toBe(1);
 
-      var majorMinorVersion = REQUIRED_NODE_JS_VERSION.substring(0, REQUIRED_NODE_JS_VERSION.lastIndexOf('.'));
       var speficicErrorMessage =
         `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. ` +
-        `Please use Node.js ~${majorMinorVersion} or higher.\n`;
+        `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
 
       expect(stderr).toStrictEqual(speficicErrorMessage);
     } else {
