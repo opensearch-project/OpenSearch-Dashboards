@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@osd/dev-utils": "1.0.0",
-    "ejs": "^3.1.6",
+    "ejs": "^3.1.7",
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",
