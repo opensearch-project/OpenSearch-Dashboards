@@ -38,6 +38,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
