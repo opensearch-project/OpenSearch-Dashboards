@@ -32,6 +32,7 @@
 
 // @ts-ignore
 import React from 'react';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
 import { uiToReactComponent } from '../../../opensearch_dashboards_react/public';
@@ -55,7 +56,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return this.definition.execute(context);
   }
 
-  public getIconType(context: Context<A>): string | undefined {
+  public getIconType(context: Context<A>): EuiIconType | undefined {
     if (!this.definition.getIconType) return undefined;
     return this.definition.getIconType(context);
   }

@@ -276,7 +276,7 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: savedVis?.id && originatingApp ? undefined : 'save',
+            iconType: savedVis?.id && originatingApp ? undefined : ('save' as const),
             label:
               savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
@@ -368,7 +368,7 @@ export const getTopNavConfig = (
               defaultMessage: 'Save and return',
             }),
             emphasize: true,
-            iconType: 'checkInCircleFilled',
+            iconType: 'checkInCircleFilled' as const,
             description: i18n.translate(
               'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {

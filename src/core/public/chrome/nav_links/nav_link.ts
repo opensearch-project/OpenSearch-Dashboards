@@ -30,6 +30,7 @@
  * GitHub history for details.
  */
 
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { pick } from '@osd/std';
 import { AppCategory } from '../../';
 
@@ -77,7 +78,7 @@ export interface ChromeNavLink {
    * A EUI iconType that will be used for the app's icon. This icon
    * takes precedence over the `icon` property.
    */
-  readonly euiIconType?: string;
+  readonly euiIconType?: EuiIconType;
 
   /**
    * A URL to an image file used as an icon. Used as a fallback

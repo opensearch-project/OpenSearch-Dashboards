@@ -31,6 +31,7 @@
  */
 
 import { EuiButtonProps } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
@@ -44,7 +45,7 @@ export interface TopNavMenuData {
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
   emphasize?: boolean;
-  iconType?: string;
+  iconType?: EuiIconType;
   iconSide?: EuiButtonProps['iconSide'];
 }
 
