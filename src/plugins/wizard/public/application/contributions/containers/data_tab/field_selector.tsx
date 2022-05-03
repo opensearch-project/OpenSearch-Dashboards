@@ -11,11 +11,11 @@ import {
   IndexPatternField,
   OPENSEARCH_FIELD_TYPES,
   OSD_FIELD_TYPES,
-} from '../../../../../data/public';
+} from '../../../../../../data/public';
 import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
-import { useTypedSelector } from '../../utils/state_management';
+import { useTypedSelector } from '../../../utils/state_management';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -85,29 +85,27 @@ interface FieldGroupProps {
 }
 
 const FieldGroup = ({ fields, header, id }: FieldGroupProps) => (
-  <>
-    <EuiAccordion
-      id={id}
-      buttonContent={
-        <EuiTitle size="xxxs">
-          <span>{header}</span>
-        </EuiTitle>
-      }
-      extraAction={
-        <EuiNotificationBadge color="subdued" size="m">
-          {fields?.length || 0}
-        </EuiNotificationBadge>
-      }
-      initialIsOpen
-    >
-      {fields?.map((field, i) => (
-        <EuiFlexItem key={i}>
-          <FieldSelectorField field={field} />
-        </EuiFlexItem>
-      ))}
-    </EuiAccordion>
-    <EuiSpacer size="s" />
-  </>
+  <EuiAccordion
+    id={id}
+    className="wizFieldSelector__fieldGroup"
+    buttonContent={
+      <EuiTitle size="xxxs">
+        <span>{header}</span>
+      </EuiTitle>
+    }
+    extraAction={
+      <EuiNotificationBadge color="subdued" size="m">
+        {fields?.length || 0}
+      </EuiNotificationBadge>
+    }
+    initialIsOpen
+  >
+    {fields?.map((field, i) => (
+      <EuiFlexItem key={i}>
+        <FieldSelectorField field={field} />
+      </EuiFlexItem>
+    ))}
+  </EuiAccordion>
 );
 
 function getFieldCategory(field: IndexPatternField): keyof IFieldCategories {
