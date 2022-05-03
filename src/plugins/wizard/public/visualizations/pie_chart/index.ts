@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationTypeOptions } from '../../services/type_service/visualization_type';
+import { VisualizationTypeOptions } from '../../services/type_service';
 
 export const createPieChartConfig = (): VisualizationTypeOptions => {
   return {

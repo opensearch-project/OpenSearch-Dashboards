@@ -3,5 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './type_service';
 export * from './types';
+
+export { Select } from './select';
+export { TextInput } from './text_input';
