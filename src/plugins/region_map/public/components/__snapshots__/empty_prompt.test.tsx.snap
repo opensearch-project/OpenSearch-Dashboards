@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty_prompt rendering renders the default Empty Prompt 1`] = `
+<EuiEmptyPrompt
+  actions=""
+  body={
+    <React.Fragment>
+      <p>
+        test
+      </p>
+    </React.Fragment>
+  }
+  iconType="test"
+  title={
+    <h2>
+      test
+    </h2>
+  }
+/>
+`;

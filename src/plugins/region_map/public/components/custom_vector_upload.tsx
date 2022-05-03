@@ -24,6 +24,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { Services, getServices } from '../services';
+import { EmptyPrompt } from './empty_prompt';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { FILE_PAYLOAD_SIZE, FILE_PAYLOAD_SIZE_IN_MB } from '../../common/constants/shared';
 
@@ -34,7 +35,6 @@ export type CustomVectorUploadProps = {
 function CustomVectorUpload(props: CustomVectorUploadProps) {
   const services = getServices(props.vis.http);
   const notifications = props.vis.notifications;
-  const [large, setLarge] = useState(true);
 
   const GEOSPATIAL_PLUGIN = 'opensearch-geospatial';
   const INDEX_NAME_SUFFIX = '-map';
@@ -261,9 +261,20 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
     getPluginInfo();
   }, [services]);
 
+  const emptyPromptProps = {
+    iconType: 'popout',
+    title: 'Missing geospatial plugin',
+    bodyFragment: 'Install the geospatial plugin in order to upload custom vector maps.',
+    actions: (
+      <EuiButton href="https://opensearch.org/docs/latest/" color="primary" fill>
+        Learn more
+      </EuiButton>
+    ),
+  };
+
   return (
     <div>
-      {isGeospatialPluginInstalled ? (
+      {!isGeospatialPluginInstalled ? (
         <div id="uploadCustomVectorMap">
           <EuiCard textAlign="left" title="" description="" aria-label="import-vector-map-card">
             <EuiSpacer size="s" aria-label="medium-spacer" />
@@ -280,7 +291,7 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
                 onChange={(files) => {
                   onChange(files);
                 }}
-                display={large ? 'large' : 'default'}
+                display="large"
                 accept=".json,.geojson"
                 required={true}
                 aria-label="geojson-file-picker"
@@ -367,22 +378,7 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
           </EuiCard>
         </div>
       ) : (
-        <div id="emptyPrompt">
-          <EuiEmptyPrompt
-            iconType="popout"
-            title={<h2>Missing geospatial plugin</h2>}
-            body={
-              <Fragment>
-                <p>Install the geospatial plugin in order to upload custom vector maps.</p>
-              </Fragment>
-            }
-            actions={
-              <EuiButton href="https://opensearch.org/docs/latest/" color="primary" fill>
-                Learn more
-              </EuiButton>
-            }
-          />
-        </div>
+        <EmptyPrompt {...emptyPromptProps} />
       )}
     </div>
   );
