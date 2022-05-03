@@ -17,8 +17,9 @@ import {
 import React, { FC, useState, useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
-import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
+import { useTypedDispatch } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
+import { useVisualizationType } from '../utils/use';
 
 import './workspace.scss';
 
@@ -49,17 +50,12 @@ export const Workspace: FC = ({ children }) => {
 
 const TypeSelectorPopover = () => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const { activeVisualization: activeVisualizationId } = useTypedSelector(
-    (state) => state.visualization
-  );
   const {
     services: { types },
   } = useOpenSearchDashboards<WizardServices>();
   const dispatch = useTypedDispatch();
-
-  // TODO: Error if no active visualization
-  const activeVisualization = types.get(activeVisualizationId || '');
   const visualizationTypes = types.all();
+  const activeVisualization = useVisualizationType();
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

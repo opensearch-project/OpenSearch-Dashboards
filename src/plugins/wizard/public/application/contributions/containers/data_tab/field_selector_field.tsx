@@ -30,8 +30,8 @@
 
 import React, { useState } from 'react';
 import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldButton, FieldIcon } from '../../../../../opensearch_dashboards_react/public';
-import { useDrag } from '../../utils/drag_drop/drag_drop_context';
+import { FieldButton, FieldIcon } from '../../../../../../opensearch_dashboards_react/public';
+import { useDrag } from '../../../utils/drag_drop/drag_drop_context';
 
 import './field_selector_field.scss';
 
@@ -39,12 +39,22 @@ export interface FieldSelectorFieldProps {
   field: IndexPatternField;
 }
 
+export type FieldDragData = Pick<IndexPatternField, 'name' | 'displayName' | 'type'>;
+
 // TODO:
 // 1. Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
 // 2. Add popover for fields stats from discover as well
 export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
+  const { displayName, type, name } = field;
   const [infoIsOpen, setOpen] = useState(false);
-  const [dragProps] = useDrag(field, `dataPlane`);
+  const [dragProps] = useDrag({
+    namespace: 'field-data',
+    value: {
+      displayName,
+      name,
+      type,
+    },
+  });
 
   function togglePopover() {
     setOpen(!infoIsOpen);

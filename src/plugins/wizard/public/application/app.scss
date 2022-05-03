@@ -4,10 +4,10 @@
   padding: 0;
   display: grid;
   grid-template-rows: min-content 1fr;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 470px 1fr;
   grid-template-areas: 
     "topNav topNav"
     "sideNav workspace"
   ;
-  height: calc(100vh - #{$osdHeaderOffset}); // TODO: update 190px to correct offset variable
+  height: calc(100vh - #{$osdHeaderOffset}); 
 }
