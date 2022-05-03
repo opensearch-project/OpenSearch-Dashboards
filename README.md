@@ -16,7 +16,6 @@ Feel free to take a look at what the community has been up to, and then head ove
 
 [![Build and Test][build-and-test-badge]][build-and-test-link]
 [![Unit Test Code Coverage][codecov-badge]][codecov-link]
-[![Developer Certificate of Origin Check][dco-badge]][dco-link]
 [![Link Checker][link-checker-badge]][link-checker-link]
 
 ## Project Resources
@@ -49,7 +48,5 @@ Copyright OpenSearch Contributors. See [NOTICE](NOTICE.txt) for details.
 [build-and-test-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/build_and_test_workflow.yml
 [codecov-badge]: https://codecov.io/gh/opensearch-project/OpenSearch-Dashboards/branch/main/graphs/badge.svg
 [codecov-link]: https://app.codecov.io/gh/opensearch-project/OpenSearch-Dashboards
-[dco-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/dco.yml/badge.svg
-[dco-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/dco.yml
 [link-checker-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml/badge.svg
 [link-checker-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml
