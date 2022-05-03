@@ -28,19 +28,21 @@
  * under the License.
  */
 
-import { VisualizationType, VisualizationTypeOptions } from './visualization_type';
+import { CoreService } from 'src/core/types';
+import { VisualizationTypeOptions } from './types';
+import { VisualizationType } from './visualization_type';
 
 /**
- * Vis Types Service
+ * Visualization Types Service
  *
  * @internal
  */
-export class TypeService {
+export class TypeService implements CoreService<TypeServiceSetup, TypeServiceStart> {
   private types: Record<string, VisualizationType> = {};
 
   private registerVisualizationType(visDefinition: VisualizationType) {
     if (this.types[visDefinition.name]) {
-      throw new Error('type already exists!');
+      throw new Error(`A visualization with this the name ${visDefinition.name} already exists!`);
     }
     this.types[visDefinition.name] = visDefinition;
   }
