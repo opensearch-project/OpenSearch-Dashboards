@@ -31,7 +31,7 @@
 import { postSnapshot } from '@percy/sdk-utils';
 import { Test } from 'mocha';
 
-import testSubjSelector from '@osd/test-subj-selector';
+import { testSubjSelector } from '@osd/test-subj-selector';
 
 import { pkg } from '../../../../src/core/server/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';

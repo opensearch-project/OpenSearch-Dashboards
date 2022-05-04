@@ -1,9 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-test-subj-selector"
+    "outDir": "./target",
+    "declaration": true,
+    "sourceMap": true,
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
-    "index.d.ts"
+    "src"
   ]
 }
