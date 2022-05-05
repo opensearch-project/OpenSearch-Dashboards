@@ -152,10 +152,6 @@ export function createRegionMapVisualization({
 
     async _updateParams() {
       await super._updateParams();
-      this._params.layerChosenByUser =
-        document.getElementById('customMapSelection').style.display === 'block'
-          ? 'custom'
-          : 'default';
       let selectedLayer;
       if (this._params.layerChosenByUser === 'default') {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);

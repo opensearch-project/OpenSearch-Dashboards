@@ -256,7 +256,10 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vis.params.selectedLayer = selectedLayer;
         vis.params.selectedJoinField = selectedJoinField;
       }
-      vis.params.layerChosenByUser = 'default';
+
+      vis.params.layerChosenByUser = vis.params.layerChosenByUser
+        ? vis.params.layerChosenByUser
+        : 'default';
 
       return vis;
     },
