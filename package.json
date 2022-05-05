@@ -81,6 +81,7 @@
     "**/@types/node": "^14.17.32",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
+    "**/axios": "^0.27.2",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
@@ -89,8 +90,7 @@
     "**/nth-check": "^2.0.1",
     "**/qs": "^6.10.3",
     "**/trim": "^0.0.3",
-    "**/typescript": "4.0.2",
-    "**/axios": "^0.27.2"
+    "**/typescript": "4.0.2"
   },
   "workspaces": {
     "packages": [
