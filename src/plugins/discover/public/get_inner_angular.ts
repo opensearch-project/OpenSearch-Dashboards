@@ -149,6 +149,7 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
+    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
     .directive('contextErrorMessage', createContextErrorMessageDirective);
