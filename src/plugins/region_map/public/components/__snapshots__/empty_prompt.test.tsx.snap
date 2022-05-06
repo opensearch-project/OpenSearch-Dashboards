@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`empty_prompt rendering renders the default Empty Prompt 1`] = `
+exports[`empty_prompt renders the Empty Prompt based on props provided 1`] = `
 <EuiEmptyPrompt
   actions=""
   body={
@@ -11,6 +11,7 @@ exports[`empty_prompt rendering renders the default Empty Prompt 1`] = `
     </React.Fragment>
   }
   iconType="test"
+  testId="empty-prompt-id"
   title={
     <h2>
       test

@@ -1,0 +1,190 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`vector_upload_options renders the VectorUploadOptions based on props provided 1`] = `
+<div
+  id="uploadCustomVectorMap"
+>
+  <EuiCard
+    aria-label="import-vector-map-card"
+    description=""
+    textAlign="left"
+    title=""
+  >
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="s"
+    />
+    <EuiText
+      aria-label="upload-map-text"
+      size="s"
+    >
+      Upload map
+    </EuiText>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiFormRow
+      aria-label="form-row-for-file-picker"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
+    >
+      <EuiFilePicker
+        accept=".json,.geojson"
+        aria-label="geojson-file-picker"
+        compressed={false}
+        display="large"
+        id="filePicker"
+        initialPromptText="Select or drag and drop a json file"
+        onChange={[Function]}
+        required={true}
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiText
+      aria-label="geojson-file-format-text"
+      color="subdued"
+      size="xs"
+    >
+      <span>
+        Formats accepted: .json, .geojson
+        <br />
+        Max size: 25 MB
+        <br />
+        Coordinates must be in EPSG:4326 coordinate reference system.
+      </span>
+    </EuiText>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiText
+      aria-label="map-name-prefix-text"
+      size="s"
+    >
+      Map name prefix
+    </EuiText>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiFieldText
+      aria-label="map-name-text-field"
+      id="customIndex"
+      label="Map name"
+      name="customIndex"
+      onBlur={[Function]}
+      onChange={[Function]}
+      placeholder="Enter a valid map name prefix"
+      required={true}
+      value=""
+    />
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiText
+      aria-label="map-name-guidelines-text"
+      color="subdued"
+      size="xs"
+    >
+      Map name guidleines:
+      <ul>
+        <li>
+           Map name prefix must contain 1-250 characters. 
+        </li>
+        <li>
+           Map name prefix must start with a-z.
+        </li>
+        <li>
+           Valid characters are a-z, 0-9, - and _ .
+        </li>
+        <li>
+           
+          The final map name will be the entered prefix here followed by -map as the suffix.
+           
+        </li>
+      </ul>
+    </EuiText>
+    <EuiText
+      aria-label="map-name-error-text"
+      size="xs"
+    >
+      <EuiTextColor
+        aria-label="map-name-error-text-color"
+        color="danger"
+      >
+        <p
+          name="errorIndexName"
+        />
+      </EuiTextColor>
+    </EuiText>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiText
+      aria-label="geodata-type-text"
+      size="s"
+    >
+      Select a geo datatype
+    </EuiText>
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <EuiSelect
+      aria-label="geo-datatype-selector"
+      id="selectGeoShape"
+      name="selectGeoShape"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Geo shape",
+            "value": "geo_shape",
+          },
+          Object {
+            "text": "Geo point",
+            "value": "geo_point",
+          },
+        ]
+      }
+      required={true}
+      value=""
+    />
+    <EuiSpacer
+      aria-label="medium-spacer"
+      size="m"
+    />
+    <div
+      style={
+        Object {
+          "display": "flex",
+          "justifyContent": "flex-end",
+          "padding": 0,
+          "width": "100%",
+        }
+      }
+    >
+      <EuiButton
+        aria-label="import-file-button"
+        fill={true}
+        id="submitButton"
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        Import file
+      </EuiButton>
+    </div>
+  </EuiCard>
+</div>
+`;

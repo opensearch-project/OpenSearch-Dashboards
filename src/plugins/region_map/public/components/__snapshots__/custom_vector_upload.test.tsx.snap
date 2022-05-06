@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`custom vector upload component renders the empty prompt if geospatial plugin is installed 1`] = `
+<div>
+  <div
+    className="euiEmptyPrompt"
+    testId="empty-prompt-id"
+  >
+    <span
+      color="subdued"
+      data-euiicon-type="popout"
+      size="xxl"
+    />
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <h2
+      className="euiTitle euiTitle--medium"
+    >
+      Missing geospatial plugin
+    </h2>
+    <span
+      className="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiText euiText--medium"
+      >
+        <p>
+          Install the geospatial plugin in order to upload custom vector maps.
+        </p>
+      </div>
+    </span>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+    <a
+      className="euiButton euiButton--primary euiButton--fill"
+      disabled={false}
+      href="https://opensearch.org/docs/latest/"
+      rel="noreferrer"
+      style={
+        Object {
+          "minWidth": undefined,
+        }
+      }
+    >
+      <span
+        className="euiButtonContent euiButton__content"
+      >
+        <span
+          className="euiButton__text"
+        >
+          Learn more
+        </span>
+      </span>
+    </a>
+  </div>
+</div>
+`;
