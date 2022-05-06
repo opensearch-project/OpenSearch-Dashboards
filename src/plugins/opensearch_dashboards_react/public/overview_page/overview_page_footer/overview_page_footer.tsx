@@ -67,7 +67,12 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
         >
           <FormattedMessage
             id="opensearch-dashboards-react.pageFooter.changeHomeRouteLink"
-            defaultMessage="Display a different page on log in"
+            defaultMessage={i18n.translate(
+              'opensearch-dashboards-react.pageFooter.changeHomeRouteLink',
+              {
+                defaultMessage: 'Display a different page on log in',
+              }
+            )}
           />
         </EuiButtonEmpty>
       </RedirectAppLinks>
@@ -91,7 +96,12 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
       >
         <FormattedMessage
           id="opensearch-dashboards-react.pageFooter.makeDefaultRouteLink"
-          defaultMessage="Make this my landing page"
+          defaultMessage={i18n.translate(
+            'opensearch-dashboards-react.pageFooter.makeDefaultRouteLink',
+            {
+              defaultMessage: 'Make this my landing page',
+            }
+          )}
         />
       </EuiButtonEmpty>
     );
@@ -116,7 +126,9 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
               >
                 <FormattedMessage
                   id="opensearch-dashboards-react.pageFooter.appDirectoryButtonLabel"
-                  defaultMessage="View app directory"
+                  defaultMessage={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+                    defaultMessage: 'View app directory',
+                  })}
                 />
               </EuiButtonEmpty>
             </RedirectAppLinks>
