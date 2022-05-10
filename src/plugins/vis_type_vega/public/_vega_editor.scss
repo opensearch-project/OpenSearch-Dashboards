@@ -5,8 +5,9 @@
 }
 
 .vgaEditor {
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     @include euiScrollBar;
+
     max-height: $euiSize * 15;
     overflow-y: auto;
   }
@@ -16,6 +17,7 @@
   position: absolute;
   z-index: $euiZLevel1;
   top: $euiSizeS;
+
   // Adjust for sidebar collapse button
   right: $euiSizeXXL;
   line-height: 1;

@@ -1,4 +1,4 @@
-@import '../../variables';
+@import "../../variables";
 
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
@@ -14,16 +14,18 @@ $visLegendLineHeight: $euiSize;
   display: flex;
   padding: $euiSizeXS;
   background-color: $euiColorEmptyShade;
-  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+  transition:
+    opacity $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
   &:focus {
     box-shadow: none;
-    background-color: $euiFocusBackgroundColor !important; // sass-lint:disable-line no-important
+    background-color: $euiFocusBackgroundColor !important;
   }
 }
 
 .visLegend__toggle--isOpen {
-  background-color: transparentize($euiColorDarkestShade, .9);
+  background-color: transparentize($euiColorDarkestShade, 0.9);
   opacity: 1;
 }
 
@@ -47,6 +49,7 @@ $visLegendLineHeight: $euiSize;
 
 .visLegend__list {
   @include euiScrollBar;
+
   display: flex;
   width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
@@ -67,8 +70,7 @@ $visLegendLineHeight: $euiSize;
   .visLib--legend-top &,
   .visLib--legend-bottom & {
     width: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
 
     .visLegend__value {
       flex-grow: 0;

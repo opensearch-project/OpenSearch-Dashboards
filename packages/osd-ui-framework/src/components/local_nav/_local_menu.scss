@@ -8,7 +8,7 @@
 .kuiLocalMenuItem {
   display: flex;
   align-items: center;
-  padding: ($localNavSideSpacing * .25) $localNavSideSpacing;
+  padding: ($localNavSideSpacing * 0.25) $localNavSideSpacing;
   font-size: $kuiFontSize;
   background-color: $localNavButtonBackgroundColor;
   color: $localNavButtonTextColor;
@@ -16,8 +16,9 @@
   cursor: pointer;
   border-bottom: solid 2px transparent;
 
-  &:hover, &:focus {
-    background-color: rgba($localNavButtonBackgroundColor-isHover, .15);
+  &:hover,
+  &:focus {
+    background-color: rgba($localNavButtonBackgroundColor-isHover, 0.15);
     text-decoration: underline;
   }
 
@@ -27,7 +28,8 @@
     border-color: $euiColorPrimary;
     z-index: 2;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       text-decoration: none;
     }
   }
@@ -43,7 +45,7 @@
   }
 }
 
-    .kuiLocalMenuItem__icon {
-      margin-right: 5px;
-      margin-bottom: -1px;
-    }
+.kuiLocalMenuItem__icon {
+  margin-right: 5px;
+  margin-bottom: -1px;
+}

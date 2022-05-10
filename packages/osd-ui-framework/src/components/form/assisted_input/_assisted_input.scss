@@ -6,12 +6,12 @@
   position: relative;
 }
 
-  /**
+/**
    * 1. Vertically center the assistance, regardless of its height.
    */
-  .kuiAssistedInput__assistance {
-    position: absolute;
-    right: $kuiFormControlHorizontalPadding;
-    top: 50%; /* 1 */
-    transform: translateY(-50%); /* 1 */
-  }
+.kuiAssistedInput__assistance {
+  position: absolute;
+  right: $kuiFormControlHorizontalPadding;
+  top: 50%; /* 1 */
+  transform: translateY(-50%); /* 1 */
+}

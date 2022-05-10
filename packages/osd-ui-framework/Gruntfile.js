@@ -31,11 +31,6 @@
 const sass = require('node-sass');
 const postcss = require('postcss');
 const postcssConfig = require('@osd/optimizer/postcss.config.js');
-const chokidar = require('chokidar');
-const { debounce } = require('lodash');
-
-const platform = require('os').platform();
-const isPlatformWindows = /^win/.test(platform);
 
 module.exports = function (grunt) {
   grunt.initConfig({
@@ -71,92 +66,18 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
+
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
-  grunt.registerTask('docSiteBuild', function () {
+  grunt.registerTask('compileCss', function () {
     const done = this.async();
-
-    const serverCmd = {
-      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack.cmd' : './node_modules/.bin/webpack',
-      args: [
-        '-p',
-        '--config=doc_site/webpack.config.js',
-        '--devtool=null', // Prevent the source map from being generated
-      ],
-      opts: { stdio: 'inherit' },
-    };
-
-    const uiFrameworkServerBuild = new Promise((resolve, reject) => {
-      grunt.util.spawn(serverCmd, (error, result, code) => {
-        if (error || code !== 0) {
-          const message = result.stderr || result.stdout;
-
-          grunt.log.error(message);
-
-          return reject();
-        }
-
-        grunt.log.writeln(result);
-
-        resolve();
-      });
-    });
-
-    uiFrameworkServerBuild.then(done);
+    Promise.all([
+      uiFrameworkCompile('src/kui_light.scss', 'dist/kui_light.css'),
+      uiFrameworkCompile('src/kui_dark.scss', 'dist/kui_dark.css'),
+    ]).then(done);
   });
 
-  grunt.registerTask('docSiteStart', function () {
-    const done = this.async();
-    Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
-  });
-
-  grunt.registerTask('compileCssLight', function () {
-    const done = this.async();
-    uiFrameworkCompileLight().then(done);
-  });
-
-  grunt.registerTask('compileCssDark', function () {
-    const done = this.async();
-    uiFrameworkCompileDark().then(done);
-  });
-
-  function uiFrameworkServerStart() {
-    const serverCmd = {
-      cmd: isPlatformWindows
-        ? '.\\node_modules\\.bin\\webpack-dev-server.cmd'
-        : './node_modules/.bin/webpack-dev-server',
-      args: [
-        '--config=doc_site/webpack.config.js',
-        '--hot',
-        '--inline',
-        '--content-base=doc_site/build',
-        '--host=0.0.0.0',
-        '--port=8020',
-      ],
-      opts: { stdio: 'inherit' },
-    };
-
-    return new Promise((resolve, reject) => {
-      grunt.util.spawn(serverCmd, (error, result, code) => {
-        if (error || code !== 0) {
-          const message = result.stderr || result.stdout;
-
-          grunt.log.error(message);
-
-          return reject();
-        }
-
-        grunt.log.writeln(result);
-
-        resolve();
-      });
-    });
-  }
-
-  function uiFrameworkCompileLight() {
-    const src = 'src/kui_light.scss';
-    const dest = 'dist/kui_light.css';
-
+  function uiFrameworkCompile(src, dest) {
     return new Promise((resolve) => {
       sass.render(
         {
@@ -180,71 +101,6 @@ module.exports = function (grunt) {
             });
         }
       );
-    });
-  }
-
-  function uiFrameworkCompileDark() {
-    const src = 'src/kui_dark.scss';
-    const dest = 'dist/kui_dark.css';
-
-    return new Promise((resolve) => {
-      sass.render(
-        {
-          file: src,
-        },
-        function (error, result) {
-          if (error) {
-            grunt.log.error(error);
-          }
-
-          postcss([postcssConfig])
-            .process(result.css, { from: src, to: dest })
-            .then((result) => {
-              grunt.file.write(dest, result.css);
-
-              if (result.map) {
-                grunt.file.write(`${dest}.map`, result.map);
-              }
-
-              resolve();
-            });
-        }
-      );
-    });
-  }
-
-  function uiFrameworkWatch() {
-    const debouncedCompile = debounce(
-      () => {
-        // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
-        // to compile.
-        grunt.util.spawn(
-          {
-            cmd: isPlatformWindows
-              ? '.\\node_modules\\.bin\\grunt.cmd'
-              : './node_modules/.bin/grunt',
-            args: ['compileCssLight', 'compileCssDark'],
-          },
-          (error, result) => {
-            if (error) {
-              grunt.log.error(result.stdout);
-            } else {
-              grunt.log.writeln(result);
-            }
-          }
-        );
-      },
-      400,
-      { leading: true }
-    );
-
-    return new Promise(() => {
-      debouncedCompile();
-
-      chokidar.watch('src', { ignoreInitial: true }).on('all', (event, path) => {
-        grunt.log.writeln(event, path);
-        debouncedCompile();
-      });
     });
   }
 };

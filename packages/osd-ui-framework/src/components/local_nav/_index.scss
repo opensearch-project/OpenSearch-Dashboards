@@ -27,6 +27,7 @@ $localSearchHeight: 32px;
 $localDatePickerBottomSpacing: 4px;
 $localDatePickerButtonPadding: 3px 6px;
 $localDatePickerCellPadding: 8px;
+
 // Match the height of body cells, but leave out side padding so content can expand without
 // affecting the cell's width.
 $localDatePickerHeaderCellPadding: #{$localDatePickerCellPadding + 1px} 0;

@@ -20,8 +20,8 @@
   & + & {
     margin-left: 6px;
 
-    &:before {
-      content: '/';
+    &::before {
+      content: "/";
       user-select: none;
       margin-right: 4px;
       color: $localNavBreadcrumbDelimiterColor;
@@ -34,6 +34,7 @@
  */
 .kuiLocalBreadcrumb__link {
   @include link;
+
   color: $localBreadcrumbLinkColor; /* 1 */
   font-size: $kuiFontSize;
 }

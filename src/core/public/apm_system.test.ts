@@ -29,7 +29,7 @@
  */
 
 jest.mock('@elastic/apm-rum');
-import { init, apm } from '@elastic/apm-rum';
+import { init, apm, Transaction } from '@elastic/apm-rum';
 import { ApmSystem } from './apm_system';
 
 const initMock = init as jest.Mocked<typeof init>;

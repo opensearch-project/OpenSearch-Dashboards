@@ -1,6 +1,8 @@
+/* stylelint-disable-next-line selector-type-no-unknown */
 paginate {
   display: block;
 
+  /* stylelint-disable-next-line selector-type-no-unknown */
   paginate-controls {
     display: flex;
     align-items: center;
@@ -48,10 +50,9 @@ paginate {
     .pagination-size {
       flex: 0 0 auto;
 
-      input[type=number] {
+      input[type="number"] {
         width: 3em;
       }
     }
   }
 }
-

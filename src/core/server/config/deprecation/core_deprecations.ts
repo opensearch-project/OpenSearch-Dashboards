@@ -127,6 +127,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
+  renameFromRootWithoutMap,
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -154,6 +155,11 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   unusedFromRoot('opensearch.preserveHost'),
   unusedFromRoot('opensearch.startupTimeout'),
+  renameFromRootWithoutMap('server.xsrf.whitelist', 'server.xsrf.allowlist'),
+  renameFromRootWithoutMap(
+    'server.compression.referrerWhitelist',
+    'server.compression.referrerAllowlist'
+  ),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,

@@ -17,5 +17,6 @@
 
 .osdSavedQueryListItem__labelText {
   @include euiTextTruncate;
+
   margin-right: $euiSizeXS;
 }

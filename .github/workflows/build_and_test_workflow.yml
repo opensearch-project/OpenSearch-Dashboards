@@ -1,0 +1,163 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Build and test
+
+# trigger on every commit push and PR for all branches except feature branches
+on:
+  push:
+    branches: [ '**', '!feature/**' ]
+  pull_request:
+    branches: [ '**', '!feature/**' ]
+
+env:
+  TEST_BROWSER_HEADLESS: 1
+  CI: 1
+  GCS_UPLOAD_PREFIX: fake
+  TEST_OPENSEARCH_DASHBOARDS_HOST: localhost
+  TEST_OPENSEARCH_DASHBOARDS_PORT: 6610
+  TEST_OPENSEARCH_TRANSPORT_PORT: 9403
+  TEST_OPENSEARCH_PORT: 9400
+  OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
+
+jobs:
+  build-lint-test:
+    runs-on: ubuntu-latest
+    name: Build and Verify
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Run linter
+        id: linter
+        run: yarn lint
+
+      - name: Run unit tests with coverage
+        id: unit-tests
+        run: yarn test:jest:ci:coverage
+
+      - name: Run mocha tests with coverage
+        id: mocha-tests
+        run: yarn test:mocha:coverage
+
+      - name: Upload Code Coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/opensearch-dashboards-coverage
+
+      - name: Run integration tests
+        id: integration-tests
+        run: yarn test:jest_integration:ci
+
+  functional-tests:
+    runs-on: ubuntu-latest
+    name: Run functional tests
+    strategy: 
+      matrix:
+        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+    steps:
+      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      # github virtual env is the latest chrome
+      - name: Setup chromedriver
+        run: yarn add --dev chromedriver@100.0.0
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Run CI test group ${{ matrix.group }}
+        id: ftr-tests
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
+          JOB: ci${{ matrix.group }}
+          CACHE_DIR: ciGroup${{ matrix.group }}
+
+  build-min-artifact-tests:
+    runs-on: ubuntu-latest
+    name: Build min release artifacts
+    defaults:
+      run:
+        working-directory: ./artifacts
+    strategy: 
+      matrix:
+        include:
+          - name: Linux x64
+            ext: tar.gz
+            suffix: linux-x64
+            script: build-platform --linux --skip-os-packages
+          - name: Linux ARM64
+            ext: tar.gz
+            suffix: linux-arm64
+            script: build-platform --linux-arm --skip-os-packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ./artifacts
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: "./artifacts/.nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build `${{ matrix.name }}`
+        run: yarn ${{ matrix.script }} --release
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.name }}
+          path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 1

@@ -39,4 +39,4 @@ $kuiSubduedTextColor: $euiColorDarkShade;
 $kuiLinkHoverColor: darken($euiColorPrimary, 10%);
 $kuiSelectedBorderColor: $euiColorPrimary;
 $kuiDangerBorderColor: $euiColorDanger;
-$kuiFormControlBorderColor: transparentize($euiColorFullShade, .9);
+$kuiFormControlBorderColor: transparentize($euiColorFullShade, 0.9);

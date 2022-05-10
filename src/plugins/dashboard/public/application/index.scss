@@ -1,11 +1,10 @@
-@import '../../../embeddable/public/variables';
-
-@import './embeddable/grid/index';
-@import './embeddable/panel/index';
-@import './embeddable/viewport/index';
+@import "../../../embeddable/public/variables";
+@import "./embeddable/grid/index";
+@import "./embeddable/panel/index";
+@import "./embeddable/viewport/index";
 
 // Temporary hacks
-@import './hacks';
+@import "./hacks";
 
 // Prefix all styles with "dsh" to avoid conflicts.
 // Examples
@@ -14,5 +13,4 @@
 //   dshChart__legend--small
 //   dshChart__legend-isLoading
 
-@import './dashboard_app';
-
+@import "./dashboard_app";

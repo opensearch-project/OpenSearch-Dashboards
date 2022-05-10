@@ -22,6 +22,7 @@
    */
   .visChart__container {
     @include euiScrollBar;
+
     min-height: 0;
     flex: 1 1 0; /* 1 */
     display: flex;
@@ -30,11 +31,11 @@
     transition: opacity 0.01s;
 
     // IE11 Hack
-    //
+    // ---------
     // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
     // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
     // have to use an IE-specific hack instead.
-    @include internetExplorerOnly(){
+    @include internetExplorerOnly {
       flex: 1 0;
     }
 
@@ -76,4 +77,3 @@
   justify-content: center;
   align-items: center;
 }
-

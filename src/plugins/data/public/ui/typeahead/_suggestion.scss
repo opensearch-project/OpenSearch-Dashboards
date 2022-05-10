@@ -12,12 +12,14 @@ $osdTypeaheadTypes: (
 
 .osdTypeahead__popover--top {
   @include euiBottomShadowFlat;
+
   border-top-left-radius: $euiBorderRadius;
   border-top-right-radius: $euiBorderRadius;
 }
 
 .osdTypeahead__popover--bottom {
   @include euiBottomShadow($adjustBorders: true);
+
   border-bottom-left-radius: $euiBorderRadius;
   border-bottom-right-radius: $euiBorderRadius;
 }
@@ -27,7 +29,9 @@ $osdTypeaheadTypes: (
 
   .osdTypeahead__popover {
     max-height: inherit;
+
     @include euiScrollBar;
+
     border: 1px solid;
     border-color: $euiBorderColor;
     color: $euiTextColor;
@@ -109,6 +113,7 @@ $osdTypeaheadTypes: (
       color: $euiColorMediumShade;
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .SuggestionItem__text {
       width: auto;
     }
@@ -125,9 +130,7 @@ $osdTypeaheadTypes: (
 }
 
 .osdSuggestionItem__type {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: auto;
+  flex: 0 0 auto;
   width: $euiSizeXL;
   height: $euiSizeXL;
   text-align: center;
@@ -168,7 +171,7 @@ $osdTypeaheadTypes: (
   display: inline-block;
 }
 
-osdnSuggestionItem--value .osdSuggestionItem__text {
+.osdSuggestionItem--value .osdSuggestionItem__text {
   flex-basis: 50%;
   flex-grow: 1;
 }

@@ -62,10 +62,10 @@ module.exports = function () {
       args: ['scripts/eslint', '--no-cache'],
     }),
 
-    sasslint: scriptWithGithubChecks({
-      title: 'sasslint',
+    stylelint: scriptWithGithubChecks({
+      title: 'stylelint',
       cmd: NODE,
-      args: ['scripts/sasslint'],
+      args: ['scripts/stylelint'],
     }),
 
     // used by the test tasks

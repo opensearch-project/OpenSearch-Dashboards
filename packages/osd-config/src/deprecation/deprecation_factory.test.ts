@@ -32,7 +32,13 @@ import { ConfigDeprecationLogger } from './types';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
-  const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
+  const {
+    rename,
+    unused,
+    renameFromRoot,
+    unusedFromRoot,
+    renameFromRootWithoutMap,
+  } = configDeprecationFactory;
 
   let deprecationMessages: string[];
   const logger: ConfigDeprecationLogger = (msg) => deprecationMessages.push(msg);
@@ -258,6 +264,62 @@ describe('DeprecationFactory', () => {
           "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
         ]
       `);
+    });
+  });
+
+  describe('renamefromRootWithoutMap', () => {
+    it('allows use of new property name but gives deprecation warning if old name is used', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'toberenamed',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const processed = renameFromRootWithoutMap('deprecated', 'renamed')(
+        rawConfig,
+        'myplugin',
+        logger
+      );
+      expect(processed).toEqual({
+        myplugin: {
+          deprecated: 'toberenamed',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      });
+      expect(deprecationMessages).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('deprecates new config and does not log if old property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          new: 'toBeDeprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const processed = renameFromRootWithoutMap('myplugin.deprecated', 'myplugin.new')(
+        rawConfig,
+        'does-not-matter',
+        logger
+      );
+      expect(processed).toEqual({
+        myplugin: {
+          deprecated: 'toBeDeprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      });
+      expect(deprecationMessages.length).toEqual(0);
     });
   });
 

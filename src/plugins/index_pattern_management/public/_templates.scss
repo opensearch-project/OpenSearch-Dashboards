@@ -4,8 +4,7 @@
   padding: $euiSizeL;
   border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
 
-  // sass-lint:disable-block mixins-before-declarations
-  @include euiBreakpoint('xs', 's') {
+  @include euiBreakpoint("xs", "s") {
     text-align: center;
   }
 }

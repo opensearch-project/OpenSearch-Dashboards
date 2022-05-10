@@ -400,7 +400,6 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        'packages/osd-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
@@ -440,7 +439,6 @@ module.exports = {
     {
       files: [
         'packages/osd-ui-framework/**/*.test.js',
-        'packages/osd-ui-framework/doc_site/**/*.js',
         'packages/osd-ui-framework/Gruntfile.js',
         'packages/osd-opensearch/src/**/*.js',
         'packages/osd-interpreter/tasks/**/*.js',

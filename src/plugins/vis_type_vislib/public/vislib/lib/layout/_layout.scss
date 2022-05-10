@@ -20,10 +20,10 @@
 //             .visAxis__splitAxes--y
 //         .visAxis__spacer--y.visAxis__spacer--y-[position]
 
-//
+// -----------
 // LAYOUT ONLY
 // Numbers in here are brittle
-//
+// -----------
 
 .visWrapper {
   display: flex;
@@ -142,10 +142,9 @@
   min-height: 0;
 }
 
-
-//
+// -----
 // STYLE
-//
+// -----
 
 // BEM NOTE: These selectors could not be renamed.
 // Most come from an external libray, others are too general for
@@ -153,9 +152,8 @@
 // could it be easily found to apply to all chart types.
 // At least wrapping selectors inside .visWrapper will narrow scope.
 
-
-// sass-lint:disable-block no-mergeable-selectors
 // Keep SVG and non-renamable selectors separately
+/* stylelint-disable-next-line no-duplicate-selectors */
 .visWrapper {
   svg {
     overflow: visible;
@@ -166,7 +164,7 @@
     opacity: 1;
 
     &:hover {
-      opacity: .8;
+      opacity: 0.8;
     }
   }
 
@@ -176,7 +174,7 @@
     &:hover {
       opacity: 1;
       stroke-width: $euiSizeS;
-      stroke-opacity: .8;
+      stroke-opacity: 0.8;
     }
   }
 
@@ -192,6 +190,7 @@
 
   .label-text {
     @include fontSize($euiFontSizeXS);
+
     font-weight: $euiFontWeightRegular;
   }
 
@@ -215,11 +214,13 @@
 
   .tick text {
     @include fontSize($euiFontSizeXS - 1px);
+
     fill: $visTextColor;
   }
 
   .axis-title text {
     @include fontSize($euiFontSizeXS);
+
     font-weight: $euiFontWeightBold;
     fill: $visTextColor;
   }
@@ -240,12 +241,14 @@
 
     text {
       @include fontSize($euiFontSizeXS - 1px);
+
       fill: $visTextColor;
     }
   }
 
   .chart {
     @include euiScrollBar;
+
     flex: 1 1 100%;
     min-height: 0;
     min-width: 0;
@@ -299,7 +302,7 @@
   }
 
   .visAreaChart__overlapArea {
-    opacity: .8;
+    opacity: 0.8;
   }
 
   .series > path,
@@ -309,12 +312,11 @@
   }
 
   .series > path {
-    fill-opacity: .8;
+    fill-opacity: 0.8;
   }
 
   .blur_shape {
-    // sass-lint:disable-block no-important
-    opacity: .3 !important;
+    opacity: 0.3 !important;
   }
 
   .slice {
@@ -322,7 +324,7 @@
     stroke: $euiColorEmptyShade;
 
     &:hover {
-      opacity: .8;
+      opacity: 0.8;
     }
   }
 
@@ -332,7 +334,7 @@
 
       &:hover {
         stroke-width: $euiSizeS;
-        stroke-opacity: .8;
+        stroke-opacity: 0.8;
       }
     }
   }

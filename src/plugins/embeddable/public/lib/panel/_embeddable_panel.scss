@@ -33,12 +33,14 @@
 .embPanel__header {
   flex: 0 0 auto;
   display: flex;
+
   // ensure menu button is on the right even if the title doesn't exist
   justify-content: flex-end;
 }
 
 .embPanel__title {
-  @include euiTitle('xxxs');
+  @include euiTitle("xxxs");
+
   overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
@@ -68,6 +70,7 @@
 
   .embPanel__placeholderTitleText {
     @include euiTextTruncate;
+
     font-weight: $euiFontWeightRegular;
     color: $euiColorMediumShade;
   }
@@ -156,7 +159,6 @@
   justify-content: center;
   flex-direction: column;
   overflow: auto;
-  text-align: center;
   padding: $euiSizeS;
 }
 
