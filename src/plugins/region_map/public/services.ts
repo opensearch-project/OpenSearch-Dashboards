@@ -8,6 +8,7 @@ import { HttpFetchError } from 'opensearch-dashboards/public';
 export interface Services {
   postGeojson: (requestBody: any) => Promise<undefined | HttpFetchError>;
   getIndex: (indexName: string) => Promise<undefined | HttpFetchError>;
+  getPlugins: () => Promise<undefined | HttpFetchError>;
 }
 
 export function getServices(http: any): Services {

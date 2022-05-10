@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`custom vector upload component renders the empty prompt if geospatial plugin is installed 1`] = `
+exports[`custom vector upload component renders the empty prompt if geospatial plugin is not installed 1`] = `
 <div>
   <div
     className="euiEmptyPrompt"
@@ -57,6 +57,291 @@ exports[`custom vector upload component renders the empty prompt if geospatial p
         </span>
       </span>
     </a>
+  </div>
+</div>
+`;
+
+exports[`custom vector upload component renders the upload customer div if geospatial plugin is installed 1`] = `
+<div>
+  <div
+    id="uploadCustomVectorMap"
+  >
+    <div
+      aria-label="import-vector-map-card"
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+    >
+      <div
+        className="euiCard__content"
+      >
+        <span
+          className="euiTitle euiTitle--small euiCard__title"
+          id="generated-idTitle"
+        >
+          
+        </span>
+        
+        <div
+          className="euiCard__children"
+        >
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--s"
+          />
+          <div
+            aria-label="upload-map-text"
+            className="euiText euiText--small"
+          >
+            Upload map
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            aria-label="form-row-for-file-picker"
+            className="euiFormRow"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <div
+                className="euiFilePicker euiFilePicker--large"
+              >
+                <div
+                  className="euiFilePicker__wrap"
+                >
+                  <input
+                    accept=".json,.geojson"
+                    aria-describedby="generated-id-filePicker__prompt"
+                    aria-label="geojson-file-picker"
+                    className="euiFilePicker__input"
+                    id="generated-id"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onDragLeave={[Function]}
+                    onDragOver={[Function]}
+                    onDrop={[Function]}
+                    onFocus={[Function]}
+                    required={true}
+                    type="file"
+                  />
+                  <div
+                    className="euiFilePicker__prompt"
+                    id="generated-id-filePicker__prompt"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFilePicker__icon"
+                      data-euiicon-type="importAction"
+                      size="l"
+                    />
+                    <div
+                      className="euiFilePicker__promptText"
+                    >
+                      Select or drag and drop a json file
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            aria-label="geojson-file-format-text"
+            className="euiText euiText--extraSmall"
+          >
+            <div
+              className="euiTextColor euiTextColor--subdued"
+            >
+              <span>
+                Formats accepted: .json, .geojson
+                <br />
+                Max size: 25 MB
+                <br />
+                Coordinates must be in EPSG:4326 coordinate reference system.
+              </span>
+            </div>
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            aria-label="map-name-prefix-text"
+            className="euiText euiText--small"
+          >
+            Map name prefix
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            className="euiFormControlLayout"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-label="map-name-text-field"
+                className="euiFieldText"
+                id="customIndex"
+                label="Map name"
+                name="customIndex"
+                onBlur={[Function]}
+                onChange={[Function]}
+                placeholder="Enter a valid map name prefix"
+                required={true}
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            aria-label="map-name-guidelines-text"
+            className="euiText euiText--extraSmall"
+          >
+            <div
+              className="euiTextColor euiTextColor--subdued"
+            >
+              Map name guidleines:
+              <ul>
+                <li>
+                   Map name prefix must contain 1-250 characters. 
+                </li>
+                <li>
+                   Map name prefix must start with a-z.
+                </li>
+                <li>
+                   Valid characters are a-z, 0-9, - and _ .
+                </li>
+                <li>
+                   
+                  The final map name will be the entered prefix here followed by -map as the suffix.
+                   
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            aria-label="map-name-error-text"
+            className="euiText euiText--extraSmall"
+          >
+            <span
+              aria-label="map-name-error-text-color"
+              className="euiTextColor euiTextColor--danger"
+            >
+              <p
+                name="errorIndexName"
+              />
+            </span>
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            aria-label="geodata-type-text"
+            className="euiText euiText--small"
+          >
+            Select a geo datatype
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            className="euiFormControlLayout"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <select
+                aria-label="geo-datatype-selector"
+                className="euiSelect"
+                id="selectGeoShape"
+                name="selectGeoShape"
+                onChange={[Function]}
+                onMouseUp={[Function]}
+                required={true}
+                value=""
+              >
+                <option
+                  value="geo_shape"
+                >
+                  Geo shape
+                </option>
+                <option
+                  value="geo_point"
+                >
+                  Geo point
+                </option>
+              </select>
+              <div
+                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <span
+                  className="euiFormControlLayoutCustomIcon"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                    size="m"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-label="medium-spacer"
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            style={
+              Object {
+                "display": "flex",
+                "justifyContent": "flex-end",
+                "padding": 0,
+                "width": "100%",
+              }
+            }
+          >
+            <button
+              aria-label="import-file-button"
+              className="euiButton euiButton--primary euiButton--fill"
+              disabled={false}
+              id="submitButton"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="submit"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Import file
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

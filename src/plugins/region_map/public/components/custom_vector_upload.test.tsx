@@ -3,43 +3,75 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import renderer, { act, create } from 'react-test-renderer';
+import renderer, { act } from 'react-test-renderer';
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { CustomVectorUpload } from './custom_vector_upload';
 import * as serviceApiCalls from '../services';
+import { CombineLatestOperator } from 'rxjs/internal/observable/combineLatest';
 
 describe('custom vector upload component', () => {
-  it('renders the empty prompt if geospatial plugin is installed', async () => {
-    const mockDataWhenPluginIsUninstalled = {
-      ok: true,
-      resp: [
-        {
-          name: 'integTest-0',
-          component: 'opensearch',
-          version: '2.1.0.0-SNAPSHOT',
-        },
-      ],
-    };
-    const props = {
-      vis: {
-        http: '',
-        notifications: '',
+  const mockDataWhenPluginIsUninstalled = {
+    ok: true,
+    resp: [
+      {
+        name: 'integTest-0',
+        component: 'opensearch',
+        version: '2.1.0.0-SNAPSHOT',
       },
-    };
-    jest.spyOn(serviceApiCalls, 'getServices').mockImplementation(() => {
+    ],
+  };
+  const mockDataWhenPluginIsInstalled = {
+    ok: true,
+    resp: [
+      {
+        name: 'integTest-0',
+        component: 'opensearch-geospatial',
+        version: '2.1.0.0-SNAPSHOT',
+      },
+    ],
+  };
+  const props = {
+    vis: {
+      http: '',
+      notifications: '',
+    },
+  };
+
+  it('renders the empty prompt if geospatial plugin is not installed', async () => {
+    jest.spyOn(serviceApiCalls, 'getServices').mockImplementation((http) => {
       return {
         getPlugins: () => {
           return mockDataWhenPluginIsUninstalled;
         },
+        postGeojson: () => {},
+        getIndex: () => {},
       };
     });
+
     let tree;
     await act(async () => {
       tree = renderer.create(<CustomVectorUpload {...props} />);
     });
     expect(tree.toJSON().children[0].props.testId).toBe('empty-prompt-id');
+    expect(tree.toJSON()).toMatchSnapshot();
+  });
+
+  it('renders the upload customer div if geospatial plugin is installed', async () => {
+    jest.spyOn(serviceApiCalls, 'getServices').mockImplementation((http) => {
+      return {
+        getPlugins: () => {
+          return mockDataWhenPluginIsInstalled;
+        },
+        postGeojson: () => {},
+        getIndex: () => {},
+      };
+    });
+
+    let tree;
+    await act(async () => {
+      tree = renderer.create(<CustomVectorUpload {...props} />);
+    });
+    expect(tree.toJSON().children[0].props.id).toBe('uploadCustomVectorMap');
     expect(tree.toJSON()).toMatchSnapshot();
   });
 });
