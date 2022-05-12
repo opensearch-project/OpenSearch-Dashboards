@@ -116,6 +116,8 @@ exports[`custom vector upload component renders the upload customer div if geosp
                     aria-describedby="generated-id-filePicker__prompt"
                     aria-label="geojson-file-picker"
                     className="euiFilePicker__input"
+                    data-test-subj="filePicker"
+                    data-testid="filePicker"
                     id="generated-id"
                     onBlur={[Function]}
                     onChange={[Function]}
@@ -189,6 +191,8 @@ exports[`custom vector upload component renders the upload customer div if geosp
               <input
                 aria-label="map-name-text-field"
                 className="euiFieldText"
+                data-test-subj="customIndex"
+                data-testid="customIndex"
                 id="customIndex"
                 label="Map name"
                 name="customIndex"
@@ -196,6 +200,7 @@ exports[`custom vector upload component renders the upload customer div if geosp
                 onChange={[Function]}
                 placeholder="Enter a valid map name prefix"
                 required={true}
+                tabIndex="0"
                 type="text"
                 value=""
               />

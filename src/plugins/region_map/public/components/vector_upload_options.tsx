@@ -238,6 +238,8 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
         <EuiFormRow aria-label="form-row-for-file-picker">
           <EuiFilePicker
             id="filePicker"
+            data-testid="filePicker"
+            data-test-subj="filePicker"
             initialPromptText="Select or drag and drop a json file"
             onChange={(files) => {
               onChange(files);
@@ -267,6 +269,9 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
         <EuiSpacer size="m" aria-label="medium-spacer" />
 
         <EuiFieldText
+          data-testid="customIndex"
+          data-test-subj="customIndex"
+          tabIndex="0"
           placeholder="Enter a valid map name prefix"
           value={value}
           onChange={(e) => onTextChange(e)}
