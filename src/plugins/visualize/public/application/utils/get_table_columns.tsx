@@ -162,7 +162,7 @@ export const getTableColumns = (
     }),
     ['data-test-subj']: 'updated-at',
     render: (updatedAt: string) =>
-      updatedAt && moment(updatedAt).format(uiSettings.get('dateFormat:scaled')[3][1]),
+      updatedAt && moment(updatedAt).format(uiSettings.get('dateFormat')),
   },
 ];
 

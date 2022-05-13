@@ -162,7 +162,7 @@ export class DashboardListing extends React.Component {
   }
 
   getTableColumns() {
-    const [, dateFormat] = this.props.core.uiSettings.get('dateFormat:scaled')[3];
+    const dateFormat = this.props.core.uiSettings.get('dateFormat');
     const tableColumns = [
       {
         field: 'title',

@@ -59,7 +59,7 @@ const SavedObjectsTablePage = ({
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
-  const [, dateFormat] = coreStart.uiSettings.get<string>('dateFormat:scaled')[3];
+  const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
 
   useEffect(() => {
     setBreadcrumbs([
