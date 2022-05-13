@@ -18,6 +18,7 @@
 * Removes UI Framework KUI doc site ([#1379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1379))
 
 ### 🛡 Security
+* [CVE-2022-1537] Resolves grunt to 1.5.3 ([#1580](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1580))
 * [CVE-2022-1214] Bumps chromedriver to v100 and axios to v0.27.2 ([#1552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1552))
 * [CVE-2021-44531] [CVE-2022-21824] [CVE-2022-0778] [CVE-2021-44532] [CVE-2021-44533] Bumps Node.js from v14.18.2 to v14.19.1 ([#1487](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1487))
 * [CVE-2022-0436] Bumps grunt from v1.4.1 to v1.5.2 ([#1451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1451))
