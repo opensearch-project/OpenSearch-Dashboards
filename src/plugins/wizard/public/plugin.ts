@@ -44,10 +44,10 @@ export class WizardPlugin
         const { renderApp } = await import('./application');
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { data, savedObjects, navigation } = pluginsStart;
+        const { data, savedObjects, navigation, expressions } = pluginsStart;
 
         const { registerDefaultTypes } = await import('./visualizations');
-        registerDefaultTypes(typeService.setup());
+        registerDefaultTypes(typeService.setup(), pluginsStart);
 
         const services: WizardServices = {
           ...coreStart,
@@ -55,6 +55,7 @@ export class WizardPlugin
           data,
           savedObjectsPublic: savedObjects,
           navigation,
+          expressions,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
         };

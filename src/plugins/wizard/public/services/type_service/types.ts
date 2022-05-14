@@ -4,6 +4,7 @@
  */
 
 import { IconType } from '@elastic/eui';
+import { RootState } from '../../application/utils/state_management';
 
 export enum ContributionTypes {
   CONTAINER = 'CONTAINER',
@@ -37,5 +38,5 @@ export interface VisualizationTypeOptions {
       [containerId: string]: ContainerSchema[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
     };
   };
-  //   pipeline: Expression;
+  readonly toExpression: (state: RootState) => string | void;
 }

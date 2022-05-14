@@ -17,13 +17,22 @@ import {
 import React, { FC, useState, useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
-import { useTypedDispatch } from '../utils/state_management';
+import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
 
 import './workspace.scss';
 
 export const Workspace: FC = ({ children }) => {
+  const {
+    services: {
+      expressions: { ReactExpressionRenderer },
+    },
+  } = useOpenSearchDashboards<WizardServices>();
+  const { toExpression } = useVisualizationType();
+  const rootState = useTypedSelector((state) => state);
+
+  const expression = useMemo(() => toExpression(rootState), [rootState, toExpression]);
   return (
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
@@ -32,8 +41,8 @@ export const Workspace: FC = ({ children }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">
-        {children ? (
-          children
+        {expression ? (
+          <ReactExpressionRenderer expression={expression} />
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt

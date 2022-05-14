@@ -30,7 +30,10 @@ export function ConfigPanel() {
   const activeItem = useTypedSelector((state) => state.config.activeItem);
   const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
 
-  const hydratedItems: MainItemContribution[] = [...(items?.[DATA_TAB_ID] ?? []), ...DEFAULT_ITEMS];
+  const hydratedItems: MainItemContribution[] = useMemo(
+    () => [...(items?.[DATA_TAB_ID] ?? []), ...DEFAULT_ITEMS],
+    [items]
+  );
 
   const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
   const secondaryPanel = useMemo(() => {

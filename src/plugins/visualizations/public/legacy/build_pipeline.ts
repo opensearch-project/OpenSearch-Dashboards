@@ -155,6 +155,7 @@ export const getSchemas = <TVisParams>(
   }
 
   const responseAggs = vis.data.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
+  // debugger;
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: IAggConfig) => {
@@ -373,7 +374,8 @@ export const buildVislibDimensions = async (vis: any, params: BuildPipelineParam
     splitColumn: schemas.split_column,
   };
   if (schemas.segment) {
-    const xAgg = vis.data.aggs.getResponseAggs()[dimensions.x.accessor];
+    const a = vis.data.aggs.getResponseAggs();
+    const xAgg = a[dimensions.x.accessor];
     if (xAgg.type.name === 'date_histogram') {
       dimensions.x.params.date = true;
       const { opensearchUnit, opensearchValue } = xAgg.buckets.getInterval();
@@ -403,6 +405,8 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const filters = searchSource!.getField('filter');
   const { uiState, title } = vis;
 
+  // debugger;
+
   // context
   let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
   if (query) {
@@ -423,10 +427,10 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     // request handler
     if (vis.type.requestHandler === 'courier') {
       pipeline += `opensearchaggs
-    ${prepareString('index', indexPattern!.id)}
-    metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || false}
-    ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
+        ${prepareString('index', indexPattern!.id)}
+        metricsAtAllLevels=${vis.isHierarchical()}
+        partialRows=${vis.params.showPartialRows || false}
+        ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
     const schemas = getSchemas(vis, params);
@@ -456,5 +460,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       }
     }
   }
+  // console.log(pipeline);
   return pipeline;
 };

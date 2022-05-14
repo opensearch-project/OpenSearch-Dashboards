@@ -39,6 +39,7 @@ export class VisualizationType implements IVisualizationType {
   public readonly icon;
   public readonly stage;
   public readonly contributions;
+  public readonly toExpression;
 
   private processContributions(contributions: VisualizationTypeOptions['contributions']) {
     const uiContainers: ContainerLocationContribution = {
@@ -73,5 +74,6 @@ export class VisualizationType implements IVisualizationType {
     this.icon = options.icon;
     this.stage = options.stage ?? 'production';
     this.contributions = this.processContributions(options.contributions);
+    this.toExpression = options.toExpression;
   }
 }
