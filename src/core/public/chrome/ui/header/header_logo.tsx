@@ -28,15 +28,18 @@
  * under the License.
  */
 
+import './header_logo.scss';
+
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
 import { ChromeNavLink } from '../..';
-import { CustomLogo } from './branding/opensearch_dashboards_custom_logo';
 import { ChromeBranding } from '../../chrome_service';
-import './header_logo.scss';
+import { LoadingIndicator } from '../loading_indicator';
+import { Mark } from './branding/mark';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -102,6 +105,7 @@ interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
+  loadingCount$: Observable<number>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
 }
@@ -109,18 +113,28 @@ interface Props {
 export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
+  const loadingCount = useObservable(observables.loadingCount$, 0);
 
   return (
-    <a
+    <EuiHeaderSectionItemButton
+      className="header__logoNavButton"
       data-test-subj="logo"
-      onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+        onClick(e, forceNavigation, navLinks, navigateToApp)
+      }
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
       })}
-      className="logoContainer"
     >
-      <CustomLogo {...branding} />
-    </a>
+      {!(loadingCount > 0) && (
+        <div className="logoContainer">
+          <Mark {...branding} />
+        </div>
+      )}
+      <div className="loaderContainer">
+        <LoadingIndicator loadingCount$={observables.loadingCount$} />
+      </div>
+    </EuiHeaderSectionItemButton>
   );
 }

@@ -1,9 +1,14 @@
-.logoContainer {
-  height: 30px;
-  padding: 3px 3px 3px 10px;
-}
+.header__logoNavButton .euiHeaderSectionItemButton__content {
+  // avoid layout shift on smallest breakpoint if logo and loading indicator are different sizes
+  min-width: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
 
-.logoImage {
-  height: 100%;
-  max-width: 100%;
+  & .loaderContainer,
+  & .logoContainer {
+    grid-area: 1 / 1;
+    align-self: center;
+    justify-self: center;
+  }
 }

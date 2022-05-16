@@ -15,10 +15,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'header', 'settings']);
   const testSubjects = getService('testSubjects');
 
-  const expectedFullLogo =
-    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
-  const expectedFullLogoDarkMode =
-    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
   const expectedMarkLogo =
     'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
   const expectedMarkLogoDarkMode =
@@ -125,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('with customized logo in header bar', async () => {
-        await globalNav.logoExistsOrFail(expectedFullLogo);
+        await globalNav.logoExistsOrFail(expectedMarkLogo);
       });
 
       it('with customized logo that can take back to home page', async () => {
@@ -168,7 +164,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
-        await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
+        await globalNav.logoExistsOrFail(expectedMarkLogoDarkMode);
       });
 
       it('with customized logo that can take back to home page in dark mode', async () => {

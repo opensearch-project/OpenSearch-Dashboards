@@ -1,274 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header logo  in dark mode  rendered using logo dark mode URL 1`] = `
-<CustomLogo
-  applicationTitle="custom title"
-  darkMode={true}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  logo={
-    Object {
-      "darkModeUrl": "/darkModeLogo",
-      "defaultUrl": "/defaultModeLogo",
-    }
-  }
-  mark={
-    Object {
-      "darkModeUrl": "/darkModeMark",
-      "defaultUrl": "/defaultModeMark",
-    }
-  }
->
-  <div
-    className="logoContainer"
-  >
-    <img
-      alt="custom title logo"
-      className="logoImage"
-      data-test-image-url="/darkModeLogo"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/darkModeLogo"
-    />
-  </div>
-</CustomLogo>
-`;
-
-exports[`Header logo  in dark mode  rendered using logo default mode URL 1`] = `
-<CustomLogo
-  applicationTitle="custom title"
-  darkMode={true}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  logo={
-    Object {
-      "defaultUrl": "/defaultModeLogo",
-    }
-  }
-  mark={
-    Object {
-      "darkModeUrl": "/darkModeMark",
-      "defaultUrl": "/defaultModeMark",
-    }
-  }
->
-  <div
-    className="logoContainer"
-  >
-    <img
-      alt="custom title logo"
-      className="logoImage"
-      data-test-image-url="/defaultModeLogo"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeLogo"
-    />
-  </div>
-</CustomLogo>
-`;
-
-exports[`Header logo  in dark mode  rendered using mark dark mode URL 1`] = `
-<CustomLogo
+exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
+<Mark
   applicationTitle="custom title"
   darkMode={true}
   intl={
@@ -381,23 +114,28 @@ exports[`Header logo  in dark mode  rendered using mark dark mode URL 1`] = `
     }
   }
 >
-  <div
-    className="logoContainer"
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/darkModeMark"
+    data-test-subj="customLogo"
+    size="l"
+    title="custom title logo"
+    type="/darkModeMark"
   >
-    <img
-      alt="custom title logo"
+    <span
       className="logoImage"
+      data-euiicon-type="/darkModeMark"
       data-test-image-url="/darkModeMark"
       data-test-subj="customLogo"
-      loading="lazy"
-      src="/darkModeMark"
+      size="l"
+      title="custom title logo"
     />
-  </div>
-</CustomLogo>
+  </EuiIcon>
+</Mark>
 `;
 
-exports[`Header logo  in dark mode  rendered using mark default mode URL 1`] = `
-<CustomLogo
+exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark mode mark 1`] = `
+<Mark
   applicationTitle="custom title"
   darkMode={true}
   intl={
@@ -509,24 +247,163 @@ exports[`Header logo  in dark mode  rendered using mark default mode URL 1`] = `
     }
   }
 >
-  <div
-    className="logoContainer"
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/defaultModeMark"
+    data-test-subj="customLogo"
+    size="l"
+    title="custom title logo"
+    type="/defaultModeMark"
   >
-    <img
-      alt="custom title logo"
+    <span
       className="logoImage"
+      data-euiicon-type="/defaultModeMark"
       data-test-image-url="/defaultModeMark"
       data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeMark"
+      size="l"
+      title="custom title logo"
     />
-  </div>
-</CustomLogo>
+  </EuiIcon>
+</Mark>
 `;
 
-exports[`Header logo  in dark mode  rendered using original opensearch logo 1`] = `
-<CustomLogo
+exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided without mark 1`] = `
+<Mark
   applicationTitle="custom title"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/opensearch_mark_dark_mode.svg"
+    data-test-subj="defaultLogo"
+    size="l"
+    title="custom title logo"
+    type="/opensearch_mark_dark_mode.svg"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="/opensearch_mark_dark_mode.svg"
+      data-test-image-url="/opensearch_mark_dark_mode.svg"
+      data-test-subj="defaultLogo"
+      size="l"
+      title="custom title logo"
+    />
+  </EuiIcon>
+</Mark>
+`;
+
+exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`] = `
+<Mark
+  applicationTitle="custom title"
+  assetFolderUrl="ui/assets"
   darkMode={true}
   intl={
     Object {
@@ -633,15 +510,161 @@ exports[`Header logo  in dark mode  rendered using original opensearch logo 1`] 
   logo={Object {}}
   mark={Object {}}
 >
-  <img
-    alt="custom title logo"
-    src="undefined/opensearch_logo.svg"
-  />
-</CustomLogo>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
+    data-test-subj="defaultLogo"
+    size="l"
+    title="custom title logo"
+    type="ui/assets/opensearch_mark_dark_mode.svg"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="ui/assets/opensearch_mark_dark_mode.svg"
+      data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
+      data-test-subj="defaultLogo"
+      size="l"
+      title="custom title logo"
+    />
+  </EuiIcon>
+</Mark>
 `;
 
-exports[`Header logo  in default mode  rendered using logo default mode URL 1`] = `
-<CustomLogo
+exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
+<Mark
+  applicationTitle="custom title"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/defaultModeMark"
+    data-test-subj="customLogo"
+    size="l"
+    title="custom title logo"
+    type="/defaultModeMark"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="/defaultModeMark"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="customLogo"
+      size="l"
+      title="custom title logo"
+    />
+  </EuiIcon>
+</Mark>
+`;
+
+exports[`Header logo  in default mode  uses opensearch logo if custom logo provided without mark 1`] = `
+<Mark
   applicationTitle="custom title"
   darkMode={false}
   intl={
@@ -753,25 +776,28 @@ exports[`Header logo  in default mode  rendered using logo default mode URL 1`] 
   }
   mark={Object {}}
 >
-  <div
-    className="logoContainer"
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/opensearch_mark_default_mode.svg"
+    data-test-subj="defaultLogo"
+    size="l"
+    title="custom title logo"
+    type="/opensearch_mark_default_mode.svg"
   >
-    <img
-      alt="custom title logo"
+    <span
       className="logoImage"
-      data-test-image-url="/defaultModeLogo"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeLogo"
+      data-euiicon-type="/opensearch_mark_default_mode.svg"
+      data-test-image-url="/opensearch_mark_default_mode.svg"
+      data-test-subj="defaultLogo"
+      size="l"
+      title="custom title logo"
     />
-  </div>
-</CustomLogo>
+  </EuiIcon>
+</Mark>
 `;
 
-exports[`Header logo  in default mode  rendered using mark default mode URL 1`] = `
-<CustomLogo
-  applicationTitle="custom title"
-  darkMode={false}
+exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] = `
+<Mark
   intl={
     Object {
       "defaultFormats": Object {},
@@ -874,31 +900,31 @@ exports[`Header logo  in default mode  rendered using mark default mode URL 1`] 
       "timeZone": null,
     }
   }
-  logo={Object {}}
-  mark={
-    Object {
-      "defaultUrl": "/defaultModeMark",
-    }
-  }
 >
-  <div
-    className="logoContainer"
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/opensearch_mark_default_mode.svg"
+    data-test-subj="defaultLogo"
+    size="l"
+    title="opensearch dashboards logo"
+    type="/opensearch_mark_default_mode.svg"
   >
-    <img
-      alt="custom title logo"
+    <span
       className="logoImage"
-      data-test-image-url="/defaultModeMark"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeMark"
+      data-euiicon-type="/opensearch_mark_default_mode.svg"
+      data-test-image-url="/opensearch_mark_default_mode.svg"
+      data-test-subj="defaultLogo"
+      size="l"
+      title="opensearch dashboards logo"
     />
-  </div>
-</CustomLogo>
+  </EuiIcon>
+</Mark>
 `;
 
-exports[`Header logo  in default mode  rendered using the original opensearch logo 1`] = `
-<CustomLogo
+exports[`Header logo  in default mode  uses opensearch logo if no mark provided 1`] = `
+<Mark
   applicationTitle="custom title"
+  assetFolderUrl="ui/assets"
   darkMode={false}
   intl={
     Object {
@@ -1005,9 +1031,22 @@ exports[`Header logo  in default mode  rendered using the original opensearch lo
   logo={Object {}}
   mark={Object {}}
 >
-  <img
-    alt="custom title logo"
-    src="undefined/opensearch_logo.svg"
-  />
-</CustomLogo>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
+    data-test-subj="defaultLogo"
+    size="l"
+    title="custom title logo"
+    type="ui/assets/opensearch_mark_default_mode.svg"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="ui/assets/opensearch_mark_default_mode.svg"
+      data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
+      data-test-subj="defaultLogo"
+      size="l"
+      title="custom title logo"
+    />
+  </EuiIcon>
+</Mark>
 `;

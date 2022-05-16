@@ -13,6 +13,9 @@
 #### Disable telemetry by default
 * Fixes search usage telemetry ([#1427](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1427))
 
+#### Redesign global header
+* [UX] Consolidate menu bars ([#1586])(https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1586))
+
 #### Deprecations
 * Deprecates non-inclusive config names ([#1467](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1467))
 * Removes UI Framework KUI doc site ([#1379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1379))
