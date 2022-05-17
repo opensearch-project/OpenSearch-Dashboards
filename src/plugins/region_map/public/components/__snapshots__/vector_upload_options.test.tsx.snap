@@ -208,11 +208,13 @@ Object {
                     required=""
                   >
                     <option
+                      name="geo_shape"
                       value="geo_shape"
                     >
                       Geo shape
                     </option>
                     <option
+                      name="geo_point"
                       value="geo_point"
                     >
                       Geo point
@@ -467,11 +469,13 @@ Object {
                   required=""
                 >
                   <option
+                    name="geo_shape"
                     value="geo_shape"
                   >
                     Geo shape
                   </option>
                   <option
+                    name="geo_point"
                     value="geo_point"
                   >
                     Geo point

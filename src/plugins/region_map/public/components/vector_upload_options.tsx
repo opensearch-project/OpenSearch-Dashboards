@@ -21,12 +21,11 @@ import {
   EuiTextColor,
   EuiFormRow,
 } from '@elastic/eui';
-import { Services, getServices } from '../services';
+import { getIndex, postGeojson } from '../services';
 import { FILE_PAYLOAD_SIZE, FILE_PAYLOAD_SIZE_IN_MB } from '../../common/constants/shared';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 const VectorUploadOptions = (props: CustomVectorUploadProps) => {
-  const services = getServices(props.vis.http);
   const notifications = props.vis.notifications;
 
   const INDEX_NAME_SUFFIX = '-map';
@@ -38,8 +37,8 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
   const MAX_LENGTH_OF_INDEX_NAME = 250;
 
   const options = [
-    { value: 'geo_shape', text: 'Geo shape' },
-    { value: 'geo_point', text: 'Geo point' },
+    { value: 'geo_shape', text: 'Geo shape', name: 'geo_shape' },
+    { value: 'geo_point', text: 'Geo point', name: 'geo_point' },
   ];
 
   const [value, setValue] = useState('');
@@ -49,6 +48,7 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
   };
 
   const [selectValue, setSelectValue] = useState('');
+  const [fileContent, setFileContent] = useState('');
 
   const onTextChange = (e) => {
     setValue(e.target.value);
@@ -57,6 +57,7 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
   const onChange = (files) => {
     if (files[0]) {
       validateFileSize(files);
+      setFileContent(files);
     }
   };
 
@@ -139,13 +140,13 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
 
     // if index name is valid, validate the file size and upload the geojson data
     const isValidIndexName = validateIndexName(newIndexName, true);
-    const files = document.querySelector('.euiFilePicker__input').files;
+    const files = fileContent;
     let fileData;
     if (isValidIndexName) {
       if (files[0] && validateFileSize(files)) {
         const [file] = files;
         if (file) {
-          fileData = await new Response(file).text();
+          fileData = await fileContent[0].text();
         }
         await handleUploadGeojson(newIndexName, fileData);
       }
@@ -158,7 +159,7 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
 
   const checkIfIndexExists = async (indexName) => {
     try {
-      const result = await services.getIndex(indexName);
+      const result = await getIndex(indexName, props.vis.http);
       return result.ok;
     } catch (e) {
       return false;
@@ -172,7 +173,7 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
       type: fetchElementByName('selectGeoShape').value,
       data: [JSON.parse(fileData)],
     };
-    const result = await services.postGeojson(JSON.stringify(bodyData));
+    const result = await postGeojson(JSON.stringify(bodyData), props.vis.http);
 
     // error handling logic that displays correct toasts for the end users
     if (result.ok) {
@@ -218,6 +219,7 @@ const VectorUploadOptions = (props: CustomVectorUploadProps) => {
 
   const handleUploadGeojson = async (indexName, fileData) => {
     const indexExists = await checkIfIndexExists(indexName);
+
     if (!indexExists) {
       await uploadGeojson(indexName, fileData);
     } else {

@@ -5,7 +5,7 @@
 
 import React, { useState, Fragment, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
-import { Services, getServices } from '../services';
+import { getPlugins } from '../services';
 import EmptyPrompt from './empty_prompt';
 import VectorUploadOptions from './vector_upload_options';
 
@@ -14,7 +14,6 @@ export type CustomVectorUploadProps = {
 } & VisOptionsProps<RegionMapVisParams>;
 
 function CustomVectorUpload(props: CustomVectorUploadProps) {
-  const services = getServices(props.vis.http);
   const GEOSPATIAL_PLUGIN = 'opensearch-geospatial';
   const [isGeospatialPluginInstalled, setIsGespatialPluginInstalled] = React.useState(false);
 
@@ -22,7 +21,7 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
   // In case geospatial plugin is not installed, an empty prompt with details is shown.
   useEffect(() => {
     const checkIfGeospatialPluginIsInstalled = async () => {
-      const result = await services.getPlugins();
+      const result = await getPlugins(props.vis.http);
       const installedPlugins = result.resp.map((plugin) => {
         return plugin.component;
       });
@@ -42,7 +41,7 @@ function CustomVectorUpload(props: CustomVectorUploadProps) {
       }
     }
     getPluginInfo();
-  }, [services]);
+  }, [props]);
 
   const emptyPromptProps = {
     iconType: 'popout',

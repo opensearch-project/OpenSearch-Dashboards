@@ -7,7 +7,6 @@ import renderer, { act } from 'react-test-renderer';
 import * as React from 'react';
 import { CustomVectorUpload } from './custom_vector_upload';
 import * as serviceApiCalls from '../services';
-import { CombineLatestOperator } from 'rxjs/internal/observable/combineLatest';
 
 describe('custom vector upload component', () => {
   const mockDataWhenPluginIsUninstalled = {
@@ -38,14 +37,8 @@ describe('custom vector upload component', () => {
   };
 
   it('renders the empty prompt if geospatial plugin is not installed', async () => {
-    jest.spyOn(serviceApiCalls, 'getServices').mockImplementation((http) => {
-      return {
-        getPlugins: () => {
-          return mockDataWhenPluginIsUninstalled;
-        },
-        postGeojson: () => {},
-        getIndex: () => {},
-      };
+    jest.spyOn(serviceApiCalls, 'getPlugins').mockImplementation((http) => {
+      return mockDataWhenPluginIsUninstalled;
     });
 
     let tree;
@@ -57,14 +50,8 @@ describe('custom vector upload component', () => {
   });
 
   it('renders the upload customer div if geospatial plugin is installed', async () => {
-    jest.spyOn(serviceApiCalls, 'getServices').mockImplementation((http) => {
-      return {
-        getPlugins: () => {
-          return mockDataWhenPluginIsInstalled;
-        },
-        postGeojson: () => {},
-        getIndex: () => {},
-      };
+    jest.spyOn(serviceApiCalls, 'getPlugins').mockImplementation((http) => {
+      return mockDataWhenPluginIsInstalled;
     });
 
     let tree;

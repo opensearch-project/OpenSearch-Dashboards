@@ -280,11 +280,13 @@ exports[`custom vector upload component renders the upload customer div if geosp
                 value=""
               >
                 <option
+                  name="geo_shape"
                   value="geo_shape"
                 >
                   Geo shape
                 </option>
                 <option
+                  name="geo_point"
                   value="geo_point"
                 >
                   Geo point
