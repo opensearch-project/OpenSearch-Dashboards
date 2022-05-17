@@ -171,18 +171,15 @@ describe('vector_upload_options', () => {
   it('renders the VectorUploadOptions component when we have successfully indexed all the data', async () => {
     addUserInputToDOM();
     const button = screen.getByRole('button', { name: 'import-file-button' });
-    const getIndexSpy = jest.spyOn(serviceApiCalls, 'getIndex').mockImplementation(() => {
+    jest.spyOn(serviceApiCalls, 'getIndex').mockImplementation(() => {
       return Promise.resolve(getIndexResponseWhenIndexIsNotPresent);
     });
-    const postGeojsonSpy = jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
+    jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
       return Promise.resolve(successfulPostGeojsonResponse);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
-    expect(getIndexSpy).toHaveBeenCalled();
   });
 
   it('renders the VectorUploadOptions component when we have partial failures during indexing', async () => {
@@ -194,8 +191,6 @@ describe('vector_upload_options', () => {
     jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
       return Promise.resolve(partialFailuresPostGeojsonResponse);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
@@ -210,8 +205,6 @@ describe('vector_upload_options', () => {
     jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
       return Promise.resolve(noDocumentsIndexedPostGeojsonResponse);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
@@ -226,8 +219,6 @@ describe('vector_upload_options', () => {
     jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
       return Promise.resolve(failedPostGeojsonResponse);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
@@ -239,8 +230,6 @@ describe('vector_upload_options', () => {
     jest.spyOn(serviceApiCalls, 'getIndex').mockImplementation(() => {
       return Promise.resolve(getIndexResponseWhenIndexIsPresent);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
@@ -272,10 +261,37 @@ describe('vector_upload_options', () => {
     jest.spyOn(serviceApiCalls, 'postGeojson').mockImplementation(() => {
       return Promise.resolve(successfulPostGeojsonResponse);
     });
-    serviceApiCalls.getIndex('', props.vis.http);
-    serviceApiCalls.postGeojson({}, props.vis.http);
     await waitFor(() => {
       fireEvent.click(button);
     });
+  });
+
+  it('renders the VectorUploadOptions component when uploaded file size is >25 MB', async () => {
+    const { getByTestId } = render(<VectorUploadOptions {...props} />);
+    const indexName = screen.getByTestId('customIndex');
+    fireEvent.change(indexName, { target: { value: 'sample' } });
+    const uploader = getByTestId('filePicker');
+    const jsonData = {
+      type: 'FeatureCollection',
+      name: 'india_china',
+      features: [
+        {
+          type: 'Feature',
+          properties: { name: 'sample' },
+          geometry: { type: 'Polygon', coordinates: [] },
+        },
+      ],
+    };
+    const jsonDataArray = [];
+    const max = 500000;
+    for (; jsonDataArray.push(jsonData) < max; );
+    const str = JSON.stringify(jsonDataArray);
+    const blob = new Blob([str]);
+    const file = new File([blob], 'sample.json', { type: 'application/JSON' });
+    File.prototype.text = jest.fn().mockResolvedValueOnce(JSON.stringify(jsonDataArray));
+    await fireEvent.change(uploader, {
+      target: { files: [file] },
+    });
+    await expect(uploader.files[0].name).toBe('sample.json');
   });
 });
