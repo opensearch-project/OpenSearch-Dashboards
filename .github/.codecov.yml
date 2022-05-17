@@ -1,0 +1,7 @@
+# https://docs.codecov.com/docs/codecov-yaml
+coverage:
+  status:
+    project:
+      default:
+        # https://docs.codecov.com/docs/commit-status#target
+        target: auto  # coverage must be equal or above the previous commit
