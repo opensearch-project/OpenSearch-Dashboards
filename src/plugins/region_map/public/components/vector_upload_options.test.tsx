@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import VectorUploadOptions from './vector_upload_options';
-import { screen, render } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import * as serviceApiCalls from '../services';
 import { act } from 'react-dom/test-utils';
@@ -179,7 +179,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
     expect(getIndexSpy).toHaveBeenCalled();
@@ -196,7 +196,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
   });
@@ -212,7 +212,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
   });
@@ -228,7 +228,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
   });
@@ -241,7 +241,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
   });
@@ -274,7 +274,7 @@ describe('vector_upload_options', () => {
     });
     serviceApiCalls.getIndex('', props.vis.http);
     serviceApiCalls.postGeojson({}, props.vis.http);
-    act(() => {
+    await waitFor(() => {
       fireEvent.click(button);
     });
   });
