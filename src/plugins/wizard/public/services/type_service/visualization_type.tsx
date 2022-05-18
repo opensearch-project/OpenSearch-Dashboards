@@ -27,45 +27,42 @@ export const DEFAULT_CONTAINERS: ContainerLocationContribution = {
   toolbar: [],
 };
 
-interface IVisualizationType extends Required<VisualizationTypeOptions> {
-  contributions: {
-    containers: ContainerLocationContribution;
-  };
-}
+type IVisualizationType = VisualizationTypeOptions;
+
 export class VisualizationType implements IVisualizationType {
   public readonly name;
   public readonly title;
   public readonly description;
   public readonly icon;
   public readonly stage;
-  public readonly contributions;
+  public readonly ui;
   public readonly toExpression;
 
-  private processContributions(contributions: VisualizationTypeOptions['contributions']) {
-    const uiContainers: ContainerLocationContribution = {
-      sidePanel: [],
-      toolbar: [],
-    };
-    const { containers, items } = contributions;
+  // private processContributions(contributions: VisualizationTypeOptions['contributions']) {
+  //   const uiContainers: ContainerLocationContribution = {
+  //     sidePanel: [],
+  //     toolbar: [],
+  //   };
+  //   const { containers, items } = contributions;
 
-    // Validate and populate containers for each container location
-    Object.keys(uiContainers).forEach((location) => {
-      const typedLocation = location as ContainerLocations;
-      const vizContainers = containers?.[typedLocation];
+  //   // Validate and populate containers for each container location
+  //   Object.keys(uiContainers).forEach((location) => {
+  //     const typedLocation = location as ContainerLocations;
+  //     const vizContainers = containers?.[typedLocation];
 
-      const mergedContainers = mergeArrays(
-        DEFAULT_CONTAINERS[typedLocation],
-        vizContainers || [],
-        'id'
-      );
-      uiContainers[typedLocation] = mergedContainers;
-    });
+  //     const mergedContainers = mergeArrays(
+  //       DEFAULT_CONTAINERS[typedLocation],
+  //       vizContainers || [],
+  //       'id'
+  //     );
+  //     uiContainers[typedLocation] = mergedContainers;
+  //   });
 
-    return {
-      containers: uiContainers,
-      items,
-    };
-  }
+  //   return {
+  //     containers: uiContainers,
+  //     items,
+  //   };
+  // }
 
   constructor(options: VisualizationTypeOptions) {
     this.name = options.name;
@@ -73,7 +70,7 @@ export class VisualizationType implements IVisualizationType {
     this.description = options.description ?? '';
     this.icon = options.icon;
     this.stage = options.stage ?? 'production';
-    this.contributions = this.processContributions(options.contributions);
+    this.ui = options.ui;
     this.toExpression = options.toExpression;
   }
 }

@@ -10,6 +10,7 @@ import {
   OpenSearchaggsExpressionFunctionDefinition,
 } from '../../../../data/common';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
+import { RootState } from '../../application/utils/state_management';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -22,6 +23,8 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
+// TODO: Update to the common getShemas from src/plugins/visualizations/public/legacy/build_pipeline.ts
+//  And move to a common location accessible by all the visualizations
 const getVisSchemas = (aggConfigs: AggConfigs): any => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     const hasSubAgg = [
@@ -80,71 +83,76 @@ const getVisSchemas = (aggConfigs: AggConfigs): any => {
   return schemas;
 };
 
-export const toExpression = (aggs: AggConfigs) => {
+export const toExpression = ({ style: styleState, visualization }: RootState) => {
+  const { activeVisualization } = visualization;
+  const { aggConfigs } = activeVisualization || {};
+
+  if (!aggConfigs || !aggConfigs.aggs || !aggConfigs.aggs.length) return;
+
   // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
     'opensearchaggs',
     {
-      index: aggs.indexPattern.id!,
+      index: aggConfigs.indexPattern.id!,
       metricsAtAllLevels: false,
       partialRows: false,
-      aggConfigs: JSON.stringify(aggs.aggs),
+      aggConfigs: JSON.stringify(aggConfigs.aggs),
       includeFormatHints: false,
     }
   );
 
   // const schemas = getVisSchemas(vis, params);
 
-  // const {
-  //   percentageMode,
-  //   useRanges,
-  //   colorSchema,
-  //   metricColorMode,
-  //   colorsRange,
-  //   labels,
-  //   invertColors,
-  //   style,
-  // } = vis.params.metric;
+  const {
+    percentageMode,
+    useRanges,
+    colorSchema,
+    metricColorMode,
+    colorsRange,
+    labels,
+    invertColors,
+    style,
+  } = styleState.metric;
 
-  // // fix formatter for percentage mode
-  // if (get(vis.params, 'metric.percentageMode') === true) {
-  //   schemas.metric.forEach((metric: SchemaConfig) => {
-  //     metric.format = { id: 'percent' };
-  //   });
-  // }
+  const schemas = getVisSchemas(aggConfigs);
 
-  const schemas = getVisSchemas(aggs);
+  // fix formatter for percentage mode
+  if (percentageMode === true) {
+    schemas.metric.forEach((metric: SchemaConfig) => {
+      metric.format = { id: 'percent' };
+    });
+  }
 
   // TODO: ExpressionFunctionDefinitions mark all arguments as required even though the function marks most as optional
   // Update buildExpressionFunction to correctly handle optional arguments
   // @ts-expect-error
   const metricVis = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
-    // percentageMode,
-    // colorSchema,
-    // colorMode: metricColorMode,
-    // useRanges,
-    // invertColors,
-    // showLabels: labels && labels.show,
+    percentageMode,
+    colorSchema,
+    colorMode: metricColorMode,
+    useRanges,
+    invertColors,
+    showLabels: labels && labels.show,
   });
 
-  // if (style) {
-  //   metricVis.addArgument('bgFill', style.bgFill);
-  //   metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
-  //   metricVis.addArgument('subText', style.subText);
-  // }
+  if (style) {
+    metricVis.addArgument('bgFill', style.bgFill);
+    metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
+    metricVis.addArgument('subText', style.subText);
+  }
 
-  // if (colorsRange) {
-  //   colorsRange.forEach((range: any) => {
-  //     metricVis.addArgument(
-  //       'colorRange',
-  //       buildExpression(`range from=${range.from} to=${range.to}`)
-  //     );
-  //   });
-  // }
+  if (colorsRange) {
+    colorsRange.forEach((range: any) => {
+      metricVis.addArgument(
+        'colorRange',
+        buildExpression(`range from=${range.from} to=${range.to}`)
+      );
+    });
+  }
 
-  //   if (schemas.group) {
-  //     metricVis.addArgument('bucket', prepareDimension(schemas.group[0]));
-  //   }
+  if (schemas.group) {
+    metricVis.addArgument('bucket', prepareDimension(schemas.group[0]));
+  }
 
   schemas.metric.forEach((metric: SchemaConfig) => {
     metricVis.addArgument('metric', prepareDimension(metric));

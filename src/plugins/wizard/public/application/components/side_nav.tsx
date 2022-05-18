@@ -10,8 +10,9 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { WizardServices } from '../../types';
 import './side_nav.scss';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
-import { setIndexPattern } from '../utils/state_management/datasource_slice';
+import { setIndexPattern } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
+import { DataTab } from '../contributions';
 
 export const SideNav = () => {
   const {
@@ -21,17 +22,19 @@ export const SideNav = () => {
     },
   } = useOpenSearchDashboards<WizardServices>();
   const { IndexPatternSelect } = data.ui;
-  const { indexPattern } = useTypedSelector((state) => state.dataSource);
+  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.visualization);
   const dispatch = useTypedDispatch();
   const {
-    contributions: { containers },
+    ui: { containerConfig },
   } = useVisualizationType();
 
-  const tabs: EuiTabbedContentTab[] = containers.sidePanel.map(({ id, name, Component }) => ({
-    id,
-    name,
-    content: Component,
-  }));
+  const tabs: EuiTabbedContentTab[] = Object.entries(containerConfig).map(
+    ([containerName, config]) => ({
+      id: containerName,
+      name: containerName,
+      content: containerName === 'Data' ? <DataTab key="containerName" /> : config.render(),
+    })
+  );
 
   return (
     <section className="wizSidenav">
@@ -46,10 +49,13 @@ export const SideNav = () => {
           placeholder={i18n.translate('wizard.nav.dataSource.selector.placeholder', {
             defaultMessage: 'Select index pattern',
           })}
-          indexPatternId={indexPattern?.id || ''}
+          indexPatternId={indexPatternId || ''}
           onChange={async (newIndexPatternId: any) => {
             const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
-            dispatch(setIndexPattern(newIndexPattern));
+
+            if (newIndexPattern) {
+              dispatch(setIndexPattern(newIndexPatternId));
+            }
           }}
           isClearable={false}
         />

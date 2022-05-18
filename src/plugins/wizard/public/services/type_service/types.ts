@@ -32,10 +32,9 @@ export interface VisualizationTypeOptions {
   readonly description?: string;
   readonly icon: IconType;
   readonly stage?: 'beta' | 'production';
-  readonly contributions: {
-    containers?: Partial<ContainerLocationContribution>;
-    items?: {
-      [containerId: string]: ContainerSchema[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
+  readonly ui: {
+    containerConfig: {
+      [containerId: string]: any;
     };
   };
   readonly toExpression: (state: RootState) => string | void;

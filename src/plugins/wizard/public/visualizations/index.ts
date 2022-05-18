@@ -16,6 +16,6 @@ export function registerDefaultTypes(
   const visualizationTypes = [createMetricConfig];
 
   visualizationTypes.forEach((createTypeConfig) => {
-    typeServiceSetup.createVisualizationType(createTypeConfig(pluginsStart));
+    typeServiceSetup.createVisualizationType(createTypeConfig());
   });
 }

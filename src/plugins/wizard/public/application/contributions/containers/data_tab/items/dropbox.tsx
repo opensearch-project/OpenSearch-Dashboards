@@ -19,6 +19,7 @@ import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
 import './dropbox.scss';
 import { DropboxContribution, DropboxDisplay } from './types';
 import { useDropbox } from './use';
+import { UseDropboxProps } from './use/use_dropbox';
 
 interface DropboxProps extends IDropState {
   id: string;
@@ -65,7 +66,7 @@ const DropboxComponent = ({
             {fields.map(({ id, label, icon }, index) => (
               <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
-                  <FieldIcon type={icon} />
+                  {/* <FieldIcon type={icon} /> */}
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>
                       {label}
@@ -104,7 +105,7 @@ const DropboxComponent = ({
   );
 };
 
-const Dropbox = React.memo((dropBox: DropboxContribution) => {
+const Dropbox = React.memo((dropBox: UseDropboxProps) => {
   const props = useDropbox(dropBox);
 
   return <DropboxComponent {...props} />;

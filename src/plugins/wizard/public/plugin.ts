@@ -21,6 +21,7 @@ import {
 import { PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
+import { setAggService, setIndexPatterns } from './plugin_services';
 
 export class WizardPlugin
   implements
@@ -42,10 +43,23 @@ export class WizardPlugin
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
+
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { data, savedObjects, navigation, expressions } = pluginsStart;
 
+        // make sure the index pattern list is up to date
+        data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and visualize won't be rendered
+        // TODO: Add the redirect
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+
+        // Register plugin services
+        setAggService(data.search.aggs);
+        setIndexPatterns(data.indexPatterns);
+
+        // Register Default Visualizations
         const { registerDefaultTypes } = await import('./visualizations');
         registerDefaultTypes(typeService.setup(), pluginsStart);
 
@@ -60,13 +74,7 @@ export class WizardPlugin
           types: typeService.start(),
         };
 
-        // make sure the index pattern list is up to date
-        data.indexPatterns.clearCache();
-        // make sure a default index pattern exists
-        // if not, the page will be redirected to management and visualize won't be rendered
-        // TODO: Add the redirect
-        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
-
+        // Instantiate the store
         const store = await getPreloadedStore(services);
 
         // Render the application
