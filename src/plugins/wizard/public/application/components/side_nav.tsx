@@ -13,6 +13,7 @@ import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setIndexPattern } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
 import { DataTab } from '../contributions';
+import { StyleTabConfig } from '../../services/type_service';
 
 export const SideNav = () => {
   const {
@@ -29,11 +30,24 @@ export const SideNav = () => {
   } = useVisualizationType();
 
   const tabs: EuiTabbedContentTab[] = Object.entries(containerConfig).map(
-    ([containerName, config]) => ({
-      id: containerName,
-      name: containerName,
-      content: containerName === 'Data' ? <DataTab key="containerName" /> : config.render(),
-    })
+    ([containerName, config]) => {
+      let content = null;
+      switch (containerName) {
+        case 'data':
+          content = <DataTab key="containerName" />;
+          break;
+
+        case 'style':
+          content = (config as StyleTabConfig).render();
+          break;
+      }
+
+      return {
+        id: containerName,
+        name: containerName,
+        content,
+      };
+    }
   );
 
   return (

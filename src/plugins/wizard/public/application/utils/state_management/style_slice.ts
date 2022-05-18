@@ -16,7 +16,7 @@ export const getPreloadedState = async ({ types, data }: WizardServices): Promis
   // debugger;
 
   const defaultVisualization = types.all()[0];
-  const defaultState = defaultVisualization.ui.containerConfig?.Style?.defaults;
+  const defaultState = defaultVisualization.ui.containerConfig.style.defaults;
   if (defaultState) {
     preloadedState = defaultState;
   }

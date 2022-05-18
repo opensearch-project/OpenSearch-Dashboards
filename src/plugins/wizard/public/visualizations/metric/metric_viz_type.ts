@@ -11,7 +11,31 @@ import { MetricVizOptions } from './components/metric_viz_options';
 import { VisualizationTypeOptions } from '../../services/type_service';
 import { toExpression } from './to_expression';
 
-export const createMetricConfig = (): VisualizationTypeOptions => ({
+export interface MetricOptionsDefaults {
+  addTooltip: boolean;
+  addLegend: boolean;
+  type: 'metric';
+  metric: {
+    percentageMode: boolean;
+    useRanges: boolean;
+    colorSchema: ColorSchemas;
+    metricColorMode: ColorModes;
+    colorsRange: [{ from: number; to: number }];
+    labels: {
+      show: boolean;
+    };
+    invertColors: boolean;
+    style: {
+      bgFill: string;
+      bgColor: boolean;
+      labelColor: boolean;
+      subText: string;
+      fontSize: number;
+    };
+  };
+}
+
+export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefaults> => ({
   name: 'metric',
   title: 'Metric',
   icon: 'visMetric',
@@ -19,7 +43,7 @@ export const createMetricConfig = (): VisualizationTypeOptions => ({
   toExpression,
   ui: {
     containerConfig: {
-      Data: {
+      data: {
         schemas: new Schemas([
           {
             group: AggGroupNames.Metrics,
@@ -61,7 +85,7 @@ export const createMetricConfig = (): VisualizationTypeOptions => ({
           },
         ]),
       },
-      Style: {
+      style: {
         defaults: {
           addTooltip: true,
           addLegend: false,

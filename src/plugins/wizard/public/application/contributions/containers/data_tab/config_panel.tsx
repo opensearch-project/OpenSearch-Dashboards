@@ -30,7 +30,7 @@ export function ConfigPanel() {
   const vizType = useVisualizationType();
 
   const [activeInstance, setActiveInstance] = useState(null);
-  const schemas = vizType.ui.containerConfig.Data?.schemas;
+  const schemas = vizType.ui.containerConfig.data.schemas;
 
   const activeItem = false;
   // const activeItem = useTypedSelector((state) => state.config.activeItem);
