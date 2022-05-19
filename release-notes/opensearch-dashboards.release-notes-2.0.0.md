@@ -55,6 +55,7 @@
 * [Circuit-Breaker] Add memory circuit breaker configuration ([#1347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1347))
 
 ### 🐛 Bug Fixes
+* Removes irrelevant upsell in the timeout message ([#1599](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1599))
 * [Bug] fix missing discover context icon ([#1545](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1545))
 * Fix: Re-rendering visualization when expression changes and improves typing ([#1491](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1491))
 * fix(actions): Better type checks for icons ([#1496](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1496))
