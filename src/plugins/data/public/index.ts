@@ -389,7 +389,6 @@ export {
   // errors
   SearchError,
   SearchTimeoutError,
-  TimeoutErrorMode,
   PainlessError,
 } from './search';
 

@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
+import { SearchTimeoutError, TIMEOUT_MESSAGE } from './timeout_error';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
@@ -44,32 +44,9 @@ describe('SearchTimeoutError', () => {
     startMock.application.navigateToApp.mockImplementation(jest.fn());
   });
 
-  it('Should navigate to upgrade', () => {
-    const e = new SearchTimeoutError(new AbortError(), TimeoutErrorMode.UPGRADE);
+  it('Should create timeout message', () => {
+    const e = new SearchTimeoutError(new AbortError());
     const component = mount(e.getErrorMessage(startMock.application));
-
-    expect(component.find('EuiButton').length).toBe(1);
-    component.find('EuiButton').simulate('click');
-    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
-      'https://opensearch.org/subscriptions'
-    );
-  });
-
-  it('Should create contact admin message', () => {
-    const e = new SearchTimeoutError(new AbortError(), TimeoutErrorMode.CONTACT);
-    const component = mount(e.getErrorMessage(startMock.application));
-
-    expect(component.find('EuiButton').length).toBe(0);
-  });
-
-  it('Should navigate to settings', () => {
-    const e = new SearchTimeoutError(new AbortError(), TimeoutErrorMode.CHANGE);
-    const component = mount(e.getErrorMessage(startMock.application));
-
-    expect(component.find('EuiButton').length).toBe(1);
-    component.find('EuiButton').simulate('click');
-    expect(startMock.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/opensearch-dashboards/settings',
-    });
+    expect(component.html()).toEqual(TIMEOUT_MESSAGE);
   });
 });

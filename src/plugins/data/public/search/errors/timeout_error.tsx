@@ -32,96 +32,23 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { OsdError } from '../../../../opensearch_dashboards_utils/common';
 
-export enum TimeoutErrorMode {
-  UPGRADE,
-  CONTACT,
-  CHANGE,
-}
-
+export const TIMEOUT_MESSAGE: string =
+  'Your query has timed out. Contact your system administrator to review your index strategy or increase the run time.';
 /**
  * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
  */
 export class SearchTimeoutError extends OsdError {
-  public mode: TimeoutErrorMode;
-  constructor(err: Error, mode: TimeoutErrorMode) {
+  constructor(err: Error) {
     super(`Request timeout: ${JSON.stringify(err?.message)}`);
-    this.mode = mode;
-  }
-
-  private getMessage() {
-    switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicense', {
-          defaultMessage:
-            'Your query has timed out. With our free Basic tier, your queries never time out.',
-        });
-      case TimeoutErrorMode.CONTACT:
-        return i18n.translate('data.search.timeoutContactAdmin', {
-          defaultMessage:
-            'Your query has timed out. Contact your system administrator to increase the run time.',
-        });
-      case TimeoutErrorMode.CHANGE:
-        return i18n.translate('data.search.timeoutIncreaseSetting', {
-          defaultMessage:
-            'Your query has timed out. Increase run time with the search timeout advanced setting.',
-        });
-    }
-  }
-
-  private getActionText() {
-    switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        return i18n.translate('data.search.upgradeLicenseActionText', {
-          defaultMessage: 'Upgrade now',
-        });
-        break;
-      case TimeoutErrorMode.CHANGE:
-        return i18n.translate('data.search.timeoutIncreaseSettingActionText', {
-          defaultMessage: 'Edit setting',
-        });
-        break;
-    }
-  }
-
-  private onClick(application: ApplicationStart) {
-    switch (this.mode) {
-      case TimeoutErrorMode.UPGRADE:
-        application.navigateToUrl('https://opensearch.org/subscriptions');
-        break;
-      case TimeoutErrorMode.CHANGE:
-        application.navigateToApp('management', {
-          path: `/opensearch-dashboards/settings`,
-        });
-        break;
-    }
   }
 
   public getErrorMessage(application: ApplicationStart) {
-    const actionText = this.getActionText();
     return (
-      <>
-        {this.getMessage()}
-        {actionText && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText textAlign="right">
-              <EuiButton
-                color="danger"
-                onClick={() => this.onClick(application)}
-                size="s"
-                data-test-subj="searchTimeoutError"
-              >
-                {actionText}
-              </EuiButton>
-            </EuiText>
-          </>
-        )}
-      </>
+      <>{i18n.translate('data.search.timeoutContactAdmin', { defaultMessage: TIMEOUT_MESSAGE })}</>
     );
   }
 }
