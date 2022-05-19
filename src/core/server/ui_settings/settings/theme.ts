@@ -57,6 +57,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       }),
       requiresPageReload: true,
       schema: schema.oneOf([schema.literal('v7'), schema.literal('v8 (beta)')]),
+      readonly: true,
     },
   };
 };
