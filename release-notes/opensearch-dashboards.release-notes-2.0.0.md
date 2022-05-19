@@ -20,6 +20,7 @@
 ### 🛡 Security
 * [CVE-2022-1537] Resolves grunt to 1.5.3 ([#1580](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1580))
 * [CVE-2022-1214] Bumps chromedriver to v100 and axios to v0.27.2 ([#1552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1552))
+* [CVE-2022-29078] Bumps ejs from 3.1.6 to 3.1.7 ([#1512](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1512))
 * [CVE-2021-44531] [CVE-2022-21824] [CVE-2022-0778] [CVE-2021-44532] [CVE-2021-44533] Bumps Node.js from v14.18.2 to v14.19.1 ([#1487](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1487))
 * [CVE-2022-0436] Bumps grunt from v1.4.1 to v1.5.2 ([#1451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1451))
 * [CVE-2021-43138] Resolves async to v3.2.3 ([#1449](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1449))
@@ -60,7 +61,6 @@
 * update re2 build for arm under node 14 ([#1454](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1454))
 * update re2 for linux, darwin, and windows ([#1453](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1453))
 * fix(Tooltip): Fixes tooltip when split series charts are used ([#1324](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1324))
-* bumps chromedriver to v100 ([#1410](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1410))
 * Fixes the header's nav trigger button not closing the nav ([#1394](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1394))
 * Fixes the linting rules to accept only the approved copyright headers ([#1373](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1373))
 
@@ -80,7 +80,6 @@
 * [Version] Increment to 2.0 ([#973](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/973/files))
 
 ### 🪛 Refactoring
-* Cleans up changes from memory circuit breaker PR ([#1463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1463))
 * Fixes interfaced errors across Dashboards ([#1409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1409))
 
 ### 🔩 Tests
@@ -88,6 +87,7 @@
 * [Tests][BWC][CI] use ODFE 1.0.2 ([#1470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1470))
 * [Tests][BWC][CI] handle distributions with qualifiers ([#1469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1469))
 * [Tests] BWC test improvements ([#1447](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1447))
+* [Tests] [CI] bumps chromedriver to v100 ([#1410](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1410))
 * Fixes inconsistent plugin installation tests ([#1346](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1346))
 * [Tests] fix JUnit Reporter test ([#1338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1338))
 * [Tests] remove include_type_name from OpenSearch Archiver ([#1334](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1334))
