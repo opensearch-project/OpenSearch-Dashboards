@@ -16,6 +16,7 @@
 #### Deprecations
 * Deprecates non-inclusive config names ([#1467](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1467))
 * Removes UI Framework KUI doc site ([#1379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1379))
+* [Purify] hide option for theme version in settings ([#1598](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1598))
 
 ### 🛡 Security
 * [CVE-2022-1537] Resolves grunt to 1.5.3 ([#1580](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1580))
