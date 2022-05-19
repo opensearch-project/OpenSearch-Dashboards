@@ -2014,8 +2014,6 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
-    protected getTimeoutMode(): TimeoutErrorMode;
-    // (undocumented)
     protected handleSearchError(e: any, request: IOpenSearchDashboardsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
@@ -2150,11 +2148,9 @@ export interface SearchSourceFields {
 //
 // @public
 export class SearchTimeoutError extends OsdError {
-    constructor(err: Error, mode: TimeoutErrorMode);
+    constructor(err: Error);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
-    // (undocumented)
-    mode: TimeoutErrorMode;
     }
 
 // Warning: (ae-missing-release-tag) "SortDirection" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2228,18 +2224,6 @@ export class TimeHistory {
 //
 // @public (undocumented)
 export type TimeHistoryContract = PublicMethodsOf<TimeHistory>;
-
-// Warning: (ae-missing-release-tag) "TimeoutErrorMode" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export enum TimeoutErrorMode {
-    // (undocumented)
-    CHANGE = 2,
-    // (undocumented)
-    CONTACT = 1,
-    // (undocumented)
-    UPGRADE = 0
-}
 
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
