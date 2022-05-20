@@ -196,7 +196,7 @@ are able to use `FormattedMessage` component in order to translate messages.
 `IntlProvider` should wrap react app's root component (inside each react render method).
 
 In order to translate messages we need to use `I18nProvider` component that
-uses I18n engine under the hood:
+uses I18n engine under the hood. This `I18nProvider` component can use either default or customized locale. If you need a self-defined locale, make sure to register it first using `addLocaleData` method in packages/osd-i18n/src/core/locales.js. Below is an example of how to use `I18nProvider` component:
 
 ```js
 import React from 'react';
