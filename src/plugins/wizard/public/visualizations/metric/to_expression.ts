@@ -2,6 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+import { cloneDeep } from 'lodash';
 import { SchemaConfig } from '../../../../visualizations/public';
 import { MetricVisExpressionFunctionDefinition } from '../../../../vis_type_metric/public';
 import {
@@ -12,6 +14,7 @@ import {
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
 import { RootState } from '../../application/utils/state_management';
 import { MetricOptionsDefaults } from './metric_viz_type';
+import { getAggService, getIndexPatterns } from '../../plugin_services';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -88,17 +91,21 @@ interface MetricRootState extends RootState {
   style: MetricOptionsDefaults;
 }
 
-export const toExpression = ({ style: styleState, visualization }: MetricRootState) => {
-  const { activeVisualization } = visualization;
-  const { aggConfigs } = activeVisualization || {};
+export const toExpression = async ({ style: styleState, visualization }: MetricRootState) => {
+  const { activeVisualization, indexPattern: indexId = '' } = visualization;
+  const { aggConfigParams } = activeVisualization || {};
 
-  if (!aggConfigs || !aggConfigs.aggs || !aggConfigs.aggs.length) return;
+  if (!aggConfigParams || !aggConfigParams.length) return;
+
+  const indexPatternsService = getIndexPatterns();
+  const indexPattern = await indexPatternsService.get(indexId);
+  const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
 
   // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
     'opensearchaggs',
     {
-      index: aggConfigs.indexPattern.id!,
+      index: indexId,
       metricsAtAllLevels: false,
       partialRows: false,
       aggConfigs: JSON.stringify(aggConfigs.aggs),

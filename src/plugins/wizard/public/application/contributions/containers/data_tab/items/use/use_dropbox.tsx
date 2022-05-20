@@ -4,16 +4,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { cloneDeep } from 'lodash';
 import { IndexPatternField } from 'src/plugins/data/common';
 import { Schema } from '../../../../../../../../vis_default_editor/public';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
-// import {
-//   addInstance,
-//   reorderInstances,
-//   setActiveItem,
-//   updateInstance,
-// } from '../../../../../utils/state_management/config_slice';
 import {
   DropboxContribution,
   DropboxState,
@@ -25,8 +20,8 @@ import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
 import { addAggInstance } from '../../../../../utils/state_management/visualization_slice';
 import { useIndexPattern } from '../../../../../../application/utils/use/use_index_pattern';
-
-type DropboxInstanceState = DropboxState['instances'][number];
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { WizardServices } from '../../../../../../types';
 
 export const INITIAL_STATE: DropboxState = {
   instances: [],
@@ -40,9 +35,22 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const { id: dropboxId, label, schema } = props;
   const dispatch = useTypedDispatch();
   const indexPattern = useIndexPattern();
-  const { aggs } = useTypedSelector((state) => ({
-    aggs: state.visualization.activeVisualization?.aggConfigs.aggs,
-  }));
+  const {
+    services: {
+      data: {
+        search: { aggs: aggService },
+      },
+    },
+  } = useOpenSearchDashboards<WizardServices>();
+  const aggConfigParams = useTypedSelector(
+    (state) => state.visualization.activeVisualization?.aggConfigParams
+  );
+
+  const aggs = useMemo(() => {
+    return indexPattern
+      ? aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams)).aggs
+      : [];
+  }, [aggConfigParams, aggService, indexPattern]);
 
   const dropboxAggs = aggs?.filter((agg) => agg.schema === schema.name);
 
@@ -71,19 +79,15 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       if (!data) return;
 
       const { name: fieldName } = data;
-      const indexField = getIndexPatternField(fieldName, indexPattern?.fields ?? []);
-
-      if (!indexField || !indexPattern) return;
 
       dispatch(
         addAggInstance({
-          indexPattern,
           schema,
           fieldName,
         })
       );
     },
-    [dispatch, indexPattern, schema]
+    [dispatch, schema]
   );
 
   const onReorderField = useCallback((reorderedInstanceIds: string[]) => {}, []);

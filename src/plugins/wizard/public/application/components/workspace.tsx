@@ -14,7 +14,7 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
@@ -30,9 +30,18 @@ export const Workspace: FC = ({ children }) => {
     },
   } = useOpenSearchDashboards<WizardServices>();
   const { toExpression } = useVisualizationType();
+  const [expression, setExpression] = useState<string>();
   const rootState = useTypedSelector((state) => state);
 
-  const expression = useMemo(() => toExpression(rootState), [rootState, toExpression]);
+  useEffect(() => {
+    async function loadExpression() {
+      const exp = await toExpression(rootState);
+      setExpression(exp);
+    }
+
+    loadExpression();
+  }, [rootState, toExpression]);
+
   return (
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
