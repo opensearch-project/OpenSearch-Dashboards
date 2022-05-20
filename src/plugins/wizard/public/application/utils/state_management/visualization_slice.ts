@@ -58,26 +58,30 @@ export const slice = createSlice({
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
     },
-    addAggInstance: (state, action: PayloadAction<{ schema: Schema; fieldName?: string }>) => {
-      const { schema, fieldName } = action.payload;
-      const defaultAggType = (schema.defaults as any).aggType;
+    reorderAggConfigParams: (
+      state,
+      action: PayloadAction<{
+        sourceId: string;
+        destinationId: string;
+      }>
+    ) => {
+      const { sourceId, destinationId } = action.payload;
+      const aggParams = state.activeVisualization!.aggConfigParams;
+      const newAggs = [...aggParams];
+      const destinationIndex = newAggs.findIndex((agg) => agg.id === destinationId);
+      newAggs.splice(
+        destinationIndex,
+        0,
+        newAggs.splice(
+          aggParams.findIndex((agg) => agg.id === sourceId),
+          1
+        )[0]
+      );
 
-      const configParams = {
-        type: defaultAggType,
-        schema: schema.name,
-        params: {} as any,
-      };
-
-      if (fieldName) {
-        configParams.params.field = fieldName;
-      }
-
-      state.activeVisualization?.aggConfigParams.push(configParams);
+      state.activeVisualization!.aggConfigParams = newAggs;
     },
-    deleteAggInstance: (state, action: PayloadAction<string>) => {
-      // const aggConfigs = state.activeVisualization!.aggConfigs;
-      // const aggId = action.payload;
-      // const filteredAggs = aggConfigs.aggs.filter((agg) => agg.id !== aggId);
+    updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
+      state.activeVisualization!.aggConfigParams = action.payload;
     },
   },
 });
@@ -87,5 +91,6 @@ export const {
   setActiveVisualization,
   setIndexPattern,
   setSearchField,
-  addAggInstance,
+  updateAggConfigParams,
+  reorderAggConfigParams,
 } = slice.actions;

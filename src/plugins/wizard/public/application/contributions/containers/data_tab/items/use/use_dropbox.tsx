@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { IndexPatternField } from 'src/plugins/data/common';
+import { CreateAggConfigParams, IndexPatternField } from 'src/plugins/data/common';
 import { Schema } from '../../../../../../../../vis_default_editor/public';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
@@ -18,7 +18,10 @@ import {
 } from '../types';
 import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
-import { addAggInstance } from '../../../../../utils/state_management/visualization_slice';
+import {
+  reorderAggConfigParams,
+  updateAggConfigParams,
+} from '../../../../../utils/state_management/visualization_slice';
 import { useIndexPattern } from '../../../../../../application/utils/use/use_index_pattern';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../../../../types';
@@ -46,33 +49,41 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     (state) => state.visualization.activeVisualization?.aggConfigParams
   );
 
-  const aggs = useMemo(() => {
-    return indexPattern
-      ? aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams)).aggs
-      : [];
+  const aggConfigs = useMemo(() => {
+    return indexPattern && aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
   }, [aggConfigParams, aggService, indexPattern]);
 
-  const dropboxAggs = aggs?.filter((agg) => agg.schema === schema.name);
+  const aggs = aggConfigs?.aggs ?? [];
 
-  const displayFields: DropboxDisplay[] = useMemo(() => {
-    // debugger;
-    return (
+  const dropboxAggs = aggs.filter((agg) => agg.schema === schema.name);
+
+  const displayFields: DropboxDisplay[] = useMemo(
+    () =>
       dropboxAggs?.map(
         (agg): DropboxDisplay => ({
           id: agg.id,
           icon: 'number', // TODO: Check if we still need an icon here
           label: agg.makeLabel(),
         })
-      ) || []
-    );
-  }, [dropboxAggs]);
+      ) || [],
+    [dropboxAggs]
+  );
 
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {}, []);
 
   const onEditField = useCallback((instanceId) => {}, []);
 
-  const onDeleteField = useCallback((aggId) => {}, []);
+  const onDeleteField = useCallback(
+    (aggId: string) => {
+      const newAggs = aggConfigs?.aggs.filter((agg) => agg.id !== aggId);
+
+      if (newAggs) {
+        dispatch(updateAggConfigParams(newAggs.map((agg) => agg.serialize())));
+      }
+    },
+    [aggConfigs?.aggs, dispatch]
+  );
 
   const onDropField = useCallback(
     (data: FieldDragDataType['value']) => {
@@ -80,17 +91,32 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
       const { name: fieldName } = data;
 
+      aggConfigs?.createAggConfig({
+        type: (schema.defaults as any).aggType,
+        schema: schema.name,
+        params: {
+          field: fieldName,
+        },
+      });
+
+      if (aggConfigs) {
+        dispatch(updateAggConfigParams(aggConfigs.aggs.map((agg) => agg.serialize())));
+      }
+    },
+    [aggConfigs, dispatch, schema.defaults, schema.name]
+  );
+
+  const onReorderField = useCallback(
+    ({ sourceAggId, destinationAggId }) => {
       dispatch(
-        addAggInstance({
-          schema,
-          fieldName,
+        reorderAggConfigParams({
+          sourceId: sourceAggId,
+          destinationId: destinationAggId,
         })
       );
     },
-    [dispatch, schema]
+    [dispatch]
   );
-
-  const onReorderField = useCallback((reorderedInstanceIds: string[]) => {}, []);
 
   const [dropProps, { isValidDropTarget, dragData, ...dropState }] = useDrop(
     'field-data',
@@ -112,7 +138,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   return {
     id: dropboxId,
     label,
-    limit: 3,
+    limit: schema.max,
     fields: displayFields,
     onAddField,
     onEditField,
