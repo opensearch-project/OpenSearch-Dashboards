@@ -6,14 +6,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 
-type StyleState = any;
+type StyleState<T = any> = T;
 
 const initialState = {} as StyleState;
 
 export const getPreloadedState = async ({ types, data }: WizardServices): Promise<StyleState> => {
   let preloadedState = initialState;
-
-  // debugger;
 
   const defaultVisualization = types.all()[0];
   const defaultState = defaultVisualization.ui.containerConfig.style.defaults;
@@ -28,10 +26,10 @@ export const styleSlice = createSlice({
   name: 'style',
   initialState,
   reducers: {
-    setState(state, action: PayloadAction<StyleState>) {
-      state = action.payload;
+    setState<T>(state: T, action: PayloadAction<StyleState<T>>) {
+      return action.payload;
     },
-    updateState(state, action: PayloadAction<Partial<StyleState>>) {
+    updateState<T>(state: T, action: PayloadAction<Partial<StyleState<T>>>) {
       state = {
         ...state,
         ...action.payload,
@@ -40,5 +38,10 @@ export const styleSlice = createSlice({
   },
 });
 
+// Exposing the state functions as generics
+export const setState = styleSlice.actions.setState as <T>(payload: T) => PayloadAction<T>;
+export const updateState = styleSlice.actions.updateState as <T>(
+  payload: Partial<T>
+) => PayloadAction<Partial<T>>;
+
 export const { reducer } = styleSlice;
-export const { setState, updateState } = styleSlice.actions;

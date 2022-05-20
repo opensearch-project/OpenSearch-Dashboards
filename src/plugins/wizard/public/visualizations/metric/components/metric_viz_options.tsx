@@ -7,28 +7,33 @@ import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import produce from 'immer';
+import { Draft } from 'immer';
 import {
   ColorRanges,
   RangeOption,
   SetColorRangeValue,
   SwitchOption,
 } from '../../../../../charts/public';
-import { useTypedSelector } from '../../../application/utils/state_management';
+import { useTypedDispatch, useTypedSelector } from '../../../application/utils/state_management';
+import { MetricOptionsDefaults } from '../metric_viz_type';
+import { setState } from '../../../application/utils/state_management/style_slice';
 
 function MetricVizOptions() {
-  const { style } = useTypedSelector((state) => state);
-  const { metric } = style;
+  const styleState = useTypedSelector((state) => state.style) as MetricOptionsDefaults;
+  const dispatch = useTypedDispatch();
+  const { metric } = styleState;
 
-  const setMetric = useCallback((key: string) => {
-    // console.log('key', key);
-
-    return () => {};
-  }, []);
-
-  if (!metric) return <div>Loading...</div>;
+  const setOption = useCallback(
+    (callback: (draft: Draft<typeof styleState>) => void) => {
+      const newState = produce(styleState, callback);
+      dispatch(setState<MetricOptionsDefaults>(newState));
+    },
+    [dispatch, styleState]
+  );
 
   return (
-    <>
+    <div>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>
@@ -43,7 +48,11 @@ function MetricVizOptions() {
           })}
           paramName="percentageMode"
           value={metric.percentageMode}
-          setValue={setMetric('value')}
+          setValue={(_, value) =>
+            setOption((draft) => {
+              draft.metric.percentageMode = value;
+            })
+          }
         />
 
         <SwitchOption
@@ -52,13 +61,17 @@ function MetricVizOptions() {
           })}
           paramName="show"
           value={metric.labels.show}
-          setValue={setMetric('labels')}
+          setValue={(_, value) =>
+            setOption((draft) => {
+              draft.metric.labels.show = value;
+            })
+          }
         />
       </EuiPanel>
 
       <EuiSpacer size="s" />
 
-      <EuiPanel paddingSize="s">
+      {/* <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage id="visTypeMetric.params.rangesTitle" defaultMessage="Ranges" />
@@ -74,7 +87,7 @@ function MetricVizOptions() {
           setValidity={setMetric('validity')}
         />
 
-        {/* <EuiFormRow fullWidth display="rowCompressed" label={metricColorModeLabel}>
+        <EuiFormRow fullWidth display="rowCompressed" label={metricColorModeLabel}>
           <EuiButtonGroup
             buttonSize="compressed"
             idSelected={metric.metricColorMode}
@@ -84,9 +97,9 @@ function MetricVizOptions() {
             options={vis.type.editorConfig.collections.metricColorMode}
             onChange={setColorMode}
           />
-        </EuiFormRow> */}
+        </EuiFormRow>
 
-        {/* <ColorSchemaOptions
+        <ColorSchemaOptions
           colorSchema={metric.colorSchema}
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
           disabled={
@@ -97,10 +110,10 @@ function MetricVizOptions() {
           setValue={setMetricValue as SetColorSchemaOptionsValue}
           showHelpText={false}
           uiState={uiState}
-        /> */}
+        />
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="s" /> */}
 
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
@@ -118,13 +131,17 @@ function MetricVizOptions() {
           max={120}
           paramName="fontSize"
           value={metric.style.fontSize}
-          setValue={setMetric('style')}
+          setValue={(_, value) =>
+            setOption((draft) => {
+              draft.metric.style.fontSize = value;
+            })
+          }
           showInput={true}
           showLabels={true}
           showValue={false}
         />
       </EuiPanel>
-    </>
+    </div>
   );
 }
 

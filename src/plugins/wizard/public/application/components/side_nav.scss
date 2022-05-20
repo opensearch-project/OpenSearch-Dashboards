@@ -11,6 +11,10 @@
 }
 
 .wizSidenavTabs {
+  .euiTab__content {
+    text-transform: capitalize;
+  }
+
   @include scrollNavParent(min-content 1fr);
   &>[role="tabpanel"] {
     @include scrollNavParent;

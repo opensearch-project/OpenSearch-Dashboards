@@ -11,6 +11,7 @@ import {
 } from '../../../../data/common';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
 import { RootState } from '../../application/utils/state_management';
+import { MetricOptionsDefaults } from './metric_viz_type';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -83,7 +84,11 @@ const getVisSchemas = (aggConfigs: AggConfigs): any => {
   return schemas;
 };
 
-export const toExpression = ({ style: styleState, visualization }: RootState) => {
+interface MetricRootState extends RootState {
+  style: MetricOptionsDefaults;
+}
+
+export const toExpression = ({ style: styleState, visualization }: MetricRootState) => {
   const { activeVisualization } = visualization;
   const { aggConfigs } = activeVisualization || {};
 

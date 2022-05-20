@@ -4,14 +4,12 @@
  */
 
 import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolkit';
-// import { reducer as dataSourceReducer } from './datasource_slice';
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { WizardServices } from '../../..';
 import { getPreloadedState } from './preload';
 
 const rootReducer = combineReducers({
-  // dataSource: dataSourceReducer,
   style: styleReducer,
   visualization: visualizationReducer,
 });
