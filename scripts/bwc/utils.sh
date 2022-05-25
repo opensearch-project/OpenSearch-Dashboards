@@ -67,3 +67,14 @@ function upload_data() {
   rm "$1.tar.gz"
   echo "Data has been uploaded and ready to test"
 }
+
+function get_dashboards_package_version() {
+  DASHBOARDS_PACKAGE_VERSION=$(cat $DASHBOARDS_DIR/package.json \
+  | grep version \
+  | head -1 \
+  | awk -F: '{ print $2 }' \
+  | sed 's/[",]//g' \
+  | tr -d [:space:])
+  
+  echo "$DASHBOARDS_PACKAGE_VERSION"
+}

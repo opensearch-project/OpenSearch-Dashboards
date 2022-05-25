@@ -27,6 +27,6 @@ function run_dashboards() {
 function check_dashboards_status {
   echo "Checking the OpenSearch Dashboards..."
   cd "$DIR"
-  check_status $DASHBOARDS_PATH "$DASHBOARDS_MSG" $DASHBOARDS_URL "" >> /dev/null 2>&1
+  check_status $DASHBOARDS_PATH "$DASHBOARDS_MSG" $DASHBOARDS_URL "$OPENSEARCH_ARGS" >> /dev/null 2>&1
   echo "OpenSearch Dashboards is up!"
 } 

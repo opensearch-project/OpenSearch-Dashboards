@@ -8,6 +8,7 @@ set -e
 . scripts/bwc/utils.sh
 . scripts/bwc/opensearch_service.sh
 . scripts/bwc/opensearch_dashboards_service.sh
+. scripts/bwc/generate_test_data.sh
 
 # For every release, add sample data and new version below:
 DEFAULT_VERSIONS=(
@@ -24,6 +25,7 @@ DEFAULT_VERSIONS=(
   "odfe-1.13.2"
   "osd-1.0.0"
   "osd-1.1.0"
+  "osd-2.0.0"
 )
 
 # Define test groups
@@ -51,11 +53,12 @@ function usage() {
     echo -e "-c CREDENTIAL\t(usename:password), no defaults, effective when SECURITY_ENABLED=true."
     echo -e "-v VERSIONS\t, Specify versions as a CSV to execute tests with data from specific version of OpenSearch Dashboards."
     echo -e "-r RELEASES\t, Specify versions as a CSV to execute tests for released versions of OpenSearch."
+    echo -e "-g GENERATE_DATA\t(true | false), defaults to false. Specify to generate test data for BWC tests (will not execute tests)."
     echo -e "-h\tPrint this message."
     echo "--------------------------------------------------------------------------"
 }
 
-while getopts ":h:b:p:s:c:v:r:o:d:" arg; do
+while getopts ":h:b:p:s:c:v:r:g:o:d:" arg; do
     case $arg in
         h)
             usage
@@ -78,6 +81,9 @@ while getopts ":h:b:p:s:c:v:r:o:d:" arg; do
             ;;
         r)
             RELEASES=$OPTARG
+            ;;
+        g)
+            GENERATE_DATA=$OPTARG
             ;;
         o)
             OPENSEARCH=$OPTARG
@@ -104,6 +110,7 @@ done
 [ $SECURITY_ENABLED == "false" ] && DASHBOARDS_TYPE="without-security" || DASHBOARDS_TYPE="with-security"
 [ $SECURITY_ENABLED == "false" ] && RELEASES_ARRAY=() || IFS=',' read -r -a RELEASES_ARRAY <<<"$RELEASES"
 [ -z "$CREDENTIAL" ] && CREDENTIAL="admin:admin"
+[ -z $GENERATE_DATA ] && GENERATE_DATA="false"
 
 TOTAL_TEST_FAILURES=0
 # OpenSearch and OpenSearch Dashboards Process IDs
@@ -162,6 +169,7 @@ TEST_SUITES=(
   ["odfe-1.13.2"]=$TEST_GROUP_4
   ["osd-1.0.0"]=$TEST_GROUP_4
   ["osd-1.1.0"]=$TEST_GROUP_4
+  ["osd-2.0.0"]=$TEST_GROUP_4
 )
 
 # this function sets up the cypress env
@@ -191,7 +199,7 @@ function run_cypress() {
     [ $IS_CORE == true ] && spec="$SPEC_FILES" || "$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins/*.js"
     [ $IS_CORE == true ] && success_msg="BWC tests for core passed ($spec)" || success_msg="BWC tests for plugin passed ($spec)"
     [ $IS_CORE == true ] && error_msg="BWC tests for core failed ($spec)" || error_msg="BWC tests for plugin failed ($spec)"
-    [ $CI == 1 ] && cypress_args="--browser chromium" || cypress_args=""
+    [ "$CI" == '1' ] && cypress_args="--browser chromium" || cypress_args=""
     env NO_COLOR=1 npx cypress run $cypress_args --headless --spec $spec || test_failures=$?
     [ -z $test_failures ] && test_failures=0
     [ $test_failures == 0 ] && echo $success_msg || echo "$error_msg::TEST_FAILURES: $test_failures"
@@ -211,6 +219,23 @@ function run_bwc() {
   else 
     run_cypress "core" "${tests[@]}"
   fi
+}
+
+# generate test data
+function generate_test_data() {
+  setup_opensearch >> /dev/null 2>&1  &
+  setup_dashboards >> /dev/null 2>&1  &
+
+  run_opensearch
+  check_opensearch_status
+  run_dashboards
+  check_dashboards_status
+
+  run_generate_data_spec
+  archive_data
+  
+  # kill the running OpenSearch process
+  clean  
 }
 
 # Main function
@@ -243,12 +268,7 @@ function execute_tests() {
 
 # Executes the main function with different versions of OpenSearch downloaded
 function execute_mismatch_tests() {
-  PACKAGE_VERSION=$(cat $DASHBOARDS_DIR/package.json \
-  | grep version \
-  | head -1 \
-  | awk -F: '{ print $2 }' \
-  | sed 's/[",]//g' \
-  | tr -d [:space:])
+  PACKAGE_VERSION=$(get_dashboards_package_version)
 
   for release in "${RELEASES_ARRAY[@]}"
   do
@@ -264,8 +284,9 @@ function execute_mismatch_tests() {
  
 # setup the cypress test env
 [ ! -d "$TEST_DIR/cypress" ] && setup_cypress
-execute_tests
-(( ${#RELEASES_ARRAY[@]} )) && execute_mismatch_tests
-echo "Completed BWC tests for $TEST_VERSIONS [$DASHBOARDS_TYPE]"
-echo "Total test failures: $TOTAL_TEST_FAILURES"
+[ $GENERATE_DATA == "false" ] && execute_tests || generate_test_data
+[ $GENERATE_DATA == "false" ] && (( ${#RELEASES_ARRAY[@]} )) && execute_mismatch_tests
+[ $GENERATE_DATA == "false" ] &&  echo "Completed BWC tests for $TEST_VERSIONS [$DASHBOARDS_TYPE]"
+[ $GENERATE_DATA == "false" ] &&  echo "Total test failures: $TOTAL_TEST_FAILURES"
+[ $GENERATE_DATA == "true" ] && echo "Generate data complete"
 exit $TOTAL_TEST_FAILURES
