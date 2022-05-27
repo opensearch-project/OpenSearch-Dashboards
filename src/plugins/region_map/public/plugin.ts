@@ -58,11 +58,14 @@ import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_leg
 import { SharePluginStart } from '../../share/public';
 
 /** @private */
-interface RegionMapVisualizationDependencies {
+export interface RegionMapVisualizationDependencies {
+  http: any;
+  notifications: any;
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
   BaseMapsVisualization: any;
+  additionalOptions: AddImportMapTab[];
 }
 
 /** @internal */
@@ -88,6 +91,13 @@ export interface RegionMapsConfig {
 
 export interface RegionMapPluginSetup {
   config: any;
+  addOptionsTab: (options: AddImportMapTab) => void;
+}
+
+export interface AddImportMapTab {
+  name: string;
+  title: string;
+  editor: (props: any) => JSX.Element;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RegionMapPluginStart {}
@@ -95,9 +105,11 @@ export interface RegionMapPluginStart {}
 /** @internal */
 export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPluginStart> {
   readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
+  private additionalOptions: AddImportMapTab[];
 
   constructor(initializerContext: PluginInitializerContext) {
     this._initializerContext = initializerContext;
+    this.additionalOptions = [];
   }
 
   public async setup(
@@ -112,10 +124,13 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
       ...mapsLegacy.config.regionmap,
     };
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
+      http: core.http,
+      notifications: core.notifications,
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
       getServiceSettings: mapsLegacy.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
+      additionalOptions: this.additionalOptions,
     };
 
     expressions.registerFunction(createRegionMapFn);
@@ -126,6 +141,8 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
 
     return {
       config,
+      addOptionsTab: (importMapTabConfig: AddImportMapTab) =>
+        this.additionalOptions.push(importMapTabConfig),
     };
   }
 
