@@ -59,8 +59,8 @@ import { SharePluginStart } from '../../share/public';
 
 /** @private */
 export interface RegionMapVisualizationDependencies {
-  http: any;
-  notifications: any;
+  http: CoreStart['http'];
+  notifications: CoreStart['notifications'];
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
@@ -91,7 +91,7 @@ export interface RegionMapsConfig {
 
 export interface RegionMapPluginSetup {
   config: any;
-  addOptionsTab: (options: AddImportMapTab) => void;
+  addOptionTab: (options: AddImportMapTab) => void;
 }
 
 export interface AddImportMapTab {
@@ -141,7 +141,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
 
     return {
       config,
-      addOptionsTab: (importMapTabConfig: AddImportMapTab) =>
+      addOptionTab: (importMapTabConfig: AddImportMapTab) =>
         this.additionalOptions.push(importMapTabConfig),
     };
   }
