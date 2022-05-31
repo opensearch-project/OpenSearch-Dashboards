@@ -38,7 +38,7 @@ import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
+  const { uiSettings, regionmapsConfig, getServiceSettings, additionalOptions } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
 
   return {
@@ -66,9 +66,23 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionsTemplate: (props) => (
-        <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
-      ),
+      optionTabs: () => {
+        return [
+          {
+            name: 'options',
+            title: i18n.translate(
+              'regionMap.mapVis.regionMapEditorConfig.optionTabs.optionsTitle',
+              {
+                defaultMessage: 'Layer Options',
+              }
+            ),
+            editor: (props) => (
+              <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
+            ),
+          },
+          ...additionalOptions,
+        ];
+      },
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
