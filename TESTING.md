@@ -67,6 +67,12 @@ To run specific versions' backwards compatibility tests, pass the versions to th
 
 `yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -v "[test versions]"`
 
+To generate test data that will be utilized for backwards compatibility tests:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -g true`
+
+This will create an archive of the data based on the OpenSearch Dashboards version you have provided. For example, if a tarball of 2.0.0 was passed then an `osd-2.0.0.zip` will be created. This command is intended to be executed when needed per a version. For example, when end-users cannot migrate directly from `vPrevious` to `vNext`. If `osd-vCurrent.zip` does not exist, then this command be ran and the output sourced controlled for future use.
+
 ### Additional checks
 Make sure you run lint checker before submitting a pull request. To run lint checker:
 `node scripts/precommit_hook.js --fix`
