@@ -98,7 +98,6 @@ opensearch_dashboards_vars=(
     regionmap
     security.showInsecureClusterWarning
     server.basePath
-    server.customResponseHeaders
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
