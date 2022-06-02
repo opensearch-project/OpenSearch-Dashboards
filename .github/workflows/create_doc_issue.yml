@@ -10,6 +10,8 @@ jobs:
   create-issue:
     if: ${{ github.event.label.name == 'needs-documentation' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     name: Create Documentation Issue
     steps:
       - name: GitHub App token
