@@ -284,9 +284,14 @@ function execute_mismatch_tests() {
  
 # setup the cypress test env
 [ ! -d "$TEST_DIR/cypress" ] && setup_cypress
-[ $GENERATE_DATA == "false" ] && execute_tests || generate_test_data
-[ $GENERATE_DATA == "false" ] && (( ${#RELEASES_ARRAY[@]} )) && execute_mismatch_tests
-[ $GENERATE_DATA == "false" ] &&  echo "Completed BWC tests for $TEST_VERSIONS [$DASHBOARDS_TYPE]"
-[ $GENERATE_DATA == "false" ] &&  echo "Total test failures: $TOTAL_TEST_FAILURES"
-[ $GENERATE_DATA == "true" ] && echo "Generate data complete"
+if [ $GENERATE_DATA == "true" ]; then
+  generate_test_data
+  echo "Generate data complete"
+  exit 0
+fi
+
+execute_tests
+(( ${#RELEASES_ARRAY[@]} )) && execute_mismatch_tests
+echo "Completed BWC tests for $TEST_VERSIONS [$DASHBOARDS_TYPE]"
+echo "Total test failures: $TOTAL_TEST_FAILURES"
 exit $TOTAL_TEST_FAILURES

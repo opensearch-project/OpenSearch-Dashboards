@@ -93,7 +93,7 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
-      # github virtual env is the latest chrome
+      # image has the latest chrome v99
       - name: Setup chromedriver
         run: yarn add --dev chromedriver@99.0.0
 
