@@ -1,6 +1,6 @@
 name: Create Documentation Issue
 on:
-  pull_request:
+  pull_request_target:
     types:
       - labeled
 env:
@@ -10,6 +10,8 @@ jobs:
   create-issue:
     if: ${{ github.event.label.name == 'needs-documentation' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     name: Create Documentation Issue
     steps:
       - name: GitHub App token
