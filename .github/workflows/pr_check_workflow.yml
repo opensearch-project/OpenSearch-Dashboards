@@ -23,9 +23,11 @@ env:
 jobs:
   build-lint-test:
     runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
     name: Build and Verify
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -61,6 +63,9 @@ jobs:
 
   functional-tests:
     runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
     name: Run functional tests
     strategy: 
       matrix:
@@ -82,9 +87,9 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
-      # github virtual env is the latest chrome
+      # image has the latest chrome v99
       - name: Setup chromedriver
-        run: yarn add --dev chromedriver@100.0.0
+        run: yarn add --dev chromedriver@99.0.0
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -100,3 +105,126 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+  build-min-artifact-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
+    name: Build min release artifacts
+    defaults:
+      run:
+        working-directory: ./artifacts
+    strategy: 
+      matrix:
+        include:
+          - name: Linux x64
+            ext: tar.gz
+            suffix: linux-x64
+            script: build-platform --linux --skip-os-packages
+          - name: Linux ARM64
+            ext: tar.gz
+            suffix: linux-arm64
+            script: build-platform --linux-arm --skip-os-packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ./artifacts
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: "./artifacts/.nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build `${{ matrix.name }}`
+        run: yarn ${{ matrix.script }} --release
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.suffix }}-${{ env.VERSION }}
+          path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 1
+    
+  bwc-tests:
+    needs: [ build-min-artifact-tests ]
+    runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
+    name: Run backwards compatibility tests
+    defaults:
+      run:
+        working-directory: ./artifacts
+    strategy: 
+      matrix:
+        version: [ osd-1.3.2,osd-2.0.0 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: ./artifacts
+
+      - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
+      - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: "./artifacts/.nvmrc"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+
+      - name: Set OpenSearch URL
+        run: |
+          echo "OPENSEARCH_URL=https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.VERSION }}/latest/linux/x64/tar/dist/opensearch/opensearch-${{ env.VERSION }}-linux-x64.tar.gz" >> $GITHUB_ENV
+
+      - name: Verify if OpenSearch is available for version
+        id: verify-opensearch-exists
+        run: |
+          if curl -I -L ${{ env.OPENSEARCH_URL }}; then
+            echo "::set-output name=version-exists::true"
+          fi
+      
+      - name: Skipping tests
+        if: steps.verify-opensearch-exists.outputs.version-exists != 'true'
+        run: echo Tests were skipped because an OpenSearch release build does not exist for this version yet!
+    
+      - name: Download OpenSearch Dashboards
+        uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: linux-x64-${{ env.VERSION }}
+          path: ./artifacts/
+        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
+
+      - name: Run tests
+        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
+        run: |
+          yarn test:bwc -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz -v ${{ matrix.version }}
