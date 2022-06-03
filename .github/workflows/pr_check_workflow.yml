@@ -176,7 +176,7 @@ jobs:
         working-directory: ./artifacts
     strategy: 
       matrix:
-        version: [ osd-1.1.0,odfe-1.13.2,odfe-1.0.2,osd-2.0.0 ]
+        version: [ osd-1.1.0,odfe-1.13.2,osd-2.0.0 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
