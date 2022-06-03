@@ -20,8 +20,10 @@
 }
 
 .mtrVis__container {
-  text-align: center;
+  line-height: normal;
+  max-width: 100%;
   padding: $euiSize;
+  text-align: center;
 }
 
 .mtrVis__container--light {
