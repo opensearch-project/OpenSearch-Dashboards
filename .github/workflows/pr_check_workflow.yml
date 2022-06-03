@@ -227,4 +227,4 @@ jobs:
       - name: Run tests
         if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
         run: |
-          ./bwctest.sh -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz
+          yarn test:bwc -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz -v ${{ matrix.version }}
