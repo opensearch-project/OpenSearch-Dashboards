@@ -25,6 +25,7 @@ DEFAULT_VERSIONS=(
   "odfe-1.13.2"
   "osd-1.0.0"
   "osd-1.1.0"
+  "osd-1.3.2"
   "osd-2.0.0"
 )
 
@@ -169,6 +170,7 @@ TEST_SUITES=(
   ["odfe-1.13.2"]=$TEST_GROUP_4
   ["osd-1.0.0"]=$TEST_GROUP_4
   ["osd-1.1.0"]=$TEST_GROUP_4
+  ["osd-1.3.2"]=$TEST_GROUP_4
   ["osd-2.0.0"]=$TEST_GROUP_4
 )
 
