@@ -47,7 +47,9 @@ describe('check previously loaded data', () => {
         .get('[data-test-subj="dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard"]')
         .click();
       commonUI.removeAllFilters();
-      commonUI.setDateRange('Dec 1, 2021 @ 00:00:00.000', 'Nov 1, 2021 @ 00:00:00.000');
+      commonUI.setDateRange(
+        `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000', 'Nov 1, 2016 @ 00:00:00.000`
+      );
     });
 
     it('Global Flight Dashboard is loaded and funtions correctly', () => {
@@ -77,7 +79,9 @@ describe('check previously loaded data', () => {
         .get('[data-test-subj="dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard"]')
         .click();
       commonUI.removeAllFilters();
-      commonUI.setDateRange('Nov 1, 2021 @ 00:00:00.000', 'Nov 1, 2016 @ 00:00:00.000');
+      commonUI.setDateRange(
+        `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000', 'Nov 1, 2016 @ 00:00:00.000`
+      );
     });
 
     it('eCommerce Revenue Dashboard is loaded and functions correctly', () => {

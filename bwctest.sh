@@ -13,7 +13,7 @@
 
 set -e
 
-DEFAULT_VERSIONS="osd-1.1.0,odfe-1.13.2,odfe-1.0.2"
+DEFAULT_VERSIONS="osd-1.3.2,"
 
 function usage() {
     echo ""
@@ -75,6 +75,7 @@ done
 [ -z "$SECURITY_ENABLED" ] && SECURITY_ENABLED="false"
 [ -z "$CREDENTIAL" ] && CREDENTIAL="admin:admin"
 [ -z "$CI" ] && CI=1
+[ -z "$BWC_VERSIONS" ] && BWC_VERSIONS=$DEFAULT_VERSIONS
 
 # If no OpenSearch build was passed then this constructs the version
 if [ -z "$OPENSEARCH" ]; then
@@ -96,4 +97,4 @@ if [ -z "$OPENSEARCH" ]; then
     OPENSEARCH="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/$PLATFORM/$ARCH/tar/dist/opensearch/opensearch-$VERSION-$PLATFORM-$ARCH.tar.gz"
 fi
 
-source scripts/bwctest_osd.sh -b $BIND_ADDRESS -p $BIND_PORT -s $SECURITY_ENABLED -c $CREDENTIAL -o $OPENSEARCH -d $DASHBOARDS -v $DEFAULT_VERSIONS
+source scripts/bwctest_osd.sh -b $BIND_ADDRESS -p $BIND_PORT -s $SECURITY_ENABLED -c $CREDENTIAL -o $OPENSEARCH -d $DASHBOARDS -v $BWC_VERSIONS
