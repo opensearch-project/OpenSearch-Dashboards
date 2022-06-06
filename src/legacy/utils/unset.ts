@@ -28,42 +28,30 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
+import _ from 'lodash';
 
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
+export function unset(object: Record<string, any>, rawPath: string | string[]) {
+  if (!object) return;
+  const path = _.toPath(rawPath);
 
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
+  switch (path.length) {
+    case 0:
+      return;
 
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
-  };
-}
+    case 1:
+      delete object[path[0]];
+      break;
 
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
-
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
+    default:
+      const leaf = path.pop();
+      const parentPath = path.slice();
+      if (leaf && parentPath) {
+        const parent = _.get(object, parentPath);
+        unset(parent, leaf);
+        if (!_.size(parent)) {
+          unset(object, parentPath);
+        }
+      }
+      break;
+  }
 }

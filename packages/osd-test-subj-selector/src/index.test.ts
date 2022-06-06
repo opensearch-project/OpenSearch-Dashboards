@@ -28,42 +28,20 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
+import { testSubjSelector } from '.';
+import expect from '@osd/expect';
 
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
-
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
-
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
-  };
-}
-
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
-
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
-}
+describe('testSubjSelector()', function () {
+  it('converts subjectSelectors to cssSelectors', function () {
+    expect(testSubjSelector('foo bar')).to.eql('[data-test-subj="foo bar"]');
+    expect(testSubjSelector('foo > bar')).to.eql('[data-test-subj="foo"] [data-test-subj="bar"]');
+    expect(testSubjSelector('foo > bar baz')).to.eql(
+      '[data-test-subj="foo"] [data-test-subj="bar baz"]'
+    );
+    expect(testSubjSelector('foo> ~bar')).to.eql('[data-test-subj="foo"] [data-test-subj~="bar"]');
+    expect(testSubjSelector('~ foo')).to.eql('[data-test-subj~="foo"]');
+    expect(testSubjSelector('~foo & ~ bar')).to.eql(
+      '[data-test-subj~="foo"][data-test-subj~="bar"]'
+    );
+  });
+});
