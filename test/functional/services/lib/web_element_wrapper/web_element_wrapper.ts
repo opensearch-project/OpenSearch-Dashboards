@@ -33,7 +33,7 @@ import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
-import testSubjSelector from '@osd/test-subj-selector';
+import { testSubjSelector } from '@osd/test-subj-selector';
 import { ToolingLog } from '@osd/dev-utils';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
@@ -131,15 +131,16 @@ export class WebElementWrapper {
     try {
       return await fn(this);
     } catch (err) {
+      const { name, message } = err as Error;
       if (
-        !RETRY_CLICK_RETRY_ON_ERRORS.includes(err.name) ||
+        !RETRY_CLICK_RETRY_ON_ERRORS.includes(name) ||
         this.locator === null ||
         attemptsRemaining === 0
       ) {
         throw err;
       }
 
-      this.logger.warning(`WebElementWrapper.${fn.name}: ${err.message}`);
+      this.logger.warning(`WebElementWrapper.${fn.name}: ${message}`);
       this.logger.debug(
         `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
       );

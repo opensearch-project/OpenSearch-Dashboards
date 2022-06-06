@@ -28,42 +28,26 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
+import fs from 'fs';
+import { engines } from '../../package.json';
+import { promisify } from 'util';
+const readFile = promisify(fs.readFile);
+import expect from '@osd/expect';
 
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
+describe('All configs should use a single version of Node', () => {
+  it('should compare .node-version and .nvmrc', async () => {
+    const [nodeVersion, nvmrc] = await Promise.all([
+      readFile('./.node-version', { encoding: 'utf-8' }),
+      readFile('./.nvmrc', { encoding: 'utf-8' }),
+    ]);
 
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
+    expect(nodeVersion.trim()).to.be(nvmrc.trim());
+  });
 
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
-  };
-}
-
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
-
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
-}
+  it('should compare .node-version and engines.node from package.json', async () => {
+    const nodeVersion = await readFile('./.node-version', {
+      encoding: 'utf-8',
+    });
+    expect(nodeVersion.trim()).to.be(engines.node);
+  });
+});
