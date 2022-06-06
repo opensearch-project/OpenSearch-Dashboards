@@ -32,38 +32,64 @@ var exec = require('child_process').exec;
 var pkg = require('../../package.json');
 
 var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
-var INVALID_NODE_JS_VERSION = 'v0.10.0';
 
 describe('NodeVersionValidator', function () {
-  it('should run the script WITH error', function (done) {
-    var processVersionOverwrite =
-      "Object.defineProperty(process, 'version', { value: '" +
-      INVALID_NODE_JS_VERSION +
-      "', writable: true });";
-    var command =
-      'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
-
-    exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
-      expect(error.code).toBe(1);
-      expect(stderr).toBeDefined();
-      expect(stderr).not.toHaveLength(0);
-      done();
-    });
+  it('should run the script WITHOUT error when the version is the same', function (done) {
+    testValidateNodeVersion(done, REQUIRED_NODE_JS_VERSION);
   });
 
-  it('should run the script WITHOUT error', function (done) {
-    var processVersionOverwrite =
-      "Object.defineProperty(process, 'version', { value: '" +
-      REQUIRED_NODE_JS_VERSION +
-      "', writable: true });";
-    var command =
-      'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
+  it('should run the script WITHOUT error when only the patch version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, +1));
+  });
 
-    exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
-      expect(error).toBeNull();
-      expect(stderr).toBeDefined();
-      expect(stderr).toHaveLength(0);
-      done();
-    });
+  it('should run the script WITH error if the patch version is lower', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, -1), true);
+  });
+
+  it('should run the script WITH error if the major version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(+1, 0, 0), true);
+  });
+
+  it('should run the script WITH error if the major version is lower', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(-1, 0, 0), true);
+  });
+
+  it('should run the script WITH error if the minor version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true);
+  });
+
+  it('should run the script WITH error if the minor version is lower', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, -1, 0), true);
   });
 });
+
+function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
+  var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
+  var major = parseInt(matches[1]) + majorDiff;
+  var minor = parseInt(matches[2]) + minorDiff;
+  var patch = parseInt(matches[3]) + patchDiff;
+
+  return `v${major}.${minor}.${patch}`;
+}
+
+function testValidateNodeVersion(done, versionToTest, expectError = false) {
+  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
+  var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
+
+  exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
+    expect(stderr).toBeDefined();
+    if (expectError) {
+      expect(error.code).toBe(1);
+
+      var speficicErrorMessage =
+        `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. ` +
+        `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
+
+      expect(stderr).toStrictEqual(speficicErrorMessage);
+    } else {
+      expect(error).toBeNull();
+      expect(stderr).toHaveLength(0);
+    }
+    done();
+  });
+}
