@@ -28,42 +28,22 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
+import { spawnSync } from 'child_process';
+import { resolve } from 'path';
 
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
+import expect from '@osd/expect';
+import { REPO_ROOT } from '@osd/utils';
 
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
+const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
+const BASIC_CONFIG = require.resolve('../fixtures/simple_project/config.js');
 
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
-  };
-}
-
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
-
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
-}
+describe('basic config file with a single app and test', function () {
+  it('runs and prints expected output', () => {
+    const proc = spawnSync(process.execPath, [SCRIPT, '--config', BASIC_CONFIG]);
+    const stdout = proc.stdout.toString();
+    expect(stdout).to.contain('$BEFORE$');
+    expect(stdout).to.contain('$TESTNAME$');
+    expect(stdout).to.contain('$INTEST$');
+    expect(stdout).to.contain('$AFTER$');
+  });
+});

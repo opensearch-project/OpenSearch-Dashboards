@@ -28,42 +28,8 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
-
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
-
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
-
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
+export default async function () {
+  return {
+    foo: 'bar',
   };
-}
-
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
-
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
 }
