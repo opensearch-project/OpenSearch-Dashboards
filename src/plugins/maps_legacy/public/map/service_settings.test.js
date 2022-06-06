@@ -44,10 +44,16 @@ import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
 import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings, DEFAULT_SERVICE } from './service_settings';
 
+function assertObject(actual, expected) {
+  Object.keys(expected).forEach((key) => {
+    expect(actual[key]).toEqual(expected[key]);
+  });
+}
+
 describe('service_settings (FKA tile_map test)', function () {
   const emsFileApiUrl = 'https://files.foobar';
   const emsTileApiUrl = 'https://tiles.foobar';
-  const emsFakeManifestApiUrl = 'https://fakemapmanifest.foobar';
+  const noInternetManifestUrl = 'https://manifest.foobar';
 
   const defaultMapConfig = {
     emsFileApiUrl,
@@ -60,27 +66,26 @@ describe('service_settings (FKA tile_map test)', function () {
     },
   };
 
-  const mapConfigWithFakeManifest = {
-    ...defaultMapConfig,
-    emsFakeManifestApiUrl,
-  };
-
   const defaultTilemapConfig = {
     options: {},
   };
 
   function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}, otherOptions = {}) {
-    if (otherOptions.noInternet) {
-      return new ServiceSettings(
-        { ...mapConfigWithFakeManifest, ...mapConfigOptions },
-        { ...defaultTilemapConfig, ...tilemapOptions }
-      );
-    }
-
+    const { noInternet } = otherOptions;
     const serviceSettings = new ServiceSettings(
-      { ...defaultMapConfig, ...mapConfigOptions },
-      { ...defaultTilemapConfig, ...tilemapOptions }
+      {
+        ...defaultMapConfig,
+        ...mapConfigOptions,
+        opensearchManifestServiceUrl: noInternet ? noInternetManifestUrl : '',
+      },
+      {
+        ...defaultTilemapConfig,
+        ...tilemapOptions,
+      }
     );
+    if (noInternet) {
+      return serviceSettings;
+    }
 
     serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
@@ -100,7 +105,6 @@ describe('service_settings (FKA tile_map test)', function () {
     });
     return serviceSettings;
   }
-
   describe('TMS', function () {
     it('should NOT get url from the config', async function () {
       const serviceSettings = makeServiceSettings();
@@ -298,20 +302,14 @@ describe('service_settings (FKA tile_map test)', function () {
 
     describe('when unable to access OpenSearch maps service', function () {
       const expectedDefaultTmService = DEFAULT_SERVICE[0];
-
-      function assertObject(actual, expected) {
-        Object.keys(expected).forEach((key) => {
-          expect(actual[key]).toEqual(expected[key]);
-        });
-      }
-
       it('should return default service', async () => {
         const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
         const tileMapServices = await serviceSettings.getTMSServices();
-        const tileMapService = tileMapServices[0];
-        await assertObject(tileMapService, expectedDefaultTmService);
-        const attrs = await serviceSettings.getAttributesForTMSLayer(tileMapService);
-        await assertObject(attrs, expectedDefaultTmService);
+        assertObject(tileMapServices[0], expectedDefaultTmService);
+        const isDesaturated = true;
+        const isDarkMode = true;
+        const attrs = await serviceSettings._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
+        assertObject(attrs[0], expectedDefaultTmService);
       });
     });
   });
