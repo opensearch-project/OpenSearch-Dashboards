@@ -33,6 +33,7 @@ import { format as formatUrl } from 'url';
 import { Agent as HttpsAgent, AgentOptions } from 'https';
 
 import { WildcardMatcher } from './wildcard_matcher';
+import { ProxyConfigs } from '../types';
 
 export class ProxyConfig {
   // @ts-ignore
@@ -50,7 +51,7 @@ export class ProxyConfig {
 
   private verifySsl: any;
 
-  constructor(config: { match: any; timeout: number }) {
+  constructor(config: ProxyConfigs) {
     config = {
       ...config,
     };
@@ -83,7 +84,7 @@ export class ProxyConfig {
     this.sslAgent = this._makeSslAgent(config);
   }
 
-  _makeSslAgent(config: any) {
+  _makeSslAgent(config: ProxyConfigs) {
     const ssl = config.ssl || {};
     this.verifySsl = ssl.verify;
 

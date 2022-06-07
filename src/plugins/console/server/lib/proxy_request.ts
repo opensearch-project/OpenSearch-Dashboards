@@ -121,7 +121,7 @@ export const proxyRequest = ({
       if (!resolved) {
         timeoutReject(Boom.gatewayTimeout('Client request timeout'));
       } else {
-        timeoutResolve();
+        timeoutResolve('Success');
       }
     }, timeout);
   });

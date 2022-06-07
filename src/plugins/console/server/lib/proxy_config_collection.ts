@@ -29,14 +29,14 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { parse as parseUrl } from 'url';
+import { ProxyConfigs } from '../types';
 
 import { ProxyConfig } from './proxy_config';
 
 export class ProxyConfigCollection {
   private configs: ProxyConfig[];
 
-  constructor(configs: Array<{ match: any; timeout: number }> = []) {
+  constructor(configs: ProxyConfigs[] = []) {
     this.configs = configs.map((settings) => new ProxyConfig(settings));
   }
 
@@ -44,8 +44,8 @@ export class ProxyConfigCollection {
     return Boolean(this.configs.length);
   }
 
-  configForUri(uri: string): object {
-    const parsedUri = parseUrl(uri);
+  configForUri(uri: string) {
+    const parsedUri = new URL(uri);
     const settings = this.configs.map((config) => config.getForParsedUri(parsedUri as any));
     return defaultsDeep({}, ...settings);
   }

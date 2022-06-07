@@ -28,42 +28,51 @@
  * under the License.
  */
 
-import { Duration } from 'moment';
-import { SecureContextOptions } from 'tls';
-import { ConsoleServerPlugin } from './plugin';
+import expect from '@osd/expect';
+import getUrl from './get_url';
 
-/** @public */
-export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['setup']>;
+describe('getUrl', function () {
+  it('should convert to a url', function () {
+    const url = getUrl(
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        pathname: 'foo',
+      }
+    );
 
-/** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
+    expect(url).to.be('http://localhost/foo');
+  });
 
-/** @internal */
-export interface OpenSearchConfigForProxy {
-  hosts: string[];
-  requestHeadersWhitelist: string[];
-  customHeaders: Record<string, any>;
-  requestTimeout: Duration;
-  ssl?: {
-    verificationMode: 'none' | 'certificate' | 'full';
-    alwaysPresentCertificate: boolean;
-    certificateAuthorities?: string[];
-    certificate?: string;
-    key?: string;
-    keyPassphrase?: string;
-  };
-}
+  it('should convert to a url with port', function () {
+    const url = getUrl(
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: 9220,
+      },
+      {
+        pathname: 'foo',
+      }
+    );
 
-export interface SslConfigs extends SecureContextOptions {
-  verify?: boolean;
-}
+    expect(url).to.be('http://localhost:9220/foo');
+  });
 
-export interface ProxyConfigs extends SecureContextOptions {
-  match?: any;
-  timeout: number;
-  ssl?: SslConfigs;
-}
+  it('should convert to a secure hashed url', function () {
+    expect(
+      getUrl(
+        {
+          protocol: 'https',
+          hostname: 'localhost',
+        },
+        {
+          pathname: 'foo',
+          hash: 'bar',
+        }
+      )
+    ).to.be('https://localhost/foo#bar');
+  });
+});
