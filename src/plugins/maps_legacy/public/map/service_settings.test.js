@@ -44,12 +44,6 @@ import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
 import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings, DEFAULT_SERVICE } from './service_settings';
 
-function assertObject(actual, expected) {
-  Object.keys(expected).forEach((key) => {
-    expect(actual[key]).toEqual(expected[key]);
-  });
-}
-
 describe('service_settings (FKA tile_map test)', function () {
   const emsFileApiUrl = 'https://files.foobar';
   const emsTileApiUrl = 'https://tiles.foobar';
@@ -305,11 +299,11 @@ describe('service_settings (FKA tile_map test)', function () {
       it('should return default service', async () => {
         const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
         const tileMapServices = await serviceSettings.getTMSServices();
-        assertObject(tileMapServices[0], expectedDefaultTmService);
+        expect(tileMapServices[0]).toMatchObject(expectedDefaultTmService);
         const isDesaturated = true;
         const isDarkMode = true;
         const attrs = await serviceSettings._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
-        assertObject(attrs[0], expectedDefaultTmService);
+        expect(attrs[0]).toMatchObject(expectedDefaultTmService);
       });
     });
   });
@@ -385,16 +379,18 @@ describe('service_settings (FKA tile_map test)', function () {
       );
     });
 
-    it('should return empty arr when unable fetch maps manifest', async () => {
+    describe('when unable to access maps service', function () {
       const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
-      const fileLayers = await serviceSettings.getFileLayers();
-      expect(fileLayers).toEqual([]);
-    });
 
-    it('should return null when unable fetch maps manifest', async () => {
-      const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
-      const fileLayer = await serviceSettings.getFileLayerFromConfig(null);
-      expect(fileLayer).toEqual(null);
+      it('should return empty arr', async () => {
+        const fileLayers = await serviceSettings.getFileLayers();
+        expect(fileLayers).toEqual([]);
+      });
+
+      it('should return null', async () => {
+        const fileLayer = await serviceSettings.getFileLayerFromConfig(null);
+        expect(fileLayer).toEqual(null);
+      });
     });
   });
 });
