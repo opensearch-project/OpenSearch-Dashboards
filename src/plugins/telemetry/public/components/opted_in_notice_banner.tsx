@@ -58,7 +58,7 @@ export class OptedInNoticeBanner extends React.PureComponent<Props> {
                 onClick={onSeenBanner}
                 href={PRIVACY_STATEMENT_URL}
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
               >
                 <FormattedMessage
                   id="telemetry.telemetryOptedInPrivacyStatement"

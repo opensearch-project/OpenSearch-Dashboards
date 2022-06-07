@@ -50,7 +50,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           values: {
             cellDimensionsLink:
               `<a href="https://opensearch.org/docs/latest/dashboards/maptiles"
-            target="_blank" rel="noopener">` +
+            target="_blank" rel="noopener noreferrer">` +
               i18n.translate(
                 'maps_legacy.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText',
                 {

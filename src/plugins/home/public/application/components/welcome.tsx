@@ -260,7 +260,7 @@ export class Welcome extends React.Component<Props> {
                       <EuiLink
                         href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
                         target="_blank"
-                        rel="noopener"
+                        rel="noopener noreferrer"
                       >
                         <FormattedMessage
                           id="home.dataManagementDisclaimerPrivacyLink"

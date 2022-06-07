@@ -22,7 +22,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
         "privacyStatementLink": <EuiLink
           href=""
           onClick={[Function]}
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <FormattedMessage
