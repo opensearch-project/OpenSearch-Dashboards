@@ -67,6 +67,8 @@ export const useOptionTabs = ({ type: visType }: Vis): [OptionTab[], (name: stri
               editor: visType.editorConfig.optionsTemplate,
             },
           ]
+        : visType.editorConfig.optionTabs instanceof Function
+        ? visType.editorConfig.optionTabs()
         : visType.editorConfig.optionTabs),
     ];
     // set up the first tab as selected
