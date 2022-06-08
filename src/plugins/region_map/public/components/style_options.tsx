@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -17,7 +17,7 @@ export type StyleOptionsProps = {
 } & VisOptionsProps<RegionMapVisParams>;
 
 function StyleOptions(props: StyleOptionsProps) {
-  const { getServiceSettings, stateParams, vis, setValue } = props;
+  const { stateParams, vis, setValue } = props;
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">

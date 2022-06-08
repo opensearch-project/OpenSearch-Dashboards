@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
-import { Services, getServices } from '../services';
+import { SelectOption, SwitchOption } from '../../../charts/public';
+import { RegionMapVisParams } from '../../../maps_legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -29,7 +28,6 @@ export type DefaultMapOptionsProps = {
 
 function DefaultMapOptions(props: DefaultMapOptionsProps) {
   const { getServiceSettings, stateParams, vis, setValue } = props;
-  const services = getServices(props.vis.http);
 
   const vectorLayers = vis.type.editorConfig.collections.vectorLayers;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);

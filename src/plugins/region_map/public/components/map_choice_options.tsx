@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './map_choice_options.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiPanel,
@@ -18,9 +19,8 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
-import { Services, getServices } from '../services';
+import { SelectOption, SwitchOption } from '../../../charts/public';
+import { RegionMapVisParams } from '../../../maps_legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -42,18 +42,15 @@ export type MapChoiceOptionsProps = {
   getServiceSettings: () => Promise<IServiceSettings>;
 } & VisOptionsProps<RegionMapVisParams>;
 
-function MapChoiceOptions(props) {
+function MapChoiceOptions(props: MapChoiceOptionsProps) {
   const { getServiceSettings, stateParams, vis, setValue } = props;
-  const services = getServices(props.vis.http);
-
   const vectorLayers = vis.type.editorConfig.collections.vectorLayers;
   const customVectorLayers = vis.type.editorConfig.collections.customVectorLayers;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
   const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
     customVectorLayers,
   ]);
-
-  const [radio, setRadio] = useState('default');
+  const [userSelectedLayer, setUserSelectedLayer] = useState('default');
 
   const fieldOptions = useMemo(
     () =>
@@ -71,27 +68,15 @@ function MapChoiceOptions(props) {
     [stateParams.selectedCustomLayer]
   );
 
-  const setLayerChosenByUser = useCallback(
-    async (layerType) => {
-      const serviceSettings = await getServiceSettings();
-      setValue('layerChosenByUser', layerType);
-    },
-    [setValue, getServiceSettings]
-  );
+  const selectDefaultVectorMap = () => {
+    setUserSelectedLayer('default');
+    setValue('layerChosenByUser', 'default');
+  };
 
-  const selectDefaultVectorMap = useCallback(() => {
-    setRadio('default');
-    setLayerChosenByUser('default');
-    document.getElementById('customMapSelection').style.display = 'none';
-    document.getElementById('defaultMapSelection').style.display = 'block';
-  }, [setRadio, setLayerChosenByUser]);
-
-  const selectCustomVectorMap = useCallback(() => {
-    setRadio('custom');
-    setLayerChosenByUser('custom');
-    document.getElementById('defaultMapSelection').style.display = 'none';
-    document.getElementById('customMapSelection').style.display = 'block';
-  }, [setRadio, setLayerChosenByUser]);
+  const selectCustomVectorMap = () => {
+    setUserSelectedLayer('custom');
+    setValue('layerChosenByUser', 'custom');
+  };
 
   const setEmsHotLink = useCallback(
     async (layer: VectorLayer) => {
@@ -171,15 +156,15 @@ function MapChoiceOptions(props) {
         </strong>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiFlexGroup style={{ fontSize: '13px' }}>
+      <EuiFlexGroup className="mapChoiceGroup">
         <EuiFlexItem>
           <EuiCheckableCard
             id="defaultVectorMap"
             label="Default vector map"
             name="defaultVectorMap"
             value="default"
-            checked={radio === 'default'}
-            onChange={() => selectDefaultVectorMap()}
+            checked={userSelectedLayer === 'default'}
+            onChange={selectDefaultVectorMap}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -188,62 +173,66 @@ function MapChoiceOptions(props) {
             label="Custom vector map"
             name="customVectorMap"
             value="custom"
-            checked={radio === 'custom'}
-            onChange={() => selectCustomVectorMap()}
+            checked={userSelectedLayer === 'custom'}
+            onChange={selectCustomVectorMap}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup id="defaultMapSelection" direction="column">
-        <EuiFlexItem grow={false}>
-          <SelectOption
-            id="regionMapOptionsSelectLayer"
-            label={i18n.translate('regionMap.visParams.vectorMapLabel', {
-              defaultMessage: 'Vector map',
-            })}
-            options={vectorLayerOptions}
-            paramName="selectedLayer"
-            value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}
-            setValue={setLayer}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SelectOption
-            id="regionMapOptionsSelectJoinField"
-            label={i18n.translate('regionMap.visParams.joinFieldLabel', {
-              defaultMessage: 'Join field',
-            })}
-            options={fieldOptions}
-            paramName="selectedJoinField"
-            value={stateParams.selectedJoinField && stateParams.selectedJoinField.name}
-            setValue={setField}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup id="customMapSelection" direction="column" style={{ display: 'none' }}>
-        <EuiFlexItem grow={false}>
-          <SelectOption
-            id="regionMapOptionsCustomSelectLayer"
-            label="Vector map"
-            options={customVectorLayerOptions}
-            paramName="selectedCustomLayer"
-            value={stateParams.selectedCustomLayer && stateParams.selectedCustomLayer.layerId}
-            setValue={setCustomLayer}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SelectOption
-            id="regionMapOptionsCustomSelectJoinField"
-            label="Join field"
-            options={customFieldOptions}
-            paramName="selectedCustomJoinField"
-            value={stateParams.selectedCustomJoinField && stateParams.selectedCustomJoinField.name}
-            setValue={setCustomJoinField}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {userSelectedLayer === 'default' ? (
+        <EuiFlexGroup id="defaultMapSelection" direction="column">
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsSelectLayer"
+              label={i18n.translate('regionMap.visParams.vectorMapLabel', {
+                defaultMessage: 'Vector map',
+              })}
+              options={vectorLayerOptions}
+              paramName="selectedLayer"
+              value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}
+              setValue={setLayer}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsSelectJoinField"
+              label={i18n.translate('regionMap.visParams.joinFieldLabel', {
+                defaultMessage: 'Join field',
+              })}
+              options={fieldOptions}
+              paramName="selectedJoinField"
+              value={stateParams.selectedJoinField && stateParams.selectedJoinField.name}
+              setValue={setField}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup id="customMapSelection" direction="column">
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsCustomSelectLayer"
+              label="Vector map"
+              options={customVectorLayerOptions}
+              paramName="selectedCustomLayer"
+              value={stateParams.selectedCustomLayer && stateParams.selectedCustomLayer.layerId}
+              setValue={setCustomLayer}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectOption
+              id="regionMapOptionsCustomSelectJoinField"
+              label="Join field"
+              options={customFieldOptions}
+              paramName="selectedCustomJoinField"
+              value={
+                stateParams.selectedCustomJoinField && stateParams.selectedCustomJoinField.name
+              }
+              setValue={setCustomJoinField}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <EuiSpacer size="m" />
       <SwitchOption

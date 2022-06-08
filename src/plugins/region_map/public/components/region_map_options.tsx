@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
@@ -48,8 +47,7 @@ export type RegionMapOptionsProps = {
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { getServiceSettings, stateParams, vis, setValue } = props;
-  const customVectorLayers = vis.type.editorConfig.collections.customVectorLayers;
+  const customVectorLayers = props.vis.type.editorConfig.collections.customVectorLayers;
   const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
     customVectorLayers,
   ]);
