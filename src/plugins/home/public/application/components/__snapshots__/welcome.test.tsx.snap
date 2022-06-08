@@ -135,7 +135,6 @@ exports[`Welcome page  should render a Welcome screen  with the telemetry discla
               values={Object {}}
             />
             <EuiLink
-              rel="noopener noreferrer"
               target="_blank"
             >
               <FormattedMessage
@@ -238,7 +237,6 @@ exports[`Welcome page  should render a Welcome screen  with the telemetry discla
               values={Object {}}
             />
             <EuiLink
-              rel="noopener noreferrer"
               target="_blank"
             >
               <FormattedMessage

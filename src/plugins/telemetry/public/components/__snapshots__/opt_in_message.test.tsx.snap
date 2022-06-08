@@ -9,7 +9,6 @@ exports[`OptInMessage renders as expected 1`] = `
       Object {
         "privacyStatementLink": <EuiLink
           href=""
-          rel="noopener noreferrer"
           target="_blank"
         >
           <FormattedMessage
