@@ -24,9 +24,7 @@
   }
 }
 
-
 saved-object-finder {
-
   .list-sort-button {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -88,6 +86,7 @@ saved-object-finder {
     }
   }
 
+  /* stylelint-disable-next-line selector-type-no-unknown */
   paginate {
     paginate-controls {
       margin: $euiSize;

@@ -67,6 +67,37 @@ const _rename = (
   return config;
 };
 
+const _renameWithoutMap = (
+  config: Record<string, any>,
+  rootPath: string,
+  log: ConfigDeprecationLogger,
+  oldKey: string,
+  newKey: string,
+  silent?: boolean
+) => {
+  const fullOldPath = getPath(rootPath, oldKey);
+  const oldValue = get(config, fullOldPath);
+
+  const fullNewPath = getPath(rootPath, newKey);
+  const newValue = get(config, fullNewPath);
+
+  if (oldValue !== undefined) {
+    if (!silent) {
+      log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
+    }
+
+    return config;
+  }
+
+  if (newValue === undefined) {
+    return config;
+  }
+
+  unset(config, fullNewPath);
+  set(config, fullOldPath, newValue);
+  return config;
+};
+
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
@@ -81,6 +112,19 @@ const _unused = (
   log(`${fullPath} is deprecated and is no longer used`);
   return config;
 };
+
+const renameWithoutMap = (oldKey: string, newKey: string): ConfigDeprecation => (
+  config,
+  rootPath,
+  log
+) => _renameWithoutMap(config, rootPath, log, oldKey, newKey);
+
+const renameFromRootWithoutMap = (
+  oldKey: string,
+  newKey: string,
+  silent?: boolean
+): ConfigDeprecation => (config, rootPath, log) =>
+  _renameWithoutMap(config, '', log, oldKey, newKey, silent);
 
 const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _rename(config, rootPath, log, oldKey, newKey);
@@ -108,6 +152,8 @@ const getPath = (rootPath: string, subPath: string) =>
 export const configDeprecationFactory: ConfigDeprecationFactory = {
   rename,
   renameFromRoot,
+  renameWithoutMap,
+  renameFromRootWithoutMap,
   unused,
   unusedFromRoot,
 };

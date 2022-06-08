@@ -33,14 +33,20 @@ import { i18n } from '@osd/i18n';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
-import { CustomVectorUpload } from './components/custom_vector_upload';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getServices } from './services';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { http, uiSettings, notifications, regionmapsConfig, getServiceSettings } = dependencies;
+  const {
+    http,
+    notifications,
+    uiSettings,
+    regionmapsConfig,
+    getServiceSettings,
+    additionalOptions,
+  } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
   const services = getServices(http);
 
@@ -117,27 +123,23 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionTabs: [
-        {
-          name: 'options',
-          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.optionTabs.optionsTitle', {
-            defaultMessage: 'Layer Options',
-          }),
-          editor: (props) => (
-            <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
-          ),
-        },
-        {
-          name: 'controls',
-          title: i18n.translate(
-            'regionMap.mapVis.regionMapEditorConfig.controlTabs.controlsTitle',
-            {
-              defaultMessage: 'Import Vector Map',
-            }
-          ),
-          editor: CustomVectorUpload,
-        },
-      ],
+      optionTabs: () => {
+        return [
+          {
+            name: 'options',
+            title: i18n.translate(
+              'regionMap.mapVis.regionMapEditorConfig.optionTabs.optionsTitle',
+              {
+                defaultMessage: 'Layer Options',
+              }
+            ),
+            editor: (props) => (
+              <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
+            ),
+          },
+          ...additionalOptions,
+        ];
+      },
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],

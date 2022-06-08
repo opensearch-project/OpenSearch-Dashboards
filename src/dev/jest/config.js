@@ -49,16 +49,6 @@ export default {
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
   ],
-  collectCoverageFrom: [
-    'src/plugins/**/*.{ts,tsx}',
-    '!src/plugins/**/*.d.ts',
-    'packages/osd-ui-framework/src/components/**/*.js',
-    '!packages/osd-ui-framework/src/components/index.js',
-    '!packages/osd-ui-framework/src/components/**/*/index.js',
-    'packages/osd-ui-framework/src/services/**/*.js',
-    '!packages/osd-ui-framework/src/services/index.js',
-    '!packages/osd-ui-framework/src/services/**/*/index.js',
-  ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
@@ -82,7 +72,8 @@ export default {
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
-  coverageReporters: ['html', 'text', 'text-summary'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coverageReporters: ['lcov', 'text-summary'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: [
     '__fixtures__/',
@@ -93,7 +84,7 @@ export default {
   testEnvironment: 'jest-environment-jsdom',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
-    '<rootDir>/packages/osd-ui-framework/(dist|doc_site)/',
+    '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],

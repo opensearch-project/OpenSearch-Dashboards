@@ -3,7 +3,7 @@
   margin-right: $euiSize;
 }
 
-@include euiBreakpoint('xs','s') {
+@include euiBreakpoint("xs","s") {
   .mgtSideBarNav {
     width: auto;
     margin-bottom: $euiSize;

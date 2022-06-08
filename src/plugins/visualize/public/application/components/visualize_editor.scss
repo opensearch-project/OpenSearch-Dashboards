@@ -1,9 +1,9 @@
 .visEditor {
-  @include flex-parent();
+  @include flex-parent;
 
   height: 100%;
 
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint("xs", "s", "m") {
     .visualization {
       // While we are on a small screen the visualization is below the
       // editor. In this cases it needs a minimum height, since it would otherwise
@@ -23,7 +23,8 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 }
 
 .visEditor__content {
-  @include flex-parent();
+  @include flex-parent;
+
   width: 100%;
   z-index: 0;
 }

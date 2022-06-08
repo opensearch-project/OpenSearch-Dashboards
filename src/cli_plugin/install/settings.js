@@ -47,7 +47,7 @@ function generatePluginUrl(version, plugin) {
   if (platform !== 'linux') {
     throw new Error('Plugins are only available for Linux');
   }
-  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
+  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/tar/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
 }
 
 export function parseMilliseconds(val) {

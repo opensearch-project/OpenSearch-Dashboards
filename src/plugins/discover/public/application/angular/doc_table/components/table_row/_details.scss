@@ -8,7 +8,6 @@
 
 // Overwrite the border on the bootstrap table
 .osdDocTableDetails__row {
-
   > td {
     // Offsets negative margins from an inner flex group
     padding: $euiSizeL !important;
@@ -22,4 +21,3 @@
     border-top: none !important;
   }
 }
-

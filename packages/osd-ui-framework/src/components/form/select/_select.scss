@@ -10,6 +10,7 @@
 
   &:focus {
     box-shadow: none;
+
     @include formControlFocus;
   }
 }

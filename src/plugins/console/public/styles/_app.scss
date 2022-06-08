@@ -3,6 +3,7 @@
 #consoleRoot {
   display: flex;
   flex: 1 1 auto;
+
   // Make sure the editor actions don't create scrollbars on this container
   // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
   overflow: hidden;
@@ -49,9 +50,11 @@
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
+
   // Adjust for possible scrollbars
   right: $euiSize;
   line-height: 1;
+
   // For IE11
   min-width: 40px;
 }
@@ -69,6 +72,7 @@
 
 .conApp__resizer {
   @include osdResizer;
+
   // Give the aria selection border priority when the divider is selected on IE11 and Chrome
   z-index: $euiZLevel1;
 }
@@ -79,6 +83,7 @@
   position: absolute;
   left: -1000px;
   visibility: hidden;
+
   /* by pass any other element in ace and resize bar, but not modal popups  */
   z-index: $euiZLevel1 + 2;
   margin-top: 22px;

@@ -27,12 +27,13 @@
   */
 
 .embPanel_optionsMenuPopover[class*="-isOpen"],
-.embPanel:hover  {
+.embPanel:hover {
   .visLegend__toggle {
     opacity: 1;
   }
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .embPanel .visLegend__toggle {
   opacity: 0; /* 1 */
 

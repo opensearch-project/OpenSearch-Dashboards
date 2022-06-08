@@ -30,7 +30,7 @@
 
 import { run, combineErrors } from '@osd/dev-utils';
 import * as Eslint from './eslint';
-import * as Sasslint from './sasslint';
+import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
@@ -44,7 +44,7 @@ run(
       errors.push(error);
     }
 
-    for (const Linter of [Eslint, Sasslint]) {
+    for (const Linter of [Eslint, Stylelint]) {
       const filesToLint = Linter.pickFilesToLint(log, files);
       if (filesToLint.length > 0) {
         try {

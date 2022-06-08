@@ -32,7 +32,7 @@
 
 .tvbVisGauge__label {
   color: $tvbTextColor;
-  font-size: .5em; /* 1 */
+  font-size: 0.5em; /* 1 */
   line-height: 1em; /* 1 */
   text-align: center;
   padding: 0 $euiSizeS $euiSizeXS;
@@ -44,7 +44,7 @@
 
 .tvbVisGauge__value {
   color: $tvbValueColor;
-  font-size: .9em; /* 1 */
+  font-size: 0.9em; /* 1 */
   line-height: 1em;  /* 1 */
   text-align: center;
 
@@ -55,7 +55,8 @@
 
 .tvbVisGauge__additionalLabel {
   @include euiTextTruncate;
-  font-size: .4em; /* 1 */
+
+  font-size: 0.4em; /* 1 */
   line-height: 1.2em; /* 1 */
   width: 100%;
   padding: 2px $euiSizeXS;

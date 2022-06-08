@@ -107,7 +107,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     core: CoreSetup<{}, DataPluginStart>,
     { registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    const usage = usageCollection ? usageProvider(core) : undefined;
+    const usage = usageCollection ? usageProvider(core, this.initializerContext) : undefined;
 
     const router = core.http.createRouter();
     const routeDependencies = {

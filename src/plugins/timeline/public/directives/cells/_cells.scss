@@ -4,7 +4,6 @@
   position: relative;
   box-sizing: border-box;
   border: 2px dashed transparent;
-  // sass-lint:disable-block no-important
   padding-left: 0 !important;
   padding-right: 0 !important;
   margin-bottom: $euiSizeM;
@@ -15,9 +14,8 @@
 }
 
 .timCell.running {
-  opacity: .5;
+  opacity: 0.5;
 }
-
 
 .timCell__actions {
   position: absolute;
@@ -27,6 +25,7 @@
   > .timCell__action,
   > .timCell__id {
     @include euiFontSizeXS;
+
     font-weight: $euiFontWeightBold;
     color: $euiColorMediumShade;
     display: inline-block;

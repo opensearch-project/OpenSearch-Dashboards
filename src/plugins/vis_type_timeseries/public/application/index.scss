@@ -5,14 +5,14 @@
 //   tvbChart__legend--small
 //   tvbChart__legend-isLoading
 
-@import './variables';
-@import './mixins';
+@import "./variables";
+@import "./mixins";
 
 // Library overrides
-@import './tvb_editor';
+@import "./tvb_editor";
 
 // Components
-@import './components/index';
+@import "./components/index";
 
 // Visualizations
-@import './visualizations/views/index';
+@import "./visualizations/views/index";

@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
 
@@ -56,7 +57,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
     });
   }
 
-  public getIconType() {
+  public getIconType(): EuiIconType {
     return 'pencil';
   }
 

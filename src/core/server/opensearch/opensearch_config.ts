@@ -77,6 +77,10 @@ export const configSchema = schema.object({
   requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
     defaultValue: ['authorization'],
   }),
+  memoryCircuitBreaker: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxPercentage: schema.number({ defaultValue: 1.0 }),
+  }),
   customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
@@ -133,7 +137,7 @@ export const configSchema = schema.object({
   ),
 });
 
-const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRootWithoutMap }) => [
   renameFromRoot('elasticsearch.sniffOnStart', 'opensearch.sniffOnStart'),
   renameFromRoot('elasticsearch.sniffInterval', 'opensearch.sniffInterval'),
   renameFromRoot('elasticsearch.sniffOnConnectionFault', 'opensearch.sniffOnConnectionFault'),
@@ -141,6 +145,10 @@ const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
   renameFromRoot('elasticsearch.username', 'opensearch.username'),
   renameFromRoot('elasticsearch.password', 'opensearch.password'),
   renameFromRoot('elasticsearch.requestHeadersWhitelist', 'opensearch.requestHeadersWhitelist'),
+  renameFromRootWithoutMap(
+    'opensearch.requestHeadersWhitelist',
+    'opensearch.requestHeadersAllowlist'
+  ),
   renameFromRoot('elasticsearch.customHeaders', 'opensearch.customHeaders'),
   renameFromRoot('elasticsearch.shardTimeout', 'opensearch.shardTimeout'),
   renameFromRoot('elasticsearch.requestTimeout', 'opensearch.requestTimeout'),
@@ -245,6 +253,13 @@ export class OpenSearchConfig {
   public readonly shardTimeout: Duration;
 
   /**
+   * Set of options to configure memory circuit breaker for query response.
+   * The `maxPercentage` field is to determine the threshold for maximum heap size for memory circuit breaker. By default the value is `1.0`.
+   * The `enabled` field specifies whether the client should protect large response that can't fit into memory.
+   */
+  public readonly memoryCircuitBreaker: OpenSearchConfigType['memoryCircuitBreaker'];
+
+  /**
    * Specifies whether the client should attempt to detect the rest of the cluster
    * when it is first instantiated.
    */
@@ -300,6 +315,7 @@ export class OpenSearchConfig {
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
+    this.memoryCircuitBreaker = rawConfig.memoryCircuitBreaker;
     this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;

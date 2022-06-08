@@ -78,6 +78,10 @@ test('set correct defaults', () => {
       ],
       "ignoreVersionMismatch": false,
       "logQueries": false,
+      "memoryCircuitBreaker": Object {
+        "enabled": false,
+        "maxPercentage": 1,
+      },
       "optimizedHealthcheckId": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
@@ -437,6 +441,7 @@ describe('deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "\\"elasticsearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersWhitelist\\"",
+        "\\"opensearch.requestHeadersWhitelist\\" is deprecated and has been replaced by \\"opensearch.requestHeadersAllowlist\\"",
       ]
     `);
   });

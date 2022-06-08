@@ -1,6 +1,6 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
 .globalQueryBar {
-  padding: 0px $euiSizeS $euiSizeS $euiSizeS;
+  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
 }
 
 .globalQueryBar:first-child {
@@ -19,7 +19,6 @@
   min-height: $euiSizeL + $euiSizeXS; // same height as the badges
 }
 
-// sass-lint:disable quotes
 .globalFilterGroup__branch {
   padding: $euiSizeS $euiSizeM 0 0;
   background-repeat: no-repeat;
@@ -42,7 +41,7 @@
   max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
 }
 
-@include euiBreakpoint('xs', 's') {
+@include euiBreakpoint("xs", "s") {
   .globalFilterGroup__wrapper-isVisible {
     // EUI Flexbox adds too much margin between responded items, this just moves it up
     margin-top: $euiSize * -1;

@@ -25,9 +25,12 @@ opensearch_dashboards_vars=(
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
+    data.search.usageTelemetry.enabled
     opensearch.customHeaders
     opensearch.hosts
     opensearch.logQueries
+    opensearch.memoryCircuitBreaker.enabled
+    opensearch.memoryCircuitBreaker.maxPercentage
     opensearch.password
     opensearch.pingTimeout
     opensearch.requestHeadersWhitelist
@@ -95,7 +98,6 @@ opensearch_dashboards_vars=(
     regionmap
     security.showInsecureClusterWarning
     server.basePath
-    server.customResponseHeaders
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors

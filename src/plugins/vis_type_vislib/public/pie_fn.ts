@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { VisRenderValue } from '../../visualizations/public';
 import {
   ExpressionFunctionDefinition,
   OpenSearchDashboardsDatatable,
@@ -43,7 +44,7 @@ interface Arguments {
 
 type VisParams = Required<Arguments>;
 
-interface RenderValue {
+interface RenderValue extends VisRenderValue {
   visConfig: VisParams;
 }
 

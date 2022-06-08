@@ -40,17 +40,17 @@
   align-items: baseline; /* 1 */
 }
 
-  .kuiInfoPanelHeader__icon {
-    margin-right: 10px;
-    font-size: $kuiFontSize;
-    line-height: $kuiLineHeight;
-  }
+.kuiInfoPanelHeader__icon {
+  margin-right: 10px;
+  font-size: $kuiFontSize;
+  line-height: $kuiLineHeight;
+}
 
-  .kuiInfoPanelHeader__title {
-    font-size: $kuiFontSize;
-    line-height: $kuiLineHeight;
-    font-weight: $kuiFontWeightBold;
-  }
+.kuiInfoPanelHeader__title {
+  font-size: $kuiFontSize;
+  line-height: $kuiLineHeight;
+  font-weight: $kuiFontWeightBold;
+}
 
 .kuiInfoPanelBody {
   margin-top: $infoPanelVerticalRhythm;

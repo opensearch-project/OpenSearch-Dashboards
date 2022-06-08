@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-
+import { VisRenderValue } from '../../visualizations/public';
 import {
   ExpressionFunctionDefinition,
   OpenSearchDashboardsDatatable,
@@ -40,11 +40,8 @@ interface Arguments {
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+interface RenderValue extends VisRenderValue {
   visType: 'input_control_vis';
-  visConfig: VisParams;
 }
 
 export const createInputControlVisFn = (): ExpressionFunctionDefinition<

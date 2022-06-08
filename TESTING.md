@@ -3,13 +3,15 @@ Overview
 - [General information](#general-information)
 - [Requirements](#requirements)
 - [Running tests](#running-tests)
-  - [Unit tests](#unit-tests)
-  - [Integration tests](#integration-tests)
-  - [Functional tests](#functional-tests)
-  - [Backwards Compatibility tests](#backwards-compatibility-tests)
+    - [Unit tests](#unit-tests)
+    - [Integration tests](#integration-tests)
+    - [Functional tests](#functional-tests)
+    - [Backwards Compatibility tests](#backwards-compatibility-tests)
+    - [Additional checks](#additional-checks)
+- [Writing Tests](#writing-tests)
 - [Continuous Integration](#continuous-integration)
-- [Environment misc](#environment-misc) 
-- [Misc](#misc) 
+- [Environment misc](#environment-misc)
+- [Misc](#misc)
 
 # General information
 OpenSearch Dashboards uses [Jest](https://jestjs.io/) for unit and integration tests, [Selenium](https://www.selenium.dev/) for functional tests, and [Cypress](https://www.cypress.io/) for backwards compatibility tests.
@@ -22,7 +24,7 @@ In general, we recommend four tiers of tests:
 
 # Requirements
 * Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-    * `nvm install v14.18.2`
+    * `nvm install v14.19.1`
     * `npm install -g yarn`
 
 # Running tests
@@ -65,11 +67,20 @@ To run specific versions' backwards compatibility tests, pass the versions to th
 
 `yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -v "[test versions]"`
 
+To generate test data that will be utilized for backwards compatibility tests:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -g true`
+
+This will create an archive of the data based on the OpenSearch Dashboards version you have provided. For example, if a tarball of 2.0.0 was passed then an `osd-2.0.0.zip` will be created. This command is intended to be executed when needed per a version. For example, when end-users cannot migrate directly from `vPrevious` to `vNext`. If `osd-vCurrent.zip` does not exist, then this command be ran and the output sourced controlled for future use.
+
 ### Additional checks
 Make sure you run lint checker before submitting a pull request. To run lint checker:
 `node scripts/precommit_hook.js --fix`
 
 Please ensure that you don't introduce any broken links accidently. For any intentional broken link (e.g. dummy url in unit test), you can add it to [lycheeexclude](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.lycheeexclude) allow list specifically. 
+
+# Writing Tests
+Conventions and best practices for writing tests can be found in [/src/core/TESTING.md](/src/core/TESTING.md)
 
 # Continuous Integration
 Automated testing is provided with Jenkins for Continuous Integration. Jenkins enables developers to build, deploy, and automate projects and provides us to run groups of tests quickly. CI groups are ran from the [Jenkinsfile](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/Jenkinsfile). 

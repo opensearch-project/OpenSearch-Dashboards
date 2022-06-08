@@ -35,6 +35,7 @@ import {
   OpenSearchDashboardsDatatable,
   Render,
 } from '../../expressions/public';
+import { VisRenderValue } from '../../visualizations/public';
 
 export type Input = OpenSearchDashboardsDatatable;
 
@@ -42,15 +43,9 @@ interface Arguments {
   visConfig: string | null;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+interface RenderValue extends VisRenderValue {
   visData: TableContext;
   visType: 'table';
-  visConfig: VisParams;
-  params: {
-    listenOnChange: boolean;
-  };
 }
 
 export const createTableVisFn = (): ExpressionFunctionDefinition<
