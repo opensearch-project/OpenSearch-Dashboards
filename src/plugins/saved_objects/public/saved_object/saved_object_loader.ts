@@ -108,7 +108,7 @@ export class SavedObjectLoader {
    * Updates hit.attributes to contain an updated_at, id and url field, and returns the updated
    * attributes object.
    * @param hit
-   * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
+   * @returns {hit.attributes} The modified hit.attributes object, with an updated_at, id and url field.
    */
   mapSavedObjectApiHits(hit: {
     attributes: Record<string, unknown>;
