@@ -57,6 +57,7 @@ describe('SimpleSavedObjectLoader', () => {
   };
 
   let client: SavedObjectsClientContract;
+  let loader: SavedObjectLoader;
   beforeEach(() => {
     client = {
       update: jest.fn(),
@@ -65,42 +66,21 @@ describe('SimpleSavedObjectLoader', () => {
     } as any;
   });
 
-  it('persists updated_at if undefined', async () => {
-    const loader = createLoader(undefined);
+  afterEach(async () => {
     const savedObjects = await loader.findAll();
 
-    expect(savedObjects.hits).toEqual([
-      {
-        id: 'logstash-*',
-        updated_at: undefined,
-        url: '#/index-pattern/logstash-*',
-      },
-    ]);
+    expect(savedObjects.hits[0].updated_at).toEqual(undefined);
   });
 
-  it("persists updated_at as undefined if doesn't exist", async () => {
-    const loader = createLoader();
-    const savedObjects = await loader.findAll();
+  it('set updated_at as undefined if undefined', async () => {
+    loader = createLoader(undefined);
+  });
 
-    expect(savedObjects.hits).toEqual([
-      {
-        id: 'logstash-*',
-        updated_at: undefined,
-        url: '#/index-pattern/logstash-*',
-      },
-    ]);
+  it("set updated_at as undefined if doesn't exist", async () => {
+    loader = createLoader();
   });
 
   it('set updated_at as undefined if null', async () => {
-    const loader = createLoader(null);
-    const savedObjects = await loader.findAll();
-
-    expect(savedObjects.hits).toEqual([
-      {
-        id: 'logstash-*',
-        updated_at: undefined,
-        url: '#/index-pattern/logstash-*',
-      },
-    ]);
+    loader = createLoader(null);
   });
 });
