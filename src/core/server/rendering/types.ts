@@ -119,10 +119,10 @@ export interface InternalRenderingServiceSetup {
 }
 
 /**
- * For each branding config:
- * check if user provides a valid URL.
- * Assign True -- if user provides a valid URL
- * Assign False -- if user provides an invalid URL or user does not provide any URL
+ * For each string branding config:
+ * check if user provides a valid string.
+ * Assign True -- if user provides a valid string
+ * Assign False -- if user provides an invalid string or user does not provide any string
  */
 export interface BrandingValidation {
   isLogoDefaultValid: boolean;
@@ -137,7 +137,7 @@ export interface BrandingValidation {
 
 /**
  * For each branding config:
- * if user provides a valid URL, the URL will be assigned;
+ * if user provides a valid value, the value will be assigned;
  * otherwise, undefined will be assigned.
  */
 export interface BrandingAssignment {
@@ -149,4 +149,5 @@ export interface BrandingAssignment {
   loadingLogoDarkmode?: string;
   favicon?: string;
   applicationTitle?: string;
+  useExpandedMenu?: boolean;
 }

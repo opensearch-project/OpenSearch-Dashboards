@@ -12,6 +12,7 @@ Object {
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
+    "useExpandedMenu": false,
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -63,6 +64,7 @@ Object {
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
+    "useExpandedMenu": false,
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -114,6 +116,7 @@ Object {
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
+    "useExpandedMenu": false,
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -169,6 +172,7 @@ Object {
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
+    "useExpandedMenu": false,
   },
   "buildNumber": Any<Number>,
   "csp": Object {
@@ -220,6 +224,7 @@ Object {
     "loadingLogo": Object {},
     "logo": Object {},
     "mark": Object {},
+    "useExpandedMenu": false,
   },
   "buildNumber": Any<Number>,
   "csp": Object {

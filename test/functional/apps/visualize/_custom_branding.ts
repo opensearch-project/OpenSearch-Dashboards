@@ -4,9 +4,10 @@
  */
 
 import expect from '@osd/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const opensearchArchiver = getService('opensearchArchiver');
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
     describe('should render welcome page', async () => {
       this.tags('includeFirefox');
 
-      //unloading any pre-existing settings so the welcome page will appear
+      // unloading any pre-existing settings so the welcome page will appear
       before(async function () {
         await opensearchArchiver.unload('logstash_functional');
         await opensearchArchiver.unload('long_window_logstash');
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('home');
       });
 
-      //loading the settings again for
+      // loading the settings again for
       after(async function () {
         await browser.setWindowSize(1280, 800);
         await opensearchArchiver.loadIfNeeded('logstash_functional');
