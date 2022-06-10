@@ -21,6 +21,7 @@ import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { SelectOption, SwitchOption } from '../../../charts/public';
 import { RegionMapVisParams } from '../../../maps_legacy/public';
+import { DEFAULT_MAP_CHOICE, CUSTOM_MAP_CHOICE } from '../../common';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -50,7 +51,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
     customVectorLayers,
   ]);
-  const [userSelectedLayer, setUserSelectedLayer] = useState('default');
+  const [userSelectedLayer, setUserSelectedLayer] = useState(DEFAULT_MAP_CHOICE);
 
   const fieldOptions = useMemo(
     () =>
@@ -69,13 +70,13 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const selectDefaultVectorMap = () => {
-    setUserSelectedLayer('default');
-    setValue('layerChosenByUser', 'default');
+    setUserSelectedLayer(DEFAULT_MAP_CHOICE);
+    setValue('layerChosenByUser', DEFAULT_MAP_CHOICE);
   };
 
   const selectCustomVectorMap = () => {
-    setUserSelectedLayer('custom');
-    setValue('layerChosenByUser', 'custom');
+    setUserSelectedLayer(CUSTOM_MAP_CHOICE);
+    setValue('layerChosenByUser', CUSTOM_MAP_CHOICE);
   };
 
   const setEmsHotLink = useCallback(
@@ -163,7 +164,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
             label="Default vector map"
             name="defaultVectorMap"
             value="default"
-            checked={userSelectedLayer === 'default'}
+            checked={DEFAULT_MAP_CHOICE === userSelectedLayer}
             onChange={selectDefaultVectorMap}
           />
         </EuiFlexItem>
@@ -173,14 +174,14 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
             label="Custom vector map"
             name="customVectorMap"
             value="custom"
-            checked={userSelectedLayer === 'custom'}
+            checked={CUSTOM_MAP_CHOICE === userSelectedLayer}
             onChange={selectCustomVectorMap}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      {userSelectedLayer === 'default' ? (
+      {DEFAULT_MAP_CHOICE === userSelectedLayer ? (
         <EuiFlexGroup id="defaultMapSelection" direction="column">
           <EuiFlexItem grow={false}>
             <SelectOption

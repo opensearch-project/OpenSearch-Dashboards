@@ -37,6 +37,7 @@ import {
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
+import { DEFAULT_MAP_CHOICE } from '../common';
 
 export function createRegionMapVisualization({
   http,
@@ -83,10 +84,10 @@ export function createRegionMapVisualization({
       }
 
       let selectedLayer;
-      if (this._params.layerChosenByUser === 'default') {
+      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
         this._params.selectedJoinField = selectedLayer.fields[0];
-      } else if (this._params.layerChosenByUser === 'custom') {
+      } else {
         selectedLayer = this._params.selectedCustomLayer;
         this._params.selectedJoinField = this._params.selectedCustomJoinField;
       }
@@ -153,10 +154,10 @@ export function createRegionMapVisualization({
     async _updateParams() {
       await super._updateParams();
       let selectedLayer;
-      if (this._params.layerChosenByUser === 'default') {
+      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
         this._params.selectedJoinField = selectedLayer.fields[0];
-      } else if (this._params.layerChosenByUser === 'custom') {
+      } else {
         selectedLayer = this._params.selectedCustomLayer;
         this._params.selectedJoinField = this._params.selectedCustomJoinField;
       }
@@ -208,12 +209,10 @@ export function createRegionMapVisualization({
     }
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
-      let selectedLayer;
-      if (this._params.layerChosenByUser === 'default') {
-        selectedLayer = await this._loadConfig(this._params.selectedLayer);
-      } else if (this._params.layerChosenByUser === 'custom') {
-        selectedLayer = this._params.selectedCustomLayer;
-      }
+      const selectedLayer =
+        DEFAULT_MAP_CHOICE === this._params.layerChosenByUser
+          ? await this._loadConfig(this._params.selectedLayer)
+          : this._params.selectedCustomLayer;
       this._opensearchDashboardsMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {

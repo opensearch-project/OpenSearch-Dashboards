@@ -37,6 +37,7 @@ import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getServices } from './services';
+import { DEFAULT_MAP_CHOICE } from '../common';
 
 export function createRegionMapTypeDefinition(dependencies) {
   const {
@@ -261,7 +262,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
 
       vis.params.layerChosenByUser = vis.params.layerChosenByUser
         ? vis.params.layerChosenByUser
-        : 'default';
+        : DEFAULT_MAP_CHOICE;
 
       return vis;
     },

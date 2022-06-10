@@ -37,6 +37,7 @@ import { getNotifications } from './opensearch_dashboards_services';
 import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps_legacy/public';
 import { truncatedColorMaps } from '../../charts/public';
 import { getServices } from './services';
+import { DEFAULT_MAP_CHOICE, CUSTOM_MAP_CHOICE } from '../common';
 
 const EMPTY_STYLE = {
   weight: 1,
@@ -146,9 +147,9 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._whenDataLoaded = new Promise(async (resolve) => {
       try {
         let data;
-        if (this._layerChosenByUser === 'default') {
+        if (DEFAULT_MAP_CHOICE === this._layerChosenByUser) {
           data = await this._makeJsonAjaxCall();
-        } else if (this._layerChosenByUser === 'custom') {
+        } else if (CUSTOM_MAP_CHOICE === this._layerChosenByUser) {
           data = await this._fetchCustomLayerData();
         } else {
           return;
