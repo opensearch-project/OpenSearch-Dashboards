@@ -16,6 +16,9 @@
 # `server.basePath` or require that they are rewritten by your reverse proxy.
 #server.rewriteBasePath: false
 
+# The maximum payload size in bytes for incoming server requests.
+#server.maxPayloadBytes: 1048576
+
 # The OpenSearch Dashboards server's name.  This is used for display purposes.
 #server.name: "your-hostname"
 

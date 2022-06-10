@@ -20,7 +20,7 @@ function StyleOptions(props: StyleOptionsProps) {
   const { stateParams, vis, setValue } = props;
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" id="styleSettingTitleId">
         <h2>
           <FormattedMessage
             id="regionMap.visParams.styleSettingsLabel"
@@ -38,6 +38,7 @@ function StyleOptions(props: StyleOptionsProps) {
         paramName="colorSchema"
         value={stateParams.colorSchema}
         setValue={setValue}
+        id="colorSchemaId"
       />
 
       <NumberInputOption
@@ -48,6 +49,7 @@ function StyleOptions(props: StyleOptionsProps) {
         paramName="outlineWeight"
         value={stateParams.outlineWeight}
         setValue={setValue}
+        id="borderThicknessId"
       />
     </EuiPanel>
   );
