@@ -169,7 +169,7 @@ export class HttpService
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
+    return !this.coreContext.env.isDevClusterManager && config.autoListen;
   }
 
   public async stop() {

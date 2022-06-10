@@ -54,5 +54,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
     },
     isDevClusterMaster:
       options.isDevClusterMaster !== undefined ? options.isDevClusterMaster : false,
+    isDevClusterManager:
+      options.isDevClusterManager !== undefined ? options.isDevClusterManager : false,
   };
 }

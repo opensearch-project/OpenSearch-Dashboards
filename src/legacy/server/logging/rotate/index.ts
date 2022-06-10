@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { isMaster, isWorker } from 'cluster';
+import { isMaster as isClusterManager, isWorker } from 'cluster';
 import { Server } from '@hapi/hapi';
 import { LogRotator } from './log_rotator';
 import { OpenSearchDashboardsConfig } from '../../osd_server';
@@ -43,7 +43,7 @@ export async function setupLoggingRotate(server: Server, config: OpenSearchDashb
 
   // We just want to start the logging rotate service once
   // and we choose to use the master (prod) or the worker server (dev)
-  if (!isMaster && isWorker && process.env.osdWorkerType !== 'server') {
+  if (!isClusterManager && isWorker && process.env.osdWorkerType !== 'server') {
     return;
   }
 

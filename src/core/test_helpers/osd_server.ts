@@ -91,6 +91,7 @@ export function createRootWithSettings(
       ...cliArgs,
     },
     isDevClusterMaster: false,
+    isDevClusterManager: false,
   });
 
   return new Root(

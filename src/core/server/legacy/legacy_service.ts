@@ -155,7 +155,7 @@ export class LegacyService implements CoreService {
     this.log.debug('starting legacy service');
 
     // Receive initial config and create osdServer/ClusterManager.
-    if (this.coreContext.env.isDevClusterMaster) {
+    if (this.coreContext.env.isDevClusterManager) {
       await this.createClusterManager(this.legacyRawConfig!);
     } else {
       this.osdServer = await this.createOsdServer(

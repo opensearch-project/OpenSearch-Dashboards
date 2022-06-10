@@ -29,7 +29,7 @@
  */
 
 import * as chokidar from 'chokidar';
-import { isMaster } from 'cluster';
+import { isMaster as isClusterManager } from 'cluster';
 import fs from 'fs';
 import { Server } from '@hapi/hapi';
 import { throttle } from 'lodash';
@@ -359,7 +359,7 @@ export class LogRotator {
   }
 
   _sendReloadLogConfigSignal() {
-    if (isMaster) {
+    if (isClusterManager) {
       (process as NodeJS.EventEmitter).emit('SIGHUP');
       return;
     }
