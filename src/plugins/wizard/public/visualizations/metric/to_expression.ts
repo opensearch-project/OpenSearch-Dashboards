@@ -113,6 +113,7 @@ export const toExpression = async ({ style: styleState, visualization }: MetricR
     }
   );
 
+  // TODO: Update to use the getVisSchemas function from the Visualizations plugin
   // const schemas = getVisSchemas(vis, params);
 
   const {
@@ -171,8 +172,6 @@ export const toExpression = async ({ style: styleState, visualization }: MetricR
   });
 
   const ast = buildExpression([opensearchaggs, metricVis]);
-
-  // debugger;
 
   return ast.toString();
 };

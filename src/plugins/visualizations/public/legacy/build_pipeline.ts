@@ -155,7 +155,6 @@ export const getSchemas = <TVisParams>(
   }
 
   const responseAggs = vis.data.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
-  // debugger;
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: IAggConfig) => {
@@ -405,8 +404,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const filters = searchSource!.getField('filter');
   const { uiState, title } = vis;
 
-  // debugger;
-
   // context
   let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
   if (query) {
@@ -460,6 +457,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       }
     }
   }
-  // console.log(pipeline);
+
   return pipeline;
 };

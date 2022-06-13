@@ -46,7 +46,6 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis, params: any) => {
-  // debugger;
   // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
     'opensearchaggs',

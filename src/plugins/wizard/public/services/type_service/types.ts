@@ -48,5 +48,5 @@ export interface VisualizationTypeOptions<T = any> {
       style: StyleTabConfig<T>;
     };
   };
-  readonly toExpression: (state: RootState) => string | undefined;
+  readonly toExpression: (state: RootState) => Promise<string | undefined>;
 }

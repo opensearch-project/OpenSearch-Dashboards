@@ -71,6 +71,7 @@ function MetricVizOptions() {
 
       <EuiSpacer size="s" />
 
+      {/* TODO: Reintroduce the other style properties */}
       {/* <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>

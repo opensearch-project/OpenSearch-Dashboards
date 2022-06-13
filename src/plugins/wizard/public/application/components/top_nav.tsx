@@ -10,7 +10,7 @@ import { getTopNavconfig } from '../utils/get_top_nav_config';
 import { WizardServices } from '../../types';
 
 import './top_nav.scss';
-import { useIndexPattern } from '../utils/use/use_index_pattern';
+import { useIndexPattern } from '../utils/use';
 
 export const TopNav = () => {
   const { services } = useOpenSearchDashboards<WizardServices>();

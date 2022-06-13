@@ -16,7 +16,7 @@ import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
 import { useTypedSelector } from '../../../utils/state_management';
-import { useIndexPattern } from '../../../utils/use/use_index_pattern';
+import { useIndexPattern } from '../../../utils/use';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];

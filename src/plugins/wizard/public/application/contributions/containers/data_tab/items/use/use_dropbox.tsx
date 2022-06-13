@@ -19,6 +19,7 @@ import {
 import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
 import {
+  createAggConfigParams,
   reorderAggConfigParams,
   updateAggConfigParams,
 } from '../../../../../utils/state_management/visualization_slice';
@@ -70,7 +71,21 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   );
 
   // Event handlers for each dropbox action type
-  const onAddField = useCallback(() => {}, []);
+  const onAddField = useCallback(() => {
+    const agg = aggConfigs?.createAggConfig(
+      {
+        type: (schema.defaults as any).aggType,
+        schema: schema.name,
+      },
+      {
+        addToAggConfigs: false,
+      }
+    );
+
+    if (agg) {
+      dispatch(createAggConfigParams(agg.serialize()));
+    }
+  }, [aggConfigs, dispatch, schema.defaults, schema.name]);
 
   const onEditField = useCallback((instanceId) => {}, []);
 
@@ -149,6 +164,8 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     isValidDropTarget: isValidDropField,
     dropProps,
   };
+
+  // TODO: Will cleanup once add and edit field support is reintroduced
   // const configItemState = items[dropboxId];
   // const dropboxState =
   //   !configItemState || typeof configItemState === 'string' ? INITIAL_STATE : configItemState;

@@ -31,6 +31,8 @@ export const useFormField = (id: string, onChange: FieldContributions['onChange'
     (newValue: string) => {
       onChange?.(newValue);
 
+      // TODO: Will cleanup once add and edit field support is reintroduced
+
       // is a MainPanel field value
       if (!activeItem) {
         // dispatch(

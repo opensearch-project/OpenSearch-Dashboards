@@ -61,11 +61,6 @@ const DropboxComponent = ({
         sourceAggId: fields[source.index].id,
         destinationAggId: fields[destination.index].id,
       });
-
-      // const instanceIds = fields.map(({ id }) => id);
-      // const reorderedIds = euiDragDropReorder(instanceIds, source.index, destination.index);
-
-      // onReorderField(reorderedIds);
     },
     [fields, onReorderField]
   );
@@ -78,6 +73,7 @@ const DropboxComponent = ({
             {fields.map(({ id, label, icon }, index) => (
               <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
+                  {/* TODO: Verify if field icon makes sense here */}
                   {/* <FieldIcon type={icon} /> */}
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>

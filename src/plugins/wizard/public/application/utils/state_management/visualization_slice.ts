@@ -5,7 +5,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from 'src/plugins/data/common';
-import { Schema } from '../../../../../vis_default_editor/public';
 import { WizardServices } from '../../../types';
 
 interface VisualizationState {
@@ -14,6 +13,7 @@ interface VisualizationState {
   activeVisualization?: {
     name: string;
     aggConfigParams: CreateAggConfigParams[];
+    activeAgg?: CreateAggConfigParams;
   };
 }
 
@@ -54,9 +54,18 @@ export const slice = createSlice({
     },
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
+      state.activeVisualization!.aggConfigParams = [];
     },
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
+    },
+    createAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams>) => {
+      state.activeVisualization!.activeAgg = action.payload;
+    },
+    saveAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams>) => {
+      delete state.activeVisualization!.activeAgg;
+
+      // TODO: Impliment reducer
     },
     reorderAggConfigParams: (
       state,
@@ -91,6 +100,7 @@ export const {
   setActiveVisualization,
   setIndexPattern,
   setSearchField,
+  createAggConfigParams,
   updateAggConfigParams,
   reorderAggConfigParams,
 } = slice.actions;

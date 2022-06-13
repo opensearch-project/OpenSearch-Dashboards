@@ -23,16 +23,16 @@ import './config_panel.scss';
 import { mapSchemaToAggPanel } from './utils/schema_to_dropbox';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../../types';
+import { SecondaryPanel } from './secondary_panel';
 
 const DEFAULT_ITEMS: MainItemContribution[] = [getTitleContribution()];
 
 export function ConfigPanel() {
   const vizType = useVisualizationType();
-
-  const [activeInstance, setActiveInstance] = useState(null);
+  const activeAgg = useTypedSelector((state) => state.visualization.activeVisualization?.activeAgg);
   const schemas = vizType.ui.containerConfig.data.schemas;
 
-  const activeItem = false;
+  // TODO: Will cleanup when add and edit field support is re introduced
   // const activeItem = useTypedSelector((state) => state.config.activeItem);
   // const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
 
@@ -75,9 +75,9 @@ export function ConfigPanel() {
   const mainPanel = mapSchemaToAggPanel(schemas);
 
   return (
-    <EuiForm className={`wizConfig ${activeItem ? 'showSecondary' : ''}`}>
+    <EuiForm className={`wizConfig ${activeAgg ? 'showSecondary' : ''}`}>
       <div className="wizConfig__section">{mainPanel}</div>
-      {/* <div className="wizConfig__section wizConfig--secondary">{secondaryPanel}</div> */}
+      <SecondaryPanel />
     </EuiForm>
   );
 }
