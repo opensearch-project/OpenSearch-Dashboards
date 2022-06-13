@@ -54,12 +54,7 @@ export class OptedInNoticeBanner extends React.PureComponent<Props> {
           defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
           values={{
             privacyStatementLink: (
-              <EuiLink
-                onClick={onSeenBanner}
-                href={PRIVACY_STATEMENT_URL}
-                target="_blank"
-                rel="noopener"
-              >
+              <EuiLink onClick={onSeenBanner} href={PRIVACY_STATEMENT_URL} target="_blank">
                 <FormattedMessage
                   id="telemetry.telemetryOptedInPrivacyStatement"
                   defaultMessage="Privacy Statement"
