@@ -6,7 +6,7 @@ http://localhost
 https://localhost
 http://127.0.0.1/
 https://127.0.0.1/
-http://127.0.0.1:10002/bar 
+http://127.0.0.1:10002/bar
 http://127.0.0.1:10002/
 http://opensearch
 https://opensearch
@@ -35,6 +35,7 @@ http://noone.nowhere.none/
 http://bar
 http://foo
 http://test.com/
+https://manifest.foobar
 https://files.foobar/
 https://tiles.foobar/
 https://1.1.1.1:9200/
@@ -51,7 +52,7 @@ http://buildurl/
 https://dryrun/
 https://url/
 http://url/
-http://notfound.svg/ 
+http://notfound.svg/
 https://validurl/
 https://myopensearch-dashboardsdomain.com
 http://myopensearch-dashboardsdomain.com
