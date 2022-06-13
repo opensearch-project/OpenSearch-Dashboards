@@ -40,8 +40,8 @@ function getConfig(config) {
     projectRoot: true,
   };
 
-  if (!config || !config['@elastic/eslint-import-resolver-kibana']) return defaults;
-  return Object.assign(defaults, config['@elastic/eslint-import-resolver-kibana']);
+  if (!config || !config['@osd/eslint-import-resolver-opensearch-dashboards']) return defaults;
+  return Object.assign(defaults, config['@osd/eslint-import-resolver-opensearch-dashboards']);
 }
 
 function getRootPackageDir(dirRoot, dir, rootPackageName) {
