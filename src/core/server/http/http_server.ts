@@ -399,7 +399,7 @@ export class HttpServer {
         fn,
         this.log,
         (req, { state, requestHeaders, responseHeaders }) => {
-          this.authState.set(req, state);
+          this.authState.set(req, req.auth.artifacts);
 
           if (responseHeaders) {
             this.authResponseHeaders.set(req, responseHeaders);
