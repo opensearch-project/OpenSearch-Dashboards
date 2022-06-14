@@ -10,7 +10,7 @@ import { getTopNavconfig } from '../utils/get_top_nav_config';
 import { WizardServices } from '../../types';
 
 import './top_nav.scss';
-import { useTypedSelector } from '../utils/state_management';
+import { useIndexPattern } from '../utils/use';
 
 export const TopNav = () => {
   const { services } = useOpenSearchDashboards<WizardServices>();
@@ -22,7 +22,7 @@ export const TopNav = () => {
   } = services;
 
   const config = useMemo(() => getTopNavconfig(services), [services]);
-  const { indexPattern } = useTypedSelector((state) => state.dataSource);
+  const indexPattern = useIndexPattern();
 
   return (
     <div className="wizTopNav">

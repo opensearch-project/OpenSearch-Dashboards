@@ -2,8 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { ReactElement } from 'react';
 import { IconType } from '@elastic/eui';
+import { RootState } from '../../application/utils/state_management';
+import { Schemas } from '../../../../vis_default_editor/public';
 
 export enum ContributionTypes {
   CONTAINER = 'CONTAINER',
@@ -25,17 +27,26 @@ type ContainerSchema = any;
 
 export type ContainerLocationContribution = { [K in ContainerLocations]: ContainerContribution[] };
 
-export interface VisualizationTypeOptions {
+export interface DataTabConfig {
+  schemas: Schemas;
+}
+
+export interface StyleTabConfig<T = any> {
+  defaults: T;
+  render: () => ReactElement;
+}
+
+export interface VisualizationTypeOptions<T = any> {
   readonly name: string;
   readonly title: string;
   readonly description?: string;
   readonly icon: IconType;
   readonly stage?: 'beta' | 'production';
-  readonly contributions: {
-    containers?: Partial<ContainerLocationContribution>;
-    items?: {
-      [containerId: string]: ContainerSchema[]; // schema that is used to render the container. Each container is responsible for deciding that for consistency
+  readonly ui: {
+    containerConfig: {
+      data: DataTabConfig;
+      style: StyleTabConfig<T>;
     };
   };
-  //   pipeline: Expression;
+  readonly toExpression: (state: RootState) => Promise<string | undefined>;
 }

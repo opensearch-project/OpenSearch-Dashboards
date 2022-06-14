@@ -4,7 +4,7 @@
  */
 
 import { EuiForm } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useVisualizationType } from '../../../utils/use';
 import {
   DropboxContribution,
@@ -20,51 +20,64 @@ import { SelectContribution } from '../common/items';
 import { INDEX_FIELD_KEY } from './items/use/use_form_field';
 import { DATA_TAB_ID } from '.';
 import './config_panel.scss';
+import { mapSchemaToAggPanel } from './utils/schema_to_dropbox';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { WizardServices } from '../../../../types';
+import { SecondaryPanel } from './secondary_panel';
 
 const DEFAULT_ITEMS: MainItemContribution[] = [getTitleContribution()];
 
 export function ConfigPanel() {
-  const {
-    contributions: { items },
-  } = useVisualizationType();
-  const activeItem = useTypedSelector((state) => state.config.activeItem);
-  const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
+  const vizType = useVisualizationType();
+  const activeAgg = useTypedSelector((state) => state.visualization.activeVisualization?.activeAgg);
+  const schemas = vizType.ui.containerConfig.data.schemas;
 
-  const hydratedItems: MainItemContribution[] = [...(items?.[DATA_TAB_ID] ?? []), ...DEFAULT_ITEMS];
+  // TODO: Will cleanup when add and edit field support is re introduced
+  // const activeItem = useTypedSelector((state) => state.config.activeItem);
+  // const configItemState = useTypedSelector((state) => state.config.items[activeItem?.id || '']);
 
-  const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
-  const secondaryPanel = useMemo(() => {
-    if (!activeItem || !configItemState || typeof configItemState === 'string') return;
+  // const hydratedItems: MainItemContribution[] = useMemo(
+  //   () => [...(items?.[DATA_TAB_ID] ?? []), ...DEFAULT_ITEMS],
+  //   [items]
+  // );
 
-    // Generate each secondary panel base on active item type
-    if (activeItem.type === ITEM_TYPES.DROPBOX) {
-      const activeDropboxContribution = hydratedItems.find(
-        (item: MainItemContribution) =>
-          item.type === ITEM_TYPES.DROPBOX && item?.id === activeItem?.id
-      ) as DropboxContribution | undefined;
+  // const mainPanel = useMemo(() => mapItemToPanelComponents(hydratedItems), [hydratedItems]);
+  // const secondaryPanel = useMemo(() => {
+  //   if (!activeItem || !configItemState || typeof configItemState === 'string') return;
 
-      if (!activeDropboxContribution) return null;
+  //   // Generate each secondary panel base on active item type
+  //   if (activeItem.type === ITEM_TYPES.DROPBOX) {
+  //     const activeDropboxContribution = hydratedItems.find(
+  //       (item: MainItemContribution) =>
+  //         item.type === ITEM_TYPES.DROPBOX && item?.id === activeItem?.id
+  //     ) as DropboxContribution | undefined;
 
-      let itemsToRender: SecondaryItemContribution[] = [
-        getTitleContribution(activeDropboxContribution.label),
-        getFieldSelectorContribution(),
-      ];
+  //     if (!activeDropboxContribution) return null;
 
-      const dropboxFieldInstance = configItemState.instances.find(
-        ({ id }) => id === activeItem.instanceId
-      );
-      if (dropboxFieldInstance && dropboxFieldInstance.properties.fieldName) {
-        itemsToRender = [...itemsToRender, ...activeDropboxContribution.items];
-      }
+  //     let itemsToRender: SecondaryItemContribution[] = [
+  //       getTitleContribution(activeDropboxContribution.label),
+  //       getFieldSelectorContribution(),
+  //     ];
 
-      return mapItemToPanelComponents(itemsToRender, true);
-    }
-  }, [activeItem, configItemState, hydratedItems]);
+  //     const dropboxFieldInstance = configItemState.instances.find(
+  //       ({ id }) => id === activeItem.instanceId
+  //     );
+  //     if (dropboxFieldInstance && dropboxFieldInstance.properties.fieldName) {
+  //       itemsToRender = [...itemsToRender, ...activeDropboxContribution.items];
+  //     }
+
+  //     return mapItemToPanelComponents(itemsToRender, true);
+  //   }
+  // }, [activeItem, configItemState, hydratedItems]);
+
+  if (!schemas) return null;
+
+  const mainPanel = mapSchemaToAggPanel(schemas);
 
   return (
-    <EuiForm className={`wizConfig ${activeItem ? 'showSecondary' : ''}`}>
+    <EuiForm className={`wizConfig ${activeAgg ? 'showSecondary' : ''}`}>
       <div className="wizConfig__section">{mainPanel}</div>
-      <div className="wizConfig__section wizConfig--secondary">{secondaryPanel}</div>
+      <SecondaryPanel />
     </EuiForm>
   );
 }
@@ -76,16 +89,16 @@ function getTitleContribution(title?: string): TitleItemContribution {
   };
 }
 
-function getFieldSelectorContribution(): SelectContribution<string> {
-  return {
-    type: ItemTypes.SELECT,
-    id: INDEX_FIELD_KEY,
-    label: 'Select a Field',
-    options: (state) => {
-      return state.dataSource.visualizableFields.map((field) => ({
-        value: field.name,
-        inputDisplay: field.displayName,
-      }));
-    },
-  };
-}
+// function getFieldSelectorContribution(): SelectContribution<string> {
+//   return {
+//     type: ItemTypes.SELECT,
+//     id: INDEX_FIELD_KEY,
+//     label: 'Select a Field',
+//     options: (state) => {
+//       return state.dataSource.visualizableFields.map((field) => ({
+//         value: field.name,
+//         inputDisplay: field.displayName,
+//       }));
+//     },
+//   };
+// }

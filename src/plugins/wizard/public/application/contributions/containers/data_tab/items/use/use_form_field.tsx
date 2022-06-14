@@ -5,11 +5,11 @@
 
 import produce from 'immer';
 import { useCallback, useMemo } from 'react';
-import {
-  ConfigState,
-  updateConfigItemState,
-  updateInstance,
-} from '../../../../../utils/state_management/config_slice';
+// import {
+//   ConfigState,
+//   updateConfigItemState,
+//   updateInstance,
+// } from '../../../../../utils/state_management/config_slice';
 import { useTypedSelector, useTypedDispatch } from '../../../../../utils/state_management';
 import { FieldContributions } from '../types';
 
@@ -31,14 +31,16 @@ export const useFormField = (id: string, onChange: FieldContributions['onChange'
     (newValue: string) => {
       onChange?.(newValue);
 
+      // TODO: Will cleanup once add and edit field support is reintroduced
+
       // is a MainPanel field value
       if (!activeItem) {
-        dispatch(
-          updateConfigItemState({
-            id,
-            itemState: newValue,
-          })
-        );
+        // dispatch(
+        //   // updateConfigItemState({
+        //   //   id,
+        //   //   itemState: newValue,
+        //   // })
+        // );
         return;
       }
 
@@ -46,15 +48,15 @@ export const useFormField = (id: string, onChange: FieldContributions['onChange'
         draftState[id] = newValue;
       });
 
-      dispatch(
-        updateInstance({
-          id: activeItem.id,
-          instanceId: activeItem.instanceId,
-          instanceState: newInstanceState,
-        })
-      );
+      // dispatch(
+      //   updateInstance({
+      //     id: activeItem.id,
+      //     instanceId: activeItem.instanceId,
+      //     instanceState: newInstanceState,
+      //   })
+      // );
     },
-    [activeItem, dispatch, id, instanceState, onChange]
+    [activeItem, id, instanceState, onChange]
   );
 
   return {
