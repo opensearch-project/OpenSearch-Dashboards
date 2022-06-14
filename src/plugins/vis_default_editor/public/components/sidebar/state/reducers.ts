@@ -57,6 +57,7 @@ const createEditorStateReducer = ({
         !state.data.aggs!.aggs.find((agg) => agg.schema === schema.name) && schema.defaults
           ? (schema as any).defaults.slice(0, schema.max)
           : { schema: schema.name };
+
       const aggConfig = state.data.aggs!.createAggConfig(defaultConfig, {
         addToAggConfigs: false,
       });

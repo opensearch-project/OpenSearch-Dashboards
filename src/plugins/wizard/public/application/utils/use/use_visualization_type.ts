@@ -14,10 +14,10 @@ export const useVisualizationType = (): VisualizationType => {
     services: { types },
   } = useOpenSearchDashboards<WizardServices>();
 
-  const visualizationType = types.get(activeVisualization || '');
+  const visualizationType = types.get(activeVisualization?.name ?? '');
 
   if (!visualizationType) {
-    throw new Error('Invalid visualization type ${activeVisualization}');
+    throw new Error(`Invalid visualization type ${activeVisualization}`);
   }
 
   return visualizationType;

@@ -12,13 +12,15 @@ import {
   EuiPanel,
   EuiText,
   euiDragDropReorder,
+  DropResult,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
 import './dropbox.scss';
-import { DropboxContribution, DropboxDisplay } from './types';
+import { DropboxDisplay } from './types';
 import { useDropbox } from './use';
+import { UseDropboxProps } from './use/use_dropbox';
 
 interface DropboxProps extends IDropState {
   id: string;
@@ -28,7 +30,13 @@ interface DropboxProps extends IDropState {
   onAddField: () => void;
   onEditField: (id: string) => void;
   onDeleteField: (id: string) => void;
-  onReorderField: (reorderedIds: string[]) => void;
+  onReorderField: ({
+    sourceAggId,
+    destinationAggId,
+  }: {
+    sourceAggId: string;
+    destinationAggId: string;
+  }) => void;
   dropProps: IDropAttributes;
 }
 
@@ -46,13 +54,13 @@ const DropboxComponent = ({
   dropProps,
 }: DropboxProps) => {
   const handleDragEnd = useCallback(
-    ({ source, destination }) => {
-      if (!source || !destination) return;
+    ({ source, destination }: DropResult) => {
+      if (!destination) return;
 
-      const instanceIds = fields.map(({ id }) => id);
-      const reorderedIds = euiDragDropReorder(instanceIds, source.index, destination.index);
-
-      onReorderField(reorderedIds);
+      onReorderField({
+        sourceAggId: fields[source.index].id,
+        destinationAggId: fields[destination.index].id,
+      });
     },
     [fields, onReorderField]
   );
@@ -65,7 +73,8 @@ const DropboxComponent = ({
             {fields.map(({ id, label, icon }, index) => (
               <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
-                  <FieldIcon type={icon} />
+                  {/* TODO: Verify if field icon makes sense here */}
+                  {/* <FieldIcon type={icon} /> */}
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>
                       {label}
@@ -104,7 +113,7 @@ const DropboxComponent = ({
   );
 };
 
-const Dropbox = React.memo((dropBox: DropboxContribution) => {
+const Dropbox = React.memo((dropBox: UseDropboxProps) => {
   const props = useDropbox(dropBox);
 
   return <DropboxComponent {...props} />;

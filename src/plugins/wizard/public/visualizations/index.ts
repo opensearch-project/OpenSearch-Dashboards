@@ -4,11 +4,16 @@
  */
 
 import type { TypeServiceSetup } from '../services/type_service';
+import { createMetricConfig } from './metric';
 import { createBarChartConfig } from './bar_chart';
 import { createPieChartConfig } from './pie_chart';
+import { WizardPluginStartDependencies } from '../types';
 
-export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup) {
-  const visualizationTypes = [createBarChartConfig, createPieChartConfig];
+export function registerDefaultTypes(
+  typeServiceSetup: TypeServiceSetup,
+  pluginsStart: WizardPluginStartDependencies
+) {
+  const visualizationTypes = [createMetricConfig];
 
   visualizationTypes.forEach((createTypeConfig) => {
     typeServiceSetup.createVisualizationType(createTypeConfig());

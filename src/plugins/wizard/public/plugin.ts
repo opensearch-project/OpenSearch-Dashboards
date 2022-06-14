@@ -21,6 +21,7 @@ import {
 import { PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
+import { setAggService, setIndexPatterns } from './plugin_services';
 
 export class WizardPlugin
   implements
@@ -42,22 +43,10 @@ export class WizardPlugin
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
+
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { data, savedObjects, navigation } = pluginsStart;
-
-        const { registerDefaultTypes } = await import('./visualizations');
-        registerDefaultTypes(typeService.setup());
-
-        const services: WizardServices = {
-          ...coreStart,
-          toastNotifications: coreStart.notifications.toasts,
-          data,
-          savedObjectsPublic: savedObjects,
-          navigation,
-          setHeaderActionMenu: params.setHeaderActionMenu,
-          types: typeService.start(),
-        };
+        const { data, savedObjects, navigation, expressions } = pluginsStart;
 
         // make sure the index pattern list is up to date
         data.indexPatterns.clearCache();
@@ -66,6 +55,26 @@ export class WizardPlugin
         // TODO: Add the redirect
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
+        // Register plugin services
+        setAggService(data.search.aggs);
+        setIndexPatterns(data.indexPatterns);
+
+        // Register Default Visualizations
+        const { registerDefaultTypes } = await import('./visualizations');
+        registerDefaultTypes(typeService.setup(), pluginsStart);
+
+        const services: WizardServices = {
+          ...coreStart,
+          toastNotifications: coreStart.notifications.toasts,
+          data,
+          savedObjectsPublic: savedObjects,
+          navigation,
+          expressions,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+          types: typeService.start(),
+        };
+
+        // Instantiate the store
         const store = await getPreloadedStore(services);
 
         // Render the application
