@@ -8,6 +8,7 @@ import { AppMountParameters, CoreStart, ToastsStart } from 'opensearch-dashboard
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
@@ -23,6 +24,7 @@ export interface WizardPluginStartDependencies {
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
+  expressions: ExpressionsStart;
 }
 
 export interface WizardServices extends CoreStart {
@@ -32,4 +34,5 @@ export interface WizardServices extends CoreStart {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   types: TypeServiceStart;
+  expressions: ExpressionsStart;
 }

@@ -6,13 +6,17 @@
   "ui": true,
   "requiredPlugins": [
     "navigation",
+    "charts",
     "data",
     "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
     "savedObjects",
     "embeddable",
+    "expressions",
     "dashboard",
     "visualizations",
-    "opensearchUiShared"
+    "opensearchUiShared",
+    "visDefaultEditor"
   ],
   "optionalPlugins": []
 }

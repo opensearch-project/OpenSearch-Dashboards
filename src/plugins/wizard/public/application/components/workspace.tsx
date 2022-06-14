@@ -14,16 +14,34 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
-import { useTypedDispatch } from '../utils/state_management';
+import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
 
 import './workspace.scss';
 
 export const Workspace: FC = ({ children }) => {
+  const {
+    services: {
+      expressions: { ReactExpressionRenderer },
+    },
+  } = useOpenSearchDashboards<WizardServices>();
+  const { toExpression } = useVisualizationType();
+  const [expression, setExpression] = useState<string>();
+  const rootState = useTypedSelector((state) => state);
+
+  useEffect(() => {
+    async function loadExpression() {
+      const exp = await toExpression(rootState);
+      setExpression(exp);
+    }
+
+    loadExpression();
+  }, [rootState, toExpression]);
+
   return (
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
@@ -32,8 +50,8 @@ export const Workspace: FC = ({ children }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">
-        {children ? (
-          children
+        {expression ? (
+          <ReactExpressionRenderer expression={expression} />
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt

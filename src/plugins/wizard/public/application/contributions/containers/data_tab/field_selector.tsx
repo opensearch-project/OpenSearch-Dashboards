@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { EuiFlexItem, EuiAccordion, EuiSpacer, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiAccordion, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
 import { FieldSearch } from './field_search';
 
 import {
@@ -16,6 +16,7 @@ import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
 import { useTypedSelector } from '../../../utils/state_management';
+import { useIndexPattern } from '../../../utils/use';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -30,19 +31,32 @@ const META_FIELDS: string[] = [
   OPENSEARCH_FIELD_TYPES._TYPE,
 ];
 
+const ALLOWED_FIELDS: string[] = [OSD_FIELD_TYPES.STRING, OSD_FIELD_TYPES.NUMBER];
+
 export const FieldSelector = () => {
-  const indexFields = useTypedSelector((state) => state.dataSource.visualizableFields);
-  const [filteredFields, setFilteredFields] = useState(indexFields);
-  const fieldSearchValue = useTypedSelector((state) => state.dataSource.searchField);
+  const indexPattern = useIndexPattern();
+  const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
+  const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
+
+  // TODO: Temporary validate function
+  // Need to identify how to get fieldCounts to use the standard filter and group functions
+  const isVisualizable = useCallback((field: IndexPatternField): boolean => {
+    const isAggregatable = field.aggregatable === true;
+    const isNotScripted = !field.scripted;
+    const isAllowed = ALLOWED_FIELDS.includes(field.type);
+
+    return isAggregatable && isNotScripted && isAllowed;
+  }, []);
 
   useEffect(() => {
-    const filteredSubset = indexFields.filter((field) =>
-      field.displayName.includes(fieldSearchValue)
-    );
+    const indexFields = indexPattern?.fields ?? [];
+    const filteredSubset = indexFields
+      .filter(isVisualizable)
+      .filter((field) => field.displayName.includes(fieldSearchValue));
 
     setFilteredFields(filteredSubset);
     return;
-  }, [indexFields, fieldSearchValue]);
+  }, [fieldSearchValue, indexPattern?.fields, isVisualizable]);
 
   const fields = filteredFields?.reduce<IFieldCategories>(
     (fieldGroups, currentField) => {
