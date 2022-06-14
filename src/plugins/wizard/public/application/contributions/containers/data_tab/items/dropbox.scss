@@ -15,13 +15,15 @@
     display: grid;
     grid-gap: $euiSizeXS;
     padding: $euiSizeS;
-    background-color: #E9EDF3;
+    background-color: #e9edf3;
     border-radius: $euiBorderRadius;
   }
 
   &__field {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto;
+
+    // grid-template-columns: auto 1fr auto;
     grid-gap: $euiSizeS;
     padding: $euiSizeS $euiSizeM;
     align-items: center;
@@ -41,15 +43,14 @@
     grid-template-columns: 1fr auto;
 
     &.validField {
-      background-color: #A8D9E7; 
-      border-color: #A8D9E7;
+      background-color: #a8d9e7;
+      border-color: #a8d9e7;
 
       &.canDrop {
-        background-color: rgba(0, 161, 201, 0.3);
-        border-color: #006BB4;
+        background-color: rgba(0, 161, 201, 30%);
+        border-color: #006bb4;
         border-style: dashed;
       }
     }
-
   }
 }

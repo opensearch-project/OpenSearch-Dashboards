@@ -54,7 +54,7 @@ interface Arguments {
   colorRange: Range[];
   font: Style;
   metric: any[]; // these aren't typed yet
-  bucket: any; // these aren't typed yet
+  bucket?: any; // these aren't typed yet
 }
 
 export interface MetricVisRenderValue {
