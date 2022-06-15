@@ -183,7 +183,7 @@ export class CoreSystem {
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
-      if (this.fatalErrorsSetup) {
+      if (this.fatalErrorsSetup && (typeof error === 'string' || error instanceof Error)) {
         this.fatalErrorsSetup.add(error);
       } else {
         // If the FatalErrorsService has not yet been setup, log error to console
@@ -260,9 +260,14 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
+      const { useExpandedMenu } = injectedMetadata.getBranding() ?? {};
+
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      if (useExpandedMenu) {
+        this.rootDomElement.classList.add('headerIsExpanded');
+      }
       this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
@@ -278,7 +283,7 @@ export class CoreSystem {
         application,
       };
     } catch (error) {
-      if (this.fatalErrorsSetup) {
+      if (this.fatalErrorsSetup && (typeof error === 'string' || error instanceof Error)) {
         this.fatalErrorsSetup.add(error);
       } else {
         // If the FatalErrorsService has not yet been setup, log error to console

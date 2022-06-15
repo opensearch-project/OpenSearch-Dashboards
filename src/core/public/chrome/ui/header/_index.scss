@@ -1,4 +1,10 @@
-@include euiHeaderAffordForFixed;
+:not(.headerIsExpanded) {
+  @include euiHeaderAffordForFixed($osdHeaderOffset);
+}
+
+.headerIsExpanded {
+  @include euiHeaderAffordForFixed($osdHeaderOffset * 2);
+}
 
 .chrHeaderHelpMenu__version {
   text-transform: none;

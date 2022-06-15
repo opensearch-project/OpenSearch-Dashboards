@@ -34,7 +34,9 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHideFor,
   EuiIcon,
+  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -58,9 +60,10 @@ import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderLogo } from './header_logo';
+import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
+import { HeaderLogo } from './header_logo';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -80,6 +83,8 @@ export interface HeaderProps {
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
+  navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -108,11 +113,47 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
+  const { useExpandedMenu } = branding;
 
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
+          {useExpandedMenu && (
+            <EuiHeader
+              theme="dark"
+              position="fixed"
+              sections={[
+                {
+                  items: [<HeaderLogo {...branding} />],
+                  borders: 'none',
+                },
+                {
+                  ...(observables.navControlsExpandedCenter$ && {
+                    items: [
+                      <EuiShowFor sizes={['m', 'l', 'xl']}>
+                        <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                      </EuiShowFor>,
+                    ],
+                  }),
+                  borders: 'none',
+                },
+                {
+                  ...((observables.navControlsExpandedCenter$ ||
+                    observables.navControlsExpandedRight$) && {
+                    items: [
+                      <EuiHideFor sizes={['m', 'l', 'xl']}>
+                        <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                      </EuiHideFor>,
+                      <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
+                    ],
+                  }),
+                  borders: 'none',
+                },
+              ]}
+            />
+          )}
+
           <EuiHeader position="fixed">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
@@ -138,7 +179,7 @@ export function Header({
               )}
 
               <EuiHeaderSectionItem border="right">
-                <HeaderLogo
+                <HomeLoader
                   href={homeHref}
                   forceNavigation$={observables.forceAppSwitcherNavigation$}
                   navLinks$={observables.navLinks$}
@@ -171,6 +212,12 @@ export function Header({
                 </EuiHeaderSectionItem>
               )}
 
+              {observables.navControlsRight$ && (
+                <EuiHeaderSectionItem border="left">
+                  <HeaderNavControls navControls$={observables.navControlsRight$} />
+                </EuiHeaderSectionItem>
+              )}
+
               <EuiHeaderSectionItem border="left">
                 <HeaderHelpMenu
                   helpExtension$={observables.helpExtension$}
@@ -179,12 +226,6 @@ export function Header({
                   opensearchDashboardsVersion={opensearchDashboardsVersion}
                 />
               </EuiHeaderSectionItem>
-
-              {observables.navControlsRight$ && (
-                <EuiHeaderSectionItem border="left">
-                  <HeaderNavControls navControls$={observables.navControlsRight$} />
-                </EuiHeaderSectionItem>
-              )}
             </EuiHeaderSection>
           </EuiHeader>
         </div>

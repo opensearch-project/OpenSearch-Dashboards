@@ -63,6 +63,8 @@ function mockProps() {
     navControlsLeft$: new BehaviorSubject([]),
     navControlsCenter$: new BehaviorSubject([]),
     navControlsRight$: new BehaviorSubject([]),
+    navControlsExpandedCenter$: new BehaviorSubject([]),
+    navControlsExpandedRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),

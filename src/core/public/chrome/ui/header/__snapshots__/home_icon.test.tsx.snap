@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   darkMode={true}
   intl={
@@ -119,7 +119,7 @@ exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
     data-test-image-url="/darkModeMark"
     data-test-subj="customLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="/darkModeMark"
   >
     <span
@@ -128,14 +128,14 @@ exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
       data-test-image-url="/darkModeMark"
       data-test-subj="customLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark mode mark 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   darkMode={true}
   intl={
@@ -252,7 +252,7 @@ exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark
     data-test-image-url="/defaultModeMark"
     data-test-subj="customLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="/defaultModeMark"
   >
     <span
@@ -261,14 +261,14 @@ exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark
       data-test-image-url="/defaultModeMark"
       data-test-subj="customLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided without mark 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   darkMode={true}
   intl={
@@ -385,7 +385,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
     data-test-image-url="/opensearch_mark_dark_mode.svg"
     data-test-subj="defaultLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="/opensearch_mark_dark_mode.svg"
   >
     <span
@@ -394,14 +394,14 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
       data-test-image-url="/opensearch_mark_dark_mode.svg"
       data-test-subj="defaultLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   assetFolderUrl="ui/assets"
   darkMode={true}
@@ -515,7 +515,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
     data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
     data-test-subj="defaultLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="ui/assets/opensearch_mark_dark_mode.svg"
   >
     <span
@@ -524,14 +524,14 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
       data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
       data-test-subj="defaultLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   darkMode={false}
   intl={
@@ -648,7 +648,7 @@ exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
     data-test-image-url="/defaultModeMark"
     data-test-subj="customLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="/defaultModeMark"
   >
     <span
@@ -657,14 +657,14 @@ exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
       data-test-image-url="/defaultModeMark"
       data-test-subj="customLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if custom logo provided without mark 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   darkMode={false}
   intl={
@@ -781,7 +781,7 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
     data-test-image-url="/opensearch_mark_default_mode.svg"
     data-test-subj="defaultLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="/opensearch_mark_default_mode.svg"
   >
     <span
@@ -790,14 +790,14 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
       data-test-image-url="/opensearch_mark_default_mode.svg"
       data-test-subj="defaultLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] = `
-<Mark
+<HomeIcon
   intl={
     Object {
       "defaultFormats": Object {},
@@ -906,7 +906,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] =
     data-test-image-url="/opensearch_mark_default_mode.svg"
     data-test-subj="defaultLogo"
     size="l"
-    title="opensearch dashboards logo"
+    title="opensearch dashboards home"
     type="/opensearch_mark_default_mode.svg"
   >
     <span
@@ -915,14 +915,14 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] =
       data-test-image-url="/opensearch_mark_default_mode.svg"
       data-test-subj="defaultLogo"
       size="l"
-      title="opensearch dashboards logo"
+      title="opensearch dashboards home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if no mark provided 1`] = `
-<Mark
+<HomeIcon
   applicationTitle="custom title"
   assetFolderUrl="ui/assets"
   darkMode={false}
@@ -1036,7 +1036,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no mark provided 
     data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
     data-test-subj="defaultLogo"
     size="l"
-    title="custom title logo"
+    title="custom title home"
     type="ui/assets/opensearch_mark_default_mode.svg"
   >
     <span
@@ -1045,8 +1045,8 @@ exports[`Header logo  in default mode  uses opensearch logo if no mark provided 
       data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
       data-test-subj="defaultLogo"
       size="l"
-      title="custom title logo"
+      title="custom title home"
     />
   </EuiIcon>
-</Mark>
+</HomeIcon>
 `;

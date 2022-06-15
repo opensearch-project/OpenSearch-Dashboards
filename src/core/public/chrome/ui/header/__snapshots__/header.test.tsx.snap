@@ -1449,6 +1449,28 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
+  navControlsExpandedCenter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  navControlsExpandedRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1886,7 +1908,7 @@ exports[`Header renders 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight"
                 >
-                  <HeaderLogo
+                  <HomeLoader
                     branding={
                       Object {
                         "applicationTitle": "OpenSearch Dashboards",
@@ -2132,10 +2154,11 @@ exports[`Header renders 1`] = `
                   >
                     <EuiHeaderSectionItemButton
                       aria-label="Go to home page"
-                      className="header__logoNavButton"
-                      data-test-subj="logo"
+                      className="header__homeLoaderNavButton"
+                      data-test-subj="homeLoader"
                       href="/"
                       onClick={[Function]}
+                      title="Go to home page"
                     >
                       <EuiButtonEmpty
                         aria-label="Go to home page"
@@ -2143,10 +2166,11 @@ exports[`Header renders 1`] = `
                           Object {
                             "current": <a
                               aria-label="Go to home page"
-                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__logoNavButton"
-                              data-test-subj="logo"
+                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                              data-test-subj="homeLoader"
                               href="/"
                               rel="noreferrer"
+                              title="Go to home page"
                             >
                               <span
                                 class="euiButtonContent euiButtonEmpty__content"
@@ -2158,14 +2182,14 @@ exports[`Header renders 1`] = `
                                     class="euiHeaderSectionItemButton__content"
                                   >
                                     <div
-                                      class="logoContainer"
+                                      class="homeIconContainer"
                                     >
                                       <span
                                         class="logoImage"
                                         data-euiicon-type="/"
                                         data-test-image-url="/"
                                         data-test-subj="customLogo"
-                                        title="OpenSearch Dashboards logo"
+                                        title="OpenSearch Dashboards home"
                                       />
                                     </div>
                                     <div
@@ -2184,19 +2208,21 @@ exports[`Header renders 1`] = `
                             </a>,
                           }
                         }
-                        className="euiHeaderSectionItemButton header__logoNavButton"
+                        className="euiHeaderSectionItemButton header__homeLoaderNavButton"
                         color="text"
-                        data-test-subj="logo"
+                        data-test-subj="homeLoader"
                         href="/"
                         onClick={[Function]}
+                        title="Go to home page"
                       >
                         <a
                           aria-label="Go to home page"
-                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__logoNavButton"
-                          data-test-subj="logo"
+                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                          data-test-subj="homeLoader"
                           href="/"
                           onClick={[Function]}
                           rel="noreferrer"
+                          title="Go to home page"
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
@@ -2218,9 +2244,9 @@ exports[`Header renders 1`] = `
                                   className="euiHeaderSectionItemButton__content"
                                 >
                                   <div
-                                    className="logoContainer"
+                                    className="homeIconContainer"
                                   >
-                                    <Mark
+                                    <HomeIcon
                                       applicationTitle="OpenSearch Dashboards"
                                       darkMode={false}
                                       logo={
@@ -2239,7 +2265,7 @@ exports[`Header renders 1`] = `
                                         data-test-image-url="/"
                                         data-test-subj="customLogo"
                                         size="l"
-                                        title="OpenSearch Dashboards logo"
+                                        title="OpenSearch Dashboards home"
                                         type="/"
                                       >
                                         <span
@@ -2248,10 +2274,10 @@ exports[`Header renders 1`] = `
                                           data-test-image-url="/"
                                           data-test-subj="customLogo"
                                           size="l"
-                                          title="OpenSearch Dashboards logo"
+                                          title="OpenSearch Dashboards home"
                                         />
                                       </EuiIcon>
-                                    </Mark>
+                                    </HomeIcon>
                                   </div>
                                   <div
                                     className="loaderContainer"
@@ -2367,7 +2393,7 @@ exports[`Header renders 1`] = `
                         </a>
                       </EuiButtonEmpty>
                     </EuiHeaderSectionItemButton>
-                  </HeaderLogo>
+                  </HomeLoader>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -2647,6 +2673,65 @@ exports[`Header renders 1`] = `
                       data-test-subj="headerAppActionMenu"
                     />
                   </HeaderActionMenu>
+                </div>
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                border="left"
+              >
+                <div
+                  className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
+                >
+                  <HeaderNavControls
+                    navControls$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  />
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
@@ -4345,65 +4430,6 @@ exports[`Header renders 1`] = `
                       </EuiPopover>
                     </HeaderHelpMenuUI>
                   </InjectIntl(HeaderHelpMenuUI)>
-                </div>
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                border="left"
-              >
-                <div
-                  className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
-                >
-                  <HeaderNavControls
-                    navControls$={
-                      BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": Array [],
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [
-                          Subscriber {
-                            "_parentOrParents": null,
-                            "_subscriptions": Array [
-                              SubjectSubscription {
-                                "_parentOrParents": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "subject": [Circular],
-                                "subscriber": [Circular],
-                              },
-                            ],
-                            "closed": false,
-                            "destination": SafeSubscriber {
-                              "_complete": undefined,
-                              "_context": [Circular],
-                              "_error": undefined,
-                              "_next": [Function],
-                              "_parentOrParents": null,
-                              "_parentSubscriber": [Circular],
-                              "_subscriptions": null,
-                              "closed": false,
-                              "destination": Object {
-                                "closed": true,
-                                "complete": [Function],
-                                "error": [Function],
-                                "next": [Function],
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": false,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                            "isStopped": false,
-                            "syncErrorThrowable": true,
-                            "syncErrorThrown": false,
-                            "syncErrorValue": null,
-                          },
-                        ],
-                        "thrownError": null,
-                      }
-                    }
-                  />
                 </div>
               </EuiHeaderSectionItem>
             </div>
