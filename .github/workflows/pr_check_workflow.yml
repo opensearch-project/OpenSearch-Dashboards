@@ -32,53 +32,54 @@ jobs:
       # Access a cache of set results from a previous run of the job
       # This is to prevent re-running steps that were already successful since it is not native to github actions
       # Can be used to verify flaky steps with reduced times
-      # - name: Restore the cached run
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: |
-      #       job_successful
-      #       linter_results
-      #       unit_tests_results
-      #       integration_tests_results
-      #     key: ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
-      #     restore-keys: |
-      #       ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
+      - name: Restore the cached run
+        uses: actions/cache@v2
+        with:
+          path: |
+            job_successful
+            linter_results
+            unit_tests_results
+            integration_tests_results
+          key: ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
 
-      # - name: Get if previous job was successful
-      #   id: job_successful
-      #   run: cat job_successful 2>/dev/null || echo 'false'
+      - name: Get if previous job was successful
+        id: job_successful
+        run: cat job_successful 2>/dev/null || echo 'false'
 
-      # - name: Get the previous linter results 
-      #   id: linter_results
-      #   run: cat linter_results 2>/dev/null || echo 'default'
+      - name: Get the previous linter results 
+        id: linter_results
+        run: cat linter_results 2>/dev/null || echo 'default'
 
-      # - name: Get the previous unit tests results 
-      #   id: unit_tests_results
-      #   run: cat unit_tests_results 2>/dev/null || echo 'default'
+      - name: Get the previous unit tests results 
+        id: unit_tests_results
+        run: cat unit_tests_results 2>/dev/null || echo 'default'
 
-      # - name: Get the previous integration tests results 
-      #   id: integration_tests_results
-      #   run: cat integration_tests_results 2>/dev/null || echo 'default'
+      - name: Get the previous integration tests results 
+        id: integration_tests_results
+        run: cat integration_tests_results 2>/dev/null || echo 'default'
 
       - name: Checkout code
-        # if: steps.job_successful.outputs.job_successful != 'true'
+        if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/checkout@v2
 
       - name: Setup Node
-        # if: steps.job_successful.outputs.job_successful != 'true'
+        if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/setup-node@v2
         with:
           node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
+          cache: '${{ github.run_id }}-${{ github.job }}-${{ github.sha }}'
 
       - name: Setup Yarn
-        # if: steps.job_successful.outputs.job_successful != 'true'
+        if: steps.job_successful.outputs.job_successful != 'true'
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
       - name: Run bootstrap
-        # if: steps.job_successful.outputs.job_successful != 'true'
+        if: steps.job_successful.outputs.job_successful != 'true'
         run: yarn osd bootstrap
 
       - name: Run linter
