@@ -42,15 +42,14 @@ import { DEFAULT_MAP_CHOICE } from '../common';
 export function createRegionMapTypeDefinition(dependencies) {
   const {
     http,
-    notifications,
     uiSettings,
     regionmapsConfig,
     getServiceSettings,
     additionalOptions,
   } = dependencies;
-  const visualization = createRegionMapVisualization(dependencies);
-  const services = getServices(http);
 
+  const services = getServices(http);
+  const visualization = createRegionMapVisualization(dependencies);
   const diffArray = (arr1, arr2) => {
     return arr1.concat(arr2).filter((item) => !arr1.includes(item) || !arr2.includes(item));
   };
@@ -72,7 +71,7 @@ export function createRegionMapTypeDefinition(dependencies) {
       ]);
       return properties.map(function (property) {
         return {
-          type: property,
+          type: 'id',
           name: property,
           description: property,
         };
@@ -110,6 +109,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
+        layerChosenByUser: DEFAULT_MAP_CHOICE,
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
@@ -187,9 +187,6 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
 
-      vis.http = http;
-      vis.params.http = http;
-      vis.notifications = notifications;
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];

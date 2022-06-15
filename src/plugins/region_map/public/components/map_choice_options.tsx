@@ -51,7 +51,6 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
     customVectorLayers,
   ]);
-  const [userSelectedLayer, setUserSelectedLayer] = useState(DEFAULT_MAP_CHOICE);
 
   const fieldOptions = useMemo(
     () =>
@@ -70,12 +69,10 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const selectDefaultVectorMap = () => {
-    setUserSelectedLayer(DEFAULT_MAP_CHOICE);
     setValue('layerChosenByUser', DEFAULT_MAP_CHOICE);
   };
 
   const selectCustomVectorMap = () => {
-    setUserSelectedLayer(CUSTOM_MAP_CHOICE);
     setValue('layerChosenByUser', CUSTOM_MAP_CHOICE);
   };
 
@@ -137,8 +134,6 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
     [setValue, stateParams.selectedLayer]
   );
 
-  // const [selectedOptions, setSelected] = useState([customFieldOptions[0]]);
-
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -161,27 +156,29 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
         <EuiFlexItem>
           <EuiCheckableCard
             id="defaultVectorMap"
+            data-test-subj="defaultVectorMap"
             label="Default vector map"
             name="defaultVectorMap"
             value="default"
-            checked={DEFAULT_MAP_CHOICE === userSelectedLayer}
+            checked={DEFAULT_MAP_CHOICE === stateParams.layerChosenByUser}
             onChange={selectDefaultVectorMap}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCheckableCard
             id="customVectorMap"
+            data-test-subj="customVectorMap"
             label="Custom vector map"
             name="customVectorMap"
             value="custom"
-            checked={CUSTOM_MAP_CHOICE === userSelectedLayer}
+            checked={CUSTOM_MAP_CHOICE === stateParams.layerChosenByUser}
             onChange={selectCustomVectorMap}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      {DEFAULT_MAP_CHOICE === userSelectedLayer ? (
+      {DEFAULT_MAP_CHOICE === stateParams.layerChosenByUser ? (
         <EuiFlexGroup id="defaultMapSelection" direction="column">
           <EuiFlexItem grow={false}>
             <SelectOption

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpFetchError } from 'opensearch-dashboards/public';
+import { CoreStart, HttpFetchError } from 'opensearch-dashboards/public';
 
 export interface Services {
   getCustomIndices: () => Promise<undefined | HttpFetchError>;
@@ -11,7 +11,7 @@ export interface Services {
   getIndexMapping: (indexName: string) => Promise<undefined | HttpFetchError>;
 }
 
-export function getServices(http: any): Services {
+export function getServices(http: CoreStart['http']): Services {
   return {
     getCustomIndices: async () => {
       try {

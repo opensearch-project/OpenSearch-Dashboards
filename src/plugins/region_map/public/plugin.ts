@@ -60,7 +60,6 @@ import { SharePluginStart } from '../../share/public';
 /** @private */
 export interface RegionMapVisualizationDependencies {
   http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   getServiceSettings: () => Promise<IServiceSettings>;
@@ -126,7 +125,6 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
 
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       http: core.http,
-      notifications: core.notifications,
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
       getServiceSettings: mapsLegacy.getServiceSettings,

@@ -54,23 +54,23 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   if (customVectorLayerOptions.length === 0) {
     return (
-      <>
+      <div id="defaultMapOption">
         <DefaultMapOptions {...props} />
         <EuiSpacer size="s" />
         <StyleOptions {...props} />
         <EuiSpacer size="s" />
         <WmsOptions {...props} />
-      </>
+      </div>
     );
   } else {
     return (
-      <>
+      <div id="customMapOption">
         <MapChoiceOptions {...props} />
         <EuiSpacer size="s" />
         <StyleOptions {...props} />
         <EuiSpacer size="s" />
         <WmsOptions {...props} />
-      </>
+      </div>
     );
   }
 }
