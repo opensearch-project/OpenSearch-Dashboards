@@ -27,6 +27,9 @@ jobs:
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
+    defaults:
+      run:
+        working-directory: ./artifacts
     name: Build and Verify
     steps:
       # Access a cache of set results from a previous run of the job
@@ -63,14 +66,15 @@ jobs:
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/checkout@v2
+        with:
+          path: ./artifacts
 
       - name: Setup Node
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/setup-node@v2
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: "./artifacts/.nvmrc"
           registry-url: 'https://registry.npmjs.org'
-          cache: '${{ github.run_id }}-${{ github.job }}-${{ github.sha }}'
 
       - name: Setup Yarn
         if: steps.job_successful.outputs.job_successful != 'true'
@@ -124,6 +128,9 @@ jobs:
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
+    defaults:
+      run:
+        working-directory: ./artifacts
     name: Run functional tests
     strategy: 
       matrix:
@@ -150,12 +157,14 @@ jobs:
       - name: Checkout code
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         uses: actions/checkout@v2
+        with:
+          path: ./artifacts
 
       - name: Setup Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         uses: actions/setup-node@v2
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: "./artifacts/.nvmrc"
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
