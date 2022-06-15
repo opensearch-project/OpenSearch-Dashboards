@@ -33,7 +33,7 @@ export const HomeIcon = ({
       : useExpandedMenu
       ? 'home'
       : `${assetFolderUrl}/${defaultMark}`;
-    const testSubj = customMark ? 'customLogo' : useExpandedMenu ? 'homeLogo' : 'defaultLogo';
+    const testSubj = customMark ? 'customMark' : useExpandedMenu ? 'homeIcon' : 'defaultMark';
     const title = `${applicationTitle} home`;
     const size = useExpandedMenu ? ('m' as const) : ('l' as const);
 

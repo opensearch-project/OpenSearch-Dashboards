@@ -28,20 +28,21 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+import expect from '@osd/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-  describe('homepage app', function () {
-    this.tags('ciGroup6');
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
-    before(function () {
-      return browser.setWindowSize(1200, 800);
+  describe('add data tutorials', function describeIndexTests() {
+    it('directory should not display registered tutorials', async () => {
+      await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflowlogs');
+        expect(tutorialExists).to.be(false);
+      });
     });
-
-    loadTestFile(require.resolve('./_navigation'));
-    loadTestFile(require.resolve('./_home'));
-    loadTestFile(require.resolve('./_newsfeed'));
-    loadTestFile(require.resolve('./_add_data'));
-    loadTestFile(require.resolve('./_sample_data'));
   });
 }

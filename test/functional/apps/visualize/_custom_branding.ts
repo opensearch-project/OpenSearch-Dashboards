@@ -121,19 +121,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home');
       });
 
-      it('with customized logo in header bar', async () => {
-        await globalNav.logoExistsOrFail(expectedMarkLogo);
+      it('with customized mark logo button in header bar', async () => {
+        await globalNav.homeMarkExistsOrFail(expectedMarkLogo);
       });
 
-      it('with customized logo that can take back to home page', async () => {
+      it('with customized mark logo button that navigates to home page', async () => {
         await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickLogo();
+        await globalNav.clickHomeButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         expect(url.includes('/app/home')).to.be(true);
       });
 
-      it('with customized logo in home dashboard card', async () => {
+      it('with customized mark logo in home dashboard card', async () => {
         await testSubjects.existOrFail('dashboardCustomLogo');
         const actualLabel = await testSubjects.getAttribute(
           'dashboardCustomLogo',
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
       });
 
-      it('with customized logo for opensearch in side menu', async () => {
+      it('with customized mark logo for opensearch in side menu', async () => {
         await appsMenu.openCollapsibleNav();
         await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
         const actualLabel = await testSubjects.getAttribute(
@@ -161,22 +161,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
       });
 
-      it('with customized logo in header bar in dark mode', async () => {
+      it('with customized mark logo button in header bar in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
-        await globalNav.logoExistsOrFail(expectedMarkLogoDarkMode);
+        await globalNav.homeMarkExistsOrFail(expectedMarkLogoDarkMode);
       });
 
-      it('with customized logo that can take back to home page in dark mode', async () => {
+      it('with customized mark logo button that navigates to home page in dark mode', async () => {
         await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickLogo();
+        await globalNav.clickHomeButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         expect(url.includes('/app/home')).to.be(true);
       });
 
-      it('with customized logo in home dashboard card in dark mode', async () => {
+      it('with customized mark logo in home dashboard card in dark mode', async () => {
         await testSubjects.existOrFail('dashboardCustomLogo');
         const actualLabel = await testSubjects.getAttribute(
           'dashboardCustomLogo',
@@ -185,7 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
       });
 
-      it('with customized logo for opensearch in side menu in dark mode', async () => {
+      it('with customized mark logo for opensearch in side menu in dark mode', async () => {
         await appsMenu.openCollapsibleNav();
         await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
         const actualLabel = await testSubjects.getAttribute(

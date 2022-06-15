@@ -29,8 +29,9 @@
  */
 
 import expect from '@osd/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
@@ -38,9 +39,9 @@ export default function ({ getService, getPageObjects }) {
   describe('OpenSearch Dashboards takes you home', function describeIndexTests() {
     this.tags('includeFirefox');
 
-    it('clicking on opensearch-dashboards logo should take you to home page', async () => {
+    it('clicking on home button should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');
-      await globalNav.clickLogo();
+      await globalNav.clickHomeButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/home')).to.be(true);

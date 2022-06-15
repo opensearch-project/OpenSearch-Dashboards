@@ -28,20 +28,22 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const browser = getService('browser');
 
-  describe('add data tutorials', function describeIndexTests() {
-    it('directory should not display registered tutorials', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflowlogs');
-        expect(tutorialExists).to.be(false);
-      });
+  describe('homepage app', function () {
+    this.tags('ciGroup6');
+
+    before(function () {
+      return browser.setWindowSize(1200, 800);
     });
+
+    loadTestFile(require.resolve('./_navigation'));
+    loadTestFile(require.resolve('./_home'));
+    loadTestFile(require.resolve('./_newsfeed'));
+    loadTestFile(require.resolve('./_add_data'));
+    loadTestFile(require.resolve('./_sample_data'));
   });
 }
