@@ -39,10 +39,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            job_successful
-            linter_results
-            unit_tests_results
-            integration_tests_results
+            ./artificats/job_successful
+            ./artificats/linter_results
+            ./artificats/unit_tests_results
+            ./artificats/integration_tests_results
           key: ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
             ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
@@ -145,7 +145,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ftr_tests_results
+            ./artifacts/ftr_tests_results
           key: ${{ github.run_id }}-${{ github.job }}-${{ matrix.group }}-${{ github.sha }}
           restore-keys: |
             ${{ github.run_id }}-${{ github.job }}-${{ matrix.group }}-${{ github.sha }}
