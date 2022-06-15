@@ -25,8 +25,8 @@ jobs:
   build-lint-test:
     runs-on: ubuntu-latest
     container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user root
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v1
+      options: --user 1001
     name: Build and Verify
     steps:
       # Access a cache of set results from a previous run of the job
@@ -121,8 +121,8 @@ jobs:
     needs: [ build-lint-test ]
     runs-on: ubuntu-latest
     container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user root
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v1
+      options: --user 1001
     name: Run functional tests
     strategy: 
       matrix:
