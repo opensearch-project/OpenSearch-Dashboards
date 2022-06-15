@@ -2188,7 +2188,7 @@ exports[`Header renders 1`] = `
                                         class="logoImage"
                                         data-euiicon-type="/"
                                         data-test-image-url="/"
-                                        data-test-subj="customLogo"
+                                        data-test-subj="customMark"
                                         title="OpenSearch Dashboards home"
                                       />
                                     </div>
@@ -2263,7 +2263,7 @@ exports[`Header renders 1`] = `
                                       <EuiIcon
                                         className="logoImage"
                                         data-test-image-url="/"
-                                        data-test-subj="customLogo"
+                                        data-test-subj="customMark"
                                         size="l"
                                         title="OpenSearch Dashboards home"
                                         type="/"
@@ -2272,7 +2272,7 @@ exports[`Header renders 1`] = `
                                           className="logoImage"
                                           data-euiicon-type="/"
                                           data-test-image-url="/"
-                                          data-test-subj="customLogo"
+                                          data-test-subj="customMark"
                                           size="l"
                                           title="OpenSearch Dashboards home"
                                         />

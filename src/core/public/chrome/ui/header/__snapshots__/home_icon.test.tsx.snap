@@ -117,7 +117,7 @@ exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
   <EuiIcon
     className="logoImage"
     data-test-image-url="/darkModeMark"
-    data-test-subj="customLogo"
+    data-test-subj="customMark"
     size="l"
     title="custom title home"
     type="/darkModeMark"
@@ -126,7 +126,7 @@ exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
       className="logoImage"
       data-euiicon-type="/darkModeMark"
       data-test-image-url="/darkModeMark"
-      data-test-subj="customLogo"
+      data-test-subj="customMark"
       size="l"
       title="custom title home"
     />
@@ -250,7 +250,7 @@ exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark
   <EuiIcon
     className="logoImage"
     data-test-image-url="/defaultModeMark"
-    data-test-subj="customLogo"
+    data-test-subj="customMark"
     size="l"
     title="custom title home"
     type="/defaultModeMark"
@@ -259,7 +259,7 @@ exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark
       className="logoImage"
       data-euiicon-type="/defaultModeMark"
       data-test-image-url="/defaultModeMark"
-      data-test-subj="customLogo"
+      data-test-subj="customMark"
       size="l"
       title="custom title home"
     />
@@ -383,7 +383,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
   <EuiIcon
     className="logoImage"
     data-test-image-url="/opensearch_mark_dark_mode.svg"
-    data-test-subj="defaultLogo"
+    data-test-subj="defaultMark"
     size="l"
     title="custom title home"
     type="/opensearch_mark_dark_mode.svg"
@@ -392,7 +392,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
       className="logoImage"
       data-euiicon-type="/opensearch_mark_dark_mode.svg"
       data-test-image-url="/opensearch_mark_dark_mode.svg"
-      data-test-subj="defaultLogo"
+      data-test-subj="defaultMark"
       size="l"
       title="custom title home"
     />
@@ -513,7 +513,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
   <EuiIcon
     className="logoImage"
     data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
-    data-test-subj="defaultLogo"
+    data-test-subj="defaultMark"
     size="l"
     title="custom title home"
     type="ui/assets/opensearch_mark_dark_mode.svg"
@@ -522,7 +522,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
       className="logoImage"
       data-euiicon-type="ui/assets/opensearch_mark_dark_mode.svg"
       data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
-      data-test-subj="defaultLogo"
+      data-test-subj="defaultMark"
       size="l"
       title="custom title home"
     />
@@ -646,7 +646,7 @@ exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
   <EuiIcon
     className="logoImage"
     data-test-image-url="/defaultModeMark"
-    data-test-subj="customLogo"
+    data-test-subj="customMark"
     size="l"
     title="custom title home"
     type="/defaultModeMark"
@@ -655,7 +655,7 @@ exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
       className="logoImage"
       data-euiicon-type="/defaultModeMark"
       data-test-image-url="/defaultModeMark"
-      data-test-subj="customLogo"
+      data-test-subj="customMark"
       size="l"
       title="custom title home"
     />
@@ -779,7 +779,7 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
   <EuiIcon
     className="logoImage"
     data-test-image-url="/opensearch_mark_default_mode.svg"
-    data-test-subj="defaultLogo"
+    data-test-subj="defaultMark"
     size="l"
     title="custom title home"
     type="/opensearch_mark_default_mode.svg"
@@ -788,7 +788,7 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
       className="logoImage"
       data-euiicon-type="/opensearch_mark_default_mode.svg"
       data-test-image-url="/opensearch_mark_default_mode.svg"
-      data-test-subj="defaultLogo"
+      data-test-subj="defaultMark"
       size="l"
       title="custom title home"
     />
@@ -904,7 +904,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] =
   <EuiIcon
     className="logoImage"
     data-test-image-url="/opensearch_mark_default_mode.svg"
-    data-test-subj="defaultLogo"
+    data-test-subj="defaultMark"
     size="l"
     title="opensearch dashboards home"
     type="/opensearch_mark_default_mode.svg"
@@ -913,7 +913,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] =
       className="logoImage"
       data-euiicon-type="/opensearch_mark_default_mode.svg"
       data-test-image-url="/opensearch_mark_default_mode.svg"
-      data-test-subj="defaultLogo"
+      data-test-subj="defaultMark"
       size="l"
       title="opensearch dashboards home"
     />
@@ -1034,7 +1034,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no mark provided 
   <EuiIcon
     className="logoImage"
     data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
-    data-test-subj="defaultLogo"
+    data-test-subj="defaultMark"
     size="l"
     title="custom title home"
     type="ui/assets/opensearch_mark_default_mode.svg"
@@ -1043,7 +1043,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no mark provided 
       className="logoImage"
       data-euiicon-type="ui/assets/opensearch_mark_default_mode.svg"
       data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
-      data-test-subj="defaultLogo"
+      data-test-subj="defaultMark"
       size="l"
       title="custom title home"
     />
