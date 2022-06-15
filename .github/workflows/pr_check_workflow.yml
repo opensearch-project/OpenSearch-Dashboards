@@ -49,19 +49,19 @@ jobs:
 
       - name: Get if previous job was successful
         id: job_successful
-        run: cat job_successful 2>/dev/null || echo 'false'
+        run: cat ./artifacts/job_successful 2>/dev/null || echo 'false'
 
       - name: Get the previous linter results 
         id: linter_results
-        run: cat linter_results 2>/dev/null || echo 'default'
+        run: cat ./artifacts/linter_results 2>/dev/null || echo 'default'
 
       - name: Get the previous unit tests results 
         id: unit_tests_results
-        run: cat unit_tests_results 2>/dev/null || echo 'default'
+        run: cat ./artifacts/unit_tests_results 2>/dev/null || echo 'default'
 
       - name: Get the previous integration tests results 
         id: integration_tests_results
-        run: cat integration_tests_results 2>/dev/null || echo 'default'
+        run: cat ./artifacts/integration_tests_results 2>/dev/null || echo 'default'
 
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
@@ -152,7 +152,7 @@ jobs:
 
       - name: Get the cached tests results 
         id: ftr_tests_results
-        run: cat ftr_tests_results 2>/dev/null || echo 'default'
+        run: cat ./artifacts/ftr_tests_results 2>/dev/null || echo 'default'
 
       - name: Checkout code
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
