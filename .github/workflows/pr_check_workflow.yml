@@ -39,10 +39,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ./artificats/job_successful
-            ./artificats/linter_results
-            ./artificats/unit_tests_results
-            ./artificats/integration_tests_results
+            ./artifacts/job_successful
+            ./artifacts/linter_results
+            ./artifacts/unit_tests_results
+            ./artifacts/integration_tests_results
           key: ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
             ${{ github.run_id }}-${{ github.job }}-${{ github.sha }}
