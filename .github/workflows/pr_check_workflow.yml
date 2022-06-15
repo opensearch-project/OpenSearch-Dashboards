@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      options: --user root
     name: Build and Verify
     steps:
       # Access a cache of set results from a previous run of the job
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      options: --user root
     name: Run functional tests
     strategy: 
       matrix:
