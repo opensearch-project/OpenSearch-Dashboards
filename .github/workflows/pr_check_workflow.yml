@@ -25,7 +25,7 @@ jobs:
   build-lint-test:
     runs-on: ubuntu-latest
     container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v1
+      image: docker://opensearchstaging/ci-runner:ci-runner-centos7-opensearch-dashboards-build-v2
       options: --user 1001
     name: Build and Verify
     steps:
@@ -121,7 +121,7 @@ jobs:
     needs: [ build-lint-test ]
     runs-on: ubuntu-latest
     container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v1
+      image: docker://opensearchstaging/ci-runner:ci-runner-centos7-opensearch-dashboards-build-v2
       options: --user 1001
     name: Run functional tests
     strategy: 
