@@ -36,6 +36,8 @@ import * as topojson from 'topojson-client';
 import { getNotifications } from './opensearch_dashboards_services';
 import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps_legacy/public';
 import { truncatedColorMaps } from '../../charts/public';
+import { getServices } from './services';
+import { DEFAULT_MAP_CHOICE, CUSTOM_MAP_CHOICE } from '../common';
 
 const EMPTY_STYLE = {
   weight: 1,
@@ -90,7 +92,9 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     meta,
     layerConfig,
     serviceSettings,
-    leaflet
+    leaflet,
+    layerChosenByUser,
+    http
   ) {
     super();
     this._serviceSettings = serviceSettings;
@@ -105,6 +109,9 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._layerName = name;
     this._layerConfig = layerConfig;
     this._leaflet = leaflet;
+    this._layerChosenByUser = layerChosenByUser;
+    this._http = http;
+    this._visParams = null;
 
     // eslint-disable-next-line no-undef
     this._leafletLayer = this._leaflet.geoJson(null, {
@@ -139,7 +146,14 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._isJoinValid = false;
     this._whenDataLoaded = new Promise(async (resolve) => {
       try {
-        const data = await this._makeJsonAjaxCall();
+        let data;
+        if (DEFAULT_MAP_CHOICE === this._layerChosenByUser) {
+          data = await this._makeJsonAjaxCall();
+        } else if (CUSTOM_MAP_CHOICE === this._layerChosenByUser) {
+          data = await this._fetchCustomLayerData();
+        } else {
+          return;
+        }
         let featureCollection;
         let formatType;
         if (typeof format === 'string') {
@@ -223,6 +237,29 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
     return this._serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
+  async _fetchCustomLayerData() {
+    // fetch data from index and transform it to feature collection
+    try {
+      const services = getServices(this._http);
+      const result = await services.getIndexData(this._layerName);
+
+      const finalResult = {
+        type: 'FeatureCollection',
+        features: [],
+      };
+      for (let featureCount = 0; featureCount < result.resp.hits.hits.length; featureCount++) {
+        finalResult.features.push({
+          geometry: result.resp.hits.hits[featureCount]._source.location,
+          properties: removeKeys(result.resp.hits.hits[featureCount]._source),
+          type: 'Feature',
+        });
+      }
+      return finalResult;
+    } catch (e) {
+      return false;
+    }
+  }
+
   _invalidateJoin() {
     this._isJoinValid = false;
   }
@@ -298,7 +335,9 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
     meta,
     layerConfig,
     serviceSettings,
-    leaflet
+    leaflet,
+    layerChosenByUser,
+    http
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -308,7 +347,9 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
       meta,
       layerConfig,
       serviceSettings,
-      leaflet
+      leaflet,
+      layerChosenByUser,
+      http
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
@@ -333,6 +374,14 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
 
   whenDataLoaded() {
     return this._whenDataLoaded;
+  }
+
+  setLayerChosenByUser(layerChosenByUser) {
+    this._layerChosenByUser = layerChosenByUser;
+  }
+
+  setVisParams(visParams) {
+    this._visParams = visParams;
   }
 
   setMetrics(metrics, fieldFormatter, metricTitle) {
@@ -519,4 +568,12 @@ function getChoroplethColor(value, min, max, colorRamp) {
   const i = Math.max(Math.min(colorRamp.length - 1, index), 0);
 
   return colorUtil.getColor(colorRamp, i);
+}
+
+function removeKeys(myObj) {
+  const array = ['id', 'location'];
+  for (let index = 0; index < array.length; index++) {
+    delete myObj[array[index]];
+  }
+  return myObj;
 }
