@@ -11,7 +11,8 @@
     "mapsLegacy",
     "opensearchDashboardsLegacy",
     "data",
-    "share"
+    "share",
+    "opensearchDashboardsReact"
   ],
   "requiredBundles": [
     "opensearchDashboardsUtils",

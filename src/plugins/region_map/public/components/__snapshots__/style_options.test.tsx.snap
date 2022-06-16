@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`style_options renders the Style options comprising of style settings, color schema and border thickness 1`] = `
+<div
+  className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+>
+  <h2
+    className="euiTitle euiTitle--xsmall"
+    id="styleSettingTitleId"
+  >
+    <span>
+      Style settings
+    </span>
+  </h2>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+    id="colorSchemaId-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="colorSchemaId"
+      >
+        Color schema
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <select
+            className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+            id="colorSchemaId"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            onMouseUp={[Function]}
+            value={Object {}}
+          >
+            <option
+              disabled={true}
+              hidden={true}
+              value="EMPTY_VALUE"
+            >
+              
+            </option>
+          </select>
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                className="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+                size="s"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="generated-id"
+      >
+        Border thickness
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldNumber euiFieldNumber--fullWidth euiFieldNumber--compressed"
+            id="generated-id"
+            min={0}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            type="number"
+            value={Object {}}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

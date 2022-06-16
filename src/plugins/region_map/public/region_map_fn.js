@@ -47,7 +47,6 @@ export const createRegionMapFn = () => ({
   },
   fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-
     return {
       type: 'render',
       as: 'visualization',

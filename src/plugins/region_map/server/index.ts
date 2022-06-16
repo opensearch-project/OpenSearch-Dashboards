@@ -29,9 +29,9 @@
  */
 
 import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
-import { CoreSetup } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { configSchema, ConfigSchema } from '../config';
-import { getUiSettings } from './ui_settings';
+import { RegionMapPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -47,10 +47,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export const plugin = () => ({
-  setup(core: CoreSetup) {
-    core.uiSettings.register(getUiSettings());
-  },
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new RegionMapPlugin(initializerContext);
+}
 
-  start() {},
-});
+export { RegionMapPluginSetup, RegionMapPluginStart } from './types';
