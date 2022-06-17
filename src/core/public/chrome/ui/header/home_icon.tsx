@@ -35,7 +35,8 @@ export const HomeIcon = ({
       : `${assetFolderUrl}/${defaultMark}`;
     const testSubj = customMark ? 'customMark' : useExpandedMenu ? 'homeIcon' : 'defaultMark';
     const title = `${applicationTitle} home`;
-    const size = useExpandedMenu ? ('m' as const) : ('l' as const);
+    // marks look better at the large size, but the home icon should be medium to fit in with other icons
+    const size = iconType === 'home' ? ('m' as const) : ('l' as const);
 
     return {
       'data-test-subj': testSubj,

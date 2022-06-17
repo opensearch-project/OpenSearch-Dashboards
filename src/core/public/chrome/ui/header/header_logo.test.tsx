@@ -1,0 +1,132 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { HeaderLogo } from './header_logo';
+
+const defaultOpensearchLogoUrl = '/opensearch_logo_default_mode.svg';
+const darkOpensearchLogoUrl = '/opensearch_logo_dark_mode.svg';
+
+describe('Header logo ', () => {
+  describe('in default mode ', () => {
+    it('uses opensearch logo if no branding provided', () => {
+      const branding = {};
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(defaultOpensearchLogoUrl);
+      expect(img.prop('alt')).toEqual(`opensearch dashboards logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses opensearch logo if no logo provided', () => {
+      const branding = {
+        darkMode: false,
+        logo: {},
+        mark: {},
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses opensearch logo if custom mark provided without logo', () => {
+      const branding = {
+        darkMode: false,
+        logo: {},
+        mark: { defaultUrl: '/defaultModeMark' },
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses custom logo default mode URL', () => {
+      const branding = {
+        darkMode: false,
+        logo: { defaultUrl: '/defaultModeLogo' },
+        mark: {},
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(branding.logo.defaultUrl);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('in dark mode ', () => {
+    it('uses opensearch logo if no logo provided', () => {
+      const branding = {
+        darkMode: true,
+        logo: {},
+        mark: {},
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses opensearch logo if custom mark provided without logo', () => {
+      const branding = {
+        darkMode: true,
+        logo: {},
+        mark: { defaultUrl: '/defaultModeMark' },
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses custom logo default mode URL if no dark mode logo provided', () => {
+      const branding = {
+        darkMode: true,
+        logo: { defaultUrl: '/defaultModeLogo' },
+        mark: {},
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(branding.logo.defaultUrl);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('uses custom logo dark mode URL', () => {
+      const branding = {
+        darkMode: true,
+        logo: { defaultUrl: '/defaultModeLogo', darkModeUrl: '/darkModeLogo' },
+        mark: {},
+        applicationTitle: 'custom title',
+        assetFolderUrl: 'base/ui/default_branding',
+      };
+      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(branding.logo.darkModeUrl);
+      expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
+      expect(component).toMatchSnapshot();
+    });
+  });
+});

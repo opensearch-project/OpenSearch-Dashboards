@@ -36,7 +36,7 @@ describe('RecentlyAccessed#start()', () => {
     return new NavControlsService().start();
   };
 
-  describe('left side', () => {
+  describe('left contorols', () => {
     it('allows registration', async () => {
       const navControls = getStart();
       const nc = { mount: jest.fn() };
@@ -56,7 +56,7 @@ describe('RecentlyAccessed#start()', () => {
     });
   });
 
-  describe('right side', () => {
+  describe('right controls', () => {
     it('allows registration', async () => {
       const navControls = getStart();
       const nc = { mount: jest.fn() };
@@ -73,6 +73,74 @@ describe('RecentlyAccessed#start()', () => {
       navControls.registerRight(nc2);
       navControls.registerRight(nc3);
       expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
+    });
+  });
+
+  describe('center controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerCenter(nc);
+      expect(await navControls.getCenter$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerCenter(nc1);
+      navControls.registerCenter(nc2);
+      navControls.registerCenter(nc3);
+      expect(await navControls.getCenter$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
+    });
+  });
+
+  describe('expanded right controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerExpandedRight(nc);
+      expect(await navControls.getExpandedRight$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerExpandedRight(nc1);
+      navControls.registerExpandedRight(nc2);
+      navControls.registerExpandedRight(nc3);
+      expect(await navControls.getExpandedRight$().pipe(take(1)).toPromise()).toEqual([
+        nc2,
+        nc1,
+        nc3,
+      ]);
+    });
+  });
+
+  describe('expanded center controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerExpandedCenter(nc);
+      expect(await navControls.getExpandedCenter$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerExpandedCenter(nc1);
+      navControls.registerExpandedCenter(nc2);
+      navControls.registerExpandedCenter(nc3);
+      expect(await navControls.getExpandedCenter$().pipe(take(1)).toPromise()).toEqual([
+        nc2,
+        nc1,
+        nc3,
+      ]);
     });
   });
 });

@@ -121,6 +121,7 @@ export function Header({
         <div id="globalHeaderBars">
           {useExpandedMenu && (
             <EuiHeader
+              className="expandedHeader"
               theme="dark"
               position="fixed"
               sections={[
@@ -129,32 +130,27 @@ export function Header({
                   borders: 'none',
                 },
                 {
-                  ...(observables.navControlsExpandedCenter$ && {
-                    items: [
-                      <EuiShowFor sizes={['m', 'l', 'xl']}>
-                        <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
-                      </EuiShowFor>,
-                    ],
-                  }),
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                    </EuiShowFor>,
+                  ],
                   borders: 'none',
                 },
                 {
-                  ...((observables.navControlsExpandedCenter$ ||
-                    observables.navControlsExpandedRight$) && {
-                    items: [
-                      <EuiHideFor sizes={['m', 'l', 'xl']}>
-                        <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
-                      </EuiHideFor>,
-                      <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
-                    ],
-                  }),
+                  items: [
+                    <EuiHideFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                    </EuiHideFor>,
+                    <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
+                  ],
                   borders: 'none',
                 },
               ]}
             />
           )}
 
-          <EuiHeader position="fixed">
+          <EuiHeader position="fixed" className="primaryHeader">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
@@ -172,11 +168,9 @@ export function Header({
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
-              {observables.navControlsLeft$ && (
-                <EuiHeaderSectionItem border="right">
-                  <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
-                </EuiHeaderSectionItem>
-              )}
+              <EuiHeaderSectionItem border="right">
+                <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+              </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="right">
                 <HomeLoader
@@ -195,28 +189,22 @@ export function Header({
               breadcrumbs$={observables.breadcrumbs$}
             />
 
-            {observables.badge$ && (
-              <EuiHeaderSectionItem border="none">
-                <HeaderBadge badge$={observables.badge$} />
-              </EuiHeaderSectionItem>
-            )}
+            <EuiHeaderSectionItem border="none">
+              <HeaderBadge badge$={observables.badge$} />
+            </EuiHeaderSectionItem>
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem border="none">
                 <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
               </EuiHeaderSectionItem>
 
-              {observables.navControlsCenter$ && (
-                <EuiHeaderSectionItem border="left">
-                  <HeaderNavControls navControls$={observables.navControlsCenter$} />
-                </EuiHeaderSectionItem>
-              )}
+              <EuiHeaderSectionItem border="left">
+                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+              </EuiHeaderSectionItem>
 
-              {observables.navControlsRight$ && (
-                <EuiHeaderSectionItem border="left">
-                  <HeaderNavControls navControls$={observables.navControlsRight$} />
-                </EuiHeaderSectionItem>
-              )}
+              <EuiHeaderSectionItem border="left">
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
+              </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="left">
                 <HeaderHelpMenu

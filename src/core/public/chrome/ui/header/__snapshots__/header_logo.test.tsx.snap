@@ -1,0 +1,1017 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "darkModeUrl": "/darkModeLogo",
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/darkModeLogo"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/darkModeLogo"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in dark mode  uses custom logo default mode URL if no dark mode logo provided 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/defaultModeLogo"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/defaultModeLogo"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided without logo 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={Object {}}
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in default mode  uses custom logo default mode URL 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/defaultModeLogo"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/defaultModeLogo"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in default mode  uses opensearch logo if custom mark provided without logo 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="base/ui/default_branding/opensearch_logo_default_mode.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="base/ui/default_branding/opensearch_logo_default_mode.svg"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in default mode  uses opensearch logo if no branding provided 1`] = `
+<HeaderLogo
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="opensearch dashboards logo"
+      className="logoImage"
+      data-test-image-url="/opensearch_logo_default_mode.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="/opensearch_logo_default_mode.svg"
+    />
+  </div>
+</HeaderLogo>
+`;
+
+exports[`Header logo  in default mode  uses opensearch logo if no logo provided 1`] = `
+<HeaderLogo
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={Object {}}
+>
+  <div
+    className="logoContainer"
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="base/ui/default_branding/opensearch_logo_default_mode.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="base/ui/default_branding/opensearch_logo_default_mode.svg"
+    />
+  </div>
+</HeaderLogo>
+`;

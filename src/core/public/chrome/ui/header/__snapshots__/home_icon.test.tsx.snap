@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
+exports[`Home button icon  in dark mode  uses custom mark dark mode URL 1`] = `
 <HomeIcon
   applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={true}
   intl={
     Object {
@@ -134,9 +135,10 @@ exports[`Header logo  in dark mode  uses custom mark dark mode URL 1`] = `
 </HomeIcon>
 `;
 
-exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark mode mark 1`] = `
+exports[`Home button icon  in dark mode  uses custom mark default mode URL if no dark mode mark provided 1`] = `
 <HomeIcon
   applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={true}
   intl={
     Object {
@@ -267,9 +269,10 @@ exports[`Header logo  in dark mode  uses custom mark default mode URL if no dark
 </HomeIcon>
 `;
 
-exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided without mark 1`] = `
+exports[`Home button icon  in dark mode  uses opensearch mark if custom logo provided without mark 1`] = `
 <HomeIcon
   applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={true}
   intl={
     Object {
@@ -382,16 +385,16 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
 >
   <EuiIcon
     className="logoImage"
-    data-test-image-url="/opensearch_mark_dark_mode.svg"
+    data-test-image-url="base/ui/default_branding/opensearch_mark_dark_mode.svg"
     data-test-subj="defaultMark"
     size="l"
     title="custom title home"
-    type="/opensearch_mark_dark_mode.svg"
+    type="base/ui/default_branding/opensearch_mark_dark_mode.svg"
   >
     <span
       className="logoImage"
-      data-euiicon-type="/opensearch_mark_dark_mode.svg"
-      data-test-image-url="/opensearch_mark_dark_mode.svg"
+      data-euiicon-type="base/ui/default_branding/opensearch_mark_dark_mode.svg"
+      data-test-image-url="base/ui/default_branding/opensearch_mark_dark_mode.svg"
       data-test-subj="defaultMark"
       size="l"
       title="custom title home"
@@ -400,10 +403,10 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom logo provided
 </HomeIcon>
 `;
 
-exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`] = `
+exports[`Home button icon  in dark mode  uses opensearch mark if no mark provided 1`] = `
 <HomeIcon
   applicationTitle="custom title"
-  assetFolderUrl="ui/assets"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={true}
   intl={
     Object {
@@ -512,16 +515,16 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
 >
   <EuiIcon
     className="logoImage"
-    data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
+    data-test-image-url="base/ui/default_branding/opensearch_mark_dark_mode.svg"
     data-test-subj="defaultMark"
     size="l"
     title="custom title home"
-    type="ui/assets/opensearch_mark_dark_mode.svg"
+    type="base/ui/default_branding/opensearch_mark_dark_mode.svg"
   >
     <span
       className="logoImage"
-      data-euiicon-type="ui/assets/opensearch_mark_dark_mode.svg"
-      data-test-image-url="ui/assets/opensearch_mark_dark_mode.svg"
+      data-euiicon-type="base/ui/default_branding/opensearch_mark_dark_mode.svg"
+      data-test-image-url="base/ui/default_branding/opensearch_mark_dark_mode.svg"
       data-test-subj="defaultMark"
       size="l"
       title="custom title home"
@@ -530,9 +533,10 @@ exports[`Header logo  in dark mode  uses opensearch logo if no mark provided 1`]
 </HomeIcon>
 `;
 
-exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
+exports[`Home button icon  in default mode  uses custom mark default mode URL 1`] = `
 <HomeIcon
   applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={false}
   intl={
     Object {
@@ -663,9 +667,10 @@ exports[`Header logo  in default mode  uses custom mark default mode URL 1`] = `
 </HomeIcon>
 `;
 
-exports[`Header logo  in default mode  uses opensearch logo if custom logo provided without mark 1`] = `
+exports[`Home button icon  in default mode  uses opensearch mark if custom logo provided without mark 1`] = `
 <HomeIcon
   applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={false}
   intl={
     Object {
@@ -778,16 +783,16 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
 >
   <EuiIcon
     className="logoImage"
-    data-test-image-url="/opensearch_mark_default_mode.svg"
+    data-test-image-url="base/ui/default_branding/opensearch_mark_default_mode.svg"
     data-test-subj="defaultMark"
     size="l"
     title="custom title home"
-    type="/opensearch_mark_default_mode.svg"
+    type="base/ui/default_branding/opensearch_mark_default_mode.svg"
   >
     <span
       className="logoImage"
-      data-euiicon-type="/opensearch_mark_default_mode.svg"
-      data-test-image-url="/opensearch_mark_default_mode.svg"
+      data-euiicon-type="base/ui/default_branding/opensearch_mark_default_mode.svg"
+      data-test-image-url="base/ui/default_branding/opensearch_mark_default_mode.svg"
       data-test-subj="defaultMark"
       size="l"
       title="custom title home"
@@ -796,7 +801,7 @@ exports[`Header logo  in default mode  uses opensearch logo if custom logo provi
 </HomeIcon>
 `;
 
-exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] = `
+exports[`Home button icon  in default mode  uses opensearch mark if no branding provided 1`] = `
 <HomeIcon
   intl={
     Object {
@@ -921,10 +926,10 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding 1`] =
 </HomeIcon>
 `;
 
-exports[`Header logo  in default mode  uses opensearch logo if no mark provided 1`] = `
+exports[`Home button icon  in default mode  uses opensearch mark if no mark provided 1`] = `
 <HomeIcon
   applicationTitle="custom title"
-  assetFolderUrl="ui/assets"
+  assetFolderUrl="base/ui/default_branding"
   darkMode={false}
   intl={
     Object {
@@ -1033,18 +1038,956 @@ exports[`Header logo  in default mode  uses opensearch logo if no mark provided 
 >
   <EuiIcon
     className="logoImage"
-    data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
+    data-test-image-url="base/ui/default_branding/opensearch_mark_default_mode.svg"
     data-test-subj="defaultMark"
     size="l"
     title="custom title home"
-    type="ui/assets/opensearch_mark_default_mode.svg"
+    type="base/ui/default_branding/opensearch_mark_default_mode.svg"
   >
     <span
       className="logoImage"
-      data-euiicon-type="ui/assets/opensearch_mark_default_mode.svg"
-      data-test-image-url="ui/assets/opensearch_mark_default_mode.svg"
+      data-euiicon-type="base/ui/default_branding/opensearch_mark_default_mode.svg"
+      data-test-image-url="base/ui/default_branding/opensearch_mark_default_mode.svg"
       data-test-subj="defaultMark"
       size="l"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded dark mode  uses custom mark dark mode URL 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "darkModeUrl": "/darkModeMark",
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/darkModeMark"
+    data-test-subj="customMark"
+    size="l"
+    title="custom title home"
+    type="/darkModeMark"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="/darkModeMark"
+      data-test-image-url="/darkModeMark"
+      data-test-subj="customMark"
+      size="l"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded dark mode  uses custom mark default mode URL if no dark mode mark provided 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/defaultModeMark"
+    data-test-subj="customMark"
+    size="l"
+    title="custom title home"
+    type="/defaultModeMark"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="/defaultModeMark"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="customMark"
+      size="l"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded dark mode  uses home icon if custom logo provided without mark 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="home"
+    data-test-subj="homeIcon"
+    size="m"
+    title="custom title home"
+    type="home"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="home"
+      data-test-image-url="home"
+      data-test-subj="homeIcon"
+      size="m"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded dark mode  uses home icon if no mark provided 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={true}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={Object {}}
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="home"
+    data-test-subj="homeIcon"
+    size="m"
+    title="custom title home"
+    type="home"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="home"
+      data-test-image-url="home"
+      data-test-subj="homeIcon"
+      size="m"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded light mode  uses custom mark default mode URL 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={
+    Object {
+      "defaultUrl": "/defaultModeMark",
+    }
+  }
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="/defaultModeMark"
+    data-test-subj="customMark"
+    size="l"
+    title="custom title home"
+    type="/defaultModeMark"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="/defaultModeMark"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="customMark"
+      size="l"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded light mode  uses home icon if custom logo provided without mark 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={
+    Object {
+      "defaultUrl": "/defaultModeLogo",
+    }
+  }
+  mark={Object {}}
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="home"
+    data-test-subj="homeIcon"
+    size="m"
+    title="custom title home"
+    type="home"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="home"
+      data-test-image-url="home"
+      data-test-subj="homeIcon"
+      size="m"
+      title="custom title home"
+    />
+  </EuiIcon>
+</HomeIcon>
+`;
+
+exports[`Home button icon  in expanded light mode  uses home icon if no mark provided 1`] = `
+<HomeIcon
+  applicationTitle="custom title"
+  assetFolderUrl="base/ui/default_branding"
+  darkMode={false}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  logo={Object {}}
+  mark={Object {}}
+  useExpandedMenu={true}
+>
+  <EuiIcon
+    className="logoImage"
+    data-test-image-url="home"
+    data-test-subj="homeIcon"
+    size="m"
+    title="custom title home"
+    type="home"
+  >
+    <span
+      className="logoImage"
+      data-euiicon-type="home"
+      data-test-image-url="home"
+      data-test-subj="homeIcon"
+      size="m"
       title="custom title home"
     />
   </EuiIcon>
