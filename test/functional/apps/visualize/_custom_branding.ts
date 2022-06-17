@@ -16,6 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home', 'header', 'settings']);
   const testSubjects = getService('testSubjects');
 
+  const expectedFullLogo =
+    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
+  const expectedFullLogoDarkMode =
+    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
   const expectedMarkLogo =
     'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
   const expectedMarkLogoDarkMode =
@@ -121,8 +125,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home');
       });
 
+      it('with customized logo in header bar', async () => {
+        await globalNav.logoExistsOrFail(expectedFullLogo);
+      });
+
       it('with customized mark logo button in header bar', async () => {
         await globalNav.homeMarkExistsOrFail(expectedMarkLogo);
+      });
+
+      it('with customized logo button that navigates to home page', async () => {
+        await PageObjects.common.navigateToApp('settings');
+        await globalNav.clickLogo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('/app/home')).to.be(true);
       });
 
       it('with customized mark logo button that navigates to home page', async () => {
@@ -161,11 +177,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
       });
 
+      it('with customized logo in header bar in dark mode', async () => {
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
+        await PageObjects.common.navigateToApp('home');
+        await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
+      });
+
       it('with customized mark logo button in header bar in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
         await globalNav.homeMarkExistsOrFail(expectedMarkLogoDarkMode);
+      });
+
+      it('with customized logo that navigates to home page in dark mode', async () => {
+        await PageObjects.common.navigateToApp('settings');
+        await globalNav.clickLogo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('/app/home')).to.be(true);
       });
 
       it('with customized mark logo button that navigates to home page in dark mode', async () => {

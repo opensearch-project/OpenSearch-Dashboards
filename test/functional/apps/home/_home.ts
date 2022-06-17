@@ -39,6 +39,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('OpenSearch Dashboards takes you home', function describeIndexTests() {
     this.tags('includeFirefox');
 
+    it('clicking on logo should take you to home page', async () => {
+      await PageObjects.common.navigateToApp('settings');
+      await globalNav.clickLogo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const url = await browser.getCurrentUrl();
+      expect(url.includes('/app/home')).to.be(true);
+    });
+
     it('clicking on home button should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');
       await globalNav.clickHomeButton();

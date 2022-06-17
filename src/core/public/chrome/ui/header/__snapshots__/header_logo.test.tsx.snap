@@ -2,9 +2,68 @@
 
 exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={true}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": true,
+      "logo": Object {
+        "darkModeUrl": "/darkModeLogo",
+        "defaultUrl": "/defaultModeLogo",
+      },
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -107,16 +166,63 @@ exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
       "timeZone": null,
     }
   }
-  logo={
-    Object {
-      "darkModeUrl": "/darkModeLogo",
-      "defaultUrl": "/defaultModeLogo",
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
     }
   }
-  mark={Object {}}
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -126,15 +232,73 @@ exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
       loading="lazy"
       src="/darkModeLogo"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in dark mode  uses custom logo default mode URL if no dark mode logo provided 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={true}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": true,
+      "logo": Object {
+        "defaultUrl": "/defaultModeLogo",
+      },
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -237,15 +401,63 @@ exports[`Header logo  in dark mode  uses custom logo default mode URL if no dark
       "timeZone": null,
     }
   }
-  logo={
-    Object {
-      "defaultUrl": "/defaultModeLogo",
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
     }
   }
-  mark={Object {}}
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -255,15 +467,73 @@ exports[`Header logo  in dark mode  uses custom logo default mode URL if no dark
       loading="lazy"
       src="/defaultModeLogo"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided without logo 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={true}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": true,
+      "logo": Object {},
+      "mark": Object {
+        "defaultUrl": "/defaultModeMark",
+      },
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -366,15 +636,63 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided
       "timeZone": null,
     }
   }
-  logo={Object {}}
-  mark={
-    Object {
-      "defaultUrl": "/defaultModeMark",
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
     }
   }
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -384,15 +702,71 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided
       loading="lazy"
       src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={true}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": true,
+      "logo": Object {},
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -495,11 +869,63 @@ exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`]
       "timeZone": null,
     }
   }
-  logo={Object {}}
-  mark={Object {}}
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -509,15 +935,73 @@ exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`]
       loading="lazy"
       src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in default mode  uses custom logo default mode URL 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={false}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": false,
+      "logo": Object {
+        "defaultUrl": "/defaultModeLogo",
+      },
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -620,15 +1104,63 @@ exports[`Header logo  in default mode  uses custom logo default mode URL 1`] = `
       "timeZone": null,
     }
   }
-  logo={
-    Object {
-      "defaultUrl": "/defaultModeLogo",
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
     }
   }
-  mark={Object {}}
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -638,15 +1170,73 @@ exports[`Header logo  in default mode  uses custom logo default mode URL 1`] = `
       loading="lazy"
       src="/defaultModeLogo"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if custom mark provided without logo 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={false}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": false,
+      "logo": Object {},
+      "mark": Object {
+        "defaultUrl": "/defaultModeMark",
+      },
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -749,15 +1339,63 @@ exports[`Header logo  in default mode  uses opensearch logo if custom mark provi
       "timeZone": null,
     }
   }
-  logo={Object {}}
-  mark={
-    Object {
-      "defaultUrl": "/defaultModeMark",
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
     }
   }
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -767,12 +1405,63 @@ exports[`Header logo  in default mode  uses opensearch logo if custom mark provi
       loading="lazy"
       src="base/ui/default_branding/opensearch_logo_default_mode.svg"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if no branding provided 1`] = `
 <HeaderLogo
+  branding={Object {}}
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -875,9 +1564,63 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding provi
       "timeZone": null,
     }
   }
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="opensearch dashboards logo"
@@ -887,15 +1630,71 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding provi
       loading="lazy"
       src="/opensearch_logo_default_mode.svg"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;
 
 exports[`Header logo  in default mode  uses opensearch logo if no logo provided 1`] = `
 <HeaderLogo
-  applicationTitle="custom title"
-  assetFolderUrl="base/ui/default_branding"
-  darkMode={false}
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "darkMode": false,
+      "logo": Object {},
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -998,11 +1797,63 @@ exports[`Header logo  in default mode  uses opensearch logo if no logo provided 
       "timeZone": null,
     }
   }
-  logo={Object {}}
-  mark={Object {}}
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
 >
-  <div
+  <a
+    aria-label="Go to home page"
     className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
   >
     <img
       alt="custom title logo"
@@ -1012,6 +1863,6 @@ exports[`Header logo  in default mode  uses opensearch logo if no logo provided 
       loading="lazy"
       src="base/ui/default_branding/opensearch_logo_default_mode.svg"
     />
-  </div>
+  </a>
 </HeaderLogo>
 `;

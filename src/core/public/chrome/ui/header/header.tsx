@@ -126,7 +126,15 @@ export function Header({
               position="fixed"
               sections={[
                 {
-                  items: [<HeaderLogo {...branding} />],
+                  items: [
+                    <HeaderLogo
+                      href={homeHref}
+                      forceNavigation$={observables.forceAppSwitcherNavigation$}
+                      navLinks$={observables.navLinks$}
+                      navigateToApp={application.navigateToApp}
+                      branding={branding}
+                    />,
+                  ],
                   borders: 'none',
                 },
                 {

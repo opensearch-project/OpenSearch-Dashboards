@@ -4,17 +4,30 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { HeaderLogo } from './header_logo';
 
 const defaultOpensearchLogoUrl = '/opensearch_logo_default_mode.svg';
 const darkOpensearchLogoUrl = '/opensearch_logo_dark_mode.svg';
 
+const mockProps = () => ({
+  href: '/',
+  navLinks$: new BehaviorSubject([]),
+  forceNavigation$: new BehaviorSubject(false),
+  navigateToApp: jest.fn(),
+  branding: {},
+});
+
 describe('Header logo ', () => {
   describe('in default mode ', () => {
     it('uses opensearch logo if no branding provided', () => {
       const branding = {};
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(defaultOpensearchLogoUrl);
       expect(img.prop('alt')).toEqual(`opensearch dashboards logo`);
@@ -29,7 +42,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -44,7 +61,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -59,7 +80,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(branding.logo.defaultUrl);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -76,7 +101,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -91,8 +120,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -107,7 +139,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(branding.logo.defaultUrl);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
@@ -122,7 +158,11 @@ describe('Header logo ', () => {
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
       };
-      const component = mountWithIntl(<HeaderLogo {...branding} />);
+      const props = {
+        ...mockProps(),
+        branding,
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
       expect(img.prop('src')).toEqual(branding.logo.darkModeUrl);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);

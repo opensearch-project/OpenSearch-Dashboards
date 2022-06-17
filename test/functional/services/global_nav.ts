@@ -35,8 +35,16 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   class GlobalNav {
+    public async moveMouseToLogo(): Promise<void> {
+      await testSubjects.moveMouseTo('headerGlobalNav > logo');
+    }
+
     public async moveMouseToHomeButton(): Promise<void> {
       await testSubjects.moveMouseTo('headerGlobalNav > homeLoader');
+    }
+
+    public async clickLogo(): Promise<void> {
+      return await testSubjects.click('headerGlobalNav > logo');
     }
 
     public async clickHomeButton(): Promise<void> {
@@ -71,6 +79,15 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
 
     public async badgeMissingOrFail(): Promise<void> {
       await testSubjects.missingOrFail('headerBadge');
+    }
+
+    public async logoExistsOrFail(expectedUrl: string): Promise<void> {
+      await testSubjects.exists('headerGlobalNav > logo > customLogo');
+      const actualLabel = await testSubjects.getAttribute(
+        'headerGlobalNav > logo > customLogo',
+        'data-test-image-url'
+      );
+      expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());
     }
 
     public async homeMarkExistsOrFail(expectedUrl: string): Promise<void> {
