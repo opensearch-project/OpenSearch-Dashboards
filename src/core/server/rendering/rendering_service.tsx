@@ -269,8 +269,8 @@ export class RenderingService {
       ? branding.applicationTitle
       : DEFAULT_TITLE;
 
-    // only use expanded menu if explicitly set to true
-    const useExpandedMenu = branding?.useExpandedMenu === true;
+    // use expanded menu by default unless explicitly set to false
+    const { useExpandedMenu = true } = branding;
 
     const brandingAssignment: BrandingAssignment = {
       logoDefault,

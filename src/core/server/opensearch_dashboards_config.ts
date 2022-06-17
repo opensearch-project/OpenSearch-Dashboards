@@ -82,7 +82,7 @@ export const config = {
         defaultValue: '',
       }),
       useExpandedMenu: schema.boolean({
-        defaultValue: false,
+        defaultValue: true,
       }),
     }),
   }),

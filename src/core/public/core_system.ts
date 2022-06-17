@@ -260,7 +260,7 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
-      const { useExpandedMenu } = injectedMetadata.getBranding() ?? {};
+      const { useExpandedMenu = true } = injectedMetadata.getBranding() ?? {};
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';

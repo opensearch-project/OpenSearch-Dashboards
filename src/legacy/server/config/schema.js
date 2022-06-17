@@ -245,7 +245,7 @@ export default () =>
         }),
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
-        useExpandedMenu: Joi.boolean().default(false),
+        useExpandedMenu: Joi.boolean().default(true),
       }),
     }).default(),
 

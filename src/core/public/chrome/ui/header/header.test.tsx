@@ -118,9 +118,9 @@ describe('Header', () => {
     act(() => isVisible$.next(true));
     component.update();
     expect(component.find('EuiHeader.primaryHeader').exists()).toBeTruthy();
-    expect(component.find('EuiHeader.expandedHeader').exists()).toBeFalsy();
-    expect(component.find('HeaderLogo').exists()).toBeFalsy();
-    expect(component.find('HeaderNavControls')).toHaveLength(3);
+    expect(component.find('EuiHeader.expandedHeader').exists()).toBeTruthy();
+    expect(component.find('HeaderLogo').exists()).toBeTruthy();
+    expect(component.find('HeaderNavControls')).toHaveLength(5);
     expect(component.find('[data-test-subj="toggleNavButton"]').exists()).toBeTruthy();
     expect(component.find('HomeLoader').exists()).toBeTruthy();
     expect(component.find('HeaderBreadcrumbs').exists()).toBeTruthy();
@@ -136,13 +136,13 @@ describe('Header', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders expanded header', () => {
+  it('renders condensed header', () => {
     const branding = {
       darkMode: false,
       logo: { defaultUrl: '/foo' },
       mark: { defaultUrl: '/foo' },
       applicationTitle: 'Foobar Dashboards',
-      useExpandedMenu: true,
+      useExpandedMenu: false,
     };
     const props = {
       ...mockProps(),
@@ -151,9 +151,9 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
 
     expect(component.find('EuiHeader.primaryHeader').exists()).toBeTruthy();
-    expect(component.find('EuiHeader.expandedHeader').exists()).toBeTruthy();
-    expect(component.find('HeaderLogo').exists()).toBeTruthy();
-    expect(component.find('HeaderNavControls')).toHaveLength(5);
+    expect(component.find('EuiHeader.expandedHeader').exists()).toBeFalsy();
+    expect(component.find('HeaderLogo').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls')).toHaveLength(3);
     expect(component.find('[data-test-subj="toggleNavButton"]').exists()).toBeTruthy();
     expect(component.find('HomeLoader').exists()).toBeTruthy();
     expect(component.find('HeaderBreadcrumbs').exists()).toBeTruthy();

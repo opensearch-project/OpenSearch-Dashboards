@@ -18,7 +18,7 @@ export const HomeIcon = ({
   assetFolderUrl = '',
   mark,
   applicationTitle = 'opensearch dashboards',
-  useExpandedMenu = false,
+  useExpandedMenu = true,
 }: ChromeBranding) => {
   const { defaultUrl: markUrl, darkModeUrl: darkMarkUrl } = mark ?? {};
 

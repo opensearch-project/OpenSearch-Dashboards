@@ -57,5 +57,6 @@ export interface Branding {
   faviconUrl?: string;
   /** Application title that will replace the default opensearch dashboard string */
   applicationTitle?: string;
+  /** Whether to use expanded menu (true) or condensed menu (false) */
   useExpandedMenu?: boolean;
 }
