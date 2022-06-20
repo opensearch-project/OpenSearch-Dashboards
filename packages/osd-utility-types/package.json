@@ -20,6 +20,6 @@
   },
   "devDependencies": {
     "del-cli": "^3.0.1",
-    "tsd": "^0.16.0"
+    "tsd": "^0.21.0"
   }
 }
