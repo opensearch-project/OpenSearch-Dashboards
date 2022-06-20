@@ -120,110 +120,117 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async function () {
-        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-        await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
       });
 
-      it('with customized logo in header bar', async () => {
-        await globalNav.logoExistsOrFail(expectedFullLogo);
+      describe('in default mode', async () => {
+        it('with customized logo in header bar', async () => {
+          await globalNav.logoExistsOrFail(expectedFullLogo);
+        });
+
+        it('with customized mark logo button in header bar', async () => {
+          await globalNav.homeMarkExistsOrFail(expectedMarkLogo);
+        });
+
+        it('with customized logo button that navigates to home page', async () => {
+          await PageObjects.common.navigateToApp('settings');
+          await globalNav.clickLogo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          const url = await browser.getCurrentUrl();
+          expect(url.includes('/app/home')).to.be(true);
+        });
+
+        it('with customized mark logo button that navigates to home page', async () => {
+          await PageObjects.common.navigateToApp('settings');
+          await globalNav.clickHomeButton();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          const url = await browser.getCurrentUrl();
+          expect(url.includes('/app/home')).to.be(true);
+        });
+
+        it('with customized mark logo in home dashboard card', async () => {
+          await testSubjects.existOrFail('dashboardCustomLogo');
+          const actualLabel = await testSubjects.getAttribute(
+            'dashboardCustomLogo',
+            'data-test-image-url'
+          );
+          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        });
+
+        it('with customized title in home dashboard card', async () => {
+          await testSubjects.existOrFail('dashboardCustomTitle');
+          const actualLabel = await testSubjects.getAttribute(
+            'dashboardCustomTitle',
+            'data-test-title'
+          );
+          expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
+        });
+
+        it('with customized mark logo for opensearch in side menu', async () => {
+          await appsMenu.openCollapsibleNav();
+          await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
+          const actualLabel = await testSubjects.getAttribute(
+            'collapsibleNavGroup-opensearchDashboards',
+            'data-test-opensearch-logo'
+          );
+          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        });
       });
 
-      it('with customized mark logo button in header bar', async () => {
-        await globalNav.homeMarkExistsOrFail(expectedMarkLogo);
-      });
+      describe('in dark mode', async () => {
+        before(async function () {
+          await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+          await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
+          await PageObjects.common.navigateToApp('home');
+        });
 
-      it('with customized logo button that navigates to home page', async () => {
-        await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickLogo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/home')).to.be(true);
-      });
+        after(async function () {
+          await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+          await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
+        });
 
-      it('with customized mark logo button that navigates to home page', async () => {
-        await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickHomeButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/home')).to.be(true);
-      });
+        it('with customized logo in header bar', async () => {
+          await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
+        });
 
-      it('with customized mark logo in home dashboard card', async () => {
-        await testSubjects.existOrFail('dashboardCustomLogo');
-        const actualLabel = await testSubjects.getAttribute(
-          'dashboardCustomLogo',
-          'data-test-image-url'
-        );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
-      });
+        it('with customized mark logo button in header bar', async () => {
+          await globalNav.homeMarkExistsOrFail(expectedMarkLogoDarkMode);
+        });
 
-      it('with customized title in home dashboard card', async () => {
-        await testSubjects.existOrFail('dashboardCustomTitle');
-        const actualLabel = await testSubjects.getAttribute(
-          'dashboardCustomTitle',
-          'data-test-title'
-        );
-        expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
-      });
+        it('with customized logo that navigates to home page', async () => {
+          await PageObjects.common.navigateToApp('settings');
+          await globalNav.clickLogo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          const url = await browser.getCurrentUrl();
+          expect(url.includes('/app/home')).to.be(true);
+        });
 
-      it('with customized mark logo for opensearch in side menu', async () => {
-        await appsMenu.openCollapsibleNav();
-        await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
-        const actualLabel = await testSubjects.getAttribute(
-          'collapsibleNavGroup-opensearchDashboards',
-          'data-test-opensearch-logo'
-        );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
-      });
+        it('with customized mark logo button that navigates to home page', async () => {
+          await PageObjects.common.navigateToApp('settings');
+          await globalNav.clickHomeButton();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          const url = await browser.getCurrentUrl();
+          expect(url.includes('/app/home')).to.be(true);
+        });
 
-      it('with customized logo in header bar in dark mode', async () => {
-        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
-        await PageObjects.common.navigateToApp('home');
-        await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
-      });
+        it('with customized mark logo in home dashboard card', async () => {
+          await testSubjects.existOrFail('dashboardCustomLogo');
+          const actualLabel = await testSubjects.getAttribute(
+            'dashboardCustomLogo',
+            'data-test-image-url'
+          );
+          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        });
 
-      it('with customized mark logo button in header bar in dark mode', async () => {
-        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
-        await PageObjects.common.navigateToApp('home');
-        await globalNav.homeMarkExistsOrFail(expectedMarkLogoDarkMode);
-      });
-
-      it('with customized logo that navigates to home page in dark mode', async () => {
-        await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickLogo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/home')).to.be(true);
-      });
-
-      it('with customized mark logo button that navigates to home page in dark mode', async () => {
-        await PageObjects.common.navigateToApp('settings');
-        await globalNav.clickHomeButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/home')).to.be(true);
-      });
-
-      it('with customized mark logo in home dashboard card in dark mode', async () => {
-        await testSubjects.existOrFail('dashboardCustomLogo');
-        const actualLabel = await testSubjects.getAttribute(
-          'dashboardCustomLogo',
-          'data-test-image-url'
-        );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
-      });
-
-      it('with customized mark logo for opensearch in side menu in dark mode', async () => {
-        await appsMenu.openCollapsibleNav();
-        await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
-        const actualLabel = await testSubjects.getAttribute(
-          'collapsibleNavGroup-opensearchDashboards',
-          'data-test-opensearch-logo'
-        );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        it('with customized mark logo for opensearch in side menu', async () => {
+          await appsMenu.openCollapsibleNav();
+          await testSubjects.existOrFail('collapsibleNavGroup-opensearchDashboards');
+          const actualLabel = await testSubjects.getAttribute(
+            'collapsibleNavGroup-opensearchDashboards',
+            'data-test-opensearch-logo'
+          );
+          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        });
       });
     });
   });
