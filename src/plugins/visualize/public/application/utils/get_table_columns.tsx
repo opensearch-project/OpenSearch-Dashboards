@@ -37,7 +37,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import moment from 'moment';
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
