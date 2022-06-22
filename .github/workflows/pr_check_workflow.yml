@@ -67,7 +67,7 @@ jobs:
       - name: Remove Node
         if: steps.job_successful.outputs.job_successful != 'true'
         run: |
-          su - root
+          su - 1000
           rm -rf $NVM_DIR
 
       - name: Setup Node
@@ -159,7 +159,7 @@ jobs:
       - name: Remove Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         run: |
-          su - root
+          su - 1000
           rm -rf $NVM_DIR
 
       - name: Setup Node
