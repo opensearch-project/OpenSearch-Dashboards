@@ -13,9 +13,8 @@ import { DropboxState, DropboxDisplay } from '../types';
 import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
 import {
-  createAgg,
   editAgg,
-  reorderAggConfigParams,
+  reorderAgg,
   updateAggConfigParams,
 } from '../../../../../utils/state_management/visualization_slice';
 import { useIndexPattern } from '../../../../../../application/utils/use/use_index_pattern';
@@ -67,7 +66,11 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {
-    const aggConfig = aggConfigs?.createAggConfig(
+    if (!aggConfigs || !indexPattern) {
+      throw new Error('Cannot create new field, missing parameters');
+    }
+
+    const aggConfig = aggConfigs.createAggConfig(
       {
         schema: schema.name,
         // using any since createAggConfig requires the type property but when an agg is brandNew, this has to be skipped.
@@ -78,29 +81,29 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       }
     );
 
-    if (aggConfig) {
-      aggConfig.brandNew = true;
-      const newAggs = [...aggs, aggConfig];
-      const newAggConfigs =
-        indexPattern && aggService.createAggConfigs(indexPattern, cloneDeep(newAggs));
-      const newAggConfig = newAggConfigs?.aggs.find((agg) => agg.brandNew);
+    aggConfig.brandNew = true;
+    const newAggs = [...aggs, aggConfig];
+    const newAggConfigs = aggService.createAggConfigs(indexPattern, cloneDeep(newAggs));
+    const newAggConfig = newAggConfigs.aggs.find((agg) => agg.brandNew);
 
-      if (newAggConfig && newAggConfigs) {
-        dispatch(
-          createAgg({
-            id: newAggConfig.id,
-            aggConfigParams: newAggConfigs.aggs.map((agg) => agg.serialize()),
-          })
-        );
-      }
+    if (!newAggConfig) {
+      throw new Error('Missing new aggConfig');
     }
+
+    dispatch(editAgg(newAggConfig.serialize()));
   }, [aggConfigs, aggService, aggs, dispatch, indexPattern, schema.name]);
 
   const onEditField = useCallback(
     (aggId) => {
-      dispatch(editAgg(aggId));
+      const aggConfig = aggConfigs?.aggs.find((agg) => agg.id === aggId);
+
+      if (!aggConfig) {
+        throw new Error('Could not find agg in aggConfigs');
+      }
+
+      dispatch(editAgg(aggConfig.serialize()));
     },
-    [dispatch]
+    [aggConfigs?.aggs, dispatch]
   );
 
   const onDeleteField = useCallback(
@@ -138,7 +141,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const onReorderField = useCallback(
     ({ sourceAggId, destinationAggId }) => {
       dispatch(
-        reorderAggConfigParams({
+        reorderAgg({
           sourceId: sourceAggId,
           destinationId: destinationAggId,
         })

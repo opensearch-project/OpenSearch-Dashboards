@@ -13,7 +13,7 @@ interface VisualizationState {
   activeVisualization?: {
     name: string;
     aggConfigParams: CreateAggConfigParams[];
-    activeAggId?: string;
+    draftAgg?: CreateAggConfigParams;
   };
 }
 
@@ -59,31 +59,26 @@ export const slice = createSlice({
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
     },
-    createAgg: (
-      state,
-      action: PayloadAction<{ id: string; aggConfigParams: CreateAggConfigParams[] }>
-    ) => {
-      const { aggConfigParams, id } = action.payload;
-
-      state.activeVisualization!.aggConfigParams = aggConfigParams;
-      state.activeVisualization!.activeAggId = id;
-    },
-    editAgg: (state, action: PayloadAction<string>) => {
-      state.activeVisualization!.activeAggId = action.payload;
+    editAgg: (state, action: PayloadAction<CreateAggConfigParams>) => {
+      state.activeVisualization!.draftAgg = action.payload;
     },
     saveAgg: (state, action: PayloadAction<boolean>) => {
+      const saveDraft = action.payload;
+      const draftAgg = state.activeVisualization!.draftAgg;
+
       // Delete the aggConfigParam if the save is not true
-      if (!action.payload) {
-        const activeAggId = state.activeVisualization!.activeAggId;
+      if (saveDraft && draftAgg) {
         const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
-          (agg) => agg.id === activeAggId
+          (agg) => agg.id === draftAgg.id
         );
-        state.activeVisualization!.aggConfigParams.splice(aggIndex, 1);
+
+        if (aggIndex === -1) {
+          state.activeVisualization!.aggConfigParams.push(draftAgg);
+        } else {
+          state.activeVisualization!.aggConfigParams.splice(aggIndex, 1, draftAgg);
+        }
       }
-      delete state.activeVisualization!.activeAggId;
-    },
-    deleteAgg: (state, action: PayloadAction<undefined>) => {
-      delete state.activeVisualization!.activeAggId;
+      delete state.activeVisualization!.draftAgg;
     },
     reorderAgg: (
       state,
@@ -110,16 +105,6 @@ export const slice = createSlice({
     updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
       state.activeVisualization!.aggConfigParams = action.payload;
     },
-    updateActiveAgg: (state, action: PayloadAction<CreateAggConfigParams>) => {
-      const activeAggId = state.activeVisualization!.activeAggId;
-      const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
-        (agg) => agg.id === activeAggId
-      );
-
-      if (aggIndex !== -1) {
-        state.activeVisualization!.aggConfigParams[aggIndex] = action.payload;
-      }
-    },
   },
 });
 
@@ -129,9 +114,7 @@ export const {
   setIndexPattern,
   setSearchField,
   editAgg,
-  createAgg,
   updateAggConfigParams,
-  updateActiveAgg,
   saveAgg,
   reorderAgg,
 } = slice.actions;

@@ -12,13 +12,10 @@ import { useIndexPattern, useVisualizationType } from '../../../utils/use';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../../types';
 import { IAggType } from '../../../../../../data/public';
-import { saveAgg, updateActiveAgg } from '../../../utils/state_management/visualization_slice';
+import { saveAgg, editAgg } from '../../../utils/state_management/visualization_slice';
 
 export function SecondaryPanel() {
-  const { activeAggId, aggConfigParams } = useTypedSelector((state) => ({
-    activeAggId: state.visualization.activeVisualization!.activeAggId,
-    aggConfigParams: state.visualization.activeVisualization!.aggConfigParams,
-  }));
+  const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
   const [valid, setValid] = useState(true);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
@@ -34,10 +31,12 @@ export function SecondaryPanel() {
   const schemas = vizType.ui.containerConfig.data.schemas.all;
 
   const aggConfigs = useMemo(() => {
-    return indexPattern && aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
-  }, [aggConfigParams, aggService, indexPattern]);
+    return (
+      indexPattern && draftAgg && aggService.createAggConfigs(indexPattern, [cloneDeep(draftAgg)])
+    );
+  }, [draftAgg, aggService, indexPattern]);
 
-  const aggConfig = aggConfigs?.aggs.find((agg) => agg.id === activeAggId);
+  const aggConfig = aggConfigs?.aggs[0];
 
   const groupName = useMemo(
     () => schemas.find((schema) => schema.name === aggConfig?.schema)?.group,
@@ -76,11 +75,11 @@ export function SecondaryPanel() {
             value: any
           ): void {
             aggConfig.params[paramName] = value;
-            dispatch(updateActiveAgg(aggConfig.serialize()));
+            dispatch(editAgg(aggConfig.serialize()));
           }}
           onAggTypeChange={function (aggId: string, aggType: IAggType): void {
             aggConfig.type = aggType;
-            dispatch(updateActiveAgg(aggConfig.serialize()));
+            dispatch(editAgg(aggConfig.serialize()));
           }}
         />
       )}
