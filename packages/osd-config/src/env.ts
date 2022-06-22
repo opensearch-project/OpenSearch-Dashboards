@@ -36,7 +36,9 @@ import { PackageInfo, EnvironmentMode } from './types';
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
+  /** @deprecated use isDevClusterManager */
   isDevClusterMaster: boolean;
+  isDevClusterManager: boolean;
 }
 
 /** @internal */
@@ -110,10 +112,10 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this OpenSearch Dashboards  instance is run as development Node Cluster master.
+   * Indicates that this OpenSearch Dashboards  instance is run as development Node Cluster manager.
    * @internal
    */
-  public readonly isDevClusterMaster: boolean;
+  public readonly isDevClusterManager: boolean;
 
   /**
    * @internal
@@ -137,7 +139,7 @@ export class Env {
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
-    this.isDevClusterMaster = options.isDevClusterMaster;
+    this.isDevClusterManager = options.isDevClusterManager || options.isDevClusterMaster;
 
     const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({

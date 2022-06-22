@@ -48,7 +48,7 @@ beforeEach(() => {
   mockPackage.raw = {};
 });
 
-test('correctly creates default environment in dev mode.', () => {
+test('correctly creates default environment in dev mode when isDevClusterMaster (deprecated) is true', () => {
   mockPackage.raw = {
     branch: 'some-branch',
     version: 'some-version',
@@ -59,10 +59,50 @@ test('correctly creates default environment in dev mode.', () => {
     getEnvOptions({
       configs: ['/test/cwd/config/opensearch_dashboards.yml'],
       isDevClusterMaster: true,
+      isDevClusterManager: false,
     })
   );
 
   expect(defaultEnv).toMatchSnapshot('env properties');
+  expect(defaultEnv.isDevClusterManager).toBeTruthy();
+});
+
+test('correctly creates default environment in dev mode when isDevClusterManager is true', () => {
+  mockPackage.raw = {
+    branch: 'some-branch',
+    version: 'some-version',
+  };
+
+  const defaultEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({
+      configs: ['/test/cwd/config/opensearch_dashboards.yml'],
+      isDevClusterMaster: false,
+      isDevClusterManager: true,
+    })
+  );
+
+  expect(defaultEnv).toMatchSnapshot('env properties');
+  expect(defaultEnv.isDevClusterManager).toBeTruthy();
+});
+
+test('correctly creates default environment in dev mode when isDevClusterManager and isDevClusterMaster both are true', () => {
+  mockPackage.raw = {
+    branch: 'some-branch',
+    version: 'some-version',
+  };
+
+  const defaultEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({
+      configs: ['/test/cwd/config/opensearch_dashboards.yml'],
+      isDevClusterMaster: true,
+      isDevClusterManager: true,
+    })
+  );
+
+  expect(defaultEnv).toMatchSnapshot('env properties');
+  expect(defaultEnv.isDevClusterManager).toBeTruthy();
 });
 
 test('correctly creates default environment in prod distributable mode.', () => {
