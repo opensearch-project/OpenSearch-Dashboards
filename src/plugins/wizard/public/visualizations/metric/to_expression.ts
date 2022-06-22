@@ -93,13 +93,16 @@ interface MetricRootState extends RootState {
 
 export const toExpression = async ({ style: styleState, visualization }: MetricRootState) => {
   const { activeVisualization, indexPattern: indexId = '' } = visualization;
-  const { aggConfigParams } = activeVisualization || {};
+  const { aggConfigParams, activeAggId } = activeVisualization || {};
+  const filteredParams = activeAggId
+    ? aggConfigParams?.filter((agg) => agg.id !== activeAggId)
+    : aggConfigParams;
 
-  if (!aggConfigParams || !aggConfigParams.length) return;
+  if (!filteredParams || !filteredParams.length) return;
 
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
-  const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
+  const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(filteredParams));
 
   // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
