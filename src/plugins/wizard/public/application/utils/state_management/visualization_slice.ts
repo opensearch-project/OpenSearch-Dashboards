@@ -105,6 +105,16 @@ export const slice = createSlice({
     updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
       state.activeVisualization!.aggConfigParams = action.payload;
     },
+    updateActiveAgg: (state, action: PayloadAction<CreateAggConfigParams>) => {
+      const activeAggId = state.activeVisualization!.activeAggId;
+      const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
+        (agg) => agg.id === activeAggId
+      );
+
+      if (aggIndex !== -1) {
+        state.activeVisualization!.aggConfigParams[aggIndex] = action.payload;
+      }
+    },
   },
 });
 
