@@ -68,7 +68,7 @@ jobs:
         if: steps.job_successful.outputs.job_successful != 'true'
         run: |
           echo "opensearch:password" | chpasswd
-          su -u opensearch -p password
+          su - opensearch 
 
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
