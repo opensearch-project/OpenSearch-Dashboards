@@ -11,11 +11,9 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiText,
-  euiDragDropReorder,
   DropResult,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
 import './dropbox.scss';
 import { DropboxDisplay } from './types';
@@ -73,8 +71,6 @@ const DropboxComponent = ({
             {fields.map(({ id, label, icon }, index) => (
               <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
-                  {/* TODO: Verify if field icon makes sense here */}
-                  {/* <FieldIcon type={icon} /> */}
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>
                       {label}

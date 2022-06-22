@@ -57,7 +57,6 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       dropboxAggs?.map(
         (agg): DropboxDisplay => ({
           id: agg.id,
-          icon: 'number', // TODO: Check if we still need an icon here
           label: agg.makeLabel(),
         })
       ) || [],
