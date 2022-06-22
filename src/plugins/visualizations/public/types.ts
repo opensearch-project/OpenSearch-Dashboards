@@ -71,11 +71,18 @@ export interface ISavedVis {
 
 export interface VisSavedObject extends SavedObject, ISavedVis {}
 
-export interface VisResponseValue {
+export interface VisRenderValue {
+  title?: string;
   visType: string;
-  visData: object;
-  visConfig: object;
-  params?: object;
+  visData?: object | null;
+  visConfig: {
+    type?: string;
+    [key: string]: any;
+  };
+  params?: {
+    [key: string]: any;
+    listenOnChange: boolean;
+  };
 }
 
 export interface VisToExpressionAstParams {

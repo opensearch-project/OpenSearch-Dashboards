@@ -30,7 +30,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { VisResponseValue, PersistedState } from '../../../../plugins/visualizations/public';
+import { VisRenderValue, PersistedState } from '../';
 import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
 import { getTypes, getIndexPatterns, getFilterManager, getSearch } from '../services';
 
@@ -49,7 +49,7 @@ export type ExpressionFunctionVisualization = ExpressionFunctionDefinition<
   'visualization',
   any,
   Arguments,
-  Promise<Render<VisResponseValue>>
+  Promise<Render<VisRenderValue>>
 >;
 
 export const visualization = (): ExpressionFunctionVisualization => ({

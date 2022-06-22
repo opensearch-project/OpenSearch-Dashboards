@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -31,7 +31,9 @@
         "built_assets",
         ".eslintcache",
         ".node_binaries",
-        "src/plugins/*/target"
+        "src/plugins/*/target",
+        "src/core/target",
+        "src/test_utils/target"
       ]
     }
   },
@@ -68,7 +70,8 @@
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console"
+    "spec_to_console": "node scripts/spec_to_console",
+    "pkg-version": "./dev-tools/get-version.sh"
   },
   "repository": {
     "type": "git",
@@ -78,6 +81,7 @@
     "**/@types/node": "^14.17.32",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
+    "**/axios": "^0.27.2",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
@@ -335,7 +339,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "chromedriver": "^91.0.1",
+    "chromedriver": "^100.0.0",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
     "d3": "3.5.17",

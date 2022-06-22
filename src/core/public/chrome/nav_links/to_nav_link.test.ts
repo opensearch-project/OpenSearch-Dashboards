@@ -32,6 +32,7 @@ import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
@@ -52,7 +53,7 @@ describe('toNavLink', () => {
         title: 'title',
         order: 12,
         tooltip: 'tooltip',
-        euiIconType: 'my-icon',
+        euiIconType: 'my-icon' as EuiIconType,
       }),
       basePath
     );

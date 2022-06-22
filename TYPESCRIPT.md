@@ -13,8 +13,7 @@ The first thing that will probably happen when you convert a `.js` file in our s
 
 #### EUI component is missing types
 
-1. Check https://github.com/elastic/eui/issues/256 to see if they know it’s missing, if it’s not on there, add it.
-2. Temporarily get around the issue by adding the missing type in the `typings/@elastic/eui/index.d.ts` file. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in OpenSearch Dashboards will take some time, as a new EUI release will need to be generated, then that new release pointed to in OpenSearch Dashboards.  Best, to make forward progress, to do a temporary workaround.
+Temporarily get around the issue by adding the missing type in the `typings/@elastic/eui/index.d.ts` file. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in OpenSearch Dashboards will take some time, as a new EUI release will need to be generated, then that new release pointed to in OpenSearch Dashboards.  Best, to make forward progress, to do a temporary workaround.
 
 ```ts
 // typings/@elastic/eui/index.d.ts

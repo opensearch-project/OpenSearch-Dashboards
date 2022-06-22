@@ -37,8 +37,10 @@ import {
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
+import { DEFAULT_MAP_CHOICE } from '../common';
 
 export function createRegionMapVisualization({
+  http,
   regionmapsConfig,
   uiSettings,
   BaseMapsVisualization,
@@ -54,8 +56,14 @@ export function createRegionMapVisualization({
 
     async render(opensearchResponse, visParams) {
       getOpenSearchDashboardsLegacy().loadFontAwesome();
+      this._choroplethLayer?.setLayerChosenByUser(visParams.layerChosenByUser);
+      this._choroplethLayer?.setVisParams(visParams);
       await super.render(opensearchResponse, visParams);
+
+      // fetches geojson data
       if (this._choroplethLayer) {
+        this._choroplethLayer.setLayerChosenByUser(visParams.layerChosenByUser);
+        this._choroplethLayer.setVisParams(visParams);
         await this._choroplethLayer.whenDataLoaded();
       }
     }
@@ -75,7 +83,15 @@ export function createRegionMapVisualization({
         });
       }
 
-      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
+      let selectedLayer;
+      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
+        selectedLayer = await this._loadConfig(this._params.selectedLayer);
+        this._params.selectedJoinField = selectedLayer.fields[0];
+      } else {
+        selectedLayer = this._params.selectedCustomLayer;
+        this._params.selectedJoinField = this._params.selectedCustomJoinField;
+      }
+
       if (!this._params.selectedJoinField && selectedLayer) {
         this._params.selectedJoinField = selectedLayer.fields[0];
       }
@@ -112,10 +128,11 @@ export function createRegionMapVisualization({
       // These settings are stored in the URL and can be used to inject dirty display content.
 
       const { escape } = await import('lodash');
-
       if (
-        fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
-        (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
+        fileLayerConfig &&
+        (fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
+          (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)))
+        //fallback for older saved objects
       ) {
         const serviceSettings = await getServiceSettings();
         return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
@@ -138,8 +155,14 @@ export function createRegionMapVisualization({
 
     async _updateParams() {
       await super._updateParams();
-
-      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
+      let selectedLayer;
+      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
+        selectedLayer = await this._loadConfig(this._params.selectedLayer);
+        this._params.selectedJoinField = selectedLayer.fields[0];
+      } else {
+        selectedLayer = this._params.selectedCustomLayer;
+        this._params.selectedJoinField = this._params.selectedCustomJoinField;
+      }
 
       if (!this._params.selectedJoinField && selectedLayer) {
         this._params.selectedJoinField = selectedLayer.fields[0];
@@ -157,6 +180,8 @@ export function createRegionMapVisualization({
 
       const metricFieldFormatter = getFormatService().deserialize(this._params.metric.format);
 
+      this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);
+
       this._choroplethLayer.setJoinField(this._params.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[this._params.colorSchema].value);
       this._choroplethLayer.setLineWeight(this._params.outlineWeight);
@@ -168,6 +193,7 @@ export function createRegionMapVisualization({
     }
 
     async _updateChoroplethLayerForNewMetrics(name, attribution, showAllData, newMetrics) {
+      this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);
       if (
         this._choroplethLayer &&
         this._choroplethLayer.canReuseInstanceForNewMetrics(name, showAllData, newMetrics)
@@ -185,7 +211,10 @@ export function createRegionMapVisualization({
     }
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
-      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
+      const selectedLayer =
+        DEFAULT_MAP_CHOICE === this._params.layerChosenByUser
+          ? await this._loadConfig(this._params.selectedLayer)
+          : this._params.selectedCustomLayer;
       this._opensearchDashboardsMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
@@ -197,7 +226,9 @@ export function createRegionMapVisualization({
           selectedLayer.meta,
           selectedLayer,
           await getServiceSettings(),
-          (await lazyLoadMapsLegacyModules()).L
+          (await lazyLoadMapsLegacyModules()).L,
+          this._params.layerChosenByUser,
+          http
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
@@ -209,9 +240,12 @@ export function createRegionMapVisualization({
           selectedLayer.meta,
           selectedLayer,
           await getServiceSettings(),
-          (await lazyLoadMapsLegacyModules()).L
+          (await lazyLoadMapsLegacyModules()).L,
+          this._params.layerChosenByUser,
+          http
         );
       }
+      this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);
 
       this._choroplethLayer.on('select', (event) => {
         const { rows, columns } = this._chartData;

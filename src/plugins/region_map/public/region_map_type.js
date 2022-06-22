@@ -36,10 +36,67 @@ import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../charts/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
+import { getServices } from './services';
+import { DEFAULT_MAP_CHOICE } from '../common';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, getServiceSettings } = dependencies;
+  const {
+    http,
+    uiSettings,
+    regionmapsConfig,
+    getServiceSettings,
+    additionalOptions,
+  } = dependencies;
+
+  const services = getServices(http);
   const visualization = createRegionMapVisualization(dependencies);
+  const diffArray = (arr1, arr2) => {
+    return arr1.concat(arr2).filter((item) => !arr1.includes(item) || !arr2.includes(item));
+  };
+
+  const getCustomIndices = async () => {
+    try {
+      const result = await services.getCustomIndices();
+      return result.resp;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const getJoinFields = async (indexName) => {
+    try {
+      const result = await services.getIndexMapping(indexName);
+      const properties = diffArray(Object.keys(result.resp[indexName].mappings.properties), [
+        'location',
+      ]);
+      return properties.map(function (property) {
+        return {
+          type: 'id',
+          name: property,
+          description: property,
+        };
+      });
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const addSchemaToCustomLayer = async (customlayer) => {
+    const joinFields = await getJoinFields(customlayer.index);
+    const customLayerWithSchema = {
+      attribution:
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
+      created_at: '2017-04-26T17:12:15.978370',
+      format: 'geojson',
+      fields: joinFields,
+      id: customlayer.index,
+      meta: undefined,
+      name: customlayer.index,
+      origin: 'user-upload',
+    };
+
+    return customLayerWithSchema;
+  };
 
   return {
     name: 'region_map',
@@ -52,6 +109,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
+        layerChosenByUser: DEFAULT_MAP_CHOICE,
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
@@ -66,12 +124,27 @@ provided base maps, or add your own. Darker colors represent higher values.',
     },
     visualization,
     editorConfig: {
-      optionsTemplate: (props) => (
-        <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
-      ),
+      optionTabs: () => {
+        return [
+          {
+            name: 'options',
+            title: i18n.translate(
+              'regionMap.mapVis.regionMapEditorConfig.optionTabs.optionsTitle',
+              {
+                defaultMessage: 'Layer Options',
+              }
+            ),
+            editor: (props) => (
+              <RegionMapOptions {...props} getServiceSettings={getServiceSettings} />
+            ),
+          },
+          ...additionalOptions,
+        ];
+      },
       collections: {
         colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
+        customVectorLayers: [],
         tmsLayers: [],
       },
       schemas: new Schemas([
@@ -113,6 +186,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
       const tmsLayers = await serviceSettings.getTMSServices();
+
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
@@ -121,8 +195,16 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const vectorLayers = regionmapsConfig.layers.map(
         mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
       );
+      const customVectorLayers = regionmapsConfig.layers.map(
+        mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
+      );
+      const customIndices = await getCustomIndices();
+
       let selectedLayer = vectorLayers[0];
+      let selectedCustomLayer = customVectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+      const selectedCustomJoinField = selectedCustomLayer ? selectedCustomLayer.fields[0] : null;
+
       if (regionmapsConfig.includeOpenSearchMapsService) {
         const layers = await serviceSettings.getFileLayers();
         const newLayers = layers
@@ -130,6 +212,8 @@ provided base maps, or add your own. Darker colors represent higher values.',
           .filter(
             (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
+        const promises = customIndices.map(addSchemaToCustomLayer);
+        const newCustomLayers = await Promise.all(promises);
 
         // backfill v1 manifest for now
         newLayers.forEach((layer) => {
@@ -140,9 +224,27 @@ provided base maps, or add your own. Darker colors represent higher values.',
           }
         });
 
+        newCustomLayers.forEach((layer) => {
+          if (layer.format === 'geojson') {
+            layer.format = {
+              type: 'geojson',
+            };
+            layer.isEMS = false;
+            layer.layerId = layer.origin + '.' + layer.name;
+          }
+        });
+
         vis.type.editorConfig.collections.vectorLayers = [...vectorLayers, ...newLayers];
+        vis.type.editorConfig.collections.customVectorLayers = [
+          ...customVectorLayers,
+          ...newCustomLayers,
+        ];
 
         [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
+        [selectedCustomLayer] = vis.type.editorConfig.collections.customVectorLayers;
+        vis.params.selectedCustomLayer = selectedCustomLayer;
+        vis.params.selectedCustomJoinField = selectedCustomJoinField;
+
         selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
         if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
@@ -154,6 +256,10 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vis.params.selectedLayer = selectedLayer;
         vis.params.selectedJoinField = selectedJoinField;
       }
+
+      vis.params.layerChosenByUser = vis.params.layerChosenByUser
+        ? vis.params.layerChosenByUser
+        : DEFAULT_MAP_CHOICE;
 
       return vis;
     },

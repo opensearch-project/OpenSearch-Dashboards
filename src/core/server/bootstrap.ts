@@ -29,7 +29,7 @@
  */
 
 import chalk from 'chalk';
-import { isMaster } from 'cluster';
+import { isMaster as isClusterManager } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
@@ -82,7 +82,8 @@ export async function bootstrap({
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
+    isDevClusterMaster: isClusterManager && cliArgs.dev && features.isClusterModeSupported,
+    isDevClusterManager: isClusterManager && cliArgs.dev && features.isClusterModeSupported,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);

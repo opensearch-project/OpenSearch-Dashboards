@@ -68,6 +68,18 @@ describe('plugins/opensearch', () => {
       it('when majors and minors are not equal, but the engine is on legacy version 8.0.0 and OpenSearch Dashboards is on 2.0.0', () => {
         expect(opensearchVersionCompatibleWithOpenSearchDashboards('8.0.0', '2.0.0')).toBe(false);
       });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 6.10.3 and OpenSearch Dashboards is on 3.0.0', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('6.10.3', '3.0.0')).toBe(false);
+      });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 7.10.3 and OpenSearch Dashboards is on 3.0.0', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('7.10.3', '3.0.0')).toBe(false);
+      });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 8.0.0 and OpenSearch Dashboards is on 3.0.0', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('8.0.0', '3.0.0')).toBe(false);
+      });
     });
 
     describe('returns true', () => {
@@ -109,6 +121,18 @@ describe('plugins/opensearch', () => {
 
       it('when majors and minors are not equal, but the engine is on legacy version 7.10.2 and OpenSearch Dashboards is on 2.1.0', () => {
         expect(opensearchVersionCompatibleWithOpenSearchDashboards('7.10.2', '2.1.0')).toBe(true);
+      });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 7.10.2 and OpenSearch Dashboards is on 3.0.0', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('7.10.2', '3.0.0')).toBe(true);
+      });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 7.10.2 and OpenSearch Dashboards is on 3.0.1', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('7.10.2', '3.0.1')).toBe(true);
+      });
+
+      it('when majors and minors are not equal, but the engine is on legacy version 7.10.2 and OpenSearch Dashboards is on 3.1.0', () => {
+        expect(opensearchVersionCompatibleWithOpenSearchDashboards('7.10.2', '3.1.0')).toBe(true);
       });
     });
   });

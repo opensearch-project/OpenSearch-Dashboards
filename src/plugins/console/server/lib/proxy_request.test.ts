@@ -68,7 +68,8 @@ describe(`Console's send request`, () => {
       });
       fail('Should not reach here!');
     } catch (e) {
-      expect(e.message).toEqual('Client request timeout');
+      const { message } = e as Error;
+      expect(message).toEqual('Client request timeout');
       expect((fakeRequest.abort as sinon.SinonStub).calledOnce).toBe(true);
     }
   });

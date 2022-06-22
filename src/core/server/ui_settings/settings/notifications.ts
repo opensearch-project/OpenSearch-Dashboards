@@ -49,7 +49,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-            target="_blank" rel="noopener">` +
+            target="_blank" rel="noopener noreferrer">` +
             i18n.translate('core.ui_settings.params.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +

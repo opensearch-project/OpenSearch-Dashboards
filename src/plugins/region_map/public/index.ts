@@ -39,3 +39,6 @@ export interface RegionMapsConfigType {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
+
+export { RegionMapPluginSetup, RegionMapVisualizationDependencies } from './plugin';
+export { RegionMapOptionsProps } from './components/region_map_options';

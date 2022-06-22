@@ -29,6 +29,7 @@
  */
 
 import { Duration } from 'moment';
+import { SecureContextOptions } from 'tls';
 import { ConsoleServerPlugin } from './plugin';
 
 /** @public */
@@ -55,4 +56,14 @@ export interface OpenSearchConfigForProxy {
     key?: string;
     keyPassphrase?: string;
   };
+}
+
+export interface SslConfigs extends SecureContextOptions {
+  verify?: boolean;
+}
+
+export interface ProxyConfigs extends SecureContextOptions {
+  match?: any;
+  timeout: number;
+  ssl?: SslConfigs;
 }
