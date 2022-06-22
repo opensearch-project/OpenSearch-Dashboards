@@ -61,7 +61,7 @@ export default () =>
       name: Joi.string().default(os.hostname()),
       // keep them for BWC, remove when not used in Legacy.
       // validation should be in sync with one in New platform.
-      // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/core/server/http/http_config.ts
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/http/http_config.ts
       basePath: Joi.string()
         .default('')
         .allow('')

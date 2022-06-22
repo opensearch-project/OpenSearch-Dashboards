@@ -86,7 +86,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/embeddable/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/src/plugins/embeddable/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

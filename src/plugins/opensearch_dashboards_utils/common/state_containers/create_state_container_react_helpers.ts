@@ -87,7 +87,7 @@ export const useContainerSelector = <Container extends StateContainer<any, any>,
  * Creates helpers for using {@link StateContainer | State Containers} with react
  *
  * TODO Update link
- * Refer to {@link https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/react.md | guide} for details
+ * Refer to {@link https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/opensearch_dashboards_utils/docs/state_containers/react.md | guide} for details
  * @public
  */
 export const createStateContainerReactHelpers = <Container extends StateContainer<any, any>>() => {
