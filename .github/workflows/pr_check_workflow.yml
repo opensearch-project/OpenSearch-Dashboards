@@ -64,6 +64,10 @@ jobs:
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/checkout@v2
 
+      - name: Remove Node
+        if: steps.job_successful.outputs.job_successful != 'true'
+        run: sudo rm -rf $NVM_DIR
+
       - name: Setup Node
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/setup-node@v2
@@ -149,6 +153,10 @@ jobs:
       - name: Checkout code
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
         uses: actions/checkout@v2
+
+      - name: Remove Node
+        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
+        run: sudo rm -rf $NVM_DIR
 
       - name: Setup Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
