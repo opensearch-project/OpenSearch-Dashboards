@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1000
+      options: --user root
     name: Build and Verify
     steps:
       # Access a cache of set results from a previous run of the job
@@ -60,17 +60,6 @@ jobs:
         id: integration_tests_results
         run: cat integration_tests_results 2>/dev/null || echo 'default'
 
-      # - name: Remove Existing Node
-      #   if: steps.job_successful.outputs.job_successful != 'true'
-      #   run: rm -rf $NVM_DIR
-
-      # - name: Switch to Non-Root User
-      #   if: steps.job_successful.outputs.job_successful != 'true'
-      #   run: |
-      #     echo "opensearch:password" | chpasswd
-      #     su - opensearch
-      #     echo password
-
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
         uses: actions/checkout@v2
@@ -90,7 +79,7 @@ jobs:
 
       - name: Run bootstrap
         if: steps.job_successful.outputs.job_successful != 'true'
-        run: yarn osd bootstrap
+        run: yarn osd bootstrap --allow-root
 
       - name: Run linter
         if: steps.linter_results.outputs.linter_results != 'success'
