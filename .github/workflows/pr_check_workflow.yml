@@ -67,7 +67,7 @@ jobs:
       - name: Switch to Non-Root User
         if: steps.job_successful.outputs.job_successful != 'true'
         run: |
-          useradd -m tempuser && echo "tempuser:tempuser" | chpasswd
+          useradd -m tempuser && (echo tempuser; echo tempuser) | passwd
           su -u tempuser -p tempuser
 
       - name: Checkout code
