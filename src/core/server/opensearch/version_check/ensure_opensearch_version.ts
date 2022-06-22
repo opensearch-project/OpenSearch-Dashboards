@@ -66,7 +66,7 @@ export const getNodeId = async (
     })) as ApiResponse;
     /* Aggregate different cluster_ids from the OpenSearch nodes
      * if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
-     * Using _cluster/state/nodes to retrieve the cluster_id of each node from master node which is considered to be a lightweight operation
+     * Using _cluster/state/nodes to retrieve the cluster_id of each node from cluster manager node which is considered to be a lightweight operation
      * else if the nodes have different cluster_ids then fan out the request to all nodes
      * else there are no nodes in the cluster
      */
@@ -214,7 +214,7 @@ export const pollOpenSearchNodesVersion = ({
        * Originally, Dashboards queries OpenSearch cluster to get the version info of each node and check the version compatibility with each node.
        * The /nodes request could fail even one node in cluster fail to response
        * For better dashboards resilience, the behaviour is changed to only query the local node when all the nodes have the same cluster_id
-       * Using _cluster/state/nodes to retrieve the cluster_id of each node from the master node
+       * Using _cluster/state/nodes to retrieve the cluster_id of each node from the cluster manager node
        */
       if (optimizedHealthcheckId) {
         return from(getNodeId(internalClient, optimizedHealthcheckId)).pipe(
