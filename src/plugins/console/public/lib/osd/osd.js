@@ -101,7 +101,17 @@ const parametrizedComponentFactories = {
   nodes: function (name, parent) {
     return new ListComponent(
       name,
-      ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
+      [
+        '_local',
+        '_master',
+        '_cluster_manager',
+        'data:true',
+        'data:false',
+        'master:true',
+        'cluster_manager:true',
+        'master:false',
+        'cluster_manager:false',
+      ],
       parent
     );
   },

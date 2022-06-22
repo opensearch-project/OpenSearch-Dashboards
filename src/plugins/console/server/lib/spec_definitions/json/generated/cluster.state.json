@@ -29,6 +29,7 @@
         "_all",
         "blocks",
         "master_node",
+        "cluster_manager_node",
         "metadata",
         "nodes",
         "routing_nodes",
