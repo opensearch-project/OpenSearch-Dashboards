@@ -66,7 +66,7 @@ jobs:
 
       - name: Remove Node
         if: steps.job_successful.outputs.job_successful != 'true'
-        run: sudo rm -rf $NVM_DIR
+        run: rm -rf $NVM_DIR
 
       - name: Setup Node
         if: steps.job_successful.outputs.job_successful != 'true'
@@ -156,7 +156,7 @@ jobs:
 
       - name: Remove Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        run: sudo rm -rf $NVM_DIR
+        run: rm -rf $NVM_DIR
 
       - name: Setup Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
