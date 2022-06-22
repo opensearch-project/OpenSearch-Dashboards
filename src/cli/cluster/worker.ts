@@ -30,6 +30,7 @@
 
 import _ from 'lodash';
 import cluster from 'cluster';
+import { setupMaster as setupClusterManager } from 'cluster';
 import { EventEmitter } from 'events';
 
 import { BinderFor } from './binder_for';
@@ -44,7 +45,7 @@ export type ClusterWorker = cluster.Worker & {
   exitCode?: number;
 };
 
-cluster.setupMaster({
+setupClusterManager({
   exec: cliPath,
   silent: false,
 });
