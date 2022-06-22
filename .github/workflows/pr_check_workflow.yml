@@ -24,6 +24,9 @@ env:
 jobs:
   build-lint-test:
     runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
     name: Build and Verify
     steps:
       # Access a cache of set results from a previous run of the job
@@ -95,20 +98,6 @@ jobs:
 
       - run: echo Unit tests completed unsuccessfully. However, unit tests are inconsistent on the CI so please verify locally with `yarn test:jest`.
         if: steps.unit_tests_results.outputs.unit_tests_results != 'success' && steps.unit-tests.outcome != 'success'
-      
-      # TODO: This gets rejected, we need approval to add this
-      # - name: Add comment if unit tests did not succeed
-      #   if: steps.unit_tests_results.outputs.unit_tests_results != 'success' && steps.unit-tests.outcome != 'success'
-      #   uses: actions/github-script@v5
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     script: |
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: 'Unit tests completed unsuccessfully. However, unit tests are inconsistent on the CI so please verify locally with `yarn test:jest`.'
-      #       })
 
       - name: Run integration tests
         if: steps.integration_tests_results.outputs.integration_tests_results != 'success'
@@ -131,6 +120,9 @@ jobs:
   functional-tests:
     needs: [ build-lint-test ]
     runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
     name: Run functional tests
     strategy: 
       matrix:
@@ -187,10 +179,9 @@ jobs:
             ${{ runner.os }}-yarn-
             ${{ runner.os }}-
 
-      # github virtual env is the latest chrome
+      # image has the latest chrome v99
       - name: Setup chromedriver
-        if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        run: yarn add --dev chromedriver@100.0.0
+        run: yarn add --dev chromedriver@99.0.0
 
       - name: Run bootstrap
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
