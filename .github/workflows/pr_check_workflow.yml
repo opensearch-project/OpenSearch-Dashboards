@@ -66,7 +66,9 @@ jobs:
 
       - name: Switch to Non-Root User
         if: steps.job_successful.outputs.job_successful != 'true'
-        run: su - opensearch
+        run: |
+          useradd -m tempuser && echo "tempuser:tempuser" | chpasswd
+          su -u tempuser -p tempuser
 
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
