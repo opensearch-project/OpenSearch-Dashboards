@@ -34,7 +34,7 @@ jobs:
         with:
           title: Add documentation related to new feature
           content-filepath: ./.github/doc_issue_template.md
-          labels: documentation
+          labels: dashboards
           repository: opensearch-project/documentation-website
           token: ${{ steps.github_app_token.outputs.token }}
       
