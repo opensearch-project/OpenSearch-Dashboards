@@ -4,7 +4,7 @@
   padding: 0;
   display: grid;
   grid-template-rows: min-content 1fr;
-  grid-template-columns: 470px 1fr;
+  grid-template-columns: $wizSideNavWidth 1fr;
   grid-template-areas: 
     "topNav topNav"
     "sideNav workspace"
