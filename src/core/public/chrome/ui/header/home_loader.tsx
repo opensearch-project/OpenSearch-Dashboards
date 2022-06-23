@@ -126,7 +126,6 @@ export function HomeLoader({ href, navigateToApp, branding, ...observables }: Pr
         onClick(e, forceNavigation, navLinks, navigateToApp)
       }
       href={href}
-      // TODO: title seems preferable for tooltip, but need figure out best ally approach to avoid duplication for screen readers: https://www.deque.com/blog/text-links-practices-screen-readers/
       aria-label={label}
       title={label}
     >

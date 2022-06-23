@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import './header.scss';
 import {
   EuiHeader,
   EuiHeaderSection,

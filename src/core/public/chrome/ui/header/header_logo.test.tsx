@@ -6,10 +6,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { HeaderLogo } from './header_logo';
-
-const defaultOpensearchLogoUrl = '/opensearch_logo_default_mode.svg';
-const darkOpensearchLogoUrl = '/opensearch_logo_dark_mode.svg';
+import { HeaderLogo, DEFAULT_DARK_LOGO, DEFAULT_LOGO } from './header_logo';
 
 const mockProps = () => ({
   href: '/',
@@ -29,7 +26,7 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(defaultOpensearchLogoUrl);
+      expect(img.prop('src')).toEqual(`/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`opensearch dashboards logo`);
       expect(component).toMatchSnapshot();
     });
@@ -48,7 +45,7 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
@@ -67,7 +64,7 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchLogoUrl}`);
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
@@ -107,7 +104,7 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
@@ -126,7 +123,7 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}${darkOpensearchLogoUrl}`);
+      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });

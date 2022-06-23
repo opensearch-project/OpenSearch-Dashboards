@@ -1,10 +1,4 @@
 /*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
-/*
- * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -103,6 +97,8 @@ function onClick(
   }
 }
 
+export const DEFAULT_DARK_LOGO = 'opensearch_logo_dark_mode.svg';
+export const DEFAULT_LOGO = 'opensearch_logo_default_mode.svg';
 interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
@@ -123,9 +119,7 @@ export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Pr
   const { defaultUrl: logoUrl, darkModeUrl: darkLogoUrl } = logo;
 
   const customLogo = darkMode ? darkLogoUrl ?? logoUrl : logoUrl;
-  const defaultLogo = darkMode
-    ? 'opensearch_logo_dark_mode.svg'
-    : 'opensearch_logo_default_mode.svg';
+  const defaultLogo = darkMode ? DEFAULT_DARK_LOGO : DEFAULT_LOGO;
 
   const logoSrc = customLogo ? customLogo : `${assetFolderUrl}/${defaultLogo}`;
   const testSubj = customLogo ? 'customLogo' : 'defaultLogo';

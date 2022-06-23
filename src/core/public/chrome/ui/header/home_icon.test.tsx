@@ -5,11 +5,11 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { HomeIcon } from './home_icon';
+import { DEFAULT_MARK, DEFAULT_DARK_MARK, HomeIcon } from './home_icon';
 
-const defaultOpensearchMarkUrl = '/opensearch_mark_default_mode.svg';
-const darkOpensearchMarkUrl = '/opensearch_mark_dark_mode.svg';
-
+// TODO: many of these tests cover the conditional logic of which mark to load depending on raw branding configurations
+// Dark mode and custom/default fallbacks should instead be consolidated and centralized elsewhere:
+// https://github.com/opensearch-project/OpenSearch-Dashboards/issues/895#issuecomment-1164995007
 describe('Home button icon ', () => {
   describe('in condensed light mode ', () => {
     it('uses opensearch mark if no mark provided', () => {
@@ -23,7 +23,7 @@ describe('Home button icon ', () => {
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
-      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchMarkUrl}`);
+      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_MARK}`);
       expect(icon.prop('title')).toEqual(`${branding.applicationTitle} home`);
       expect(component).toMatchSnapshot();
     });
@@ -39,7 +39,7 @@ describe('Home button icon ', () => {
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
-      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}${defaultOpensearchMarkUrl}`);
+      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_MARK}`);
       expect(icon.prop('title')).toEqual(`${branding.applicationTitle} home`);
       expect(component).toMatchSnapshot();
     });
@@ -73,7 +73,7 @@ describe('Home button icon ', () => {
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
-      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}${darkOpensearchMarkUrl}`);
+      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_MARK}`);
       expect(icon.prop('title')).toEqual(`${branding.applicationTitle} home`);
       expect(component).toMatchSnapshot();
     });
@@ -89,7 +89,7 @@ describe('Home button icon ', () => {
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
-      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}${darkOpensearchMarkUrl}`);
+      expect(icon.prop('type')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_MARK}`);
       expect(icon.prop('title')).toEqual(`${branding.applicationTitle} home`);
       expect(component).toMatchSnapshot();
     });
