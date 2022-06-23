@@ -340,7 +340,7 @@ variable can’t be null has changed (potentially even due to changes in compelt
 assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
-[`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
+[`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
 linting rule for you plugin in the [`.eslintrc.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.eslintrc.js) config.
 
 ### Return/throw early from functions
