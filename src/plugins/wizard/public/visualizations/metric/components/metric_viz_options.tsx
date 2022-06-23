@@ -140,7 +140,6 @@ function MetricVizOptions() {
           colorSchemas={colorSchemas}
           disabled={metric.colorsRange.length === 1 || metric.metricColorMode === ColorModes.NONE}
           invertColors={metric.invertColors}
-          // setValue={setMetricValue as SetColorSchemaOptionsValue}
           setValue={(paramName, value) =>
             setOption((draft) => {
               // The paramName and associated value are expected to pair correctly but will be messy to type correctly
@@ -148,7 +147,7 @@ function MetricVizOptions() {
             })
           }
           showHelpText={false}
-          // TODO: use uiState correctly
+          // uistate here is used for custom colors which is not currently supported. Update when supported
           uiState={new PersistedState({})}
         />
       </EuiPanel>
