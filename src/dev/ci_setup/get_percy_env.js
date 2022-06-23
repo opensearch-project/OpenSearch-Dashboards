@@ -63,5 +63,5 @@ console.log(
   `export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : branch}/${process.env.BUILD_ID}";`
 );
 console.log(`export PERCY_BRANCH="${branch}";`);
-// percy snapshots always target pkg.branch, so that feature branches can be based on master/7.x/etc.
+// percy snapshots always target pkg.branch, so that feature branches can be based on main/7.x/etc.
 console.log(`export PERCY_TARGET_BRANCH="${isPr ? process.env.PR_TARGET_BRANCH : pkg.branch}";`);

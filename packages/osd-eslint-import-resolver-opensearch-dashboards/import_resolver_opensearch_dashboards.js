@@ -121,5 +121,5 @@ exports.resolve = function resolveOpenSearchDashboardsPath(importRequest, file, 
   });
 };
 
-// use version 2 of the resolver interface, https://github.com/benmosher/eslint-plugin-import/blob/master/resolvers/README.md#interfaceversion--number
+// use version 2 of the resolver interface, https://github.com/benmosher/eslint-plugin-import/blob/main/resolvers/README.md#interfaceversion--number
 exports.interfaceVersion = 2;

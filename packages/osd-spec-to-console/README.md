@@ -1,4 +1,4 @@
-\ mini utility to convert [OpenSearch's REST spec](https://github.com/opensearch-project/OpenSearch/blob/master/rest-api-spec) to Console's (OpenSearch Dashboards) autocomplete format.
+\ mini utility to convert [OpenSearch's REST spec](https://github.com/opensearch-project/OpenSearch/blob/main/rest-api-spec) to Console's (OpenSearch Dashboards) autocomplete format.
 
 
 It is used to semi-manually update Console's autocompletion rules.
@@ -13,7 +13,7 @@ git init
 git remote add origin https://github.com/opensearch-project/OpenSearch
 git config core.sparsecheckout true
 echo "rest-api-spec/src/main/resources/rest-api-spec/api/*\nx-pack/plugin/src/test/resources/rest-api-spec/api/*" > .git/info/sparse-checkout
-git pull --depth=1 origin master
+git pull --depth=1 origin main
 ```
 
 ### Usage
