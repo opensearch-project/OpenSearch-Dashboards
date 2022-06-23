@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "typescript": "4.0.2",
-    "tsd": "^0.16.0"
+    "tsd": "^0.21.0"
   },
   "peerDependencies": {
     "lodash": "^4.17.21",
