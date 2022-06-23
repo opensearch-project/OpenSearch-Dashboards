@@ -86,7 +86,7 @@ function RoutingExplorer({
                 {
                   label: 'Conventions',
                   href:
-                    'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/DEVELOPER_GUIDE.md#api-endpoints',
+                    'https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/DEVELOPER_GUIDE.md#api-endpoints',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',

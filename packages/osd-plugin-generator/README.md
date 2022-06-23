@@ -12,7 +12,7 @@ The plugin generator became a part of the OpenSearch Dashboards project as of Op
 
 ## Quick Start
 
-To target the current development version of OpenSearch Dashboards just use the default  `master` branch.
+To target the current development version of OpenSearch Dashboards just use the default  `main` branch.
 
 ```sh
 node scripts/generate_plugin --name my_plugin_name -y
@@ -41,7 +41,7 @@ Since the Plugin Generator is now a part of the OpenSearch Dashboards repo, when
 > ***NOTE:*** These commands should be run from the OpenSearch Dashboards repo, and `upstream` is our convention for the git remote that references https://github.com/opensearch-project/OpenSearch-Dashboards.git, unless you added this remote you might need to use `origin`.
 
 ```sh
-git pull upstream master
+git pull upstream main
 yarn osd bootstrap
 ```
 
