@@ -10,7 +10,7 @@ import { DashboardStart } from 'src/plugins/dashboard/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginStart, IndexPatternField } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 
 export type WizardSetup = TypeServiceSetup;

@@ -1,0 +1,26 @@
+@import "../variables";
+
+.searchableDropdown {
+  overflow: "hidden";
+}
+
+.searchableDropdown .euiPopover,
+.searchableDropdown .euiPopover__anchor {
+  width: 100%;
+}
+
+.searchableDropdown--fixedWidthChild {
+  width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2) ;
+}
+
+.searchableDropdown--topDisplay {
+  padding-right: $euiSizeL;
+}
+
+
+.searchableDropdown--selectableWrapper .euiSelectableList {
+  // When clicking on the selectable content it will "highlight" itself with a box shadow
+  // This turns that off
+  box-shadow: none !important;
+  margin: ($euiFormControlPadding * -1) - 4;
+}
