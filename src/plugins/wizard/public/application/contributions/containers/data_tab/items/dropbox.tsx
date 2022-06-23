@@ -68,7 +68,7 @@ const DropboxComponent = ({
       <EuiFormRow label={boxLabel} className="dropBox" fullWidth>
         <div className="dropBox__container">
           <EuiDroppable droppableId={dropboxId}>
-            {fields.map(({ id, label, icon }, index) => (
+            {fields.map(({ id, label }, index) => (
               <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
