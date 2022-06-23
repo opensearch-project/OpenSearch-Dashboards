@@ -18,22 +18,30 @@ import {
 import { CoreStart } from '../../../../core/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { DataSourceManagmentContext } from '../types';
 
-interface DataSourceManagementAppDeps {
-  http: CoreStart['http'];
-}
+// interface DataSourceManagementAppDeps {
+//   http: CoreStart['http'];
+// }
 
-export const DataSourceManagementApp = ({ http }: DataSourceManagementAppDeps) => {
+export const DataSourceManagementApp = ({ services }: DataSourceManagmentContext) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
-    http.get('/api/data_source_management/example').then((res) => {
+    services.http.get('/api/data_source_management/example').then((res) => {
       setTimestamp(res.time);
       // eslint-disable-next-line no-console
       console.log('data updated');
     });
+
+    services.savedObjects.client
+      .create('sample-data-source', { name: "i'm data source", count: 1 })
+      .then((res: any) => {
+        // eslint-disable-next-line no-console
+        console.log(res);
+      });
   };
 
   // Render the application DOM.

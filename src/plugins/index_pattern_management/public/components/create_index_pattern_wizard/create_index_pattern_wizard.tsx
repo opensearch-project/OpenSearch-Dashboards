@@ -166,7 +166,8 @@ export class CreateIndexPatternWizard extends Component<
     let emptyPattern: IndexPattern;
     const { history } = this.props;
     const { indexPattern } = this.state;
-
+    // eslint-disable-next-line no-console
+    console.log('debug debug debug');
     try {
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,

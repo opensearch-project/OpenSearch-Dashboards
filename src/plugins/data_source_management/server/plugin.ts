@@ -8,6 +8,7 @@ import {
 
 import { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { sampleDataSource } from './saved_objects';
 
 export class DataSourceManagementPlugin
   implements Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart> {
@@ -18,6 +19,8 @@ export class DataSourceManagementPlugin
   }
 
   public setup(core: CoreSetup) {
+    core.savedObjects.registerType(sampleDataSource);
+
     this.logger.debug('dataSourceManagement: Setup');
     const router = core.http.createRouter();
 
