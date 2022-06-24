@@ -60,7 +60,7 @@ settings:
         plugin2: plugins/plugin2
 ```
 
-See [the resolvers docs](https://github.com/benmosher/eslint-plugin-import#resolvers) or the [resolver spec](https://github.com/benmosher/eslint-plugin-import/blob/master/resolvers/README.md#resolvesource-file-config---found-boolean-path-string-) for more details.
+See [the resolvers docs](https://github.com/benmosher/eslint-plugin-import#resolvers) or the [resolver spec](https://github.com/benmosher/eslint-plugin-import/blob/main/resolvers/README.md#resolvesource-file-config---found-boolean-path-string-) for more details.
 
 ## Debugging
 

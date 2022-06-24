@@ -31,7 +31,7 @@
 /**
  * State containers are Redux-store-like objects meant to help you manage state in your services or apps.
  * TODO: Update link
- * Refer to {@link https://github.com/opensearch-project/OpenSearch-Dashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers | guides and examples} for more info
+ * Refer to {@link https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/src/plugins/opensearch_dashboards_utils/docs/state_containers | guides and examples} for more info
  *
  * @packageDocumentation
  */

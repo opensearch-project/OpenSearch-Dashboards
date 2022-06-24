@@ -198,7 +198,7 @@
     
     Bumps [jszip](https://github.com/Stuk/jszip) from 3.3.0 to 3.7.1.
     - [Release notes](https://github.com/Stuk/jszip/releases)
-    - [Changelog](https://github.com/Stuk/jszip/blob/master/CHANGES.md)
+    - [Changelog](https://github.com/Stuk/jszip/blob/main/CHANGES.md)
     - [Commits](https://github.com/Stuk/jszip/compare/v3.3.0...v3.7.1)
     
     updated-dependencies:

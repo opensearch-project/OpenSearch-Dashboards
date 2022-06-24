@@ -134,7 +134,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
         {
           label: 'README',
           href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/src/plugins/ui_actions/README.md',
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/ui_actions/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
