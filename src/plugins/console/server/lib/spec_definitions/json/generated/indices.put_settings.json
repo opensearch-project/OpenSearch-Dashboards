@@ -2,6 +2,7 @@
   "indices.put_settings": {
     "url_params": {
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "timeout": "",
       "preserve_existing": "__flag__",
       "ignore_unavailable": "__flag__",

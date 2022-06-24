@@ -4,6 +4,7 @@
       "copy_settings": "__flag__",
       "timeout": "",
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "wait_for_active_shards": ""
     },
     "methods": [
