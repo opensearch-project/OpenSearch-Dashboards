@@ -260,12 +260,12 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
-      const { useExpandedMenu = true } = injectedMetadata.getBranding() ?? {};
+      const { useExpandedHeader = true } = injectedMetadata.getBranding() ?? {};
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
-      if (useExpandedMenu) {
+      if (useExpandedHeader) {
         this.rootDomElement.classList.add('headerIsExpanded');
       }
       this.rootDomElement.appendChild(coreUiTargetDomElement);
