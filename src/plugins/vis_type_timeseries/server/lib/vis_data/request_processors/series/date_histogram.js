@@ -74,8 +74,6 @@ export function dateHistogram(
       ? getDateHistogramForLastBucketMode()
       : getDateHistogramForEntireTimerangeMode();
 
-    // master
-
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
