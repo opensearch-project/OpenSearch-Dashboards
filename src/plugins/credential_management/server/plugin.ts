@@ -1,3 +1,14 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -7,8 +18,8 @@ import {
 } from '../../../core/server';
 
 import { CredentialManagementPluginSetup, CredentialManagementPluginStart } from './types';
-import { defineRoutes } from './routes';
-import { credential } from './saved_objects';
+import { registerRoutes, defineRoutes } from './routes';
+import { credentialSavedObjectType } from './saved_objects';
 
 export class CredentialManagementPlugin
   implements Plugin<CredentialManagementPluginSetup, CredentialManagementPluginStart> {
@@ -23,10 +34,11 @@ export class CredentialManagementPlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
+    registerRoutes(router);
     defineRoutes(router);
 
     // Register credential saved object type
-    core.savedObjects.registerType(credential);
+    core.savedObjects.registerType(credentialSavedObjectType);
 
     return {};
   }
@@ -36,5 +48,7 @@ export class CredentialManagementPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.logger.debug('credentialManagement: Stoped');
+  }
 }

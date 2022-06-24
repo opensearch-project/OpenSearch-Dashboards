@@ -9,4 +9,4 @@
  * GitHub history for details.
  */
 
-export { credentialSavedObjectType } from './credential_saved_object_type';
+export { createHandler } from './credential_manager';

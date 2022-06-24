@@ -9,4 +9,8 @@
  * GitHub history for details.
  */
 
-export { credentialSavedObjectType } from './credential_saved_object_type';
+import { CryptoCli } from './cli';
+
+const args = require('yargs').argv;
+
+CryptoCli.generateCryptoMaterials(args.keyName, args.keyNamespace);
