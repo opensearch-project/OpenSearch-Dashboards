@@ -142,7 +142,7 @@ describe('Header', () => {
       logo: { defaultUrl: '/foo' },
       mark: { defaultUrl: '/foo' },
       applicationTitle: 'Foobar Dashboards',
-      useExpandedMenu: false,
+      useExpandedHeader: false,
     };
     const props = {
       ...mockProps(),

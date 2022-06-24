@@ -19,7 +19,7 @@ describe('Home button icon ', () => {
         mark: {},
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -35,7 +35,7 @@ describe('Home button icon ', () => {
         mark: {},
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -51,7 +51,7 @@ describe('Home button icon ', () => {
         mark: { defaultUrl: '/defaultModeMark' },
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -69,7 +69,7 @@ describe('Home button icon ', () => {
         mark: {},
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -85,7 +85,7 @@ describe('Home button icon ', () => {
         mark: {},
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -101,7 +101,7 @@ describe('Home button icon ', () => {
         mark: { defaultUrl: '/defaultModeMark' },
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');
@@ -117,7 +117,7 @@ describe('Home button icon ', () => {
         mark: { defaultUrl: '/defaultModeMark', darkModeUrl: '/darkModeMark' },
         applicationTitle: 'custom title',
         assetFolderUrl: 'base/ui/default_branding',
-        useExpandedMenu: false,
+        useExpandedHeader: false,
       };
       const component = mountWithIntl(<HomeIcon {...branding} />);
       const icon = component.find('EuiIcon');

@@ -81,7 +81,7 @@ export const config = {
       applicationTitle: schema.string({
         defaultValue: '',
       }),
-      useExpandedMenu: schema.boolean({
+      useExpandedHeader: schema.boolean({
         defaultValue: true,
       }),
     }),
