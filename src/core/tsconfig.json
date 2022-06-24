@@ -9,7 +9,7 @@
   },
   "include": [
     "public/**/*",
-    "server/**/*",
+    "server/**/**/*",
     "types/**/*",
     "test_helpers/**/*",
     "utils/**/*",

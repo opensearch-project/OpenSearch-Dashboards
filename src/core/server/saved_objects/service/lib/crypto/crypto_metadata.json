@@ -1,0 +1,11 @@
+{
+    "wrappingKeyName": "aes-name",
+    "wrappingKeyNamespace": "aes-namespace",
+    "unencrypted_wrappingkey": [
+        65, 168, 217, 241, 254, 235, 238,
+        143, 164, 147, 255, 132, 246, 174,
+        149,  74,  95,  23, 149, 181,  88,
+         36, 245, 190,  68, 180, 252,  80,
+         76, 174, 100, 132
+    ]
+}
