@@ -2,6 +2,7 @@
   "ingest.put_pipeline": {
     "url_params": {
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "timeout": ""
     },
     "methods": [

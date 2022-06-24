@@ -1,9 +1,9 @@
 {
   "indices.get_template": {
     "url_params": {
-      "include_type_name": "__flag__",
       "flat_settings": "__flag__",
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "local": "__flag__"
     },
     "methods": [

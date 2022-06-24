@@ -3,6 +3,7 @@
     "url_params": {
       "flat_settings": "__flag__",
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "timeout": ""
     },
     "methods": [

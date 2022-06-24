@@ -2,6 +2,7 @@
   "snapshot.status": {
     "url_params": {
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "ignore_unavailable": "__flag__"
     },
     "methods": [

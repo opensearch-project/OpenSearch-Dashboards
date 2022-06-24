@@ -5,7 +5,7 @@
       "bytes": [
         "b",
         "k",
-        "osd",
+        "kb",
         "m",
         "mb",
         "g",
@@ -17,6 +17,7 @@
       ],
       "local": "__flag__",
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "h": [],
       "health": [
         "green",
