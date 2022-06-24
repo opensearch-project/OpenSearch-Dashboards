@@ -1,0 +1,14 @@
+.header__homeLoaderNavButton .euiHeaderSectionItemButton__content {
+  // avoid layout shift on smallest breakpoint if logo and loading indicator are different sizes
+  min-width: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  & .loaderContainer,
+  & .homeIconContainer {
+    grid-area: 1 / 1;
+    align-self: center;
+    justify-self: center;
+  }
+}

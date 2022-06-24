@@ -28,14 +28,18 @@
  * under the License.
  */
 
-import './header_logo.scss';
+import './home_loader.scss';
+
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
+import { LoadingIndicator } from '../loading_indicator';
+import { HomeIcon } from './home_icon';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -97,52 +101,42 @@ function onClick(
   }
 }
 
-export const DEFAULT_DARK_LOGO = 'opensearch_logo_dark_mode.svg';
-export const DEFAULT_LOGO = 'opensearch_logo_default_mode.svg';
 interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
+  loadingCount$: Observable<number>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
 }
 
-export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
+export function HomeLoader({ href, navigateToApp, branding, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
-  const {
-    darkMode,
-    assetFolderUrl = '',
-    logo = {},
-    applicationTitle = 'opensearch dashboards',
-  } = branding;
-  const { defaultUrl: logoUrl, darkModeUrl: darkLogoUrl } = logo;
-
-  const customLogo = darkMode ? darkLogoUrl ?? logoUrl : logoUrl;
-  const defaultLogo = darkMode ? DEFAULT_DARK_LOGO : DEFAULT_LOGO;
-
-  const logoSrc = customLogo ? customLogo : `${assetFolderUrl}/${defaultLogo}`;
-  const testSubj = customLogo ? 'customLogo' : 'defaultLogo';
-  const alt = `${applicationTitle} logo`;
+  const loadingCount = useObservable(observables.loadingCount$, 0);
+  const label = i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
+    defaultMessage: 'Go to home page',
+  });
 
   return (
-    <a
-      data-test-subj="logo"
-      onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
+    <EuiHeaderSectionItemButton
+      className="header__homeLoaderNavButton"
+      data-test-subj="homeLoader"
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+        onClick(e, forceNavigation, navLinks, navigateToApp)
+      }
       href={href}
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
-        defaultMessage: 'Go to home page',
-      })}
-      className="logoContainer"
+      aria-label={label}
+      title={label}
     >
-      <img
-        data-test-subj={testSubj}
-        data-test-image-url={logoSrc}
-        src={logoSrc}
-        alt={alt}
-        loading="lazy"
-        className="logoImage"
-      />
-    </a>
+      {!(loadingCount > 0) && (
+        <div className="homeIconContainer">
+          <HomeIcon {...branding} />
+        </div>
+      )}
+      <div className="loaderContainer">
+        <LoadingIndicator loadingCount$={observables.loadingCount$} />
+      </div>
+    </EuiHeaderSectionItemButton>
   );
 }

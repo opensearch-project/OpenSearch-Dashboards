@@ -1,4 +1,14 @@
-@include euiHeaderAffordForFixed;
+:not(.headerIsExpanded) {
+  @include euiHeaderAffordForFixed($osdHeaderOffset);
+}
+
+.headerIsExpanded {
+  @include euiHeaderAffordForFixed($osdHeaderOffset * 2);
+}
+
+.headerGlobalNav .euiHeaderSectionItem:empty {
+  min-width: 0;
+}
 
 .chrHeaderHelpMenu__version {
   text-transform: none;

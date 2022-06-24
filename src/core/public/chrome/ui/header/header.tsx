@@ -59,9 +59,10 @@ import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderLogo } from './header_logo';
+import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
+import { HeaderLogo } from './header_logo';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -81,6 +82,8 @@ export interface HeaderProps {
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
+  navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -109,57 +112,52 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
+  const { useExpandedMenu = true } = branding;
 
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
-          <EuiHeader
-            theme="dark"
-            position="fixed"
-            sections={[
-              {
-                items: [
-                  <HeaderLogo
-                    href={homeHref}
-                    forceNavigation$={observables.forceAppSwitcherNavigation$}
-                    navLinks$={observables.navLinks$}
-                    navigateToApp={application.navigateToApp}
-                    branding={branding}
-                  />,
-                  <LoadingIndicator loadingCount$={observables.loadingCount$} />,
-                ],
-                borders: 'none',
-              },
-              {
-                ...(observables.navControlsCenter$ && {
+          {useExpandedMenu && (
+            <EuiHeader
+              className="expandedHeader"
+              theme="dark"
+              position="fixed"
+              sections={[
+                {
+                  items: [
+                    <HeaderLogo
+                      href={homeHref}
+                      forceNavigation$={observables.forceAppSwitcherNavigation$}
+                      navLinks$={observables.navLinks$}
+                      navigateToApp={application.navigateToApp}
+                      branding={branding}
+                    />,
+                  ],
+                  borders: 'none',
+                },
+                {
                   items: [
                     <EuiShowFor sizes={['m', 'l', 'xl']}>
-                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                      <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
                     </EuiShowFor>,
                   ],
-                }),
-                borders: 'none',
-              },
-              {
-                items: [
-                  <EuiHideFor sizes={['m', 'l', 'xl']}>
-                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
-                  </EuiHideFor>,
-                  <HeaderHelpMenu
-                    helpExtension$={observables.helpExtension$}
-                    helpSupportUrl$={observables.helpSupportUrl$}
-                    opensearchDashboardsDocLink={opensearchDashboardsDocLink}
-                    opensearchDashboardsVersion={opensearchDashboardsVersion}
-                  />,
-                  <HeaderNavControls navControls$={observables.navControlsRight$} />,
-                ],
-                borders: 'none',
-              },
-            ]}
-          />
+                  borders: 'none',
+                },
+                {
+                  items: [
+                    <EuiHideFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                    </EuiHideFor>,
+                    <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
+                  ],
+                  borders: 'none',
+                },
+              ]}
+            />
+          )}
 
-          <EuiHeader position="fixed">
+          <EuiHeader position="fixed" className="primaryHeader">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
@@ -177,7 +175,20 @@ export function Header({
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
-              <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+              <EuiHeaderSectionItem border="right">
+                <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem border="right">
+                <HomeLoader
+                  href={homeHref}
+                  forceNavigation$={observables.forceAppSwitcherNavigation$}
+                  navLinks$={observables.navLinks$}
+                  navigateToApp={application.navigateToApp}
+                  branding={branding}
+                  loadingCount$={observables.loadingCount$}
+                />
+              </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
@@ -185,11 +196,30 @@ export function Header({
               breadcrumbs$={observables.breadcrumbs$}
             />
 
-            <HeaderBadge badge$={observables.badge$} />
+            <EuiHeaderSectionItem border="none">
+              <HeaderBadge badge$={observables.badge$} />
+            </EuiHeaderSectionItem>
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem border="none">
                 <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem border="left">
+                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem border="left">
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem border="left">
+                <HeaderHelpMenu
+                  helpExtension$={observables.helpExtension$}
+                  helpSupportUrl$={observables.helpSupportUrl$}
+                  opensearchDashboardsDocLink={opensearchDashboardsDocLink}
+                  opensearchDashboardsVersion={opensearchDashboardsVersion}
+                />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

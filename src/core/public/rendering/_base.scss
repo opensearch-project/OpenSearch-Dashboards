@@ -1,5 +1,3 @@
-@include euiHeaderAffordForFixed($osdHeaderOffset);
-
 /**
  * stretch the root element of the OpenSearch Dashboards application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
@@ -16,6 +14,10 @@
   flex-flow: column nowrap;
   margin: 0 auto;
   min-height: calc(100vh - #{$osdHeaderOffset});
+
+  .headerIsExpanded & {
+    min-height: calc(100vh - #{$osdHeaderOffset * 2});
+  }
 
   &.hidden-chrome {
     min-height: 100vh;

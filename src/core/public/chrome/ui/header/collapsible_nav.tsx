@@ -217,41 +217,6 @@ export function CollapsibleNav({
         </Fragment>
       )}
 
-      {/* Pinned items */}
-      <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-        <EuiCollapsibleNavGroup
-          background="light"
-          className="eui-yScroll"
-          style={{ maxHeight: '40vh' }}
-        >
-          <EuiListGroup
-            aria-label={i18n.translate('core.ui.primaryNav.pinnedLinksAriaLabel', {
-              defaultMessage: 'Pinned links',
-            })}
-            listItems={[
-              {
-                label: 'Home',
-                iconType: 'home',
-                href: homeHref,
-                onClick: (event) => {
-                  if (isModifiedOrPrevented(event)) {
-                    return;
-                  }
-
-                  event.preventDefault();
-                  closeNav();
-                  navigateToApp('home');
-                },
-              },
-            ]}
-            maxWidth="none"
-            color="text"
-            gutterSize="none"
-            size="s"
-          />
-        </EuiCollapsibleNavGroup>
-      </EuiFlexItem>
-
       {/* Recently viewed */}
       <EuiCollapsibleNavGroup
         key="recentlyViewed"
