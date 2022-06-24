@@ -149,5 +149,5 @@ export interface BrandingAssignment {
   loadingLogoDarkmode?: string;
   favicon?: string;
   applicationTitle?: string;
-  useExpandedMenu?: boolean;
+  useExpandedHeader?: boolean;
 }

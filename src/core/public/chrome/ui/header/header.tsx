@@ -112,13 +112,13 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
-  const { useExpandedMenu = true } = branding;
+  const { useExpandedHeader = true } = branding;
 
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
-          {useExpandedMenu && (
+          {useExpandedHeader && (
             <EuiHeader
               className="expandedHeader"
               theme="dark"

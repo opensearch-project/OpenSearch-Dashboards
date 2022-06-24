@@ -114,7 +114,7 @@ exports[`Home button icon  in condensed dark mode  uses custom mark dark mode UR
       "defaultUrl": "/defaultModeMark",
     }
   }
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -249,7 +249,7 @@ exports[`Home button icon  in condensed dark mode  uses custom mark default mode
       "defaultUrl": "/defaultModeMark",
     }
   }
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -384,7 +384,7 @@ exports[`Home button icon  in condensed dark mode  uses opensearch mark if custo
     }
   }
   mark={Object {}}
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -515,7 +515,7 @@ exports[`Home button icon  in condensed dark mode  uses opensearch mark if no ma
   }
   logo={Object {}}
   mark={Object {}}
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -650,7 +650,7 @@ exports[`Home button icon  in condensed light mode  uses custom mark default mod
       "defaultUrl": "/defaultModeMark",
     }
   }
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -785,7 +785,7 @@ exports[`Home button icon  in condensed light mode  uses opensearch mark if cust
     }
   }
   mark={Object {}}
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
@@ -916,7 +916,7 @@ exports[`Home button icon  in condensed light mode  uses opensearch mark if no m
   }
   logo={Object {}}
   mark={Object {}}
-  useExpandedMenu={false}
+  useExpandedHeader={false}
 >
   <EuiIcon
     className="logoImage"
