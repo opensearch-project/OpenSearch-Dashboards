@@ -39,8 +39,16 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
       await testSubjects.moveMouseTo('headerGlobalNav > logo');
     }
 
+    public async moveMouseToHomeButton(): Promise<void> {
+      await testSubjects.moveMouseTo('headerGlobalNav > homeLoader');
+    }
+
     public async clickLogo(): Promise<void> {
       return await testSubjects.click('headerGlobalNav > logo');
+    }
+
+    public async clickHomeButton(): Promise<void> {
+      return await testSubjects.click('headerGlobalNav > homeLoader');
     }
 
     public async clickNewsfeed(): Promise<void> {
@@ -77,6 +85,15 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
       await testSubjects.exists('headerGlobalNav > logo > customLogo');
       const actualLabel = await testSubjects.getAttribute(
         'headerGlobalNav > logo > customLogo',
+        'data-test-image-url'
+      );
+      expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());
+    }
+
+    public async homeMarkExistsOrFail(expectedUrl: string): Promise<void> {
+      await testSubjects.exists('headerGlobalNav > homeLoader > customMark');
+      const actualLabel = await testSubjects.getAttribute(
+        'headerGlobalNav > homeLoader > customMark',
         'data-test-image-url'
       );
       expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());

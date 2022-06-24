@@ -51,13 +51,16 @@ import {
 import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 import { HttpConfigType } from '../http/http_config';
 import { SslConfig } from '../http/ssl_config';
+import { LoggerFactory } from '../logging';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
 /** @internal */
 export class RenderingService {
-  constructor(private readonly coreContext: CoreContext) {}
-  private logger = this.coreContext.logger;
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = this.coreContext.logger;
+  }
+  private logger: LoggerFactory;
   private httpsAgent?: HttpsAgent;
 
   public async setup({
@@ -148,6 +151,7 @@ export class RenderingService {
               },
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
+              useExpandedMenu: brandingAssignment.useExpandedMenu,
             },
           },
         };
@@ -260,10 +264,13 @@ export class RenderingService {
     // assign favicon based on brandingValidation function result
     const favicon = brandingValidation.isFaviconValid ? branding.faviconUrl : undefined;
 
-    // assign applition title based on brandingValidation function result
+    // assign application title based on brandingValidation function result
     const applicationTitle = brandingValidation.isTitleValid
       ? branding.applicationTitle
       : DEFAULT_TITLE;
+
+    // use expanded menu by default unless explicitly set to false
+    const { useExpandedMenu = true } = branding;
 
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
@@ -274,6 +281,7 @@ export class RenderingService {
       loadingLogoDarkmode,
       favicon,
       applicationTitle,
+      useExpandedMenu,
     };
 
     return brandingAssignment;

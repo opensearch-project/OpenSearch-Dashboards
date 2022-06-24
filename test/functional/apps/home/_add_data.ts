@@ -29,27 +29,20 @@
  */
 
 import expect from '@osd/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const browser = getService('browser');
-  const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
-  describe('OpenSearch Dashboards takes you home', function describeIndexTests() {
-    this.tags('includeFirefox');
-
-    it('clicking on opensearch-dashboards logo should take you to home page', async () => {
-      await PageObjects.common.navigateToApp('settings');
-      await globalNav.clickLogo();
+  describe('add data tutorials', function describeIndexTests() {
+    it('directory should not display registered tutorials', async () => {
+      await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/home')).to.be(true);
-    });
-
-    it('clicking on console on homepage should take you to console app', async () => {
-      await PageObjects.home.clickSynopsis('console');
-      const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/dev_tools#/console')).to.be(true);
+      await retry.try(async () => {
+        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflowlogs');
+        expect(tutorialExists).to.be(false);
+      });
     });
   });
 }

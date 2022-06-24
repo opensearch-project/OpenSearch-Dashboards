@@ -28,7 +28,9 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('homepage app', function () {

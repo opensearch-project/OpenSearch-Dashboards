@@ -78,6 +78,10 @@ export class NavControlsService {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
+    const navControlsExpandedRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
+    const navControlsExpandedCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
+      new Set()
+    );
 
     return {
       // In the future, registration should be moved to the setup phase. This
@@ -91,6 +95,16 @@ export class NavControlsService {
       registerCenter: (navControl: ChromeNavControl) =>
         navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
 
+      registerExpandedRight: (navControl: ChromeNavControl) =>
+        navControlsExpandedRight$.next(
+          new Set([...navControlsExpandedRight$.value.values(), navControl])
+        ),
+
+      registerExpandedCenter: (navControl: ChromeNavControl) =>
+        navControlsExpandedCenter$.next(
+          new Set([...navControlsExpandedCenter$.value.values(), navControl])
+        ),
+
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
@@ -103,6 +117,16 @@ export class NavControlsService {
         ),
       getCenter$: () =>
         navControlsCenter$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getExpandedRight$: () =>
+        navControlsExpandedRight$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getExpandedCenter$: () =>
+        navControlsExpandedCenter$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
