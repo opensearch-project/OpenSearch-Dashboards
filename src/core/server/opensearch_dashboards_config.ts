@@ -81,6 +81,9 @@ export const config = {
       applicationTitle: schema.string({
         defaultValue: '',
       }),
+      useExpandedMenu: schema.boolean({
+        defaultValue: true,
+      }),
     }),
   }),
   deprecations,
