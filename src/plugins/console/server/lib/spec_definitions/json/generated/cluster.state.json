@@ -3,6 +3,7 @@
     "url_params": {
       "local": "__flag__",
       "master_timeout": "",
+      "cluster_manager_timeout": "",
       "flat_settings": "__flag__",
       "wait_for_metadata_version": "",
       "wait_for_timeout": "",
@@ -28,8 +29,8 @@
       "metrics": [
         "_all",
         "blocks",
-        "master_node",
         "cluster_manager_node",
+        "master_node",
         "metadata",
         "nodes",
         "routing_nodes",
