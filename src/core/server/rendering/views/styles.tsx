@@ -101,8 +101,6 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .osdWelcomeText {
-            font-family:
-            display: inline-block;
             font-size: 14px;
             font-family: sans-serif;
             line-height: 40px !important;
@@ -112,9 +110,10 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .osdLoaderWrap {
+            display: flex;
+            align-items: center;
             text-align: center;
             line-height: 1;
-            text-align: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
             letter-spacing: -.005em;
             -webkit-text-size-adjust: 100%;
