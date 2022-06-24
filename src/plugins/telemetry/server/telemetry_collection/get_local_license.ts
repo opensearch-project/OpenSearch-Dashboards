@@ -49,18 +49,19 @@ async function fetchLicense(opensearchClient: OpenSearchClient, local: boolean) 
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *
  * In OSS we'll get a 400 response using the new opensearch  client.
+ * @deprecated
  */
-async function getLicenseFromLocalOrMaster(opensearchClient: OpenSearchClient) {
-  // Fetching the local license is cheaper than getting it from the master node and good enough
+async function getLicenseFromLocalOrClusterManager(opensearchClient: OpenSearchClient) {
+  // Fetching the local license is cheaper than getting it from the cluster manager node and good enough
   const { license } = await fetchLicense(opensearchClient, true).catch(async (err) => {
     if (cachedLicense) {
       try {
-        // Fallback to the master node's license info
+        // Fallback to the cluster manager node's license info
         const response = await fetchLicense(opensearchClient, false);
         return response;
-      } catch (masterError) {
-        if ([400, 404].includes(masterError.statusCode)) {
-          // If the master node does not have a license, we can assume there is no license
+      } catch (clusterManagerError) {
+        if ([400, 404].includes(clusterManagerError.statusCode)) {
+          // If the cluster manager node does not have a license, we can assume there is no license
           cachedLicense = undefined;
         } else {
           throw err;
@@ -77,7 +78,7 @@ async function getLicenseFromLocalOrMaster(opensearchClient: OpenSearchClient) {
 }
 
 export const getLocalLicense: LicenseGetter = async (clustersDetails, { opensearchClient }) => {
-  const license = await getLicenseFromLocalOrMaster(opensearchClient);
+  const license = await getLicenseFromLocalOrClusterManager(opensearchClient);
   // It should be called only with 1 cluster element in the clustersDetails array, but doing reduce just in case.
   return clustersDetails.reduce((acc, { clusterUuid }) => ({ ...acc, [clusterUuid]: license }), {});
 };
