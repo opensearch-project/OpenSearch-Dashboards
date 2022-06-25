@@ -6604,7 +6604,7 @@ exports[`Header renders condensed header 1`] = `
       "mark": Object {
         "defaultUrl": "/foo",
       },
-      "useExpandedMenu": false,
+      "useExpandedHeader": false,
     }
   }
   breadcrumbs$={
@@ -8246,7 +8246,7 @@ exports[`Header renders condensed header 1`] = `
                         "mark": Object {
                           "defaultUrl": "/foo",
                         },
-                        "useExpandedMenu": false,
+                        "useExpandedHeader": false,
                       }
                     }
                     forceNavigation$={
@@ -8580,7 +8580,7 @@ exports[`Header renders condensed header 1`] = `
                                           "defaultUrl": "/foo",
                                         }
                                       }
-                                      useExpandedMenu={false}
+                                      useExpandedHeader={false}
                                     >
                                       <EuiIcon
                                         className="logoImage"
@@ -10826,7 +10826,7 @@ exports[`Header renders condensed header 1`] = `
           "mark": Object {
             "defaultUrl": "/foo",
           },
-          "useExpandedMenu": false,
+          "useExpandedHeader": false,
         }
       }
       closeNav={[Function]}

@@ -151,7 +151,7 @@ export class RenderingService {
               },
               faviconUrl: brandingAssignment.favicon,
               applicationTitle: brandingAssignment.applicationTitle,
-              useExpandedMenu: brandingAssignment.useExpandedMenu,
+              useExpandedHeader: brandingAssignment.useExpandedHeader,
             },
           },
         };
@@ -270,7 +270,7 @@ export class RenderingService {
       : DEFAULT_TITLE;
 
     // use expanded menu by default unless explicitly set to false
-    const { useExpandedMenu = true } = branding;
+    const { useExpandedHeader = true } = branding;
 
     const brandingAssignment: BrandingAssignment = {
       logoDefault,
@@ -281,7 +281,7 @@ export class RenderingService {
       loadingLogoDarkmode,
       favicon,
       applicationTitle,
-      useExpandedMenu,
+      useExpandedHeader,
     };
 
     return brandingAssignment;

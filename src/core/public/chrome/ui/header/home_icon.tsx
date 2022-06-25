@@ -21,7 +21,7 @@ export const HomeIcon = ({
   assetFolderUrl = '',
   mark,
   applicationTitle = 'opensearch dashboards',
-  useExpandedMenu = true,
+  useExpandedHeader = true,
 }: ChromeBranding) => {
   const { defaultUrl: markUrl, darkModeUrl: darkMarkUrl } = mark ?? {};
 
@@ -31,10 +31,10 @@ export const HomeIcon = ({
   const getIconProps = () => {
     const iconType = customMark
       ? customMark
-      : useExpandedMenu
+      : useExpandedHeader
       ? 'home'
       : `${assetFolderUrl}/${defaultMark}`;
-    const testSubj = customMark ? 'customMark' : useExpandedMenu ? 'homeIcon' : 'defaultMark';
+    const testSubj = customMark ? 'customMark' : useExpandedHeader ? 'homeIcon' : 'defaultMark';
     const title = `${applicationTitle} home`;
     // marks look better at the large size, but the home icon should be medium to fit in with other icons
     const size = iconType === 'home' ? ('m' as const) : ('l' as const);
