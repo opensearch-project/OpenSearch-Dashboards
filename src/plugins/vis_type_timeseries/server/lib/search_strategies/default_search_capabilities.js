@@ -49,23 +49,23 @@ export class DefaultSearchCapabilities {
     return null;
   }
 
-  get whiteListedMetrics() {
+  get allowListedMetrics() {
     return this.createUiRestriction();
   }
 
-  get whiteListedGroupByFields() {
+  get allowListedGroupByFields() {
     return this.createUiRestriction();
   }
 
-  get whiteListedTimerangeModes() {
+  get allowListedTimerangeModes() {
     return this.createUiRestriction();
   }
 
   get uiRestrictions() {
     return {
-      [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
-      [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
-      [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
+      [RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS]: this.ListedMetrics,
+      [RESTRICTIONS_KEYS.ALLOW_LISTED_GROUP_BY_FIELDS]: this.allowListedGroupByFields,
+      [RESTRICTIONS_KEYS.ALLOW_LISTED_TIMERANGE_MODES]: this.allowListedTimerangeModes,
     };
   }
 

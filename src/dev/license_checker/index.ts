@@ -28,5 +28,5 @@
  * under the License.
  */
 
-export { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
+export { LICENSE_ALLOWLIST, DEV_ONLY_LICENSE_ALLOWLIST, LICENSE_OVERRIDES } from './config';
 export { assertLicensesValid } from './valid';

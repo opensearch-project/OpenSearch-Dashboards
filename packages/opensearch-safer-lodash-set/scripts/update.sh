@@ -22,7 +22,7 @@ all_files=$(cd lodash && ls)
 modified_lodash_files=(_baseSet.js)
 
 # Get fresh copies of all the files that was originally copied from lodash,
-# expect the ones in the whitelist
+# expect the ones in the allowlist
 for file in $all_files
 do
   if [[ ! "${modified_lodash_files[@]}" =~ "${file}" ]]

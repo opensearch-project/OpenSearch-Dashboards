@@ -24,7 +24,7 @@ exports[`props openLinksInNewTab 1`] = `
 />
 `;
 
-exports[`props whiteListedRules 1`] = `
+exports[`props allowListedRules 1`] = `
 <div
   className="osdMarkdown__body"
   dangerouslySetInnerHTML={

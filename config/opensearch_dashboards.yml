@@ -131,9 +131,9 @@
 # Set the allowlist to check input graphite Url. Allowlist is the default check list.
 #vis_type_timeline.graphiteAllowedUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite']
 
-# Set the blocklist to check input graphite Url. Blocklist is an IP list.
+# Set the denylist to check input graphite Url. Denylist is an IP list.
 # Below is an example for reference
-# vis_type_timeline.graphiteBlockedIPs: [
+# vis_type_timeline.graphiteDenyedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
 #  '::1/128',
@@ -161,7 +161,7 @@
 #  '2001:db8::/32',
 #  'ff00::/8',
 # ]
-#vis_type_timeline.graphiteBlockedIPs: []
+#vis_type_timeline.graphiteDeniedIPs: []
 
 # opensearchDashboards.branding:
 #   logo:
@@ -177,9 +177,9 @@
 #   applicationTitle: ""
 #   useExpandedHeader: false
 
-# Set the value of this setting to true to capture region blocked warnings and errors
+# Set the value of this setting to true to capture region denied warnings and errors
 # for your map rendering services.
-# map.showRegionBlockedWarning: false
+# map.showRegionDeniedWarning: false
 
 # Set the value of this setting to false to suppress search usage telemetry
 # for reducing the load of OpenSearch cluster.

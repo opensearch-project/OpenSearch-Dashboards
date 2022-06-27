@@ -32,10 +32,10 @@ function getIpAddress(urlObject) {
  * Then IPCIDR check if a specific IP address fall in the
  * range of an IP address block
  * @param {string} configuredUrls
- * @param {Array|string} blockedIPs
+ * @param {Array|string} deniedIPs
  * @returns {boolean} true if the configuredUrl is blocked
  */
-function isBlockedURL(configuredUrl, blockedIPs) {
+function isBlockedURL(configuredUrl, deniedIPs) {
   let configuredUrlObject;
   try {
     configuredUrlObject = new URL(configuredUrl);
@@ -46,26 +46,26 @@ function isBlockedURL(configuredUrl, blockedIPs) {
   if (!ip) {
     return true;
   }
-  const isBlocked = blockedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
+  const isBlocked = deniedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
   return isBlocked;
 }
 /**
- * Check configured url using blocklist and allowlist
+ * Check configured url using denylist and allowlist
  * If allowlist is used, return false if allowlist does not contain configured url
- * If blocklist is used, return false if blocklist contains configured url
- * If both allowlist and blocklist are used, check blocklist first then allowlist
- * @param {Array|string} blockedIPs
+ * If denylist is used, return false if denylist contains configured url
+ * If both allowlist and denylist are used, check denylist first then allowlist
+ * @param {Array|string} deniedIPs
  * @param {Array|string} allowedUrls
  * @param {string} configuredUrls
  * @returns {boolean} true if the configuredUrl is valid
  */
-function isValidConfig(blockedIPs, allowedUrls, configuredUrl) {
-  if (blockedIPs.length === 0) {
+function isValidConfig(deniedIPs, allowedUrls, configuredUrl) {
+  if (deniedIPs.length === 0) {
     if (!allowedUrls.includes(configuredUrl)) return false;
   } else if (allowedUrls.length === 0) {
-    if (exports.isBlockedURL(configuredUrl, blockedIPs)) return false;
+    if (exports.isBlockedURL(configuredUrl, deniedIPs)) return false;
   } else {
-    if (exports.isBlockedURL(configuredUrl, blockedIPs) || !allowedUrls.includes(configuredUrl))
+    if (exports.isBlockedURL(configuredUrl, deniedIPs) || !allowedUrls.includes(configuredUrl))
       return false;
   }
   return true;

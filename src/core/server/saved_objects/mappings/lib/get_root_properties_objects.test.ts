@@ -179,7 +179,7 @@ test(`includes one object with type === 'object' and excludes one object without
   });
 });
 
-test('excludes references and migrationVersion which are part of the blacklist', () => {
+test('excludes references and migrationVersion which are part of the denylist', () => {
   const mappings = {
     properties: {
       references: {

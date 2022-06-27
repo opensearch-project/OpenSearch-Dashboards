@@ -37,19 +37,19 @@ import { PANEL_TYPES } from './panel_types';
  */
 export enum RESTRICTIONS_KEYS {
   /**
-   * Key for getting the white listed group by fields from the UIRestrictions object.
+   * Key for getting the allow listed group by fields from the UIRestrictions object.
    */
-  WHITE_LISTED_GROUP_BY_FIELDS = 'whiteListedGroupByFields',
+  ALLOW_LISTED_GROUP_BY_FIELDS = 'allowListedGroupByFields',
 
   /**
-   * Key for getting the white listed metrics from the UIRestrictions object.
+   * Key for getting the allow listed metrics from the UIRestrictions object.
    */
-  WHITE_LISTED_METRICS = 'whiteListedMetrics',
+  ALLOW_LISTED_METRICS = 'allowListedMetrics',
 
   /**
-   * Key for getting  the white listed Time Range modes from the UIRestrictions object.
+   * Key for getting  the allow listed Time Range modes from the UIRestrictions object.
    */
-  WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
+  ALLOW_LISTED_TIMERANGE_MODES = 'allowListedTimerangeModes',
 }
 
 export interface UIRestrictions {
