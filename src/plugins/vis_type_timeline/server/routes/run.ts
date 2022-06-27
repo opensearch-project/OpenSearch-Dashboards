@@ -101,7 +101,7 @@ export function runRoute(
           getFunction,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteAllowedUrls(),
-          blockedGraphiteIPs: configManager.getGraphiteBlockedIPs(),
+          deniedGraphiteIPs: configManager.getGraphiteDeniedIPs(),
           opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
         });

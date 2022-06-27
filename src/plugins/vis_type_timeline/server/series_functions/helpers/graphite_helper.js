@@ -26,16 +26,16 @@ function getIpAddress(urlObject) {
   return null;
 }
 /**
- * Check whether customer input URL is blocked
+ * Check whether customer input URL is denied
  * This function first check the format of URL, URL has be in the format as
  * scheme://server/path/resource otherwise an TypeError would be thrown
  * Then IPCIDR check if a specific IP address fall in the
  * range of an IP address block
  * @param {string} configuredUrls
  * @param {Array|string} deniedIPs
- * @returns {boolean} true if the configuredUrl is blocked
+ * @returns {boolean} true if the configuredUrl is denied
  */
-function isBlockedURL(configuredUrl, deniedIPs) {
+function isDeniedURL(configuredUrl, deniedIPs) {
   let configuredUrlObject;
   try {
     configuredUrlObject = new URL(configuredUrl);
@@ -46,8 +46,8 @@ function isBlockedURL(configuredUrl, deniedIPs) {
   if (!ip) {
     return true;
   }
-  const isBlocked = deniedIPs.some((blockedIP) => new IPCIDR(blockedIP).contains(ip));
-  return isBlocked;
+  const isDenied = deniedIPs.some((deniedIP) => new IPCIDR(deniedIP).contains(ip));
+  return isDenied;
 }
 /**
  * Check configured url using denylist and allowlist
@@ -63,11 +63,11 @@ function isValidConfig(deniedIPs, allowedUrls, configuredUrl) {
   if (deniedIPs.length === 0) {
     if (!allowedUrls.includes(configuredUrl)) return false;
   } else if (allowedUrls.length === 0) {
-    if (exports.isBlockedURL(configuredUrl, deniedIPs)) return false;
+    if (exports.isDeniedURL(configuredUrl, deniedIPs)) return false;
   } else {
-    if (exports.isBlockedURL(configuredUrl, deniedIPs) || !allowedUrls.includes(configuredUrl))
+    if (exports.isDeniedURL(configuredUrl, deniedIPs) || !allowedUrls.includes(configuredUrl))
       return false;
   }
   return true;
 }
-export { getIpAddress, isBlockedURL, isValidConfig };
+export { getIpAddress, isDeniedURL, isValidConfig };

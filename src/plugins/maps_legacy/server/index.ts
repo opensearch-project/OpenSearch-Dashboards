@@ -38,7 +38,7 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   exposeToBrowser: {
     includeOpenSearchMapsService: true,
     proxyOpenSearchMapsServiceInMaps: true,
-    showRegionBlockedWarning: true,
+    showRegionDeniedWarning: true,
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,

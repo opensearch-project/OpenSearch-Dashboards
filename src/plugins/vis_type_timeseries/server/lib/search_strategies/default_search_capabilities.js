@@ -63,7 +63,7 @@ export class DefaultSearchCapabilities {
 
   get uiRestrictions() {
     return {
-      [RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS]: this.ListedMetrics,
+      [RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS]: this.allowListedMetrics,
       [RESTRICTIONS_KEYS.ALLOW_LISTED_GROUP_BY_FIELDS]: this.allowListedGroupByFields,
       [RESTRICTIONS_KEYS.ALLOW_LISTED_TIMERANGE_MODES]: this.allowListedTimerangeModes,
     };
