@@ -43,7 +43,7 @@ export class DataSourceManagementPlugin
   private readonly dataSourceManagementService = new DataSourceManagementService();
 
   public setup(
-    // why is setup acception start fucntions -.-
+    // todo: y setup accept start fucntions
     core: CoreSetup<DataSourceManagementStartDependencies, DataSourceManagementStart>,
     { management, urlForwarding }: DataSourceManagementSetupDependencies
   ) {

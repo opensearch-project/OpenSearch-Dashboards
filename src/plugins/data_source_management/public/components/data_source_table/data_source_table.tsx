@@ -106,7 +106,7 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
   // const removeAliases = (item: MatchedItem) =>
   //   !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
-  const searchClient = data.search.search; // this is dependency on data plugin????
+  const searchClient = data.search.search; // todo: v dependency on data plugin
 
   // todo: loadDatasources
   // const loadSources = () => {
