@@ -58,6 +58,7 @@ export const UI_SETTINGS = {
   TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
   TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
+  DATASOURCE_PLACEHOLDER: 'dataSource:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
 } as const;

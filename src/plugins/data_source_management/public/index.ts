@@ -8,3 +8,5 @@ export function plugin() {
   return new DataSourceManagementPlugin();
 }
 export { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from './types';
+
+export { DataSourceManagementSetup, DataSourceManagementStart } from './plugin';

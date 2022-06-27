@@ -1,4 +1,5 @@
 import { i18n } from '@osd/i18n';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {
   DataSourceManagementPluginSetup,
@@ -10,21 +11,42 @@ import { PLUGIN_NAME } from '../common';
 import { ManagementSetup } from '../../management/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 
-import { DataSourceManagementService } from './service';
+import {
+  DataSourceManagementService,
+  DataSourceManagementServiceSetup,
+  DataSourceManagementServiceStart,
+} from './service';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
 }
 
+export interface DataSourceManagementStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+export type DataSourceManagementSetup = DataSourceManagementServiceSetup;
+
+export type DataSourceManagementStart = DataSourceManagementServiceStart;
+
+const IPM_APP_ID = 'dataSources';
+
 export class DataSourceManagementPlugin
-  implements Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart> {
+  implements
+    Plugin<
+      DataSourceManagementSetup,
+      DataSourceManagementStart,
+      DataSourceManagementSetupDependencies,
+      DataSourceManagementStartDependencies
+    > {
   private readonly dataSourceManagementService = new DataSourceManagementService();
 
   public setup(
-    core: CoreSetup,
+    // why is setup acception start fucntions -.-
+    core: CoreSetup<DataSourceManagementStartDependencies, DataSourceManagementStart>,
     { management, urlForwarding }: DataSourceManagementSetupDependencies
-  ): DataSourceManagementPluginSetup {
+  ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {
@@ -32,7 +54,7 @@ export class DataSourceManagementPlugin
     }
 
     opensearchDashboardsSection.registerApp({
-      id: 'dataSourceManagement',
+      id: IPM_APP_ID,
       title: PLUGIN_NAME,
       order: 0,
       mount: async (params) => {
@@ -45,9 +67,11 @@ export class DataSourceManagementPlugin
     return this.dataSourceManagementService.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart): DataSourceManagementPluginStart {
-    return {};
+  public start(core: CoreStart, plugins: DataSourceManagementStartDependencies) {
+    return this.dataSourceManagementService.start();
   }
 
-  public stop() {}
+  public stop() {
+    return this.dataSourceManagementService.stop();
+  }
 }

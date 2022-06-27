@@ -1,2 +1,2 @@
-export const PLUGIN_ID = 'dataSourceManagement';
-export const PLUGIN_NAME = 'dataSourceManagement';
+export const PLUGIN_ID = 'Data Sources';
+export const PLUGIN_NAME = 'Data Sources';

@@ -179,6 +179,7 @@ export async function getIndices({
   const isCCS = pattern.indexOf(':') !== -1;
   const requests: Array<Promise<MatchedItem[]>> = [];
 
+  console.log('HI, I AM HERE in getIndices');
   // Searching for `*:` fails for CCS environments. The search request
   // is worthless anyways as the we should only send a request
   // for a specific query (where we do not append *) if there is at

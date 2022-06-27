@@ -668,6 +668,17 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
+    [UI_SETTINGS.DATASOURCE_PLACEHOLDER]: {
+      name: i18n.translate('data.advancedSettings.dataSourcePlaceholderTitle', {
+        defaultMessage: 'Data source placeholder',
+      }),
+      value: '',
+      description: i18n.translate('data.advancedSettings.dataSourcePlaceholderText', {
+        defaultMessage:
+          'The placeholder for the "Data source name" field in "Management > Data Sources > Create Data Source".',
+      }),
+      schema: schema.string(),
+    },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',

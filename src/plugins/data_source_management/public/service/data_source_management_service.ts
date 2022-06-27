@@ -1,4 +1,5 @@
 import { HttpSetup } from '../../../../core/public';
+import { DataSourceCreationConfig, DataSourceCreationManager } from './creation';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
@@ -10,11 +11,26 @@ interface SetupDependencies {
  * @internal
  */
 export class DataSourceManagementService {
-  constructor() {}
+  dataSourceCreationManager: DataSourceCreationManager;
 
-  public setup({ httpClient }: SetupDependencies) {}
+  constructor() {
+    this.dataSourceCreationManager = new DataSourceCreationManager();
+  }
 
-  public start() {}
+  public setup({ httpClient }: SetupDependencies) {
+    const creationManagerSetup = this.dataSourceCreationManager.setup(httpClient);
+    creationManagerSetup.addCreationConfig(DataSourceCreationConfig);
+
+    return {
+      creation: creationManagerSetup,
+    };
+  }
+
+  public start() {
+    return {
+      creation: this.dataSourceCreationManager.start(),
+    };
+  }
 
   public stop() {
     // nothing to do here yet.
@@ -22,5 +38,5 @@ export class DataSourceManagementService {
 }
 
 // /** @internal */
-// export type IndexPatternManagementServiceSetup = ReturnType<IndexPatternManagementService['setup']>;
-// export type IndexPatternManagementServiceStart = ReturnType<IndexPatternManagementService['start']>;
+export type DataSourceManagementServiceSetup = ReturnType<DataSourceManagementService['setup']>;
+export type DataSourceManagementServiceStart = ReturnType<DataSourceManagementService['start']>;

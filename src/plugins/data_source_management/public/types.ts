@@ -9,16 +9,20 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
+import { ManagementAppMountParams } from '../../management/public';
+// import { NavigationPublicPluginStart } from '../../navigation/public';
+import { OpenSearchDashboardsReactContext } from '../../opensearch_dashboards_react/public';
+import { DataSourceManagementStart } from './index';
+
 export interface DataSourceManagementPluginSetup {
   getGreeting: () => string;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
-}
+// export interface AppPluginStartDependencies {
+//   navigation: NavigationPublicPluginStart;
+// }
 
 export interface DataSourceManagmentContext {
   chrome: ChromeStart;
@@ -30,4 +34,17 @@ export interface DataSourceManagmentContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataSourceManagementStart: DataSourceManagementStart;
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  // getMlCardState: () => MlCardState;
+}
+
+export type DataSourceManagmentContextValue = OpenSearchDashboardsReactContext<
+  DataSourceManagmentContext
+>;
+
+export enum MlCardState {
+  HIDDEN,
+  DISABLED,
+  ENABLED,
 }
