@@ -101,6 +101,8 @@ export function runRoute(
           getFunction,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteAllowedUrls(),
+           /** @deprecated use deniedGraphiteIPs*/
+          blockedGraphiteIPs: configManager.getGraphiteDeniedIPs(),
           deniedGraphiteIPs: configManager.getGraphiteDeniedIPs(),
           opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
