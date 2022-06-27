@@ -133,7 +133,7 @@
 
 # Set the denylist to check input graphite Url. Denylist is an IP list.
 # Below is an example for reference
-# vis_type_timeline.graphiteDenyedIPs: [
+# vis_type_timeline.graphiteDeniedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
 #  '::1/128',
