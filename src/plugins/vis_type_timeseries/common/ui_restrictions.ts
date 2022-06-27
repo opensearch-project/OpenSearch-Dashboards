@@ -39,16 +39,22 @@ export enum RESTRICTIONS_KEYS {
   /**
    * Key for getting the allow listed group by fields from the UIRestrictions object.
    */
+  /** @deprecated use ALLOW_LISTED_GROUP_BY_FIELDS*/
+  WHITE_LISTED_GROUP_BY_FIELDS = 'whiteListedGroupByFields',
   ALLOW_LISTED_GROUP_BY_FIELDS = 'allowListedGroupByFields',
 
   /**
    * Key for getting the allow listed metrics from the UIRestrictions object.
    */
+  /** @deprecated use ALLOW_LISTED_METRICS*/
+  WHITE_LISTED_METRICS = 'whiteListedMetrics',
   ALLOW_LISTED_METRICS = 'allowListedMetrics',
 
   /**
    * Key for getting  the allow listed Time Range modes from the UIRestrictions object.
    */
+  /** @deprecated use ALLOW_LISTED_TIMERANGE_MODES*/
+  WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
   ALLOW_LISTED_TIMERANGE_MODES = 'allowListedTimerangeModes',
 }
 

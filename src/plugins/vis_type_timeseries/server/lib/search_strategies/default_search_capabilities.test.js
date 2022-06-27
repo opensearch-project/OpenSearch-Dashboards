@@ -50,6 +50,9 @@ describe('DefaultSearchCapabilities', () => {
 
   test('should return default uiRestrictions', () => {
     expect(defaultSearchCapabilities.uiRestrictions).toEqual({
+      whiteListedMetrics: { '*': true },
+      whiteListedGroupByFields: { '*': true },
+      whiteListedTimerangeModes: { '*': true },
       allowListedMetrics: { '*': true },
       allowListedGroupByFields: { '*': true },
       allowListedTimerangeModes: { '*': true },

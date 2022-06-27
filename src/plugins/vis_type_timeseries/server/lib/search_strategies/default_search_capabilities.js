@@ -49,6 +49,21 @@ export class DefaultSearchCapabilities {
     return null;
   }
 
+  /** @deprecated use allowListedMetrics*/
+  get whiteListedMetrics() {
+    return this.createUiRestriction();
+  }
+
+  /** @deprecated use allowListedGroupByFields*/
+  get whiteListedGroupByFields() {
+    return this.createUiRestriction();
+  }
+
+  /** @deprecated use allowListedTimerangeMode*/
+  get whiteListedTimerangeModes() {
+    return this.createUiRestriction();
+  }
+
   get allowListedMetrics() {
     return this.createUiRestriction();
   }
@@ -63,6 +78,9 @@ export class DefaultSearchCapabilities {
 
   get uiRestrictions() {
     return {
+      [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
       [RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS]: this.allowListedMetrics,
       [RESTRICTIONS_KEYS.ALLOW_LISTED_GROUP_BY_FIELDS]: this.allowListedGroupByFields,
       [RESTRICTIONS_KEYS.ALLOW_LISTED_TIMERANGE_MODES]: this.allowListedTimerangeModes,
