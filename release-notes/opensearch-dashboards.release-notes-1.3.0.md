@@ -396,7 +396,7 @@
     
     
     Clean up temp aws paths in code base. Add a configurable flag
-    `showRegionBlockedWarning` into map plugin level config file.
+    `showRegionDeniedWarning` into map plugin level config file.
     
     Backport PR: 
     
