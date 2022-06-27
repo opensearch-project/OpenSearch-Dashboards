@@ -67,13 +67,13 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
     docLinks,
     application,
     http,
-    getMlCardState,
+    // getMlCardState,
     data,
   } = useOpenSearchDashboards<DataSourceManagmentContext>().services;
 
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<DataSourceCreationOption[]>([]);
-  const [sources, setSources] = useState<MatchedItem[]>([]);
+  // const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingDataSources, setIsLoadingDataSources] = useState<boolean>(true);
@@ -164,7 +164,6 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
   ];
 
   const createButton = ( // canSave?
-    // todo: add creationOptions as method is must have
     <CreateButton options={creationOptions}>
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
@@ -214,7 +213,7 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
             <p>
               <FormattedMessage
                 id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the data sources that help you retrieve your data from multi Elasticsearch clusters."
+                defaultMessage="Create and manage the data sources that help you retrieve your data from multiple Elasticsearch clusters."
               />
             </p>
           </EuiText>
