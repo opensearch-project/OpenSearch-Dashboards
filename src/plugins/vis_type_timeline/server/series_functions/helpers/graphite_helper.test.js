@@ -6,32 +6,32 @@
 import * as helper from './graphite_helper';
 
 describe('graphite_helper', function () {
-  it('valid Url should not be blocked and isBlockedURL should return false', function () {
-    expect(helper.isBlockedURL('https://opensearch.org', ['127.0.0.0/8'])).toEqual(false);
+  it('valid Url should not be blocked and isDeniedURL should return false', function () {
+    expect(helper.isDeniedURL('https://opensearch.org', ['127.0.0.0/8'])).toEqual(false);
   });
 
-  it('blocked Url should be blocked and isBlockedURL should return true', function () {
-    expect(helper.isBlockedURL('https://127.0.0.1', ['127.0.0.0/8'])).toEqual(true);
+  it('blocked Url should be blocked and isDeniedURL should return true', function () {
+    expect(helper.isDeniedURL('https://127.0.0.1', ['127.0.0.0/8'])).toEqual(true);
   });
 
-  it('invalid Url should be blocked and isBlockedURL should return true', function () {
-    expect(helper.isBlockedURL('www.opensearch.org', ['127.0.0.0/8'])).toEqual(true);
+  it('invalid Url should be blocked and isDeniedURL should return true', function () {
+    expect(helper.isDeniedURL('www.opensearch.org', ['127.0.0.0/8'])).toEqual(true);
   });
 
   it('denylist should be checked if denylist is enabled', function () {
-    jest.spyOn(helper, 'isBlockedURL').mockReturnValueOnce(false);
+    jest.spyOn(helper, 'isDeniedURL').mockReturnValueOnce(false);
     helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org');
-    expect(helper.isBlockedURL).toBeCalled();
+    expect(helper.isDeniedURL).toBeCalled();
   });
 
   it('denylist should be checked it both allowlist and denylist are enabled', function () {
-    jest.spyOn(helper, 'isBlockedURL').mockReturnValueOnce(false);
+    jest.spyOn(helper, 'isDeniedURL').mockReturnValueOnce(false);
     helper.isValidConfig(
       ['127.0.0.0/8'],
       ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       'https://opensearch.org'
     );
-    expect(helper.isBlockedURL).toBeCalled();
+    expect(helper.isDeniedURL).toBeCalled();
   });
 
   it('with only allowlist, isValidConfig should return false for Url not in the allowlist', function () {
