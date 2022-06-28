@@ -4,7 +4,6 @@
  */
 
 import { IndexPatternField } from 'src/plugins/data/common';
-import { FieldIconProps } from '../../../../../../../opensearch_dashboards_react/public';
 import { SelectContribution, InputContribution } from '../../common/items';
 
 /**
@@ -31,7 +30,6 @@ export interface TitleItemContribution {
 
 export interface DropboxDisplay {
   label: string;
-  icon: FieldIconProps['type'];
   id: string;
 }
 export interface DropboxFieldProps {
@@ -49,7 +47,7 @@ export interface DropboxContribution {
   display?: (
     indexField: IndexPatternField,
     state: DropboxFieldProps
-  ) => Pick<DropboxDisplay, 'icon' | 'label'>;
+  ) => Pick<DropboxDisplay, 'label'>;
   // Defines how the initial state of a field should be set when a field is dropped onto it
   onDrop?: (field: IndexPatternField) => DropboxFieldProps;
   isDroppable?: (field: IndexPatternField) => boolean;

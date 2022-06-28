@@ -13,7 +13,7 @@ interface VisualizationState {
   activeVisualization?: {
     name: string;
     aggConfigParams: CreateAggConfigParams[];
-    activeAgg?: CreateAggConfigParams;
+    draftAgg?: CreateAggConfigParams;
   };
 }
 
@@ -59,15 +59,28 @@ export const slice = createSlice({
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
     },
-    createAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams>) => {
-      state.activeVisualization!.activeAgg = action.payload;
+    editAgg: (state, action: PayloadAction<CreateAggConfigParams>) => {
+      state.activeVisualization!.draftAgg = action.payload;
     },
-    saveAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams>) => {
-      delete state.activeVisualization!.activeAgg;
+    saveAgg: (state, action: PayloadAction<boolean>) => {
+      const saveDraft = action.payload;
+      const draftAgg = state.activeVisualization!.draftAgg;
 
-      // TODO: Impliment reducer
+      // Delete the aggConfigParam if the save is not true
+      if (saveDraft && draftAgg) {
+        const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
+          (agg) => agg.id === draftAgg.id
+        );
+
+        if (aggIndex === -1) {
+          state.activeVisualization!.aggConfigParams.push(draftAgg);
+        } else {
+          state.activeVisualization!.aggConfigParams.splice(aggIndex, 1, draftAgg);
+        }
+      }
+      delete state.activeVisualization!.draftAgg;
     },
-    reorderAggConfigParams: (
+    reorderAgg: (
       state,
       action: PayloadAction<{
         sourceId: string;
@@ -100,7 +113,8 @@ export const {
   setActiveVisualization,
   setIndexPattern,
   setSearchField,
-  createAggConfigParams,
+  editAgg,
   updateAggConfigParams,
-  reorderAggConfigParams,
+  saveAgg,
+  reorderAgg,
 } = slice.actions;
