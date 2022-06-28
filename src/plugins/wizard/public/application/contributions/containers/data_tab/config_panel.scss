@@ -22,6 +22,10 @@
     padding: $euiSizeS;
   }
 
+  &__aggEditor {
+    padding: 0 $euiSizeM;
+  }
+
   &--secondary {
     position: absolute;
     top: 0;

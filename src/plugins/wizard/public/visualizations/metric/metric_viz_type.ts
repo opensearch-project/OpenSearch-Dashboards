@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { Schemas } from '../../../../vis_default_editor/public';
+import { RangeValues, Schemas } from '../../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../../data/public';
 import { ColorModes, ColorSchemas } from '../../../../charts/public';
 import { MetricVizOptions } from './components/metric_viz_options';
@@ -20,7 +20,7 @@ export interface MetricOptionsDefaults {
     useRanges: boolean;
     colorSchema: ColorSchemas;
     metricColorMode: ColorModes;
-    colorsRange: [{ from: number; to: number }];
+    colorsRange: RangeValues[];
     labels: {
       show: boolean;
     };
