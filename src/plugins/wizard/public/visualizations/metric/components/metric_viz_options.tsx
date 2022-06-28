@@ -5,19 +5,43 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import produce from 'immer';
 import { Draft } from 'immer';
 import {
+  ColorModes,
   ColorRanges,
+  ColorSchemaOptions,
+  colorSchemas,
   RangeOption,
-  SetColorRangeValue,
   SwitchOption,
 } from '../../../../../charts/public';
 import { useTypedDispatch, useTypedSelector } from '../../../application/utils/state_management';
 import { MetricOptionsDefaults } from '../metric_viz_type';
 import { setState } from '../../../application/utils/state_management/style_slice';
+import { PersistedState } from '../../../../../visualizations/public';
+
+const METRIC_COLOR_MODES = [
+  {
+    id: ColorModes.NONE,
+    label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
+      defaultMessage: 'None',
+    }),
+  },
+  {
+    id: ColorModes.LABELS,
+    label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
+      defaultMessage: 'Labels',
+    }),
+  },
+  {
+    id: ColorModes.BACKGROUND,
+    label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
+      defaultMessage: 'Background',
+    }),
+  },
+];
 
 function MetricVizOptions() {
   const styleState = useTypedSelector((state) => state.style) as MetricOptionsDefaults;
@@ -32,8 +56,12 @@ function MetricVizOptions() {
     [dispatch, styleState]
   );
 
+  const metricColorModeLabel = i18n.translate('visTypeMetric.params.color.useForLabel', {
+    defaultMessage: 'Use color for',
+  });
+
   return (
-    <div>
+    <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="transparent">
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>
@@ -71,8 +99,7 @@ function MetricVizOptions() {
 
       <EuiSpacer size="s" />
 
-      {/* TODO: Reintroduce the other style properties */}
-      {/* <EuiPanel paddingSize="s">
+      <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage id="visTypeMetric.params.rangesTitle" defaultMessage="Ranges" />
@@ -83,9 +110,13 @@ function MetricVizOptions() {
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={metric.colorsRange}
-          setValue={setMetric('labels') as SetColorRangeValue}
-          setTouched={setMetric('touched')}
-          setValidity={setMetric('validity')}
+          setValue={(_, value) =>
+            setOption((draft) => {
+              draft.metric.colorsRange = value;
+            })
+          }
+          setTouched={() => {}}
+          setValidity={() => {}}
         />
 
         <EuiFormRow fullWidth display="rowCompressed" label={metricColorModeLabel}>
@@ -95,26 +126,33 @@ function MetricVizOptions() {
             isDisabled={metric.colorsRange.length === 1}
             isFullWidth={true}
             legend={metricColorModeLabel}
-            options={vis.type.editorConfig.collections.metricColorMode}
-            onChange={setColorMode}
+            options={METRIC_COLOR_MODES}
+            onChange={(value) =>
+              setOption((draft) => {
+                draft.metric.metricColorMode = value as ColorModes;
+              })
+            }
           />
         </EuiFormRow>
 
         <ColorSchemaOptions
           colorSchema={metric.colorSchema}
-          colorSchemas={vis.type.editorConfig.collections.colorSchemas}
-          disabled={
-            metric.colorsRange.length === 1 ||
-            metric.metricColorMode === ColorModes.NONE
-          }
+          colorSchemas={colorSchemas}
+          disabled={metric.colorsRange.length === 1 || metric.metricColorMode === ColorModes.NONE}
           invertColors={metric.invertColors}
-          setValue={setMetricValue as SetColorSchemaOptionsValue}
+          setValue={(paramName, value) =>
+            setOption((draft) => {
+              // The paramName and associated value are expected to pair correctly but will be messy to type correctly
+              draft.metric[paramName] = value as any;
+            })
+          }
           showHelpText={false}
-          uiState={uiState}
+          // uistate here is used for custom colors which is not currently supported. Update when supported
+          uiState={new PersistedState({})}
         />
       </EuiPanel>
 
-      <EuiSpacer size="s" /> */}
+      <EuiSpacer size="s" />
 
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
@@ -142,7 +180,7 @@ function MetricVizOptions() {
           showValue={false}
         />
       </EuiPanel>
-    </div>
+    </EuiPanel>
   );
 }
 
