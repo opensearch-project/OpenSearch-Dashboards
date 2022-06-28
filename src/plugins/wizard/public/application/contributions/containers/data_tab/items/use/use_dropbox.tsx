@@ -5,22 +5,16 @@
 
 import { useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { CreateAggConfigParams, IndexPatternField } from 'src/plugins/data/common';
+import { IndexPatternField } from 'src/plugins/data/common';
 import { Schema } from '../../../../../../../../vis_default_editor/public';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
-import {
-  DropboxContribution,
-  DropboxState,
-  ITEM_TYPES,
-  DropboxDisplay,
-  DropboxFieldProps,
-} from '../types';
+import { DropboxState, DropboxDisplay } from '../types';
 import { DropboxProps } from '../dropbox';
 import { useDrop } from '../../../../../utils/drag_drop';
 import {
-  createAggConfigParams,
-  reorderAggConfigParams,
+  editAgg,
+  reorderAgg,
   updateAggConfigParams,
 } from '../../../../../utils/state_management/visualization_slice';
 import { useIndexPattern } from '../../../../../../application/utils/use/use_index_pattern';
@@ -54,7 +48,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     return indexPattern && aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
   }, [aggConfigParams, aggService, indexPattern]);
 
-  const aggs = aggConfigs?.aggs ?? [];
+  const aggs = useMemo(() => aggConfigs?.aggs ?? [], [aggConfigs?.aggs]);
 
   const dropboxAggs = aggs.filter((agg) => agg.schema === schema.name);
 
@@ -63,7 +57,6 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       dropboxAggs?.map(
         (agg): DropboxDisplay => ({
           id: agg.id,
-          icon: 'number', // TODO: Check if we still need an icon here
           label: agg.makeLabel(),
         })
       ) || [],
@@ -72,22 +65,45 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {
-    const agg = aggConfigs?.createAggConfig(
+    if (!aggConfigs || !indexPattern) {
+      throw new Error('Cannot create new field, missing parameters');
+    }
+
+    const aggConfig = aggConfigs.createAggConfig(
       {
-        type: (schema.defaults as any).aggType,
         schema: schema.name,
-      },
+        // using any since createAggConfig requires the type property but when an agg is brandNew, this has to be skipped.
+        // TODO: Update createAggConfig typing to correctly handle missing type field
+      } as any,
       {
         addToAggConfigs: false,
       }
     );
 
-    if (agg) {
-      dispatch(createAggConfigParams(agg.serialize()));
-    }
-  }, [aggConfigs, dispatch, schema.defaults, schema.name]);
+    aggConfig.brandNew = true;
+    const newAggs = [...aggs, aggConfig];
+    const newAggConfigs = aggService.createAggConfigs(indexPattern, cloneDeep(newAggs));
+    const newAggConfig = newAggConfigs.aggs.find((agg) => agg.brandNew);
 
-  const onEditField = useCallback((instanceId) => {}, []);
+    if (!newAggConfig) {
+      throw new Error('Missing new aggConfig');
+    }
+
+    dispatch(editAgg(newAggConfig.serialize()));
+  }, [aggConfigs, aggService, aggs, dispatch, indexPattern, schema.name]);
+
+  const onEditField = useCallback(
+    (aggId) => {
+      const aggConfig = aggConfigs?.aggs.find((agg) => agg.id === aggId);
+
+      if (!aggConfig) {
+        throw new Error('Could not find agg in aggConfigs');
+      }
+
+      dispatch(editAgg(aggConfig.serialize()));
+    },
+    [aggConfigs?.aggs, dispatch]
+  );
 
   const onDeleteField = useCallback(
     (aggId: string) => {
@@ -124,7 +140,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const onReorderField = useCallback(
     ({ sourceAggId, destinationAggId }) => {
       dispatch(
-        reorderAggConfigParams({
+        reorderAgg({
           sourceId: sourceAggId,
           destinationId: destinationAggId,
         })
@@ -164,148 +180,6 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     isValidDropTarget: isValidDropField,
     dropProps,
   };
-
-  // TODO: Will cleanup once add and edit field support is reintroduced
-  // const configItemState = items[dropboxId];
-  // const dropboxState =
-  //   !configItemState || typeof configItemState === 'string' ? INITIAL_STATE : configItemState;
-  // const filterPatrialInstances = useCallback(
-  //   ({ properties }: DropboxInstanceState) => !!properties.fieldName,
-  //   []
-  // );
-  // const mapInstanceToFieldDisplay = useCallback(
-  //   ({ id, properties }: DropboxInstanceState): DropboxDisplay => {
-  //     const indexPatternField = availableFields.find(({ name }) => name === properties.fieldName);
-
-  //     if (!indexPatternField) throw new Error('Field to display missing in available fields');
-
-  //     return getDisplayField(id, indexPatternField, properties, display);
-  //   },
-  //   [availableFields, display]
-  // );
-
-  // const displayFields: DropboxDisplay[] = useMemo(
-  //   () => dropboxState.instances.filter(filterPatrialInstances).map(mapInstanceToFieldDisplay),
-  //   [dropboxState.instances, filterPatrialInstances, mapInstanceToFieldDisplay]
-  // );
-
-  // Event handlers for each dropbox action type
-  // const onAddField = useCallback(() => {
-  //   dispatch(addInstance(dropboxId, ITEM_TYPES.DROPBOX));
-  // }, [dispatch, dropboxId]);
-
-  // const onEditField = useCallback(
-  //   (instanceId) => {
-  //     dispatch(
-  //       setActiveItem({
-  //         id: dropboxId,
-  //         type: ITEM_TYPES.DROPBOX,
-  //         instanceId,
-  //       })
-  //     );
-  //   },
-  //   [dispatch, dropboxId]
-  // );
-
-  // const onDeleteField = useCallback(
-  //   (instanceId) => {
-  //     dispatch(
-  //       updateInstance({
-  //         id: dropboxId,
-  //         instanceId,
-  //         instanceState: null,
-  //       })
-  //     );
-  //   },
-  //   [dispatch, dropboxId]
-  // );
-
-  // const onDropField = useCallback(
-  //   (data: FieldDragDataType['value']) => {
-  //     if (!data) return;
-
-  //     const { name: fieldName } = data;
-  //     const indexField = getIndexPatternField(fieldName, availableFields);
-
-  //     if (!indexField) return;
-
-  //     if (isDroppable && !isDroppable(indexField)) return;
-
-  //     const newState: DropboxFieldProps = {
-  //       ...onDrop?.(indexField),
-  //       fieldName,
-  //     };
-
-  //     dispatch(addInstance(dropboxId, ITEM_TYPES.DROPBOX, false, newState));
-  //   },
-  //   [availableFields, isDroppable, onDrop, dispatch, dropboxId]
-  // );
-
-  // const onReorderField = useCallback(
-  //   (reorderedInstanceIds: string[]) => {
-  //     dispatch(
-  //       reorderInstances({
-  //         id: dropboxId,
-  //         reorderedInstanceIds,
-  //       })
-  //     );
-  //   },
-  //   [dispatch, dropboxId]
-  // );
-
-  // const [dropProps, { isValidDropTarget, dragData, ...dropState }] = useDrop(
-  //   'field-data',
-  //   onDropField
-  // );
-
-  // const isValidDropField = useMemo(() => {
-  //   if (!dragData) return false;
-
-  //   const indexField = getIndexPatternField(dragData.name, availableFields);
-
-  //   if (!indexField) return false;
-
-  //   return isValidDropTarget && (isDroppable?.(indexField) ?? true);
-  // }, [availableFields, dragData, isDroppable, isValidDropTarget]);
-
-  // return {
-  //   id: dropboxId,
-  //   label,
-  //   limit,
-  //   fields: displayFields,
-  //   onAddField,
-  //   onEditField,
-  //   onDeleteField,
-  //   onReorderField,
-  //   ...dropState,
-  //   dragData,
-  //   isValidDropTarget: isValidDropField,
-  //   dropProps,
-  // };
-};
-
-const getDisplayField = (
-  instanceId: string,
-  indexField: IndexPatternField,
-  properties: DropboxFieldProps,
-  display: DropboxContribution['display']
-): DropboxDisplay => {
-  let displayField: DropboxDisplay = {
-    id: instanceId,
-    icon: indexField.type,
-    label: indexField.displayName,
-  };
-  if (display) {
-    const { icon, label } = display(indexField, properties);
-
-    displayField = {
-      ...displayField,
-      icon,
-      label,
-    };
-  }
-
-  return displayField;
 };
 
 const getIndexPatternField = (indexFieldName: string, availableFields: IndexPatternField[]) =>
