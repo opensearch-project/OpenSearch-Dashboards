@@ -2,9 +2,6 @@
 
 exports[`should render content with markdown 1`] = `
 <Markdown
-  className="euiText"
-  markdown="I am *some* [content](https://en.wikipedia.org/wiki/Content) with \`markdown\`"
-  openLinksInNewTab={true}
   allowListedRules={
     Array [
       "backticks",
@@ -13,5 +10,8 @@ exports[`should render content with markdown 1`] = `
       "list",
     ]
   }
+  className="euiText"
+  markdown="I am *some* [content](https://en.wikipedia.org/wiki/Content) with \`markdown\`"
+  openLinksInNewTab={true}
 />
 `;
