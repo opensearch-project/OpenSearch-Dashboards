@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { CoreService } from 'src/core/types';
+import { CoreService } from '../../../../../core/types';
 import { VisualizationTypeOptions } from './types';
 import { VisualizationType } from './visualization_type';
 
