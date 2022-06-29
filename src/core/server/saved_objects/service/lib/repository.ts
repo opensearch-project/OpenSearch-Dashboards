@@ -84,7 +84,6 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { CryptoCli } from './crypto';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -145,7 +144,6 @@ export class SavedObjectsRepository {
   private _allowedTypes: string[];
   private readonly client: RepositoryOpenSearchClient;
   private _serializer: SavedObjectsSerializer;
-  private readonly _crypto_cli: CryptoCli;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -216,7 +214,6 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
     this._serializer = serializer;
-    this._crypto_cli = CryptoCli.getInstance();
   }
 
   /**
@@ -260,15 +257,6 @@ export class SavedObjectsRepository {
         );
       }
     }
-
-    if (
-      'credential' === type &&
-      typeof attributes !== 'undefined' &&
-      typeof attributes.password !== 'undefined'
-    ) {
-      attributes.password = await this._crypto_cli.encrypt(attributes.password);
-    }
-    // console.info('Which type? ', type);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -383,7 +371,14 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedResults
       .filter(isRight)
       .filter(({ value }) => value.opensearchRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
+      .map(
+        (
+          {
+             value: {
+                object: { type, id },
+               },
+               },
+               ) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
         _source: ['type', 'namespaces'],
