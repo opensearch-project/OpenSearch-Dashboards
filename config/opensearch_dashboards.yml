@@ -133,6 +133,35 @@
 
 # Set the denylist to check input graphite Url. Denylist is an IP list.
 # Below is an example for reference
+# /** @deprecated use graphiteDeniedIPs */
+# vis_type_timeline.graphiteBlockedIPs: [
+#  //Loopback
+#  '127.0.0.0/8',
+#  '::1/128',
+#  //Link-local Address for IPv6
+#  'fe80::/10',
+#  //Private IP address for IPv4
+#  '10.0.0.0/8',
+#  '172.16.0.0/12',
+#  '192.168.0.0/16',
+#  //Unique local address (ULA)
+#  'fc00::/7',
+#  //Reserved IP address
+#  '0.0.0.0/8',
+#  '100.64.0.0/10',
+#  '192.0.0.0/24',
+#  '192.0.2.0/24',
+#  '198.18.0.0/15',
+#  '192.88.99.0/24',
+#  '198.51.100.0/24',
+#  '203.0.113.0/24',
+#  '224.0.0.0/4',
+#  '240.0.0.0/4',
+#  '255.255.255.255/32',
+#  '::/128',
+#  '2001:db8::/32',
+#  'ff00::/8',
+# ]
 # vis_type_timeline.graphiteDeniedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
@@ -161,7 +190,6 @@
 #  '2001:db8::/32',
 #  'ff00::/8',
 # ]
-#vis_type_timeline.graphiteDeniedIPs: []
 
 # opensearchDashboards.branding:
 #   logo:
