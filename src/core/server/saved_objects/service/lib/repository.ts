@@ -371,14 +371,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedResults
       .filter(isRight)
       .filter(({ value }) => value.opensearchRequestIndex !== undefined)
-      .map(
-        (
-          {
-             value: {
-                object: { type, id },
-               },
-               },
-               ) => ({
+      .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
         _source: ['type', 'namespaces'],

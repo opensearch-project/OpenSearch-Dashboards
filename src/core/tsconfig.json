@@ -9,13 +9,13 @@
   },
   "include": [
     "public/**/*",
-    "server/**/**/*",
+    "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts",
     "typings.ts"
-, "../plugins/credential_management/crypto"  ],
+  ],
   "references": [
     { "path": "../test_utils/" }
   ]
