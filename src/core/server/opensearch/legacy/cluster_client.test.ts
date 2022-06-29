@@ -48,7 +48,7 @@ const logger = loggingSystemMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('#constructor creates client with parsed config', () => {
-  const mockOpenSearchClientConfig = { apiVersion: 'opensearch-client-master' };
+  const mockOpenSearchClientConfig = { apiVersion: 'opensearch-client-main' };
   mockParseOpenSearchClientConfig.mockReturnValue(mockOpenSearchClientConfig);
 
   const mockOpenSearchConfig = { apiVersion: 'opensearch-version' } as any;
