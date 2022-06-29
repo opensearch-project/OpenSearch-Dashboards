@@ -153,11 +153,11 @@ export default function ({ getService, getPageObjects }) {
         '5th percentile of machine.ram',
         '7,516,192,768',
         '25th percentile of machine.ram',
-        '12,884,901,888',
+        '12,884,901,88',
         '50th percentile of machine.ram',
-        '18,253,611,008',
+        '18,138,485,823.049',
         '75th percentile of machine.ram',
-        '32,212,254,720',
+        '30,506,082,436.557',
         '95th percentile of machine.ram',
         '32,212,254,720',
         '99th percentile of machine.ram',
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show Percentile Ranks', async function () {
-      const percentileRankBytes = ['2.036%', 'Percentile rank 99 of "memory"'];
+      const percentileRankBytes = ['2.029%', 'Percentile rank 99 of "memory"'];
       log.debug('Aggregation = Percentile Ranks');
       await PageObjects.visEditor.selectAggregation('Percentile Ranks', 'metrics');
       log.debug('Field =  bytes');
