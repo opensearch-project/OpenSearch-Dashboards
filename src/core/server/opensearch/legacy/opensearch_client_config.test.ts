@@ -42,7 +42,7 @@ test('parses minimally specified config', () => {
   expect(
     parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { xsrf: 'something' },
         logQueries: false,
         sniffOnStart: false,
@@ -50,11 +50,12 @@ test('parses minimally specified config', () => {
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
       },
+
       logger.get()
     )
   ).toMatchInlineSnapshot(`
     Object {
-      "apiVersion": "master",
+      "apiVersion": "main",
       "hosts": Array [
         Object {
           "headers": Object {
@@ -180,7 +181,7 @@ test('parses config timeouts of moment.Duration type', () => {
   expect(
     parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { xsrf: 'something' },
         logQueries: false,
         sniffOnStart: false,
@@ -191,11 +192,12 @@ test('parses config timeouts of moment.Duration type', () => {
         hosts: ['http://localhost:9200/opensearch'],
         requestHeadersWhitelist: [],
       },
+
       logger.get()
     )
   ).toMatchInlineSnapshot(`
     Object {
-      "apiVersion": "master",
+      "apiVersion": "main",
       "hosts": Array [
         Object {
           "headers": Object {
@@ -359,7 +361,7 @@ describe('#customHeaders', () => {
     const headerKey = Object.keys(DEFAULT_HEADERS)[0];
     const parsedConfig = parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { [headerKey]: 'foo' },
         logQueries: false,
         sniffOnStart: false,
@@ -379,7 +381,7 @@ describe('#log', () => {
   test('default logger with #logQueries = false', () => {
     const parsedConfig = parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { xsrf: 'something' },
         logQueries: false,
         sniffOnStart: false,
@@ -423,7 +425,7 @@ describe('#log', () => {
   test('default logger with #logQueries = true', () => {
     const parsedConfig = parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { xsrf: 'something' },
         logQueries: true,
         sniffOnStart: false,
@@ -482,7 +484,7 @@ describe('#log', () => {
 
     const parsedConfig = parseOpenSearchClientConfig(
       {
-        apiVersion: 'master',
+        apiVersion: 'main',
         customHeaders: { xsrf: 'something' },
         logQueries: true,
         sniffOnStart: false,

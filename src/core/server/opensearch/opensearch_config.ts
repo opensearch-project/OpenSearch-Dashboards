@@ -208,7 +208,7 @@ export class OpenSearchConfig {
   public readonly ignoreVersionMismatch: boolean;
 
   /**
-   * Version of the OpenSearch (6.7, 7.1 or `master`) client will be connecting to.
+   * Version of the OpenSearch (1.1, 2.1 or `main`) client will be connecting to.
    */
   public readonly apiVersion: string;
 
