@@ -11,4 +11,4 @@ import { WizardPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new WizardPlugin(initializerContext);
 }
-export { WizardServices, WizardPluginStartDependencies } from './types';
+export { WizardServices, WizardPluginStartDependencies, WizardStart } from './types';

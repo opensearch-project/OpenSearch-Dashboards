@@ -12,8 +12,9 @@ import {
 } from '../../../core/server';
 
 import { WizardPluginSetup, WizardPluginStart } from './types';
+import { capabilitiesProvider } from './capabilities_provider';
 import { defineRoutes } from './routes';
-import { wizardApp } from './saved_objects';
+import { wizardSavedObjectType } from './saved_objects';
 
 export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart> {
   private readonly logger: Logger;
@@ -22,7 +23,7 @@ export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart
     this.logger = initializerContext.logger.get();
   }
 
-  public setup({ http, savedObjects }: CoreSetup) {
+  public setup({ capabilities, http, savedObjects }: CoreSetup) {
     this.logger.debug('wizard: Setup');
     const router = http.createRouter();
 
@@ -30,12 +31,15 @@ export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart
     defineRoutes(router);
 
     // Register saved object types
-    savedObjects.registerType(wizardApp);
+    savedObjects.registerType(wizardSavedObjectType);
+
+    // Register capabilities
+    capabilities.registerProvider(capabilitiesProvider);
 
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     this.logger.debug('wizard: Started');
     return {};
   }

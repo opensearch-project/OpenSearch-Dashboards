@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsType } from 'src/core/server';
-import { WIZARD_SAVED_OBJECT } from '../../common';
+import { SavedObject, SavedObjectsType } from '../../../../core/server';
+import { WizardSavedObjectAttributes, WIZARD_SAVED_OBJECT } from '../../common';
 
-export const wizardApp: SavedObjectsType = {
+export const wizardSavedObjectType: SavedObjectsType = {
   name: WIZARD_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
@@ -14,8 +14,15 @@ export const wizardApp: SavedObjectsType = {
     icon: 'visVisualBuilder', // TODO: Need a custom icon here
     defaultSearchField: 'title',
     importableAndExportable: true,
-    getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
-    //   getInAppUrl: TODO: Enable once editing is supported
+    getTitle: ({ attributes: { title } }: SavedObject<WizardSavedObjectAttributes>) => title,
+    getEditUrl: ({ id }: SavedObject) =>
+      `/management/opensearch-dashboards/objects/savedWizard/${encodeURIComponent(id)}`,
+    getInAppUrl({ id }: SavedObject) {
+      return {
+        path: `/app/wizard#/edit/${encodeURIComponent(id)}`,
+        uiCapabilitiesPath: 'wizard.show',
+      };
+    },
   },
   migrations: {},
   mappings: {

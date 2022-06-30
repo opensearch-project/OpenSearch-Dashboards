@@ -17,15 +17,17 @@ import {
   WizardPluginStartDependencies,
   WizardServices,
   WizardSetup,
+  WizardStart,
 } from './types';
 import { PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import { setAggService, setIndexPatterns } from './plugin_services';
+import { createSavedWizardLoader } from './saved_visualizations';
 
 export class WizardPlugin
   implements
-    Plugin<WizardSetup, void, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
+    Plugin<WizardSetup, WizardStart, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
   private typeService = new TypeService();
 
   constructor(public initializerContext: PluginInitializerContext) {}
@@ -101,7 +103,20 @@ export class WizardPlugin
     };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { data }: WizardPluginStartDependencies): WizardStart {
+    const typeService = this.typeService;
+
+    return {
+      ...typeService.start(),
+      savedWizardLoader: createSavedWizardLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: data.indexPatterns,
+        search: data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
+    };
+  }
 
   public stop() {}
 }

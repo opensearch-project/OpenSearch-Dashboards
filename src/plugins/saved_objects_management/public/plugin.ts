@@ -30,6 +30,8 @@
 
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+
+import { WizardStart } from '../../wizard/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
@@ -69,6 +71,7 @@ export interface StartDependencies {
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
   discover?: DiscoverStart;
+  wizard?: WizardStart;
 }
 
 export class SavedObjectsManagementPlugin
