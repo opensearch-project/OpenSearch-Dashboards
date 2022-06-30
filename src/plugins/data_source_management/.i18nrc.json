@@ -1,0 +1,7 @@
+{
+  "prefix": "dataSourceManagement",
+  "paths": {
+    "dataSourceManagement": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
