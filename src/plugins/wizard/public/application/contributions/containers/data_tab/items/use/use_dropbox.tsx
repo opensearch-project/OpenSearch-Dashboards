@@ -122,9 +122,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   const onDropField = useCallback(
     (data: FieldDragDataType['value']) => {
-      if (!data || !validAggTypes.length) {
-        throw new Error('Cannot drop field here, missing drop properties');
-      }
+      if (!data || !validAggTypes.length) return;
 
       const { name: fieldName } = data;
       const schemaAggTypes = (schema.defaults as any).aggTypes;
@@ -166,26 +164,25 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   useEffect(() => {
     const getValidAggTypes = () => {
-      const types: unknown[] = [];
       if (!dragData || schema.group === 'none') return [];
 
       const indexField = getIndexPatternField(dragData.name, indexPattern?.fields ?? []);
 
       if (!indexField) return [];
 
-      // Check if the aggTypes allowed by the schema allow this field
+      // Get all aggTypes allowed by the schema and get a list of all the aggTypes that the dragged index field can use
       const aggTypes = aggService.types.getAll();
-
       const allowedAggTypes = filterByName(aggTypes[schema.group], schema.aggFilter);
 
-      allowedAggTypes.forEach((aggType) => {
-        const allowedFieldTypes = aggType.paramByName('field')?.filterFieldTypes;
-        const isFieldDroppable = filterByType([indexField], allowedFieldTypes).length !== 0;
-        if (isFieldDroppable) types.push(aggType);
-      });
-
-      // `types` can be either a Bucket or Metric aggType, but both types have the name property.
-      return types.map((agg) => (agg as BucketAggType).name);
+      return (
+        allowedAggTypes
+          .filter((aggType) => {
+            const allowedFieldTypes = aggType.paramByName('field')?.filterFieldTypes;
+            return filterByType([indexField], allowedFieldTypes).length !== 0;
+          })
+          // `types` can be either a Bucket or Metric aggType, but both types have the name property.
+          .map((agg) => (agg as BucketAggType).name)
+      );
     };
 
     setValidAggTypes(getValidAggTypes());
