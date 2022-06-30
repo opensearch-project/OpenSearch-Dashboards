@@ -151,15 +151,14 @@ export default function ({ getService, getPageObjects }) {
         '1st percentile of machine.ram',
         '3,221,225,472',
         '5th percentile of machine.ram',
-        // TODO: Inconsistent values from https://github.com/opensearch-project/OpenSearch/pull/3634
-        // '7,516,192,768',
-        // '25th percentile of machine.ram',
-        // '12,884,901,888',
-        // '50th percentile of machine.ram',
-        // '18,253,611,008',
-        // '75th percentile of machine.ram',
-        // '32,212,254,720',
-        // '95th percentile of machine.ram',
+        '7,516,192,768',
+        '25th percentile of machine.ram',
+        '12,884,901,888',
+        '50th percentile of machine.ram',
+        '18,253,611,008',
+        '75th percentile of machine.ram',
+        '32,212,254,720',
+        '95th percentile of machine.ram',
         '32,212,254,720',
         '99th percentile of machine.ram',
       ];
@@ -171,7 +170,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(percentileMachineRam).to.eql(metricValue);
+        // TODO: Restore when inconsistent values are fixed from https://github.com/opensearch-project/OpenSearch/pull/3634
+        // expect(percentileMachineRam).to.eql(metricValue);
+        expect(percentileMachineRam.slice(0, 5)).to.eql(metricValue.slice(0, 5));
+        expect(percentileMachineRam.slice(13, 15)).to.eql(metricValue.slice(13, 15));
       });
     });
 
