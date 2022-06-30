@@ -3,17 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import { AppMountParameters, CoreStart, ToastsStart } from 'opensearch-dashboards/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableSetup } from '../../embeddable/public';
+import { DashboardStart } from '../../dashboard/public';
+import { VisualizationsSetup } from '../../visualizations/public';
+import { ExpressionsStart } from '../../expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { DataPublicPluginStart, IndexPatternField } from '../../data/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
+import { SavedObjectLoader } from '../../saved_objects/public';
+import { AppMountParameters, CoreStart, ToastsStart } from '../../../core/public';
 
 export type WizardSetup = TypeServiceSetup;
+export interface WizardStart extends TypeServiceStart {
+  savedWizardLoader: SavedObjectLoader;
+}
 
 export interface WizardPluginSetupDependencies {
   embeddable: EmbeddableSetup;
