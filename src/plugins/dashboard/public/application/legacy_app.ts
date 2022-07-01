@@ -46,10 +46,27 @@ import {
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
+import { from, of, merge } from 'rxjs';
+import { map, mergeMap, reduce, tap } from 'rxjs/operators';
+
+export interface DashboardListItem {
+  id: string,
+  title: string,
+  description: string,
+  url: string,
+  listType: string
+}
+export type DashboardListItems = DashboardListItem[]
+export type DashboardListProviderFn = () => Promise<DashboardListItems>
+export type DashboardDisplay = {
+  hits: DashboardListItems,
+  total: number
+}
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
+  console.log("initDashboardApp", { app, deps })
   app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
@@ -128,7 +145,35 @@ export function initDashboardApp(app, deps) {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
           $scope.find = (search) => {
-            return service.find(search, $scope.listingLimit);
+            const dashboardList$ = from(service.find(search, $scope.listingLimit))
+            const dashboardListItems$ = dashboardList$.pipe(
+              mergeMap(l => l.hits)
+
+            )
+            const otherDashboardLists$ =
+              from(Object.entries(deps.dashboardListSources))
+                .pipe(
+                  mergeMap(([key, fn]) => fn()),              // execute each list source
+                  mergeMap(item => item)                      // flatten
+                )
+
+            const combined$ = merge(dashboardListItems$,
+              otherDashboardLists$).pipe(
+                reduce<DashboardListItem, DashboardDisplay>(
+                  (acc: DashboardDisplay, item: DashboardListItem) => {
+                    return { hits: [...acc.hits, item], total: acc.total + 1 }
+                  },
+                  { hits: [], total: 0 }
+                )
+              )
+
+
+            console.log("LegacyApp find", {
+              deps, dashboardList$, dashboardListItems$,
+              otherDashboardLists$, combined$, service
+            })
+
+            return combined$.toPromise();
           };
           $scope.editItem = ({ id }) => {
             history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
@@ -179,7 +224,7 @@ export function initDashboardApp(app, deps) {
                       history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
                       $route.reload();
                     }
-                    return new Promise(() => {});
+                    return new Promise(() => { });
                   });
               }
             });
@@ -243,12 +288,12 @@ export function initDashboardApp(app, deps) {
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
                     })
                   );
-                  return new Promise(() => {});
+                  return new Promise(() => { });
                 } else {
                   // E.g. a corrupt or deleted dashboard
                   deps.core.notifications.toasts.addDanger(error.message);
                   history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return new Promise(() => {});
+                  return new Promise(() => { });
                 }
               });
           },
@@ -265,7 +310,7 @@ export function initDashboardApp(app, deps) {
             }
           });
           // prevent angular from completing the navigation
-          return new Promise(() => {});
+          return new Promise(() => { });
         },
       });
   });

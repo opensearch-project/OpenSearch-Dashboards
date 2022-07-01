@@ -119,6 +119,8 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
+import { DashboardListProviderFn } from './application/legacy_app';
+import type { DashboardListSources } from './application/application';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -156,8 +158,12 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type DashboardSetup = void;
-
+export type RegisterDashboardListSourceFn = (
+  pluginName: string, 
+  listProviderFn: DashboardListProviderFn) => void
+export interface DashboardSetup {
+  registerDashboardListSource: RegisterDashboardListSourceFn
+}
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
   addEmbeddableToDashboard: (options: {
@@ -199,6 +205,8 @@ export class DashboardPlugin
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
+
+  private dashboardListSources: DashboardListSources = {};
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -308,6 +316,12 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const registerDashboardListSource = (
+      pluginName: string, 
+      listProviderFn: DashboardListProviderFn) => {
+      this.dashboardListSources[pluginName] = listProviderFn;
+    }
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -341,6 +355,7 @@ export class DashboardPlugin
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
           savedDashboards: dashboardStart.getSavedDashboardLoader(),
+          dashboardListSources: this.dashboardListSources,
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -419,6 +434,10 @@ export class DashboardPlugin
         solutionId: 'opensearchDashboards',
         order: 100,
       });
+    }
+
+    return {
+      registerDashboardListSource
     }
   }
 
