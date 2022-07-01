@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPatternField } from 'src/plugins/data/common';
+import { IndexPatternField } from '../../../../../data/common';
 
 export interface EmptyDragDataType {
   namespace: null;
