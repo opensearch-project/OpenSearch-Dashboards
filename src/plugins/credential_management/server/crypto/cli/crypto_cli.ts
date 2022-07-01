@@ -30,16 +30,17 @@ export class CryptoCli {
 
   private constructor() {
     const wrappingSuite = RawAesWrappingSuiteIdentifier.AES256_GCM_IV12_TAG16_NO_PADDING;
-    
-    // TODO: Load config during bootstrap
+    // TODO: Move config to opensearch_dashboards.yam and load config during bootstrap
     // TODO: Generate materials by default during bootstrap
-    const cryptoMaterials = JSON.parse(readFileSync(CryptoCli.loadConfigAndGetPath('config/opensearch_dashboards.yml'), 'utf8'));
+    const cryptoMaterials = JSON.parse(
+      readFileSync(CryptoCli.loadConfigAndGetPath('config/credential_management.yml'), 'utf8')
+    );
 
     const input = {
       keyName: cryptoMaterials.keyName,
       keyNamespace: cryptoMaterials.keyNamespace,
       unencryptedMasterKey: new Uint8Array(cryptoMaterials.unencryptedMasterKey.data),
-      wrappingSuite: wrappingSuite,
+      wrappingSuite,
     };
 
     this._keyring = new RawAesKeyringNode(input);
@@ -71,27 +72,25 @@ export class CryptoCli {
   // TODO: Fine grain config loader
   public static loadConfigAndGetPath(path: string): string {
     const yaml = safeLoad(readFileSync(path, 'utf8'));
-    if (yaml !== null && typeof(yaml) == 'object') {
+    if (yaml !== null && typeof yaml === 'object') {
       return JSON.parse(JSON.stringify(yaml))['multiDataSource.materialPath'];
     }
-    console.error("Load failed! Please check the config path.");
+    // console.error('Load failed! Please check the config path.');
     // Return Default Path
-    return "./crypto_material";
+    return './crypto_material';
   }
 
   public static generateCryptoMaterials(keyName: string, keyNamespace: string) {
     const cryptoMaterials = {
-      "keyName": keyName,
-      "keyNamespace": keyNamespace,
-      "unencryptedMasterKey": randomBytes(32),
+      keyName,
+      keyNamespace,
+      unencryptedMasterKey: randomBytes(32),
     };
-    
-    const path = CryptoCli.loadConfigAndGetPath('./config/opensearch_dashboards.yml');
+    const path = CryptoCli.loadConfigAndGetPath('config/credential_management.yml');
 
-    writeFile (path, JSON.stringify(cryptoMaterials), function(err) {
+    writeFile(path, JSON.stringify(cryptoMaterials), function (err) {
       if (err) throw err;
-      console.log('crypto materials generated successfully!');
-      }
-    );
+    });
+    // console.info('crypto materials generated successfully!');
   }
 }
