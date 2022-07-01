@@ -58,7 +58,7 @@ export const visDataRoutes = (
           (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
           'unavailable';
         framework.logger.warn(
-          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/opensearch-dashboards/issues/new?template=Bug_report.md`
+          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new?template=bug_template.md`
         );
       }
 
