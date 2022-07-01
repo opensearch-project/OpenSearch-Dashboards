@@ -67,7 +67,7 @@ export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefa
               },
             },
             defaults: {
-              aggType: 'avg',
+              aggTypes: ['avg', 'cardinality'],
             },
           },
           {
@@ -80,7 +80,7 @@ export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefa
             max: 1,
             aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
             defaults: {
-              aggType: 'count',
+              aggTypes: ['terms'],
             },
           },
         ]),
