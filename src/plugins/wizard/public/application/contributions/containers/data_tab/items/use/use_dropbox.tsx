@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { IndexPatternField } from 'src/plugins/data/common';
+import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../../../data/common';
 import { Schema } from '../../../../../../../../vis_default_editor/public';
 import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
@@ -21,6 +21,9 @@ import { useIndexPattern } from '../../../../../../application/utils/use/use_ind
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../../../../types';
 
+const filterByName = propFilter('name');
+const filterByType = propFilter('type');
+
 export const INITIAL_STATE: DropboxState = {
   instances: [],
 };
@@ -31,6 +34,7 @@ export interface UseDropboxProps extends Pick<DropboxProps, 'id' | 'label'> {
 
 export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const { id: dropboxId, label, schema } = props;
+  const [validAggTypes, setValidAggTypes] = useState<string[]>([]);
   const dispatch = useTypedDispatch();
   const indexPattern = useIndexPattern();
   const {
@@ -118,12 +122,16 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   const onDropField = useCallback(
     (data: FieldDragDataType['value']) => {
-      if (!data) return;
+      if (!data || !validAggTypes.length) return;
 
       const { name: fieldName } = data;
+      const schemaAggTypes = (schema.defaults as any).aggTypes;
+      const allowedAggTypes = schemaAggTypes
+        ? schemaAggTypes.filter((type) => validAggTypes.includes(type))
+        : [];
 
       aggConfigs?.createAggConfig({
-        type: (schema.defaults as any).aggType,
+        type: allowedAggTypes[0] || validAggTypes[0],
         schema: schema.name,
         params: {
           field: fieldName,
@@ -134,7 +142,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
         dispatch(updateAggConfigParams(aggConfigs.aggs.map((agg) => agg.serialize())));
       }
     },
-    [aggConfigs, dispatch, schema.defaults, schema.name]
+    [aggConfigs, dispatch, schema.defaults, schema.name, validAggTypes]
   );
 
   const onReorderField = useCallback(
@@ -154,17 +162,35 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     onDropField
   );
 
-  const isValidDropField = useMemo(() => {
-    if (!dragData) return false;
+  useEffect(() => {
+    const getValidAggTypes = () => {
+      if (!dragData || schema.group === 'none') return [];
 
-    const indexField = getIndexPatternField(dragData.name, indexPattern?.fields ?? []);
+      const indexField = getIndexPatternField(dragData.name, indexPattern?.fields ?? []);
 
-    if (!indexField) return false;
+      if (!indexField) return [];
 
-    return isValidDropTarget;
-    // TODO: Validate if the field is droppable from schema ref : src/plugins/vis_default_editor/public/components/agg_params.tsx
-    // return isValidDropTarget && (isDroppable?.(indexField) ?? true);
-  }, [dragData, indexPattern?.fields, isValidDropTarget]);
+      // Get all aggTypes allowed by the schema and get a list of all the aggTypes that the dragged index field can use
+      const aggTypes = aggService.types.getAll();
+      const allowedAggTypes = filterByName(aggTypes[schema.group], schema.aggFilter);
+
+      return (
+        allowedAggTypes
+          .filter((aggType) => {
+            const allowedFieldTypes = aggType.paramByName('field')?.filterFieldTypes;
+            return filterByType([indexField], allowedFieldTypes).length !== 0;
+          })
+          // `types` can be either a Bucket or Metric aggType, but both types have the name property.
+          .map((agg) => (agg as BucketAggType).name)
+      );
+    };
+
+    setValidAggTypes(getValidAggTypes());
+
+    return () => {
+      setValidAggTypes([]);
+    };
+  }, [aggService.types, dragData, indexPattern?.fields, schema.aggFilter, schema.group]);
 
   return {
     id: dropboxId,
@@ -177,7 +203,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     onReorderField,
     ...dropState,
     dragData,
-    isValidDropTarget: isValidDropField,
+    isValidDropTarget: validAggTypes.length > 0,
     dropProps,
   };
 };
