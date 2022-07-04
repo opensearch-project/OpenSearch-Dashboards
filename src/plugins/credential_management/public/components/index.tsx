@@ -1,0 +1,1 @@
+export { CredentialManagementApp } from './app'

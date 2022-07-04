@@ -8,6 +8,9 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+import { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial } from './types';
 
 export const PLUGIN_ID = 'credentialManagement';
-export const PLUGIN_NAME = 'credentialManagement';
+export const PLUGIN_NAME = 'Credentials';
+
+export { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial } 
