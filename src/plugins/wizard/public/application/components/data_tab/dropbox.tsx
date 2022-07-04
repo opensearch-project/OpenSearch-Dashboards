@@ -14,7 +14,7 @@ import {
   DropResult,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { IDropAttributes, IDropState } from '../../../utils/drag_drop';
+import { IDropAttributes, IDropState } from '../../utils/drag_drop';
 import './dropbox.scss';
 import { useDropbox } from './use';
 import { UseDropboxProps } from './use/use_dropbox';

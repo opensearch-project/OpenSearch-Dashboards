@@ -7,7 +7,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public';
-import { Title } from './items';
+import { Title } from './title';
 import { useIndexPattern, useVisualizationType } from '../../utils/use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../types';

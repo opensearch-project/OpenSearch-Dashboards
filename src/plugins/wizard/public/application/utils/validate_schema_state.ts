@@ -4,8 +4,8 @@
  */
 
 import { countBy } from 'lodash';
-import { Schemas } from '../../../../../../vis_default_editor/public';
-import { RootState } from '../../../utils/state_management';
+import { Schemas } from '../../../../vis_default_editor/public';
+import { RootState } from './state_management';
 
 export const validateSchemaState = (schemas: Schemas, state: RootState): [boolean, string?] => {
   const activeViz = state.visualization.activeVisualization;
