@@ -10,13 +10,13 @@
 }
 
 .searchableDropdown--fixedWidthChild {
-  width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2) ;
+  width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2);
 }
 
 .searchableDropdown--topDisplay {
   padding-right: $euiSizeL;
+  font-size: $euiFontSizeS;
 }
-
 
 .searchableDropdown--selectableWrapper .euiSelectableList {
   // When clicking on the selectable content it will "highlight" itself with a box shadow
