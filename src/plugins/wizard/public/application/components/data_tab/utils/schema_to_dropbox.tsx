@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Schemas } from '../../../../../../../vis_default_editor/public';
+import { Schemas } from '../../../../../../vis_default_editor/public';
 import { Title, Dropbox } from '../items';
 
 export const mapSchemaToAggPanel = (schemas: Schemas) => {

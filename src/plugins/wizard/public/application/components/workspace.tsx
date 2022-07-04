@@ -17,7 +17,7 @@ import {
 import React, { FC, useState, useMemo, useEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
-import { validateSchemaState } from '../contributions/containers/data_tab/utils/validate_schema_state';
+import { validateSchemaState } from './data_tab/utils/validate_schema_state';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';

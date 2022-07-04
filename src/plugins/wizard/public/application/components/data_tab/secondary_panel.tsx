@@ -5,14 +5,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
-import { useTypedDispatch, useTypedSelector } from '../../../utils/state_management';
-import { DefaultEditorAggParams } from '../../../../../../vis_default_editor/public';
+import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public';
 import { Title } from './items';
-import { useIndexPattern, useVisualizationType } from '../../../utils/use';
-import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../../types';
-import { IAggType } from '../../../../../../data/public';
-import { saveAgg, editAgg } from '../../../utils/state_management/visualization_slice';
+import { useIndexPattern, useVisualizationType } from '../../utils/use';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { WizardServices } from '../../../types';
+import { IAggType } from '../../../../../data/public';
+import { saveAgg, editAgg } from '../../utils/state_management/visualization_slice';
 
 export function SecondaryPanel() {
   const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
