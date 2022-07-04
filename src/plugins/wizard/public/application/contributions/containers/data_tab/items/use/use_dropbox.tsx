@@ -192,6 +192,8 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     };
   }, [aggService.types, dragData, indexPattern?.fields, schema.aggFilter, schema.group]);
 
+  const canDrop = validAggTypes.length > 0 && schema.max > dropboxAggs.length;
+
   return {
     id: dropboxId,
     label,
@@ -203,7 +205,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     onReorderField,
     ...dropState,
     dragData,
-    isValidDropTarget: validAggTypes.length > 0,
+    isValidDropTarget: canDrop,
     dropProps,
   };
 };

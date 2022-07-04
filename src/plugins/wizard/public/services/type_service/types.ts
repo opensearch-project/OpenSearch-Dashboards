@@ -23,8 +23,6 @@ export interface ContainerContribution {
   Component: JSX.Element;
 }
 
-type ContainerSchema = any;
-
 export type ContainerLocationContribution = { [K in ContainerLocations]: ContainerContribution[] };
 
 export interface DataTabConfig {

@@ -95,8 +95,6 @@ export const toExpression = async ({ style: styleState, visualization }: MetricR
   const { activeVisualization, indexPattern: indexId = '' } = visualization;
   const { aggConfigParams } = activeVisualization || {};
 
-  if (!aggConfigParams || !aggConfigParams.length) return;
-
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
   const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
