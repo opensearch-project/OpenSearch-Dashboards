@@ -19,6 +19,7 @@ import {
   WizardSetup,
   WizardStart,
 } from './types';
+import wizardIcon from './assets/wizard_icon.svg';
 import { PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
@@ -92,7 +93,7 @@ export class WizardPlugin
         defaultMessage: 'TODO...',
       }),
       // TODO: Replace with actual icon once available
-      icon: 'vector',
+      icon: wizardIcon,
       stage: 'beta',
       aliasApp: 'wizard',
       aliasPath: '#/',
