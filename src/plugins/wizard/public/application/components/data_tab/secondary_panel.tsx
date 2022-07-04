@@ -38,8 +38,8 @@ export function SecondaryPanel() {
 
   const aggConfig = aggConfigs?.aggs[0];
 
-  const groupName = useMemo(
-    () => schemas.find((schema) => schema.name === aggConfig?.schema)?.group,
+  const selectedSchema = useMemo(
+    () => schemas.find((schema) => schema.name === aggConfig?.schema),
     [aggConfig?.schema, schemas]
   );
 
@@ -52,7 +52,7 @@ export function SecondaryPanel() {
 
   return (
     <div className="wizConfig__section wizConfig--secondary">
-      <Title title="Test" isSecondary closeMenu={closeMenu} />
+      <Title title={selectedSchema?.title ?? 'Edit'} isSecondary closeMenu={closeMenu} />
       {showAggParamEditor && (
         <DefaultEditorAggParams
           className="wizConfig__aggEditor"
@@ -62,7 +62,7 @@ export function SecondaryPanel() {
           setTouched={setTouched}
           schemas={schemas}
           formIsTouched={false}
-          groupName={groupName ?? 'none'}
+          groupName={selectedSchema?.group ?? 'none'}
           metricAggs={[]}
           state={{
             data: {},
