@@ -19,5 +19,3 @@ export const DataTab = () => {
     </div>
   );
 };
-
-export * from './items';
