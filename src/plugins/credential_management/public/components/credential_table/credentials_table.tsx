@@ -1,31 +1,43 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
 import React from 'react';
-// import React, { useState, useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import {
-    reactRouterNavigate,
-    useOpenSearchDashboards,
-  } from '../../../../opensearch_dashboards_react/public';
 
-import {
-    EuiBadge,
-    EuiButtonEmpty,
-    EuiFlexGroup,
-    EuiFlexItem,
-    EuiInMemoryTable,
-    EuiSpacer,
-    EuiText,
-    EuiBadgeGroup,
-    EuiPageContent,
-    EuiTitle,
-    // EuiButton,
-  } from '@elastic/eui';
-
-import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiText,
+  EuiBadgeGroup,
+  EuiPageContent,
+  EuiTitle,
+  // EuiButton,
+} from '@elastic/eui';
+
+import {
+  reactRouterNavigate,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
+
 import { CredentialManagementContext } from '../../types';
 import { getCredentials } from '../utils';
-import { CredentialsTableItem } from '../types';
-import { PLUGIN_NAME } from '../../../common';
+import { CredentialsTableItem, CredentialCreationOption } from '../types';
+import { CreateButton } from '../create_button';
 
 const pagination = {
   initialPageSize: 10,
@@ -34,7 +46,7 @@ const pagination = {
 
 const sorting = {
   sort: {
-    field: 'title',
+    field: 'credential_name',
     direction: 'asc' as const,
   },
 };
@@ -53,7 +65,7 @@ const search = {
 // });
 
 const title = i18n.translate('credentialManagement.credentialsTable.title', {
-  defaultMessage: PLUGIN_NAME,
+  defaultMessage: 'Credentials',
 });
 
 interface Props extends RouteComponentProps {
@@ -62,7 +74,7 @@ interface Props extends RouteComponentProps {
 
 export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
-  // const [creationOptions, setCreationOptions] = useState<DataSourceCreationOption[]>([]);
+  const [creationOptions, setCreationOptions] = React.useState<CredentialCreationOption[]>([]);
 
   const {
     // setBreadcrumbs,
@@ -82,7 +94,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const columns = [
     {
       field: 'credential_name',
-      name: 'Credentials',
+      name: 'Credential',
       render: (
         name: string,
         index: {
@@ -111,46 +123,40 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
     },
   ];
 
-
   React.useEffect(() => {
     (async function () {
-      // const options = await dataSourceManagementStart.creation.getDataSourceCreationOptions(
-      //   history.push
-      // ); // todo
       const fetchedCredentials: CredentialsTableItem[] = await getCredentials(
         savedObjects.client,
-        uiSettings.get('defaultIndex'),
-        // dataSourceManagementStart
+        uiSettings.get('defaultIndex')
       );
-      // setIsLoadingDataSources(false);
-      // setCreationOptions(options);
       setCredentials(fetchedCredentials);
     })();
   }, [
     history.push,
     credentials.length,
-    // dataSourceManagementStart,
     uiSettings,
     savedObjects.client,
   ]);
+  
+  // TODO: Update it
+  creationOptions.push({
+    text: 'Create',
+    onClick(): void {
+      throw new Error('Function not implemented.');
+    },
+  });
 
-  // creationOptions.push({
-  //   text: 'Create',
-  //   onClick(): void {
-  //     throw new Error('Function not implemented.');
-  //   },
-  // });
+  const createButton = canSave ? (
+    <CreateButton options={creationOptions}>
+      <FormattedMessage
+        id="credentialManagement.credentialsTable.createBtn"
+        defaultMessage="Create credential"
+      />
+    </CreateButton>
+  ) : (
+    <></>
+  );
 
-  // const createButton = canSave ? (
-  //   <CreateButton options={creationOptions}>
-  //     <FormattedMessage
-  //       id="dataSourceManagement.dataSourceTable.createBtn"
-  //       defaultMessage="Create data source"
-  //     />
-  //   </CreateButton>
-  // ) : (
-  //   <></>
-  // );
   return (
     // <EuiPageContent data-test-subj="credentialsTable" role="region" aria-label={ariaRegion}>
     <EuiPageContent data-test-subj="credentialsTable" role="region">
@@ -163,18 +169,17 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="dataSourceManagement.dataSourceTable.dataSourceExplanation"
-                defaultMessage="Create and manage the data sources that help you retrieve your data from OpenSearch."
+                id="credentialManagement.credentialsTable.credentialManagementExplanation"
+                defaultMessage="Create and manage the credentials that help you retrieve your data from OpenSearch."
               />
             </p>
           </EuiText>
         </EuiFlexItem>
-        {/* <EuiFlexItem grow={false}>{createButton}</EuiFlexItem> */}
+        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiInMemoryTable
         allowNeutralSort={false}
-        // itemId="id"
         itemId="id"
         isSelectable={false}
         items={credentials}

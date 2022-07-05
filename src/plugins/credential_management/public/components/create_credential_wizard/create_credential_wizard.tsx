@@ -8,16 +8,3 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
-// TODO: Refactor models
-export interface CredentialCreationOption {
-  text: string;
-  description?: string;
-  onClick: () => void;
-}
-
-export interface CredentialsTableItem {
-  id: string;
-  credential_name: string;
-  sort: string;
-}

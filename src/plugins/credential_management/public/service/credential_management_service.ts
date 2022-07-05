@@ -1,4 +1,5 @@
 import { HttpSetup } from '../../../../core/public';
+import { CredentialCreationConfig, CredentialCreationManager } from './creation';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
@@ -10,13 +11,33 @@ interface SetupDependencies {
  * @internal
  */
 export class CredentialManagementService {
-  constructor() {}
+  credentialCreationManager: CredentialCreationManager;
 
-  public setup({ httpClient }: SetupDependencies) {}
+  constructor() {
+    // TODO: Refactor with Singleton
+    this.credentialCreationManager = new CredentialCreationManager();
+  }
 
-  public start() {}
+  public setup({ httpClient }: SetupDependencies) {
+    const creationManagerSetup = this.credentialCreationManager.setup(httpClient);
+    return {
+      creation: creationManagerSetup,
+      // TODO: Add list, editor, and env service setup
+    };
+  }
+
+  public start() {
+    return {
+      creation: this.credentialCreationManager.start(),
+      // TODO: Add list config and editor
+    };
+  }
 
   public stop() {
     // nothing to do here yet.
   }
 }
+
+// /** @internal */
+export type CredentialManagementServiceSetup = ReturnType<CredentialManagementService['setup']>;
+export type CredentialManagementServiceStart = ReturnType<CredentialManagementService['start']>;
