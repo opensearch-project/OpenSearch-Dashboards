@@ -5,28 +5,23 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../../../data/common';
-import { Schema } from '../../../../../../../../vis_default_editor/public';
-import { FieldDragDataType } from '../../../../../utils/drag_drop/types';
-import { useTypedDispatch, useTypedSelector } from '../../../../../utils/state_management';
-import { DropboxState, DropboxDisplay } from '../types';
-import { DropboxProps } from '../dropbox';
-import { useDrop } from '../../../../../utils/drag_drop';
+import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../data/common';
+import { Schema } from '../../../../../../vis_default_editor/public';
+import { FieldDragDataType } from '../../../utils/drag_drop/types';
+import { useTypedDispatch, useTypedSelector } from '../../../utils/state_management';
+import { DropboxDisplay, DropboxProps } from '../dropbox';
+import { useDrop } from '../../../utils/drag_drop';
 import {
   editAgg,
   reorderAgg,
   updateAggConfigParams,
-} from '../../../../../utils/state_management/visualization_slice';
-import { useIndexPattern } from '../../../../../../application/utils/use/use_index_pattern';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../../../../types';
+} from '../../../utils/state_management/visualization_slice';
+import { useIndexPattern } from '../../../utils/use/use_index_pattern';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { WizardServices } from '../../../../types';
 
 const filterByName = propFilter('name');
 const filterByType = propFilter('type');
-
-export const INITIAL_STATE: DropboxState = {
-  instances: [],
-};
 
 export interface UseDropboxProps extends Pick<DropboxProps, 'id' | 'label'> {
   schema: Schema;
@@ -192,6 +187,8 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     };
   }, [aggService.types, dragData, indexPattern?.fields, schema.aggFilter, schema.group]);
 
+  const canDrop = validAggTypes.length > 0 && schema.max > dropboxAggs.length;
+
   return {
     id: dropboxId,
     label,
@@ -203,7 +200,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     onReorderField,
     ...dropState,
     dragData,
-    isValidDropTarget: validAggTypes.length > 0,
+    isValidDropTarget: canDrop,
     dropProps,
   };
 };

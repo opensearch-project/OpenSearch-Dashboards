@@ -29,9 +29,9 @@
  */
 
 import React, { useState } from 'react';
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldButton, FieldIcon } from '../../../../../../opensearch_dashboards_react/public';
-import { useDrag } from '../../../utils/drag_drop/drag_drop_context';
+import { IndexPatternField } from '../../../../../data/public';
+import { FieldButton, FieldIcon } from '../../../../../opensearch_dashboards_react/public';
+import { useDrag } from '../../utils/drag_drop/drag_drop_context';
 
 import './field_selector_field.scss';
 

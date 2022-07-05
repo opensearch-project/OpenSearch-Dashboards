@@ -2,18 +2,20 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { IconType } from '@elastic/eui';
+import { RootState } from '../../application/utils/state_management';
 import { VisualizationTypeOptions } from './types';
 
 type IVisualizationType = VisualizationTypeOptions;
 
 export class VisualizationType implements IVisualizationType {
-  public readonly name;
-  public readonly title;
-  public readonly description;
-  public readonly icon;
-  public readonly stage;
-  public readonly ui;
-  public readonly toExpression;
+  public readonly name: string;
+  public readonly title: string;
+  public readonly description: string;
+  public readonly icon: IconType;
+  public readonly stage: 'beta' | 'production';
+  public readonly ui: IVisualizationType['ui'];
+  public readonly toExpression: (state: RootState) => Promise<string | undefined>;
 
   constructor(options: VisualizationTypeOptions) {
     this.name = options.name;

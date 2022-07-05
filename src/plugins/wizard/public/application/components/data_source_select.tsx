@@ -8,7 +8,6 @@ import { i18n } from '@osd/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { SearchableDropdown, SearchableDropdownOption } from './searchable_dropdown';
 import { useIndexPatterns } from '../utils/use';
-import indexPatternSvg from '../../assets/index_pattern.svg';
 import { useTypedDispatch } from '../utils/state_management';
 import { setIndexPattern } from '../utils/state_management/visualization_slice';
 import { IndexPattern } from '../../../../data/public';
@@ -22,7 +21,7 @@ function toSearchableDropdownOption(indexPattern: IndexPattern): SearchableDropd
     id: indexPattern.id || '',
     label: indexPattern.title,
     searchableLabel: indexPattern.title,
-    prepend: <EuiIcon type={indexPatternSvg} />,
+    prepend: <EuiIcon type="indexPatternApp" />,
   };
 }
 

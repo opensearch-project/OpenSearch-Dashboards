@@ -142,6 +142,7 @@ export const SearchableDropdown = ({
   const selectedView = (
     <EuiButtonEmpty
       color="text"
+      size="s"
       style={{ textAlign: 'left' }}
       className="searchableDropdown--topDisplay"
       onClick={onButtonClick}
@@ -150,21 +151,25 @@ export const SearchableDropdown = ({
     </EuiButtonEmpty>
   );
 
-  const formControl = <EuiFormControlLayout
-      title={selected === undefined ? "Select an option" : selected.label}
+  const formControl = (
+    <EuiFormControlLayout
+      title={selected === undefined ? 'Select an option' : selected.label}
       isLoading={loading}
       fullWidth={true}
       style={{ cursor: 'pointer' }}
       prepend={prepend}
       icon={{ type: 'arrowDown', side: 'right' }}
       readOnly={true}
-    >{selectedView}</EuiFormControlLayout>
+    >
+      {selectedView}
+    </EuiFormControlLayout>
+  );
 
   return (
-      <div className="searchableDropdown">
-        <EuiPopover button={formControl} isOpen={isPopoverOpen} closePopover={closePopover}>
-          <div className="searchableDropdown--fixedWidthChild">{selectable}</div>
-        </EuiPopover>
-      </div>
+    <div className="searchableDropdown">
+      <EuiPopover button={formControl} isOpen={isPopoverOpen} closePopover={closePopover}>
+        <div className="searchableDropdown--fixedWidthChild">{selectable}</div>
+      </EuiPopover>
+    </div>
   );
 };

@@ -17,6 +17,7 @@ import {
 import React, { FC, useState, useMemo, useEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
+import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
@@ -27,20 +28,30 @@ export const Workspace: FC = ({ children }) => {
   const {
     services: {
       expressions: { ReactExpressionRenderer },
+      notifications: { toasts },
     },
   } = useOpenSearchDashboards<WizardServices>();
-  const { toExpression } = useVisualizationType();
+  const { toExpression, ui } = useVisualizationType();
   const [expression, setExpression] = useState<string>();
   const rootState = useTypedSelector((state) => state);
 
   useEffect(() => {
     async function loadExpression() {
+      const schemas = ui.containerConfig.data.schemas;
+      const [valid, errorMsg] = validateSchemaState(schemas, rootState);
+
+      if (!valid) {
+        if (errorMsg) {
+          toasts.addWarning(errorMsg);
+        }
+        return;
+      }
       const exp = await toExpression(rootState);
       setExpression(exp);
     }
 
     loadExpression();
-  }, [rootState, toExpression]);
+  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas]);
 
   return (
     <section className="wizWorkspace">
@@ -94,7 +105,8 @@ const TypeSelectorPopover = () => {
             icon: <EuiIcon type={icon} />,
             onClick: () => {
               closePopover();
-              dispatch(setActiveVisualization(name));
+              // TODO: Fix changing viz type
+              // dispatch(setActiveVisualization(name));
             },
             toolTipContent: description,
             toolTipPosition: 'right',
@@ -102,7 +114,7 @@ const TypeSelectorPopover = () => {
         ),
       },
     ],
-    [dispatch, visualizationTypes]
+    [visualizationTypes]
   );
 
   const button = (

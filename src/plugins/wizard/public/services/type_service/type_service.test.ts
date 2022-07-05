@@ -6,11 +6,14 @@
 import { VisualizationTypeOptions } from './types';
 import { TypeService } from './type_service';
 
-const DEFAULT_VIZ_PROPS = {
+const DEFAULT_VIZ_PROPS: VisualizationTypeOptions = {
   name: 'some-name',
   icon: 'some-icon',
   title: 'Some Title',
-  contributions: {},
+  ui: {} as any, // Not required for this test
+  toExpression: async (state) => {
+    return 'test';
+  },
 };
 
 describe('TypeService', () => {
@@ -28,7 +31,7 @@ describe('TypeService', () => {
   });
 
   describe('#setup', () => {
-    test('should throw an error if two visualizzations of the same id are registered', () => {
+    test('should throw an error if two visualizations of the same id are registered', () => {
       const { createVisualizationType } = service.setup();
 
       createVisualizationType(createVizType({ name: 'viz-type-1' }));

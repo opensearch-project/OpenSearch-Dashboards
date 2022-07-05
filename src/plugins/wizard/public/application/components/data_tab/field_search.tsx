@@ -6,8 +6,8 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { setSearchField } from '../../../utils/state_management/visualization_slice';
-import { useTypedDispatch } from '../../../utils/state_management';
+import { setSearchField } from '../../utils/state_management/visualization_slice';
+import { useTypedDispatch } from '../../utils/state_management';
 
 export interface Props {
   /**
