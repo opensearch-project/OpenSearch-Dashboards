@@ -9,9 +9,15 @@
  * GitHub history for details.
  */
 
-import { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial } from './types';
+// TODO: Refactor models
+export interface CredentialCreationOption {
+  text: string;
+  description?: string;
+  onClick: () => void;
+}
 
-export const PLUGIN_ID = 'credentialManagement';
-export const PLUGIN_NAME = 'Credential Management';
-
-export { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial };
+export interface CredentialsTableItem {
+  id: string;
+  credentialName: string;
+  sort: string;
+}
