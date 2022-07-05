@@ -18,6 +18,6 @@ export interface CredentialCreationOption {
 
 export interface CredentialsTableItem {
   id: string;
-  credential_name: string;
+  credentialName: string;
   sort: string;
 }

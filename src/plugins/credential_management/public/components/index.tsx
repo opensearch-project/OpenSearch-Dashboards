@@ -10,4 +10,4 @@
  */
 
 export { CredentialsTableWithRouter } from './credential_table';
-export { CreateIndexPatternWizardWithRouter } from './create_credential_wizard';
+export { CreateCredentialWizardWithRouter } from './create_credential_wizard';

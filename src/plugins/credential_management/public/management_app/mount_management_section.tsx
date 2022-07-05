@@ -28,7 +28,7 @@ import { ManagementAppMountParams } from '../../../management/public';
 //   CreateIndexPatternWizardWithRouter,
 // } from '../components';
 // import { CredentialManagementStart } from '../plugin';
-import { CredentialsTableWithRouter } from '../components/credential_table';
+import { CredentialsTableWithRouter, CreateIndexPatternWizardWithRouter } from '../components';
 import { CredentialManagementContext } from '../types';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
@@ -67,38 +67,38 @@ export async function mountManagementSection(
     // getMlCardState,
   };
 
-//   ReactDOM.render(
-//     <OpenSearchDashboardsContextProvider services={deps}>
-//       <I18nProvider>
-//         <Router history={params.history}>
-//           <Switch>
-//             <Route path={['/create']}>
-//               <CreateIndexPatternWizardWithRouter />
-//             </Route>
-//             <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-//               <CreateEditFieldContainer />
-//             </Route>
-//             <Route path={['/patterns/:id']}>
-//               <EditIndexPatternContainer />
-//             </Route>
-//             <Route path={['/']}>
-//               <IndexPatternTableWithRouter canSave={canSave} />
-//             </Route>
-//           </Switch>
-//         </Router>
-//       </I18nProvider>
-//     </OpenSearchDashboardsContextProvider>,
-//     params.element
-//   );
+  // ReactDOM.render(
+  //   <OpenSearchDashboardsContextProvider services={deps}>
+  //     <I18nProvider>
+  //       <Router history={params.history}>
+  //         <Switch>
+  //           <Route path={['/create']}>
+  //             <CreateIndexPatternWizardWithRouter />
+  //           </Route>
+  //           <Route path={['/credentials/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+  //               <CreateEditFieldContainer />
+  //             </Route>
+  //           <Route path={['/credentials/:id']}>
+  //             <EditCredentialContainer />
+  //           </Route>
+  //         </Switch>
+  //       </Router>
+  //     </I18nProvider>
+  //   </OpenSearchDashboardsContextProvider>,
+  //   params.element
+  // );
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         <Router history={params.history}>
           <Switch>
-            <Route path={['/']}>
-              <CredentialsTableWithRouter canSave={true} />
+              <Route path={['/']}>
+                <CredentialsTableWithRouter canSave={true} />
               </Route>
+              {/* <Route path={['/create']}>
+                <CreateIndexPatternWizardWithRouter />
+              </Route> */}
             </Switch>
           </Router>
         </I18nProvider>

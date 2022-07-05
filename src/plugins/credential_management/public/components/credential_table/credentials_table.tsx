@@ -46,7 +46,7 @@ const pagination = {
 
 const sorting = {
   sort: {
-    field: 'credential_name',
+    field: 'credentialName',
     direction: 'asc' as const,
   },
 };
@@ -93,7 +93,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   const columns = [
     {
-      field: 'credential_name',
+      field: 'credentialName',
       name: 'Credential',
       render: (
         name: string,
