@@ -79,12 +79,11 @@ export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
 
   return (
     <FieldButton
-      size="s"
       className="wizFieldSelectorField"
       isActive={infoIsOpen}
       onClick={togglePopover}
       dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={<FieldIcon type={field.type} scripted={field.scripted} />}
+      fieldIcon={<FieldIcon type={field.type} scripted={field.scripted} size="l" />}
       // fieldAction={actionButton}
       fieldName={fieldName}
       {...dragProps}
