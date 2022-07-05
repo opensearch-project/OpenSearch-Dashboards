@@ -4,7 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CreateAggConfigParams } from 'src/plugins/data/common';
+import { CreateAggConfigParams } from '../../../../../data/common';
 import { WizardServices } from '../../../types';
 
 interface VisualizationState {

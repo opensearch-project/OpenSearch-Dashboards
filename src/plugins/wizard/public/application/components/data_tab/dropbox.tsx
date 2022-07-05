@@ -14,11 +14,15 @@ import {
   DropResult,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { IDropAttributes, IDropState } from '../../../../utils/drag_drop';
+import { IDropAttributes, IDropState } from '../../utils/drag_drop';
 import './dropbox.scss';
-import { DropboxDisplay } from './types';
 import { useDropbox } from './use';
 import { UseDropboxProps } from './use/use_dropbox';
+
+export interface DropboxDisplay {
+  label: string;
+  id: string;
+}
 
 interface DropboxProps extends IDropState {
   id: string;
