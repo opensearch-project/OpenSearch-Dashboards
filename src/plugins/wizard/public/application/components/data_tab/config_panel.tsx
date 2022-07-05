@@ -5,10 +5,10 @@
 
 import { EuiForm } from '@elastic/eui';
 import React from 'react';
-import { useVisualizationType } from '../../../utils/use';
-import { useTypedSelector } from '../../../utils/state_management';
+import { useVisualizationType } from '../../utils/use';
+import { useTypedSelector } from '../../utils/state_management';
 import './config_panel.scss';
-import { mapSchemaToAggPanel } from './utils/schema_to_dropbox';
+import { mapSchemaToAggPanel } from './schema_to_dropbox';
 import { SecondaryPanel } from './secondary_panel';
 
 export function ConfigPanel() {

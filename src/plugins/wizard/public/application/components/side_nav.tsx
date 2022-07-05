@@ -8,7 +8,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import './side_nav.scss';
 import { useVisualizationType } from '../utils/use';
 import { DataSourceSelect } from './data_source_select';
-import { DataTab } from '../contributions';
+import { DataTab } from './data_tab';
 import { StyleTabConfig } from '../../services/type_service';
 
 export const SideNav = () => {
