@@ -1130,7 +1130,7 @@
     [Anan](mailto:79961084+ananzh@users.noreply.github.com) - Fri, 4 Jun 2021 15:08:02 -0700
     
     
-    This PR is an implementation of ssrf patch. This patch allows customers to choose allowlist (vis_type_timeline.graphiteUrls) or denylist (vis_type_timeline.denylist) or both to verify its users' graphite url inputs. Customers can simply enable or disable these settings in the opensearch_dashboards.yml file to control what method they would like to apply for the safety check
+    This PR is an implementation of ssrf patch. This patch allows customers to choose allowlist (vis_type_timeline.graphiteUrls) or blocklist (vis_type_timeline.blocklist) or both to verify its users' graphite url inputs. Customers can simply enable or disable these settings in the opensearch_dashboards.yml file to control what method they would like to apply for the safety check
     
     Signed-off-by: Anan Zhuang &lt;ananzh@amazon.com&gt;
 
