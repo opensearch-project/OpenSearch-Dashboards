@@ -25,6 +25,7 @@ import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import { setAggService, setIndexPatterns } from './plugin_services';
 import { createSavedWizardLoader } from './saved_visualizations';
+import { registerDefaultTypes } from './visualizations';
 
 export class WizardPlugin
   implements
@@ -38,6 +39,8 @@ export class WizardPlugin
     { visualizations }: WizardPluginSetupDependencies
   ) {
     const typeService = this.typeService;
+    registerDefaultTypes(typeService.setup());
+
     // Register the plugin to core
     core.application.register({
       id: 'wizard',
@@ -63,8 +66,6 @@ export class WizardPlugin
         setIndexPatterns(data.indexPatterns);
 
         // Register Default Visualizations
-        const { registerDefaultTypes } = await import('./visualizations');
-        registerDefaultTypes(typeService.setup(), pluginsStart);
 
         const services: WizardServices = {
           ...coreStart,
