@@ -5,12 +5,8 @@
 
 import type { TypeServiceSetup } from '../services/type_service';
 import { createMetricConfig } from './metric';
-import { WizardPluginStartDependencies } from '../types';
 
-export function registerDefaultTypes(
-  typeServiceSetup: TypeServiceSetup,
-  pluginsStart: WizardPluginStartDependencies
-) {
+export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup) {
   const visualizationTypes = [createMetricConfig];
 
   visualizationTypes.forEach((createTypeConfig) => {
