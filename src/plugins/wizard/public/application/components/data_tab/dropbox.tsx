@@ -13,11 +13,12 @@ import {
   EuiText,
   DropResult,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { IDropAttributes, IDropState } from '../../utils/drag_drop';
 import './dropbox.scss';
 import { useDropbox } from './use';
 import { UseDropboxProps } from './use/use_dropbox';
+import { usePrefersReducedMotion } from './use/use_prefers_reduced_motion';
 
 export interface DropboxDisplay {
   label: string;
@@ -55,6 +56,8 @@ const DropboxComponent = ({
   canDrop,
   dropProps,
 }: DropboxProps) => {
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const [closing, setClosing] = useState<boolean | string>(false);
   const handleDragEnd = useCallback(
     ({ source, destination }: DropResult) => {
       if (!destination) return;
@@ -67,13 +70,32 @@ const DropboxComponent = ({
     [fields, onReorderField]
   );
 
+  const animateDelete = useCallback(
+    (id: string) => {
+      setClosing(id);
+      setTimeout(
+        () => {
+          onDeleteField(id);
+          setClosing(false);
+        },
+        prefersReducedMotion ? 0 : 350 // Also update speed in dropbox.scss
+      );
+    },
+    [onDeleteField, prefersReducedMotion]
+  );
+
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd}>
       <EuiFormRow label={boxLabel} className="dropBox" fullWidth>
         <div className="dropBox__container">
           <EuiDroppable droppableId={dropboxId}>
             {fields.map(({ id, label }, index) => (
-              <EuiDraggable className="dropBox__draggable" key={id} draggableId={id} index={index}>
+              <EuiDraggable
+                className={`dropBox__draggable ${id === closing && 'closing'}`}
+                key={id}
+                draggableId={id}
+                index={index}
+              >
                 <EuiPanel key={index} paddingSize="s" className="dropBox__field">
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>
@@ -85,7 +107,7 @@ const DropboxComponent = ({
                     iconType="cross"
                     aria-label="clear-field"
                     iconSize="s"
-                    onClick={() => onDeleteField(id)}
+                    onClick={() => animateDelete(id)}
                   />
                 </EuiPanel>
               </EuiDraggable>
