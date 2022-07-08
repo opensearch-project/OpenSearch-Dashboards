@@ -207,6 +207,8 @@
 
 # Set the value of this setting to true to capture region denied warnings and errors
 # for your map rendering services.
+# # /** @deprecated use map.showRegionDeniedWarning: */
+# map.showRegionBlockedWarning: false
 # map.showRegionDeniedWarning: false
 
 # Set the value of this setting to false to suppress search usage telemetry
