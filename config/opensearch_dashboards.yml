@@ -162,6 +162,10 @@
 #  '2001:db8::/32',
 #  'ff00::/8',
 # ]
+# /** @deprecated use graphiteDeniedIPs */
+# vis_type_timeline.graphiteBlockedIPs: []
+# vis_type_timeline.graphiteDeniedIPs: []
+
 # vis_type_timeline.graphiteDeniedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
