@@ -9,6 +9,7 @@ import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
 import { visualizationsPluginMock } from '../../../plugins/visualizations/public/mocks';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { WizardPlugin } from './plugin';
 
 describe('WizardPlugin', () => {
@@ -34,8 +35,8 @@ describe('WizardPlugin', () => {
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
         // TODO: Update this once the properties are final
         expect.objectContaining({
-          name: 'wizard',
-          title: 'Wizard',
+          name: PLUGIN_ID,
+          title: PLUGIN_NAME,
           aliasPath: '#/',
         })
       );

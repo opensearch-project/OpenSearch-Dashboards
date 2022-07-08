@@ -7,12 +7,13 @@ import {
   createSavedObjectClass,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
+import { EDIT_PATH, PLUGIN_ID, WIZARD_SAVED_OBJECT } from '../../common';
 
 export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedWizardVis extends SavedObjectClass {
-    public static type = 'wizard';
+    public static type = WIZARD_SAVED_OBJECT;
 
     // if type:wizard has no mapping, we push this mapping into OpenSearch
     public static mapping = {
@@ -20,7 +21,7 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
       description: 'text',
       state: 'text',
       //   savedSearchId: 'keyword',
-      //   version: 'integer',
+      version: 'integer',
     };
 
     // Order these fields to the top, the rest are alphabetical
@@ -41,11 +42,11 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
           description: '',
           state: '{}',
           //   savedSearchId,
-          //   version: 1,
+          version: 1,
         },
       });
       this.showInRecentlyAccessed = true;
-      this.getFullPath = () => `/app/wizard#/edit/${this.id}`;
+      this.getFullPath = () => `/app/${PLUGIN_ID}${EDIT_PATH}/${this.id}`;
     }
   }
 

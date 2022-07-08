@@ -33,6 +33,7 @@ export interface WizardPluginStartDependencies {
 
 export interface WizardServices extends CoreStart {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedWizardLoader: WizardStart['savedWizardLoader'];
   toastNotifications: ToastsStart;
   savedObjectsPublic: SavedObjectsStart;
   navigation: NavigationPublicPluginStart;

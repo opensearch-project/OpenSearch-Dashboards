@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectAttributes } from 'opensearch-dashboards/public';
+import { SavedObjectAttributes } from '../../../core/types';
 
 export const WIZARD_SAVED_OBJECT = 'wizard';
 

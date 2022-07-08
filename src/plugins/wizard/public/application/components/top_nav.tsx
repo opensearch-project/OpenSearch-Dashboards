@@ -12,8 +12,10 @@ import { WizardServices } from '../../types';
 
 import './top_nav.scss';
 import { useIndexPattern } from '../utils/use';
+import { useTypedSelector } from '../utils/state_management';
+import { SavedObject } from '../../../../saved_objects/public';
 
-export const TopNav = () => {
+export const TopNav = ({ savedWizardViz }: { savedWizardViz?: SavedObject }) => {
   const { services } = useOpenSearchDashboards<WizardServices>();
   const {
     setHeaderActionMenu,
@@ -22,8 +24,19 @@ export const TopNav = () => {
       ui: { TopNavMenu },
     },
   } = services;
+  const rootState = useTypedSelector((state) => state);
+  const hasUnappliedChanges = useTypedSelector(
+    (state) => !!state.visualization.activeVisualization?.draftAgg
+  );
 
-  const config = useMemo(() => getTopNavconfig(services), [services]);
+  const config = useMemo(() => {
+    const visInstance = {
+      ...savedWizardViz,
+      state: JSON.stringify(rootState),
+    };
+    return getTopNavconfig({ visInstance, hasUnappliedChanges }, services);
+  }, [hasUnappliedChanges, rootState, savedWizardViz, services]);
+
   const indexPattern = useIndexPattern();
 
   useEffect(() => {

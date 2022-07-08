@@ -37,19 +37,39 @@ import {
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { WizardServices } from '../..';
+import { WIZARD_SAVED_OBJECT } from '../../../common';
 
-export const getTopNavconfig = ({
-  savedObjects: { client: savedObjectsClient },
-  toastNotifications,
-  i18n: { Context: I18nContext },
-}: WizardServices) => {
+interface TopNavConfigParams {
+  visInstance: Record<string, any>; // TODO: fix this type
+  hasUnappliedChanges: boolean;
+}
+
+export const getTopNavconfig = (
+  { visInstance, hasUnappliedChanges }: TopNavConfigParams,
+  {
+    savedObjects: { client: savedObjectsClient },
+    toastNotifications,
+    i18n: { Context: I18nContext },
+  }: WizardServices
+) => {
+  const { state } = visInstance;
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
       iconType: 'save',
-      emphasize: true,
-      label: 'Save',
+      emphasize: true, // TODO: need to be conditional for save vs create (save as)?
+      description: 'Save Visualization', // TODO: i18n
+      className: 'saveButton',
+      label: 'save', // TODO: i18n
       testId: 'wizardSaveButton',
+      disableButton: hasUnappliedChanges,
+      tooltip() {
+        if (hasUnappliedChanges) {
+          return i18n.translate('visualize.topNavMenu.saveVisualizationDisabledButtonTooltip', {
+            defaultMessage: 'Apply aggregation configuration changes before saving', // TODO: Update text to match agg save flow
+          });
+        }
+      },
       run: (anchorElement) => {
         const onSave = async ({
           // TODO: Figure out what the other props here do
@@ -61,11 +81,17 @@ export const getTopNavconfig = ({
           returnToOrigin,
         }: OnSaveProps & { returnToOrigin: boolean }) => {
           // TODO: Save the actual state of the wizard
-          const wizardSavedObject = await savedObjectsClient.create('wizard', {
-            title: newTitle,
-            description: newDescription,
-            state: JSON.stringify({}),
-          });
+          const wizardSavedObject = visInstance.id
+            ? await savedObjectsClient.update(WIZARD_SAVED_OBJECT, visInstance.id, {
+                title: newTitle,
+                description: newDescription,
+                state,
+              })
+            : await savedObjectsClient.create(WIZARD_SAVED_OBJECT, {
+                title: newTitle,
+                description: newDescription,
+                state,
+              });
 
           try {
             const id = await wizardSavedObject.save();
@@ -111,9 +137,9 @@ export const getTopNavconfig = ({
 
         const saveModal = (
           <SavedObjectSaveModalOrigin
-            documentInfo={{ title: '' }}
+            documentInfo={visInstance || { title: '' }}
             onSave={onSave}
-            objectType={'visualization'}
+            objectType={'wizard'}
             onClose={() => {}}
           />
         );

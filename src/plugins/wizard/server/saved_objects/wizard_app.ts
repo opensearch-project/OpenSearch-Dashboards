@@ -4,7 +4,12 @@
  */
 
 import { SavedObject, SavedObjectsType } from '../../../../core/server';
-import { WizardSavedObjectAttributes, WIZARD_SAVED_OBJECT } from '../../common';
+import {
+  EDIT_PATH,
+  PLUGIN_ID,
+  WizardSavedObjectAttributes,
+  WIZARD_SAVED_OBJECT,
+} from '../../common';
 
 export const wizardSavedObjectType: SavedObjectsType = {
   name: WIZARD_SAVED_OBJECT,
@@ -19,7 +24,7 @@ export const wizardSavedObjectType: SavedObjectsType = {
       `/management/opensearch-dashboards/objects/savedWizard/${encodeURIComponent(id)}`,
     getInAppUrl({ id }: SavedObject) {
       return {
-        path: `/app/wizard#/edit/${encodeURIComponent(id)}`,
+        path: `/app/${PLUGIN_ID}${EDIT_PATH}/${encodeURIComponent(id)}`,
         uiCapabilitiesPath: 'wizard.show',
       };
     },
@@ -38,6 +43,7 @@ export const wizardSavedObjectType: SavedObjectsType = {
         type: 'text',
         index: false,
       },
+      version: { type: 'integer' },
     },
   },
 };

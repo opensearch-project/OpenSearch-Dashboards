@@ -105,6 +105,9 @@ export const slice = createSlice({
     updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
       state.activeVisualization!.aggConfigParams = action.payload;
     },
+    setState: (_state, action: PayloadAction<VisualizationState>) => {
+      return action.payload;
+    },
   },
 });
 
@@ -117,4 +120,5 @@ export const {
   updateAggConfigParams,
   saveAgg,
   reorderAgg,
+  setState,
 } = slice.actions;
