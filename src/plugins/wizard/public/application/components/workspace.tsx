@@ -44,6 +44,7 @@ export const Workspace: FC = ({ children }) => {
         if (errorMsg) {
           toasts.addWarning(errorMsg);
         }
+        setExpression(undefined);
         return;
       }
       const exp = await toExpression(rootState);
