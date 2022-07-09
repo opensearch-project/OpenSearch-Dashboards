@@ -27,8 +27,7 @@ export const Header = ({
     {
       defaultMessage: 'Create {dataSourceName}',
       values: { dataSourceName },
-    }
-  );
+    });
 
   changeTitle(createIndexPatternHeader);
 

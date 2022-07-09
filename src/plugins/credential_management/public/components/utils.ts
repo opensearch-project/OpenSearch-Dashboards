@@ -10,7 +10,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import { ICredential } from '../../common';
+import { Credential } from '../../common';
 // import { CredentialManagementStart } from '../plugin';
 
 export async function getCredentials(
@@ -20,7 +20,7 @@ export async function getCredentials(
 ) {
 return await (
   savedObjectsClient
-    .find<ICredential>({
+    .find<Credential.ICredential>({
       type: 'credential',
       fields: ['id', 'credential_name', 'credential_type'],
       perPage: 10000,

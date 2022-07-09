@@ -9,5 +9,4 @@
  * GitHub history for details.
  */
 
-export * from './credential_management_service';
-export { CredentialCreationOption } from './creation';
+export { Header } from './header';

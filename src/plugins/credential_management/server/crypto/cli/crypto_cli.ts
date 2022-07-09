@@ -80,6 +80,7 @@ export class CryptoCli {
     return './crypto_material';
   }
 
+  // TODO: Support configurable crypto materials file path 
   public static generateCryptoMaterials(keyName: string, keyNamespace: string) {
     const cryptoMaterials = {
       keyName,

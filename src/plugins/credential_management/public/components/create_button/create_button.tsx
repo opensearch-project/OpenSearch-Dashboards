@@ -11,7 +11,7 @@
 
 // @ts-ignore
 import { euiColorAccent } from '@elastic/eui/dist/eui_theme_light.json';
-import React, { Component, Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiBadge,
@@ -40,7 +40,7 @@ interface Props {
   }>;
 }
 
-export class CreateButton extends Component<Props, State> {
+export class CreateButton extends React.Component<Props, State> {
   public state = {
     isPopoverOpen: false,
   };
@@ -100,7 +100,7 @@ export class CreateButton extends Component<Props, State> {
                   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
                     <EuiDescriptionListTitle>
                       {option.text}
-                      {option.isBeta ? <Fragment> {this.renderBetaBadge()}</Fragment> : null}
+                      {option.isBeta ? <React.Fragment> {this.renderBetaBadge()}</React.Fragment> : null}
                     </EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       {option.description}

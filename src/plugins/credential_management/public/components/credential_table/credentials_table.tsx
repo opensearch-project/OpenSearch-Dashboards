@@ -26,7 +26,6 @@ import {
   EuiBadgeGroup,
   EuiPageContent,
   EuiTitle,
-  // EuiButton,
 } from '@elastic/eui';
 
 import {
@@ -36,7 +35,8 @@ import {
 
 import { CredentialManagementContext } from '../../types';
 import { getCredentials } from '../utils';
-import { CredentialsTableItem, CredentialCreationOption } from '../types';
+import { CredentialsTableItem } from '../types';
+import { CredentialCreationOption } from '../../service';
 import { CreateButton } from '../create_button';
 
 const pagination = {
@@ -77,19 +77,10 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const [creationOptions, setCreationOptions] = React.useState<CredentialCreationOption[]>([]);
 
   const {
-    // setBreadcrumbs,
     savedObjects,
     uiSettings,
-    // dataSourceManagementStart,
-    // chrome,
-    // docLinks,
-    // application,
-    // http,
-    // getMlCardState,
-    // data,
+    credentialManagementStart,
   } = useOpenSearchDashboards<CredentialManagementContext>().services;
-
-  // console.warn("services: ", useOpenSearchDashboards<CredentialManagementContext>().services);
 
   const columns = [
     {
@@ -125,26 +116,23 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   React.useEffect(() => {
     (async function () {
+      const options = await credentialManagementStart.creation.getCredentialCreationOptions(
+        history.push
+      );
       const fetchedCredentials: CredentialsTableItem[] = await getCredentials(
         savedObjects.client,
         uiSettings.get('defaultIndex')
       );
       setCredentials(fetchedCredentials);
+      setCreationOptions(options);
     })();
   }, [
     history.push,
     credentials.length,
+    credentialManagementStart,
     uiSettings,
     savedObjects.client,
   ]);
-  
-  // TODO: Update it
-  creationOptions.push({
-    text: 'Create',
-    onClick(): void {
-      throw new Error('Function not implemented.');
-    },
-  });
 
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>
@@ -158,7 +146,6 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   );
 
   return (
-    // <EuiPageContent data-test-subj="credentialsTable" role="region" aria-label={ariaRegion}>
     <EuiPageContent data-test-subj="credentialsTable" role="region">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

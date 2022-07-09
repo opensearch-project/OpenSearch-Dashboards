@@ -9,9 +9,9 @@
  * GitHub history for details.
  */
 
-import { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial } from './types';
+import * as Credential from './types';
 
 export const PLUGIN_ID = 'credentialManagement';
 export const PLUGIN_NAME = 'Credential Management';
 
-export { ICredential, IBasicAuthCredentialMaterial, IAWSIAMCredentialMaterial };
+export { Credential };

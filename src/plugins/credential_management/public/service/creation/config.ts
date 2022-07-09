@@ -68,10 +68,10 @@ export class CredentialCreationConfig {
     this.isBeta = isBeta;
   }
 
-  public getIndexPatternCreationOption(urlHandler: UrlHandler): CredentialCreationOption {
+  public getCredentialCreationOption(urlHandler: UrlHandler): CredentialCreationOption {
     return {
       text: credentialButtonText,
-      description: `getIndexPatternCreationOption`,
+      description: `getCredentialCreationOption`,
       testSubj: `createStandardCredentialButton`,
       onClick: () => {
         urlHandler('/create');

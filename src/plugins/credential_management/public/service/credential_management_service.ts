@@ -31,6 +31,8 @@ export class CredentialManagementService {
 
   public setup({ httpClient }: SetupDependencies) {
     const creationManagerSetup = this.credentialCreationManager.setup(httpClient);
+    creationManagerSetup.addCreationConfig(CredentialCreationConfig);
+
     return {
       creation: creationManagerSetup,
       // TODO: Add list, editor, and env service setup

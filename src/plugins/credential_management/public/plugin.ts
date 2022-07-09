@@ -9,21 +9,19 @@
  * GitHub history for details.
  */
 
-// import { i18n } from '@osd/i18n';
+import { i18n } from '@osd/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import {
-  CredentialManagementPluginSetup,
-  CredentialManagementPluginStart,
-  AppPluginStartDependencies,
-} from './types';
-import { PLUGIN_NAME } from '../common';
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { ManagementSetup } from '../../management/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 
-import { CredentialManagementService } from './service';
+import {
+  CredentialManagementService,
+  CredentialManagementServiceSetup,
+  CredentialManagementServiceStart,
+} from './service';
 
 export interface CredentialManagementSetupDependencies {
   management: ManagementSetup;
@@ -34,23 +32,52 @@ export interface CredentialManagementStartDependencies {
   data: DataPublicPluginStart;
 }
 
+export type CredentialManagementSetup = CredentialManagementServiceSetup;
+
+export type CredentialManagementStart = CredentialManagementServiceStart;
+
+const sectionsHeader = i18n.translate('credentialManagement.credential.sectionsHeader', {
+  defaultMessage: 'Credentials',
+});
+
+const CM_APP_ID = 'credentials';
+
 export class CredentialManagementPlugin
-  implements Plugin<CredentialManagementPluginSetup, CredentialManagementPluginStart> {
-  private readonly credentialManagementService = new CredentialManagementService();  
-  
-  public setup (
-    core: CoreSetup<CredentialManagementStartDependencies>,
-    { management, urlForwarding}: CredentialManagementSetupDependencies
-  ): CredentialManagementPluginSetup {
+  implements
+    Plugin<
+      CredentialManagementSetup,
+      CredentialManagementStart,
+      CredentialManagementSetupDependencies,
+      CredentialManagementStartDependencies
+    > {
+  private readonly credentialManagementService = new CredentialManagementService();
+  public setup(
+    core: CoreSetup<CredentialManagementStartDependencies, CredentialManagementStart>,
+    { management, urlForwarding }: CredentialManagementSetupDependencies
+  ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    
+
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
     }
 
+    const newAppPath = `management/opensearch-dashboards/${CM_APP_ID}`;
+    const legacyPatternsPath = 'management/opensearch-dashboards/credentials';
+
+    urlForwarding.forwardApp(
+      'management/opensearch-dashboards/credentials',
+      newAppPath,
+      (path) => '/create'
+    );
+
+    urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
+      const pathInApp = path.substr(legacyPatternsPath.length + 1);
+      return pathInApp && `/patterns${pathInApp}`;
+    });
+
     opensearchDashboardsSection.registerApp({
-      id: 'credentialManagement',
-      title: PLUGIN_NAME,
+      id: CM_APP_ID,
+      title: sectionsHeader,
       order: 0,
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
@@ -62,8 +89,8 @@ export class CredentialManagementPlugin
     return this.credentialManagementService.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart): CredentialManagementPluginStart {
-    return {};
+  public start(core: CoreStart, plugins: CredentialManagementStartDependencies) {
+    return this.credentialManagementService.start();
   }
 
   public stop() {}

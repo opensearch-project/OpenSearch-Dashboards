@@ -18,4 +18,4 @@ import { CredentialManagementPlugin } from './plugin';
 export function plugin() {
   return new CredentialManagementPlugin();
 }
-export { CredentialManagementPluginSetup, CredentialManagementPluginStart } from './types';
+export { CredentialManagementSetup, CredentialManagementStart } from './plugin';
