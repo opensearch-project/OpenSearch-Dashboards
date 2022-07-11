@@ -14,7 +14,7 @@ import { WizardPlugin } from './plugin';
 
 describe('WizardPlugin', () => {
   describe('setup', () => {
-    it('initializes the plugin correctly and registers it as an alias vizualization', () => {
+    it('initializes the plugin correctly and registers it as an alias visualization', () => {
       const plugin = new WizardPlugin(coreMock.createPluginInitializerContext());
       const pluginStartContract = {
         data: dataPluginMock.createStartContract(),

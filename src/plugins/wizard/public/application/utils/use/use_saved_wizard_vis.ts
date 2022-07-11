@@ -3,82 +3,88 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { i18n } from '@osd/i18n';
+import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
 import { SavedObject } from '../../../../../saved_objects/public';
-// import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
-// import { EDIT_PATH } from '../../../../common';
+import {
+  redirectWhenMissing,
+  SavedObjectNotFound,
+} from '../../../../../opensearch_dashboards_utils/public';
+import { EDIT_PATH, PLUGIN_ID } from '../../../../common';
 import { WizardServices } from '../../../types';
 import { MetricOptionsDefaults } from '../../../visualizations/metric/metric_viz_type';
+import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
 import { getSavedWizardVis } from '../get_saved_wizard_vis';
 import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
 
-export const useSavedWizardVisInstance = (
+export const useSavedWizardVis = (
   services: WizardServices,
   visualizationIdFromUrl: string | undefined
 ) => {
-  const [state, setState] = useState<{
-    savedWizardVis?: SavedObject;
-  }>({});
+  const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);
   const dispatch = useTypedDispatch();
 
   useEffect(() => {
     const {
-      // application: { navigateToApp },
+      application: { navigateToApp },
       chrome,
-      // history,
-      // http: { basePath },
-      // setActiveUrl,
-      // toastNotifications,
+      history,
+      http: { basePath },
+      toastNotifications,
     } = services;
-    // TODO: remove "instance" from naming
-    const getSavedWizardVisInstance = async () => {
+    const loadSavedWizardVis = async () => {
       try {
         const savedWizardVis = await getSavedWizardVis(services, visualizationIdFromUrl);
 
         if (savedWizardVis.id) {
-          // TODO: update breadcrumbs
-          // chrome.setBreadcrumbs(getEditBreadcrumbs(savedWizardVis.title));
+          chrome.setBreadcrumbs(getEditBreadcrumbs(savedWizardVis.title, navigateToApp));
           chrome.docTitle.change(savedWizardVis.title);
         } else {
-          // chrome.setBreadcrumbs(getCreateBreadcrumbs());
+          chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
         }
 
-        dispatch(setStyleState<MetricOptionsDefaults>(JSON.parse(savedWizardVis.state).style));
-        dispatch(setVisualizationState(JSON.parse(savedWizardVis.state).visualization));
-        setState({ savedWizardVis });
+        if (savedWizardVis.styleState !== '{}' && savedWizardVis.visualizationState !== '{}') {
+          const styleState = JSON.parse(savedWizardVis.styleState);
+          const visualizationState = JSON.parse(savedWizardVis.visualizationState);
+          // TODO: Add validation and transformation, throw/handle errors
+          dispatch(setStyleState<MetricOptionsDefaults>(styleState));
+          dispatch(setVisualizationState(visualizationState));
+        }
+
+        setSavedVisState(savedWizardVis);
       } catch (error) {
-        // TODO: implement error handling
-        // const managementRedirectTarget = {
-        //   app: 'management',
-        //   path: `opensearch-dashboards/objects/savedVisualizations/${visualizationIdFromUrl}`,
-        // };
-        //
-        // try {
-        //   redirectWhenMissing({
-        //     history,
-        //     navigateToApp,
-        //     toastNotifications,
-        //     basePath,
-        //     mapping: managementRedirectTarget,
-        //     onBeforeRedirect() {
-        //       setActiveUrl(EDIT_PATH);
-        //     },
-        //   })(error);
-        // } catch (e) {
-        //   toastNotifications.addWarning({
-        //     title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
-        //       defaultMessage: 'Failed to load the visualization',
-        //     }),
-        //     text: e.message,
-        //   });
-        //   history.replace(EDIT_PATH);
-        // }
+        const managementRedirectTarget = {
+          [PLUGIN_ID]: {
+            app: 'management',
+            path: `opensearch-dashboards/objects/savedWizard/${visualizationIdFromUrl}`,
+          },
+        };
+
+        try {
+          if (error instanceof SavedObjectNotFound) {
+            redirectWhenMissing({
+              history,
+              navigateToApp,
+              toastNotifications,
+              basePath,
+              mapping: managementRedirectTarget,
+            })(error);
+          }
+        } catch (e) {
+          const message = e instanceof Error ? e.message : '';
+          toastNotifications.addWarning({
+            title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
+              defaultMessage: 'Failed to load the visualization',
+            }),
+            text: message,
+          });
+          history.replace(EDIT_PATH);
+        }
       }
     };
 
-    getSavedWizardVisInstance();
+    loadSavedWizardVis();
   }, [dispatch, services, visualizationIdFromUrl]);
 
-  return state;
+  return savedVisState;
 };

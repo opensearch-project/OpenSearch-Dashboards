@@ -38,8 +38,11 @@ export const wizardSavedObjectType: SavedObjectsType = {
       description: {
         type: 'text',
       },
-      //   TODO: Determine what needs to be pulled out of state and added directly into the mapping
-      state: {
+      visualizationState: {
+        type: 'text',
+        index: false,
+      },
+      styleState: {
         type: 'text',
         index: false,
       },

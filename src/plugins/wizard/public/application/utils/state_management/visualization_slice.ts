@@ -7,7 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
 import { WizardServices } from '../../../types';
 
-interface VisualizationState {
+export interface VisualizationState {
   indexPattern?: string;
   searchField: string;
   activeVisualization?: {

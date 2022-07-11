@@ -19,8 +19,8 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
     public static mapping = {
       title: 'text',
       description: 'text',
-      state: 'text',
-      //   savedSearchId: 'keyword',
+      visualizationState: 'text',
+      styleState: 'text',
       version: 'integer',
     };
 
@@ -40,8 +40,8 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
         defaults: {
           title: '',
           description: '',
-          state: '{}',
-          //   savedSearchId,
+          visualizationState: '{}',
+          styleState: '{}',
           version: 1,
         },
       });

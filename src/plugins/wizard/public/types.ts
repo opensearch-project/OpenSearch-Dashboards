@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsStart } from '../../saved_objects/public';
+import { History } from 'history';
+import { SavedObject, SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableSetup } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -40,4 +41,16 @@ export interface WizardServices extends CoreStart {
   data: DataPublicPluginStart;
   types: TypeServiceStart;
   expressions: ExpressionsStart;
+  history: History;
 }
+
+export interface ISavedVis {
+  id?: string;
+  title: string;
+  description?: string;
+  visualizationState?: string;
+  styleState?: string;
+  version?: number;
+}
+
+export interface WizardVisSavedObject extends SavedObject, ISavedVis {}

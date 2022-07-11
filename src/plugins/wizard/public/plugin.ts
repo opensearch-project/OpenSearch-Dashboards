@@ -51,8 +51,7 @@ export class WizardPlugin
         const { renderApp } = await import('./application');
 
         // Get start services as specified in opensearch_dashboards.json
-        const startServices = core.getStartServices();
-        const [coreStart, pluginsStart, selfStart] = await startServices;
+        const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
         const { data, savedObjects, navigation, expressions } = pluginsStart;
 
         // make sure the index pattern list is up to date
@@ -75,6 +74,7 @@ export class WizardPlugin
           savedObjectsPublic: savedObjects,
           navigation,
           expressions,
+          history: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
           savedWizardLoader: selfStart.savedWizardLoader,
@@ -92,7 +92,7 @@ export class WizardPlugin
     visualizations.registerAlias({
       name: PLUGIN_ID,
       title: PLUGIN_NAME,
-      description: i18n.translate('wizard.vizPicker.description', {
+      description: i18n.translate('wizard.visPicker.description', {
         defaultMessage: 'TODO...',
       }),
       // TODO: Replace with actual icon once available
