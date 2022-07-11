@@ -30,7 +30,7 @@ export const Header = ({
     .docTitle.change;
   const createCredentialHeader = i18n.translate('credentialManagement.createIndexPatternHeader',
     {
-      defaultMessage: 'Create Credential',
+      defaultMessage: 'Save Your Credential',
     }
   );
 

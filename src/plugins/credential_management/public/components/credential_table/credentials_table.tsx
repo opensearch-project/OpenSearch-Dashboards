@@ -18,6 +18,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -34,7 +35,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 
 import { CredentialManagementContext } from '../../types';
-import { getCredentials } from '../utils';
+import { deleteCredentials, getCredentials } from '../utils';
 import { CredentialsTableItem } from '../types';
 import { CredentialCreationOption } from '../../service';
 import { CreateButton } from '../create_button';
@@ -75,6 +76,7 @@ interface Props extends RouteComponentProps {
 export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
   const [creationOptions, setCreationOptions] = React.useState<CredentialCreationOption[]>([]);
+  const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
 
   const {
     savedObjects,
@@ -85,7 +87,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const columns = [
     {
       field: 'credentialName',
-      name: 'Credential',
+      name: 'Credential Name',
       render: (
         name: string,
         index: {
@@ -112,7 +114,45 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
+    {
+      field: 'credentialType',
+      name: 'Credential Type',
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
+    },
   ];
+
+  const onSelectionChange = (selectedCredentials: CredentialsTableItem[]) => {
+    setSelectedCredentials(selectedCredentials);
+  };
+
+  const selection = {
+    onSelectionChange,
+  };
+
+  const renderDeleteButton = () => {
+    if (selectedCredentials.length === 0) {
+      return;
+    }
+
+    return (
+      <EuiButton color="danger" iconType="trash" onClick={onClickDelete}>
+        Delete {selectedCredentials.length} Credentials
+      </EuiButton>
+    );
+  };
+
+  const onClickDelete = () => {
+    Promise.resolve(deleteCredentials(savedObjects.client, selectedCredentials)).then(function () {
+      setSelectedCredentials([]);
+      // TODO: Fix routing
+      history.push('');
+    });
+  };
+
+  const deleteButton = renderDeleteButton();
 
   React.useEffect(() => {
     (async function () {
@@ -138,7 +178,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
     <CreateButton options={creationOptions}>
       <FormattedMessage
         id="credentialManagement.credentialsTable.createBtn"
-        defaultMessage="Create credential"
+        defaultMessage="Save your credential"
       />
     </CreateButton>
   ) : (
@@ -163,12 +203,14 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+        {deleteButton}
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiInMemoryTable
         allowNeutralSort={false}
         itemId="id"
-        isSelectable={false}
+        isSelectable={true}
+        selection={selection}
         items={credentials}
         columns={columns}
         pagination={pagination}

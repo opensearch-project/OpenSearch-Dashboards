@@ -21,9 +21,10 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiLink,
-  EuiFilePicker,
+  // EuiFilePicker,
   EuiButton,
   EuiPageContent,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import { getCreateBreadcrumbs } from '../breadsrumbs';
@@ -37,6 +38,7 @@ interface CreateCredentialWizardState {
   credentialType: string;
   user_name: string;
   password: string;
+  dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
 }
@@ -49,7 +51,7 @@ export class CreateCredentialWizard extends React.Component<
 > {
   static contextType = contextType;
   public readonly context!: CredentialManagmentContextValue;
-
+  
   constructor(props: RouteComponentProps, context: CredentialManagmentContextValue) {
     super(props, context);
 
@@ -60,6 +62,7 @@ export class CreateCredentialWizard extends React.Component<
       credentialType: USERNAME_PASSWORD_TYPE,
       user_name: '',
       password: '',
+      dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
     };
@@ -142,18 +145,19 @@ export class CreateCredentialWizard extends React.Component<
               />
             </EuiFormRow>
             <EuiFormRow label="Password">
-              <EuiFieldText
+              <EuiFieldPassword
                 placeholder="Your Password"
-                value={this.redact(this.state.password.length) || ''}
+                type={this.state.dual ? 'dual' : undefined}
+                value={this.state.password || ''}
                 onChange={(e) => this.setState({ password: e.target.value })}
               />
             </EuiFormRow>
-            <EuiFormRow label="Upload Credential File">
+            {/* <EuiFormRow label="Upload Credential File">
               <EuiFilePicker />
-            </EuiFormRow>
+            </EuiFormRow> */}
           </EuiDescribedFormGroup>
           <EuiButton type="submit" fill onClick={this.createCredential}>
-            Create
+            Save
           </EuiButton>
         </EuiForm>
       </EuiPageContent>
@@ -165,6 +169,7 @@ export class CreateCredentialWizard extends React.Component<
       toasts: prevState.toasts.filter((toast) => toast.id !== id),
     }));
   };
+
   render() {
     const content = this.renderContent();
 
@@ -182,10 +187,6 @@ export class CreateCredentialWizard extends React.Component<
     );
   }
 
-  redact = (len: number) => {
-    return '*'.repeat(len);
-  };
-
   createCredential = async () => {
     const { http } = this.context.services;
     try {
@@ -202,6 +203,8 @@ export class CreateCredentialWizard extends React.Component<
           }),
         })
         .then((res) => {
+          // TODO: Fix routing
+          this.props.history.push('');
           console.log(res);
         });
     } catch (e) {

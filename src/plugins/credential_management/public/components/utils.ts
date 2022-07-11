@@ -11,15 +11,13 @@
 
 import { SavedObjectsClientContract } from 'src/core/public';
 import { Credential } from '../../common';
-// import { CredentialManagementStart } from '../plugin';
+import { CredentialsTableItem } from './types';
 
 export async function getCredentials(
   savedObjectsClient: SavedObjectsClientContract,
   defaultIndex: string
-  // credentialManagementStart: CredentialManagementStart
 ) {
-return await (
-  savedObjectsClient
+  return await (savedObjectsClient
     .find<Credential.ICredential>({
       type: 'credential',
       fields: ['id', 'credential_name', 'credential_type'],
@@ -49,6 +47,13 @@ return await (
             return 0;
           }
         })
-    ) || []
-  );
+    ) || []);
+}
+
+export async function deleteCredentials(
+  savedObjectsClient: SavedObjectsClientContract,
+  selectedCredentials: CredentialsTableItem[]) {
+  selectedCredentials.forEach(function (selectedCredential) {
+    savedObjectsClient.delete('credential', selectedCredential.id);
+  });
 }

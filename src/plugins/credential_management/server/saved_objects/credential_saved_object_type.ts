@@ -21,6 +21,9 @@ export const credentialSavedObjectType: SavedObjectsType = {
     getCredentialName(obj) {
       return obj.attributes.credential_name;
     },
+    getCredentialType(obj) {
+      return obj.attributes.credential_type;
+    },
     getUserName(obj) {
       return obj.attributes.user_name;
     },

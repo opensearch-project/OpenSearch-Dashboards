@@ -12,6 +12,10 @@
 import { IRouter } from '../../../../core/server';
 import { schema } from '@osd/config-schema';
 import { createHandler } from '../credential';
+import { Credential } from '../../common';
+
+const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
+const AWS_IAM_TYPE: Credential.AWS_IAM_TYPE = 'aws_iam_credential';
 
 export function registerCreateRoute(router: IRouter) {
   router.post(
@@ -21,8 +25,8 @@ export function registerCreateRoute(router: IRouter) {
         body: schema.object({
           credential_name: schema.string(),
           credential_type: schema.oneOf([
-            schema.literal('username_password_credential'),
-            schema.literal('aws_iam_credential'),
+            schema.literal(USERNAME_PASSWORD_TYPE),
+            schema.literal(AWS_IAM_TYPE),
           ]),
           username_password_credential_materials: schema.maybe(
             schema.object({
