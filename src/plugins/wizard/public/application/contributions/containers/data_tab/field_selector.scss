@@ -1,0 +1,22 @@
+@import "../../../util";
+
+.wizFieldSelector {
+  @include scrollNavParent(auto 1fr);
+  padding: $euiSizeS;
+
+  &__fieldGroups {
+    @include euiYScrollWithShadows;
+    overflow-y: auto;
+    margin-right: -$euiSizeS;
+    padding-right: $euiSizeS;
+    margin-top: $euiSizeS;
+  }
+
+  &__fieldGroup {
+    margin-top: $euiSizeS;
+  
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
