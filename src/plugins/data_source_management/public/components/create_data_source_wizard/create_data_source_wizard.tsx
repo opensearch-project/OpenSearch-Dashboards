@@ -1,5 +1,5 @@
-import React, { ReactElement, Component } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import React, { ReactElement, Component, useState, useEffect } from 'react';
+import { withRouter, RouteComponentProps, useParams } from 'react-router-dom';
 import { EuiForm, EuiFieldText, EuiFieldNumber, EuiFormRow, EuiButton } from '@elastic/eui';
 import {
   EuiGlobalToastList,
@@ -9,12 +9,20 @@ import {
 } from '@elastic/eui';
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 import { IDataSource } from 'src/plugins/data_source_management/common/data_sources/types';
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
+import { DataSourceSavedObject } from 'src/plugins/data_sources/public/types';
+import { useEffectOnce } from 'react-use';
+import { i18n } from '@osd/i18n';
+import {
+  context as contextType,
+  useOpenSearchDashboards,
+  withOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 
 import { DataSourceCreationConfig } from '../../service';
-import { DataSourceManagmentContextValue } from '../../types';
+import { DataSourceManagmentContext, DataSourceManagmentContextValue } from '../../types';
 import { getCreateBreadcrumbs } from '../breadsrumbs';
 import { Header } from './components/header';
+import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
 
 interface CreateDataSourceWizardState {
   dataSource: string;
@@ -24,82 +32,64 @@ interface CreateDataSourceWizardState {
   existingDataSources: string[];
   dataSourceName: string;
   endpoint: string;
+  savedDS?: DataSourceSavedObject;
 }
 
-export class CreateDataSourceWizard extends Component<
-  RouteComponentProps,
-  CreateDataSourceWizardState
-> {
-  static contextType = contextType;
-  public readonly context!: DataSourceManagmentContextValue;
+interface SelectedSavedObj {
+  id: string;
+  type: string;
+  name?: string;
+}
 
-  constructor(props: RouteComponentProps, context: DataSourceManagmentContextValue) {
-    super(props, context);
+const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProps> = (
+  props: CreateDataSourceWizardProps
+) => {
+  const {
+    uiSettings,
+    savedObjects,
+    setBreadcrumbs,
+    dataSourceManagementStart,
+    dataSource,
+  } = useOpenSearchDashboards<DataSourceManagmentContext>().services;
 
-    context.services.setBreadcrumbs(getCreateBreadcrumbs());
+  const type = new URLSearchParams(props.location.search).get('type') || undefined;
+  const [dataSourceName, setDataSourceName] = useState('');
+  const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
+  const [dataSourceCreationType, setDataSourceCreationType] = useState<DataSourceCreationConfig>(
+    dataSourceManagementStart.creation.getType(type)
+  );
+  const [existingDataSources, setExistingDataSources] = useState([]);
+  const [endpoint, setEndpoint] = useState('');
+  const [savedDS, setSavedDS] = useState<DataSourceSavedObject>();
+  const [selectedCrediential, setSelectedCrediential] = useState<SelectedSavedObj[]>([]);
 
-    const type = new URLSearchParams(props.location.search).get('type') || undefined;
+  useEffectOnce(() => {
+    setBreadcrumbs(getCreateBreadcrumbs());
+    fetchSavedDataSources();
+  });
 
-    this.state = {
-      dataSource: '',
-      toasts: [],
-      dataSourceCreationType: context.services.dataSourceManagementStart.creation.getType(type),
-      existingIndexPatterns: [], // todo: This is just for demo purpose
-      existingDataSources: [],
-      dataSourceName: '',
-      endpoint: '',
-    };
-  }
+  const fetchSavedDataSources = async () => {
+    const { savedDataSourceLoader: savedDataSource } = dataSource;
 
-  async UNSAFE_componentWillMount() {
-    this.fetchExistingDataSources();
-    this.fetchExistingIndexPatterns();
-    // this.fetchData();
-  }
+    const gettedSavedDS: DataSourceSavedObject = await savedDataSource.get();
 
-  createDataSource = async (dataSourceName: string, endpoint: string) => {};
+    setSavedDS(gettedSavedDS);
+  };
 
-  fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.context.services.savedObjects.client.find<
-      IndexPatternAttributes
-    >({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
+  const handleSubmit = () => {
+    const savedDataSource = savedDS!; // todo
+    savedDataSource.credientialsJSON = JSON.stringify(selectedCrediential);
+
+    savedDataSource.title = dataSourceName;
+    savedDataSource.endpoint = endpoint;
+
+    savedDataSource.save({}).then((res: any) => {
+      // eslint-disable-next-line no-console
+      console.log(res);
     });
-
-    const existingIndexPatterns = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.title : ''
-    ) as string[];
-
-    this.setState({ existingIndexPatterns });
   };
 
-  fetchExistingDataSources = async () => {
-    const { savedObjects } = await this.context.services.savedObjects.client.find<IDataSource>({
-      type: 'data-source',
-      fields: ['id'],
-      perPage: 10000,
-    });
-
-    const existingDataSources = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.id : ''
-    ) as string[];
-
-    this.setState({ existingDataSources });
-  };
-
-  handleSubmit = () => {
-    this.context.services.savedObjects.client
-      .create('data-source', { title: this.state.dataSourceName, endpoint: this.state.endpoint })
-      .then((res: any) => {
-        // eslint-disable-next-line no-console
-        console.log(res);
-      });
-  };
-
-  renderHeader() {
-    const { dataSourceCreationType } = this.state;
+  const renderHeader = () => {
     return (
       <Header
         prompt={dataSourceCreationType.renderPrompt()}
@@ -108,11 +98,17 @@ export class CreateDataSourceWizard extends Component<
         // docLinks={docLinks}
       />
     );
-  }
+  };
 
-  // todo: cqui indexPatternCreationType
-  renderContent() {
-    const header = this.renderHeader();
+  // todo: consistent name
+  const onSearchSelected = (id: string, selectedType: string, name: string) => {
+    const selected = [{ id, type: selectedType, name }];
+    setSelectedCrediential(selected);
+  };
+
+  // todo: cqwi indexPatternCreationType
+  const renderContent = () => {
+    const header = renderHeader();
 
     return (
       <EuiPageContent>
@@ -122,49 +118,83 @@ export class CreateDataSourceWizard extends Component<
           <EuiFormRow helpText="Name of the data source">
             <EuiFieldText
               name="dataSourceName"
-              value={this.state.dataSourceName || ''}
+              value={dataSourceName || ''}
               placeholder="Name"
-              onChange={(e) => this.setState({ dataSourceName: e.target.value })}
+              onChange={(e) => setDataSourceName(e.target.value)}
             />
           </EuiFormRow>
           <EuiFormRow helpText="The connection URL">
             <EuiFieldText
               name="endPoint"
-              value={this.state.endpoint || ''}
+              value={endpoint || ''}
               placeholder="Endpoint"
-              onChange={(e) => this.setState({ endpoint: e.target.value })}
+              onChange={(e) => setEndpoint(e.target.value)}
             />
           </EuiFormRow>
-          <EuiButton type="submit" fill onClick={this.handleSubmit}>
+          <EuiFormRow helpText="The seleted crediential">
+            <EuiFieldText
+              disabled={true}
+              name="crediential"
+              value={selectedCrediential?.length > 0 ? selectedCrediential[0].name : ''}
+              placeholder="Credential"
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <SavedObjectFinderUi
+              key="searchSavedObjectFinder"
+              onChoose={onSearchSelected} // todo
+              showFilter={false}
+              noItemsMessage={i18n.translate(
+                'visualizations.newVisWizard.searchSelection.notFoundLabel',
+                {
+                  defaultMessage: 'No matching indices or saved searches found.',
+                }
+              )}
+              savedObjectMetaData={[
+                {
+                  type: 'dashboard',
+                  getIconForSavedObject: () => 'dashboard',
+                  name: i18n.translate(
+                    'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                    {
+                      defaultMessage: 'Dashboard',
+                    }
+                  ),
+                },
+              ]}
+              fixedPageSize={5} // todo
+              uiSettings={uiSettings} // todo
+              savedObjects={savedObjects}
+            />
+          </EuiFormRow>
+          <EuiButton type="submit" fill onClick={handleSubmit}>
             Create
           </EuiButton>
         </EuiForm>
       </EuiPageContent>
     );
-  }
-
-  removeToast = (id: string) => {
-    this.setState((prevState) => ({
-      toasts: prevState.toasts.filter((toast) => toast.id !== id),
-    }));
   };
 
-  render() {
-    const content = this.renderContent();
+  const removeToast = (id: string) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
 
-    return (
-      <>
-        {content}
-        <EuiGlobalToastList
-          toasts={this.state.toasts}
-          dismissToast={({ id }) => {
-            this.removeToast(id);
-          }}
-          toastLifeTimeMs={6000}
-        />
-      </>
-    );
-  }
-}
+  const content = renderContent();
+
+  return (
+    <>
+      {content}
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={({ id }) => {
+          removeToast(id);
+        }}
+        toastLifeTimeMs={6000}
+      />
+    </>
+  );
+};
+
+type CreateDataSourceWizardProps = RouteComponentProps;
 
 export const CreateDataSourceWizardWithRouter = withRouter(CreateDataSourceWizard);

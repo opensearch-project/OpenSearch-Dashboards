@@ -1,5 +1,6 @@
 import { i18n } from '@osd/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourceStart } from 'src/plugins/data_sources/public/plugin';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {
   DataSourceManagementPluginSetup,
@@ -24,6 +25,7 @@ export interface DataSourceManagementSetupDependencies {
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
+  dataSource: DataSourceStart;
 }
 
 export type DataSourceManagementSetup = DataSourceManagementServiceSetup;

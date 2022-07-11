@@ -1,0 +1,10 @@
+{
+  "id": "dataSource",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "urlForwarding"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["savedObjects"]
+}

@@ -6,12 +6,11 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { dataSource } from './saved_objects';
+import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
 
-export class DataSourceManagementPlugin
-  implements Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart> {
+export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -19,7 +18,7 @@ export class DataSourceManagementPlugin
   }
 
   public setup(core: CoreSetup) {
-    // core.savedObjects.registerType(dataSource);
+    core.savedObjects.registerType(dataSource);
 
     this.logger.debug('dataSourceManagement: Setup');
     const router = core.http.createRouter();
