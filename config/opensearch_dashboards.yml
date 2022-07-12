@@ -184,3 +184,7 @@
 # Set the value of this setting to false to suppress search usage telemetry
 # for reducing the load of OpenSearch cluster.
 # data.search.usageTelemetry.enabled: false
+
+# Set the value of this setting to true to start exploring wizard
+# functionality in Visualization.
+# wizard.enabled: true

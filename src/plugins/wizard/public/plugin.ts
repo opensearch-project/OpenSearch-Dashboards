@@ -26,13 +26,14 @@ import { getPreloadedStore } from './application/utils/state_management';
 import { setAggService, setIndexPatterns } from './plugin_services';
 import { createSavedWizardLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
+import { ConfigSchema } from '../config';
 
 export class WizardPlugin
   implements
     Plugin<WizardSetup, WizardStart, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
   private typeService = new TypeService();
 
-  constructor(public initializerContext: PluginInitializerContext) {}
+  constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<WizardPluginStartDependencies, WizardStart>,
