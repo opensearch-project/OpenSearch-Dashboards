@@ -1,18 +1,5 @@
 
-<h1 align="center">Chrome Service :man_firefighter:</h1>
-
-<div align="center">
-  🚅:train::train::train:
-</div>
-<div align="center">
-  <strong>Is Part of CoreStart</strong>
-</div>
-<div align="center">
-  Allows plugins to customize the global-header UI
-</div>
-
-<br>
-
+##    Chrome Service
 
 - [About!](#about-)
 - [Nav Controls Service](#navcontrolsservice-)
@@ -25,23 +12,25 @@
 
 
 ## About :
-- <b> Signature </b> - ```export interface ChromeStart```
-- <b> CoreStart</b> - Core services exposed to the Plugin start lifecycle.
-- <b> How to access ? </b>  add in interface ```chrome: ChromeStart && chrome.servicesName => e.g chrome.docTitle.method```
-- <b> Where it is getting Registered/Executed </b> [Staring Point](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/public/rendering/rendering_service.tsx)
-- <b> How header component is getting rendered </b> ``` const chromeUi = chrome.getHeaderComponent(); ```
-- <b> Chrome Methods </b> [See chrome interface/methods](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/53e98a66a81cf986894962b5f17e4190baebf57f/src/core/public/chrome/chrome_service.tsx)
-- <b> Consists of these sub-services/components </b> : 
-```js
+- **Signature** - `export interface ChromeStart`
+
+The chrome service is a high level UI service that is part of CoreStart (Core services exposed to the Plugin start lifecycle) and offers other plugins a way to add navigation controls to the UI, edit the document title, manipuate navlinks on global header as well as edit the Recent accessed tab. it consists of these sub-services/components.
 - NavControlsService : for registering new controls to be displayed in the navigation bar.
 - NavLinksService : for manipulating nav links.
 - RecentlyAccessedService : for recently accessed history.
 - DocTitleService: for accessing and updating the document title
 - UI : All the UI components,icons for e.g  header, loaders.
-```
+
+
+- How to access ? add in interface `chrome: ChromeStart && chrome.servicesName => e.g chrome.docTitle.method`
+- Where it is getting Registered/Executed [Staring Point](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/2.1/src/core/public/rendering/rendering_service.tsx)
+- How header component is getting rendered `const chromeUi = chrome.getHeaderComponent(); `
+- Chrome Methods </b> [See chrome interface/methods](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/2.1/src/core/public/chrome/chrome_service.tsx)
+
+
 ### NavControlsService : 
 - Interface : ChromeNavControls
-- Signature : ```navControls: ChromeNavControls```
+- **Signature** - `navControls: ChromeNavControls`
 - Registering new controller 
 
 Example : 
@@ -57,25 +46,24 @@ chrome.navControls.registerLeft({
 ```
 ### NavLinksService : 
 - Interface :  ChromeNavLinks
-- Signature : ```navLinks: ChromeNavLinks```
+- **Signature** - `navLinks: ChromeNavLinks`
 - e.g Method : 
 
-```typescript
 Get an observable for a sorted list of navlinks :-
-getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+`getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>`
 
 Get the state of a navlink at this point in time :-
-get(id: string): ChromeNavLink | undefined;
+`get(id: string): ChromeNavLink | undefined`
 
 Get the current state of all navlinks :-
-getAll(): Array<Readonly<ChromeNavLink>>;
+`getAll(): Array<Readonly<ChromeNavLink>>`
 
 Check whether or not a navlink exists :-
-has(id: string): boolean;
+```has(id: string): boolean```
 
 Remove all navlinks except the one matching the given id :-
-showOnly(id: string): void;
-```
+`showOnly(id: string): void`
+
 - How to access
   ###### Get the current state of all navlinks: 
   ```ts
@@ -95,17 +83,15 @@ showOnly(id: string): void;
 - You can go back to the recent search/visualization/dashboard , each item has (link,label,id)
 - Methods :
 
-```typescript
-
 Adds a new item to the recently accessed history :-
-add(link: string, label: string, id: string): void;
+`add(link: string, label: string, id: string): void`
  
 Gets an Array of the current recently accessed history :-
-get(): ChromeRecentlyAccessedHistoryItem[];
+`get(): ChromeRecentlyAccessedHistoryItem[]`
 
 Gets an Observable of the array of recently accessed history :-
-get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>; 
-```
+`get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>`
+
 - How to access
    ###### Adds a new item to the recently accessed history :
    ```ts
@@ -118,7 +104,7 @@ get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
    
 ### DocTitleService : 
 - Interface : ChromeDocTitle
-- Signature : ```docTitle: ChromeDocTitle```
+- **Signature** - `docTitle: ChromeDocTitle`
   ###### - How to change the title of the document
 
 
@@ -129,23 +115,22 @@ get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
 ### UI :
 ###### consists of tsx/scss files && renders UI components from css Library e.g ```<Progress props={props}>```
 
-- Adding/overriding existing css : e.g.
-  ```jsx
-      - Create scss file and define class e.g .osdCustomClass{}
-      - pass className prop to UI component.
-        e.g <HeaderBreadcrumbs className="osdCustomClass"/>;
-  ```
-- UI Components :
+###### Adding/overriding existing css : 
+- Create scss file and define class e.g .osdCustomClass{}
+- pass className prop to UI component.
+        e.g `<HeaderBreadcrumbs className="osdCustomClass"/> `
+
+###### UI Components :
   - HeaderBreadcrumbs : Props
-       ```ts
+       
        - responsive:boolean Hides extra (above the max) breadcrumbs under a collapsed item as the window gets smaller.
        
        - truncate: boolean Forces all breadcrumbs to single line and truncates each breadcrumb to a particular width, except for the last item
        
-	   - max : Collapses the inner items past the maximum set here into a single ellipses item.
+	     - max : Collapses the inner items past the maximum set here into a single ellipses item.
 	   
-	   - breadcrumbs : The array of individual Breadcrumb items
-       ```
+	     - breadcrumbs : The array of individual Breadcrumb items
+      
 ### Custom React Hooks :
 <b> useObservable</b> : React state hook that tracks the latest value of an Observable.
 [More About "React-use" custom hooks library](https://github.com/streamich/react-use)
