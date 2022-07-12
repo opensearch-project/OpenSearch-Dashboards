@@ -37,22 +37,50 @@ import {
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { WizardServices } from '../..';
+import { WizardVisSavedObject } from '../../types';
+import { StyleState, VisualizationState } from './state_management';
+import { EDIT_PATH } from '../../../common';
+interface TopNavConfigParams {
+  visualizationIdFromUrl: string;
+  savedWizardVis: WizardVisSavedObject;
+  visualizationState: VisualizationState;
+  styleState: StyleState;
+  hasUnappliedChanges: boolean;
+}
 
-export const getTopNavconfig = ({
-  savedObjects: { client: savedObjectsClient },
-  toastNotifications,
-  i18n: { Context: I18nContext },
-}: WizardServices) => {
+export const getTopNavConfig = (
+  {
+    visualizationIdFromUrl,
+    savedWizardVis,
+    visualizationState,
+    styleState,
+    hasUnappliedChanges,
+  }: TopNavConfigParams,
+  { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
+) => {
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
       iconType: 'save',
-      emphasize: true,
-      label: 'Save',
+      emphasize: savedWizardVis && !savedWizardVis.id,
+      description: i18n.translate('wizard.topNavMenu.saveVisualizationButtonAriaLabel', {
+        defaultMessage: 'Save Visualization',
+      }),
+      className: 'saveButton',
+      label: i18n.translate('wizard.topNavMenu.saveVisualizationButtonLabel', {
+        defaultMessage: 'save',
+      }),
       testId: 'wizardSaveButton',
-      run: (anchorElement) => {
+      disableButton: hasUnappliedChanges,
+      tooltip() {
+        if (hasUnappliedChanges) {
+          return i18n.translate('wizard.topNavMenu.saveVisualizationDisabledButtonTooltip', {
+            defaultMessage: 'Apply aggregation configuration changes before saving', // TODO: Update text to match agg save flow
+          });
+        }
+      },
+      run: (_anchorElement) => {
         const onSave = async ({
-          // TODO: Figure out what the other props here do
           newTitle,
           newCopyOnSave,
           isTitleDuplicateConfirmed,
@@ -60,15 +88,22 @@ export const getTopNavconfig = ({
           newDescription,
           returnToOrigin,
         }: OnSaveProps & { returnToOrigin: boolean }) => {
-          // TODO: Save the actual state of the wizard
-          const wizardSavedObject = await savedObjectsClient.create('wizard', {
-            title: newTitle,
-            description: newDescription,
-            state: JSON.stringify({}),
-          });
+          if (!savedWizardVis) {
+            return;
+          }
+          savedWizardVis.visualizationState = JSON.stringify(visualizationState);
+          savedWizardVis.styleState = JSON.stringify(styleState);
+          savedWizardVis.title = newTitle;
+          savedWizardVis.description = newDescription;
+          savedWizardVis.copyOnSave = newCopyOnSave;
 
           try {
-            const id = await wizardSavedObject.save();
+            const id = await savedWizardVis.save({
+              confirmOverwrite: false,
+              isTitleDuplicateConfirmed,
+              onTitleDuplicate,
+              returnToOrigin,
+            });
 
             if (id) {
               toastNotifications.addSuccess({
@@ -77,12 +112,20 @@ export const getTopNavconfig = ({
                   {
                     defaultMessage: `Saved '{visTitle}'`,
                     values: {
-                      visTitle: newTitle,
+                      visTitle: savedWizardVis.title,
                     },
                   }
                 ),
                 'data-test-subj': 'saveVisualizationSuccess',
               });
+
+              // Update URL
+              if (id !== visualizationIdFromUrl) {
+                history.push({
+                  ...history.location,
+                  pathname: `${EDIT_PATH}/${id}`,
+                });
+              }
 
               return { id };
             }
@@ -93,15 +136,12 @@ export const getTopNavconfig = ({
             console.error(error);
 
             toastNotifications.addDanger({
-              title: i18n.translate(
-                'visualize.topNavMenu.saveVisualization.failureNotificationText',
-                {
-                  defaultMessage: `Error on saving '{visTitle}'`,
-                  values: {
-                    visTitle: newTitle,
-                  },
-                }
-              ),
+              title: i18n.translate('wizard.topNavMenu.saveVisualization.failureNotificationText', {
+                defaultMessage: `Error on saving '{visTitle}'`,
+                values: {
+                  visTitle: newTitle,
+                },
+              }),
               text: error.message,
               'data-test-subj': 'saveVisualizationError',
             });
@@ -111,9 +151,9 @@ export const getTopNavconfig = ({
 
         const saveModal = (
           <SavedObjectSaveModalOrigin
-            documentInfo={{ title: '' }}
+            documentInfo={savedWizardVis}
             onSave={onSave}
-            objectType={'visualization'}
+            objectType={'wizard'}
             onClose={() => {}}
           />
         );

@@ -30,3 +30,6 @@ export const getPreloadedStore = async (services: WizardServices) => {
 export type RootState = ReturnType<typeof rootReducer>;
 type Store = ReturnType<typeof configurePreloadedStore>;
 export type AppDispatch = Store['dispatch'];
+
+export { setState as setStyleState, StyleState } from './style_slice';
+export { setState as setVisualizationState, VisualizationState } from './visualization_slice';
