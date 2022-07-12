@@ -7,7 +7,7 @@ From the primary UI page, this plugin allows you to:
 2. Import/export saved objects
 3. Inspect/edit raw saved object values without validation
 
-For 3., this plugin can also be used to provide a route/page for editing, such as `/app/management/opensearch-dashboards/objects/savedVisualizations/{visualizationId}`, although plugins are alos free to provide or host alternate routes for this purpose (see index patterns, for instance, which provide their own integration and UI via the `management` plugin directly).
+For 3., this plugin can also be used to provide a route/page for editing, such as `/app/management/opensearch-dashboards/objects/savedVisualizations/{visualizationId}`, although plugins are also free to provide or host alternate routes for this purpose (see index patterns, for instance, which provide their own integration and UI via the `management` plugin directly).
 ## Making a new saved object type manageable
 
 1. Create a new `SavedObjectsType` or add the `management` property to an existing one. (See `SavedObjectsTypeManagementDefinition` for explanation of its properties: https://github.com/opensearch-project/OpenSearch-Dashboards/blob/e1380f14deb98cc7cce55c3b82c2d501826a78c3/src/core/server/saved_objects/types.ts#L247-L285)
