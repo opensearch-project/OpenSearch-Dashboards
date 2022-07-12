@@ -20,7 +20,7 @@ export async function getCredentials(
   return await (savedObjectsClient
     .find<Credential.ICredential>({
       type: 'credential',
-      fields: ['id', 'credential_name', 'credential_type'],
+      fields: ['id', 'title', 'credential_type'],
       perPage: 10000,
     })
     .then((response) =>
@@ -28,14 +28,12 @@ export async function getCredentials(
         .map((source) => {
           const id = source.id;
           const title = source.get('title');
-          const credentialName = source.get('credential_name');
           const credentialType = source.get('credential_type');
           return {
             id,
             title,
-            credentialName,
             credentialType,
-            sort: `${credentialName}`,
+            sort: `${title}`,
           };
         })
         .sort((a, b) => {
@@ -52,7 +50,8 @@ export async function getCredentials(
 
 export async function deleteCredentials(
   savedObjectsClient: SavedObjectsClientContract,
-  selectedCredentials: CredentialsTableItem[]) {
+  selectedCredentials: CredentialsTableItem[])
+{
   selectedCredentials.forEach(function (selectedCredential) {
     savedObjectsClient.delete('credential', selectedCredential.id);
   });

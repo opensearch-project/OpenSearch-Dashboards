@@ -27,7 +27,7 @@ export async function createHandler(request: OpenSearchDashboardsRequest) {
       ),
     };
     return {
-      credential_name: request.body.credential_name,
+      title: request.body.credential_name,
       credential_type: request.body.credential_type,
       credential_material: basicAuthCredentialMaterial,
     };
@@ -38,7 +38,7 @@ export async function createHandler(request: OpenSearchDashboardsRequest) {
       ),
     };
     return {
-      credential_name: request.body.credential_name,
+      title: request.body.credential_name,
       credential_type: request.body.credential_type,
       credential_material: aWSIAMCredentialMaterial,
     };

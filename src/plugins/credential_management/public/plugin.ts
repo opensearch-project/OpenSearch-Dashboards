@@ -62,18 +62,12 @@ export class CredentialManagementPlugin
     }
 
     const newAppPath = `management/opensearch-dashboards/${CM_APP_ID}`;
-    const legacyPatternsPath = 'management/opensearch-dashboards/credentials';
 
     urlForwarding.forwardApp(
       'management/opensearch-dashboards/credentials',
       newAppPath,
       (path) => '/create'
     );
-
-    urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
-      const pathInApp = path.substr(legacyPatternsPath.length + 1);
-      return pathInApp && `/patterns${pathInApp}`;
-    });
 
     opensearchDashboardsSection.registerApp({
       id: CM_APP_ID,

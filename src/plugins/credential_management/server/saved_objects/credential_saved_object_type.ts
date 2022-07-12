@@ -16,10 +16,10 @@ export const credentialSavedObjectType: SavedObjectsType = {
   namespaceType: 'agnostic',
   hidden: false,
   management: {
-    defaultSearchField: 'credential_name',
+    defaultSearchField: 'title',
     importableAndExportable: true,
-    getCredentialName(obj) {
-      return obj.attributes.credential_name;
+    getTitle(obj) {
+      return obj.attributes.title;
     },
     getCredentialType(obj) {
       return obj.attributes.credential_type;
@@ -40,7 +40,7 @@ export const credentialSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      credential_name: {
+      title: {
         type: 'text',
       },
       credential_type: {

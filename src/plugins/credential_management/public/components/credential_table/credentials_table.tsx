@@ -86,7 +86,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   const columns = [
     {
-      field: 'credentialName',
+      field: 'title',
       name: 'Credential Name',
       render: (
         name: string,

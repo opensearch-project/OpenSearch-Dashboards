@@ -8,9 +8,8 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
-import { IRouter } from '../../../../core/server';
 import { schema } from '@osd/config-schema';
+import { IRouter } from '../../../../core/server';
 import { createHandler } from '../credential';
 import { Credential } from '../../common';
 
@@ -51,7 +50,7 @@ export function registerCreateRoute(router: IRouter) {
         body: {
           time: new Date().toISOString(),
           credential_id: result.id,
-          credential_name: result.attributes.credential_name,
+          credential_name: result.attributes.title,
           credential_type: result.attributes.credential_type,
         },
       });
