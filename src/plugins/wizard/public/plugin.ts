@@ -20,7 +20,7 @@ import {
   WizardStart,
 } from './types';
 import wizardIcon from './assets/wizard_icon.svg';
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import { setAggService, setIndexPatterns } from './plugin_services';
@@ -35,7 +35,7 @@ export class WizardPlugin
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<WizardPluginStartDependencies>,
+    core: CoreSetup<WizardPluginStartDependencies, WizardStart>,
     { visualizations }: WizardPluginSetupDependencies
   ) {
     const typeService = this.typeService;
@@ -43,7 +43,7 @@ export class WizardPlugin
 
     // Register the plugin to core
     core.application.register({
-      id: 'wizard',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
@@ -51,7 +51,7 @@ export class WizardPlugin
         const { renderApp } = await import('./application');
 
         // Get start services as specified in opensearch_dashboards.json
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
         const { data, savedObjects, navigation, expressions } = pluginsStart;
 
         // make sure the index pattern list is up to date
@@ -74,8 +74,10 @@ export class WizardPlugin
           savedObjectsPublic: savedObjects,
           navigation,
           expressions,
+          history: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
+          savedWizardLoader: selfStart.savedWizardLoader,
         };
 
         // Instantiate the store
@@ -88,15 +90,15 @@ export class WizardPlugin
 
     // Register the plugin as an alias to create visualization
     visualizations.registerAlias({
-      name: 'wizard',
-      title: 'Wizard',
-      description: i18n.translate('wizard.vizPicker.description', {
+      name: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      description: i18n.translate('wizard.visPicker.description', {
         defaultMessage: 'TODO...',
       }),
       // TODO: Replace with actual icon once available
       icon: wizardIcon,
       stage: 'beta',
-      aliasApp: 'wizard',
+      aliasApp: PLUGIN_ID,
       aliasPath: '#/',
     });
 

@@ -9,11 +9,12 @@ import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
 import { visualizationsPluginMock } from '../../../plugins/visualizations/public/mocks';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { WizardPlugin } from './plugin';
 
 describe('WizardPlugin', () => {
   describe('setup', () => {
-    it('initializes the plugin correctly and registers it as an alias vizualization', () => {
+    it('initializes the plugin correctly and registers it as an alias visualization', () => {
       const plugin = new WizardPlugin(coreMock.createPluginInitializerContext());
       const pluginStartContract = {
         data: dataPluginMock.createStartContract(),
@@ -34,8 +35,8 @@ describe('WizardPlugin', () => {
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
         // TODO: Update this once the properties are final
         expect.objectContaining({
-          name: 'wizard',
-          title: 'Wizard',
+          name: PLUGIN_ID,
+          title: PLUGIN_NAME,
           aliasPath: '#/',
         })
       );

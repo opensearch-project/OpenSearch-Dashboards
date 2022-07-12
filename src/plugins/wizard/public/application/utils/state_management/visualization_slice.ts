@@ -7,7 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
 import { WizardServices } from '../../../types';
 
-interface VisualizationState {
+export interface VisualizationState {
   indexPattern?: string;
   searchField: string;
   activeVisualization?: {
@@ -105,6 +105,9 @@ export const slice = createSlice({
     updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
       state.activeVisualization!.aggConfigParams = action.payload;
     },
+    setState: (_state, action: PayloadAction<VisualizationState>) => {
+      return action.payload;
+    },
   },
 });
 
@@ -117,4 +120,5 @@ export const {
   updateAggConfigParams,
   saveAgg,
   reorderAgg,
+  setState,
 } = slice.actions;

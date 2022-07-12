@@ -6,7 +6,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 
-type StyleState<T = any> = T;
+export type StyleState<T = any> = T;
 
 const initialState = {} as StyleState;
 
