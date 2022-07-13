@@ -31,7 +31,7 @@
 import { EventEmitter } from 'events';
 import {
   createZoomWarningMsg,
-  createRegionBlockedWarning,
+  createRegionDeniedWarning,
   removeRegionBlockedWarning,
 } from './map_messages';
 import $ from 'jquery';
@@ -610,7 +610,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
       });
       baseLayer.on('tileerror', () => {
         if (settings.options.showRegionDeniedWarning) {
-          createRegionBlockedWarning();
+          createRegionDeniedWarning();
         }
       });
 

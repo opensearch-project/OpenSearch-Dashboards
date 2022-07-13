@@ -35,6 +35,8 @@ import { configSchema as regionmapSchema } from '../region_map/config';
 export const configSchema = schema.object({
   includeOpenSearchMapsService: schema.boolean({ defaultValue: true }),
   proxyOpenSearchMapsServiceInMaps: schema.boolean({ defaultValue: false }),
+  /** @deprecated use showRegionDeniedWarning */
+  showRegionBlcokedWarning: schema.boolean({ defaultValue: false }),
   showRegionDeniedWarning: schema.boolean({ defaultValue: false }),
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,

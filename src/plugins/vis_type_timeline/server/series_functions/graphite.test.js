@@ -90,6 +90,16 @@ describe('graphite', function () {
     });
   });
 
+  it('should return error message if both allowlist and blockedlist are disabled', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: [],
+    }).catch((e) => {
+      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+    });
+  });
+
   it('should return error message if both allowlist and denylist are disabled', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'http://127.0.0.1' },

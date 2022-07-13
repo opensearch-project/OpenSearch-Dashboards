@@ -133,7 +133,7 @@
 
 # Set the denylist to check input graphite Url. Denylist is an IP list.
 # Below is an example for reference
-# /** @deprecated use graphiteDeniedIPs */
+
 # vis_type_timeline.graphiteBlockedIPs: [
 #  //Loopback
 #  '127.0.0.0/8',
@@ -162,7 +162,7 @@
 #  '2001:db8::/32',
 #  'ff00::/8',
 # ]
-# /** @deprecated use graphiteDeniedIPs */
+
 # vis_type_timeline.graphiteBlockedIPs: []
 # vis_type_timeline.graphiteDeniedIPs: []
 
@@ -211,7 +211,7 @@
 
 # Set the value of this setting to true to capture region denied warnings and errors
 # for your map rendering services.
-# /** @deprecated use map.showRegionDeniedWarning: */
+
 # map.showRegionBlockedWarning: false
 # map.showRegionDeniedWarning: false
 

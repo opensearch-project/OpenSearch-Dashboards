@@ -1,5 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`props allowListedRules 1`] = `
+<div
+  className="osdMarkdown__body"
+  dangerouslySetInnerHTML={
+    Object {
+      "__html": "<p>I am <em>some</em> [content](https://en.wikipedia.org/wiki/Content) with <code>markdown</code></p>
+",
+    }
+  }
+/>
+`;
+
 exports[`props markdown 1`] = `
 <div
   className="osdMarkdown__body"
@@ -24,7 +36,7 @@ exports[`props openLinksInNewTab 1`] = `
 />
 `;
 
-exports[`props allowListedRules 1`] = `
+exports[`props whiteListedRules 1`] = `
 <div
   className="osdMarkdown__body"
   dangerouslySetInnerHTML={

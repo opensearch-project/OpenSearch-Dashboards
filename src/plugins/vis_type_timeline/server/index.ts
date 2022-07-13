@@ -61,6 +61,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
     renameFromRoot('vis_type_timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
     renameFromRoot('timeline.ui.enabled', 'vis_type_timeline.ui.enabled', true),
+
+    renameFromRoot('graphiteBlockedIPs', 'graphiteDeniedIPs'),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
