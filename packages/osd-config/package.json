@@ -17,7 +17,7 @@
     "js-yaml": "^3.14.0",
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.21",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "rxjs": "^6.5.5",
     "type-detect": "^4.0.8"
   },
