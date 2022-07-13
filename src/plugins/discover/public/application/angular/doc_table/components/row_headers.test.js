@@ -41,6 +41,7 @@ import {
   setScopedHistory,
   setServices,
   setDocViewsRegistry,
+  setDocViewsLinksRegistry,
 } from '../../../../opensearch_dashboards_services';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
@@ -91,6 +92,18 @@ describe('Doc Table', () => {
         registry.push(view);
       },
       getDocViewsSorted() {
+        return registry;
+      },
+      resetRegistry: () => {
+        registry = [];
+      },
+    });
+
+    setDocViewsLinksRegistry({
+      addDocViewLink(view) {
+        registry.push(view);
+      },
+      getDocViewsLinksSorted() {
         return registry;
       },
       resetRegistry: () => {

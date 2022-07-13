@@ -63,6 +63,17 @@ jest.mock('../../../opensearch_dashboards_services', () => {
         registry = [];
       },
     }),
+    getDocViewsLinksRegistry: () => ({
+      addDocViewLink(view: any) {
+        registry.push(view);
+      },
+      getDocViewsLinksSorted() {
+        return registry;
+      },
+      resetRegistry: () => {
+        registry = [];
+      },
+    }),
   };
 });
 

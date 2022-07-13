@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dont Render <DocViewerLink/> if generateCb.hide 1`] = `
+<EuiFlexGroup
+  gutterSize="xs"
+/>
+`;
+
+exports[`Render <DocViewerLink/> with 2 different links 1`] = `
+<EuiFlexGroup
+  gutterSize="xs"
+>
+  <EuiFlexItem
+    key="0"
+  >
+    <EuiListGroupItem
+      data-test-subj="docTableRowAction"
+      href="aaa"
+      label="generateCb link"
+      order={10}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    key="1"
+  >
+    <EuiListGroupItem
+      data-test-subj="docTableRowAction"
+      href="bbb"
+      label="href link"
+      order={20}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
