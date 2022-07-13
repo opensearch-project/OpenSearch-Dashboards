@@ -9,6 +9,7 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourceStart } from 'src/plugins/data_sources/public/plugin';
 import { ManagementAppMountParams } from '../../management/public';
 // import { NavigationPublicPluginStart } from '../../navigation/public';
 import {
@@ -37,6 +38,7 @@ export interface DataSourceManagmentContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataSource: DataSourceStart;
   dataSourceManagementStart: DataSourceManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   // getMlCardState: () => MlCardState;

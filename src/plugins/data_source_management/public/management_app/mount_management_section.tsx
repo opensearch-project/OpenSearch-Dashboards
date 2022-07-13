@@ -5,6 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
+import { DataSourceStart } from 'src/plugins/data_sources/public/plugin';
 import { DataSourceManagementApp } from '../components/app';
 import { ManagementAppMountParams } from '../../../management/public';
 
@@ -16,6 +17,7 @@ import { CreateDataSourceWizardWithRouter } from '../components/create_data_sour
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
+  dataSource: DataSourceStart;
 }
 
 // todo: move the data source management part on top of navigation bar
@@ -26,7 +28,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, dataSource },
     dataSourceManagementStart,
   ] = await getStartServices();
   // const canSave = Boolean(application.capabilities.indexPatterns.save); todo
@@ -41,6 +43,7 @@ export async function mountManagementSection(
     http,
     docLinks,
     data,
+    dataSource,
     dataSourceManagementStart: dataSourceManagementStart as DataSourceManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     // getMlCardState,

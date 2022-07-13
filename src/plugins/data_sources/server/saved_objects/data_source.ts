@@ -43,6 +43,10 @@ export const dataSource: SavedObjectsType = {
       type: {
         type: 'keyword',
       },
+      credientialsJSON: {
+        type: 'text',
+        index: false,
+      },
       endpoint: {
         type: 'keyword',
         index: false,
