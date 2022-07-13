@@ -22,6 +22,7 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "osd": "src/legacy/core_plugins/opensearch-dashboards",
     "osdDocViews": "src/legacy/core_plugins/osd_doc_views",
+    "osdDocViewsLinks": "src/legacy/core_plugins/osd_doc_views_links",
     "management": [
       "src/legacy/core_plugins/management",
       "src/plugins/management"
