@@ -37,7 +37,7 @@ export function createSavedDataSourceClass(services: SavedObjectOpenSearchDashbo
         extractReferences,
         injectReferences,
         id,
-        searchSource: true, // todo: witf?
+        searchSource: true, // todo: witf? -- kibanaSavedObjectMeta
         defaults: SavedDataSource.defaultMapping,
       });
 

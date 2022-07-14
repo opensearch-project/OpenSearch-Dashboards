@@ -145,19 +145,19 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
               onChoose={onSearchSelected} // todo
               showFilter={false}
               noItemsMessage={i18n.translate(
-                'visualizations.newVisWizard.searchSelection.notFoundLabel',
+                'dataSources.newDataSource.searchSelection.notFoundLabel',
                 {
-                  defaultMessage: 'No matching indices or saved searches found.',
+                  defaultMessage: 'No credentials have been configured yet.',
                 }
               )}
               savedObjectMetaData={[
                 {
-                  type: 'dashboard',
-                  getIconForSavedObject: () => 'dashboard',
+                  type: 'credential',
+                  getIconForSavedObject: () => 'credential',
                   name: i18n.translate(
-                    'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                    'dataSources.newDataSource.searchSelection.savedObjectType.credential',
                     {
-                      defaultMessage: 'Dashboard',
+                      defaultMessage: 'Credential',
                     }
                   ),
                 },
