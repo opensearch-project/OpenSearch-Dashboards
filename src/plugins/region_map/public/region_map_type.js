@@ -50,6 +50,7 @@ export function createRegionMapTypeDefinition(dependencies) {
 
   const services = getServices(http);
   const visualization = createRegionMapVisualization(dependencies);
+
   const diffArray = (arr1, arr2) => {
     return arr1.concat(arr2).filter((item) => !arr1.includes(item) || !arr2.includes(item));
   };
@@ -201,9 +202,10 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const customIndices = await getCustomIndices();
 
       let selectedLayer = vectorLayers[0];
-      let selectedCustomLayer = customVectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
-      const selectedCustomJoinField = selectedCustomLayer ? selectedCustomLayer.fields[0] : null;
+
+      let selectedCustomLayer = customVectorLayers[0];
+      let selectedCustomJoinField = selectedCustomLayer ? selectedCustomLayer.fields[0] : null;
 
       if (regionmapsConfig.includeOpenSearchMapsService) {
         const layers = await serviceSettings.getFileLayers();
@@ -241,11 +243,9 @@ provided base maps, or add your own. Darker colors represent higher values.',
         ];
 
         [selectedLayer] = vis.type.editorConfig.collections.vectorLayers;
-        [selectedCustomLayer] = vis.type.editorConfig.collections.customVectorLayers;
-        vis.params.selectedCustomLayer = selectedCustomLayer;
-        vis.params.selectedCustomJoinField = selectedCustomJoinField;
-
         selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
+        [selectedCustomLayer] = vis.type.editorConfig.collections.customVectorLayers;
+        selectedCustomJoinField = selectedCustomLayer ? selectedCustomLayer.fields[0] : null;
 
         if (selectedLayer && !vis.params.selectedLayer && selectedLayer.isEMS) {
           vis.params.emsHotLink = await serviceSettings.getEMSHotLink(selectedLayer);
@@ -255,6 +255,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
       if (!vis.params.selectedLayer) {
         vis.params.selectedLayer = selectedLayer;
         vis.params.selectedJoinField = selectedJoinField;
+      }
+
+      if (!vis.params.selectedCustomLayer) {
+        vis.params.selectedCustomLayer = selectedCustomLayer;
+        vis.params.selectedCustomJoinField = selectedCustomJoinField;
       }
 
       vis.params.layerChosenByUser = vis.params.layerChosenByUser
