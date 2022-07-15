@@ -18,7 +18,7 @@ import {
 } from '../../../core/server';
 
 import { CredentialManagementPluginSetup, CredentialManagementPluginStart } from './types';
-import { registerRoutes, defineRoutes } from './routes';
+import { registerRoutes } from './routes';
 import { credentialSavedObjectType } from './saved_objects';
 
 export class CredentialManagementPlugin
@@ -35,7 +35,6 @@ export class CredentialManagementPlugin
 
     // Register server side APIs
     registerRoutes(router);
-    defineRoutes(router);
 
     // Register credential saved object type
     core.savedObjects.registerType(credentialSavedObjectType);

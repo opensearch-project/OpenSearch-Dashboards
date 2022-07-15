@@ -99,7 +99,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `credentials/${index.id}`)}>
+          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `/${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           &emsp;

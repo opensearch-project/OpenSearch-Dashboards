@@ -20,7 +20,11 @@ import { ManagementAppMountParams } from '../../../management/public';
 
 import { CredentialManagementStart } from '../plugin';
 import { CredentialManagementContext } from '../types';
-import { CredentialsTableWithRouter, CreateCredentialWizardWithRouter } from '../components';
+import {
+  CredentialsTableWithRouter,
+  CreateCredentialWizardWithRouter,
+  EditCredentialPageWithRouter,
+} from '../components';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
 export interface CredentialManagementStartDependencies {
@@ -58,6 +62,9 @@ export async function mountManagementSection(
           <Switch>
             <Route path={['/create']}>
               <CreateCredentialWizardWithRouter />
+            </Route>
+            <Route path={['/:id']}>
+              <EditCredentialPageWithRouter />
             </Route>
             <Route path={['/']}>
               <CredentialsTableWithRouter canSave={true} />

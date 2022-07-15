@@ -29,11 +29,12 @@ import {
 import { DocLinksStart } from 'src/core/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
-import { Header } from './components/header';
+// import { Header } from './components/header';
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { Credential } from '../../../common';
+import { CredentialEditPageItem } from '../types';
 
-interface CreateCredentialWizardState {
+interface EditCredentialState {
   credentialName: string;
   credentialType: string;
   userName: string;
@@ -43,23 +44,26 @@ interface CreateCredentialWizardState {
   docLinks: DocLinksStart;
 }
 
+export interface EditCredentialProps extends RouteComponentProps {
+  credential: CredentialEditPageItem;
+}
 const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
 
-export class CreateCredentialWizard extends React.Component<
-  RouteComponentProps,
-  CreateCredentialWizardState
+export class EditCredentialComponent extends React.Component<
+  EditCredentialProps,
+  EditCredentialState
 > {
   static contextType = contextType;
   public readonly context!: CredentialManagmentContextValue;
-  constructor(props: RouteComponentProps, context: CredentialManagmentContextValue) {
+  constructor(props: EditCredentialProps, context: CredentialManagmentContextValue) {
     super(props, context);
 
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     this.state = {
-      credentialName: '',
-      credentialType: USERNAME_PASSWORD_TYPE,
-      userName: '',
+      credentialName: props.credential.title,
+      credentialType: props.credential.credentialType,
+      userName: props.credential.userName,
       password: '',
       dual: true,
       toasts: [],
@@ -67,23 +71,10 @@ export class CreateCredentialWizard extends React.Component<
     };
   }
 
-  renderHeader() {
-    const { docLinks } = this.state;
-
-    return (
-      <Header
-        docLinks={docLinks}
-      />
-    );
-  }
-
   // TODO: Add conditional rendering to select credential types
   renderContent() {
-    const header = this.renderHeader();
-
     return (
       <EuiPageContent>
-        {header}
         <EuiHorizontalRule />
         <EuiForm component="form">
           <EuiDescribedFormGroup
@@ -155,8 +146,8 @@ export class CreateCredentialWizard extends React.Component<
               <EuiFilePicker />
             </EuiFormRow> */}
           </EuiDescribedFormGroup>
-          <EuiButton type="submit" fill onClick={this.createCredential}>
-            Save
+          <EuiButton type="submit" fill onClick={this.updateCredential}>
+            Update
           </EuiButton>
         </EuiForm>
       </EuiPageContent>
@@ -186,12 +177,13 @@ export class CreateCredentialWizard extends React.Component<
     );
   }
 
-  createCredential = async () => {
+  updateCredential = async () => {
     const { http } = this.context.services;
     try {
+      console.warn(this.props.credential.id);
       // TODO: Refactor it by registering client wrapper factory
       await http
-        .post('/api/credential_management/create', {
+        .put(`/api/credential_management/${this.props.credential.id}`, {
           body: JSON.stringify({
             credential_name: this.state.credentialName,
             credential_type: this.state.credentialType,
@@ -213,4 +205,4 @@ export class CreateCredentialWizard extends React.Component<
 }
 
 // TODO: Add router
-export const CreateCredentialWizardWithRouter = withRouter(CreateCredentialWizard);
+export const EditCredential = withRouter(EditCredentialComponent);

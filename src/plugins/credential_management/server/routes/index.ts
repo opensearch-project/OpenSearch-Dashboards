@@ -11,25 +11,10 @@
 
 import { IRouter } from '../../../../core/server';
 import { registerCreateRoute } from './create';
+import { registerUpdateRoute } from './update';
 
+// TODO: Refactor routing strategy https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1850
 export function registerRoutes(router: IRouter) {
   registerCreateRoute(router);
-}
-
-// Auto-generated for front end page routing
-// TODO: Remove it after front end implementation
-export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/credential_management/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
+  registerUpdateRoute(router);
 }

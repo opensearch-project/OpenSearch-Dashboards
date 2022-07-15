@@ -8,8 +8,6 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
-import { OpenSearchDashboardsRequest } from 'opensearch-dashboards/server';
 import { CryptoCli } from '../crypto';
 import { Credential } from '../../common';
 
@@ -17,30 +15,23 @@ const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_pass
 const AWS_IAM_TYPE: Credential.AWS_IAM_TYPE = 'aws_iam_credential';
 
 // TODO: Refactor handler, add logger, etc
-export async function createHandler(request: OpenSearchDashboardsRequest) {
+export async function encryptionHandler(
+  credentialType: Credential.CredentialType,
+  usernamePasswordCredentialMaterials: Record<string, string> | undefined,
+  awsIamCredentialMaterials: Record<string, string> | undefined
+) {
   const cryptoCli = CryptoCli.getInstance();
-  if (request.body.credential_type === USERNAME_PASSWORD_TYPE) {
-    const basicAuthCredentialMaterial: Credential.IBasicAuthCredentialMaterial = {
-      user_name: request.body.username_password_credential_materials.user_name,
-      password: await cryptoCli.encrypt(
-        request.body.username_password_credential_materials.password
-      ),
-    };
+  if (credentialType === USERNAME_PASSWORD_TYPE && usernamePasswordCredentialMaterials) {
+    const { user_name, password } = usernamePasswordCredentialMaterials;
     return {
-      title: request.body.credential_name,
-      credential_type: request.body.credential_type,
-      credential_material: basicAuthCredentialMaterial,
+      user_name,
+      password: await cryptoCli.encrypt(password),
     };
-  } else if (request.body.credential_type === AWS_IAM_TYPE) {
-    const aWSIAMCredentialMaterial: Credential.IAWSIAMCredentialMaterial = {
+  } else if (credentialType === AWS_IAM_TYPE && awsIamCredentialMaterials) {
+    return {
       encrypted_aws_iam_credential: await cryptoCli.encrypt(
-        request.body.username_password_credential_materials.password
+        awsIamCredentialMaterials.aws_iam_credential
       ),
-    };
-    return {
-      title: request.body.credential_name,
-      credential_type: request.body.credential_type,
-      credential_material: aWSIAMCredentialMaterial,
     };
   }
 }

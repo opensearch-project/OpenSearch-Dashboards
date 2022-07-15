@@ -16,11 +16,14 @@ import { Credential } from '../../common';
 const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
 const AWS_IAM_TYPE: Credential.AWS_IAM_TYPE = 'aws_iam_credential';
 
-export function registerCreateRoute(router: IRouter) {
-  router.post(
+export function registerUpdateRoute(router: IRouter) {
+  router.put(
     {
-      path: '/api/credential_management/create',
+      path: '/api/credential_management/{id}',
       validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
         body: schema.object({
           credential_name: schema.string(),
           credential_type: schema.oneOf([
@@ -43,6 +46,7 @@ export function registerCreateRoute(router: IRouter) {
     },
 
     async (context, request, response) => {
+      const { id } = request.params;
       const { credential_name, credential_type, username_password_credential_materials, aws_iam_credential_materials } = request.body;
       const attributes = {
         title: credential_name,
@@ -53,7 +57,7 @@ export function registerCreateRoute(router: IRouter) {
           aws_iam_credential_materials
         ),
       };
-      const result = await context.core.savedObjects.client.create('credential', attributes);
+      const result = await context.core.savedObjects.client.update('credential', id, attributes);
       return response.ok({
         body: {
           time: new Date().toISOString(),

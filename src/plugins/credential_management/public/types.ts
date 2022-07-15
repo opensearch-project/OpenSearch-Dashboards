@@ -43,6 +43,7 @@ export interface CredentialManagementContext {
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
+  // TODO: Refactor it
   data: DataPublicPluginStart;
   credentialManagementStart: CredentialManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

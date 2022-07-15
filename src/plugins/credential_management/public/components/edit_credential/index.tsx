@@ -8,17 +8,5 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Credential } from '../../common';
 
-export interface CredentialsTableItem {
-  id: string;
-  title: string;
-  sort: string;
-}
-
-export interface CredentialEditPageItem {
-  id: string;
-  title: string;
-  credentialType: Credential.CredentialType;
-  userName: string;
-}
+export { EditCredentialPageWithRouter } from './edit_credential_page';

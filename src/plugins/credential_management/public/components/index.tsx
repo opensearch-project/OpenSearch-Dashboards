@@ -11,3 +11,4 @@
 
 export { CredentialsTableWithRouter } from './credential_table';
 export { CreateCredentialWizardWithRouter } from './create_credential_wizard';
+export { EditCredentialPageWithRouter } from './edit_credential';
