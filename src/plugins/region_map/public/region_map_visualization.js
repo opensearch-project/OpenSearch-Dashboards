@@ -37,7 +37,7 @@ import {
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
-import { DEFAULT_MAP_CHOICE } from '../common';
+import { DEFAULT_MAP_CHOICE, CUSTOM_MAP_CHOICE } from '../common';
 
 export function createRegionMapVisualization({
   http,
@@ -86,7 +86,7 @@ export function createRegionMapVisualization({
       let selectedLayer;
       if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
-        this._params.selectedJoinField = selectedLayer.fields[0];
+        this._params.selectedJoinField = selectedLayer?.fields[0];
       } else {
         selectedLayer = this._params.selectedCustomLayer;
         this._params.selectedJoinField = this._params.selectedCustomJoinField;
@@ -156,12 +156,15 @@ export function createRegionMapVisualization({
     async _updateParams() {
       await super._updateParams();
       let selectedLayer;
-      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser) {
+      if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser && this._params.selectedLayer) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
-        this._params.selectedJoinField = selectedLayer.fields[0];
-      } else {
+        this._params.selectedJoinField = selectedLayer?.fields[0];
+      } else if (
+        CUSTOM_MAP_CHOICE === this._params.layerChosenByUser &&
+        this._params.selectedCustomLayer
+      ) {
         selectedLayer = this._params.selectedCustomLayer;
-        this._params.selectedJoinField = this._params.selectedCustomJoinField;
+        this._params.selectedJoinField = this._params?.selectedCustomJoinField;
       }
 
       if (!this._params.selectedJoinField && selectedLayer) {
