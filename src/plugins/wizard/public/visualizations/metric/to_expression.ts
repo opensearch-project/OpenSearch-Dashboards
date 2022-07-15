@@ -171,5 +171,5 @@ export const toExpression = async ({ style: styleState, visualization }: MetricR
 
   const ast = buildExpression([opensearchaggs, metricVis]);
 
-  return ast.toString();
+  return `opensearchDashboards | opensearch_dashboards_context | ${ast.toString()}`;
 };

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { FC, useState, useMemo, useEffect, Fragment } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { WizardServices } from '../../types';
 import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
@@ -57,6 +58,11 @@ export const Workspace: FC = ({ children }) => {
     loadExpression();
   }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas]);
 
+  const searchContext: IExpressionLoaderParams['searchContext'] = {
+    query: rootState.metadata.query,
+    timeRange: rootState.metadata.dateRange,
+  };
+
   return (
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
@@ -66,7 +72,7 @@ export const Workspace: FC = ({ children }) => {
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">
         {expression ? (
-          <ReactExpressionRenderer expression={expression} />
+          <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt

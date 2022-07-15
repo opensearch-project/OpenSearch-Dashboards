@@ -12,8 +12,9 @@ import { WizardServices } from '../../types';
 
 import './top_nav.scss';
 import { useIndexPattern } from '../utils/use';
-import { useTypedSelector } from '../utils/state_management';
+import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
 import { useSavedWizardVis } from '../utils/use/use_saved_wizard_vis';
+import { setTopNav } from '../utils/state_management/metadata_slice';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -26,6 +27,7 @@ export const TopNav = () => {
     },
   } = services;
   const rootState = useTypedSelector((state) => state);
+  const dispatch = useTypedDispatch();
   const hasUnappliedChanges = useTypedSelector(
     (state) => !!state.visualization.activeVisualization?.draftAgg
   );
@@ -62,6 +64,11 @@ export const TopNav = () => {
         useDefaultBehaviors={true}
         screenTitle="Test"
         indexPatterns={indexPattern ? [indexPattern] : []}
+        onQuerySubmit={(payload, isUpdate) => {
+          if (isUpdate) {
+            dispatch(setTopNav(payload));
+          }
+        }}
       />
     </div>
   );
