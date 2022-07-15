@@ -22,8 +22,8 @@ import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
 
-import hand_field from '../../assets/logos/hand_field.svg';
-import fields_bg from '../../assets/logos/fields_bg.svg';
+import hand_field from '../../assets/hand_field.svg';
+import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
 
@@ -75,12 +75,12 @@ export const Workspace: FC = ({ children }) => {
                 <Fragment>
                   <p>Drag a field directly to the canvas or axis to generate a visualization.</p>
                   <span className="wizWorkspace__container">
-                    <p className="wizWorkspace__fieldSvg">
-                      <EuiIcon type={fields_bg} size="original" />
-                    </p>
-                    <p className="wizWorkspace__handFieldSvg">
-                      <EuiIcon type={hand_field} size="original" />
-                    </p>
+                    <EuiIcon className="wizWorkspace__fieldSvg" type={fields_bg} size="original" />
+                    <EuiIcon
+                      className="wizWorkspace__handFieldSvg"
+                      type={hand_field}
+                      size="original"
+                    />
                   </span>
                 </Fragment>
               }
