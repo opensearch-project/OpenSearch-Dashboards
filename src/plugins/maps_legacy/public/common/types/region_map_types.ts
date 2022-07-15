@@ -41,6 +41,8 @@ export interface RegionMapVisParams {
   outlineWeight: number | '';
   isDisplayWarning: boolean;
   showAllShapes: boolean;
+  selectedCustomLayer?: VectorLayer;
+  selectedCustomJoinField?: FileLayerField;
   selectedLayer?: VectorLayer;
   selectedJoinField?: FileLayerField;
   wms: WMSOptions;
