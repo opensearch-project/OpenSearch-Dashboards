@@ -14,7 +14,7 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import React, { FC, useState, useMemo, useEffect, Fragment } from 'react';
+import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { WizardServices } from '../../types';
@@ -33,10 +33,16 @@ export const Workspace: FC = ({ children }) => {
     services: {
       expressions: { ReactExpressionRenderer },
       notifications: { toasts },
+      data,
     },
   } = useOpenSearchDashboards<WizardServices>();
   const { toExpression, ui } = useVisualizationType();
   const [expression, setExpression] = useState<string>();
+  const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
+  });
   const rootState = useTypedSelector((state) => state);
 
   useEffect(() => {
@@ -58,10 +64,19 @@ export const Workspace: FC = ({ children }) => {
     loadExpression();
   }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas]);
 
-  const searchContext: IExpressionLoaderParams['searchContext'] = {
-    query: rootState.metadata.query,
-    timeRange: rootState.metadata.dateRange,
-  };
+  useLayoutEffect(() => {
+    const subscription = data.query.state$.subscribe(({ state }) => {
+      setSearchContext({
+        query: state.query,
+        timeRange: state.time,
+        filters: state.filters,
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [data.query.state$]);
 
   return (
     <section className="wizWorkspace">
@@ -78,7 +93,7 @@ export const Workspace: FC = ({ children }) => {
             <EuiEmptyPrompt
               title={<h2>Drop some fields here to start</h2>}
               body={
-                <Fragment>
+                <>
                   <p>Drag a field directly to the canvas or axis to generate a visualization.</p>
                   <span className="wizWorkspace__container">
                     <EuiIcon className="wizWorkspace__fieldSvg" type={fields_bg} size="original" />
@@ -88,7 +103,7 @@ export const Workspace: FC = ({ children }) => {
                       size="original"
                     />
                   </span>
-                </Fragment>
+                </>
               }
             />
           </EuiFlexItem>
