@@ -1,5 +1,6 @@
 .wizWorkspace {
   display: grid;
+  -ms-grid-rows: auto $euiSizeM 1fr;
   grid-template-rows: auto 1fr;
   grid-area: workspace;
   grid-gap: $euiSizeM;
@@ -8,5 +9,28 @@
 
   &__empty {
     height: 100%;
+  }
+
+  &__container {
+    position: relative;
+  }
+
+  &__handFieldSvg {
+    animation-name: dragAndDropAnimation;
+    animation-direction: alternate-reverse;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    position: absolute;
+    top: 43%;
+  }
+}
+
+@keyframes dragAndDropAnimation {
+  0% {
+    transform: translate(65%, 0);
+  }
+
+  100% {
+    transform: none;
   }
 }

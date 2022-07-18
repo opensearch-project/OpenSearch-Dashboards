@@ -14,13 +14,16 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import React, { FC, useState, useMemo, useEffect, Fragment } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../types';
 import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
 import { setActiveVisualization } from '../utils/state_management/visualization_slice';
 import { useVisualizationType } from '../utils/use';
+
+import hand_field from '../../assets/hand_field.svg';
+import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
 
@@ -67,9 +70,20 @@ export const Workspace: FC = ({ children }) => {
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt
-              iconType="visBarVertical"
-              title={<h2>Welcome to the wizard!</h2>}
-              body={<p>Drag some fields onto the panel to visualize some data.</p>}
+              title={<h2>Drop some fields here to start</h2>}
+              body={
+                <Fragment>
+                  <p>Drag a field directly to the canvas or axis to generate a visualization.</p>
+                  <span className="wizWorkspace__container">
+                    <EuiIcon className="wizWorkspace__fieldSvg" type={fields_bg} size="original" />
+                    <EuiIcon
+                      className="wizWorkspace__handFieldSvg"
+                      type={hand_field}
+                      size="original"
+                    />
+                  </span>
+                </Fragment>
+              }
             />
           </EuiFlexItem>
         )}
