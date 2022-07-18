@@ -5,7 +5,7 @@
 
 import { History } from 'history';
 import { SavedObject, SavedObjectsStart } from '../../saved_objects/public';
-import { EmbeddableSetup } from '../../embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { ExpressionsStart } from '../../expressions/public';
@@ -25,6 +25,7 @@ export interface WizardPluginSetupDependencies {
   visualizations: VisualizationsSetup;
 }
 export interface WizardPluginStartDependencies {
+  embeddable: EmbeddableStart;
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
