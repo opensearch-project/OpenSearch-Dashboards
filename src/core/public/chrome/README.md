@@ -10,18 +10,18 @@
 
 ## About :
 - **Signature** - `export interface ChromeStart`
+The chrome service is a high level UI service that is part of CoreStart (Core services exposed to the Plugin start lifecycle) and offers other plugins a way to add navigation controls to the UI, edit the document title, manipuate navlinks on global header as well as edit the recent accessed tab. It consists of these sub-services/components.
 
-The chrome service is a high level UI service that is part of CoreStart (Core services exposed to the Plugin start lifecycle) and offers other plugins a way to add navigation controls to the UI, edit the document title, manipuate navlinks on global header as well as edit the Recent accessed tab. it consists of these sub-services/components.
 - NavControlsService : for registering new controls to be displayed in the navigation bar.
 - NavLinksService : for manipulating nav links.
 - RecentlyAccessedService : for recently accessed history.
 - DocTitleService: for accessing and updating the document title
-- UI : All the UI components,icons for e.g  header, loaders.
+- UI : All the UI components,icons e.g.  header, loaders.
 
 
 - How to access ? add in interface `chrome: ChromeStart && chrome.servicesName => e.g chrome.docTitle.method`
-- Where it is getting Registered/Executed [Staring Point](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/2.1/src/core/public/rendering/rendering_service.tsx)
-- How header component is getting rendered `const chromeUi = chrome.getHeaderComponent(); `
+- Where it is getting Registered/Executed ? [Staring Point](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/2.1/src/core/public/rendering/rendering_service.tsx)
+- How header component is getting rendered ? `const chromeUi = chrome.getHeaderComponent(); `
 - Chrome Methods </b> [See chrome interface/methods](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/2.1/src/core/public/chrome/chrome_service.tsx)
 
 
@@ -44,33 +44,33 @@ chrome.navControls.registerLeft({
 ### NavLinksService : 
 - Interface :  ChromeNavLinks
 - **Signature** - `navLinks: ChromeNavLinks`
-- e.g Method : 
+- e.g. Method : 
 
 Get an observable for a sorted list of navlinks :-
+
 `getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>`
 
 Get the state of a navlink at this point in time :-
+
 `get(id: string): ChromeNavLink | undefined`
 
 Get the current state of all navlinks :-
+
 `getAll(): Array<Readonly<ChromeNavLink>>`
 
 Check whether or not a navlink exists :-
-```has(id: string): boolean```
+
+`has(id: string): boolean`
 
 Remove all navlinks except the one matching the given id :-
 `showOnly(id: string): void`
 
 - How to access
   ###### Get the current state of all navlinks: 
-  ```ts
-  core.chrome.navLinks.getAll() 
-  ```
+  `core.chrome.navLinks.getAll()`
 
   ###### Get the state of a navlink at this point in time: 
-  ```ts
-  core.chrome.navLinks.get()
-  ```
+  `core.chrome.navLinks.get()`
 
 ### RecentlyAccessedService : 
 
@@ -81,23 +81,26 @@ Remove all navlinks except the one matching the given id :-
 - Methods :
 
 Adds a new item to the recently accessed history :-
+
 `add(link: string, label: string, id: string): void`
  
 Gets an Array of the current recently accessed history :-
+
 `get(): ChromeRecentlyAccessedHistoryItem[]`
 
 Gets an Observable of the array of recently accessed history :-
+
 `get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>`
 
 - How to access
    ###### Adds a new item to the recently accessed history :
-   ```ts
+   `
    chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
-   ```
+   `
    ###### Gets an Array of the current recently accessed history :
-   ```ts
+   `
     chrome.recentlyAccessed.get().forEach(console.log);;
-   ```
+   `
    
 ### DocTitleService : 
 - Interface : ChromeDocTitle
