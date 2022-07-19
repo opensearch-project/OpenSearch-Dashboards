@@ -88,6 +88,7 @@ import {
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { createSavedIndexPatternLoader } from './index_patterns/saved_index_patterns';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -176,9 +177,18 @@ export class DataPublicPlugin
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
+    const savedIndexPatternLoader = createSavedIndexPatternLoader({
+      savedObjectsClient: savedObjects.client,
+      // indexPatterns: data.indexPatterns,
+      // search: data.search,
+      chrome: core.chrome,
+      overlays,
+    });
+
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      savedIndexPattern: savedIndexPatternLoader,
       apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {

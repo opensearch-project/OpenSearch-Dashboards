@@ -40,9 +40,13 @@ import { IndexPatternsContract } from '../../../../data/public';
 export async function hydrateIndexPattern(
   id: string,
   savedObject: SavedObject,
-  indexPatterns: IndexPatternsContract,
+  indexPatterns: IndexPatternsContract | undefined,
   config: SavedObjectConfig
 ) {
+  if (!indexPatterns) {
+    return null;
+  }
+
   const indexPattern = config.indexPattern;
 
   if (!savedObject.searchSource) {

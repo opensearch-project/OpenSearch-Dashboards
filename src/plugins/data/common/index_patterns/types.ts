@@ -194,6 +194,7 @@ export interface IndexPatternSpec {
   fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;
   type?: string;
+  dataSourcesJSON?: string;
 }
 
 export interface SourceFilter {

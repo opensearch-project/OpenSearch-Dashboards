@@ -86,6 +86,8 @@ export class IndexPattern implements IIndexPattern {
   // savedObject version
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
+  public dataSourcesJSON: string | undefined;
+
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -128,6 +130,8 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
+
+    this.dataSourcesJSON = spec.dataSourcesJSON;
   }
 
   /**
@@ -354,6 +358,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      dataSourcesJSON: this.dataSourcesJSON, // todo: maybe stringfy here instead
     };
   }
 

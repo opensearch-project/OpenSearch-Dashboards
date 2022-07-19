@@ -29,6 +29,8 @@
  */
 
 import { i18n } from '@osd/i18n';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { IndexPatternSavedObject } from 'src/plugins/data/public/index_patterns';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -56,6 +58,8 @@ import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/com
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { SavedObjectLoader } from '../../../../saved_objects/public';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -67,6 +71,7 @@ export interface IndexPatternSavedObjectAttrs {
 
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
+  savedIndexPattern: SavedObjectLoader;
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
@@ -78,6 +83,7 @@ interface IndexPatternsServiceDeps {
 
 export class IndexPatternsService {
   private config: UiSettingsCommon;
+  private savedIndexPattern: SavedObjectLoader;
   private savedObjectsClient: SavedObjectsClientCommon;
   private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IIndexPatternsApiClient;
@@ -89,6 +95,7 @@ export class IndexPatternsService {
 
   constructor({
     uiSettings,
+    savedIndexPattern,
     savedObjectsClient,
     apiClient,
     fieldFormats,
@@ -108,6 +115,7 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
+    this.savedIndexPattern = savedIndexPattern;
   }
 
   /**
@@ -562,12 +570,32 @@ export class IndexPatternsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: indexPattern.id,
-    });
-    indexPattern.id = response.id;
+    // todo: replace this
+    const savedIndexPattern: IndexPatternSavedObject = await this.savedIndexPattern.get();
+
+    this.populateSavedIndexPattern(savedIndexPattern, body);
+
+    // const response = await this.savedObjectsClient.create(savedObjectType, body, {
+    //   id: indexPattern.id, //todo: where is this id come from, cannot be the dup one
+    // });
+
+    // todo: 1. this will cause duplidate overrwrite as it defaults to true
+    const response = await savedIndexPattern.save({});
+    indexPattern.id = response; // response.id
     indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
+  }
+
+  populateSavedIndexPattern(emptyIndexPattern: IndexPatternSavedObject, body: Record<string, any>) {
+    emptyIndexPattern.title = body.title;
+    emptyIndexPattern.timeFieldName = body.timeFieldName;
+    emptyIndexPattern.intervalName = body.intervalName;
+    emptyIndexPattern.sourceFilters = body.sourceFilters;
+    emptyIndexPattern.fields = body.fields;
+    emptyIndexPattern.fieldFormatMap = body.fieldFormatMap;
+    emptyIndexPattern.type = body.type;
+    emptyIndexPattern.typeMeta = body.typeMeta;
+    emptyIndexPattern.dataSourcesJSON = body.dataSourcesJSON;
   }
 
   /**

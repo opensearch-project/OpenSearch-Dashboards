@@ -62,6 +62,7 @@ export async function intializeSavedObject(
     references: resp.references,
     found: !!resp._version,
   };
+
   await savedObject.applyOpenSearchResp(respMapped);
   if (typeof config.init === 'function') {
     await config.init.call(savedObject);
