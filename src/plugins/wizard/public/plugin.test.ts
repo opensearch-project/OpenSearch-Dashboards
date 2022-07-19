@@ -33,11 +33,12 @@ describe('WizardPlugin', () => {
       const setup = plugin.setup(coreSetup, setupDeps);
       expect(setup).toHaveProperty('createVisualizationType');
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
-        // TODO: Update this once the properties are final
         expect.objectContaining({
           name: PLUGIN_ID,
           title: PLUGIN_NAME,
           aliasPath: '#/',
+          aliasApp: PLUGIN_ID,
+          stage: 'experimental',
         })
       );
     });

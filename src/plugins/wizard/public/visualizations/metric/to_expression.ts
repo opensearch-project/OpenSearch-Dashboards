@@ -87,7 +87,7 @@ const getVisSchemas = (aggConfigs: AggConfigs): any => {
   return schemas;
 };
 
-interface MetricRootState extends RootState {
+export interface MetricRootState extends RootState {
   style: MetricOptionsDefaults;
 }
 

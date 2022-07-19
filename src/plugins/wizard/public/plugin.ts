@@ -94,11 +94,10 @@ export class WizardPlugin
       name: PLUGIN_ID,
       title: PLUGIN_NAME,
       description: i18n.translate('wizard.visPicker.description', {
-        defaultMessage: 'TODO...',
+        defaultMessage: 'Create visualizations using the new Drag & Drop experience',
       }),
-      // TODO: Replace with actual icon once available
       icon: wizardIcon,
-      stage: 'beta',
+      stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
     });
