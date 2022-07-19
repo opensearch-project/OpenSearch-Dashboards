@@ -29,6 +29,7 @@ import {
 import { DocLinksStart } from 'src/core/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
+// TODO: Add Header
 // import { Header } from './components/header';
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { Credential } from '../../../common';
@@ -146,7 +147,7 @@ export class EditCredentialComponent extends React.Component<
               <EuiFilePicker />
             </EuiFormRow> */}
           </EuiDescribedFormGroup>
-          <EuiButton type="submit" fill onClick={this.updateCredential}>
+          <EuiButton fill onClick={this.updateCredential}>
             Update
           </EuiButton>
         </EuiForm>
@@ -180,25 +181,21 @@ export class EditCredentialComponent extends React.Component<
   updateCredential = async () => {
     const { http } = this.context.services;
     try {
-      console.warn(this.props.credential.id);
       // TODO: Refactor it by registering client wrapper factory
-      await http
-        .put(`/api/credential_management/${this.props.credential.id}`, {
-          body: JSON.stringify({
-            credential_name: this.state.credentialName,
-            credential_type: this.state.credentialType,
-            username_password_credential_materials: {
-              user_name: this.state.userName,
-              password: this.state.password,
-            },
-          }),
-        })
-        .then((res) => {
-          // TODO: Fix routing
-          this.props.history.push('');
-          console.log(res);
-        });
+      // TODO: Add rendering spanner
+      await http.put(`/api/credential_management/${this.props.credential.id}`, {
+        body: JSON.stringify({
+          credential_name: this.state.credentialName,
+          credential_type: this.state.credentialType,
+          username_password_credential_materials: {
+            user_name: this.state.userName,
+            password: this.state.password,
+          },
+        }),
+      });
+      this.props.history.push('');
     } catch (e) {
+      // TODO: Add Toast
       console.log(e);
     }
   };

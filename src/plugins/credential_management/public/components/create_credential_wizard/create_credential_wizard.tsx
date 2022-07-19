@@ -67,6 +67,7 @@ export class CreateCredentialWizard extends React.Component<
     };
   }
 
+  // TODO: Fix header component error
   renderHeader() {
     const { docLinks } = this.state;
 
@@ -155,7 +156,7 @@ export class CreateCredentialWizard extends React.Component<
               <EuiFilePicker />
             </EuiFormRow> */}
           </EuiDescribedFormGroup>
-          <EuiButton type="submit" fill onClick={this.createCredential}>
+          <EuiButton fill onClick={this.createCredential}>
             Save
           </EuiButton>
         </EuiForm>
@@ -190,23 +191,20 @@ export class CreateCredentialWizard extends React.Component<
     const { http } = this.context.services;
     try {
       // TODO: Refactor it by registering client wrapper factory
-      await http
-        .post('/api/credential_management/create', {
-          body: JSON.stringify({
-            credential_name: this.state.credentialName,
-            credential_type: this.state.credentialType,
-            username_password_credential_materials: {
-              user_name: this.state.userName,
-              password: this.state.password,
-            },
-          }),
-        })
-        .then((res) => {
-          // TODO: Fix routing
-          this.props.history.push('');
-          console.log(res);
-        });
+      // TODO: Add rendering spanner
+      await http.post('/api/credential_management/create', {
+        body: JSON.stringify({
+          credential_name: this.state.credentialName,
+          credential_type: this.state.credentialType,
+          username_password_credential_materials: {
+            user_name: this.state.userName,
+            password: this.state.password,
+          },
+        }),
+      });
+      this.props.history.push('');
     } catch (e) {
+      // TODO: Add Toast
       console.log(e);
     }
   };

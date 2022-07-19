@@ -53,7 +53,7 @@ export async function deleteCredentials(
   selectedCredentials: CredentialsTableItem[]
 ) {
   // TODO: Refactor it
-  selectedCredentials.forEach(function (selectedCredential) {
-    savedObjectsClient.delete('credential', selectedCredential.id);
-  });
+  for (const credential of selectedCredentials) {
+    await savedObjectsClient.delete('credential', credential.id);
+  }
 }

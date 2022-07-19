@@ -144,12 +144,15 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
     );
   };
 
-  const onClickDelete = () => {
-    Promise.resolve(deleteCredentials(savedObjects.client, selectedCredentials)).then(function () {
-      setSelectedCredentials([]);
-      // TODO: Fix routing
-      history.push('');
-    });
+  const onClickDelete = async () => {
+    await deleteCredentials(savedObjects.client, selectedCredentials);
+    // TODO: Add status bar + fetch from source + refresh list
+    const fetchedCredentials: CredentialsTableItem[] = await getCredentials(
+      savedObjects.client,
+      uiSettings.get('defaultIndex')
+    );
+    setCredentials(fetchedCredentials);
+    setSelectedCredentials([]);
   };
 
   const deleteButton = renderDeleteButton();
