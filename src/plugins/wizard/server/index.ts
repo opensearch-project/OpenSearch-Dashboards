@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
 import { WizardPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
@@ -14,3 +15,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { WizardPluginSetup, WizardPluginStart } from './types';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    enabled: true,
+  },
+  schema: configSchema,
+};
