@@ -1,5 +1,5 @@
 <svg width="336" height="220" viewBox="0 0 336 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="118" y="2" width="216" height="216" rx="2" fill="url(#paint0_diamond_169_44976)" stroke="#006BB4" stroke-width="4" stroke-linecap="round" stroke-dasharray="80 80"/>
+<rect x="118" y="2" width="216" height="216" rx="2" fill="url(#paint0_diamond_169_44976)" stroke="#006BB4" stroke-width="4" stroke-linecap="round" stroke-dasharray="108" stroke-dashoffset="54"/>
 <g opacity="0.5">
 <path d="M0 99.6C0 98.1641 1.14799 97 2.5641 97H97.4359C98.852 97 100 98.1641 100 99.6V120.4C100 121.836 98.852 123 97.4359 123H2.5641C1.14799 123 0 121.836 0 120.4V99.6Z" fill="#EFF4F9"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M97.4359 99.6H2.5641L2.5641 120.4H97.4359V99.6ZM2.5641 97C1.14799 97 0 98.1641 0 99.6V120.4C0 121.836 1.14799 123 2.5641 123H97.4359C98.852 123 100 121.836 100 120.4V99.6C100 98.1641 98.852 97 97.4359 97H2.5641Z" fill="#343741"/>
