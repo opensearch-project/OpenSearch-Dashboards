@@ -58,10 +58,10 @@ export const TopNav = () => {
         appName={PLUGIN_ID}
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
-        showSearchBar={true}
-        useDefaultBehaviors={true}
-        screenTitle="Test"
         indexPatterns={indexPattern ? [indexPattern] : []}
+        showSearchBar
+        showSaveQuery
+        useDefaultBehaviors
       />
     </div>
   );
