@@ -29,7 +29,7 @@ export const TopNav = () => {
     (state) => !!state.visualization.activeVisualization?.draftAgg
   );
 
-  const savedWizardVis = useSavedWizardVis(services, visualizationIdFromUrl);
+  const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
 
   const config = useMemo(() => {
     if (savedWizardVis === undefined) return;
