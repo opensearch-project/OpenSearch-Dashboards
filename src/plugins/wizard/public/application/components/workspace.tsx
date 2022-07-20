@@ -14,8 +14,9 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import React, { FC, useState, useMemo, useEffect, Fragment } from 'react';
+import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { WizardServices } from '../../types';
 import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
@@ -32,10 +33,16 @@ export const Workspace: FC = ({ children }) => {
     services: {
       expressions: { ReactExpressionRenderer },
       notifications: { toasts },
+      data,
     },
   } = useOpenSearchDashboards<WizardServices>();
   const { toExpression, ui } = useVisualizationType();
   const [expression, setExpression] = useState<string>();
+  const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
+  });
   const rootState = useTypedSelector((state) => state);
 
   useEffect(() => {
@@ -57,6 +64,20 @@ export const Workspace: FC = ({ children }) => {
     loadExpression();
   }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas]);
 
+  useLayoutEffect(() => {
+    const subscription = data.query.state$.subscribe(({ state }) => {
+      setSearchContext({
+        query: state.query,
+        timeRange: state.time,
+        filters: state.filters,
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [data.query.state$]);
+
   return (
     <section className="wizWorkspace">
       <EuiFlexGroup className="wizCanvasControls">
@@ -66,13 +87,13 @@ export const Workspace: FC = ({ children }) => {
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">
         {expression ? (
-          <ReactExpressionRenderer expression={expression} />
+          <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt
               title={<h2>Drop some fields here to start</h2>}
               body={
-                <Fragment>
+                <>
                   <p>Drag a field directly to the canvas or axis to generate a visualization.</p>
                   <span className="wizWorkspace__container">
                     <EuiIcon className="wizWorkspace__fieldSvg" type={fields_bg} size="original" />
@@ -82,7 +103,7 @@ export const Workspace: FC = ({ children }) => {
                       size="original"
                     />
                   </span>
-                </Fragment>
+                </>
               }
             />
           </EuiFlexItem>
