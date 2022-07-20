@@ -15,28 +15,12 @@
         </div>
       </div>
     </div>
-    <div class="euiFlexItem euiFlexItem--flexGrowZero euiText euiText--small">
-      <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow">
-        <div class="euiFlexItem euiFlexItem--flexGrowZero euiText euiText--small">
-          <a
-            class="euiLink"
-            data-test-subj="docTableRowAction"
-            ng-href="{{ getContextAppHref() }}"
-            ng-if="indexPattern.isTimeBased()"
-            i18n-id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
-            i18n-default-message="View surrounding documents"
-          ></a>
-        </div>
-        <div class="euiFlexItem euiFlexItem--flexGrowZero euiText euiText--small">
-          <a
-            class="euiLink"
-            data-test-subj="docTableRowAction"
-            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}?id={{uriEncodedId}}"
-            i18n-id="discover.docTable.tableRow.viewSingleDocumentLinkText"
-            i18n-default-message="View single document"
-          ></a>
-        </div>
-      </div>
+    <div data-test-subj="docViewerLinks">
+      <doc-viewer-links
+        columns="columns"
+        hit="hit"
+        index-pattern="indexPattern"
+      ></doc-viewer-links>
     </div>
   </div>
   <div data-test-subj="docViewer">
