@@ -1,9 +1,10 @@
+@use "sass:list";
 @import "variables";
 
 .wizLayout {
   padding: 0;
   display: grid;
-  grid-template: min-content 1fr / $wizSideNavWidth 1fr;
+  grid-template: min-content 1fr / #{$wizSideNavWidth} 1fr;
   grid-template-areas:
     "topNav topNav"
     "sideNav workspace";
