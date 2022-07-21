@@ -16,11 +16,10 @@ import { MetricOptionsDefaults } from '../../../visualizations/metric/metric_viz
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
 import { getSavedWizardVis } from '../get_saved_wizard_vis';
 import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
-export const useSavedWizardVis = (
-  services: WizardServices,
-  visualizationIdFromUrl: string | undefined
-) => {
+export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) => {
+  const { services } = useOpenSearchDashboards<WizardServices>();
   const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);
   const dispatch = useTypedDispatch();
 

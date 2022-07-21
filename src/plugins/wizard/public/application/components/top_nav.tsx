@@ -11,9 +11,8 @@ import { getTopNavConfig } from '../utils/get_top_nav_config';
 import { WizardServices } from '../../types';
 
 import './top_nav.scss';
-import { useIndexPattern } from '../utils/use';
+import { useIndexPattern, useSavedWizardVis } from '../utils/use';
 import { useTypedSelector } from '../utils/state_management';
-import { useSavedWizardVis } from '../utils/use/use_saved_wizard_vis';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -30,12 +29,11 @@ export const TopNav = () => {
     (state) => !!state.visualization.activeVisualization?.draftAgg
   );
 
-  const savedWizardVis = useSavedWizardVis(services, visualizationIdFromUrl);
+  const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
 
   const config = useMemo(() => {
-    if (savedWizardVis === undefined) {
-      return;
-    }
+    if (savedWizardVis === undefined) return;
+
     const { visualization: visualizationState, style: styleState } = rootState;
 
     return getTopNavConfig(

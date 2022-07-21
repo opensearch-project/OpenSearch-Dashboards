@@ -222,7 +222,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
     let highlightMsg;
-    if (!isVisTypeAlias(visType.type) && visType.type.stage === 'experimental') {
+    if (visType.type.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
