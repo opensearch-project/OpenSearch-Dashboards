@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IndexPattern } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../types';
@@ -17,14 +17,14 @@ export const useIndexPattern = (): IndexPattern | undefined => {
     },
   } = useOpenSearchDashboards<WizardServices>();
 
-  const handleIndexUpdate = useCallback(async () => {
-    const currentIndex = await indexPatterns.get(indexId);
-    setIndexPattern(currentIndex);
-  }, [indexId, indexPatterns]);
-
   useEffect(() => {
+    const handleIndexUpdate = async () => {
+      const currentIndex = await indexPatterns.get(indexId);
+      setIndexPattern(currentIndex);
+    };
+
     handleIndexUpdate();
-  }, [handleIndexUpdate]);
+  }, [indexId, indexPatterns]);
 
   return indexPattern;
 };
@@ -38,7 +38,7 @@ export const useIndexPatterns = () => {
     services: { data },
   } = useOpenSearchDashboards<WizardServices>();
 
-  let foundSelected;
+  let foundSelected: IndexPattern;
   if (!loading && !error) {
     foundSelected = indexPatterns.filter((p) => p.id === indexId)[0];
     if (foundSelected === undefined) {
@@ -51,19 +51,18 @@ export const useIndexPatterns = () => {
   useEffect(() => {
     const handleUpdate = async () => {
       try {
-        const ids = await data.indexPatterns.getIds(indexId);
+        const ids = await data.indexPatterns.getIds(true);
         const patterns = await Promise.all(ids.map((id) => data.indexPatterns.get(id)));
         setIndexPatterns(patterns);
       } catch (e) {
-        setError(e);
+        setError(e as Error);
       } finally {
         setLoading(false);
       }
     };
+
     handleUpdate();
-    // we want to run this hook exactly once, which you do by an empty dep array
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.indexPatterns]);
 
   return {
     indexPatterns,
