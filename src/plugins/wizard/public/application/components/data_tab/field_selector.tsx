@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
 import { FieldSearch } from './field_search';
 
@@ -17,6 +17,7 @@ import { FieldSelectorField } from './field_selector_field';
 import './field_selector.scss';
 import { useTypedSelector } from '../../utils/state_management';
 import { useIndexPattern } from '../../utils/use';
+import { getAvailableFields } from './utils';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -31,45 +32,37 @@ const META_FIELDS: string[] = [
   OPENSEARCH_FIELD_TYPES._TYPE,
 ];
 
-const ALLOWED_FIELDS: string[] = [OSD_FIELD_TYPES.STRING, OSD_FIELD_TYPES.NUMBER];
-
 export const FieldSelector = () => {
   const indexPattern = useIndexPattern();
   const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
 
-  // TODO: Temporary validate function
-  // Need to identify how to get fieldCounts to use the standard filter and group functions
-  const isVisualizable = useCallback((field: IndexPatternField): boolean => {
-    const isAggregatable = field.aggregatable === true;
-    const isNotScripted = !field.scripted;
-    const isAllowed = ALLOWED_FIELDS.includes(field.type);
-
-    return isAggregatable && isNotScripted && isAllowed;
-  }, []);
-
   useEffect(() => {
     const indexFields = indexPattern?.fields ?? [];
-    const filteredSubset = indexFields
-      .filter(isVisualizable)
-      .filter((field) => field.displayName.includes(fieldSearchValue));
+    const filteredSubset = getAvailableFields(indexFields).filter((field) =>
+      field.displayName.includes(fieldSearchValue)
+    );
 
     setFilteredFields(filteredSubset);
     return;
-  }, [fieldSearchValue, indexPattern?.fields, isVisualizable]);
+  }, [fieldSearchValue, indexPattern?.fields]);
 
-  const fields = filteredFields?.reduce<IFieldCategories>(
-    (fieldGroups, currentField) => {
-      const category = getFieldCategory(currentField);
-      fieldGroups[category].push(currentField);
+  const fields = useMemo(
+    () =>
+      filteredFields?.reduce<IFieldCategories>(
+        (fieldGroups, currentField) => {
+          const category = getFieldCategory(currentField);
+          fieldGroups[category].push(currentField);
 
-      return fieldGroups;
-    },
-    {
-      categorical: [],
-      numerical: [],
-      meta: [],
-    }
+          return fieldGroups;
+        },
+        {
+          categorical: [],
+          numerical: [],
+          meta: [],
+        }
+      ),
+    [filteredFields]
   );
 
   return (
