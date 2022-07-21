@@ -84,8 +84,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectOpenSearchDashboardsServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  indexPatterns?: IndexPatternsContract;
+  search?: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

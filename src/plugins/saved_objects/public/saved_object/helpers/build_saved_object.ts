@@ -48,7 +48,7 @@ export function buildSavedObject(
   config: SavedObjectConfig = {},
   services: SavedObjectOpenSearchDashboardsServices
 ) {
-  const { indexPatterns, savedObjectsClient } = services;
+  const { indexPatterns = undefined, savedObjectsClient } = services;
   // type name for this object, used as the OpenSearch-type
   const opensearchType = config.type || '';
 
@@ -66,8 +66,9 @@ export function buildSavedObject(
   savedObject.isSaving = false;
   savedObject.defaults = config.defaults || {};
   // optional search source which this object configures
+  // when searchSource is false, services.search does not need to be present
   savedObject.searchSource = config.searchSource
-    ? services.search.searchSource.createEmpty()
+    ? services.search!.searchSource.createEmpty()
     : undefined;
   // the id of the document
   savedObject.id = config.id || void 0;
