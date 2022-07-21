@@ -12,9 +12,9 @@ export interface IndexPatternObject {
   title: string;
   intervalName?: string;
   timeFieldName?: string;
-  sourceFilters?: SourceFilter[];
-  fields?: IndexPatternFieldMap;
-  typeMeta?: TypeMeta;
+  sourceFilters?: string;
+  fields?: string;
+  typeMeta?: string;
   type?: string;
   fieldFormatMap?: string;
   dataSourcesJSON?: string;

@@ -23,7 +23,7 @@ export function createSavedIndexPatternClass(services: SavedObjectOpenSearchDash
       sourceFilters: 'text',
       fields: 'text',
       fieldFormatMap: 'text',
-      type: 'text',
+      type: 'keyword',
       typeMeta: 'text',
       dataSourcesJSON: 'text',
       // todo
