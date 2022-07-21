@@ -19,6 +19,7 @@ import {
   WizardSetup,
   WizardStart,
 } from './types';
+import { WizardEmbeddableFactoryDefinition, WIZARD_EMBEDDABLE } from './embeddable';
 import wizardIcon from './assets/wizard_icon.svg';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { TypeService } from './services/type_service';
@@ -37,7 +38,7 @@ export class WizardPlugin
 
   public setup(
     core: CoreSetup<WizardPluginStartDependencies, WizardStart>,
-    { visualizations }: WizardPluginSetupDependencies
+    { embeddable, visualizations }: WizardPluginSetupDependencies
   ) {
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
@@ -88,6 +89,24 @@ export class WizardPlugin
         return renderApp(params, services, store);
       },
     });
+
+    // Register embeddable
+    // TODO: investigate simplification via getter a la visualizations:
+    // const start = createStartServicesGetter(core.getStartServices));
+    // const embeddableFactory = new WizardEmbeddableFactoryDefinition({ start });
+    const embeddableFactory = new WizardEmbeddableFactoryDefinition(async () => {
+      const [coreStart, pluginsStart, _wizardStart] = await core.getStartServices();
+      // TODO: refactor to pass minimal service methods?
+      return {
+        savedObjectsClient: coreStart.savedObjects.client,
+        data: pluginsStart.data,
+        getEmbeddableFactory: pluginsStart.embeddable.getEmbeddableFactory,
+        expressions: pluginsStart.expressions,
+        notifications: coreStart.notifications,
+        types: this.typeService.start(),
+      };
+    });
+    embeddable.registerEmbeddableFactory(WIZARD_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
     visualizations.registerAlias({

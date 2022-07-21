@@ -34,7 +34,7 @@ You'll notice that when clicking on the "Inspect" button from the saved objects 
 
 ### Registering
 
-Ideally, we'd allow plugins to self-register their `savedObjectLoader` and (declare a dependency on this plugin). However, as currently implemented, any plugins that want this plugin to handle their inpect routes need to be added as optional dependencies and registered here.
+Ideally, we'd allow plugins to self-register their `savedObjectLoader` and (declare a dependency on this plugin). However, as currently implemented, any plugins that want this plugin to handle their inspect routes need to be added as optional dependencies and registered here.
 
 1. Add your plugin to the `optionalPlugins` array in `./opensearch_dashboards.json`
 2. Update the `StartDependencies` interface of this plugin to include the public plugin start type
