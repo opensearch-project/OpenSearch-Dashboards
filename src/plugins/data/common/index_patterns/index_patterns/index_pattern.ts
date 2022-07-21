@@ -43,7 +43,13 @@ import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields'
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
+import {
+  IndexPatternSpec,
+  TypeMeta,
+  SourceFilter,
+  IndexPatternFieldMap,
+  DataSourceRef,
+} from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
@@ -86,7 +92,8 @@ export class IndexPattern implements IIndexPattern {
   // savedObject version
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
-  public dataSourcesJSON: string | undefined;
+  public dataSourcesJSON?: string; // todo: cleanup, only keep one
+  public dataSourceRef?: DataSourceRef;
 
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
@@ -132,7 +139,17 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.dataSourcesJSON = spec.dataSourcesJSON;
+    this.dataSourceRef = this.getDataSourceRef(spec.dataSourcesJSON);
   }
+
+  getDataSourceRef = (dataSourcesJSON?: string) => {
+    if (dataSourcesJSON) {
+      const refs = JSON.parse(dataSourcesJSON);
+      if (!_.isEmpty(refs)) {
+        return refs[0]; // only support 1-1 mapping now
+      }
+    }
+  };
 
   /**
    * Get last saved saved object fields

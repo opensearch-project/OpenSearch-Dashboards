@@ -127,7 +127,7 @@ export class IndexPatternsService {
       fields: ['title'],
       perPage: 10000,
     });
-  }
+  } // todo: does this find method imcompatible with using loader?
 
   /**
    * Get list of index pattern ids
@@ -385,6 +385,46 @@ export class IndexPatternsService {
   };
 
   /**
+   * Converts index pattern saved object to index pattern spec
+   * @param savedObject
+   */
+
+  indexPatternSavedObjectToSpec = (savedObject: IndexPatternSavedObject): IndexPatternSpec => {
+    const {
+      id,
+      version,
+      title,
+      timeFieldName,
+      intervalName,
+      fields,
+      sourceFilters,
+      fieldFormatMap,
+      typeMeta,
+      type,
+      dataSourcesJSON,
+    } = savedObject;
+
+    const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
+    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
+    const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+
+    this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
+    return {
+      id,
+      version,
+      title,
+      intervalName,
+      timeFieldName,
+      sourceFilters: parsedSourceFilters,
+      fields: this.fieldArrayToMap(parsedFields),
+      typeMeta: parsedTypeMeta,
+      type,
+      dataSourcesJSON,
+    };
+  };
+
+  /**
    * Get an index pattern by id. Cache optimized
    * @param id
    */
@@ -395,12 +435,15 @@ export class IndexPatternsService {
       return cache;
     }
 
-    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
-      savedObjectType,
-      id
-    );
+    // const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+    //   savedObjectType,
+    //   id
+    // );
 
-    if (!savedObject.version) {
+    const savedIndexPattern: IndexPatternSavedObject = await this.savedIndexPattern.get(id);
+    const { version, fieldFormatMap } = savedIndexPattern;
+
+    if (!version) {
       throw new SavedObjectNotFound(
         savedObjectType,
         id,
@@ -408,11 +451,10 @@ export class IndexPatternsService {
       );
     }
 
-    const spec = this.savedObjectToSpec(savedObject);
+    // const spec = this.savedObjectToSpec(savedObject);
+    const spec = this.indexPatternSavedObjectToSpec(savedIndexPattern);
     const { title, type, typeMeta } = spec;
-    const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
-      ? JSON.parse(savedObject.attributes.fieldFormatMap)
-      : {};
+    const parsedFieldFormats: FieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
 
     const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
