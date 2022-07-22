@@ -27,6 +27,7 @@ import hand_field from '../../assets/hand_field.svg';
 import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
+import { ExperimentalInfo } from './experimental_info';
 
 export const Workspace: FC = ({ children }) => {
   const {
@@ -83,6 +84,9 @@ export const Workspace: FC = ({ children }) => {
       <EuiFlexGroup className="wizCanvasControls">
         <EuiFlexItem grow={false}>
           <TypeSelectorPopover />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ExperimentalInfo />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas">

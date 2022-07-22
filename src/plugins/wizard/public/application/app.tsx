@@ -12,7 +12,6 @@ import { Workspace } from './components/workspace';
 
 import './app.scss';
 import { TopNav } from './components/top_nav';
-import { ExperimentalInfo } from './components/experimental_info';
 
 export const WizardApp = () => {
   // Render the application DOM.
@@ -21,7 +20,6 @@ export const WizardApp = () => {
       <DragDropProvider>
         <EuiPage className="wizLayout">
           <TopNav />
-          <ExperimentalInfo />
           <SideNav />
           <Workspace />
         </EuiPage>

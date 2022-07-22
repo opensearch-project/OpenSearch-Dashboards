@@ -36,7 +36,6 @@ export const InfoComponent = () => {
       size="s"
       title={title}
       iconType="beaker"
-      style={{ gridArea: 'info' }}
     />
   );
 };

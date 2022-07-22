@@ -6,7 +6,6 @@
   grid-template: min-content 1fr / #{$wizSideNavWidth} 1fr;
   grid-template-areas:
     "topNav topNav"
-    "info info"
     "sideNav workspace";
   height: calc(100vh - #{$osdHeaderOffset});
 }
