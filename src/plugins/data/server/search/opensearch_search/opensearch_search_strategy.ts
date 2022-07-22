@@ -70,10 +70,11 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const promise = shimAbortSignal(
-          context.core.opensearch.client.asCurrentUser.search(params),
-          options?.abortSignal
-        );
+        const selectedClient = request.dataSourceId
+          ? await context.core.opensearchData.getClient(request.dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
+
+        const promise = shimAbortSignal(selectedClient.search(params), options?.abortSignal);
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
         if (usage) usage.trackSuccess(rawResponse.took);

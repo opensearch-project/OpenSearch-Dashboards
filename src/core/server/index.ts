@@ -57,6 +57,7 @@ import {
   configSchema as opensearchsearchConfigSchema,
   OpenSearchServiceStart,
   IScopedClusterClient,
+  OpenSearchClient,
 } from './opensearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
@@ -402,6 +403,9 @@ export interface RequestHandlerContext {
       legacy: {
         client: ILegacyScopedClusterClient;
       };
+    };
+    opensearchData: {
+      getClient(dataSourceId: string): Promise<OpenSearchClient>;
     };
     uiSettings: {
       client: IUiSettingsClient;

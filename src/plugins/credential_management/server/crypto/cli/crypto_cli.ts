@@ -56,7 +56,7 @@ export class CryptoCli {
     return result.result.toString('base64');
   }
 
-  public async decrypt(encrypted: Buffer) {
+  public async decrypt(encrypted: Buffer): Promise<string> {
     const result = await this._decrypt(this._keyring, encrypted);
     return result.plaintext.toString();
   }
@@ -80,7 +80,7 @@ export class CryptoCli {
     return './crypto_material';
   }
 
-  // TODO: Support configurable crypto materials file path 
+  // TODO: Support configurable crypto materials file path
   public static generateCryptoMaterials(keyName: string, keyNamespace: string) {
     const cryptoMaterials = {
       keyName,

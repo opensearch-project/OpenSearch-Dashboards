@@ -48,6 +48,10 @@ import { InternalStatusServiceSetup } from './status';
 import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import {
+  InternalOpenSearchDataServiceSetup,
+  InternalOpenSearchDataServiceStart,
+} from './opensearch_data/types';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -55,6 +59,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   opensearch: InternalOpenSearchServiceSetup;
+  opensearchData: InternalOpenSearchDataServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
@@ -72,6 +77,7 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   opensearch: InternalOpenSearchServiceStart;
+  opensearchData: InternalOpenSearchDataServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;

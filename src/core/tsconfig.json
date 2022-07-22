@@ -16,7 +16,10 @@
     "index.ts",
     "typings.ts"
   ],
-  "references": [
-    { "path": "../test_utils/" }
-  ]
+  "exclude": [
+    "server/**/*.test.ts",
+    "server/saved_objects/routes/test_utils.ts",
+    "server/test_utils.ts"
+  ],
+  "references": [{ "path": "../test_utils/" }]
 }

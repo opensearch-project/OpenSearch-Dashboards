@@ -40,6 +40,7 @@ import {
 } from './opensearch';
 import { Auditor } from './audit_trail';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
+import { InternalOpenSearchDataServiceStart } from './opensearch_data/types';
 
 class CoreOpenSearchRouteHandlerContext {
   #client?: IScopedClusterClient;
@@ -66,6 +67,24 @@ class CoreOpenSearchRouteHandlerContext {
       };
     }
     return this.#legacy;
+  }
+}
+
+class CoreOpenSearchDataSourceRouteHandlerContext {
+  constructor(private readonly opensearchDataStart: InternalOpenSearchDataServiceStart) {}
+
+  public async getClient(dataSourceId: string) {
+    try {
+      const client = await this.opensearchDataStart.client.asDataSource(dataSourceId);
+      return client;
+    } catch (error) {
+      if (error.message) {
+        throw new Error(error.message);
+      } else
+        throw new Error(
+          `Fail to get data source client for dataSource id: [${dataSourceId}]. Detail: ${error}`
+        );
+    }
   }
 }
 
@@ -115,6 +134,7 @@ export class CoreRouteHandlerContext {
   readonly opensearch: CoreOpenSearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
+  readonly opensearchData: CoreOpenSearchDataSourceRouteHandlerContext;
 
   constructor(
     private readonly coreStart: InternalCoreStart,
@@ -123,6 +143,9 @@ export class CoreRouteHandlerContext {
     this.opensearch = new CoreOpenSearchRouteHandlerContext(
       this.coreStart.opensearch,
       this.request
+    );
+    this.opensearchData = new CoreOpenSearchDataSourceRouteHandlerContext(
+      this.coreStart.opensearchData
     );
     this.savedObjects = new CoreSavedObjectsRouteHandlerContext(
       this.coreStart.savedObjects,

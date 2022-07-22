@@ -62,6 +62,7 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { OpenSearchDataService } from './opensearch_data/opensearch_data_service';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -71,6 +72,7 @@ export class Server {
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly opensearch: OpenSearchService;
+  private readonly opensearchData: OpenSearchDataService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
   private readonly legacy: LegacyService;
@@ -107,6 +109,7 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.opensearch = new OpenSearchService(core);
+    this.opensearchData = new OpenSearchDataService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -160,6 +163,8 @@ export class Server {
       http: httpSetup,
     });
 
+    const opensearchDataServiceSetup = await this.opensearchData.setup();
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       opensearch: opensearchServiceSetup,
@@ -174,6 +179,7 @@ export class Server {
 
     const statusSetup = await this.status.setup({
       opensearch: opensearchServiceSetup,
+      // TODO: add opensearch data ?
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
@@ -202,6 +208,7 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       opensearch: opensearchServiceSetup,
+      opensearchData: opensearchDataServiceSetup,
       environment: environmentSetup,
       http: httpSetup,
       savedObjects: savedObjectsSetup,
@@ -244,6 +251,10 @@ export class Server {
       opensearch: opensearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    const opensearchDataStart = await this.opensearchData.start({
+      savedObjects: savedObjectsStart,
+      auditTrail: auditTrailStart,
+    });
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
@@ -257,6 +268,7 @@ export class Server {
     this.coreStart = {
       capabilities: capabilitiesStart,
       opensearch: opensearchStart,
+      opensearchData: opensearchDataStart,
       http: httpStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
@@ -288,6 +300,7 @@ export class Server {
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.opensearch.stop();
+    await this.opensearchData.stop();
     await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
