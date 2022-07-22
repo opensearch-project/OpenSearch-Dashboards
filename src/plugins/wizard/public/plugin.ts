@@ -21,7 +21,7 @@ import {
 } from './types';
 import { WizardEmbeddableFactoryDefinition, WIZARD_EMBEDDABLE } from './embeddable';
 import wizardIcon from './assets/wizard_icon.svg';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, WIZARD_SAVED_OBJECT } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import { setAggService, setIndexPatterns } from './plugin_services';
@@ -119,6 +119,22 @@ export class WizardPlugin
       stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
+      appExtensions: {
+        visualizations: {
+          docTypes: [PLUGIN_ID],
+          toListItem: ({ id, attributes }) => ({
+            description: attributes?.description,
+            editApp: PLUGIN_ID,
+            editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
+            icon: wizardIcon,
+            id,
+            savedObjectType: WIZARD_SAVED_OBJECT,
+            stage: 'experimental',
+            title: attributes?.title,
+            typeTitle: PLUGIN_NAME,
+          }),
+        },
+      },
     });
 
     return {
