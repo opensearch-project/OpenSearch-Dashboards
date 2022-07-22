@@ -1,0 +1,1097 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`region_map_options renders the RegionMapOptions with custom option if custom vector maps are found 1`] = `
+<div
+  id="customMapOption"
+>
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+    >
+      <span>
+        Layer settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiText euiText--extraSmall"
+    >
+      <strong>
+        <span
+          className="euiTextColor euiTextColor--default"
+        >
+          Choose a vector map layer
+        </span>
+      </strong>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive mapChoiceGroup"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+            onClick={[Function]}
+          >
+            <div
+              className="euiRadio euiRadio--noLabel"
+              data-test-subj="defaultVectorMap"
+            >
+              <input
+                checked={false}
+                className="euiRadio__input"
+                id="defaultVectorMap"
+                name="defaultVectorMap"
+                onChange={[Function]}
+                type="radio"
+                value="default"
+              />
+              <div
+                className="euiRadio__circle"
+              />
+            </div>
+          </div>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+          >
+            <label
+              className="euiCheckableCard__label"
+              htmlFor="defaultVectorMap"
+            >
+              Default vector map
+            </label>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+            onClick={[Function]}
+          >
+            <div
+              className="euiRadio euiRadio--noLabel"
+              data-test-subj="customVectorMap"
+            >
+              <input
+                checked={false}
+                className="euiRadio__input"
+                id="customVectorMap"
+                name="customVectorMap"
+                onChange={[Function]}
+                type="radio"
+                value="custom"
+              />
+              <div
+                className="euiRadio__circle"
+              />
+            </div>
+          </div>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+          >
+            <label
+              className="euiCheckableCard__label"
+              htmlFor="customVectorMap"
+            >
+              Custom vector map
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      id="customMapSelection"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+          id="regionMapOptionsCustomSelectLayer-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="regionMapOptionsCustomSelectLayer"
+            >
+              Vector map
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+                  id="regionMapOptionsCustomSelectLayer"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="sample"
+                >
+                  <option
+                    disabled={true}
+                    hidden={true}
+                    value="EMPTY_VALUE"
+                  >
+                    
+                  </option>
+                  <option>
+                    sample
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                      size="s"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+          id="regionMapOptionsCustomSelectJoinField-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="regionMapOptionsCustomSelectJoinField"
+            >
+              Join field
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+                  id="regionMapOptionsCustomSelectJoinField"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="EMPTY_VALUE"
+                >
+                  <option
+                    disabled={true}
+                    hidden={true}
+                    value="EMPTY_VALUE"
+                  >
+                    
+                  </option>
+                  <option
+                    label="name"
+                    value="name"
+                  />
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                      size="s"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              Display warnings
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              Show all shapes
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+      id="styleSettingTitleId"
+    >
+      <span>
+        Style settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="colorSchemaId-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="colorSchemaId"
+        >
+          Color schema
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+              id="colorSchemaId"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              onMouseUp={[Function]}
+              value={Object {}}
+            >
+              <option
+                disabled={true}
+                hidden={true}
+                value="EMPTY_VALUE"
+              >
+                
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="generated-id"
+        >
+          Border thickness
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              className="euiFieldNumber euiFieldNumber--fullWidth euiFieldNumber--compressed"
+              id="generated-id"
+              min={0}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              type="number"
+              value={Object {}}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+    >
+      <span>
+        Base layer settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              WMS map server
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="wmsOptionsSelectTmsLayer-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="wmsOptionsSelectTmsLayer"
+        >
+          Layers
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+              id="wmsOptionsSelectTmsLayer"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              onMouseUp={[Function]}
+              value="EMPTY_VALUE"
+            >
+              <option
+                disabled={true}
+                hidden={true}
+                value="EMPTY_VALUE"
+              >
+                
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`region_map_options renders the RegionMapOptions with default option if no custom vector maps are found 1`] = `
+<div
+  id="defaultMapOption"
+>
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+    >
+      <span>
+        Layer settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      id="defaultMapSelection"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+          id="regionMapOptionsSelectLayer-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="regionMapOptionsSelectLayer"
+            >
+              Vector map
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+                  id="regionMapOptionsSelectLayer"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="name"
+                >
+                  <option
+                    disabled={true}
+                    hidden={true}
+                    value="EMPTY_VALUE"
+                  >
+                    
+                  </option>
+                  <option>
+                    sample
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                      size="s"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+          id="regionMapOptionsSelectJoinField-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="regionMapOptionsSelectJoinField"
+            >
+              Join field
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+                  id="regionMapOptionsSelectJoinField"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="randomId"
+                >
+                  <option
+                    disabled={true}
+                    hidden={true}
+                    value="EMPTY_VALUE"
+                  >
+                    
+                  </option>
+                  <option
+                    value="name"
+                  />
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                      size="s"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              Display warnings
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              Show all shapes
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+      id="styleSettingTitleId"
+    >
+      <span>
+        Style settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="colorSchemaId-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="colorSchemaId"
+        >
+          Color schema
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+              id="colorSchemaId"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              onMouseUp={[Function]}
+              value={Object {}}
+            >
+              <option
+                disabled={true}
+                hidden={true}
+                value="EMPTY_VALUE"
+              >
+                
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="generated-id"
+        >
+          Border thickness
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              className="euiFieldNumber euiFieldNumber--fullWidth euiFieldNumber--compressed"
+              id="generated-id"
+              min={0}
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              type="number"
+              value={Object {}}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <h2
+      className="euiTitle euiTitle--xsmall"
+    >
+      <span>
+        Base layer settings
+      </span>
+    </h2>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <span
+          className="euiToolTipAnchor"
+          onKeyUp={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <div
+            className="euiSwitch euiSwitch--compressed"
+          >
+            <button
+              aria-checked={false}
+              aria-labelledby="generated-id"
+              className="euiSwitch__button"
+              id="generated-id"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              role="switch"
+              type="button"
+            >
+              <span
+                className="euiSwitch__body"
+              >
+                <span
+                  className="euiSwitch__thumb"
+                />
+                <span
+                  className="euiSwitch__track"
+                />
+              </span>
+            </button>
+            <span
+              className="euiSwitch__label"
+              id="generated-id"
+              onClick={[Function]}
+            >
+              WMS map server
+            </span>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="wmsOptionsSelectTmsLayer-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <label
+          className="euiFormLabel euiFormRow__label"
+          htmlFor="wmsOptionsSelectTmsLayer"
+        >
+          Layers
+        </label>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--fullWidth euiSelect--compressed"
+              id="wmsOptionsSelectTmsLayer"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              onMouseUp={[Function]}
+              value="EMPTY_VALUE"
+            >
+              <option
+                disabled={true}
+                hidden={true}
+                value="EMPTY_VALUE"
+              >
+                
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
