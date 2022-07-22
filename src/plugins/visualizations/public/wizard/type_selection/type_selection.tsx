@@ -182,21 +182,19 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
-    const types = visTypes.all().filter((type) => {
-      // Filter out all lab visualizations if lab mode is not enabled
+    const filterExperimental = (type: VisType | VisTypeAlias): boolean => {
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
       }
-
-      // Filter out hidden visualizations
-      if (type.hidden) {
-        return false;
-      }
-
       return true;
-    });
+    };
 
-    const allTypes = [...types, ...visTypes.getAliases()];
+    const types = visTypes
+      .all()
+      .filter(filterExperimental)
+      .filter((type) => !type.hidden); // Filter out hidden visualizations
+    const aliasedTypes = visTypes.getAliases().filter(filterExperimental);
+    const allTypes = [...types, ...aliasedTypes];
 
     let entries: VisTypeListEntry[];
     if (!query) {
