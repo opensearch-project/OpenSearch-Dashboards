@@ -104,6 +104,7 @@ export class WizardPlugin
         expressions: pluginsStart.expressions,
         notifications: coreStart.notifications,
         types: this.typeService.start(),
+        uiSettings: coreStart.uiSettings,
       };
     });
     embeddable.registerEmbeddableFactory(WIZARD_EMBEDDABLE, embeddableFactory);
