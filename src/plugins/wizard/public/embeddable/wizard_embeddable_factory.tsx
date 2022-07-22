@@ -4,18 +4,25 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { NotificationsStart, SavedObjectsClientContract } from '../../../../core/public';
+import {
+  IUiSettingsClient,
+  NotificationsStart,
+  SavedObjectsClientContract,
+} from '../../../../core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
+  EmbeddableOutput,
   EmbeddableStart,
   ErrorEmbeddable,
   IContainer,
 } from '../../../embeddable/public';
 import { ExpressionsStart } from '../../../expressions/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 import { WizardSavedObjectAttributes } from '../../common';
 import { TypeServiceStart } from '../services/type_service';
+import { DisabledEmbeddable } from './disabled_embeddable';
 import {
   WizardEmbeddable,
   WizardInput,
@@ -30,13 +37,14 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: NotificationsStart;
   types: TypeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 // TODO: use or remove?
 export type WizardEmbeddableFactory = EmbeddableFactory<
   WizardInput,
-  WizardOutput,
-  WizardEmbeddable,
+  WizardOutput | EmbeddableOutput,
+  WizardEmbeddable | DisabledEmbeddable,
   WizardSavedObjectAttributes
 >;
 
@@ -44,8 +52,8 @@ export class WizardEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<
       WizardInput,
-      WizardOutput,
-      WizardEmbeddable,
+      WizardOutput | EmbeddableOutput,
+      WizardEmbeddable | DisabledEmbeddable,
       WizardSavedObjectAttributes
     > {
   public readonly type = WIZARD_EMBEDDABLE;
@@ -69,7 +77,7 @@ export class WizardEmbeddableFactoryDefinition
     savedObjectId: string,
     input: Partial<WizardInput> & { id: string },
     parent?: IContainer
-  ): Promise<WizardEmbeddable | ErrorEmbeddable> => {
+  ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> => {
     return this.create({ ...input, savedObjectId }, parent);
   };
 
@@ -81,7 +89,15 @@ export class WizardEmbeddableFactoryDefinition
       notifications: { toasts },
       savedObjectsClient,
       types,
+      uiSettings,
     } = await this.getStartServices();
+
+    const isLabsEnabled = uiSettings.get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
+
+    if (!isLabsEnabled) {
+      return new DisabledEmbeddable('Wizard', input);
+    }
+
     return new WizardEmbeddable(input, {
       parent,
       data,
