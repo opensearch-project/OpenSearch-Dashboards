@@ -10,7 +10,7 @@
  */
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../core/server';
-import { encryptionHandler } from '../credential';
+import { encryptionHandler } from '../credential_manager';
 import { Credential } from '../../common';
 
 const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';

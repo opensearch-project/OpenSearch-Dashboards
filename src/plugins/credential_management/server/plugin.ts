@@ -8,6 +8,7 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+import { first } from 'rxjs/operators';
 
 import {
   PluginInitializerContext,
@@ -20,34 +21,53 @@ import {
 import { CredentialManagementPluginSetup, CredentialManagementPluginStart } from './types';
 import { registerRoutes } from './routes';
 import { credentialSavedObjectType } from './saved_objects';
+import { ConfigSchema } from '../config';
+import { CryptographySingleton } from './crypto';
 
 export class CredentialManagementPlugin
   implements Plugin<CredentialManagementPluginSetup, CredentialManagementPluginStart> {
   private readonly logger: Logger;
+  private initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  private cryptographySingleton?: CryptographySingleton;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get();
+    this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup) {
-    this.logger.debug('credentialManagement: Setup');
-    const router = core.http.createRouter();
+  public async setup(core: CoreSetup) {
+    this.logger.debug('credential_management: Setup');
 
-    // Register server side APIs
-    registerRoutes(router);
+    const { opensearchDashboards } = await this.initializerContext.config.legacy.globalConfig$
+      .pipe(first())
+      .toPromise();
 
-    // Register credential saved object type
-    core.savedObjects.registerType(credentialSavedObjectType);
+    if (opensearchDashboards.multipleDataSource.enabled) {
+      const {
+        materialPath,
+        keyName,
+        keyNamespace,
+      } = await this.initializerContext.config.create().pipe(first()).toPromise();
 
+      const router = core.http.createRouter();
+      // Register server side APIs
+      registerRoutes(router);
+      // Register credential saved object type
+      core.savedObjects.registerType(credentialSavedObjectType);
+      // Instantiate CryptoCli for encryption / decryption
+      this.cryptographySingleton = CryptographySingleton.getInstance(
+        materialPath,
+        keyName,
+        keyNamespace
+      );
+    }
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('credentialManagement: Started');
     return {};
   }
 
-  public stop() {
-    this.logger.debug('credentialManagement: Stoped');
-  }
+  public stop() {}
 }

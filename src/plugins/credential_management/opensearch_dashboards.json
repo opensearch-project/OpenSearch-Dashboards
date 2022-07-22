@@ -2,6 +2,7 @@
   "id": "credentialManagement",
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["credential_management"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data", "navigation", "urlForwarding"],

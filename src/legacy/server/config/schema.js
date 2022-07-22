@@ -246,6 +246,9 @@ export default () =>
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
       }),
+      multipleDataSource: Joi.object({
+        enabled: Joi.boolean().default(false),
+      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

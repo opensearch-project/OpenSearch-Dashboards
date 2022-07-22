@@ -9,8 +9,9 @@
  * GitHub history for details.
  */
 
-import { CryptoCli } from './cli';
+require('../src/setup_node_env');
 
-const args = require('yargs').argv;
+var args = require('yargs').argv;
+var generateCryptoMaterials = require('../src/plugins/credential_management/server/crypto/crypto_cli');
 
-CryptoCli.generateCryptoMaterials(args.keyName, args.keyNamespace);
+generateCryptoMaterials(args.path, args.keyName, args.keyNamespace);

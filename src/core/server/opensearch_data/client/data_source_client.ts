@@ -11,7 +11,7 @@ import { Logger } from '../../logging';
 import { OpenSearchClient, OpenSearchClientConfig } from '../../opensearch/client';
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 // @ts-ignore
-import { CryptoCli } from '../../../../../src/plugins/credential_management/server/crypto/cli/crypto_cli';
+import { CryptographySingleton } from '../../../../../src/plugins/credential_management/server/crypto/singleton/cryptography_singleton';
 
 /**
  * TODO: update doc
@@ -125,7 +125,7 @@ export class DataSourceClient implements ICustomDataSourceClient {
     const credentialObj = credential!.attributes as any;
     const { user_name: username, password: encryptedPassword } = credentialObj.credential_material;
 
-    const password = await CryptoCli.getInstance().decrypt(
+    const password = await CryptographySingleton.getInstance().decrypt(
       Buffer.from(encryptedPassword, 'base64')
     );
     return { username, password };

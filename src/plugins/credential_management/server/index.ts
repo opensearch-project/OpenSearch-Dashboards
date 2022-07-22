@@ -9,14 +9,20 @@
  * GitHub history for details.
  */
 
+import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
+
 import { PluginInitializerContext } from '../../../core/server';
 import { CredentialManagementPlugin } from './plugin';
+import { configSchema, ConfigSchema } from '../config';
 
-// This exports static code and TypeScript types,
-// as well as, OpenSearch Dashboards Platform `plugin()` initializer.
+// TODO: Add exposeToBrowser for conditional rendering
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+};
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CredentialManagementPlugin(initializerContext);
 }
 
 export { CredentialManagementPluginSetup, CredentialManagementPluginStart } from './types';
+export { CryptographySingleton, generateCryptoMaterials } from './crypto';

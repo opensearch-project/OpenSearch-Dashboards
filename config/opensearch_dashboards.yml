@@ -183,3 +183,15 @@
 # Set the value of this setting to false to suppress search usage telemetry
 # for reducing the load of OpenSearch cluster.
 # data.search.usageTelemetry.enabled: false
+
+# Set the value of this setting to true to enable all multipleDataSource
+# related features including:
+# 1. credential management for managing the credential of each OpenSearch cluster.
+# 2. data source management for managing the connection endpoint of each OpenSearch cluster.
+# opensearchDashboards.multipleDataSource.enabled: false
+
+# Set the value of this setting to custermize crypto materials config to 
+# use encryption / decryption within credential management plugin
+# credential_management.keyName: "keyName"
+# credential_management.keyNamespace: "keyNamespace" 
+# credential_management.materialPath: "path/to/your/crypto_material"

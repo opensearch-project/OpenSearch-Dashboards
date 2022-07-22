@@ -76,6 +76,9 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       index: '.opensearch_dashboards_tests',
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
+      multipleDataSource: {
+        enabled: false,
+      },
     },
     opensearch: {
       shardTimeout: duration('30s'),

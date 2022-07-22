@@ -82,6 +82,9 @@ export const config = {
         defaultValue: '',
       }),
     }),
+    multipleDataSource: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
   deprecations,
 };

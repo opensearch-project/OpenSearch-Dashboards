@@ -9,5 +9,4 @@
  * GitHub history for details.
  */
 
-export { CryptographySingleton } from './singleton/cryptography_singleton';
-export { generateCryptoMaterials } from './crypto_cli';
+export { CryptographySingleton, generateCryptoMaterials } from './cryptography_singleton';

@@ -8,7 +8,7 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { CryptoCli } from '../crypto';
+import { CryptographySingleton } from '../crypto';
 import { Credential } from '../../common';
 
 const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
@@ -20,7 +20,7 @@ export async function encryptionHandler(
   usernamePasswordCredentialMaterials: Record<string, string> | undefined,
   awsIamCredentialMaterials: Record<string, string> | undefined
 ) {
-  const cryptoCli = CryptoCli.getInstance();
+  const cryptoCli = CryptographySingleton.getInstance();
   if (credentialType === USERNAME_PASSWORD_TYPE && usernamePasswordCredentialMaterials) {
     const { user_name, password } = usernamePasswordCredentialMaterials;
     return {
