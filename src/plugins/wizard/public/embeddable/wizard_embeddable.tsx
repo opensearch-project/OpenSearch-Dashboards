@@ -22,21 +22,7 @@ import { DataPublicPluginStart } from '../../../data/public';
 
 export const WIZARD_EMBEDDABLE = 'WIZARD_EMBEDDABLE';
 
-// TODO: remove search, hasMatch or update as appropriate
-export interface WizardInput extends SavedObjectEmbeddableInput {
-  /**
-   * Optional search string which will be used to highlight search terms as
-   * well as calculate `output.hasMatch`.
-   */
-  search?: string;
-}
-
 export interface WizardOutput extends EmbeddableOutput {
-  /**
-   * Should be true if input.search is defined and the task or title contain
-   * search as a substring.
-   */
-  hasMatch: boolean;
   /**
    * Will contain the saved object attributes of the Wizard Saved Object that matches
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
@@ -44,22 +30,7 @@ export interface WizardOutput extends EmbeddableOutput {
   savedAttributes?: WizardSavedObjectAttributes;
 }
 
-/**
- * Returns whether any attributes contain the search string.  If search is empty, true is returned. If
- * there are no savedAttributes, false is returned.
- * @param search - the search string
- * @param savedAttributes - the saved object attributes for the saved object with id `input.savedObjectId`
- */
-function getHasMatch(search?: string, savedAttributes?: WizardSavedObjectAttributes): boolean {
-  if (!search) return true;
-  if (!savedAttributes) return false;
-  return Boolean(
-    (savedAttributes.description && savedAttributes.description.match(search)) ||
-      (savedAttributes.title && savedAttributes.title.match(search))
-  );
-}
-
-export class WizardEmbeddable extends Embeddable<WizardInput, WizardOutput> {
+export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, WizardOutput> {
   public readonly type = WIZARD_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
@@ -72,7 +43,7 @@ export class WizardEmbeddable extends Embeddable<WizardInput, WizardOutput> {
   private savedObjectId?: string;
 
   constructor(
-    initialInput: WizardInput,
+    initialInput: SavedObjectEmbeddableInput,
     {
       parent,
       savedObjectsClient,
@@ -90,7 +61,7 @@ export class WizardEmbeddable extends Embeddable<WizardInput, WizardOutput> {
     }
   ) {
     // TODO: can default title come from saved object?
-    super(initialInput, { defaultTitle: 'wizard', hasMatch: false }, parent);
+    super(initialInput, { defaultTitle: 'wizard' }, parent);
     this.savedObjectsClient = savedObjectsClient;
     this.ReactExpressionRenderer = ReactExpressionRenderer;
     this.toasts = toasts;
@@ -115,10 +86,7 @@ export class WizardEmbeddable extends Embeddable<WizardInput, WizardOutput> {
         savedAttributes = wizardSavedObject?.attributes;
       }
 
-      // The search string might have changed as well so we need to make sure we recalculate
-      // hasMatch.
       this.updateOutput({
-        hasMatch: getHasMatch(this.input.search, savedAttributes),
         savedAttributes,
         title: savedAttributes?.title,
       });
@@ -144,7 +112,6 @@ export class WizardEmbeddable extends Embeddable<WizardInput, WizardOutput> {
     );
     const savedAttributes = wizardSavedObject?.attributes;
     this.updateOutput({
-      hasMatch: getHasMatch(this.input.search, savedAttributes),
       savedAttributes,
       title: wizardSavedObject?.attributes?.title,
     });
