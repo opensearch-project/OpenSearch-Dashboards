@@ -17,18 +17,15 @@ import {
   EmbeddableStart,
   ErrorEmbeddable,
   IContainer,
+  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { ExpressionsStart } from '../../../expressions/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 import { WizardSavedObjectAttributes } from '../../common';
 import { TypeServiceStart } from '../services/type_service';
 import { DisabledEmbeddable } from './disabled_embeddable';
-import {
-  WizardEmbeddable,
-  WizardInput,
-  WizardOutput,
-  WIZARD_EMBEDDABLE,
-} from './wizard_embeddable';
+import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './wizard_embeddable';
+import wizardIcon from '../assets/wizard_icon.svg';
 
 interface StartServices {
   data: DataPublicPluginStart;
@@ -42,7 +39,7 @@ interface StartServices {
 
 // TODO: use or remove?
 export type WizardEmbeddableFactory = EmbeddableFactory<
-  WizardInput,
+  SavedObjectEmbeddableInput,
   WizardOutput | EmbeddableOutput,
   WizardEmbeddable | DisabledEmbeddable,
   WizardSavedObjectAttributes
@@ -51,7 +48,7 @@ export type WizardEmbeddableFactory = EmbeddableFactory<
 export class WizardEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<
-      WizardInput,
+      SavedObjectEmbeddableInput,
       WizardOutput | EmbeddableOutput,
       WizardEmbeddable | DisabledEmbeddable,
       WizardSavedObjectAttributes
@@ -62,7 +59,7 @@ export class WizardEmbeddableFactoryDefinition
     name: 'Wizard',
     includeFields: ['visualizationState'],
     type: 'wizard',
-    getIconForSavedObject: () => 'pencil',
+    getIconForSavedObject: () => wizardIcon,
   };
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
@@ -75,13 +72,13 @@ export class WizardEmbeddableFactoryDefinition
 
   public createFromSavedObject = (
     savedObjectId: string,
-    input: Partial<WizardInput> & { id: string },
+    input: Partial<SavedObjectEmbeddableInput> & { id: string },
     parent?: IContainer
   ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> => {
     return this.create({ ...input, savedObjectId }, parent);
   };
 
-  public async create(input: WizardInput, parent?: IContainer) {
+  public async create(input: SavedObjectEmbeddableInput, parent?: IContainer) {
     // TODO: Use savedWizardLoader here instead
     const {
       data,
