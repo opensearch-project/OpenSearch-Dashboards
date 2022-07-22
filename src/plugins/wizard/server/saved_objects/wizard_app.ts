@@ -16,7 +16,7 @@ export const wizardSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   management: {
-    icon: 'visVisualBuilder', // TODO: Need a custom icon here
+    // icon: '', // TODO: Need a custom icon here - unfortunately a custom SVG won't work without changes to the SavedObjectsManagement plugin
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle: ({ attributes: { title } }: SavedObject<WizardSavedObjectAttributes>) => title,
