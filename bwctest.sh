@@ -13,7 +13,7 @@
 
 set -e
 
-DEFAULT_VERSIONS="osd-2.0.0,osd-1.3.2,"
+DEFAULT_VERSIONS="osd-1.3.2,osd-2.0.0,osd-2.1.0"
 
 function usage() {
     echo ""
