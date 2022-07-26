@@ -8,27 +8,6 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { WizardServices } from '../../../types';
 import { useTypedSelector } from '../state_management';
 
-export const useIndexPattern = (): IndexPattern | undefined => {
-  const { indexPattern: indexId = '' } = useTypedSelector((state) => state.visualization);
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
-  const {
-    services: {
-      data: { indexPatterns },
-    },
-  } = useOpenSearchDashboards<WizardServices>();
-
-  useEffect(() => {
-    const handleIndexUpdate = async () => {
-      const currentIndex = await indexPatterns.get(indexId);
-      setIndexPattern(currentIndex);
-    };
-
-    handleIndexUpdate();
-  }, [indexId, indexPatterns]);
-
-  return indexPattern;
-};
-
 export const useIndexPatterns = () => {
   const { indexPattern: indexId = '' } = useTypedSelector((state) => state.visualization);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
