@@ -12,11 +12,14 @@ import { useIndexPatterns, useVisualizationType } from '../../utils/use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../types';
 import { IAggType } from '../../../../../data/public';
-import { saveAgg, editAgg } from '../../utils/state_management/visualization_slice';
+import { saveDraftAgg, editDraftAgg } from '../../utils/state_management/visualization_slice';
+import { setValid } from '../../utils/state_management/metadata_slice';
+
+const EDITOR_KEY = 'CONFIG_PANEL';
 
 export function SecondaryPanel() {
   const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
-  const [valid, setValid] = useState(true);
+  const valid = useTypedSelector((state) => state.metadata.editorState.valid[EDITOR_KEY]);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
@@ -46,9 +49,26 @@ export function SecondaryPanel() {
   const showAggParamEditor = !!(aggConfig && indexPattern);
 
   const closeMenu = useCallback(() => {
-    // Save the agg if valid else discard
-    dispatch(saveAgg(valid));
-  }, [dispatch, valid]);
+    dispatch(editDraftAgg(undefined));
+  }, [dispatch]);
+
+  const handleSetValid = useCallback(
+    (isValid: boolean) => {
+      // Set validity state globally
+      dispatch(
+        setValid({
+          key: EDITOR_KEY,
+          valid: isValid,
+        })
+      );
+
+      // Autosave changes if valid
+      if (valid) {
+        dispatch(saveDraftAgg());
+      }
+    },
+    [dispatch, valid]
+  );
 
   return (
     <div className="wizConfig__section wizConfig--secondary">
@@ -58,7 +78,7 @@ export function SecondaryPanel() {
           className="wizConfig__aggEditor"
           agg={aggConfig!}
           indexPattern={indexPattern!}
-          setValidity={setValid}
+          setValidity={handleSetValid}
           setTouched={setTouched}
           schemas={schemas}
           formIsTouched={false}
@@ -66,8 +86,8 @@ export function SecondaryPanel() {
           metricAggs={[]}
           state={{
             data: {},
-            description: 'Falalala',
-            title: 'Title for the aggParams',
+            description: '',
+            title: '',
           }}
           setAggParamValue={function <T extends string | number | symbol>(
             aggId: string,
@@ -75,11 +95,11 @@ export function SecondaryPanel() {
             value: any
           ): void {
             aggConfig.params[paramName] = value;
-            dispatch(editAgg(aggConfig.serialize()));
+            dispatch(editDraftAgg(aggConfig.serialize()));
           }}
           onAggTypeChange={function (aggId: string, aggType: IAggType): void {
             aggConfig.type = aggType;
-            dispatch(editAgg(aggConfig.serialize()));
+            dispatch(editDraftAgg(aggConfig.serialize()));
           }}
         />
       )}
