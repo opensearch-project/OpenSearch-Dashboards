@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public';
 import { Title } from './title';
-import { useIndexPattern, useVisualizationType } from '../../utils/use';
+import { useIndexPatterns, useVisualizationType } from '../../utils/use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../types';
 import { IAggType } from '../../../../../data/public';
@@ -20,7 +20,7 @@ export function SecondaryPanel() {
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
-  const indexPattern = useIndexPattern();
+  const indexPattern = useIndexPatterns().selected;
   const {
     services: {
       data: {

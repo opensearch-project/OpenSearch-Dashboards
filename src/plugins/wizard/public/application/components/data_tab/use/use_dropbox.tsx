@@ -16,7 +16,7 @@ import {
   reorderAgg,
   updateAggConfigParams,
 } from '../../../utils/state_management/visualization_slice';
-import { useIndexPattern } from '../../../utils/use/use_index_pattern';
+import { useIndexPatterns } from '../../../utils/use/use_index_pattern';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { WizardServices } from '../../../../types';
 
@@ -31,7 +31,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const { id: dropboxId, label, schema } = props;
   const [validAggTypes, setValidAggTypes] = useState<string[]>([]);
   const dispatch = useTypedDispatch();
-  const indexPattern = useIndexPattern();
+  const indexPattern = useIndexPatterns().selected;
   const {
     services: {
       data: {

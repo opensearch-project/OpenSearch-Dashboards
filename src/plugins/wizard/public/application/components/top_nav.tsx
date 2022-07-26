@@ -11,7 +11,7 @@ import { getTopNavConfig } from '../utils/get_top_nav_config';
 import { WizardServices } from '../../types';
 
 import './top_nav.scss';
-import { useIndexPattern, useSavedWizardVis } from '../utils/use';
+import { useIndexPatterns, useSavedWizardVis } from '../utils/use';
 import { useTypedSelector } from '../utils/state_management';
 
 export const TopNav = () => {
@@ -48,7 +48,7 @@ export const TopNav = () => {
     );
   }, [hasUnappliedChanges, rootState, savedWizardVis, services, visualizationIdFromUrl]);
 
-  const indexPattern = useIndexPattern();
+  const indexPattern = useIndexPatterns().selected;
 
   return (
     <div className="wizTopNav">
