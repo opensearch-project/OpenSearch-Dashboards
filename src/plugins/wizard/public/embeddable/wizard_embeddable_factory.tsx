@@ -5,37 +5,25 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  IUiSettingsClient,
-  NotificationsStart,
-  SavedObjectsClientContract,
-} from '../../../../core/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
-  EmbeddableStart,
   ErrorEmbeddable,
   IContainer,
   SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
-import { ExpressionsStart } from '../../../expressions/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
-import { WizardSavedObjectAttributes } from '../../common';
-import { TypeServiceStart } from '../services/type_service';
+import {
+  EDIT_PATH,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  WizardSavedObjectAttributes,
+  WIZARD_SAVED_OBJECT,
+} from '../../common';
 import { DisabledEmbeddable } from './disabled_embeddable';
 import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './wizard_embeddable';
 import wizardIcon from '../assets/wizard_icon.svg';
-
-interface StartServices {
-  data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  savedObjectsClient: SavedObjectsClientContract;
-  notifications: NotificationsStart;
-  types: TypeServiceStart;
-  uiSettings: IUiSettingsClient;
-}
+import { getHttp, getSavedWizardLoader, getTimeFilter, getUISettings } from '../plugin_services';
 
 // TODO: use or remove?
 export type WizardEmbeddableFactory = EmbeddableFactory<
@@ -56,13 +44,19 @@ export class WizardEmbeddableFactoryDefinition
   public readonly type = WIZARD_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     // TODO: Update to include most vis functionality
-    name: 'Wizard',
+    name: PLUGIN_NAME,
     includeFields: ['visualizationState'],
-    type: 'wizard',
+    type: WIZARD_SAVED_OBJECT,
     getIconForSavedObject: () => wizardIcon,
   };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {}
+  // TODO: Would it be better to explicitly declare start service dependencies?
+  constructor() {}
+
+  public canCreateNew() {
+    // Because wizard creation starts with the visualization modal, no need to have a separate entry for wizard until it's separate
+    return false;
+  }
 
   public async isEditable() {
     // TODO: Add proper access controls
@@ -70,44 +64,53 @@ export class WizardEmbeddableFactoryDefinition
     return true;
   }
 
-  public createFromSavedObject = (
+  public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<SavedObjectEmbeddableInput> & { id: string },
     parent?: IContainer
-  ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> => {
-    return this.create({ ...input, savedObjectId }, parent);
-  };
+  ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
+    try {
+      const savedWizard = await getSavedWizardLoader().get(savedObjectId);
 
-  public async create(input: SavedObjectEmbeddableInput, parent?: IContainer) {
-    // TODO: Use savedWizardLoader here instead
-    const {
-      data,
-      expressions: { ReactExpressionRenderer },
-      notifications: { toasts },
-      savedObjectsClient,
-      types,
-      uiSettings,
-    } = await this.getStartServices();
+      const editPath = `${EDIT_PATH}/${savedObjectId}`;
 
-    const isLabsEnabled = uiSettings.get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
+      const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
 
-    if (!isLabsEnabled) {
-      return new DisabledEmbeddable('Wizard', input);
+      const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
+
+      if (!isLabsEnabled) {
+        return new DisabledEmbeddable(PLUGIN_NAME, input);
+      }
+
+      return new WizardEmbeddable(
+        getTimeFilter(),
+        {
+          savedWizard,
+          editUrl,
+          editPath,
+          editable: true,
+        },
+        {
+          ...input,
+          savedObjectId: input.savedObjectId ?? '',
+        },
+        {
+          parent,
+        }
+      );
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return new ErrorEmbeddable(e as Error, input, parent);
     }
+  }
 
-    return new WizardEmbeddable(input, {
-      parent,
-      data,
-      savedObjectsClient,
-      ReactExpressionRenderer,
-      toasts,
-      types,
-    });
+  public async create(_input: SavedObjectEmbeddableInput, _parent?: IContainer) {
+    return undefined;
   }
 
   public getDisplayName() {
     return i18n.translate('wizard.displayName', {
-      defaultMessage: 'Wizard',
+      defaultMessage: PLUGIN_ID,
     });
   }
 }

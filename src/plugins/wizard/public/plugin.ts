@@ -20,11 +20,22 @@ import {
   WizardStart,
 } from './types';
 import { WizardEmbeddableFactoryDefinition, WIZARD_EMBEDDABLE } from './embeddable';
+import wizardIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
 import wizardIcon from './assets/wizard_icon.svg';
 import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, WIZARD_SAVED_OBJECT } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
-import { setAggService, setIndexPatterns } from './plugin_services';
+import {
+  setAggService,
+  setIndexPatterns,
+  setHttp,
+  setSavedWizardLoader,
+  setExpressionLoader,
+  setTimeFilter,
+  setUISettings,
+  setTypeService,
+  setReactExpressionRenderer,
+} from './plugin_services';
 import { createSavedWizardLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
 import { ConfigSchema } from '../config';
@@ -63,10 +74,6 @@ export class WizardPlugin
         // TODO: Add the redirect
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
-        // Register plugin services
-        setAggService(data.search.aggs);
-        setIndexPatterns(data.indexPatterns);
-
         // Register Default Visualizations
 
         const services: WizardServices = {
@@ -94,19 +101,7 @@ export class WizardPlugin
     // TODO: investigate simplification via getter a la visualizations:
     // const start = createStartServicesGetter(core.getStartServices));
     // const embeddableFactory = new WizardEmbeddableFactoryDefinition({ start });
-    const embeddableFactory = new WizardEmbeddableFactoryDefinition(async () => {
-      const [coreStart, pluginsStart, _wizardStart] = await core.getStartServices();
-      // TODO: refactor to pass minimal service methods?
-      return {
-        savedObjectsClient: coreStart.savedObjects.client,
-        data: pluginsStart.data,
-        getEmbeddableFactory: pluginsStart.embeddable.getEmbeddableFactory,
-        expressions: pluginsStart.expressions,
-        notifications: coreStart.notifications,
-        types: this.typeService.start(),
-        uiSettings: coreStart.uiSettings,
-      };
-    });
+    const embeddableFactory = new WizardEmbeddableFactoryDefinition();
     embeddable.registerEmbeddableFactory(WIZARD_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
@@ -116,7 +111,7 @@ export class WizardPlugin
       description: i18n.translate('wizard.visPicker.description', {
         defaultMessage: 'Create visualizations using the new Drag & Drop experience',
       }),
-      icon: wizardIcon,
+      icon: wizardIconSecondaryFill,
       stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
@@ -143,18 +138,31 @@ export class WizardPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: WizardPluginStartDependencies): WizardStart {
-    const typeService = this.typeService;
+  public start(core: CoreStart, { data, expressions }: WizardPluginStartDependencies): WizardStart {
+    const typeService = this.typeService.start();
+
+    const savedWizardLoader = createSavedWizardLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+
+    // Register plugin services
+    setAggService(data.search.aggs);
+    setExpressionLoader(expressions.ExpressionLoader);
+    setReactExpressionRenderer(expressions.ReactExpressionRenderer);
+    setHttp(core.http);
+    setIndexPatterns(data.indexPatterns);
+    setSavedWizardLoader(savedWizardLoader);
+    setTimeFilter(data.query.timefilter.timefilter);
+    setTypeService(typeService);
+    setUISettings(core.uiSettings);
 
     return {
-      ...typeService.start(),
-      savedWizardLoader: createSavedWizardLoader({
-        savedObjectsClient: core.savedObjects.client,
-        indexPatterns: data.indexPatterns,
-        search: data.search,
-        chrome: core.chrome,
-        overlays: core.overlays,
-      }),
+      ...typeService,
+      savedWizardLoader,
     };
   }
 

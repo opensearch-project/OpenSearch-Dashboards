@@ -15,11 +15,7 @@ export class VisualizationType implements IVisualizationType {
   public readonly icon: IconType;
   public readonly stage: 'beta' | 'production';
   public readonly ui: IVisualizationType['ui'];
-  public readonly toExpression: (
-    state: RootState,
-    indexPatterns?,
-    aggs?
-  ) => Promise<string | undefined>;
+  public readonly toExpression: (state: RootState) => Promise<string | undefined>;
 
   constructor(options: VisualizationTypeOptions) {
     this.name = options.name;
