@@ -54,14 +54,20 @@ export function SecondaryPanel() {
 
   const handleSetValid = useCallback(
     (isValid: boolean) => {
+      // Set validity state globally
       dispatch(
         setValid({
           key: EDITOR_KEY,
           valid: isValid,
         })
       );
+
+      // Autosave changes if valid
+      if (valid) {
+        dispatch(saveDraftAgg());
+      }
     },
-    [dispatch]
+    [dispatch, valid]
   );
 
   return (
@@ -90,11 +96,6 @@ export function SecondaryPanel() {
           ): void {
             aggConfig.params[paramName] = value;
             dispatch(editDraftAgg(aggConfig.serialize()));
-
-            // Autosave changes if valid
-            if (valid) {
-              dispatch(saveDraftAgg());
-            }
           }}
           onAggTypeChange={function (aggId: string, aggType: IAggType): void {
             aggConfig.type = aggType;
