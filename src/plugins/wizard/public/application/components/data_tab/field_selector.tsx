@@ -16,7 +16,7 @@ import { FieldSelectorField } from './field_selector_field';
 
 import './field_selector.scss';
 import { useTypedSelector } from '../../utils/state_management';
-import { useIndexPattern } from '../../utils/use';
+import { useIndexPatterns } from '../../utils/use';
 import { getAvailableFields } from './utils';
 
 interface IFieldCategories {
@@ -33,7 +33,7 @@ const META_FIELDS: string[] = [
 ];
 
 export const FieldSelector = () => {
-  const indexPattern = useIndexPattern();
+  const indexPattern = useIndexPatterns().selected;
   const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
 
