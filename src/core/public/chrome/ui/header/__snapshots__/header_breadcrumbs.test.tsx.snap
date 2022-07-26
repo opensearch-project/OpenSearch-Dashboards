@@ -4,6 +4,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = 
 <span
   aria-current="page"
   className="euiBreadcrumb euiBreadcrumb--last"
+  data-background="osdHeaderBreadcrumbs first last"
   data-test-subj="breadcrumb first last"
   title="First"
 >
@@ -16,6 +17,7 @@ Array [
   <span
     aria-current="false"
     className="euiBreadcrumb"
+    data-background="osdHeaderBreadcrumbs first"
     data-test-subj="breadcrumb first"
     title="First"
   >
@@ -24,6 +26,7 @@ Array [
   <span
     aria-current="page"
     className="euiBreadcrumb euiBreadcrumb--last"
+    data-background="osdHeaderBreadcrumbs last"
     data-test-subj="breadcrumb last"
     title="Second"
   >
