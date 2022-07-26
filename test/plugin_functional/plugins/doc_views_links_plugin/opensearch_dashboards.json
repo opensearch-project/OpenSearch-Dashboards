@@ -1,0 +1,8 @@
+{
+    "id": "docViewLinksPlugin",
+    "version": "0.0.1",
+    "opensearchDashboardsVersion": "opensearchDashboards",
+    "server": false,
+    "ui": true,
+    "requiredPlugins": ["discover"]
+}

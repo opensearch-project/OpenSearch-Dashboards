@@ -28,23 +28,18 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import { FormattedMessage } from '@osd/i18n/react';
+import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
+import { VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
+import { DefaultMapOptions } from './default_map_options';
+import { MapChoiceOptions } from './map_choice_options';
+import { StyleOptions } from './style_options';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
   value: layerId,
-});
-
-const mapFieldForOption = ({ description, name }: FileLayerField) => ({
-  text: description,
-  value: name,
 });
 
 export type RegionMapOptionsProps = {
@@ -52,152 +47,32 @@ export type RegionMapOptionsProps = {
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { getServiceSettings, stateParams, vis, setValue } = props;
-  const { vectorLayers } = vis.type.editorConfig.collections;
-  const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
-  const fieldOptions = useMemo(
-    () =>
-      ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
-        mapFieldForOption
-      ),
-    [stateParams.selectedLayer]
-  );
+  const customVectorLayers = props.vis.type.editorConfig.collections.customVectorLayers;
+  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
+    customVectorLayers,
+  ]);
 
-  const setEmsHotLink = useCallback(
-    async (layer: VectorLayer) => {
-      const serviceSettings = await getServiceSettings();
-      const emsHotLink = await serviceSettings.getEMSHotLink(layer);
-      setValue('emsHotLink', emsHotLink);
-    },
-    [setValue, getServiceSettings]
-  );
-
-  const setLayer = useCallback(
-    async (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
-      const newLayer = vectorLayers.find(({ layerId }: VectorLayer) => layerId === value);
-
-      if (newLayer) {
-        setValue(paramName, newLayer);
-        setValue('selectedJoinField', newLayer.fields[0]);
-        setEmsHotLink(newLayer);
-      }
-    },
-    [vectorLayers, setEmsHotLink, setValue]
-  );
-
-  const setField = useCallback(
-    (paramName: 'selectedJoinField', value: FileLayerField['name']) => {
-      if (stateParams.selectedLayer) {
-        setValue(
-          paramName,
-          stateParams.selectedLayer.fields.find((f) => f.name === value)
-        );
-      }
-    },
-    [setValue, stateParams.selectedLayer]
-  );
-
-  return (
-    <>
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="regionMap.visParams.layerSettingsTitle"
-              defaultMessage="Layer settings"
-            />
-          </h2>
-        </EuiTitle>
+  if (customVectorLayerOptions.length === 0) {
+    return (
+      <div id="defaultMapOption">
+        <DefaultMapOptions {...props} />
         <EuiSpacer size="s" />
-
-        <SelectOption
-          id="regionMapOptionsSelectLayer"
-          label={i18n.translate('regionMap.visParams.vectorMapLabel', {
-            defaultMessage: 'Vector map',
-          })}
-          options={vectorLayerOptions}
-          paramName="selectedLayer"
-          value={stateParams.selectedLayer && stateParams.selectedLayer.layerId}
-          setValue={setLayer}
-        />
-
-        <SelectOption
-          id="regionMapOptionsSelectJoinField"
-          label={i18n.translate('regionMap.visParams.joinFieldLabel', {
-            defaultMessage: 'Join field',
-          })}
-          options={fieldOptions}
-          paramName="selectedJoinField"
-          value={stateParams.selectedJoinField && stateParams.selectedJoinField.name}
-          setValue={setField}
-        />
-
-        <SwitchOption
-          label={i18n.translate('regionMap.visParams.displayWarningsLabel', {
-            defaultMessage: 'Display warnings',
-          })}
-          tooltip={i18n.translate('regionMap.visParams.switchWarningsTipText', {
-            defaultMessage:
-              'Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.',
-          })}
-          paramName="isDisplayWarning"
-          value={stateParams.isDisplayWarning}
-          setValue={setValue}
-        />
-
-        <SwitchOption
-          label={i18n.translate('regionMap.visParams.showAllShapesLabel', {
-            defaultMessage: 'Show all shapes',
-          })}
-          tooltip={i18n.translate('regionMap.visParams.turnOffShowingAllShapesTipText', {
-            defaultMessage:
-              'Turning this off only shows the shapes that were matched with a corresponding term.',
-          })}
-          paramName="showAllShapes"
-          value={stateParams.showAllShapes}
-          setValue={setValue}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="regionMap.visParams.styleSettingsLabel"
-              defaultMessage="Style settings"
-            />
-          </h2>
-        </EuiTitle>
+        <StyleOptions {...props} />
         <EuiSpacer size="s" />
-
-        <SelectOption
-          label={i18n.translate('regionMap.visParams.colorSchemaLabel', {
-            defaultMessage: 'Color schema',
-          })}
-          options={vis.type.editorConfig.collections.colorSchemas}
-          paramName="colorSchema"
-          value={stateParams.colorSchema}
-          setValue={setValue}
-        />
-
-        <NumberInputOption
-          label={i18n.translate('regionMap.visParams.outlineWeightLabel', {
-            defaultMessage: 'Border thickness',
-          })}
-          min={0}
-          paramName="outlineWeight"
-          value={stateParams.outlineWeight}
-          setValue={setValue}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
-
-      <WmsOptions {...props} />
-    </>
-  );
+        <WmsOptions {...props} />
+      </div>
+    );
+  } else {
+    return (
+      <div id="customMapOption">
+        <MapChoiceOptions {...props} />
+        <EuiSpacer size="s" />
+        <StyleOptions {...props} />
+        <EuiSpacer size="s" />
+        <WmsOptions {...props} />
+      </div>
+    );
+  }
 }
 
 export { RegionMapOptions };

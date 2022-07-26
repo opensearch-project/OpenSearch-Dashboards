@@ -39,7 +39,7 @@ const createStartContractMock = () => {
       new BehaviorSubject<CoreUsageData>({
         config: {
           opensearch: {
-            apiVersion: 'master',
+            apiVersion: 'main',
             customHeadersConfigured: false,
             healthCheckDelayMs: 2500,
             logQueries: false,
