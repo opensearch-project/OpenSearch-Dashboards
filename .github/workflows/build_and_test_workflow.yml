@@ -3,10 +3,10 @@
 
 name: Build and test
 
-# trigger on every commit push and PR for all branches except feature branches
+# trigger on every commit push and PR for all branches except feature branches and pushes for backport branches
 on:
   push:
-    branches: [ '**', '!feature/**' ]
+    branches: [ '**', '!feature/**', '!backport/**' ]
   pull_request:
     branches: [ '**', '!feature/**' ]
 
@@ -182,7 +182,7 @@ jobs:
         working-directory: ./artifacts
     strategy: 
       matrix:
-        version: [ osd-2.0.0 ]
+        version: [ osd-2.0.0, osd-2.1.0 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -221,6 +221,10 @@ jobs:
       - name: Skipping tests
         if: steps.verify-opensearch-exists.outputs.version-exists != 'true'
         run: echo Tests were skipped because an OpenSearch release build does not exist for this version yet!
+
+      - name: Setting environment variable to run tests for ${{ matrix.version }}
+        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
+        run: echo "BWC_VERSIONS=${{ matrix.version }}" >> $GITHUB_ENV
     
       - name: Download OpenSearch Dashboards
         uses: actions/download-artifact@v3
@@ -234,3 +238,12 @@ jobs:
         if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
         run: |
           ./bwctest.sh -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz
+      
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() && steps.verify-opensearch-exists.outputs.version-exists == 'true' }}
+        with:
+          name: ${{ matrix.version }}-test-failures
+          path: |
+            ./artifacts/bwc_tmp/test/cypress/videos/without-security/*
+            ./artifacts/bwc_tmp/test/cypress/screenshots/without-security/*
+          retention-days: 1
