@@ -10,6 +10,8 @@ import {
 
 const miscUtils = new MiscUtils(cy);
 const commonUI = new CommonUI(cy);
+const startDate = 'Nov 1, 2016 @ 00:00:00.000';
+const endDate = `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000`;
 
 describe('check dashboards filter and query', () => {
   beforeEach(() => {
@@ -56,7 +58,7 @@ describe('check dashboards filter and query', () => {
         .find('[class="osdSavedQueryListItem__labelText"]')
         .should('have.text', 'test-query')
         .click();
-      commonUI.setDateRange('Dec 1, 2021 @ 00:00:00.000', 'Jan 1, 2021 @ 00:00:00.000');
+      commonUI.setDateRange(endDate, startDate);
 
       //[Logs] vistor chart should show osx 100%
       cy.get('[data-title="[Logs] Visitors by OS"]')
