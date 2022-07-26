@@ -13,7 +13,9 @@ import { SecondaryPanel } from './secondary_panel';
 
 export function ConfigPanel() {
   const vizType = useVisualizationType();
-  const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization?.draftAgg);
+  const editingState = useTypedSelector(
+    (state) => state.visualization.activeVisualization?.draftAgg
+  );
   const schemas = vizType.ui.containerConfig.data.schemas;
 
   if (!schemas) return null;
@@ -21,7 +23,7 @@ export function ConfigPanel() {
   const mainPanel = mapSchemaToAggPanel(schemas);
 
   return (
-    <EuiForm className={`wizConfig ${draftAgg ? 'showSecondary' : ''}`}>
+    <EuiForm className={`wizConfig ${editingState ? 'showSecondary' : ''}`}>
       <div className="wizConfig__section">{mainPanel}</div>
       <SecondaryPanel />
     </EuiForm>

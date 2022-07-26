@@ -95,7 +95,7 @@ export const Workspace: FC = ({ children }) => {
         ) : (
           <EuiFlexItem className="wizWorkspace__empty">
             <EuiEmptyPrompt
-              title={<h2>Drop some fields to start</h2>}
+              title={<h2>Add a field to start</h2>}
               body={
                 <>
                   <p>Drag a field to the configuration panel to generate a visualization.</p>
