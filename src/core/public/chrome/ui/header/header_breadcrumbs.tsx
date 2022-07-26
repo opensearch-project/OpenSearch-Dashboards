@@ -70,7 +70,7 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
   return (
     <EuiHeaderBreadcrumbs
       breadcrumbs={crumbs}
-      max={2}
+      max={10}
       data-test-subj="breadcrumbs"
       className="osdHeaderBreadcrumbs"
     />
