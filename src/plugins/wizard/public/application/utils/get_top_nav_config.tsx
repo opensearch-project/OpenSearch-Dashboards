@@ -91,6 +91,7 @@ export const getTopNavConfig = (
           if (!savedWizardVis) {
             return;
           }
+          const currentTitle = savedWizardVis.title;
           savedWizardVis.visualizationState = JSON.stringify(visualizationState);
           savedWizardVis.styleState = JSON.stringify(styleState);
           savedWizardVis.title = newTitle;
@@ -126,11 +127,13 @@ export const getTopNavConfig = (
                   pathname: `${EDIT_PATH}/${id}`,
                 });
               }
-
-              return { id };
+            } else {
+              // reset title if save not successful
+              savedWizardVis.title = currentTitle;
             }
 
-            throw new Error('Saved but no id returned');
+            // Even if id='', which it will be for a duplicate title warning, we still want to return it, to avoid closing the modal
+            return { id };
           } catch (error: any) {
             // eslint-disable-next-line no-console
             console.error(error);
@@ -145,6 +148,9 @@ export const getTopNavConfig = (
               text: error.message,
               'data-test-subj': 'saveVisualizationError',
             });
+
+            // reset title if save not successful
+            savedWizardVis.title = currentTitle;
             return { error };
           }
         };
