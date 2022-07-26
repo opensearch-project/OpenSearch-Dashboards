@@ -13,5 +13,13 @@ exports[`should render content with markdown 1`] = `
   className="euiText"
   markdown="I am *some* [content](https://en.wikipedia.org/wiki/Content) with \`markdown\`"
   openLinksInNewTab={true}
+  whiteListedRules={
+    Array [
+      "backticks",
+      "emphasis",
+      "link",
+      "list",
+    ]
+  }
 />
 `;
