@@ -35,6 +35,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
+import './header_breadcrumbs.scss';
+
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -57,7 +59,20 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
       i === 0 && 'first',
       i === breadcrumbs.length - 1 && 'last'
     ),
+    'data-background': classNames(
+      'osdHeaderBreadcrumbs',
+      i === 0 && 'first',
+      i > 0 && i < crumbs.length - 1 && 'middle',
+      i === crumbs.length - 1 && 'last'
+    ),
   }));
 
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={crumbs}
+      max={2}
+      data-test-subj="breadcrumbs"
+      className="osdHeaderBreadcrumbs"
+    />
+  );
 }
