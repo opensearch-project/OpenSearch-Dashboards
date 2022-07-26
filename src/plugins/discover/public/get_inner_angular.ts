@@ -51,6 +51,7 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
+import { createDocViewerLinksDirective } from './application/angular/doc_viewer_links';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
@@ -202,5 +203,6 @@ function createDocTableModule() {
     .directive('osdTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('osdInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('docViewer', createDocViewerDirective)
+    .directive('docViewerLinks', createDocViewerLinksDirective);
 }
