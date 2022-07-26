@@ -3,125 +3,289 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { cloneDeep, isEqual } from 'lodash';
 import ReactDOM from 'react-dom';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 
-import { WizardSavedObjectAttributes } from '../../common';
+import { PLUGIN_ID, WizardSavedObjectAttributes, WIZARD_SAVED_OBJECT } from '../../common';
 import {
   Embeddable,
   EmbeddableOutput,
+  ErrorEmbeddable,
   IContainer,
   SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
-import { IToasts, SavedObjectsClientContract } from '../../../../core/public';
-import { WizardEmbeddableComponent } from './wizard_component';
-import { ReactExpressionRendererType } from '../../../expressions/public';
-import { TypeServiceStart } from '../services/type_service';
-import { DataPublicPluginStart } from '../../../data/public';
+import {
+  ExpressionRenderError,
+  ExpressionsStart,
+  IExpressionLoaderParams,
+} from '../../../expressions/public';
+import {
+  Filter,
+  opensearchFilters,
+  Query,
+  TimefilterContract,
+  TimeRange,
+} from '../../../data/public';
+import { validateSchemaState } from '../application/utils/validate_schema_state';
+import { getExpressionLoader, getTypeService } from '../plugin_services';
 
-export const WIZARD_EMBEDDABLE = 'WIZARD_EMBEDDABLE';
+// Apparently this needs to match the saved object type for the clone and replace panel actions to work
+export const WIZARD_EMBEDDABLE = WIZARD_SAVED_OBJECT;
+
+export interface WizardEmbeddableConfiguration {
+  savedWizard: WizardSavedObjectAttributes;
+  // TODO: add indexPatterns as part of configuration
+  // indexPatterns?: IIndexPattern[];
+  editPath: string;
+  editUrl: string;
+  editable: boolean;
+}
 
 export interface WizardOutput extends EmbeddableOutput {
   /**
    * Will contain the saved object attributes of the Wizard Saved Object that matches
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
    */
-  savedAttributes?: WizardSavedObjectAttributes;
+  savedWizard?: WizardSavedObjectAttributes;
 }
+
+type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, WizardOutput> {
   public readonly type = WIZARD_EMBEDDABLE;
-  private subscription: Subscription;
+  private handler?: ExpressionLoader;
+  private timeRange?: TimeRange;
+  private query?: Query;
+  private filters?: Filter[];
+  private abortController?: AbortController;
+  public expression: string = '';
+  private autoRefreshFetchSubscription: Subscription;
+  private subscriptions: Subscription[] = [];
   private node?: HTMLElement;
-  private savedObjectsClient: SavedObjectsClientContract;
-  public ReactExpressionRenderer: ReactExpressionRendererType;
-  public toasts: IToasts;
-  public types: TypeServiceStart;
-  public indexPatterns: DataPublicPluginStart['indexPatterns'];
-  public aggs: DataPublicPluginStart['search']['aggs'];
-  private savedObjectId?: string;
+  private savedWizard?: WizardSavedObjectAttributes;
+  private serializedState?: { visualization: string; style: string };
 
   constructor(
+    timefilter: TimefilterContract,
+    { savedWizard, editPath, editUrl, editable }: WizardEmbeddableConfiguration,
     initialInput: SavedObjectEmbeddableInput,
     {
       parent,
-      savedObjectsClient,
-      data,
-      ReactExpressionRenderer,
-      toasts,
-      types,
     }: {
       parent?: IContainer;
-      data: DataPublicPluginStart;
-      savedObjectsClient: SavedObjectsClientContract;
-      ReactExpressionRenderer: ReactExpressionRendererType;
-      toasts: IToasts;
-      types: TypeServiceStart;
     }
   ) {
-    // TODO: can default title come from saved object?
-    super(initialInput, { defaultTitle: 'wizard' }, parent);
-    this.savedObjectsClient = savedObjectsClient;
-    this.ReactExpressionRenderer = ReactExpressionRenderer;
-    this.toasts = toasts;
-    this.types = types;
-    this.indexPatterns = data.indexPatterns;
-    this.aggs = data.search.aggs;
+    super(
+      initialInput,
+      {
+        defaultTitle: savedWizard.title,
+        editPath,
+        editApp: PLUGIN_ID,
+        editUrl,
+        editable,
+        savedWizard,
+      },
+      parent
+    );
 
-    this.subscription = this.getInput$().subscribe(async () => {
-      // There is a little more work today for this embeddable because it has
-      // more output it needs to update in response to input state changes.
-      let savedAttributes: WizardSavedObjectAttributes | undefined;
+    this.savedWizard = savedWizard;
 
-      // Since this is an expensive task, we save a local copy of the previous
-      // savedObjectId locally and only retrieve the new saved object if the id
-      // actually changed.
-      if (this.savedObjectId !== this.input.savedObjectId) {
-        this.savedObjectId = this.input.savedObjectId;
-        const wizardSavedObject = await this.savedObjectsClient.get<WizardSavedObjectAttributes>(
-          'wizard',
-          this.input.savedObjectId
-        );
-        savedAttributes = wizardSavedObject?.attributes;
+    this.autoRefreshFetchSubscription = timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.updateHandler.bind(this));
+
+    this.subscriptions.push(
+      merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+        this.handleChanges();
+      })
+    );
+  }
+
+  private getSerializedState = () => {
+    const { visualizationState: visualization = '{}', styleState: style = '{}' } =
+      this.savedWizard || {};
+    return {
+      visualization,
+      style,
+    };
+  };
+
+  private getExpression = async () => {
+    if (!this.serializedState) {
+      return;
+    }
+    const { visualization, style } = this.serializedState;
+    const rootState = {
+      visualization: JSON.parse(visualization),
+      style: JSON.parse(style),
+    };
+    const visualizationName = rootState.visualization?.activeVisualization?.name ?? '';
+    const visualizationType = getTypeService().get(visualizationName);
+    if (!visualizationType) {
+      this.onContainerError(new Error(`Invalid visualization type ${visualizationName}`));
+      return;
+    }
+    const { toExpression, ui } = visualizationType;
+    const schemas = ui.containerConfig.data.schemas;
+    const [valid, errorMsg] = validateSchemaState(schemas, rootState);
+
+    if (!valid) {
+      if (errorMsg) {
+        this.onContainerError(new Error(errorMsg));
+        return;
       }
+    } else {
+      // TODO: handle error in Expression creation
+      const exp = await toExpression(rootState);
+      return exp;
+    }
+  };
 
-      this.updateOutput({
-        savedAttributes,
-        title: savedAttributes?.title,
-      });
-    });
+  // Needed to enable inspection panel option
+  public getInspectorAdapters = () => {
+    if (!this.handler) {
+      return undefined;
+    }
+    return this.handler.inspect();
+  };
+
+  // Needed to add informational tooltip
+  public getDescription() {
+    return this.savedWizard?.description;
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.output.error) {
+      // TODO: Can we find a more elegant way to throw, propagate, and render errors?
+      const errorEmbeddable = new ErrorEmbeddable(
+        this.output.error as Error,
+        this.input,
+        this.parent
+      );
+      return errorEmbeddable.render(node);
     }
-    this.node = node;
-    ReactDOM.render(<WizardEmbeddableComponent embeddable={this} />, node);
+    this.timeRange = cloneDeep(this.input.timeRange);
+
+    const div = document.createElement('div');
+    div.className = `wizard visualize panel-content panel-content--fullWidth`;
+    node.appendChild(div);
+
+    this.node = div;
+    super.render(this.node);
+
+    // TODO: Investigate migrating to using `./wizard_component` for React rendering instead
+    const ExpressionLoader = getExpressionLoader();
+    this.handler = new ExpressionLoader(this.node, undefined, {
+      onRenderError: (_element: HTMLElement, error: ExpressionRenderError) => {
+        this.onContainerError(error);
+      },
+    });
+
+    if (this.savedWizard?.description) {
+      div.setAttribute('data-description', this.savedWizard.description);
+    }
+
+    div.setAttribute('data-test-subj', 'wizardLoader');
+
+    this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
+    this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
+
+    this.updateHandler();
   }
 
-  /**
-   * Lets re-sync our saved object to make sure it's up to date!
-   */
   public async reload() {
-    this.savedObjectId = this.input.savedObjectId;
-    const wizardSavedObject = await this.savedObjectsClient.get<WizardSavedObjectAttributes>(
-      'wizard',
-      this.input.savedObjectId
-    );
-    const savedAttributes = wizardSavedObject?.attributes;
-    this.updateOutput({
-      savedAttributes,
-      title: wizardSavedObject?.attributes?.title,
-    });
+    this.updateHandler();
   }
 
   public destroy() {
     super.destroy();
-    this.subscription.unsubscribe();
+    this.subscriptions.forEach((s) => s.unsubscribe());
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+
+    if (this.handler) {
+      this.handler.destroy();
+      this.handler.getElement().remove();
+    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
+
+  private async updateHandler() {
+    const expressionParams: IExpressionLoaderParams = {
+      searchContext: {
+        timeRange: this.timeRange,
+        query: this.input.query,
+        filters: this.input.filters,
+      },
+    };
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+    const abortController = this.abortController;
+
+    if (this.handler && !abortController.signal.aborted) {
+      this.handler.update(this.expression, expressionParams);
+    }
+  }
+
+  public async handleChanges() {
+    // TODO: refactor (here and in visualize) to remove lodash dependency - immer probably a better choice
+
+    let dirty = false;
+
+    // Check if timerange has changed
+    if (!isEqual(this.input.timeRange, this.timeRange)) {
+      this.timeRange = cloneDeep(this.input.timeRange);
+      dirty = true;
+    }
+
+    // Check if filters has changed
+    if (!opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+      this.filters = this.input.filters;
+      dirty = true;
+    }
+
+    // Check if query has changed
+    if (!isEqual(this.input.query, this.query)) {
+      this.query = this.input.query;
+      dirty = true;
+    }
+
+    // Check if rootState has changed
+    if (!isEqual(this.getSerializedState(), this.serializedState)) {
+      this.serializedState = this.getSerializedState();
+      this.expression = (await this.getExpression()) ?? '';
+      dirty = true;
+    }
+
+    if (this.handler && dirty) {
+      this.updateHandler();
+    }
+  }
+
+  onContainerLoading = () => {
+    this.renderComplete.dispatchInProgress();
+    this.updateOutput({ loading: true, error: undefined });
+  };
+
+  onContainerRender = () => {
+    this.renderComplete.dispatchComplete();
+    this.updateOutput({ loading: false, error: undefined });
+  };
+
+  onContainerError = (error: ExpressionRenderError) => {
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.renderComplete.dispatchError();
+    this.updateOutput({ loading: false, error });
+  };
+
+  // TODO: we may eventually need to add support for visualizations that use triggers like filter or brush, but current wizard vis types don't support triggers
+  // public supportedTriggers(): TriggerId[] {
+  //   return this.visType.getSupportedTriggers?.() ?? [];
+  // }
 }
