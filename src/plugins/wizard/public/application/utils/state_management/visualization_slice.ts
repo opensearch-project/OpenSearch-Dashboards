@@ -59,15 +59,13 @@ export const slice = createSlice({
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
     },
-    editAgg: (state, action: PayloadAction<CreateAggConfigParams>) => {
+    editDraftAgg: (state, action: PayloadAction<CreateAggConfigParams | undefined>) => {
       state.activeVisualization!.draftAgg = action.payload;
     },
-    saveAgg: (state, action: PayloadAction<boolean>) => {
-      const saveDraft = action.payload;
+    saveDraftAgg: (state, action: PayloadAction<undefined>) => {
       const draftAgg = state.activeVisualization!.draftAgg;
 
-      // Delete the aggConfigParam if the save is not true
-      if (saveDraft && draftAgg) {
+      if (draftAgg) {
         const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
           (agg) => agg.id === draftAgg.id
         );
@@ -78,7 +76,6 @@ export const slice = createSlice({
           state.activeVisualization!.aggConfigParams.splice(aggIndex, 1, draftAgg);
         }
       }
-      delete state.activeVisualization!.draftAgg;
     },
     reorderAgg: (
       state,
@@ -116,9 +113,9 @@ export const {
   setActiveVisualization,
   setIndexPattern,
   setSearchField,
-  editAgg,
+  editDraftAgg,
+  saveDraftAgg,
   updateAggConfigParams,
-  saveAgg,
   reorderAgg,
   setState,
 } = slice.actions;

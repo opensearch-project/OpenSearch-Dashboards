@@ -12,7 +12,7 @@ import { useTypedDispatch, useTypedSelector } from '../../../utils/state_managem
 import { DropboxDisplay, DropboxProps } from '../dropbox';
 import { useDrop } from '../../../utils/drag_drop';
 import {
-  editAgg,
+  editDraftAgg,
   reorderAgg,
   updateAggConfigParams,
 } from '../../../utils/state_management/visualization_slice';
@@ -88,18 +88,18 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
       throw new Error('Missing new aggConfig');
     }
 
-    dispatch(editAgg(newAggConfig.serialize()));
+    dispatch(editDraftAgg(newAggConfig.serialize()));
   }, [aggConfigs, aggService, aggs, dispatch, indexPattern, schema.name]);
 
   const onEditField = useCallback(
-    (aggId) => {
+    (aggId: string) => {
       const aggConfig = aggConfigs?.aggs.find((agg) => agg.id === aggId);
 
       if (!aggConfig) {
         throw new Error('Could not find agg in aggConfigs');
       }
 
-      dispatch(editAgg(aggConfig.serialize()));
+      dispatch(editDraftAgg(aggConfig.serialize()));
     },
     [aggConfigs?.aggs, dispatch]
   );

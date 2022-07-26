@@ -6,12 +6,14 @@
 import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolkit';
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
+import { reducer as metadataReducer } from './metadata_slice';
 import { WizardServices } from '../../..';
 import { getPreloadedState } from './preload';
 
 const rootReducer = combineReducers({
   style: styleReducer,
   visualization: visualizationReducer,
+  metadata: metadataReducer,
 });
 
 export const configurePreloadedStore = (preloadedState: PreloadedState<RootState>) => {
