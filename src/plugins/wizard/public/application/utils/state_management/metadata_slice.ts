@@ -9,7 +9,7 @@ import { WizardServices } from '../../../types';
 export interface MetadataState {
   editorState: {
     valid: {
-      // Vaidity for each section in the editor
+      // Validity for each section in the editor
       [key: string]: boolean;
     };
   };
