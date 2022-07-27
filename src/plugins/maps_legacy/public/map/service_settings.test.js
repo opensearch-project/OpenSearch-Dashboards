@@ -44,11 +44,12 @@ import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems_mocks/sample_style_b
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
 import { ORIGIN } from '../common/constants/origin';
-import { ServiceSettings } from './service_settings';
+import { ServiceSettings, DEFAULT_SERVICE } from './service_settings';
 
 describe('service_settings (FKA tile_map test)', function () {
   const emsFileApiUrl = 'https://files.foobar';
   const emsTileApiUrl = 'https://tiles.foobar';
+  const noInternetManifestUrl = 'https://manifest.foobar';
 
   const defaultMapConfig = {
     emsFileApiUrl,
@@ -65,11 +66,23 @@ describe('service_settings (FKA tile_map test)', function () {
     options: {},
   };
 
-  function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}) {
+  function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}, otherOptions = {}) {
+    const { noInternet } = otherOptions;
     const serviceSettings = new ServiceSettings(
-      { ...defaultMapConfig, ...mapConfigOptions },
-      { ...defaultTilemapConfig, ...tilemapOptions }
+      {
+        ...defaultMapConfig,
+        ...mapConfigOptions,
+        opensearchManifestServiceUrl: noInternet ? noInternetManifestUrl : '',
+      },
+      {
+        ...defaultTilemapConfig,
+        ...tilemapOptions,
+      }
     );
+    if (noInternet) {
+      return serviceSettings;
+    }
+
     serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
       if (url.startsWith('https://tiles.foobar')) {
@@ -88,7 +101,6 @@ describe('service_settings (FKA tile_map test)', function () {
     });
     return serviceSettings;
   }
-
   describe('TMS', function () {
     it('should NOT get url from the config', async function () {
       const serviceSettings = makeServiceSettings();
@@ -283,6 +295,19 @@ describe('service_settings (FKA tile_map test)', function () {
         expect(tilemapServices).toEqual(expected);
       });
     });
+
+    describe('when unable to access OpenSearch maps service', function () {
+      const expectedDefaultTmService = DEFAULT_SERVICE[0];
+      it('should return default service', async () => {
+        const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
+        const tileMapServices = await serviceSettings.getTMSServices();
+        expect(tileMapServices[0]).toMatchObject(expectedDefaultTmService);
+        const isDesaturated = true;
+        const isDarkMode = true;
+        const attrs = await serviceSettings._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
+        expect(attrs[0]).toMatchObject(expectedDefaultTmService);
+      });
+    });
   });
 
   describe('File layers', function () {
@@ -354,6 +379,20 @@ describe('service_settings (FKA tile_map test)', function () {
       expect(fileLayer.attribution).toEqual(
         '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">OpenSearch Maps Service</a>'
       );
+    });
+
+    describe('when unable to access maps service', function () {
+      const serviceSettings = makeServiceSettings({}, {}, { noInternet: true });
+
+      it('should return empty arr', async () => {
+        const fileLayers = await serviceSettings.getFileLayers();
+        expect(fileLayers).toEqual([]);
+      });
+
+      it('should return null', async () => {
+        const fileLayer = await serviceSettings.getFileLayerFromConfig(null);
+        expect(fileLayer).toEqual(null);
+      });
     });
   });
 });

@@ -40,6 +40,19 @@ import { ORIGIN } from '../common/constants/origin';
 
 const TMS_IN_YML_ID = 'TMS in config/opensearch_dashboards.yml';
 
+// When unable to fetch OpenSearch maps service, return default values to
+// make sure wms can be set up.
+export const DEFAULT_SERVICE = [
+  {
+    origin: 'elastic_maps_service',
+    id: 'road_map',
+    minZoom: 0,
+    maxZoom: 22,
+    attribution:
+      '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">Map data © OpenStreetMap contributors</a>',
+  },
+];
+
 export class ServiceSettings {
   constructor(mapConfig, tilemapsConfig) {
     this._mapConfig = mapConfig;
@@ -155,8 +168,12 @@ export class ServiceSettings {
     }
 
     await this._setMapServices();
-    const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.map(this._backfillSettings);
+    try {
+      const fileLayers = await this._emsClient.getFileLayers();
+      return fileLayers.map(this._backfillSettings);
+    } catch (e) {
+      return [];
+    }
   }
 
   /**
@@ -175,7 +192,12 @@ export class ServiceSettings {
 
     await this._setMapServices();
     if (this._mapConfig.includeOpenSearchMapsService) {
-      const servicesFromManifest = await this._emsClient.getTMSServices();
+      let servicesFromManifest = [];
+      try {
+        servicesFromManifest = await this._emsClient.getTMSServices();
+      } catch (e) {
+        return DEFAULT_SERVICE;
+      }
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest
           .filter((tmsService) => tmsService.getId() === this._mapConfig.emsTileLayerId.bright)
@@ -207,12 +229,17 @@ export class ServiceSettings {
   }
 
   async getFileLayerFromConfig(fileLayerConfig) {
-    const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.find((fileLayer) => {
-      const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
-      const hasIdById = fileLayer.hasId(fileLayerConfig.id);
-      return hasIdByName || hasIdById;
-    });
+    let fileLayers = [];
+    try {
+      fileLayers = await this._emsClient.getFileLayers();
+      return fileLayers.find((fileLayer) => {
+        const hasIdByName = fileLayer.hasId(fileLayerConfig.name); //legacy
+        const hasIdById = fileLayer.hasId(fileLayerConfig.id);
+        return hasIdByName || hasIdById;
+      });
+    } catch (err) {
+      return null;
+    }
   }
 
   async getEMSHotLink(fileLayerConfig) {
@@ -228,7 +255,12 @@ export class ServiceSettings {
 
   async _getAttributesForEMSTMSLayer(isDesaturated, isDarkMode) {
     await this._setMapServices();
-    const tmsServices = await this._emsClient.getTMSServices();
+    let tmsServices = [];
+    try {
+      tmsServices = await this._emsClient.getTMSServices();
+    } catch (e) {
+      return DEFAULT_SERVICE;
+    }
     const emsTileLayerId = this._mapConfig.emsTileLayerId;
     let serviceId;
     if (isDarkMode) {
