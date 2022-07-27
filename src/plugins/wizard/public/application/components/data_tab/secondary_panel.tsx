@@ -73,6 +73,9 @@ export function SecondaryPanel() {
     () => {
       if (isEditorValid) {
         dispatch(saveDraftAgg());
+      } else {
+        // To indicate that an invalid edit was made
+        setTouched(true);
       }
     },
     200,
@@ -90,7 +93,7 @@ export function SecondaryPanel() {
           setValidity={handleSetValid}
           setTouched={setTouched}
           schemas={schemas}
-          formIsTouched={false}
+          formIsTouched={touched}
           groupName={selectedSchema?.group ?? 'none'}
           metricAggs={[]}
           state={{
