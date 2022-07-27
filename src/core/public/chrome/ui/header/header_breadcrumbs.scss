@@ -1,6 +1,6 @@
 @import "../../../../public/variables";
 
-@mixin backround($color,$shape) {
+@mixin background($color,$shape) {
   background-color: #{$color};
   clip-path: $shape;
   padding: $euiSizeXS - 2.5 $euiSizeL - $euiSizeXS;
@@ -10,7 +10,7 @@
   filter: url("../../public/assets/round_filter.svg#round");
 
   .osdBreadcrumbs.first {
-    @include backround($osdSanFranciscoFog,
+    @include background($osdSanFranciscoFog,
     polygon(
       0% 0%,
       100% 0%,
@@ -20,7 +20,7 @@
   }
 
   .osdBreadcrumbs.middle {
-    @include backround($osdSanFranciscoFog,
+    @include background($osdSanFranciscoFog,
     polygon(
       $euiSizeS 0%,
       100% 0%,
@@ -30,7 +30,7 @@
   }
 
   .osdBreadcrumbs.last {
-    @include backround($osdPacificSky,
+    @include background($osdPacificSky,
     polygon(
       $euiSizeS 0%,
       100% 0%,
@@ -40,7 +40,7 @@
   }
 
   .osdBreadcrumbs.first.last {
-    @include backround($osdPacificSky,
+    @include background($osdPacificSky,
     polygon(
       0% 0%,
       100% 0%,
