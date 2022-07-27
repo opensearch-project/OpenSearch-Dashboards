@@ -5,6 +5,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
+import { useDebounce } from 'react-use';
 import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public';
 import { Title } from './title';
@@ -13,13 +14,15 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { WizardServices } from '../../../types';
 import { IAggType } from '../../../../../data/public';
 import { saveDraftAgg, editDraftAgg } from '../../utils/state_management/visualization_slice';
-import { setValid } from '../../utils/state_management/metadata_slice';
+import { setValidity } from '../../utils/state_management/metadata_slice';
 
 const EDITOR_KEY = 'CONFIG_PANEL';
 
 export function SecondaryPanel() {
   const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
-  const valid = useTypedSelector((state) => state.metadata.editorState.valid[EDITOR_KEY]);
+  const isEditorValid = useTypedSelector(
+    (state) => state.metadata.editorState.validity[EDITOR_KEY]
+  );
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
@@ -56,18 +59,27 @@ export function SecondaryPanel() {
     (isValid: boolean) => {
       // Set validity state globally
       dispatch(
-        setValid({
+        setValidity({
           key: EDITOR_KEY,
           valid: isValid,
         })
       );
+    },
+    [dispatch]
+  );
 
-      // Autosave changes if valid
-      if (valid) {
+  // Autosave is agg value has changed and edits are valid
+  useDebounce(
+    () => {
+      if (isEditorValid) {
         dispatch(saveDraftAgg());
+      } else {
+        // To indicate that an invalid edit was made
+        setTouched(true);
       }
     },
-    [dispatch, valid]
+    200,
+    [draftAgg, isEditorValid]
   );
 
   return (
@@ -81,7 +93,7 @@ export function SecondaryPanel() {
           setValidity={handleSetValid}
           setTouched={setTouched}
           schemas={schemas}
-          formIsTouched={false}
+          formIsTouched={touched}
           groupName={selectedSchema?.group ?? 'none'}
           metricAggs={[]}
           state={{

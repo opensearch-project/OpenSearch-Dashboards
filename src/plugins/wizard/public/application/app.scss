@@ -9,3 +9,7 @@
     "sideNav workspace";
   height: calc(100vh - #{$osdHeaderOffset});
 }
+
+.headerIsExpanded .wizLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+}

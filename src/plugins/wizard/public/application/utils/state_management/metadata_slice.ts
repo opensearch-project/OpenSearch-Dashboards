@@ -8,7 +8,7 @@ import { WizardServices } from '../../../types';
 
 export interface MetadataState {
   editorState: {
-    valid: {
+    validity: {
       // Validity for each section in the editor
       [key: string]: boolean;
     };
@@ -17,7 +17,7 @@ export interface MetadataState {
 
 const initialState: MetadataState = {
   editorState: {
-    valid: {},
+    validity: {},
   },
 };
 
@@ -34,9 +34,9 @@ export const slice = createSlice({
   name: 'metadata',
   initialState,
   reducers: {
-    setValid: (state, action: PayloadAction<{ key: string; valid: boolean }>) => {
+    setValidity: (state, action: PayloadAction<{ key: string; valid: boolean }>) => {
       const { key, valid } = action.payload;
-      state.editorState.valid[key] = valid;
+      state.editorState.validity[key] = valid;
     },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
@@ -45,4 +45,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setValid, setState } = slice.actions;
+export const { setValidity, setState } = slice.actions;
