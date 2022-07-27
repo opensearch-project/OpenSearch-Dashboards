@@ -3595,7 +3595,7 @@ exports[`Header handles visibility and lock changes 1`] = `
               breadcrumbs={
                 Array [
                   Object {
-                    "data-background": "osdHeaderBreadcrumbs first last",
+                    "className": "osdBreadcrumbs first last",
                     "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
@@ -3609,7 +3609,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "data-background": "osdHeaderBreadcrumbs first last",
+                      "className": "osdBreadcrumbs first last",
                       "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
@@ -3628,8 +3628,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                   <EuiInnerText>
                     <span
                       aria-current="page"
-                      className="euiBreadcrumb euiBreadcrumb--last"
-                      data-background="osdHeaderBreadcrumbs first last"
+                      className="euiBreadcrumb osdBreadcrumbs first last euiBreadcrumb--last"
                       data-test-subj="breadcrumb first last"
                       title="test"
                     >
@@ -8828,7 +8827,7 @@ exports[`Header renders condensed header 1`] = `
               breadcrumbs={
                 Array [
                   Object {
-                    "data-background": "osdHeaderBreadcrumbs first last",
+                    "className": "osdBreadcrumbs first last",
                     "data-test-subj": "breadcrumb first",
                     "text": "test",
                   },
@@ -8842,7 +8841,7 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "data-background": "osdHeaderBreadcrumbs first last",
+                      "className": "osdBreadcrumbs first last",
                       "data-test-subj": "breadcrumb first",
                       "text": "test",
                     },
@@ -8861,8 +8860,7 @@ exports[`Header renders condensed header 1`] = `
                   <EuiInnerText>
                     <span
                       aria-current="page"
-                      className="euiBreadcrumb euiBreadcrumb--last"
-                      data-background="osdHeaderBreadcrumbs first last"
+                      className="euiBreadcrumb osdBreadcrumbs first last euiBreadcrumb--last"
                       data-test-subj="breadcrumb first"
                       title="test"
                     >
