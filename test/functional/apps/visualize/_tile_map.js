@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }) {
         zoomWarningEnabled = await testSubjects.exists('zoomWarningEnabled');
         log.debug(`Zoom warning enabled: ${zoomWarningEnabled}`);
 
-        const zoomLevel = 9;
+        const zoomLevel = 13;
         for (let i = 0; i < zoomLevel; i++) {
           await PageObjects.tileMap.clickMapZoomIn();
         }
@@ -278,7 +278,7 @@ export default function ({ getService, getPageObjects }) {
         }
       });
 
-      it('should show warning at zoom 10', async () => {
+      it('should show warning at zoom 14', async () => {
         await testSubjects.existOrFail('maxZoomWarning');
       });
 
