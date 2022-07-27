@@ -59,8 +59,8 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
       i === 0 && 'first',
       i === breadcrumbs.length - 1 && 'last'
     ),
-    'data-background': classNames(
-      'osdHeaderBreadcrumbs',
+    className: classNames(
+      'osdBreadcrumbs',
       i === 0 && 'first',
       i > 0 && i < crumbs.length - 1 && 'middle',
       i === crumbs.length - 1 && 'last'

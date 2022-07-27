@@ -4,27 +4,49 @@
   background-color: #{$color};
   clip-path: $shape;
   padding: $euiSizeXS - 2.5 $euiSizeL - $euiSizeXS;
-  border-radius: $euiSizeXS - 2;
 }
 
 .osdHeaderBreadcrumbs {
-  [data-background="osdHeaderBreadcrumbs first"] {
-    @include backround($osdSanFranciscoFog, polygon(0% 0%,100% 0%,calc(100% - #{
-      $euiSizeS + 2}) 100%,0% 100%));
-  }
+  filter: url("../../public/assets/round_filter.svg#round");
 
-  [data-background="osdHeaderBreadcrumbs middle"] {
+  .osdBreadcrumbs.first {
     @include backround($osdSanFranciscoFog,
-    polygon($euiSizeS + 2 0%,100% 0%,calc(100% - #{$euiSizeS + 2})  100%,0% 100%));
+    polygon(
+      0% 0%,
+      100% 0%,
+      calc(100% - #{$euiSizeS}) 100%,
+      0% 100%
+    ));
   }
 
-  [data-background="osdHeaderBreadcrumbs last"] {
-    @include backround($osdPacificSky,polygon(
-      $euiSizeS + 2 0%, 100% 0%, calc(100% - #{$euiSizeS + 2}) 100%, 0% 100%));
+  .osdBreadcrumbs.middle {
+    @include backround($osdSanFranciscoFog,
+    polygon(
+      $euiSizeS 0%,
+      100% 0%,
+      calc(100% - #{$euiSizeS})  100%,
+      0% 100%
+    ));
   }
 
-  [data-background="osdHeaderBreadcrumbs first last"] {
-    @include backround($osdPacificSky,polygon(0% 0%,100% 0%,calc(100% - #{$euiSizeS + 2}) 100%,0% 100%));
+  .osdBreadcrumbs.last {
+    @include backround($osdPacificSky,
+    polygon(
+      $euiSizeS 0%,
+      100% 0%,
+      calc(100% - #{$euiSizeS}) 100%,
+      0% 100%
+    ));
+  }
+
+  .osdBreadcrumbs.first.last {
+    @include backround($osdPacificSky,
+    polygon(
+      0% 0%,
+      100% 0%,
+      calc(100% - #{$euiSizeS})100%,
+      0% 100%
+    ));
   }
 
   .euiBreadcrumbSeparator {
@@ -36,7 +58,8 @@
   }
 
   .euiBreadcrumb__collapsedLink {
-    color: $osdDarkCyanBlue;
+    color: $osdMidnightSky;
+    background: $euiColorEmptyShade;
   }
 
   .euiPopover__anchor {
