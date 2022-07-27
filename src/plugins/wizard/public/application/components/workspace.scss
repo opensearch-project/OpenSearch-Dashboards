@@ -16,9 +16,9 @@
   }
 
   &__handFieldSvg {
-    animation: wizDragAnimation 2s ease-in-out infinite alternate;
+    animation: wizDragAnimation 6s ease-in-out infinite forwards;
     position: absolute;
-    top: 43%;
+    top: 34.5%;
   }
 }
 
@@ -27,7 +27,15 @@
     transform: none;
   }
 
+  30% {
+    transform: translate(116%, -80%);
+  }
+
+  60% {
+    transform: none;
+  }
+
   100% {
-    transform: translate(65%, -30%);
+    transform: none;
   }
 }
