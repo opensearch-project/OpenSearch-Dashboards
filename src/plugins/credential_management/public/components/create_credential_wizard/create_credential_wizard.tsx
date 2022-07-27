@@ -31,7 +31,7 @@ import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
-import { Credential } from '../../../common';
+import { IUSERNAME_PASSWORD_TYPE, IAWS_IAM_TYPE } from '../../../common';
 
 interface CreateCredentialWizardState {
   credentialName: string;
@@ -43,7 +43,8 @@ interface CreateCredentialWizardState {
   docLinks: DocLinksStart;
 }
 
-const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
+const USERNAME_PASSWORD_KEYWORD: IUSERNAME_PASSWORD_TYPE = 'username_password_credential';
+const IAWS_IAM_KEYWORD: IAWS_IAM_TYPE = 'aws_iam_credential';
 
 export class CreateCredentialWizard extends React.Component<
   RouteComponentProps,
@@ -58,7 +59,7 @@ export class CreateCredentialWizard extends React.Component<
 
     this.state = {
       credentialName: '',
-      credentialType: USERNAME_PASSWORD_TYPE,
+      credentialType: USERNAME_PASSWORD_KEYWORD,
       userName: '',
       password: '',
       dual: true,
@@ -132,8 +133,8 @@ export class CreateCredentialWizard extends React.Component<
               <EuiSelect
                 onChange={(e) => this.setState({ credentialType: e.target.value })}
                 options={[
-                  { value: USERNAME_PASSWORD_TYPE, text: 'Username and Password Credential' },
-                  { value: 'aws_iam_credential', text: 'AWS IAM Credential' },
+                  { value: USERNAME_PASSWORD_KEYWORD, text: 'Username and Password Credential' },
+                  { value: IAWS_IAM_KEYWORD, text: 'AWS IAM Credential' },
                 ]}
               />
             </EuiFormRow>

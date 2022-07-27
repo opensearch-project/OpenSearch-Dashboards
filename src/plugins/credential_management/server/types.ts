@@ -8,6 +8,11 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
+import { SavedObjectsServiceStart } from 'src/core/server';
+
+export interface CredentialManagementPluginStartDeps {
+  savedObjects: SavedObjectsServiceStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CredentialManagementPluginSetup {}

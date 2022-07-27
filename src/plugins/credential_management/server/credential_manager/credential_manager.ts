@@ -9,14 +9,14 @@
  * GitHub history for details.
  */
 import { CryptographySingleton } from '../crypto';
-import { Credential } from '../../common';
+import { ICredentialType, IUSERNAME_PASSWORD_TYPE, IAWS_IAM_TYPE} from '../../common';
 
-const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
-const AWS_IAM_TYPE: Credential.AWS_IAM_TYPE = 'aws_iam_credential';
+const USERNAME_PASSWORD_TYPE: IUSERNAME_PASSWORD_TYPE = 'username_password_credential';
+const AWS_IAM_TYPE: IAWS_IAM_TYPE = 'aws_iam_credential';
 
 // TODO: Refactor handler, add logger, etc
 export async function encryptionHandler(
-  credentialType: Credential.CredentialType,
+  credentialType: ICredentialType,
   usernamePasswordCredentialMaterials: Record<string, string> | undefined,
   awsIamCredentialMaterials: Record<string, string> | undefined
 ) {

@@ -9,4 +9,5 @@
  * GitHub history for details.
  */
 
-export { credentialSavedObjectType } from './credential_saved_object_type';
+export { CredentialSavedObjectsClientWrapper } from './credential_saved_objects_client_wrapper';
+export { CredentialSavedObjectsType } from './credential_saved_objects_type';

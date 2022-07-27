@@ -59,7 +59,7 @@ export class CryptographySingleton {
     this._decrypt = decrypt;
   }
 
-  public async encrypt(plainText: string) {
+  public async encrypt(plainText: string): Promise<string> {
     const result = await this._encrypt(this._keyring, plainText);
     return result.result.toString('base64');
   }

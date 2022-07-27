@@ -8,7 +8,7 @@
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import { Credential } from '../../common';
+import { ICredentialType } from '../../common';
 
 export interface CredentialsTableItem {
   id: string;
@@ -19,6 +19,6 @@ export interface CredentialsTableItem {
 export interface CredentialEditPageItem {
   id: string;
   title: string;
-  credentialType: Credential.CredentialType;
+  credentialType: ICredentialType;
   userName: string;
 }

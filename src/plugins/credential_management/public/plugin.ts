@@ -53,21 +53,13 @@ export class CredentialManagementPlugin
   private readonly credentialManagementService = new CredentialManagementService();
   public setup(
     core: CoreSetup<CredentialManagementStartDependencies, CredentialManagementStart>,
-    { management, urlForwarding }: CredentialManagementSetupDependencies
+    { management }: CredentialManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
     }
-
-    const newAppPath = `management/opensearch-dashboards/${CM_APP_ID}`;
-
-    urlForwarding.forwardApp(
-      'management/opensearch-dashboards/credentials',
-      newAppPath,
-      (path) => '/create'
-    );
 
     opensearchDashboardsSection.registerApp({
       id: CM_APP_ID,

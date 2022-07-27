@@ -10,13 +10,16 @@
  */
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../core/server';
-import { encryptionHandler } from '../credential_manager';
-import { Credential } from '../../common';
 
-const USERNAME_PASSWORD_TYPE: Credential.USERNAME_PASSWORD_TYPE = 'username_password_credential';
-const AWS_IAM_TYPE: Credential.AWS_IAM_TYPE = 'aws_iam_credential';
+import { IUSERNAME_PASSWORD_TYPE, IAWS_IAM_TYPE } from '../../common';
 
-export function registerCreateRoute(router: IRouter) {
+const USERNAME_PASSWORD_TYPE: IUSERNAME_PASSWORD_TYPE = 'username_password_credential';
+const AWS_IAM_TYPE: IAWS_IAM_TYPE = 'aws_iam_credential';
+
+import { SavedObjectsServiceStart } from 'src/core/server';
+import { CredentialAttributes } from './index';
+
+export function registerCreateRoute(router: IRouter, saved_object: SavedObjectsServiceStart) {
   router.post(
     {
       path: '/api/credential_management/create',
@@ -44,22 +47,22 @@ export function registerCreateRoute(router: IRouter) {
 
     async (context, request, response) => {
       const { credential_name, credential_type, username_password_credential_materials, aws_iam_credential_materials } = request.body;
-      const attributes = {
+
+      const client = saved_object.getScopedClient(request);
+      
+      const result = await client.create<CredentialAttributes>('credential', {
         title: credential_name,
-        credential_type,
-        credential_material: await encryptionHandler(
-          credential_type,
-          username_password_credential_materials,
-          aws_iam_credential_materials
-        ),
-      };
-      const result = await context.core.savedObjects.client.create('credential', attributes);
+        credentialType: credential_type,
+        usernamePasswordCredentialMaterials: username_password_credential_materials,
+        awsIamCredentialMaterials: aws_iam_credential_materials
+      })
+
       return response.ok({
         body: {
           time: new Date().toISOString(),
           credential_id: result.id,
           credential_name: result.attributes.title,
-          credential_type: result.attributes.credential_type,
+          credential_type: result.attributes.credentialType,
         },
       });
     }

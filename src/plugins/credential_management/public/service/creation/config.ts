@@ -78,35 +78,7 @@ export class CredentialCreationConfig {
       },
     };
   }
-
-  // public getIndexPatternType() {
-  //   return this.type;
-  // }
-
-  // public getIndexPatternName() {
-  //   return this.name;
-  // }
-
-  // public getIsBeta() {
-  //   return this.isBeta;
-  // }
-
-  // public getShowSystemIndices() {
-  //   return this.showSystemIndices;
-  // }
-
-  // public getIndexTags(indexName: string) {
-  //   return [];
-  // }
-
-  // public checkIndicesForErrors(indices: MatchedItem[]) {
-  //   return undefined;
-  // }
-
-  // public getIndexPatternMappings() {
-  //   return {};
-  // }
-
+  
   public renderPrompt() {
     return null;
   }

@@ -9,9 +9,14 @@
  * GitHub history for details.
  */
 
-import * as Credential from './types';
-
 export const PLUGIN_ID = 'credentialManagement';
 export const PLUGIN_NAME = 'Credential Management';
 
-export { Credential };
+export { 
+ ICredential,
+ ICredentialType,
+ IUSERNAME_PASSWORD_TYPE,
+ IAWS_IAM_TYPE,
+ IUserNamePasswordCredentialMaterial,
+ IAWSIAMCredentialMaterial,
+} from './types';

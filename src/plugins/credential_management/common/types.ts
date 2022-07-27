@@ -11,14 +11,14 @@
 
 // TODO: refactor the credential in heritance:
 export interface ICredential {
-  readonly credential_name: string;
-  readonly credential_type: CredentialType;
-  readonly credential_material: IUserNamePasswordCredentialMaterial | IAWSIAMCredentialMaterial;
+  readonly title: string;
+  readonly credential_type: ICredentialType;
+  readonly credential_material: IUserNamePasswordCredentialMaterial | IAWSIAMCredentialMaterial | undefined;
 }
 
-export type CredentialType = USERNAME_PASSWORD_TYPE | AWS_IAM_TYPE;
-export type USERNAME_PASSWORD_TYPE = 'username_password_credential';
-export type AWS_IAM_TYPE = 'aws_iam_credential';
+export type ICredentialType = IUSERNAME_PASSWORD_TYPE | IAWS_IAM_TYPE;
+export type IUSERNAME_PASSWORD_TYPE = 'username_password_credential';
+export type IAWS_IAM_TYPE = 'aws_iam_credential';
 
 export interface IUserNamePasswordCredentialMaterial {
   readonly user_name: string;
