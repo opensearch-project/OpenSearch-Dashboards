@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.2",
   "branch": "2.0",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -67,7 +67,8 @@
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console"
+    "spec_to_console": "node scripts/spec_to_console",
+    "pkg-version": "./dev-tools/get-version.sh"
   },
   "repository": {
     "type": "git",
