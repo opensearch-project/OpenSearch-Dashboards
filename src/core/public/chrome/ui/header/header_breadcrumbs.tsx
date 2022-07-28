@@ -51,8 +51,6 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
     crumbs = [{ text: appTitle }];
   }
 
-  const crumbsLength = crumbs.length;
-
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
     'data-test-subj': classNames(
@@ -61,12 +59,7 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
       i === 0 && 'first',
       i === breadcrumbs.length - 1 && 'last'
     ),
-    className: classNames(
-      'osdBreadcrumbs',
-      i === 0 && 'first',
-      i > 0 && i < crumbsLength - 1 && 'middle',
-      i === crumbsLength - 1 && 'last'
-    ),
+    className: classNames('osdBreadcrumbs'),
   }));
 
   return (
