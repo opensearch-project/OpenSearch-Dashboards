@@ -50,9 +50,9 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
   if (breadcrumbs.length === 0 && appTitle) {
     crumbs = [{ text: appTitle }];
   }
-  
+
   const crumbsLength = crumbs.length;
-  
+
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
     'data-test-subj': classNames(
