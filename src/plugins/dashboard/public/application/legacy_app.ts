@@ -178,8 +178,8 @@ export function initDashboardApp(app, deps) {
           $scope.editItem = ({ id }) => {
             history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
           };
-          $scope.getViewUrl = ({ id }) => {
-            return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
+          $scope.getViewUrl = ({ url }) => {
+            return deps.addBasePath(url);
           };
           $scope.delete = (dashboards) => {
             return service.delete(dashboards.map((d) => d.id));
