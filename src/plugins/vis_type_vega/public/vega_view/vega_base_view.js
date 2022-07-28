@@ -310,23 +310,25 @@ export class VegaBaseView {
   }
 
   /**
-   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {object} query Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this.findIndex(index);
-    const filter = opensearchFilters.buildQueryFilter(query, indexId);
-
+    const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
+    const filter = opensearchFilters.buildQueryFilter(Utils.handleInvalidQuery(query), indexId);
     this._applyFilter({ filters: [filter] });
   }
 
   /**
-   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {object} query Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this.findIndex(index);
-    const filterToRemove = opensearchFilters.buildQueryFilter(query, indexId);
+    const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
+    const filterToRemove = opensearchFilters.buildQueryFilter(
+      Utils.handleInvalidQuery(query),
+      indexId
+    );
 
     const currentFilters = this._filterManager.getFilters();
     const existingFilter = currentFilters.find((filter) =>
@@ -352,7 +354,10 @@ export class VegaBaseView {
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
-    const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
+    const { from, to, mode } = VegaBaseView._parseTimeRange(
+      Utils.handleInvalidDate(start),
+      Utils.handleInvalidDate(end)
+    );
 
     this._applyFilter({
       timeFieldName: '*',
