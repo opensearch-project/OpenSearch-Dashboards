@@ -53,10 +53,6 @@
     display: none;
   }
 
-  .euiBreadcrumb:not(.euiBreadcrumb--collapsed) {
-    max-width: 170px;
-  }
-
   .euiBreadcrumb__collapsedLink {
     color: $osdMidnightSky;
     background: $euiColorEmptyShade;
