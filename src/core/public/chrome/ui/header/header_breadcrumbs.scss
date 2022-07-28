@@ -10,7 +10,7 @@
   filter: url("../../public/assets/round_filter.svg#round");
 
   .osdBreadcrumbs.first {
-    @include background($osdSanFranciscoFog,
+    @include background($osdHeaderBreadcrumbGrayBackground,
     polygon(
       0% 0%,
       100% 0%,
@@ -20,17 +20,17 @@
   }
 
   .osdBreadcrumbs.middle {
-    @include background($osdSanFranciscoFog,
+    @include background($osdHeaderBreadcrumbGrayBackground,
     polygon(
       $euiSizeS 0%,
       100% 0%,
-      calc(100% - #{$euiSizeS})  100%,
+      calc(100% - #{$euiSizeS}) 100%,
       0% 100%
     ));
   }
 
   .osdBreadcrumbs.last {
-    @include background($osdPacificSky,
+    @include background($osdHeaderBreadcrumbBlueBackground,
     polygon(
       $euiSizeS 0%,
       100% 0%,
@@ -40,11 +40,11 @@
   }
 
   .osdBreadcrumbs.first.last {
-    @include background($osdPacificSky,
+    @include background($osdHeaderBreadcrumbBlueBackground,
     polygon(
       0% 0%,
       100% 0%,
-      calc(100% - #{$euiSizeS})100%,
+      calc(100% - #{$euiSizeS}) 100%,
       0% 100%
     ));
   }
@@ -54,7 +54,7 @@
   }
 
   .euiBreadcrumb__collapsedLink {
-    color: $osdMidnightSky;
+    color: $osdHeaderBreadcrumbCollapsedLink;
     background: $euiColorEmptyShade;
   }
 
