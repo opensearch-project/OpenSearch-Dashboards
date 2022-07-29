@@ -4,11 +4,11 @@ Core is a set of systems (frontend, backend etc.) that OpenSearch Dashboards and
 
 ## Plugin development
 Core Plugin API Documentation:
- - [Core Public API](/docs/development/core/public/opensearch-dashboards-plugin-core-public.md)
- - [Core Server API](/docs/development/core/server/opensearch-dashboards-plugin-core-server.md)
+ - [Core Public API](../core/public/public.api.md)
+ - [Core Server API](../core/server/server.api.md)
  - [Conventions for Plugins](./CONVENTIONS.md)
  - [Testing OpenSearch Dashboards Plugins](./TESTING.md)
- - [OpenSearch Dashboards Platform Plugin API](./docs/developer/architecture/kibana-platform-plugin-api.asciidoc )
+ - [OpenSearch Dashboards Platform Plugin API](./PRINCIPLES.md)
  
 Internal Documentation:
  - [Saved Objects Migrations](./server/saved_objects/migrations/README.md)
