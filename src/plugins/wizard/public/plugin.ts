@@ -35,6 +35,7 @@ import {
   setUISettings,
   setTypeService,
   setReactExpressionRenderer,
+  setCapabilities,
 } from './plugin_services';
 import { createSavedWizardLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
@@ -151,6 +152,7 @@ export class WizardPlugin
 
     // Register plugin services
     setAggService(data.search.aggs);
+    setCapabilities(core.application.capabilities);
     setExpressionLoader(expressions.ExpressionLoader);
     setReactExpressionRenderer(expressions.ReactExpressionRenderer);
     setHttp(core.http);

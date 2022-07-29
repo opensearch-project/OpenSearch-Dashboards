@@ -6,13 +6,15 @@
 import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
 import { DataPublicPluginStart, TimefilterContract } from '../../data/public';
 import { SavedWizardLoader } from './saved_visualizations';
-import { HttpStart, IUiSettingsClient } from '../../../core/public';
+import { Capabilities, HttpStart, IUiSettingsClient } from '../../../core/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
 
 export const [getAggService, setAggService] = createGetterSetter<
   DataPublicPluginStart['search']['aggs']
 >('data.search.aggs');
+
+export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
 export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<
   ExpressionsStart['ExpressionLoader']

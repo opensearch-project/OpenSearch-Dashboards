@@ -23,7 +23,13 @@ import {
 import { DisabledEmbeddable } from './disabled_embeddable';
 import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './wizard_embeddable';
 import wizardIcon from '../assets/wizard_icon.svg';
-import { getHttp, getSavedWizardLoader, getTimeFilter, getUISettings } from '../plugin_services';
+import {
+  getCapabilities,
+  getHttp,
+  getSavedWizardLoader,
+  getTimeFilter,
+  getUISettings,
+} from '../plugin_services';
 
 // TODO: use or remove?
 export type WizardEmbeddableFactory = EmbeddableFactory<
@@ -59,9 +65,7 @@ export class WizardEmbeddableFactoryDefinition
   }
 
   public async isEditable() {
-    // TODO: Add proper access controls
-    // return getCapabilities().visualize.save as boolean;
-    return true;
+    return getCapabilities().visualize.save as boolean;
   }
 
   public async createFromSavedObject(
@@ -82,13 +86,15 @@ export class WizardEmbeddableFactoryDefinition
         return new DisabledEmbeddable(PLUGIN_NAME, input);
       }
 
+      const editable = await this.isEditable();
+
       return new WizardEmbeddable(
         getTimeFilter(),
         {
           savedWizard,
           editUrl,
           editPath,
-          editable: true,
+          editable,
         },
         {
           ...input,
