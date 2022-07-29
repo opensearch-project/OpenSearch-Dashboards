@@ -12,6 +12,8 @@ import {
 const miscUtils = new MiscUtils(cy);
 const commonUI = new CommonUI(cy);
 const loginPage = new LoginPage(cy);
+const startDate = 'Nov 1, 2016 @ 00:00:00.000';
+const endDate = `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000`;
 
 describe('check previously loaded data', () => {
   beforeEach(() => {
@@ -47,9 +49,7 @@ describe('check previously loaded data', () => {
         .get('[data-test-subj="dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard"]')
         .click();
       commonUI.removeAllFilters();
-      commonUI.setDateRange(
-        `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000', 'Nov 1, 2016 @ 00:00:00.000`
-      );
+      commonUI.setDateRange(endDate, startDate);
     });
 
     it('Global Flight Dashboard is loaded and funtions correctly', () => {
@@ -79,9 +79,7 @@ describe('check previously loaded data', () => {
         .get('[data-test-subj="dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard"]')
         .click();
       commonUI.removeAllFilters();
-      commonUI.setDateRange(
-        `Dec 31, ${new Date().getFullYear()} @ 00:00:00.000', 'Nov 1, 2016 @ 00:00:00.000`
-      );
+      commonUI.setDateRange(endDate, startDate);
     });
 
     it('eCommerce Revenue Dashboard is loaded and functions correctly', () => {
