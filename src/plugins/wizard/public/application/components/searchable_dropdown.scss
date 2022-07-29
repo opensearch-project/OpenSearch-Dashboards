@@ -6,25 +6,34 @@
 
 .searchableDropdown {
   overflow: "hidden";
-}
 
-.searchableDropdown .euiPopover,
-.searchableDropdown .euiPopover__anchor {
-  width: 100%;
-}
+  .euiFormControlLayout__childrenWrapper {
+    display: flex;
+  }
 
-.searchableDropdown--fixedWidthChild {
-  width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2);
-}
+  &--topDisplay {
+    padding-right: $euiSizeL;
+    font-size: $euiFontSizeS;
+    flex-grow: 1;
 
-.searchableDropdown--topDisplay {
-  padding-right: $euiSizeL;
-  font-size: $euiFontSizeS;
-}
+    .euiButtonEmpty__content {
+      justify-content: flex-start;
+    }
+  }
 
-.searchableDropdown--selectableWrapper .euiSelectableList {
-  // When clicking on the selectable content it will "highlight" itself with a box shadow
-  // This turns that off
-  box-shadow: none !important;
-  margin: ($euiFormControlPadding * -1) - 4;
+  &--fixedWidthChild {
+    width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2);
+  }
+
+  &--selectableWrapper .euiSelectableList {
+    // When clicking on the selectable content it will "highlight" itself with a box shadow
+    // This turns that off
+    box-shadow: none !important;
+    margin: ($euiFormControlPadding * -1) - 4;
+  }
+
+  .euiPopover,
+  .euiPopover__anchor {
+    width: 100%;
+  }
 }
