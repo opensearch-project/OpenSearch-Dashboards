@@ -609,6 +609,12 @@ export class OpenSearchDashboardsMap extends EventEmitter {
         this.emit('baseLayer:loading');
       });
       baseLayer.on('tileerror', () => {
+        if (settings.options.showRegionBlockedWarning) {
+          createRegionDeniedWarning();
+        }
+      });
+
+      baseLayer.on('tileerror', () => {
         if (settings.options.showRegionDeniedWarning) {
           createRegionDeniedWarning();
         }

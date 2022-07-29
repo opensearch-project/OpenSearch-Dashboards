@@ -154,6 +154,8 @@ export default () =>
     map: Joi.object({
       includeOpenSearchMapsService: Joi.boolean().default(true),
       proxyOpenSearchMapsServiceInMaps: Joi.boolean().default(false),
+      /* @deprecated use showRegionDeniedWarning */
+      showRegionBlockedWarning: Joi.boolean().default(false),
       showRegionDeniedWarning: Joi.boolean().default(false),
       tilemap: Joi.object({
         url: Joi.string(),
