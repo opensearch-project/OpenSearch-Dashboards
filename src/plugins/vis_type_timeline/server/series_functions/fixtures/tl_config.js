@@ -54,9 +54,8 @@ export default function () {
 
     opensearchShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
-    /** @deprecated use deniedGraphiteIPs*/
+
     blockedGraphiteIPs: [],
-    deniedGraphiteIPs: [],
   });
 
   tlConfig.time = {
@@ -69,9 +68,8 @@ export default function () {
   tlConfig.settings = timelineDefaults();
 
   tlConfig.allowedGraphiteUrls = timelineDefaults();
-  /** @deprecated use deniedGraphiteIPs*/
+
   tlConfig.blockedGraphiteIPs = timelineDefaults();
-  tlConfig.deniedGraphiteIPs = timelineDefaults();
 
   tlConfig.setTargetSeries();
 

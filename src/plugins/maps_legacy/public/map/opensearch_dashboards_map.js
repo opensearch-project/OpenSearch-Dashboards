@@ -614,12 +614,6 @@ export class OpenSearchDashboardsMap extends EventEmitter {
         }
       });
 
-      baseLayer.on('tileerror', () => {
-        if (settings.options.showRegionDeniedWarning) {
-          createRegionDeniedWarning();
-        }
-      });
-
       this._leafletBaseLayer = baseLayer;
       if (settings.options.showZoomMessage) {
         baseLayer.on('add', () => {

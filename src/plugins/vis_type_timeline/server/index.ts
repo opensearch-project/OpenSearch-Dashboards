@@ -39,7 +39,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     ui: true,
   },
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, renameFromRootWithoutMap }) => [
     // timelion.enabled and timelion_vis.enabled deprecation
     renameFromRoot('timelion.enabled', 'vis_type_timeline.enabled'),
     renameFromRoot('timelion_vis.enabled', 'vis_type_timeline.enabled'),
@@ -62,7 +62,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('vis_type_timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
     renameFromRoot('timeline.ui.enabled', 'vis_type_timeline.ui.enabled', true),
 
-    renameFromRoot('graphiteBlockedIPs', 'graphiteDeniedIPs'),
+    renameFromRootWithoutMap('graphiteBlockedIPs', 'graphiteDeniedIPs'),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
