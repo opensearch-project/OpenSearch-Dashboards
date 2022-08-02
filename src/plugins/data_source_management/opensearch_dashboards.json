@@ -1,7 +1,6 @@
 {
   "id": "dataSourceManagement",
-  "version": "1.0.0",
-  "opensearchDashboardsVersion": "opensearchDashboards",
+  "version": "opensearchDashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": ["management"],
