@@ -12,7 +12,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { CredentialManagementContext } from '../../../../types';
-// TODO: Update the header content
 export const Header = ({
   isBeta = true,
   docLinks,
@@ -58,7 +57,6 @@ export const Header = ({
             }}
           />
           <br />
-          {/* // <HeaderBreadcrumbs /> */}
           <EuiLink
             href={docLinks.links.noDocumentation.indexPatterns.introduction}
             target="_blank"

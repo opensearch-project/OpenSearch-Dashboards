@@ -4,29 +4,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { ManagementSetup } from '../../management/public';
 
-import {
-  CredentialManagementService,
-  CredentialManagementServiceSetup,
-  CredentialManagementServiceStart,
-} from './service';
-
 export interface CredentialManagementSetupDependencies {
   management: ManagementSetup;
 }
-
-export interface CredentialManagementStartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export type CredentialManagementSetup = CredentialManagementServiceSetup;
-
-export type CredentialManagementStart = CredentialManagementServiceStart;
 
 const sectionsHeader = i18n.translate('credentialManagement.credential.sectionsHeader', {
   defaultMessage: 'Credentials',
@@ -35,18 +20,8 @@ const sectionsHeader = i18n.translate('credentialManagement.credential.sectionsH
 const CM_APP_ID = 'credentials';
 
 export class CredentialManagementPlugin
-  implements
-    Plugin<
-      CredentialManagementSetup,
-      CredentialManagementStart,
-      CredentialManagementSetupDependencies,
-      CredentialManagementStartDependencies
-    > {
-  private readonly credentialManagementService = new CredentialManagementService();
-  public setup(
-    core: CoreSetup<CredentialManagementStartDependencies, CredentialManagementStart>,
-    { management }: CredentialManagementSetupDependencies
-  ) {
+  implements Plugin<void, void, CredentialManagementSetupDependencies> {
+  public setup(core: CoreSetup, { management }: CredentialManagementSetupDependencies) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {
@@ -63,13 +38,9 @@ export class CredentialManagementPlugin
         return mountManagementSection(core.getStartServices, params);
       },
     });
-
-    return this.credentialManagementService.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart, plugins: CredentialManagementStartDependencies) {
-    return this.credentialManagementService.start();
-  }
+  public start(core: CoreStart) {}
 
   public stop() {}
 }

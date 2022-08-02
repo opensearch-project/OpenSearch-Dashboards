@@ -4,6 +4,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@osd/i18n/react';
+
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiHorizontalRule,
@@ -15,7 +17,6 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiLink,
-  // EuiFilePicker,
   EuiButton,
   EuiPageContent,
   EuiFieldPassword,
@@ -58,14 +59,13 @@ export class CreateCredentialWizard extends React.Component<
     };
   }
 
-  // TODO: Fix header component error
+  // TODO: Fix header component error https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2048
   renderHeader() {
     const { docLinks } = this.state;
 
     return <Header docLinks={docLinks} />;
   }
 
-  // TODO: Add conditional rendering to select credential types
   renderContent() {
     const header = this.renderHeader();
 
@@ -106,7 +106,7 @@ export class CreateCredentialWizard extends React.Component<
                     For <b>username_password_credential</b> type: this type can be used for{' '}
                     credentials in format of username, password.{' '}
                   </li>
-                  <li> Ex: Opensearch basic auth </li>
+                  <li> Ex: OpenSearch basic auth </li>
                 </ul>
                 <ul>
                   <li>
@@ -173,10 +173,9 @@ export class CreateCredentialWizard extends React.Component<
   createCredential = async () => {
     const { savedObjects } = this.context.services;
     try {
-      // TODO: Add rendering spanner
+      // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.create('credential', {
         title: this.state.credentialName,
-        // TODO: Refactor this state with UX input
         credentialType: this.state.credentialType,
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialType,
@@ -188,7 +187,22 @@ export class CreateCredentialWizard extends React.Component<
       });
       this.props.history.push('');
     } catch (e) {
-      // TODO: Add Toast
+      const createCredentialFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.createCredential.loadCreateCredentialFailMsg"
+          defaultMessage="The credential saved object creation failed with some errors. Please try it again.'"
+        />
+      );
+      this.setState((prevState) => ({
+        toasts: prevState.toasts.concat([
+          {
+            title: createCredentialFailMsg,
+            id: createCredentialFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
+      }));
     }
   };
 }

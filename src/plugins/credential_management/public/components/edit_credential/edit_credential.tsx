@@ -4,6 +4,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@osd/i18n/react';
+
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiHorizontalRule,
@@ -22,8 +24,7 @@ import {
 import { DocLinksStart } from 'src/core/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
-// TODO: Add Header
-// import { Header } from './components/header';
+// TODO: Add Header https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2051
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { CredentialEditPageItem } from '../types';
 
@@ -63,7 +64,6 @@ export class EditCredentialComponent extends React.Component<
     };
   }
 
-  // TODO: Add conditional rendering to select credential types
   renderContent() {
     const options = [
       { value: 'username_password_credential', text: 'Username and Password Credential' },
@@ -101,7 +101,7 @@ export class EditCredentialComponent extends React.Component<
                     For <b>username_password_credential</b> type: this type can be used for{' '}
                     credentials in format of username, password.{' '}
                   </li>
-                  <li> Ex: Opensearch basic auth </li>
+                  <li> Ex: OpenSearch basic auth </li>
                 </ul>
                 <ul>
                   <li>
@@ -168,10 +168,9 @@ export class EditCredentialComponent extends React.Component<
   updateCredential = async () => {
     const { savedObjects } = this.context.services;
     try {
-      // TODO: Add rendering spanner
+      // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.update('credential', this.props.credential.id, {
         title: this.state.credentialName,
-        // TODO: Refactor this state with UX input
         credentialType: this.state.credentialType,
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialType,
@@ -183,7 +182,22 @@ export class EditCredentialComponent extends React.Component<
       });
       this.props.history.push('');
     } catch (e) {
-      // TODO: Add Toast
+      const createCredentialFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.createCredential.loadCreateCredentialFailMsg"
+          defaultMessage="The credential saved object creation failed with some errors. Please try it again.'"
+        />
+      );
+      this.setState((prevState) => ({
+        toasts: prevState.toasts.concat([
+          {
+            title: createCredentialFailMsg,
+            id: createCredentialFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
+      }));
     }
   };
 }

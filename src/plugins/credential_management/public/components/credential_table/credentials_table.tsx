@@ -31,7 +31,6 @@ import {
 import { CredentialManagementContext } from '../../types';
 import { deleteCredentials, getCredentials } from '../utils';
 import { CredentialsTableItem } from '../types';
-import { CredentialCreationOption } from '../../service';
 import { CreateButton } from '../create_button';
 
 const pagination = {
@@ -65,10 +64,9 @@ interface Props extends RouteComponentProps {
 
 export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
-  const [creationOptions, setCreationOptions] = React.useState<CredentialCreationOption[]>([]);
   const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
 
-  const { savedObjects, uiSettings, credentialManagementStart } = useOpenSearchDashboards<
+  const { savedObjects, uiSettings } = useOpenSearchDashboards<
     CredentialManagementContext
   >().services;
 
@@ -134,7 +132,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   const onClickDelete = async () => {
     await deleteCredentials(savedObjects.client, selectedCredentials);
-    // TODO: Add status bar + fetch from source + refresh list
+    // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2055
     const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
     setCredentials(fetchedCredentials);
     setSelectedCredentials([]);
@@ -144,31 +142,12 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   React.useEffect(() => {
     (async function () {
-      const options = await credentialManagementStart.creation.getCredentialCreationOptions(
-        history.push
-      );
       const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
       setCredentials(fetchedCredentials);
-      setCreationOptions(options);
     })();
-  }, [
-    history.push,
-    credentials.length,
-    credentialManagementStart,
-    uiSettings,
-    savedObjects.client,
-  ]);
+  }, [history.push, credentials.length, uiSettings, savedObjects.client]);
 
-  const createButton = canSave ? (
-    <CreateButton options={creationOptions}>
-      <FormattedMessage
-        id="credentialManagement.credentialsTable.createBtn"
-        defaultMessage="Save your credential"
-      />
-    </CreateButton>
-  ) : (
-    <></>
-  );
+  const createButton = canSave ? <CreateButton history={history} /> : <></>;
 
   return (
     <EuiPageContent data-test-subj="credentialsTable" role="region">
@@ -188,7 +167,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-        {deleteButton}
+        <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiInMemoryTable

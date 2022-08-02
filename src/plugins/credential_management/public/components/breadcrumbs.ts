@@ -29,12 +29,12 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(crednetial: CredentialEditPageItem) {
+export function getEditBreadcrumbs(credentials: CredentialEditPageItem) {
   return [
     ...getListBreadcrumbs(),
     {
-      text: crednetial.title,
-      href: `/${crednetial.id}`,
+      text: credentials.title,
+      href: `/${credentials.id}`,
     },
   ];
 }
