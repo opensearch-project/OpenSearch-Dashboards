@@ -9,13 +9,7 @@
  * GitHub history for details.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
 

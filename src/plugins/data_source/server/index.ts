@@ -9,8 +9,8 @@
  * GitHub history for details.
  */
 
-import { schema, TypeOf } from 'packages/osd-config-schema/target/types';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { schema, TypeOf } from '@osd/config-schema';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { DataSourcePlugin } from './plugin';
 
 export const configSchema = schema.object({
