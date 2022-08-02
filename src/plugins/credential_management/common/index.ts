@@ -4,4 +4,4 @@
  */
 
 export const PLUGIN_ID = 'credentialManagement';
-export const PLUGIN_NAME = 'credentialManagement';
+export const PLUGIN_NAME = 'Credential Management';
