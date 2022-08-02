@@ -57,3 +57,4 @@ export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<Map
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;
+export const getShowRegionBlockedWarning = () => getMapsLegacyConfig().showRegionBlockedWarning;
