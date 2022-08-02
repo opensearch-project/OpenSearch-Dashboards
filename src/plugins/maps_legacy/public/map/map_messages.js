@@ -80,7 +80,7 @@ export const createRegionDeniedWarning = (function () {
   };
 })();
 
-export const removeRegionBlockedWarning = (function () {
+export const removeRegionDeniedWarning = (function () {
   return () => {
     const childEle = document.getElementById('blocker-div');
     if (childEle) {

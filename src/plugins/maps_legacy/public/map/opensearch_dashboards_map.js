@@ -32,7 +32,7 @@ import { EventEmitter } from 'events';
 import {
   createZoomWarningMsg,
   createRegionDeniedWarning,
-  removeRegionBlockedWarning,
+  removeRegionDeniedWarning,
 } from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
@@ -691,7 +691,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
   }
 
   _updateDesaturation() {
-    removeRegionBlockedWarning();
+    removeRegionDeniedWarning();
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps
     if (get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
