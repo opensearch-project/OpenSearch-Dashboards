@@ -54,6 +54,7 @@ export const toExpression = async ({ style: styleState, visualization }: Histogr
     "addTooltip": true,
     dimensions: dimensions
   }
+  console.log(dimensions);
 
   const histogramVis = buildExpressionFunction<any>('vislib', {
     type: "histogram",
