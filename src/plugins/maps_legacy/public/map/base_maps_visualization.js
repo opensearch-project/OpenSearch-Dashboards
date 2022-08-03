@@ -205,12 +205,13 @@ export function BaseMapsVisualizationProvider() {
         isDarkMode
       );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
+      const showRegionBlockedWarning = serviceSettings.shouldShowRegionBlockedWarning();
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._opensearchDashboardsMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { ...options, showZoomMessage, ...meta },
+        options: { ...options, showZoomMessage, showRegionBlockedWarning, ...meta },
       });
     }
 
