@@ -58,7 +58,7 @@ export class ServiceSettings {
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
     this._showZoomMessage = true;
-    this._showRegionBlockedWarning = this._mapConfig.showRegionBlockedWarning;
+    this._showRegionDeniedWarning = this._mapConfig.showRegionDeniedWarning;
     this._emsClient = null;
     this._opensearchMapsClient = new OpenSearchMapsClient({
       language: i18n.getLocale(),
@@ -89,8 +89,8 @@ export class ServiceSettings {
     });
   }
 
-  shouldShowRegionBlockedWarning() {
-    return this._showRegionBlockedWarning;
+  shouldShowRegionDeniedWarning() {
+    return this._showRegionDeniedWarning;
   }
 
   shouldShowZoomMessage({ origin }) {

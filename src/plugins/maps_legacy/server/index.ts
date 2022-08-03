@@ -38,7 +38,7 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   exposeToBrowser: {
     includeOpenSearchMapsService: true,
     proxyOpenSearchMapsServiceInMaps: true,
-    showRegionBlockedWarning: true,
+    showRegionDeniedWarning: true,
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,
@@ -57,7 +57,7 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
       'map.regionmap.includeElasticMapsService',
       'map.regionmap.includeOpenSearchMapsService'
     ),
-    renameFromRoot('showRegionBlockedWarning', 'showRegionDeniedWarning'),
+    renameFromRoot('map.showRegionBlockedWarning', 'map.showRegionDeniedWarning'),
   ],
 };
 
