@@ -4,7 +4,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
-import { dataSource } from './saved_objects';
+import { dataSource, credential } from './saved_objects';
 
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
 
@@ -17,6 +17,11 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
   public setup(core: CoreSetup) {
     this.logger.debug('data_source: Setup');
+
+    // Register credential saved object type
+    core.savedObjects.registerType(credential);
+
+    // Register data source saved object type
     core.savedObjects.registerType(dataSource);
 
     return {};
