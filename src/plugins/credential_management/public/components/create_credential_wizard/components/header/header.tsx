@@ -12,13 +12,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { CredentialManagementContext } from '../../../../types';
-export const Header = ({
-  isBeta = true,
-  docLinks,
-}: {
-  isBeta?: boolean;
-  docLinks: DocLinksStart;
-}) => {
+export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const changeTitle = useOpenSearchDashboards<CredentialManagementContext>().services.chrome
     .docTitle.change;
   const createCredentialHeader = i18n.translate('credentialManagement.createIndexPatternHeader', {
@@ -32,16 +26,14 @@ export const Header = ({
       <EuiTitle>
         <h1>
           {createCredentialHeader}
-          {isBeta ? (
-            <>
-              {' '}
-              <EuiBetaBadge
-                label={i18n.translate('credentialManagement.createCredential.betaLabel', {
-                  defaultMessage: 'Beta',
-                })}
-              />
-            </>
-          ) : null}
+          <>
+            {' '}
+            <EuiBetaBadge
+              label={i18n.translate('credentialManagement.createCredential.betaLabel', {
+                defaultMessage: 'Beta',
+              })}
+            />
+          </>
         </h1>
       </EuiTitle>
       <EuiSpacer size="s" />
