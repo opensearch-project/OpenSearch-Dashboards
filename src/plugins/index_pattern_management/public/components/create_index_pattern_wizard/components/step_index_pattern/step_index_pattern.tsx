@@ -29,7 +29,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiCallOut,
+  EuiSwitchEvent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { indexPatterns, IndexPatternAttributes, UI_SETTINGS } from '../../../../../../data/public';
@@ -52,6 +59,7 @@ import { IndexPatternManagmentContextValue } from '../../../../types';
 interface StepIndexPatternProps {
   allIndices: MatchedItem[];
   indexPatternCreationType: IndexPatternCreationConfig;
+  goToPreviousStep: () => void;
   goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
@@ -116,6 +124,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
+  dataSrouceEnabled: boolean;
+
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
     const { indexPatternCreationType, initialQuery } = this.props;
@@ -123,6 +133,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.state.query =
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
+    this.dataSrouceEnabled = context.services.dataSourceEnabled;
   }
 
   lastQuery = '';
@@ -229,6 +240,23 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
         <EuiSpacer />
       </>
+    );
+  }
+
+  renderGoToPrevious() {
+    const { goToPreviousStep } = this.props;
+
+    return (
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.stepIndexPattern.backButton"
+              defaultMessage="Back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -383,6 +411,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer />
         {this.renderList(matchedIndices)}
+        {this.dataSrouceEnabled && this.renderGoToPrevious()}
       </>
     );
   }

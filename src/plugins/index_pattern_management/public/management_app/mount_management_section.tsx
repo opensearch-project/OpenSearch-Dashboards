@@ -69,6 +69,8 @@ export async function mountManagementSection(
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const dataSourceEnabled = false;
+  // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -87,6 +89,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    dataSourceEnabled,
   };
 
   ReactDOM.render(
