@@ -182,17 +182,17 @@ export class EditCredentialComponent extends React.Component<
       });
       this.props.history.push('');
     } catch (e) {
-      const createCredentialFailMsg = (
+      const editCredentialFailMsg = (
         <FormattedMessage
-          id="credentialManagement.createCredential.loadCreateCredentialFailMsg"
-          defaultMessage="The credential saved object creation failed with some errors. Please try it again.'"
+          id="credentialManagement.editCredential.loadEditCredentialFailMsg"
+          defaultMessage="The credential saved object edit failed with some errors. Please try it again.'"
         />
       );
       this.setState((prevState) => ({
         toasts: prevState.toasts.concat([
           {
-            title: createCredentialFailMsg,
-            id: createCredentialFailMsg.props.id,
+            title: editCredentialFailMsg,
+            id: editCredentialFailMsg.props.id,
             color: 'warning',
             iconType: 'alert',
           },

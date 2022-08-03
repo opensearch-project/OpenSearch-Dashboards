@@ -29,11 +29,13 @@ export async function getCredentials(savedObjectsClient: SavedObjectsClientContr
         .sort((a, b) => {
           if (a.sort < b.sort) {
             return -1;
-          } else if (a.sort > b.sort) {
+          } 
+
+          if (a.sort > b.sort) {
             return 1;
-          } else {
-            return 0;
-          }
+          } 
+
+          return 0;
         })
     ) || []);
 }
