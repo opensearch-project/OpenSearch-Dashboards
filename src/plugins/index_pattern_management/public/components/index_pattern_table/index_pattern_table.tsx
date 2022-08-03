@@ -103,6 +103,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     getMlCardState,
     data,
+    dataSourceEnabled,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -210,16 +211,18 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
   if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
-          canSave={canSave}
-        />
-      );
+    if (!dataSourceEnabled) {
+      if (!hasDataIndices && !remoteClustersExist) {
+        return (
+          <EmptyState
+            onRefresh={loadSources}
+            docLinks={docLinks}
+            navigateToApp={application.navigateToApp}
+            getMlCardState={getMlCardState}
+            canSave={canSave}
+          />
+        );
+      }
     } else {
       return (
         <EmptyIndexPatternPrompt

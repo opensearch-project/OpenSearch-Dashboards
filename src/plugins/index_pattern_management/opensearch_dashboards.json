@@ -4,5 +4,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data", "urlForwarding"],
-  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"]
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "savedObjects"]
 }
