@@ -1,9 +1,8 @@
 {
   "id": "credentialManagement",
-  "version": "1.0.0",
-  "opensearchDashboardsVersion": "opensearchDashboards",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
+  "requiredPlugins": ["management"],
+  "requiredBundles": ["opensearchDashboardsReact"]
 }
