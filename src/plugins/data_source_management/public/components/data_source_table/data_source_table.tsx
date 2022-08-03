@@ -12,7 +12,7 @@ export interface DataSourceTableProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const DataSourceTable = ({setBreadcrumbs}: DataSourceTableProps) => {
+export const DataSourceTable = ({ setBreadcrumbs }: DataSourceTableProps) => {
   useEffect(() => {
     setBreadcrumbs([
       {
@@ -29,5 +29,3 @@ export const DataSourceTable = ({setBreadcrumbs}: DataSourceTableProps) => {
     </EuiTitle>
   );
 };
-
-export {DataSourceTable as default}
