@@ -14,8 +14,8 @@ import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
-import { DataSourceManagmentContext } from '../types';
-import { DataSourceTable } from '../components/data_source_table/data_source_table';
+import { DataSourceTableWithRouter } from '../components/data_source_table';
+import { DataSourceManagementContext } from '../types';
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor,
@@ -25,7 +25,7 @@ export async function mountManagementSection(
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
   ] = await getStartServices();
 
-  const deps: DataSourceManagmentContext = {
+  const deps: DataSourceManagementContext = {
     chrome,
     application,
     savedObjects,
@@ -53,7 +53,7 @@ export async function mountManagementSection(
               <CreateDataSourceWizardWithRouter />
             </Route>
             <Route path={['/']}>
-              <DataSourceTable setBreadcrumbs={deps.setBreadcrumbs} />
+              <DataSourceTableWithRouter />
             </Route>
           </Switch>
         </Router>

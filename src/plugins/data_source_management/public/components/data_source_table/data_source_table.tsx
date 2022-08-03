@@ -4,28 +4,22 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { i18n } from '@osd/i18n';
-import { ChromeBreadcrumb } from 'src/core/public';
+import React from 'react';
+import { withRouter } from 'react-router-dom';
+import { getListBreadcrumbs } from '../breadcrumbs';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { DataSourceManagementContext } from '../../types';
 
-export interface DataSourceTableProps {
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-}
+export const DataSourceTable = () => {
+  const { setBreadcrumbs } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
-export const DataSourceTable = ({ setBreadcrumbs }: DataSourceTableProps) => {
-  useEffect(() => {
-    setBreadcrumbs([
-      {
-        text: i18n.translate('dataSourceManagement.breadcrumb.index', {
-          defaultMessage: 'Data Sources',
-        }),
-        href: '/',
-      },
-    ]);
-  }, [setBreadcrumbs]);
+  setBreadcrumbs(getListBreadcrumbs());
+
   return (
     <EuiTitle>
       <h2>{'This is the landing page, going to list data sources here...'}</h2>
     </EuiTitle>
   );
 };
+
+export const DataSourceTableWithRouter = withRouter(DataSourceTable);
