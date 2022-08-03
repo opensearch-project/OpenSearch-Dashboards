@@ -1,7 +1,0 @@
-{
-  "prefix": "credentialManagement",
-  "paths": {
-    "credentialManagement": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

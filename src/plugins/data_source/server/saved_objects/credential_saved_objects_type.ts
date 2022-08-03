@@ -5,7 +5,7 @@
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
 
-export const credentialSavedObjectType: SavedObjectsType = {
+export const credential: SavedObjectsType = {
   name: 'credential',
   hidden: false,
   namespaceType: 'agnostic',
