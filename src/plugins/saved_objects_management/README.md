@@ -21,7 +21,7 @@ For 3., this plugin can also be used to provide a route/page for editing, such a
 1. Make sure `management.getInAppUrl` method of the `SavedObjectsType` is defined with a `path` (which will specify the link target) and the `uiCapabilitiesPath`
 2. For `uiCapabilitiesPath` to work without additional hardcoding, it should be in the format `{plugin}.show`, so that [the default logic of `src/plugins/saved_objects_management/public/lib/in_app_url.ts`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/a9984f63a38e964007ab94fae99237a14d8f9ee2/src/plugins/saved_objects_management/public/lib/in_app_url.ts#L48-L50) will correctly match. Otherwise, you'll need to [add a case for your `uiCapabilities` path](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/a9984f63a38e964007ab94fae99237a14d8f9ee2/src/plugins/saved_objects_management/public/lib/in_app_url.ts#L45-L47) to that function
 3. Create default plugin capabilities provider
-3. Register plugin capabilities via `core.capabilities.registerProvider(...);` as part of plugin server setup method
+4. Register plugin capabilities via `core.capabilities.registerProvider(...);` as part of plugin server setup method
 
 ## Using saved objects management to inspect/edit new plugin objects
 
