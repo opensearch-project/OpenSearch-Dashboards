@@ -8,7 +8,7 @@ import { ConfigSchema, configSchema } from '../config';
 import { WizardPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
-// as well as, OpenSearch Dashboards Platform `plugin()` initializer.
+// as well as the OpenSearch Dashboards Platform `plugin()` initializer.
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new WizardPlugin(initializerContext);
