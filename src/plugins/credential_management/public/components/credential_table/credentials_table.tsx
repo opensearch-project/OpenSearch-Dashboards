@@ -28,6 +28,7 @@ import {
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 
+import { getListBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagementContext } from '../../types';
 import { deleteCredentials, getCredentials } from '../utils';
 import { CredentialsTableItem } from '../types';
@@ -66,6 +67,9 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
   const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
 
+  const { setBreadcrumbs } = useOpenSearchDashboards<CredentialManagementContext>().services;
+  setBreadcrumbs(getListBreadcrumbs());
+
   const { savedObjects, uiSettings } = useOpenSearchDashboards<
     CredentialManagementContext
   >().services;
@@ -101,7 +105,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
       sortable: ({ sort }: { sort: string }) => sort,
     },
     {
-      field: 'credentialType',
+      field: 'credentialMaterialsType',
       name: 'Credential Type',
       truncateText: true,
       mobileOptions: {

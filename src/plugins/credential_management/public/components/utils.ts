@@ -10,7 +10,7 @@ export async function getCredentials(savedObjectsClient: SavedObjectsClientContr
   return await (savedObjectsClient
     .find({
       type: 'credential',
-      fields: ['id', 'title', 'credentialType'],
+      fields: ['id', 'title', 'credentialMaterials'],
       perPage: 10000,
     })
     .then((response) =>
@@ -18,11 +18,11 @@ export async function getCredentials(savedObjectsClient: SavedObjectsClientContr
         .map((source) => {
           const id = source.id;
           const title = source.get('title');
-          const credentialType = source.get('credentialType');
+          const credentialMaterialsType = source.get('credentialMaterials').credentialMaterialsType;
           return {
             id,
             title,
-            credentialType,
+            credentialMaterialsType,
             sort: `${title}`,
           };
         })
