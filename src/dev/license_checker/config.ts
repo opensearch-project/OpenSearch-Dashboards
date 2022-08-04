@@ -30,7 +30,7 @@
 
 // The following list applies to packages both
 // used as dependencies or dev dependencies
-export const LICENSE_WHITELIST = [
+export const LICENSE_ALLOWLIST = [
   'Elastic-License',
   '0BSD',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
@@ -86,7 +86,7 @@ export const LICENSE_WHITELIST = [
 
 // The following list only applies to licenses that
 // we wanna allow in packages only used as dev dependencies
-export const DEV_ONLY_LICENSE_WHITELIST = ['MPL-2.0'];
+export const DEV_ONLY_LICENSE_ALLOWLIST = ['MPL-2.0'];
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {

@@ -52,7 +52,7 @@ export function santaLogsSpecProvider(context: TutorialContext): TutorialSchema 
     longDescription: i18n.translate('home.tutorials.santaLogs.longDescription', {
       defaultMessage:
         'The  module collects and parses logs from [Google Santa](https://github.com/google/santa), \
-        a security tool for macOS that monitors process executions and can blacklist/whitelist binaries. \
+        a security tool for macOS that monitors process executions and can denylist/allowlist binaries. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-santa.html',

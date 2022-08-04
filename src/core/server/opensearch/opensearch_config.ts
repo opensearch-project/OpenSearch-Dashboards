@@ -149,6 +149,10 @@ const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRoo
     'opensearch.requestHeadersWhitelist',
     'opensearch.requestHeadersAllowlist'
   ),
+  renameFromRootWithoutMap(
+    'opensearch.requestHeadersWhitelistConfigured',
+    'opensearch.requestHeadersAllowlistConfigured'
+  ),
   renameFromRoot('elasticsearch.customHeaders', 'opensearch.customHeaders'),
   renameFromRoot('elasticsearch.shardTimeout', 'opensearch.shardTimeout'),
   renameFromRoot('elasticsearch.requestTimeout', 'opensearch.requestTimeout'),

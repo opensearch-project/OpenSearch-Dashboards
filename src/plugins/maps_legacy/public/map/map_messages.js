@@ -35,9 +35,9 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
-export const createRegionBlockedWarning = (function () {
+export const createRegionDeniedWarning = (function () {
   /* eslint-disable react/prefer-stateless-function */
-  class RegionBlockedWarningOverlay extends React.Component {
+  class RegionDeniedWarningOverlay extends React.Component {
     constructor(props) {
       super(props);
     }
@@ -71,7 +71,7 @@ export const createRegionBlockedWarning = (function () {
         document.getElementsByClassName('leaflet-container'),
         (leafletDom) => {
           ReactDOM.render(
-            new RegionBlockedWarningOverlay().render(),
+            new RegionDeniedWarningOverlay().render(),
             leafletDom.appendChild(messageBlock)
           );
         }
@@ -80,7 +80,7 @@ export const createRegionBlockedWarning = (function () {
   };
 })();
 
-export const removeRegionBlockedWarning = (function () {
+export const removeRegionDeniedWarning = (function () {
   return () => {
     const childEle = document.getElementById('blocker-div');
     if (childEle) {

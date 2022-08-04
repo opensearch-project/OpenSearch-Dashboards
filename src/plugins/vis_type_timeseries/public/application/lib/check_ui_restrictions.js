@@ -53,7 +53,7 @@ const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) =
  * @return {boolean}
  */
 export const isMetricEnabled = (key, restrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_METRICS);
+  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS);
 };
 
 /**
@@ -69,7 +69,7 @@ export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_REST
   if (isMetricEnabled(metricType, restrictions)) {
     return checkUIRestrictions(
       field,
-      restrictions[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS],
+      restrictions[RESTRICTIONS_KEYS.ALLOW_LISTED_METRICS],
       metricType
     );
   }
@@ -86,7 +86,7 @@ export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_REST
  * @return {boolean}
  */
 export const isGroupByFieldsEnabled = (key, restrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS);
+  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.ALLOW_LISTED_GROUP_BY_FIELDS);
 };
 
 /**
@@ -99,5 +99,5 @@ export const isGroupByFieldsEnabled = (key, restrictions) => {
  * @return {boolean}
  */
 export const isTimerangeModeEnabled = (key, restrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES);
+  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.ALLOW_LISTED_TIMERANGE_MODES);
 };
