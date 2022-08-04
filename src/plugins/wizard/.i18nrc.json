@@ -1,7 +1,0 @@
-{
-  "prefix": "wizard",
-  "paths": {
-    "wizard": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
