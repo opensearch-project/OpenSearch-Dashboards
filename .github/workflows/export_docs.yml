@@ -1,0 +1,27 @@
+name: Doc Export
+
+on:
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  pushdocs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: extract readmes
+        run: node scripts/extract_readmes.js
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_PUSH_DOC_REPO }}
+        with:
+          source-directory: 'extracted_readmes'
+          destination-github-username: 'CPTNB'
+          destination-repository-name: 'opensearch-dashboards-dev-docs'
+          user-email: 'cptn@amazon.net'
+          target-branch: main
+          target-directory: 'upstream_readmes'
