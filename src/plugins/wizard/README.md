@@ -24,10 +24,10 @@ metric/
 ```
 
 Outline:
-- index.ts: Exposes the create<Viz>Config function that is used to register the viz type
-- <vizName>_viz_type.ts: Contains the config that the type service needs to register the new vis type.
-- to_expression.ts: The expression function that the plugin will use to render the visualization given the state of the plugin
-- <vizName>_viz_options.tsx: The component that will render the other properties that user can set in the `Style` tab. 
+- `index.ts`: Exposes the `create<Viz>Config` function that is used to register the viz type
+- `<vizName>_viz_type.ts`: Contains the config that the type service needs to register the new vis type
+- `to_expression.ts`: The expression function that the plugin will use to render the visualization given the state of the plugin
+- `<vizName>_viz_options.tsx`: The component that will render the other properties that user can set in the `Style` tab
 
 **Notes:**
 
