@@ -62,7 +62,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('vis_type_timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
     renameFromRoot('timeline.ui.enabled', 'vis_type_timeline.ui.enabled', true),
 
-    renameFromRootWithoutMap('graphiteBlockedIPs', 'graphiteDeniedIPs'),
+    renameFromRootWithoutMap(
+      'vis_type_timeline.graphiteBlockedIPs',
+      'vis_type_timeline.graphiteDeniedIPs'
+    ),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
