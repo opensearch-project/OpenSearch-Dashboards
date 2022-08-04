@@ -13,7 +13,7 @@ export class VisualizationType implements IVisualizationType {
   public readonly title: string;
   public readonly description: string;
   public readonly icon: IconType;
-  public readonly stage: 'beta' | 'production';
+  public readonly stage: 'experimental' | 'production';
   public readonly ui: IVisualizationType['ui'];
   public readonly toExpression: (state: RootState) => Promise<string | undefined>;
 

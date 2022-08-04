@@ -21,7 +21,7 @@ export interface VisualizationTypeOptions<T = any> {
   readonly title: string;
   readonly description?: string;
   readonly icon: IconType;
-  readonly stage?: 'beta' | 'production';
+  readonly stage?: 'experimental' | 'production';
   readonly ui: {
     containerConfig: {
       data: DataTabConfig;

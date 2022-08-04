@@ -65,7 +65,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   // Event handlers for each dropbox action type
   const onAddField = useCallback(() => {
     if (!aggConfigs || !indexPattern) {
-      throw new Error('Cannot create new field, missing parameters');
+      throw new Error('Cannot create new field, missing aggConfigs or indexPattern');
     }
 
     const aggConfig = aggConfigs.createAggConfig(

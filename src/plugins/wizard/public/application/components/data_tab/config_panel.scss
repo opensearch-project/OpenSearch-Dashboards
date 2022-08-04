@@ -1,6 +1,13 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 .wizConfig {
+  @include euiYScrollWithShadows;
+
   background: $euiColorLightestShade;
   border-left: $euiBorderThin;
+  border-right: $euiBorderThin;
   position: relative;
   overflow-x: hidden;
 
