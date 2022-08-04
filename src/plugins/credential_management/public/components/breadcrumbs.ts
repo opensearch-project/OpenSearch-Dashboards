@@ -22,19 +22,19 @@ export function getCreateBreadcrumbs() {
     ...getListBreadcrumbs(),
     {
       text: i18n.translate('credentialManagement.credentials.createBreadcrumb', {
-        defaultMessage: 'Create credentials',
+        defaultMessage: 'Create Stored Credential',
       }),
       href: `/create`,
     },
   ];
 }
 
-export function getEditBreadcrumbs(credentials: CredentialEditPageItem) {
+export function getEditBreadcrumbs(credential: CredentialEditPageItem) {
   return [
     ...getListBreadcrumbs(),
     {
-      text: credentials.title,
-      href: `/${credentials.id}`,
+      text: credential.title,
+      href: `/${credential.id}`,
     },
   ];
 }

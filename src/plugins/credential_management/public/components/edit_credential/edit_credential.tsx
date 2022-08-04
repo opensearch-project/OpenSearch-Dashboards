@@ -30,7 +30,7 @@ import { CredentialEditPageItem } from '../types';
 
 interface EditCredentialState {
   credentialName: string;
-  credentialType: string;
+  credentialMaterialsType: string;
   userName: string;
   password: string;
   dual: boolean;
@@ -55,7 +55,7 @@ export class EditCredentialComponent extends React.Component<
 
     this.state = {
       credentialName: props.credential.title,
-      credentialType: props.credential.credentialType,
+      credentialMaterialsType: props.credential.credentialMaterialsType,
       userName: '',
       password: '',
       dual: true,
@@ -114,7 +114,7 @@ export class EditCredentialComponent extends React.Component<
           >
             <EuiFormRow label="Credential Type">
               <EuiSelect
-                onChange={(e) => this.setState({ credentialType: e.target.value })}
+                onChange={(e) => this.setState({ credentialMaterialsType: e.target.value })}
                 options={options}
               />
             </EuiFormRow>
@@ -171,9 +171,8 @@ export class EditCredentialComponent extends React.Component<
       // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.update('credential', this.props.credential.id, {
         title: this.state.credentialName,
-        credentialType: this.state.credentialType,
         credentialMaterials: {
-          credentialMaterialsType: this.state.credentialType,
+          credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
             userName: this.state.userName,
             password: this.state.password,
@@ -185,7 +184,7 @@ export class EditCredentialComponent extends React.Component<
       const editCredentialFailMsg = (
         <FormattedMessage
           id="credentialManagement.editCredential.loadEditCredentialFailMsg"
-          defaultMessage="The credential saved object edit failed with some errors. Please try it again.'"
+          defaultMessage="The credential saved object edit failed with some errors. Please configure data_source.enabled and try it again."
         />
       );
       this.setState((prevState) => ({
