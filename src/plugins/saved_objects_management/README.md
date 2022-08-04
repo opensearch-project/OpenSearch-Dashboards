@@ -13,7 +13,7 @@ For 3., this plugin can also be used to provide a route/page for editing, such a
 
 1. Create a new `SavedObjectsType` or add the `management` property to an existing one. (See [`SavedObjectsTypeManagementDefinition`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/e1380f14deb98cc7cce55c3b82c2d501826a78c3/src/core/server/saved_objects/types.ts#L247-L285) for explanation of its properties)
 2. Register saved object type via `core.savedObjects.registerType(...)` as part of plugin server setup method
-3. Implement a way to save the object via `savedObjectsClient.create(...)`
+3. Implement a way to save the object (e.g. via `savedObjectsClient.create(...)` or a `savedObjectLoader`)
 4. After these steps, you should be able to save objects and view/search for them in Saved Objects management (`/app/management/opensearch-dashboards/objects`)
 
 ## Enabling edit links from saved objects management
