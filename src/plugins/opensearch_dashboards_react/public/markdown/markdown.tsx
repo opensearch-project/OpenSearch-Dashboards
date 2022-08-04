@@ -37,22 +37,30 @@ import { getSecureRelForTarget } from '@elastic/eui';
 import './index.scss';
 /**
  * Return a memoized markdown rendering function that use the specified
- * whiteListedRules and openLinksInNewTab configurations.
- * @param {Array of Strings} whiteListedRules - white list of markdown rules
+ * whiteListedRules (deprecated) (use allowListedRules) and openLinksInNewTab configurations.
+ * @param {Array of Strings} whiteListedRules - allow list of markdown rules
+ * @param {Array of Strings} allowListedRules - allow list of markdown rules
  * list of rules can be found at https://github.com/markdown-it/markdown-it/issues/361
  * @param {Boolean} openLinksInNewTab
  * @return {Function} Returns an Object to use with dangerouslySetInnerHTML
  * with the rendered markdown HTML
  */
 export const markdownFactory = memoize(
-  (whiteListedRules: string[] = [], openLinksInNewTab: boolean = false) => {
+  (
+    whiteListedRules: string[] = [],
+    allowListedRules: string[] = [],
+    openLinksInNewTab: boolean = false
+  ) => {
     let markdownIt: MarkdownIt;
 
     // It is imperative that the html config property be set to false, to mitigate XSS: the output of markdown-it is
     // fed directly to the DOM via React's dangerouslySetInnerHTML below.
 
-    if (whiteListedRules && whiteListedRules.length > 0) {
-      markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
+    markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
+
+    if (allowListedRules && allowListedRules.length > 0) {
+      markdownIt.enable(allowListedRules);
+    } else if (whiteListedRules && whiteListedRules.length > 0) {
       markdownIt.enable(whiteListedRules);
     } else {
       markdownIt = new MarkdownIt({ html: false, linkify: true });
@@ -90,8 +98,14 @@ export const markdownFactory = memoize(
       return markdown ? markdownIt.render(markdown) : '';
     };
   },
-  (whiteListedRules: string[] = [], openLinksInNewTab: boolean = false) => {
-    return `${whiteListedRules.join('_')}${openLinksInNewTab}`;
+  (
+    whiteListedRules: string[] = [],
+    allowListedRules: string[] = [],
+    openLinksInNewTab: boolean = false
+  ) => {
+    return whiteListedRules.length > 0
+      ? `${whiteListedRules.join('_')}${openLinksInNewTab}`
+      : `${allowListedRules.join('_')}${openLinksInNewTab}`;
   }
 );
 
@@ -99,15 +113,24 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   markdown?: string;
   openLinksInNewTab?: boolean;
+  /** @deprecated use allowListedRules: */
   whiteListedRules?: string[];
+  allowListedRules?: string[];
 }
 
 export class Markdown extends PureComponent<MarkdownProps> {
   render() {
-    const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = this.props;
+    const {
+      className,
+      markdown = '',
+      openLinksInNewTab,
+      whiteListedRules,
+      allowListedRules,
+      ...rest
+    } = this.props;
 
     const classes = classNames('osdMarkdown__body', className);
-    const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
+    const markdownRenderer = markdownFactory(whiteListedRules, allowListedRules, openLinksInNewTab);
     const renderedMarkdown = markdownRenderer(markdown);
     return (
       <div

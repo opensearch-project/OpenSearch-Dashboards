@@ -6,32 +6,32 @@
 import * as helper from './graphite_helper';
 
 describe('graphite_helper', function () {
-  it('valid Url should not be blocked and isBlockedURL should return false', function () {
-    expect(helper.isBlockedURL('https://opensearch.org', ['127.0.0.0/8'])).toEqual(false);
+  it('valid Url should not be blocked and isDeniedURL should return false', function () {
+    expect(helper.isDeniedURL('https://opensearch.org', ['127.0.0.0/8'])).toEqual(false);
   });
 
-  it('blocked Url should be blocked and isBlockedURL should return true', function () {
-    expect(helper.isBlockedURL('https://127.0.0.1', ['127.0.0.0/8'])).toEqual(true);
+  it('blocked Url should be blocked and isDeniedURL should return true', function () {
+    expect(helper.isDeniedURL('https://127.0.0.1', ['127.0.0.0/8'])).toEqual(true);
   });
 
-  it('invalid Url should be blocked and isBlockedURL should return true', function () {
-    expect(helper.isBlockedURL('www.opensearch.org', ['127.0.0.0/8'])).toEqual(true);
+  it('invalid Url should be blocked and isDeniedURL should return true', function () {
+    expect(helper.isDeniedURL('www.opensearch.org', ['127.0.0.0/8'])).toEqual(true);
   });
 
-  it('blocklist should be checked if blocklist is enabled', function () {
-    jest.spyOn(helper, 'isBlockedURL').mockReturnValueOnce(false);
+  it('denylist should be checked if denylist is enabled', function () {
+    jest.spyOn(helper, 'isDeniedURL').mockReturnValueOnce(false);
     helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org');
-    expect(helper.isBlockedURL).toBeCalled();
+    expect(helper.isDeniedURL).toBeCalled();
   });
 
-  it('blocklist should be checked it both allowlist and blocklist are enabled', function () {
-    jest.spyOn(helper, 'isBlockedURL').mockReturnValueOnce(false);
+  it('denylist should be checked it both allowlist and denylist are enabled', function () {
+    jest.spyOn(helper, 'isDeniedURL').mockReturnValueOnce(false);
     helper.isValidConfig(
       ['127.0.0.0/8'],
       ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       'https://opensearch.org'
     );
-    expect(helper.isBlockedURL).toBeCalled();
+    expect(helper.isDeniedURL).toBeCalled();
   });
 
   it('with only allowlist, isValidConfig should return false for Url not in the allowlist', function () {
@@ -54,15 +54,15 @@ describe('graphite_helper', function () {
     ).toEqual(true);
   });
 
-  it('with only blocklist, isValidConfig should return false for Url in the blocklist', function () {
+  it('with only denylist, isValidConfig should return false for Url in the denylist', function () {
     expect(helper.isValidConfig(['127.0.0.0/8'], [], 'https://127.0.0.1')).toEqual(false);
   });
 
-  it('with only blocklist, isValidConfig should return true for Url not in the blocklist', function () {
+  it('with only denylist, isValidConfig should return true for Url not in the denylist', function () {
     expect(helper.isValidConfig(['127.0.0.0/8'], [], 'https://opensearch.org')).toEqual(true);
   });
 
-  it('with both blocklist and allowlist, isValidConfig should return false if allowlist check fails', function () {
+  it('with both denylist and allowlist, isValidConfig should return false if allowlist check fails', function () {
     expect(
       helper.isValidConfig(
         ['127.0.0.0/8'],
@@ -72,7 +72,7 @@ describe('graphite_helper', function () {
     ).toEqual(false);
   });
 
-  it('with both blocklist and allowlist, isValidConfig should return false if blocklist check fails', function () {
+  it('with both denylist and allowlist, isValidConfig should return false if denylist check fails', function () {
     expect(
       helper.isValidConfig(
         ['127.0.0.0/8'],
@@ -82,7 +82,7 @@ describe('graphite_helper', function () {
     ).toEqual(false);
   });
 
-  it('with conflict blocklist and allowlist, isValidConfig should return false if blocklist check fails', function () {
+  it('with conflict denylist and allowlist, isValidConfig should return false if denylist check fails', function () {
     expect(
       helper.isValidConfig(['127.0.0.0/8'], ['https://127.0.0.1'], 'https://127.0.0.1')
     ).toEqual(false);

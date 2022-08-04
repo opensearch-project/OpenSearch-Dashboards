@@ -86225,7 +86225,7 @@ module.exports = ProgressEmitter;
 "use strict";
 
 
-const blacklist = [
+const denylist = [
 	// # All
 	'^npm-debug\\.log$', // Error log for npm
 	'^\\..*\\.swp$', // Swap file for vim state
@@ -86254,7 +86254,7 @@ exports.re = () => {
 	throw new Error('`junk.re` was renamed to `junk.regex`');
 };
 
-exports.regex = new RegExp(blacklist.join('|'));
+exports.regex = new RegExp(denylist.join('|'));
 
 exports.is = filename => exports.regex.test(filename);
 
