@@ -21,7 +21,7 @@ const EditCredentialPage: React.FC<RouteComponentProps<{ id: string }>> = ({ ...
       const object = {
         id: savedObject.id,
         title: savedObject.attributes.title,
-        credentialType: savedObject.attributes.credentialType,
+        credentialMaterialsType: savedObject.attributes.credentialMaterials.credentialMaterialsType,
       };
       setCredential(object);
       setBreadcrumbs(getEditBreadcrumbs(object));

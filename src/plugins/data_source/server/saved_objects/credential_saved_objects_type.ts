@@ -11,7 +11,8 @@ export const credential: SavedObjectsType = {
   namespaceType: 'agnostic',
   management: {
     defaultSearchField: 'title',
-    importableAndExportable: true,
+    // TODO: Support import / export https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1872
+    importableAndExportable: false,
     getTitle(obj) {
       return obj.attributes.title;
     },
@@ -28,10 +29,8 @@ export const credential: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      title: { type: 'text', index: false },
-      credentialType: { type: 'keyword', index: false },
-      credentialMaterials: { type: 'object' },
-      description: { type: 'text', index: false },
+      title: { type: 'text' },
+      authType: { type: 'keyword' },
     },
   },
   migrations: {},
