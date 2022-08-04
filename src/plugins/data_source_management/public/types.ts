@@ -22,7 +22,7 @@ export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
 }
 
-export interface DataSourceManagmentContext {
+export interface DataSourceManagementContext {
   chrome: ChromeStart;
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
