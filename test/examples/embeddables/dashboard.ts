@@ -30,7 +30,7 @@
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
-export const testDashboardInput = {
+const testDashboardInput = {
   panels: {
     '1': {
       gridData: {
