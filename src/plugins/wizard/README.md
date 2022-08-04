@@ -32,5 +32,5 @@ Outline:
 **Notes:**
 
 - Currently only the metric viz is setup so schema properties that other vis types need may not be setup fully and need to be set correctly. 
-- `to_expression` is quite custom and can be abstracted into a common utility for different visualizations. Adding more vis types should make it clear as to how this can be done
+- `to_expression` has not yet been abstracted into a common utility for different visualizations. Adding more visualization types should make it easier to identify which parts of expression creation are common, and which are visualization-specific.
 
