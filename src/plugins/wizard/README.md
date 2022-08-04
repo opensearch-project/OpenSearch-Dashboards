@@ -10,7 +10,7 @@ Visualize -> Create Visualization -> Wizard
 
 ## Add a visualization (TODO: Cleanup before merging into mainline)
 
-All new visualizations currently reside in [public/visualizations](./public/visualizations). To add a new one, create a new visualization folder and add the required code to setup and register a new vis type.
+All new visualizations currently reside in [public/visualizations](./public/visualizations). To add a new one, create a new visualization directory and add the required code (below) to setup and register a new vis type.
 
 ### Anatomy of a visualization
 
