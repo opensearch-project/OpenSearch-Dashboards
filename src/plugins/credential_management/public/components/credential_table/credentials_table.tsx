@@ -15,6 +15,8 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
   EuiInMemoryTable,
   EuiSpacer,
   EuiText,
@@ -66,6 +68,7 @@ interface Props extends RouteComponentProps {
 export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
   const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
+  const [toasts, setToasts] = React.useState<EuiGlobalToastListToast[]>([]);
 
   const { setBreadcrumbs } = useOpenSearchDashboards<CredentialManagementContext>().services;
   setBreadcrumbs(getListBreadcrumbs());
@@ -135,11 +138,30 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   };
 
   const onClickDelete = async () => {
-    await deleteCredentials(savedObjects.client, selectedCredentials);
-    // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2055
-    const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
-    setCredentials(fetchedCredentials);
-    setSelectedCredentials([]);
+    try {
+      await deleteCredentials(savedObjects.client, selectedCredentials);
+      // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2055
+      const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
+      setCredentials(fetchedCredentials);
+      setSelectedCredentials([]);
+    } catch (e) {
+      const deleteCredentialsFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.credentialsTable.loadDeleteCredentialsFailMsg"
+          defaultMessage="The credential saved objects delete failed with some errors. Please configure data_source.enabled and try it again."
+        />
+      );
+      setToasts(
+        toasts.concat([
+          {
+            title: deleteCredentialsFailMsg,
+            id: deleteCredentialsFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ])
+      );
+    }
   };
 
   const deleteButton = renderDeleteButton();
@@ -153,39 +175,58 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
 
   const createButton = canSave ? <CreateButton history={history} /> : <></>;
 
+  const removeToast = (id: string) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
+
+  const renderContent = () => {
+    return (
+      <EuiPageContent data-test-subj="credentialsTable" role="region">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>{title}</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="credentialManagement.credentialsTable.credentialManagementExplanation"
+                  defaultMessage="Create and manage the credentials that help you retrieve your data from OpenSearch."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={true}
+          selection={selection}
+          items={credentials}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </EuiPageContent>
+    );
+  };
+
   return (
-    <EuiPageContent data-test-subj="credentialsTable" role="region">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="credentialManagement.credentialsTable.credentialManagementExplanation"
-                defaultMessage="Create and manage the credentials that help you retrieve your data from OpenSearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={true}
-        selection={selection}
-        items={credentials}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
+    <>
+      {renderContent()}
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={({ id }) => {
+          removeToast(id);
+        }}
+        toastLifeTimeMs={6000}
       />
-    </EuiPageContent>
+    </>
   );
 };
 
