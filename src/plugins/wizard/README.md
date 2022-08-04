@@ -16,8 +16,8 @@ All new visualizations currently reside in [public/visualizations](./public/visu
 
 ```
 metric/
-├─ metric_viz_type.ts
 ├─ index.ts
+├─ metric_viz_type.ts
 ├─ to_expression.ts
 ├─ components/
    ├─ metric_viz_options.tsx
