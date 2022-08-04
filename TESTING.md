@@ -89,7 +89,7 @@ Automated testing is provided with Jenkins for Continuous Integration. Jenkins e
 Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:
 `export TEST_BROWSER_HEADLESS=1`
 
-Since local Selenium tests are run in a real browser, the dev environment should have a desktop environment and a Google Chrome installed to run the tests.
+Since local Selenium tests are run in a real browser, the dev environment should have a desktop environment and Google Chrome or Chromium installed to run the tests.
 
 By default the version of OpenSearch Dashboards will pull the snapshot of the same version of OpenSearch if available while running a few integration tests and for running functional tests. However, if the version of OpenSearch Dashboards is not available, you can build OpenSearch locally and point the functional test runner to the executable with:
 `export TEST_OPENSEARCH_FROM=[local directory of OpenSearch executable]`
@@ -97,7 +97,7 @@ By default the version of OpenSearch Dashboards will pull the snapshot of the sa
 Selinium tests require a chromedriver and a corresponding version of chrome to run properly. Depending on the version of chromedriver used, you may need to use a version of Google Chrome that is not the latest version. You can do this by running:
 
 ```sh
-# Enter tghe version of chrome that you want to install
+# Enter the version of chrome that you want to install
 CHROME_VERSION=100.0.4896.127-1
 
 # Download Chrome to a temp directory

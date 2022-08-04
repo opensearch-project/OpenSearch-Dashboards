@@ -41,7 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Try to find the wizard Vis type.
       const wizardVisTypeExists = await PageObjects.visualize.hasVisType('wizard');
       expect(wizardVisTypeExists).to.be(false);
+    });
 
+    after(async () => {
       // unset the experimental ui setting
       await opensearchDashboardsServer.uiSettings.unset(VISUALIZE_ENABLE_LABS_SETTING);
     });
