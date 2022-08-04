@@ -13,7 +13,6 @@ import {
 
 import { WizardPluginSetup, WizardPluginStart } from './types';
 import { capabilitiesProvider } from './capabilities_provider';
-import { defineRoutes } from './routes';
 import { wizardSavedObjectType } from './saved_objects';
 
 export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart> {
@@ -25,10 +24,6 @@ export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart
 
   public setup({ capabilities, http, savedObjects }: CoreSetup) {
     this.logger.debug('wizard: Setup');
-    const router = http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
 
     // Register saved object types
     savedObjects.registerType(wizardSavedObjectType);
