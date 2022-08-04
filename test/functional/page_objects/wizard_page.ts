@@ -4,7 +4,6 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-// import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
 
 export function WizardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
