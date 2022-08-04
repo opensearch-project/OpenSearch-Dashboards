@@ -89,11 +89,11 @@ export const Workspace: FC = ({ children }) => {
           <ExperimentalInfo />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiPanel className="wizCanvas">
+      <EuiPanel className="wizCanvas" data-test-subj="visualizationLoader">
         {expression ? (
           <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
         ) : (
-          <EuiFlexItem className="wizWorkspace__empty">
+          <EuiFlexItem className="wizWorkspace__empty" data-test-subj="emptyWorkspace">
             <EuiEmptyPrompt
               title={<h2>Add a field to start</h2>}
               body={

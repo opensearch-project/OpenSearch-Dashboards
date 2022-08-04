@@ -18,7 +18,9 @@ export interface TitleProps {
 }
 
 export const Title = ({ title, isSecondary, closeMenu }: TitleProps) => {
-  const icon = isSecondary && <EuiIcon type="arrowLeft" onClick={closeMenu} />;
+  const icon = isSecondary && (
+    <EuiIcon type="arrowLeft" onClick={closeMenu} data-test-subj="panelCloseBtn" />
+  );
   return (
     <>
       <div className="wizConfig__title">

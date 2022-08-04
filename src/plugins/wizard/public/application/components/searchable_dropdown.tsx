@@ -118,6 +118,7 @@ export const SearchableDropdown = ({
     <div className="searchableDropdown--selectableWrapper">
       <EuiSelectable
         aria-label="Selectable options"
+        data-test-subj="searchableDropdownList"
         searchable
         options={localOptions}
         onChange={selectNewOption}
@@ -145,6 +146,7 @@ export const SearchableDropdown = ({
       size="s"
       style={{ textAlign: 'left' }}
       className="searchableDropdown--topDisplay"
+      data-test-subj="searchableDropdownValue"
       onClick={onButtonClick}
     >
       {selectedText}

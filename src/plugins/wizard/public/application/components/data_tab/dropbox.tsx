@@ -96,7 +96,12 @@ const DropboxComponent = ({
                 draggableId={id}
                 index={index}
               >
-                <EuiPanel key={index} paddingSize="s" className="dropBox__field">
+                <EuiPanel
+                  key={index}
+                  paddingSize="s"
+                  className="dropBox__field"
+                  data-test-subj={`dropBoxField-${dropboxId}-${index}`}
+                >
                   <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
                     <a role="button" tabIndex={0}>
                       {label}
@@ -108,6 +113,7 @@ const DropboxComponent = ({
                     aria-label="clear-field"
                     iconSize="s"
                     onClick={() => animateDelete(id)}
+                    data-test-subj="dropBoxRemoveBtn"
                   />
                 </EuiPanel>
               </EuiDraggable>
@@ -115,6 +121,7 @@ const DropboxComponent = ({
           </EuiDroppable>
           {fields.length < limit && (
             <EuiPanel
+              data-test-subj={`dropBoxAddField-${dropboxId}`}
               className={`dropBox__field dropBox__dropTarget ${
                 isValidDropTarget ? 'validField' : ''
               } ${canDrop ? 'canDrop' : ''}`}
@@ -126,6 +133,7 @@ const DropboxComponent = ({
                 aria-label="clear-field"
                 iconSize="s"
                 onClick={() => onAddField()}
+                data-test-subj="dropBoxAddBtn"
               />
             </EuiPanel>
           )}
