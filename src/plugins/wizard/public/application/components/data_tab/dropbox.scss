@@ -53,12 +53,12 @@
     animation: pop-in $euiAnimSpeedFast $euiAnimSlightResistance forwards;
 
     &.validField {
-      background-color: #a8d9e7;
-      border-color: #a8d9e7;
+      background-color: tintOrShade($euiColorPrimary, 80%, 70%);
+      border-color: tintOrShade($euiColorPrimary, 80%, 70%);
 
       &.canDrop {
-        background-color: rgba(0, 161, 201, 30%);
-        border-color: #006bb4;
+        background-color: tintOrShade($euiColorPrimary, 60%, 40%);
+        border-color: tintOrShade($euiColorPrimary, 30%, 20%);
         border-style: dashed;
       }
     }
