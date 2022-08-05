@@ -12,7 +12,7 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "@elastic/eui": "34.6.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.0.0",
     "@osd/plugin-helpers": "1.0.0",
     "react": "^16.14.0",
     "react-dom": "^16.12.0",
