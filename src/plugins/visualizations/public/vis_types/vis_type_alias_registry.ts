@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { SavedObjectAttributes } from 'opensearch-dashboards/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface VisualizationListItem {
@@ -51,7 +52,7 @@ export interface VisualizationsAppExtension {
   toListItem: (savedObject: {
     id: string;
     type: string;
-    attributes: object;
+    attributes: SavedObjectAttributes;
   }) => VisualizationListItem;
 }
 

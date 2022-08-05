@@ -43,7 +43,7 @@ export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
   groupName: AggGroupName;
   metricAggs: IAggConfig[];
-  state: EditorVisState;
+  state: Partial<EditorVisState>;
   setAggParamValue: <T extends keyof AggParams>(
     aggId: AggId,
     paramName: T,

@@ -1,0 +1,30 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../util";
+@import "../variables";
+
+.wizSidenav {
+  @include scrollNavParent(auto 1fr);
+
+  grid-area: sideNav;
+  border-right: $euiBorderThin;
+}
+
+.wizSidenavTabs {
+  .euiTab__content {
+    text-transform: capitalize;
+  }
+
+  @include scrollNavParent(min-content 1fr);
+
+  & > [role="tabpanel"] {
+    @include scrollNavParent;
+  }
+}
+
+.wizDatasourceSelect {
+  max-width: $wizSideNavWidth;
+  padding: $euiSize $euiSize 0 $euiSize;
+}

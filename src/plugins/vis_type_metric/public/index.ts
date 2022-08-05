@@ -34,3 +34,6 @@ import { MetricVisPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
+
+/* Public Types */
+export { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
