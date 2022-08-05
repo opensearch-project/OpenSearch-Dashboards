@@ -36,7 +36,7 @@ export const registerServices = async (
   registry: ISavedObjectsManagementServiceRegistry,
   getStartServices: StartServicesAccessor<StartDependencies, SavedObjectsManagementPluginStart>
 ) => {
-  const [, { dashboard, visualizations, discover }] = await getStartServices();
+  const [, { dashboard, visualizations, discover, wizard }] = await getStartServices();
 
   if (dashboard) {
     registry.register({
@@ -59,6 +59,14 @@ export const registerServices = async (
       id: 'savedSearches',
       title: 'searches',
       service: discover.savedSearchLoader,
+    });
+  }
+
+  if (wizard) {
+    registry.register({
+      id: 'savedWizard',
+      title: 'wizard',
+      service: wizard.savedWizardLoader,
     });
   }
 };

@@ -1,0 +1,106 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.dropBox {
+  margin-top: $euiSize;
+  border-bottom: $euiBorderThin;
+  padding-bottom: $euiSize;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__container {
+    display: grid;
+    grid-gap: $euiSizeXS / 2;
+    padding: $euiSizeS - ($euiSizeXS / 2) $euiSizeS $euiSizeS $euiSizeS;
+    background-color: $euiColorLightShade;
+    border-radius: $euiBorderRadius;
+  }
+
+  &__field {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-gap: $euiSizeS;
+    padding: $euiSizeS $euiSizeM;
+    align-items: center;
+  }
+
+  &__draggable {
+    padding: $euiSizeXS / 2 0;
+    animation: pop-in $euiAnimSpeedSlow $euiAnimSlightResistance forwards;
+    transform-origin: bottom;
+
+    &.closing {
+      animation: pop-out $euiAnimSpeedSlow $euiAnimSlightResistance forwards; // Also update speed in dropbox.tsx
+    }
+  }
+
+  &__field_text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__dropTarget {
+    color: $euiColorDarkShade;
+    grid-template-columns: 1fr auto;
+    transform-origin: top;
+    animation: pop-in $euiAnimSpeedFast $euiAnimSlightResistance forwards;
+
+    &.validField {
+      background-color: tintOrShade($euiColorPrimary, 80%, 70%);
+      border-color: tintOrShade($euiColorPrimary, 80%, 70%);
+
+      &.canDrop {
+        background-color: tintOrShade($euiColorPrimary, 60%, 40%);
+        border-color: tintOrShade($euiColorPrimary, 30%, 20%);
+        border-style: dashed;
+      }
+    }
+  }
+}
+
+@keyframes pop-in {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+@keyframes pop-out {
+  from {
+    max-height: 1000px;
+    opacity: 1;
+  }
+
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .dropBox {
+    &__draggable {
+      animation: none;
+
+      &.closing {
+        animation: none;
+      }
+    }
+
+    &__dropTarget {
+      animation: none;
+    }
+  }
+}

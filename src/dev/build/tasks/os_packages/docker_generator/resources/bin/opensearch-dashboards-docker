@@ -149,6 +149,7 @@ opensearch_dashboards_vars=(
     telemetry.optIn
     telemetry.optInStatusUrl
     telemetry.sendUsageFrom
+    wizard.enabled
 )
 
 longopts=''

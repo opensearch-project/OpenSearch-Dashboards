@@ -51,7 +51,7 @@ interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
-  state: EditorVisState;
+  state: Partial<EditorVisState>;
   schemas: Schema[];
   hideCustomLabel?: boolean;
 }
