@@ -68,6 +68,7 @@ def functionalDynamicParallelSteps(image){
       "ciGroup10",
       "ciGroup11",
       "ciGroup12",
+      "ciGroup13",
     ]
     for (int i = 0; i < ciGroups.size(); i++) {
       def currentCiGroup = ciGroups[i];

@@ -373,7 +373,8 @@ export const buildVislibDimensions = async (vis: any, params: BuildPipelineParam
     splitColumn: schemas.split_column,
   };
   if (schemas.segment) {
-    const xAgg = vis.data.aggs.getResponseAggs()[dimensions.x.accessor];
+    const a = vis.data.aggs.getResponseAggs();
+    const xAgg = a[dimensions.x.accessor];
     if (xAgg.type.name === 'date_histogram') {
       dimensions.x.params.date = true;
       const { opensearchUnit, opensearchValue } = xAgg.buckets.getInterval();
@@ -423,10 +424,10 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     // request handler
     if (vis.type.requestHandler === 'courier') {
       pipeline += `opensearchaggs
-    ${prepareString('index', indexPattern!.id)}
-    metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || false}
-    ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
+        ${prepareString('index', indexPattern!.id)}
+        metricsAtAllLevels=${vis.isHierarchical()}
+        partialRows=${vis.params.showPartialRows || false}
+        ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
     }
 
     const schemas = getSchemas(vis, params);
@@ -456,5 +457,6 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       }
     }
   }
+
   return pipeline;
 };

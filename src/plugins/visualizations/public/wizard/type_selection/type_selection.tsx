@@ -182,21 +182,19 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
-    const types = visTypes.all().filter((type) => {
-      // Filter out all lab visualizations if lab mode is not enabled
+    const filterExperimental = (type: VisType | VisTypeAlias): boolean => {
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
       }
-
-      // Filter out hidden visualizations
-      if (type.hidden) {
-        return false;
-      }
-
       return true;
-    });
+    };
 
-    const allTypes = [...types, ...visTypes.getAliases()];
+    const types = visTypes
+      .all()
+      .filter(filterExperimental)
+      .filter((type) => !type.hidden); // Filter out hidden visualizations
+    const aliasedTypes = visTypes.getAliases().filter(filterExperimental);
+    const allTypes = [...types, ...aliasedTypes];
 
     let entries: VisTypeListEntry[];
     if (!query) {
@@ -222,7 +220,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
     let highlightMsg;
-    if (!isVisTypeAlias(visType.type) && visType.type.stage === 'experimental') {
+    if (visType.type.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -278,7 +276,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       >
         <VisTypeIcon
           icon={visType.type.icon === 'visTimeline' ? 'visTimelion' : visType.type.icon}
-          image={'image' in visType.type ? visType.type.image : 'visTimelion'}
+          image={'image' in visType.type ? visType.type.image : undefined}
         />
       </EuiKeyPadMenuItem>
     );
