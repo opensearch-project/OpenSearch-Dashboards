@@ -93,6 +93,13 @@ describe('props', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('allowListedRules', () => {
+    const component = shallow(
+      <Markdown markdown={markdown} allowListedRules={['backticks', 'emphasis']} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
   test('should update markdown when openLinksInNewTab prop change', () => {
     const component = shallow(<Markdown markdown={markdown} openLinksInNewTab={false} />);
     expect(component.render().find('a').prop('target')).not.toBe('_blank');
@@ -108,6 +115,18 @@ describe('props', () => {
     expect(component.render().find('em')).toHaveLength(1);
     expect(component.render().find('code')).toHaveLength(1);
     component.setProps({ whiteListedRules: ['backticks'] });
+    expect(component.render().find('code')).toHaveLength(1);
+    expect(component.render().find('em')).toHaveLength(0);
+  });
+
+  test('should update markdown when allowListedRules prop change', () => {
+    const md = '*emphasis* `backticks`';
+    const component = shallow(
+      <Markdown markdown={md} allowListedRules={['emphasis', 'backticks']} />
+    );
+    expect(component.render().find('em')).toHaveLength(1);
+    expect(component.render().find('code')).toHaveLength(1);
+    component.setProps({ allowListedRules: ['backticks'] });
     expect(component.render().find('code')).toHaveLength(1);
     expect(component.render().find('em')).toHaveLength(0);
   });

@@ -32,7 +32,7 @@ import { REPO_ROOT } from '@osd/utils';
 import { run } from '@osd/dev-utils';
 import { getInstalledPackages } from '../npm';
 
-import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
+import { LICENSE_ALLOWLIST, DEV_ONLY_LICENSE_ALLOWLIST, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';
 
 run(
@@ -47,7 +47,7 @@ run(
     // packages are valid
     assertLicensesValid({
       packages: packages.filter((pkg) => !pkg.isDevOnly),
-      validLicenses: LICENSE_WHITELIST,
+      validLicenses: LICENSE_ALLOWLIST,
     });
     log.success('All production dependency licenses are allowed');
 
@@ -56,7 +56,7 @@ run(
     if (flags.dev) {
       assertLicensesValid({
         packages: packages.filter((pkg) => pkg.isDevOnly),
-        validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST),
+        validLicenses: LICENSE_ALLOWLIST.concat(DEV_ONLY_LICENSE_ALLOWLIST),
       });
       log.success('All development dependency licenses are allowed');
     }

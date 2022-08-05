@@ -31,8 +31,8 @@
 import { EventEmitter } from 'events';
 import {
   createZoomWarningMsg,
-  createRegionBlockedWarning,
-  removeRegionBlockedWarning,
+  createRegionDeniedWarning,
+  removeRegionDeniedWarning,
 } from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
@@ -609,8 +609,8 @@ export class OpenSearchDashboardsMap extends EventEmitter {
         this.emit('baseLayer:loading');
       });
       baseLayer.on('tileerror', () => {
-        if (settings.options.showRegionBlockedWarning) {
-          createRegionBlockedWarning();
+        if (settings.options.showRegionDeniedWarning) {
+          createRegionDeniedWarning();
         }
       });
 
@@ -691,7 +691,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
   }
 
   _updateDesaturation() {
-    removeRegionBlockedWarning();
+    removeRegionDeniedWarning();
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps
     if (get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {

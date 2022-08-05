@@ -36,7 +36,6 @@ export class ConfigManager {
   private opensearchShardTimeout: number = 0;
   private graphiteAllowedUrls: string[] = [];
   private graphiteBlockedIPs: string[] = [];
-
   constructor(config: PluginInitializerContext['config']) {
     config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
       this.graphiteAllowedUrls = configUpdate.graphiteAllowedUrls || [];

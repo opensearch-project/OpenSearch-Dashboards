@@ -90,7 +90,17 @@ describe('graphite', function () {
     });
   });
 
-  it('should return error message if both allowlist and blocklist are disabled', function () {
+  it('should return error message if both allowlist and blockedlist are disabled', function () {
+    return invoke(fn, [], {
+      settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
+      allowedGraphiteUrls: [],
+      blockedGraphiteIPs: [],
+    }).catch((e) => {
+      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+    });
+  });
+
+  it('should return error message if both allowlist and denylist are disabled', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
       allowedGraphiteUrls: [],
@@ -122,7 +132,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with matched blocklist url should return error message', function () {
+  it('setting with matched denylist url should return error message', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'http://127.0.0.1' },
       allowedGraphiteUrls: [],
@@ -132,7 +142,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with matched blocklist localhost should return error message', function () {
+  it('setting with matched denylist localhost should return error message', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'http://localhost' },
       allowedGraphiteUrls: [],
@@ -142,7 +152,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with unmatched blocklist https url should return result', function () {
+  it('setting with unmatched denylist https url should return result', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'https://opensearch.org/' },
       allowedGraphiteUrls: [],
@@ -152,7 +162,7 @@ describe('graphite', function () {
     });
   });
 
-  it('setting with unmatched blocklist ftp url should return result', function () {
+  it('setting with unmatched denylist ftp url should return result', function () {
     return invoke(fn, [], {
       settings: { 'timeline:graphite.url': 'ftp://www.opensearch.org' },
       allowedGraphiteUrls: [],
@@ -182,7 +192,7 @@ describe('graphite', function () {
     });
   });
 
-  it('with both allowlist and blocklist, setting not in blocklist but in allowlist should return result', function () {
+  it('with both allowlist and denylist, setting not in denylist but in allowlist should return result', function () {
     return invoke(fn, [], {
       settings: {
         'timeline:graphite.url': 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
@@ -194,7 +204,7 @@ describe('graphite', function () {
     });
   });
 
-  it('with conflict allowlist and blocklist, setting in blocklist and in allowlist should return error message', function () {
+  it('with conflict allowlist and denylist, setting in denylist and in allowlist should return error message', function () {
     return invoke(fn, [], {
       settings: {
         'timeline:graphite.url': 'http://127.0.0.1',

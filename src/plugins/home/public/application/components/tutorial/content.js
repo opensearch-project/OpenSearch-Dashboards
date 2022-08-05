@@ -32,7 +32,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Markdown } from '../../../../../opensearch_dashboards_react/public';
 
+/** @deprecated use allowListedRules: */
 const whiteListedRules = ['backticks', 'emphasis', 'link', 'list'];
+const allowListedRules = ['backticks', 'emphasis', 'link', 'list'];
 
 export function Content({ text }) {
   return (
@@ -41,6 +43,7 @@ export function Content({ text }) {
       markdown={text}
       openLinksInNewTab={true}
       whiteListedRules={whiteListedRules}
+      allowListedRules={allowListedRules}
     />
   );
 }

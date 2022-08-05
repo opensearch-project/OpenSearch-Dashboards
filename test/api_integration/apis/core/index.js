@@ -44,7 +44,7 @@ export default function ({ getService }) {
           });
       });
 
-      it(`uses compression when there is a whitelisted referer`, async () => {
+      it(`uses compression when there is a allowlisted referer`, async () => {
         await supertest
           .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')
@@ -54,7 +54,7 @@ export default function ({ getService }) {
           });
       });
 
-      it(`doesn't use compression when there is a non-whitelisted referer`, async () => {
+      it(`doesn't use compression when there is a non-allowlisted referer`, async () => {
         await supertest
           .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')

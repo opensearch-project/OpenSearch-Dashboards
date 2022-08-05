@@ -32,7 +32,7 @@ import { i18n } from '@osd/i18n';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { getEmsTileLayerId, getShowRegionBlockedWarning, getUISettings } from '../services';
+import { getEmsTileLayerId, getShowRegionDeniedWarning, getUISettings } from '../services';
 import { lazyLoadMapsLegacyModules } from '../../../maps_legacy/public';
 
 export class VegaMapView extends VegaBaseView {
@@ -58,7 +58,7 @@ export class VegaMapView extends VegaBaseView {
       baseMapOpts = {
         ...baseMapOpts,
         ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
-        showRegionBlockedWarning: getShowRegionBlockedWarning(),
+        showRegionDeniedWarning: getShowRegionDeniedWarning(),
       };
       if (!baseMapOpts) {
         this.onWarn(
