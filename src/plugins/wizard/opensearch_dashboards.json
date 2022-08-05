@@ -1,0 +1,22 @@
+{
+  "id": "wizard",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "navigation",
+    "charts",
+    "data",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
+    "savedObjects",
+    "embeddable",
+    "expressions",
+    "dashboard",
+    "visualizations",
+    "opensearchUiShared",
+    "visDefaultEditor"
+  ],
+  "optionalPlugins": []
+}
