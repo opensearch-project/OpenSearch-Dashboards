@@ -76,15 +76,15 @@ $breadcrumbPolygon: polygon(
   /* only dark mode */
   &--dark {
     .osdBreadcrumbs {
-      background-color: $osdHeaderMidnightSkyMediumBackground;
-      color: $osdHeaderMidnightSkyMediumLightColor;
+      background-color: $osdHeaderBreadcrumbMidnightSkyMediumBackground;
+      color: $osdHeaderBreadcrumbMidnightSkyMediumLightColor;
 
       &:hover {
-        color: $osdMidnightSkyMediumLightHoverColor;
+        color: $osdHeaderBreadcrumbMidnightSkyMediumLightHoverColor;
       }
 
       &:last-child {
-        background-color: $osdHeaderPacificSkyDarkestBackground;
+        background-color: $osdHeaderBreadcrumbPacificSkyDarkestBackground;
         color: $euiColorFullShade;
       }
     }

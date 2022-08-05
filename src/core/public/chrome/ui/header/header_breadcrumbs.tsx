@@ -40,13 +40,13 @@ import './header_breadcrumbs.scss';
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isDarkMode: boolean | undefined;
+  isDarkMode?: boolean;
 }
 
 export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, isDarkMode }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
-  const className = !isDarkMode ? 'osdHeaderBreadcrumbs' : 'osdHeaderBreadcrumbs--dark';
+  const className = isDarkMode ? 'osdHeaderBreadcrumbs--dark' : 'osdHeaderBreadcrumbs';
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
