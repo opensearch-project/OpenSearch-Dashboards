@@ -69,7 +69,7 @@ export async function mountManagementSection(
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
-  const dataSourceEnabled = false;
+  const dataSourceEnabled = true;
   // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor;
 
   if (!canSave) {

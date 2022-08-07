@@ -52,21 +52,32 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should filter indexed fields', async function () {
+      console.log("1");
       await PageObjects.settings.navigateTo();
+      console.log("2");
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
+      console.log("3");
       await PageObjects.settings.clickIndexPatternLogstash();
+      console.log("4");
       await PageObjects.settings.getFieldTypes();
+      console.log("5");
       await PageObjects.settings.setFieldTypeFilter('string');
+      console.log("6");
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
+        console.log("7");
+
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
           expect(fieldType).to.be('string');
+          console.log("8");
+
         }
       });
 
       await PageObjects.settings.setFieldTypeFilter('number');
+      console.log("9");
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
