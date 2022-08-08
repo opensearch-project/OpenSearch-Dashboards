@@ -89,7 +89,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
-    dataSourceEnabled,
+    // dataSourceEnabled,
   };
 
   ReactDOM.render(

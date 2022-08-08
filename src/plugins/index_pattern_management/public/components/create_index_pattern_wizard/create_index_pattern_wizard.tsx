@@ -293,6 +293,7 @@ export class CreateIndexPatternWizard extends Component<Props, CreateIndexPatter
             indexPatternCreationType={this.state.indexPatternCreationType}
             goToPreviousStep={this.goToPreviousStep}
             goToNextStep={this.goToNextFromIndexPattern}
+            dataSrouceEnabled={this.dataSrouceEnabled}
             showSystemIndices={
               this.state.indexPatternCreationType.getShowSystemIndices() &&
               this.state.step === INDEX_PATTERN_STEP

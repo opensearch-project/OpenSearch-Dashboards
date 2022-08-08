@@ -63,6 +63,7 @@ interface StepIndexPatternProps {
   goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
+  dataSrouceEnabled: boolean;
 }
 
 interface StepIndexPatternState {
@@ -124,8 +125,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
-  dataSrouceEnabled: boolean;
-
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
     const { indexPatternCreationType, initialQuery } = this.props;
@@ -133,7 +132,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.state.query =
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
-    this.dataSrouceEnabled = context.services.dataSourceEnabled;
   }
 
   lastQuery = '';
@@ -147,13 +145,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.context.services.savedObjects.client.find<
-      IndexPatternAttributes
-    >({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
-    });
+    const { savedObjects } =
+      await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: 10000,
+      });
 
     const existingIndexPatterns = savedObjects.map((obj) =>
       obj && obj.attributes ? obj.attributes.title : ''
@@ -392,7 +389,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   };
 
   render() {
-    const { allIndices } = this.props;
+    const { allIndices, dataSrouceEnabled } = this.props;
     const { partialMatchedIndices, exactMatchedIndices, isIncludingSystemIndices } = this.state;
 
     const matchedIndices = getMatchedIndices(
@@ -411,7 +408,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer />
         {this.renderList(matchedIndices)}
-        {this.dataSrouceEnabled && this.renderGoToPrevious()}
+        {dataSrouceEnabled && this.renderGoToPrevious()}
       </>
     );
   }
