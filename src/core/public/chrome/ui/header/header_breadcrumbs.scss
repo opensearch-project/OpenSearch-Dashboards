@@ -46,6 +46,11 @@ $breadcrumbPolygon: polygon(
     background: $euiColorEmptyShade;
   }
 
+  .euiLink.euiLink--subdued:focus {
+    background: $euiColorEmptyShade;
+    outline: $euiSizeXS - 1 solid $osdHeaderBreadcrumbBlueBackground;
+  }
+
   /* common for dark & light mode */
   &,
   &--dark {
@@ -92,6 +97,11 @@ $breadcrumbPolygon: polygon(
     .euiBreadcrumb__collapsedLink {
       color: $euiColorGhost;
       background: $euiColorEmptyShade;
+    }
+
+    .euiLink.euiLink--subdued:focus {
+      background: $euiColorEmptyShade;
+      outline: $euiSizeXS - 1 solid $osdHeaderBreadcrumbPacificSkyDarkestBackground;
     }
   }
 }
