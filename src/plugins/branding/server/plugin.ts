@@ -7,15 +7,8 @@ import {
 } from '../../../core/server';
 
 import { BrandingPluginSetup, BrandingPluginStart } from './types';
-import { defineRoutes } from './routes';
-
 import { first } from 'rxjs/operators';
-import { TypeOf, schema } from '@osd/config-schema';
-import { RecursiveReadonly } from '@osd/utility-types';
-import { deepFreeze } from '@osd/std';
-
-import { PluginStart } from '../../data/server';
-
+import { TypeOf } from '@osd/config-schema';
 import { configSchema } from '../config';
 import { ConfigManager } from './config_manager';
 
@@ -33,15 +26,14 @@ export class BrandingPlugin implements Plugin<BrandingPluginSetup, BrandingPlugi
         .create<TypeOf<typeof configSchema>>()
         .pipe(first())
         .toPromise()
-    
-    console.log(config)
 
     const configManager = new ConfigManager(this.initializerContext.config);
-
+    console.log(configManager)
+    console.log(configManager.getLogo())
     // Register server side APIs
-    defineRoutes(router);
+  
 
-    return configManager;
+    return {}
   }
 
   public start(core: CoreStart) {
