@@ -13,43 +13,95 @@ $breadcrumbPolygon: polygon(
   0% 100%
 );
 
+/* remove background color on autofocus for euiBreadcrumbs in Popover */
+.euiBreadcrumbs__inPopover {
+  .euiLink.euiLink--text:focus {
+    background: none;
+  }
+}
+
 .osdHeaderBreadcrumbs {
-  /*
-  filter defines a custom filter effect by grouping atomic filter primitives!
-  here we are using Gaussian filter with stdDeviation for applying
-  border-radius on clipped background.
-  */
-
-  filter: url("../../public/assets/round_filter.svg#round");
-
-  .osdBreadcrumbs {
+  /* common for both light & dark theme */
+  .osdBreadcrumbs,
+  &--dark .osdBreadcrumbs {
     clip-path: $breadcrumbPolygon;
-    background-color: $osdHeaderBreadcrumbGrayBackground;
     padding: $euiSizeXS - 2.5 $euiSizeL - $euiSizeXS;
 
     &:first-child {
       clip-path: $firstBreadcrumbPolygon;
     }
+  }
+
+  .osdBreadcrumbs {
+    background-color: $osdHeaderBreadcrumbGrayBackground;
 
     &:last-child {
       background-color: $osdHeaderBreadcrumbBlueBackground;
     }
   }
 
-  .euiBreadcrumbSeparator {
-    display: none;
-  }
-
+  /* only light mode */
   .euiBreadcrumb__collapsedLink {
     color: $osdHeaderBreadcrumbCollapsedLink;
     background: $euiColorEmptyShade;
   }
 
-  .euiPopover__anchor {
-    padding: 0 $euiSizeS;
+  .euiLink.euiLink--subdued:focus {
+    background: $euiColorEmptyShade;
+    outline: $euiSizeXS - 1 solid $osdHeaderBreadcrumbBlueBackground;
   }
 
-  .euiBreadcrumb:not(.euiBreadcrumb:last-child) {
-    margin-right: 0;
+  /* common for dark & light mode */
+  &,
+  &--dark {
+    /*
+  filter defines a custom filter effect by grouping atomic filter primitives!
+  here we are using Gaussian filter with stdDeviation for applying
+  border-radius on clipped background.
+  */
+    filter: url("../../public/assets/round_filter.svg#round");
+
+    button {
+      line-height: inherit;
+    }
+
+    .euiBreadcrumbSeparator {
+      display: none;
+    }
+
+    .euiPopover__anchor {
+      padding: 0 $euiSizeS;
+    }
+
+    .euiBreadcrumb:not(.euiBreadcrumb:last-child) {
+      margin-right: 0;
+    }
+  }
+
+  /* only dark mode */
+  &--dark {
+    .osdBreadcrumbs {
+      background-color: $osdHeaderBreadcrumbMidnightSkyMediumBackground;
+      color: $osdHeaderBreadcrumbMidnightSkyMediumLightColor;
+
+      &:hover {
+        color: $osdHeaderBreadcrumbMidnightSkyMediumLightHoverColor;
+      }
+
+      &:last-child {
+        background-color: $osdHeaderBreadcrumbPacificSkyDarkestBackground;
+        color: $euiColorFullShade;
+      }
+    }
+
+    .euiBreadcrumb__collapsedLink {
+      color: $euiColorGhost;
+      background: $euiColorEmptyShade;
+    }
+
+    .euiLink.euiLink--subdued:focus {
+      background: $euiColorEmptyShade;
+      outline: $euiSizeXS - 1 solid $osdHeaderBreadcrumbPacificSkyDarkestBackground;
+    }
   }
 }
