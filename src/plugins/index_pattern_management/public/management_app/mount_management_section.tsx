@@ -69,7 +69,7 @@ export async function mountManagementSection(
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
-  const dataSourceEnabled = true;
+  const dataSourceEnabled = false;
   // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor;
 
   if (!canSave) {
@@ -98,7 +98,7 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
+              <CreateIndexPatternWizardWithRouter dataSourceEnabled={dataSourceEnabled} />
             </Route>
             <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
               <CreateEditFieldContainer />
@@ -107,7 +107,10 @@ export async function mountManagementSection(
               <EditIndexPatternContainer />
             </Route>
             <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
+              <IndexPatternTableWithRouter
+                canSave={canSave}
+                dataSourceEnabled={dataSourceEnabled}
+              />
             </Route>
           </Switch>
         </Router>

@@ -89,9 +89,10 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
+  dataSourceEnabled: boolean;
 }
 
-export const IndexPatternTable = ({ canSave, history }: Props) => {
+export const IndexPatternTable = ({ canSave, history, dataSourceEnabled }: Props) => {
   const {
     setBreadcrumbs,
     savedObjects,
@@ -103,7 +104,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     getMlCardState,
     data,
-    dataSourceEnabled,
+    // dataSourceEnabled,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -136,7 +137,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ]);
 
   const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+    !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
   const searchClient = data.search.search;
 

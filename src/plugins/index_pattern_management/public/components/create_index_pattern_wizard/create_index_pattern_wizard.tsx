@@ -77,24 +77,25 @@ interface CreateIndexPatternWizardState {
   dataSourceRef?: DataSourceRef;
 }
 
-export class CreateIndexPatternWizard extends Component<
-  RouteComponentProps,
-  CreateIndexPatternWizardState
-> {
+interface Props extends RouteComponentProps {
+  dataSourceEnabled: boolean;
+}
+export class CreateIndexPatternWizard extends Component<Props, CreateIndexPatternWizardState> {
   static contextType = contextType;
 
   public readonly context!: IndexPatternManagmentContextValue;
 
   dataSourceEnabled: boolean;
 
-  constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
+  constructor(props: Props, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
-    this.dataSourceEnabled = context.services.dataSourceEnabled;
+    // this.dataSourceEnabled = context.services.dataSourceEnabled;
+    this.dataSourceEnabled = props.dataSourceEnabled;
 
     this.state = {
       step: getInitialStepName(this.dataSourceEnabled),
