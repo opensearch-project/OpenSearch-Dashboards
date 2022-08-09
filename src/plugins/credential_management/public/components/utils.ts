@@ -18,7 +18,8 @@ export async function getCredentials(savedObjectsClient: SavedObjectsClientContr
         .map((source) => {
           const id = source.id;
           const title = source.get('title');
-          const credentialMaterialsType = source.get('credentialMaterials').credentialMaterialsType;
+          const credentialMaterialsType = source.get('credentialMaterials')
+            ?.credentialMaterialsType;
           return {
             id,
             title,

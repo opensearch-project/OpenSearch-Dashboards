@@ -25,18 +25,20 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
+import { Credential } from '../../../../data_source/common';
+
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
 // TODO: Add Header https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2051
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { CredentialEditPageItem } from '../types';
-import * as localizedContent from '../text_content/text_content';
+import { localizedContent } from '../text_content';
 
 interface EditCredentialState {
   credentialName: string;
   credentialMaterialsType: string;
-  userName: string;
-  password: string;
+  username?: string;
+  password?: string;
   dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
@@ -61,8 +63,8 @@ export class EditCredentialComponent extends React.Component<
     this.state = {
       credentialName: props.credential.title,
       credentialMaterialsType: props.credential.credentialMaterialsType,
-      userName: '',
-      password: '',
+      username: undefined,
+      password: undefined,
       dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
@@ -140,10 +142,9 @@ export class EditCredentialComponent extends React.Component<
   renderContent() {
     const options = [
       {
-        value: 'username_password_credential',
+        value: Credential.CredentialMaterialsType.UsernamePasswordType,
         text: 'Username and Password Credential',
       },
-      { value: 'no_auth', text: 'No Auth' },
     ];
 
     return (
@@ -198,15 +199,15 @@ export class EditCredentialComponent extends React.Component<
             <EuiFormRow label="User Name">
               <EuiFieldText
                 placeholder="Your User Name"
-                value={this.state.userName || ''}
-                onChange={(e) => this.setState({ userName: e.target.value })}
+                value={this.state.username || undefined}
+                onChange={(e) => this.setState({ username: e.target.value })}
               />
             </EuiFormRow>
             <EuiFormRow label="Password">
               <EuiFieldPassword
                 placeholder="Your Password"
                 type={this.state.dual ? 'dual' : undefined}
-                value={this.state.password || ''}
+                value={this.state.password || undefined}
                 onChange={(e) => this.setState({ password: e.target.value })}
               />
             </EuiFormRow>
@@ -254,7 +255,7 @@ export class EditCredentialComponent extends React.Component<
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
-            userName: this.state.userName,
+            username: this.state.username,
             password: this.state.password,
           },
         },
