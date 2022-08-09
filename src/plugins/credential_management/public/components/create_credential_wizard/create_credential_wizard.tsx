@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiHorizontalRule,
