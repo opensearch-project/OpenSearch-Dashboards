@@ -40,6 +40,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
         ]
       }
       goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
           "httpClient": null,
@@ -84,6 +85,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     <StepIndexPattern
       allIndices={Array []}
       goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
           "httpClient": null,
@@ -106,7 +108,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 </Fragment>
 `;
 
-exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
+exports[`CreateIndexPatternWizard renders time field step when step is set to TIME_FIELD_STEP 1`] = `
 <Fragment>
   <EuiPageContent>
     <Header
@@ -172,6 +174,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
     <StepIndexPattern
       allIndices={Array []}
       goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
           "httpClient": null,
@@ -222,6 +225,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
         ]
       }
       goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       indexPatternCreationType={
         IndexPatternCreationConfig {
           "httpClient": null,
