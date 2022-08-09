@@ -43,7 +43,12 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the patch version is lower', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, -1), true);
+    var lowerPatchversion = requiredNodeVersionWithDiff(0, 0, -1);
+    testValidateNodeVersion(
+      done,
+      lowerPatchversion,
+      REQUIRED_NODE_JS_VERSION !== lowerPatchversion
+    );
   });
 
   it('should run the script WITH error if the major version is higher', function (done) {
@@ -51,7 +56,12 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the major version is lower', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(-1, 0, 0), true);
+    var lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
+    testValidateNodeVersion(
+      done,
+      lowerMajorVersion,
+      REQUIRED_NODE_JS_VERSION !== lowerMajorVersion
+    );
   });
 
   it('should run the script WITH error if the minor version is higher', function (done) {
@@ -59,15 +69,20 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the minor version is lower', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, -1, 0), true);
+    var lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
+    testValidateNodeVersion(
+      done,
+      lowerMinorVersion,
+      REQUIRED_NODE_JS_VERSION !== lowerMinorVersion
+    );
   });
 });
 
 function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
   var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
-  var major = parseInt(matches[1]) + majorDiff;
-  var minor = parseInt(matches[2]) + minorDiff;
-  var patch = parseInt(matches[3]) + patchDiff;
+  var major = Math.max(parseInt(matches[1], 10) + majorDiff, 0);
+  var minor = Math.max(parseInt(matches[2], 10) + minorDiff, 0);
+  var patch = Math.max(parseInt(matches[3], 10) + patchDiff, 0);
 
   return `v${major}.${minor}.${patch}`;
 }
