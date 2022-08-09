@@ -3,6 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import opensearch from './opensearch';
-
-export { opensearch };
+export { registerGeospatialRoutes } from './opensearch';
