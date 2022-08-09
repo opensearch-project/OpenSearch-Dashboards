@@ -4,13 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import {
-  IOpenSearchDashboardsResponse,
-  IRouter,
-  OpenSearchDashboardsRequest,
-  OpenSearchDashboardsResponseFactory,
-  RequestHandlerContext,
-} from 'opensearch-dashboards/server';
+import { IRouter } from 'opensearch-dashboards/server';
 
 export function registerGeospatialRoutes(router: IRouter) {
   router.post(
