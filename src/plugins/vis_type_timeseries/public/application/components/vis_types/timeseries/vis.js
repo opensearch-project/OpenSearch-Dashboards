@@ -212,7 +212,6 @@ export class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
         });
 
       if (isCustomDomain) {
