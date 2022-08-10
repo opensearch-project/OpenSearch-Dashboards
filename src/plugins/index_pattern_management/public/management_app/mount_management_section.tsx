@@ -70,7 +70,7 @@ export async function mountManagementSection(
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
   const dataSourceEnabled = false;
-  // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor;
+  // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor; #2111
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
