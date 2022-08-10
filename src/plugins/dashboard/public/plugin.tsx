@@ -29,7 +29,7 @@
  */
 
 import * as React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 
@@ -119,7 +119,7 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
-import { DashboardListProviderFn } from './application/legacy_app';
+import { DashboardListItem, DashboardListProviderFn } from './application/legacy_app';
 import type { DashboardListSources } from './application/application';
 
 declare module '../../share/public' {
@@ -159,10 +159,12 @@ interface StartDependencies {
 }
 
 export type RegisterDashboardListSourceFn = (
-  pluginName: string, 
-  listProviderFn: DashboardListProviderFn) => void
+  pluginName: string,
+  listProviderFn: DashboardListProviderFn
+) => void;
+
 export interface DashboardSetup {
-  registerDashboardListSource: RegisterDashboardListSourceFn
+  registerDashboardListSource: RegisterDashboardListSourceFn;
 }
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -206,7 +208,7 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
-  private dashboardListSources: DashboardListSources = {};
+  private dashboardListSources: DashboardListSources = [];
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -317,10 +319,11 @@ export class DashboardPlugin
     };
 
     const registerDashboardListSource = (
-      pluginName: string, 
-      listProviderFn: DashboardListProviderFn) => {
-      this.dashboardListSources[pluginName] = listProviderFn;
-    }
+      pluginName: string,
+      listProviderFn: () => Observable<DashboardListItem>
+    ) => {
+      this.dashboardListSources.push({ name: pluginName, listProviderFn });
+    };
 
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
@@ -437,8 +440,8 @@ export class DashboardPlugin
     }
 
     return {
-      registerDashboardListSource
-    }
+      registerDashboardListSource,
+    };
   }
 
   private addEmbeddableToDashboard(

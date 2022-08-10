@@ -30,10 +30,12 @@
 
 import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
+import { createHashHistory } from 'history';
+import { from, merge, Observable } from 'rxjs';
+import { filter, map, mergeMap, reduce } from 'rxjs/operators';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
-import { createHashHistory } from 'history';
 
 import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -46,27 +48,27 @@ import {
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
-import { from, of, merge } from 'rxjs';
-import { map, mergeMap, reduce, tap } from 'rxjs/operators';
 
 export interface DashboardListItem {
-  id: string,
-  title: string,
-  description: string,
-  url: string,
-  listType: string
+  id: string;
+  title: string;
+  type: string;
+  description: string;
+  url: string;
+  listType: string;
 }
-export type DashboardListItems = DashboardListItem[]
-export type DashboardListProviderFn = () => Promise<DashboardListItems>
-export type DashboardDisplay = {
-  hits: DashboardListItems,
-  total: number
+
+export type DashboardListItems = DashboardListItem[];
+export type DashboardListProviderFn = () => Observable<DashboardListItem>;
+
+export interface DashboardDisplay {
+  hits: DashboardListItems;
+  total: number;
 }
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
-  console.log("initDashboardApp", { app, deps })
   app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
@@ -126,7 +128,7 @@ export function initDashboardApp(app, deps) {
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller: function ($scope, osdUrlStateStorage, history) {
+        controller: ($scope, osdUrlStateStorage, history) => {
           deps.core.chrome.docTitle.change(
             i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
           );
@@ -145,33 +147,37 @@ export function initDashboardApp(app, deps) {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
           $scope.find = (search) => {
-            const dashboardList$ = from(service.find(search, $scope.listingLimit))
+            const dashboardList$ = from(service.find(search, $scope.listingLimit));
             const dashboardListItems$ = dashboardList$.pipe(
-              mergeMap(l => l.hits)
+              mergeMap((l) => l.hits),
+              map((item) => ({ ...item, type: 'Dashboard' }))
+            );
 
-            )
-            const otherDashboardLists$ =
-              from(Object.entries(deps.dashboardListSources))
-                .pipe(
-                  mergeMap(([key, fn]) => fn()),              // execute each list source
-                  mergeMap(item => item)                      // flatten
-                )
+            const otherDashboardItems$: Observable<DashboardListItem> = from(
+              deps.dashboardListSources
+            ).pipe(mergeMap(({ name, listProviderFn }) => listProviderFn()));
 
-            const combined$ = merge(dashboardListItems$,
-              otherDashboardLists$).pipe(
-                reduce<DashboardListItem, DashboardDisplay>(
-                  (acc: DashboardDisplay, item: DashboardListItem) => {
-                    return { hits: [...acc.hits, item], total: acc.total + 1 }
-                  },
-                  { hits: [], total: 0 }
-                )
+            const listItemMatch = (item: DashboardListItem) => {
+              const searchRx = new RegExp(search, 'i');
+              const titleMatch = !!item.title.match(searchRx);
+              const descriptionMatch = !!item.description.match(searchRx);
+              const typeMatch = !!item.type.match(searchRx);
+
+              return titleMatch || descriptionMatch || typeMatch;
+            };
+
+            const searchFiltered$ = merge(dashboardListItems$, otherDashboardItems$).pipe(
+              filter((item) => listItemMatch(item))
+            );
+
+            const combined$ = searchFiltered$.pipe(
+              reduce<DashboardListItem, DashboardDisplay>(
+                (acc: DashboardDisplay, item: DashboardListItem) => {
+                  return { hits: [...acc.hits, item], total: acc.total + 1 };
+                },
+                { hits: [], total: 0 }
               )
-
-
-            console.log("LegacyApp find", {
-              deps, dashboardList$, dashboardListItems$,
-              otherDashboardLists$, combined$, service
-            })
+            );
 
             return combined$.toPromise();
           };
@@ -201,7 +207,7 @@ export function initDashboardApp(app, deps) {
           });
         },
         resolve: {
-          dash: function ($route, history) {
+          dash: ($route, history) => {
             return deps.data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
@@ -224,7 +230,7 @@ export function initDashboardApp(app, deps) {
                       history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
                       $route.reload();
                     }
-                    return new Promise(() => { });
+                    return new Promise(() => {});
                   });
               }
             });
@@ -258,7 +264,7 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function ($route, history) {
+          dash: ($route, history) => {
             const id = $route.current.params.id;
 
             return deps.data.indexPatterns
@@ -288,19 +294,19 @@ export function initDashboardApp(app, deps) {
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
                     })
                   );
-                  return new Promise(() => { });
+                  return new Promise(() => {});
                 } else {
                   // E.g. a corrupt or deleted dashboard
                   deps.core.notifications.toasts.addDanger(error.message);
                   history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return new Promise(() => { });
+                  return new Promise(() => {});
                 }
               });
           },
         },
       })
       .otherwise({
-        resolveRedirectTo: function ($rootScope) {
+        resolveRedirectTo: ($rootScope) => {
           const path = window.location.hash.substr(1);
           deps.restorePreviousUrl();
           $rootScope.$applyAsync(() => {
@@ -310,7 +316,7 @@ export function initDashboardApp(app, deps) {
             }
           });
           // prevent angular from completing the navigation
-          return new Promise(() => { });
+          return new Promise(() => {});
         },
       });
   });

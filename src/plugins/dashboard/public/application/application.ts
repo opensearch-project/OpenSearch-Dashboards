@@ -47,7 +47,7 @@ import {
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
-import { DashboardListProviderFn, initDashboardApp } from './legacy_app';
+import { DashboardListItem, DashboardListProviderFn, initDashboardApp } from './legacy_app';
 import { EmbeddableStart } from '../../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart } from '../../../data/public';
@@ -64,7 +64,8 @@ import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
 
-export type DashboardListSources = { [key:string]: DashboardListProviderFn}
+export type DashboardListSources = Array<{ name: string; listProviderFn: DashboardListProviderFn }>;
+
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
   core: CoreStart;
@@ -72,7 +73,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardListSources: DashboardListSources,
+  dashboardListSources: DashboardListSources;
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {
