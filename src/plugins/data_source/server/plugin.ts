@@ -32,7 +32,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.dataSourceClient = new DataSourceClient(this.logger);
   }
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     this.logger.debug('data_source: Setup');
 
     // Register credential saved object type
@@ -76,7 +76,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'data_source'> => {
     return async (context, req) => {
       const [{ savedObjects }] = await core.getStartServices();
-      this.dataSourceClient.attachSavedObjectClient(savedObjects.getScopedClient(req));
+      this.dataSourceClient.attachScopedSavedObjectsClient(savedObjects.getScopedClient(req));
       return new DataSourceRouteHandlerContext(this.dataSourceClient, this.logger);
     };
   };

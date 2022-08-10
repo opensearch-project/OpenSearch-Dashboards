@@ -7,7 +7,7 @@ import { Logger, OpenSearchClient, SavedObjectsClientContract } from 'src/core/s
 
 /**
  * Represents an OpenSearch cluster API client created by the platform.
- * It allows to call API on behalf of user defined in "data source" saved object
+ * It allows to call API on behalf of the user(credential) associated to "data source"
  *
  * @public
  **/
@@ -33,14 +33,13 @@ export interface ICustomDataSourceClient extends IDataSourceClient {
 
 // TODO: This needs further implementation. See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1981
 export class DataSourceClient implements ICustomDataSourceClient {
-  private savedObjectClient?: SavedObjectsClientContract;
+  private scopedSavedObjectsClient?: SavedObjectsClientContract;
 
   constructor(logger: Logger) {}
   asDataSource!: (dataSourceId: string) => Promise<OpenSearchClient>;
-  // asDataSource: (dataSourceId: string) => Promise<OpenSearchClient>;
 
-  public attachSavedObjectClient(savedObjectClient: SavedObjectsClientContract) {
-    this.savedObjectClient = savedObjectClient;
+  public attachScopedSavedObjectsClient(scopedSavedObjectsClient: SavedObjectsClientContract) {
+    this.scopedSavedObjectsClient = scopedSavedObjectsClient;
   }
 
   public async close() {}

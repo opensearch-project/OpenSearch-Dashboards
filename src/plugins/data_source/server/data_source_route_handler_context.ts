@@ -8,10 +8,7 @@ import { Logger } from 'src/core/server';
 import { IDataSourceClient } from './client/data_source_client';
 
 class OpenSearchDataSourceRouteHandlerContext {
-  private logger: Logger;
-  constructor(private dataSourceClient: IDataSourceClient, logger: Logger) {
-    this.logger = logger;
-  }
+  constructor(private dataSourceClient: IDataSourceClient, private logger: Logger) {}
 
   public async getClient(dataSourceId: string) {
     try {
@@ -19,6 +16,7 @@ class OpenSearchDataSourceRouteHandlerContext {
       return client;
     } catch (error) {
       // TODO: convert as audit log when integrate with osd auditing
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1986
       this.logger.error(
         `Fail to get data source client for dataSource id: [${dataSourceId}]. Detail: ${error.messages}`
       );
