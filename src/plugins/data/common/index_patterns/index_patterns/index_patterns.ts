@@ -562,8 +562,11 @@ export class IndexPatternsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
+    const references = indexPattern.getSaveObjectReference();
+
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
+      references,
     });
     indexPattern.id = response.id;
     indexPatternCache.set(indexPattern.id, indexPattern);
