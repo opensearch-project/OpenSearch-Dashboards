@@ -11,6 +11,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 import './create_new_credential.scss';
@@ -45,20 +46,16 @@ export const CreateNewCredential = () => {
         className="datasource-create-new-credential-row-reverse"
         title={<> </>}
         description={
-          <div>
-            <ul>
-              <li>
-                For <b>username_password_credential</b> type: this type can be used for credentials
-                in format of username, password. Ex: OpenSearch basic auth
-              </li>
-            </ul>
-            <ul>
-              <li>
-                For <b>aws_iam_credential</b> type: this type can only be used for aws iam
-                credential, with aws_access_key_id, aws_secret_access_key, and region (optional)
-              </li>
-            </ul>
-          </div>
+          <EuiText size="xs">
+            <p>
+              For <b>username_password_credential</b> type: this type can be used for credentials in
+              in format of username, password. <br /> &emsp; Ex: OpenSearch basic auth
+            </p>
+            <p>
+              For <b>aws_iam_credential</b> type: this type can only be used for aws iam credential,
+              with aws_access_key_id, aws_secret_access_key, and region (optional)
+            </p>
+          </EuiText>
         }
       >
         <EuiFormRow>
