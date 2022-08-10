@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiHorizontalRule,
@@ -29,7 +28,8 @@ import { context as contextType } from '../../../../opensearch_dashboards_react/
 
 interface CreateCredentialWizardState {
   credentialName: string;
-  credentialType: string;
+  authType: string;
+  credentialMaterialsType: string;
   userName: string;
   password: string;
   dual: boolean;
@@ -50,7 +50,8 @@ export class CreateCredentialWizard extends React.Component<
 
     this.state = {
       credentialName: '',
-      credentialType: 'username_password_credential',
+      authType: 'shared',
+      credentialMaterialsType: 'username_password_credential',
       userName: '',
       password: '',
       dual: true,
@@ -119,7 +120,7 @@ export class CreateCredentialWizard extends React.Component<
           >
             <EuiFormRow label="Credential Type">
               <EuiSelect
-                onChange={(e) => this.setState({ credentialType: e.target.value })}
+                onChange={(e) => this.setState({ credentialMaterialsType: e.target.value })}
                 options={options}
               />
             </EuiFormRow>
@@ -176,9 +177,9 @@ export class CreateCredentialWizard extends React.Component<
       // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.create('credential', {
         title: this.state.credentialName,
-        credentialType: this.state.credentialType,
+        authType: this.state.authType,
         credentialMaterials: {
-          credentialMaterialsType: this.state.credentialType,
+          credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
             userName: this.state.userName,
             password: this.state.password,
@@ -190,7 +191,7 @@ export class CreateCredentialWizard extends React.Component<
       const createCredentialFailMsg = (
         <FormattedMessage
           id="credentialManagement.createCredential.loadCreateCredentialFailMsg"
-          defaultMessage="The credential saved object creation failed with some errors. Please try it again.'"
+          defaultMessage="The credential saved object creation failed with some errors. Please configure data_source.enabled and try it again."
         />
       );
       this.setState((prevState) => ({

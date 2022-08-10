@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiHorizontalRule,
@@ -20,6 +19,10 @@ import {
   EuiButton,
   EuiPageContent,
   EuiFieldPassword,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
@@ -27,15 +30,17 @@ import { CredentialManagmentContextValue } from '../../types';
 // TODO: Add Header https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2051
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { CredentialEditPageItem } from '../types';
+import * as localizedContent from '../text_content/text_content';
 
 interface EditCredentialState {
   credentialName: string;
-  credentialType: string;
+  credentialMaterialsType: string;
   userName: string;
   password: string;
   dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
+  isVisible: boolean;
 }
 
 export interface EditCredentialProps extends RouteComponentProps {
@@ -55,23 +60,95 @@ export class EditCredentialComponent extends React.Component<
 
     this.state = {
       credentialName: props.credential.title,
-      credentialType: props.credential.credentialType,
+      credentialMaterialsType: props.credential.credentialMaterialsType,
       userName: '',
       password: '',
       dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
+      isVisible: false,
     };
   }
 
+  confirmDelete = async () => {
+    const { savedObjects } = this.context.services;
+    try {
+      await savedObjects.client.delete('credential', this.props.credential.id);
+      this.props.history.push('');
+    } catch (e) {
+      const deleteCredentialFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.editCredential.deleteCredentialFailMsg"
+          defaultMessage="The credential delete failed with some errors. Please try it again.'"
+        />
+      );
+      this.setState((prevState) => ({
+        toasts: prevState.toasts.concat([
+          {
+            title: deleteCredentialFailMsg,
+            id: deleteCredentialFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
+      }));
+    }
+  };
+
+  delelteButtonRender() {
+    return (
+      <>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+          }}
+        >
+          <EuiFlexItem>
+            <EuiToolTip content={localizedContent.deleteCredentialButtonDescription}>
+              <EuiButtonIcon
+                color="danger"
+                onClick={this.removeCredential}
+                iconType="trash"
+                aria-label={localizedContent.deleteCredentialButtonDescription}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </div>
+
+        {this.state.isVisible ? (
+          <EuiConfirmModal
+            title={localizedContent.deleteButtonOnConfirmText}
+            onCancel={() => {
+              this.setState({ isVisible: false });
+            }}
+            onConfirm={this.confirmDelete}
+            cancelButtonText={localizedContent.cancelButtonOnDeleteCancelText}
+            confirmButtonText={localizedContent.confirmButtonOnDeleteComfirmText}
+            defaultFocusedButton="confirm"
+          >
+            <p>{localizedContent.deleteCredentialDescribeMsg}</p>
+            <p>{localizedContent.deleteCredentialConfirmMsg}</p>
+            <p>{localizedContent.deleteCredentialWarnMsg}</p>
+          </EuiConfirmModal>
+        ) : null}
+      </>
+    );
+  }
+  // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
   renderContent() {
     const options = [
-      { value: 'username_password_credential', text: 'Username and Password Credential' },
+      {
+        value: 'username_password_credential',
+        text: 'Username and Password Credential',
+      },
       { value: 'no_auth', text: 'No Auth' },
     ];
 
     return (
       <EuiPageContent>
+        {this.delelteButtonRender()}
         <EuiHorizontalRule />
         <EuiForm component="form">
           <EuiDescribedFormGroup
@@ -114,7 +191,7 @@ export class EditCredentialComponent extends React.Component<
           >
             <EuiFormRow label="Credential Type">
               <EuiSelect
-                onChange={(e) => this.setState({ credentialType: e.target.value })}
+                onChange={(e) => this.setState({ credentialMaterialsType: e.target.value })}
                 options={options}
               />
             </EuiFormRow>
@@ -165,15 +242,17 @@ export class EditCredentialComponent extends React.Component<
     );
   }
 
+  removeCredential = async () => {
+    this.setState({ isVisible: true });
+  };
+
   updateCredential = async () => {
     const { savedObjects } = this.context.services;
     try {
-      // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.update('credential', this.props.credential.id, {
         title: this.state.credentialName,
-        credentialType: this.state.credentialType,
         credentialMaterials: {
-          credentialMaterialsType: this.state.credentialType,
+          credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
             userName: this.state.userName,
             password: this.state.password,
@@ -185,7 +264,7 @@ export class EditCredentialComponent extends React.Component<
       const editCredentialFailMsg = (
         <FormattedMessage
           id="credentialManagement.editCredential.loadEditCredentialFailMsg"
-          defaultMessage="The credential saved object edit failed with some errors. Please try it again.'"
+          defaultMessage="The credential saved object edit failed with some errors. Please configure data_source.enabled and try it again."
         />
       );
       this.setState((prevState) => ({

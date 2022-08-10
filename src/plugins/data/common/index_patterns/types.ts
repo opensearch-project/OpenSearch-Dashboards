@@ -184,6 +184,11 @@ export interface FieldSpec {
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
 
+export interface SavedObjectReference {
+  name?: string;
+  id: string;
+  type: string;
+}
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
@@ -194,6 +199,7 @@ export interface IndexPatternSpec {
   fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;
   type?: string;
+  dataSourceRef?: SavedObjectReference;
 }
 
 export interface SourceFilter {

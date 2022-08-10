@@ -6,11 +6,12 @@
 export interface CredentialsTableItem {
   id: string;
   title: string;
+  credentialMaterialsType: string;
   sort: string;
 }
 
 export interface CredentialEditPageItem {
   id: string;
   title: string;
-  credentialType: string;
+  credentialMaterialsType: string;
 }

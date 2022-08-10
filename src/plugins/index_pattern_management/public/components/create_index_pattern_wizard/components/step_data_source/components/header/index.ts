@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { credentialSavedObjectType } from './credential_saved_objects_type';
+export { Header } from './header';

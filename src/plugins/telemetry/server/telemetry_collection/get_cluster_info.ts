@@ -53,7 +53,7 @@ export interface OpenSearchClusterInfo {
  *
  * @param {function} opensearchClient The asInternalUser handler (exposed for testing)
  */
-export async function getClusterInfo(opensearchClient: OpenSearchClusterInfo) {
-  const { body } = await opensearchClient.info<OpenSearchClusterInfo>();
+export async function getClusterInfo(opensearchClient: OpenSearchClient) {
+  const { body } = await opensearchClient.info<OpenSearchClient>();
   return body;
 }

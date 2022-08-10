@@ -6,6 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { StartServicesAccessor } from 'src/core/public';
@@ -37,6 +38,13 @@ export async function mountManagementSection(
     docLinks,
     setBreadcrumbs: params.setBreadcrumbs,
   };
+
+  /* Browser - Page Title */
+  const title = i18n.translate('credentialManagement.objects.credentialsTitle', {
+    defaultMessage: 'Credentials',
+  });
+
+  chrome.docTitle.change(title);
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
