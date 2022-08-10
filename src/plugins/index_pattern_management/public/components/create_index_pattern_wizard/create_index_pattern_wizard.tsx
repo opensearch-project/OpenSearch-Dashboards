@@ -181,13 +181,14 @@ export class CreateIndexPatternWizard extends Component<
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     let emptyPattern: IndexPattern;
     const { history } = this.props;
-    const { indexPattern } = this.state;
+    const { indexPattern, dataSourceRef } = this.state;
 
     try {
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
         timeFieldName,
+        dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });
     } catch (err) {
