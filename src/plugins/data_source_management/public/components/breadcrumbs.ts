@@ -8,10 +8,22 @@ import { i18n } from '@osd/i18n';
 export function getListBreadcrumbs() {
   return [
     {
-      text: i18n.translate('indexPatternManagement.dataSources.listBreadcrumb', {
+      text: i18n.translate('dataSourcesManagement.dataSources.listBreadcrumb', {
         defaultMessage: 'Data Sources',
       }),
       href: `/`,
+    },
+  ];
+}
+
+export function getCreateBreadcrumbs() {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: i18n.translate('dataSourcesManagement.dataSources.createBreadcrumb', {
+        defaultMessage: 'Create data source',
+      }),
+      href: `/create`,
     },
   ];
 }

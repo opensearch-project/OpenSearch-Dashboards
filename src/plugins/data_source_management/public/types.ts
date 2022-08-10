@@ -14,6 +14,9 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams, ManagementSetup } from 'src/plugins/management/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourceStart } from 'src/plugins/data_source/public';
+import { DataSourceManagementStart } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -21,6 +24,13 @@ export interface DataSourceManagementPluginStart {}
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
 }
+
+export interface DataSourceManagementPluginSetup {
+  getGreeting: () => string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataSourceManagementPluginStart {}
 
 export interface DataSourceManagementContext {
   chrome: ChromeStart;
@@ -31,5 +41,16 @@ export interface DataSourceManagementContext {
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
+  data: DataPublicPluginStart;
+  dataSource: DataSourceStart;
+  dataSourceManagementStart: DataSourceManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+}
+
+export interface DataSourceTableItem {
+  id: string;
+  title: string;
+  // default: boolean;
+  // tag?: string[];
+  sort: string;
 }

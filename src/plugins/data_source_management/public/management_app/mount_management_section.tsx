@@ -10,19 +10,29 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
+import { DataSourceManagementStart } from '../plugin';
+import { DataSourceStart } from '../../../data_source/public';
+
+export interface DataSourceManagementStartDependencies {
+  data: DataPublicPluginStart;
+  dataSource: DataSourceStart;
+}
 
 export async function mountManagementSection(
-  getStartServices: StartServicesAccessor,
+  getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
   params: ManagementAppMountParams
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    { data, dataSource },
+    dataSourceManagementStart,
   ] = await getStartServices();
 
   const deps: DataSourceManagementContext = {
@@ -34,6 +44,9 @@ export async function mountManagementSection(
     overlays,
     http,
     docLinks,
+    data,
+    dataSource,
+    dataSourceManagementStart: dataSourceManagementStart as DataSourceManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
   };
 
@@ -53,7 +66,7 @@ export async function mountManagementSection(
               <CreateDataSourceWizardWithRouter />
             </Route>
             <Route path={['/']}>
-              <DataSourceTableWithRouter />
+              <DataSourceTableWithRouter canSave={true} /> {/* TODO: send canSave info*/}
             </Route>
           </Switch>
         </Router>
