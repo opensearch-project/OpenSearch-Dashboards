@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataSourceStart } from 'src/plugins/data_source/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
@@ -12,41 +10,17 @@ import { PLUGIN_NAME } from '../common';
 import { ManagementSetup } from '../../management/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 
-import {
-  DataSourceManagementService,
-  DataSourceManagementServiceSetup,
-  DataSourceManagementServiceStart,
-} from './service';
-
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
 }
 
-export interface DataSourceManagementStartDependencies {
-  data: DataPublicPluginStart;
-  dataSource: DataSourceStart;
-}
-
-export type DataSourceManagementSetup = DataSourceManagementServiceSetup;
-
-export type DataSourceManagementStart = DataSourceManagementServiceStart;
-
-const IPM_APP_ID = 'dataSources';
+const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
-  implements
-    Plugin<
-      DataSourceManagementSetup,
-      DataSourceManagementStart,
-      DataSourceManagementSetupDependencies,
-      DataSourceManagementStartDependencies
-    > {
-  private readonly dataSourceManagementService = new DataSourceManagementService();
-
+  implements Plugin<void, void, DataSourceManagementSetupDependencies> {
   public setup(
-    // todo: y setup accept start fucntions
-    core: CoreSetup<DataSourceManagementStartDependencies, DataSourceManagementStart>,
+    core: CoreSetup,
     { management, urlForwarding }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
@@ -56,7 +30,7 @@ export class DataSourceManagementPlugin
     }
 
     opensearchDashboardsSection.registerApp({
-      id: IPM_APP_ID,
+      id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
       mount: async (params) => {
@@ -65,15 +39,9 @@ export class DataSourceManagementPlugin
         return mountManagementSection(core.getStartServices, params);
       },
     });
-
-    return this.dataSourceManagementService.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart, plugins: DataSourceManagementStartDependencies) {
-    return this.dataSourceManagementService.start();
-  }
+  public start(core: CoreStart) {}
 
-  public stop() {
-    return this.dataSourceManagementService.stop();
-  }
+  public stop() {}
 }

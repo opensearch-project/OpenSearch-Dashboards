@@ -20,7 +20,7 @@ export const Header = ({
   docLinks,
 }: {
   prompt?: React.ReactNode;
-  dataSourceName: string;
+  dataSourceName?: string;
   isBeta?: boolean;
   docLinks?: DocLinksStart; // todo: ck
 }) => {

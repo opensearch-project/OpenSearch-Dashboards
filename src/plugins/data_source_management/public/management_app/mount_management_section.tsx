@@ -17,7 +17,6 @@ import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboa
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
-import { DataSourceManagementStart } from '../plugin';
 import { DataSourceStart } from '../../../data_source/public';
 
 export interface DataSourceManagementStartDependencies {
@@ -46,7 +45,7 @@ export async function mountManagementSection(
     docLinks,
     data,
     dataSource,
-    dataSourceManagementStart: dataSourceManagementStart as DataSourceManagementStart,
+    dataSourceManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
   };
 
@@ -66,7 +65,7 @@ export async function mountManagementSection(
               <CreateDataSourceWizardWithRouter />
             </Route>
             <Route path={['/']}>
-              <DataSourceTableWithRouter canSave={true} /> {/* TODO: send canSave info*/}
+              <DataSourceTableWithRouter />
             </Route>
           </Switch>
         </Router>

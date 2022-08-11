@@ -19,6 +19,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { useEffectOnce } from 'react-use';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import {
   reactRouterNavigate,
@@ -57,11 +58,7 @@ const title = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
   defaultMessage: 'Data Sources',
 });
 
-interface Props extends RouteComponentProps {
-  canSave: boolean;
-}
-
-export const DataSourceTable = ({ canSave, history }: Props) => {
+export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const {
     setBreadcrumbs,
     savedObjects,
@@ -73,7 +70,9 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
 
   /* Update breadcrumb*/
-  setBreadcrumbs(getListBreadcrumbs());
+  useEffectOnce(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
 
   /* Initialize the component state*/
   useEffect(() => {
@@ -127,7 +126,7 @@ export const DataSourceTable = ({ canSave, history }: Props) => {
   ];
 
   /* Create Data Source button */
-  const createButton = canSave ? <CreateButton history={history} /> : <></>;
+  const createButton = <CreateButton history={history} />;
 
   /* UI Elements */
   return (

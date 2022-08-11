@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import * as H from 'history';
+import { History } from 'history';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
-  history: H.History;
+  history: History;
 }
 
 export const CreateButton = ({ history }: Props) => {

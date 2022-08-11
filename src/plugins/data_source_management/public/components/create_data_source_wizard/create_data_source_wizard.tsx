@@ -22,9 +22,6 @@ import { i18n } from '@osd/i18n';
 import { useEffectOnce } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { DataSourceSavedObject } from '../../../../data_source/public/types';
-import { DataSourceCreationConfig } from '../../service';
 import { SavedObjectFinderUi } from '../../../../saved_objects/public';
 import { Header } from './components/header';
 import { DataSourceManagementContext } from '../../types';
@@ -44,63 +41,25 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
   props: CreateDataSourceWizardProps
 ) => {
   /* Initialization */
-  const {
-    uiSettings,
-    savedObjects,
-    setBreadcrumbs,
-    dataSourceManagementStart,
-    dataSource,
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { uiSettings, savedObjects, setBreadcrumbs } = useOpenSearchDashboards<
+    DataSourceManagementContext
+  >().services;
 
-  const type = new URLSearchParams(props.location.search).get('type') || undefined;
   const toastLifeTimeMs: number = 6000;
 
   /* State Variables */
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
   const [dataSourceName, setDataSourceName] = useState('');
   const [endpoint, setEndpoint] = useState('');
-  const [savedDS, setSavedDS] = useState<DataSourceSavedObject>();
   const [selectedCredential, setSelectedCredential] = useState<SelectedSavedObj[]>([]);
-  const [dataSourceCreationType, setDataSourceCreationType] = useState<DataSourceCreationConfig>(
-    dataSourceManagementStart.creation.getType(type)
-  );
 
-  /* Fetch Data Sources*/
   useEffectOnce(() => {
-    /* Set the breadcrumb */
     setBreadcrumbs(getCreateBreadcrumbs());
-    fetchSavedDataSources();
   });
-
-  const fetchSavedDataSources = async () => {
-    const { savedDataSourceLoader } = dataSource || {};
-    const fetchedSavedDS: DataSourceSavedObject = await savedDataSourceLoader.get();
-
-    setSavedDS(fetchedSavedDS);
-  };
 
   /* Handle submit - create data source*/
   const handleSubmit = async () => {
-    const { history } = props;
-
-    const savedDataSource = savedDS!; // todo
-    savedDataSource.credientialsJSON = JSON.stringify(selectedCredential);
-
-    savedDataSource.title = dataSourceName;
-    savedDataSource.endpoint = endpoint;
-
-    await savedDataSource
-      .save({})
-      .then((res: any) => {
-        // eslint-disable-next-line no-console
-        console.log(res); // todo
-      })
-      .catch((error: any) => {
-        // eslint-disable-next-line no-console
-        console.error(error); // todo
-      });
-
-    history.push('');
+    /* TODO: Handle Create data source option*/
   };
 
   // todo: consistent name
@@ -111,14 +70,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
 
   /* Render header*/
   const renderHeader = () => {
-    return (
-      <Header
-        prompt={dataSourceCreationType.renderPrompt()}
-        dataSourceName={dataSourceCreationType.getDataSourceName()}
-        // isBeta={dataSourceCreationType.getIsBeta()}
-        // docLinks={docLinks}
-      />
-    );
+    return <Header />;
   };
 
   /* Render Section header*/
