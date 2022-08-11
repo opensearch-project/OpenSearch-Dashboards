@@ -31,6 +31,10 @@
 import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
 import { createHashHistory } from 'history';
+import { from, of, merge, Observable } from 'rxjs';
+import { map, mergeMap, reduce, tap } from 'rxjs/operators';
+
+import { DashboardListItem } from 'src/plugins/dashboard/public/types';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
@@ -46,6 +50,11 @@ import {
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
+
+export interface DashboardDisplay {
+  hits: DashboardListItem[];
+  total: number;
+}
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -129,7 +138,31 @@ export function initDashboardApp(app, deps) {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
           $scope.find = (search) => {
-            return service.find(search, $scope.listingLimit);
+            const dashboardList$ = from(service.find(search, $scope.listingLimit));
+            const dashboardListItems$ = dashboardList$.pipe(mergeMap((l) => l.hits));
+
+            const otherDashboardLists$ = from(deps.dashboardListSources)
+              .pipe
+              // tap((item) => console.log('dashboardListSource', item))
+              ();
+            //
+            //   mergeMap((item) => item) // flatten
+            // );
+            //
+
+            // otherDashboardLists$.subscribe((item) => console.log('otherDashboardLists$', { item }));
+
+            const combined$ = dashboardListItems$.pipe(
+              map((item) => item as DashboardListItem),
+              reduce<DashboardListItem, DashboardDisplay>(
+                (acc: DashboardDisplay, item: DashboardListItem) => {
+                  return { hits: [...acc.hits, item], total: acc.total + 1 };
+                },
+                { hits: [], total: 0 }
+              )
+            );
+
+            return combined$.toPromise();
           };
           $scope.editItem = ({ id }) => {
             history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);

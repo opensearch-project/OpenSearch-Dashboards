@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+
 import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
 import { SavedDashboardPanel730ToLatest } from '../common';
@@ -141,3 +143,20 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
+
+export interface DashboardListSource {
+  name: string;
+  listProviderFn: () => Observable<DashboardListItem>;
+}
+
+export type DashboardListSources = DashboardListSource[];
+
+export interface DashboardListItem {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  listType: string;
+}
+
+export type DashboardListItems = DashboardListItem[];

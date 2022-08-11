@@ -29,7 +29,7 @@
  */
 
 import * as React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 
@@ -119,6 +119,7 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
+import { DashboardListItem, DashboardListSources } from './types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -156,8 +157,13 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type DashboardSetup = void;
-
+export type RegisterDashboardListSourceFn = (
+  pluginName: string,
+  listProviderFn: DashboardListProviderFn
+) => void;
+export interface DashboardSetup {
+  registerDashboardListSource: RegisterDashboardListSourceFn;
+}
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
   addEmbeddableToDashboard: (options: {
@@ -199,6 +205,8 @@ export class DashboardPlugin
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
+
+  private dashboardListSources: DashboardListSources = [];
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -308,6 +316,13 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const registerDashboardListSource = (
+      pluginName: string,
+      listProviderFn: () => Observable<DashboardListItem>
+    ) => {
+      this.dashboardListSources.push({ name: pluginName, listProviderFn });
+    };
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -341,6 +356,7 @@ export class DashboardPlugin
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
           savedDashboards: dashboardStart.getSavedDashboardLoader(),
+          dashboardListSources: this.dashboardListSources,
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -420,6 +436,10 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    return {
+      registerDashboardListSource,
+    };
   }
 
   private addEmbeddableToDashboard(
