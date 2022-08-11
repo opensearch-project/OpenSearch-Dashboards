@@ -32,9 +32,9 @@ import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
 import { createHashHistory } from 'history';
 import { from, of, merge, Observable } from 'rxjs';
-import { map, mergeMap, reduce, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, reduce, tap } from 'rxjs/operators';
 
-import { DashboardListItem } from 'src/plugins/dashboard/public/types';
+import { DashboardListItem, DashboardListSource } from 'src/plugins/dashboard/public/types';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
@@ -139,21 +139,29 @@ export function initDashboardApp(app, deps) {
           };
           $scope.find = (search) => {
             const dashboardList$ = from(service.find(search, $scope.listingLimit));
-            const dashboardListItems$ = dashboardList$.pipe(mergeMap((l) => l.hits));
+            const dashboardListItems$ = dashboardList$.pipe(
+              map((item) => item as DashboardDisplay),
+              mergeMap((l) => l.hits),
+              map((item: DashboardListItem) => ({ ...item, type: 'Dashboard' }))
+            );
 
-            const otherDashboardLists$ = from(deps.dashboardListSources)
-              .pipe
-              // tap((item) => console.log('dashboardListSource', item))
-              ();
-            //
-            //   mergeMap((item) => item) // flatten
-            // );
-            //
+            const otherDashboardLists$ = from(deps.dashboardListSources).pipe(
+              map((item) => item as DashboardListSource),
+              mergeMap(({ name, listProviderFn }) => listProviderFn())
+            );
 
-            // otherDashboardLists$.subscribe((item) => console.log('otherDashboardLists$', { item }));
+            const combined$ = merge(dashboardListItems$, otherDashboardLists$).pipe(
+              map((item) => item as DashboardListItem)
+            );
 
-            const combined$ = dashboardListItems$.pipe(
-              map((item) => item as DashboardListItem),
+            const searchRx = new RegExp(search, 'i');
+            const matchSearchToItem: (item: DashboardListItem) => boolean = (item) => {
+              return !!`${item.title} ${item.description} ${item.type}`.match(searchRx);
+            };
+
+            const searchFiltered$ = combined$.pipe(filter(matchSearchToItem));
+
+            const dashboardDisplay$ = searchFiltered$.pipe(
               reduce<DashboardListItem, DashboardDisplay>(
                 (acc: DashboardDisplay, item: DashboardListItem) => {
                   return { hits: [...acc.hits, item], total: acc.total + 1 };
@@ -162,7 +170,7 @@ export function initDashboardApp(app, deps) {
               )
             );
 
-            return combined$.toPromise();
+            return dashboardDisplay$.toPromise();
           };
           $scope.editItem = ({ id }) => {
             history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);

@@ -178,6 +178,14 @@ export class DashboardListing extends React.Component {
         ),
       },
       {
+        field: 'type',
+        name: i18n.translate('dashboard.listing.table.typeColumnName', {
+          defaultMessage: 'Type',
+        }),
+        dataType: 'string',
+        sortable: true,
+      },
+      {
         field: 'description',
         name: i18n.translate('dashboard.listing.table.descriptionColumnName', {
           defaultMessage: 'Description',
