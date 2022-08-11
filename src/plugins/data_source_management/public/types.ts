@@ -22,6 +22,13 @@ export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
 }
 
+export interface DataSourceManagementPluginSetup {
+  getGreeting: () => string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataSourceManagementPluginStart {}
+
 export interface DataSourceManagementContext {
   chrome: ChromeStart;
   application: ApplicationStart;
@@ -32,4 +39,12 @@ export interface DataSourceManagementContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+}
+
+export interface DataSourceTableItem {
+  id: string;
+  title: string;
+  // default: boolean;
+  // tag?: string[];
+  sort: string;
 }

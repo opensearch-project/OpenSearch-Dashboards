@@ -4,15 +4,25 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { DataSourceManagementPluginStart, DataSourceManagementSetupDependencies } from './types';
 
 import { PLUGIN_NAME } from '../common';
 
-const IPM_APP_ID = 'dataSources';
+import { ManagementSetup } from '../../management/public';
+import { UrlForwardingSetup } from '../../url_forwarding/public';
+
+export interface DataSourceManagementSetupDependencies {
+  management: ManagementSetup;
+  urlForwarding: UrlForwardingSetup;
+}
+
+const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
-  implements Plugin<void, DataSourceManagementPluginStart, DataSourceManagementSetupDependencies> {
-  public setup(core: CoreSetup, { management }: DataSourceManagementSetupDependencies) {
+  implements Plugin<void, void, DataSourceManagementSetupDependencies> {
+  public setup(
+    core: CoreSetup,
+    { management, urlForwarding }: DataSourceManagementSetupDependencies
+  ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {
@@ -20,9 +30,9 @@ export class DataSourceManagementPlugin
     }
 
     opensearchDashboardsSection.registerApp({
-      id: IPM_APP_ID,
+      id: DSM_APP_ID,
       title: PLUGIN_NAME,
-      order: 0,
+      order: 1,
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
@@ -31,9 +41,7 @@ export class DataSourceManagementPlugin
     });
   }
 
-  public start(core: CoreStart): DataSourceManagementPluginStart {
-    return {};
-  }
+  public start(core: CoreStart) {}
 
   public stop() {}
 }
