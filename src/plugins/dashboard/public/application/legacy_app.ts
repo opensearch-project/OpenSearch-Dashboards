@@ -30,10 +30,10 @@
 
 import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
+import { createHashHistory } from 'history';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
-import { createHashHistory } from 'history';
 
 import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -102,6 +102,7 @@ export function initDashboardApp(app, deps) {
       },
     };
 
+    /* eslint-disable object-shorthand */
     $routeProvider
       .when('/', {
         redirectTo: DashboardConstants.LANDING_PAGE_PATH,
