@@ -4,8 +4,9 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { Logger } from 'src/core/server';
+import { IContextProvider, Logger, RequestHandler } from 'src/core/server';
 import { IDataSourceClient } from './client/data_source_client';
+import { DataSourceService } from './data_source_service';
 
 class OpenSearchDataSourceRouteHandlerContext {
   constructor(private dataSourceClient: IDataSourceClient, private logger: Logger) {}
@@ -35,3 +36,16 @@ export class DataSourceRouteHandlerContext {
     );
   }
 }
+
+export const createDataSourceRouteHandlerContext = (
+  dataSourceService: DataSourceService,
+  logger: Logger
+): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'data_source'> => {
+  return async (context, req) => {
+    const dataSourceClient = dataSourceService!.getDataSourceClient(
+      logger,
+      context.core.savedObjects.client
+    );
+    return new DataSourceRouteHandlerContext(dataSourceClient, logger);
+  };
+};

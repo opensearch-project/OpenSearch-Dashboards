@@ -19,26 +19,13 @@ export interface IDataSourceClient {
   asDataSource: (dataSourceId: string) => Promise<OpenSearchClient>;
 }
 
-/**
- * See {@link IDataSourceClient}
- *
- * @public
- */
-export interface ICustomDataSourceClient extends IDataSourceClient {
-  /**
-   * Closes the data source client. After that client cannot be used and one should
-   * create a new client instance to be able to interact with OpenSearch API.
-   */
-  close: () => Promise<void>;
-}
-
 interface DataSourceClientCtorParams {
   dataSourceService: DataSourceService;
   logger: Logger;
   scopedSavedObjectsClient: SavedObjectsClientContract;
 }
 // TODO: This needs further implementation. See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1981
-export class DataSourceClient implements ICustomDataSourceClient {
+export class DataSourceClient implements IDataSourceClient {
   private dataSourceService: DataSourceService;
   private log: Logger;
   private scopedSavedObjectClient;
@@ -50,6 +37,4 @@ export class DataSourceClient implements ICustomDataSourceClient {
   }
 
   asDataSource!: (dataSourceId: string) => Promise<OpenSearchClient>;
-
-  public async close() {}
 }

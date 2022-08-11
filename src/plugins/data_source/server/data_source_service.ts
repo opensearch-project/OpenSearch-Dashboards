@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Client } from '@opensearch-project/opensearch';
 import { Logger, OpenSearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { DataSourceClient } from './client';
 import { IDataSourceService } from './types';
 
 export class DataSourceService implements IDataSourceService {
-  private openSearchClientsPool: Map<string, OpenSearchClient>;
+  private openSearchClientsPool: Map<string, Client>;
   constructor() {
-    this.openSearchClientsPool = new Map<string, OpenSearchClient>();
+    this.openSearchClientsPool = new Map<string, Client>();
   }
   // TODO: placeholders, need implement when adding global config
   isEnabled(): boolean {
