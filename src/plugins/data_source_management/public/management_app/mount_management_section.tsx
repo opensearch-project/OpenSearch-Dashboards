@@ -30,8 +30,6 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data, dataSource },
-    dataSourceManagementStart,
   ] = await getStartServices();
 
   const deps: DataSourceManagementContext = {
@@ -43,9 +41,6 @@ export async function mountManagementSection(
     overlays,
     http,
     docLinks,
-    data,
-    dataSource,
-    dataSourceManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
   };
 

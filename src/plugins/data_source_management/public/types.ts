@@ -14,9 +14,6 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams, ManagementSetup } from 'src/plugins/management/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataSourceStart } from 'src/plugins/data_source/public';
-import { DataSourceManagementStart } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -41,9 +38,6 @@ export interface DataSourceManagementContext {
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
-  data: DataPublicPluginStart;
-  dataSource: DataSourceStart;
-  dataSourceManagementStart: DataSourceManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 

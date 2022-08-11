@@ -41,7 +41,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
   props: CreateDataSourceWizardProps
 ) => {
   /* Initialization */
-  const { uiSettings, savedObjects, setBreadcrumbs } = useOpenSearchDashboards<
+  const { uiSettings, savedObjects, setBreadcrumbs, docLinks } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
 
@@ -62,15 +62,14 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
     /* TODO: Handle Create data source option*/
   };
 
-  // todo: consistent name
-  const onSearchSelected = (id: string, selectedType: string, name: string) => {
+  const onSelectExistingCredential = (id: string, selectedType: string, name: string) => {
     const selected = [{ id, type: selectedType, name }];
     setSelectedCredential(selected);
   };
 
   /* Render header*/
   const renderHeader = () => {
-    return <Header />;
+    return <Header docLinks={docLinks} />;
   };
 
   /* Render Section header*/
@@ -94,7 +93,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
       <EuiFormRow>
         <SavedObjectFinderUi
           key="searchSavedObjectFinder"
-          onChoose={onSearchSelected} // todo
+          onChoose={onSelectExistingCredential}
           showFilter={false}
           noItemsMessage={i18n.translate(
             'dataSources.newDataSource.searchSelection.notFoundLabel',
@@ -114,8 +113,8 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
               ),
             },
           ]}
-          fixedPageSize={5} // todo
-          uiSettings={uiSettings} // todo
+          fixedPageSize={5}
+          uiSettings={uiSettings}
           savedObjects={savedObjects}
         />
       </EuiFormRow>

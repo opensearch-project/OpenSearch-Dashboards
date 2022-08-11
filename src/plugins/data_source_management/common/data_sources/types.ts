@@ -11,8 +11,7 @@ export interface IDataSource {
   title: string;
   id?: string;
   type?: string;
-  endpoint: string; // todo: url type
-  // todo: fucntions???
+  endpoint: string;
 }
 
 export interface IDataSourceAttributes {

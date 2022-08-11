@@ -22,7 +22,7 @@ export const Header = ({
   prompt?: React.ReactNode;
   dataSourceName?: string;
   isBeta?: boolean;
-  docLinks?: DocLinksStart; // todo: ck
+  docLinks: DocLinksStart;
 }) => {
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
@@ -64,7 +64,7 @@ export const Header = ({
           />
           <br />
           <EuiLink
-            href={'https://www.youtube.com/'} // todo
+            href={docLinks.links.noDocumentation.indexPatterns.introduction}
             target="_blank"
             external
           >
