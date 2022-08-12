@@ -30,7 +30,7 @@
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
-    "node-sass": "^6.0.1",
+    "sass": "~1.26.11",
     "postcss": "^8.4.5",
     "sinon": "^7.4.2"
   }
