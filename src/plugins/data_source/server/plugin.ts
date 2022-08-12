@@ -3,19 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { first } from 'rxjs/operators';
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
-import { dataSource, credential } from './saved_objects';
+import { dataSource, credential, CredentialSavedObjectsClientWrapper } from './saved_objects';
+import { DataSourcePluginConfigType } from '../config';
 
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+
+import { CryptographyClient } from './cryptography';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
+    this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('data_source: Setup');
 
     // Register credential saved object type
@@ -23,6 +28,22 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
+
+    // Fetch configs used to create redential saved objects client wrapper
+    const { encryption } = await this.initializerContext.config.create().pipe(first()).toPromise();
+    const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = encryption;
+
+    // Create credential saved objects client wrapper
+    const credentialSavedObjectsClientWrapper = new CredentialSavedObjectsClientWrapper(
+      new CryptographyClient(wrappingKeyName, wrappingKeyNamespace, wrappingKey)
+    );
+
+    // Add credential saved objects client wrapper factory
+    core.savedObjects.addClientWrapper(
+      1,
+      'credential',
+      credentialSavedObjectsClientWrapper.wrapperFactory
+    );
 
     return {};
   }

@@ -5,3 +5,4 @@
 
 export { credential } from './credential_saved_objects_type';
 export { dataSource } from './data_source';
+export { CredentialSavedObjectsClientWrapper } from './credential_saved_objects_client_wrapper';

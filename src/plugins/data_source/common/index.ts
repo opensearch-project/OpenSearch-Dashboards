@@ -5,3 +5,5 @@
 
 export const PLUGIN_ID = 'dataSource';
 export const PLUGIN_NAME = 'data_source';
+
+export { Credential } from './credentials';

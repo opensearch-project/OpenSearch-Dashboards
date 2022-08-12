@@ -30,7 +30,6 @@ export const credential: SavedObjectsType = {
     dynamic: false,
     properties: {
       title: { type: 'text' },
-      authType: { type: 'keyword' },
     },
   },
   migrations: {},

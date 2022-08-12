@@ -21,17 +21,18 @@ import {
   EuiFieldPassword,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
+import { Credential } from '../../../../data_source/common';
+
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 
 interface CreateCredentialWizardState {
-  credentialName: string;
-  authType: string;
-  credentialMaterialsType: string;
-  userName: string;
-  password: string;
+  credentialName?: string;
+  credentialMaterialsType?: string;
+  username?: string;
+  password?: string;
   dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
@@ -49,11 +50,10 @@ export class CreateCredentialWizard extends React.Component<
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     this.state = {
-      credentialName: '',
-      authType: 'shared',
-      credentialMaterialsType: 'username_password_credential',
-      userName: '',
-      password: '',
+      credentialName: undefined,
+      credentialMaterialsType: undefined,
+      username: undefined,
+      password: undefined,
       dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
@@ -71,8 +71,11 @@ export class CreateCredentialWizard extends React.Component<
     const header = this.renderHeader();
 
     const options = [
-      { value: 'username_password_credential', text: 'Username and Password Credential' },
-      { value: 'no_auth', text: 'No Auth' },
+      { value: undefined, text: 'Select Credential Materials Type' },
+      {
+        value: Credential.CredentialMaterialsType.UsernamePasswordType,
+        text: 'Username and Password Credential',
+      },
     ];
 
     return (
@@ -127,15 +130,15 @@ export class CreateCredentialWizard extends React.Component<
             <EuiFormRow label="User Name">
               <EuiFieldText
                 placeholder="Your User Name"
-                value={this.state.userName || ''}
-                onChange={(e) => this.setState({ userName: e.target.value })}
+                value={this.state.username || undefined}
+                onChange={(e) => this.setState({ username: e.target.value })}
               />
             </EuiFormRow>
             <EuiFormRow label="Password">
               <EuiFieldPassword
                 placeholder="Your Password"
                 type={this.state.dual ? 'dual' : undefined}
-                value={this.state.password || ''}
+                value={this.state.password || undefined}
                 onChange={(e) => this.setState({ password: e.target.value })}
               />
             </EuiFormRow>
@@ -177,11 +180,10 @@ export class CreateCredentialWizard extends React.Component<
       // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.create('credential', {
         title: this.state.credentialName,
-        authType: this.state.authType,
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
-            userName: this.state.userName,
+            username: this.state.username,
             password: this.state.password,
           },
         },
