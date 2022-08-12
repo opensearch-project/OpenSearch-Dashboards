@@ -110,6 +110,7 @@
     ]
   },
   "dependencies": {
+    "@aws-crypto/client-node": "^3.1.1",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "34.6.0",
     "@elastic/good": "^9.0.1-kibana3",

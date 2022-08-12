@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useEffectOnce } from 'react-use';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -41,7 +42,7 @@ const pagination = {
 
 const sorting = {
   sort: {
-    field: 'credentialName',
+    field: 'title',
     direction: 'asc' as const,
   },
 };
@@ -68,7 +69,11 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
 
   const { setBreadcrumbs } = useOpenSearchDashboards<CredentialManagementContext>().services;
-  setBreadcrumbs(getListBreadcrumbs());
+
+  /* Update breadcrumb*/
+  useEffectOnce(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
 
   const { savedObjects, uiSettings } = useOpenSearchDashboards<
     CredentialManagementContext

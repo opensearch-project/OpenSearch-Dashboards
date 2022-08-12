@@ -3,15 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { schema, TypeOf } from '@osd/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { DataSourcePlugin } from './plugin';
-
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
-
-export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
+import { configSchema, DataSourcePluginConfigType } from '../config';
 
 export const config: PluginConfigDescriptor<DataSourcePluginConfigType> = {
   schema: configSchema,
