@@ -164,7 +164,8 @@ export function BaseMapsVisualizationProvider() {
 
       try {
         if (this._wmsConfigured()) {
-          if (WMS_MINZOOM > this._opensearchDashboardsMap.getMaxZoomLevel()) {
+          const currentMaxZoomLevel = this._opensearchDashboardsMap.getMaxZoomLevel();
+          if (WMS_MINZOOM < currentMaxZoomLevel || WMS_MAXZOOM > currentMaxZoomLevel) {
             this._opensearchDashboardsMap.setMinZoom(WMS_MINZOOM);
             this._opensearchDashboardsMap.setMaxZoom(WMS_MAXZOOM);
           }
