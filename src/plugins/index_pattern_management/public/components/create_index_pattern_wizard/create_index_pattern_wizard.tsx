@@ -95,13 +95,14 @@ export class CreateIndexPatternWizard extends Component<
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
     this.dataSourceEnabled = context.services.dataSourceEnabled;
+    const isInitiallyLoadingIndices = !this.dataSourceEnabled;
 
     this.state = {
       step: getInitialStepName(this.dataSourceEnabled),
       indexPattern: '',
       allIndices: [],
       remoteClustersExist: false,
-      isInitiallyLoadingIndices: true,
+      isInitiallyLoadingIndices,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -109,7 +110,9 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   async UNSAFE_componentWillMount() {
-    this.fetchData();
+    if (!this.dataSourceEnabled) {
+      this.fetchData();
+    }
   }
 
   catchAndWarn = async (
@@ -136,6 +139,8 @@ export class CreateIndexPatternWizard extends Component<
 
   fetchData = async () => {
     const { http } = this.context.services;
+    const { dataSourceRef } = this.state;
+    const dataSourceId = dataSourceRef?.id;
     const getIndexTags = (indexName: string) =>
       this.state.indexPatternCreationType.getIndexTags(indexName);
     const searchClient = this.context.services.data.search.search;
@@ -155,9 +160,9 @@ export class CreateIndexPatternWizard extends Component<
     );
 
     // query local and remote indices, updating state independently
-    ensureMinimumTime(
+    const queryLocalAndRemotePromise = ensureMinimumTime(
       this.catchAndWarn(
-        getIndices({ http, getIndexTags, pattern: '*', searchClient }),
+        getIndices({ http, getIndexTags, pattern: '*', searchClient, dataSourceId }),
 
         [],
         indicesFailMsg
@@ -166,16 +171,18 @@ export class CreateIndexPatternWizard extends Component<
       this.setState({ allIndices, isInitiallyLoadingIndices: false })
     );
 
-    this.catchAndWarn(
+    const queryWithFallbackPromise = this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices({ http, getIndexTags, pattern: '*:*', searchClient }),
+      getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId }),
 
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedItem[]) =>
       this.setState({ remoteClustersExist: !!remoteIndices.length })
     );
+
+    await Promise.all([queryLocalAndRemotePromise, queryWithFallbackPromise]);
   };
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
@@ -232,8 +239,10 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   goToNextFromDataSource = (dataSourceRef: DataSourceRef) => {
-    this.setState({ dataSourceRef });
-    this.goToNextStep();
+    this.setState({ isInitiallyLoadingIndices: true, dataSourceRef }, async () => {
+      await this.fetchData();
+      this.goToNextStep();
+    });
   };
 
   goToNextStep = () => {
@@ -261,7 +270,7 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   renderContent() {
-    const { allIndices, isInitiallyLoadingIndices, step, indexPattern } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef } = this.state;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
@@ -297,6 +306,7 @@ export class CreateIndexPatternWizard extends Component<
               this.state.indexPatternCreationType.getShowSystemIndices() &&
               this.state.step === INDEX_PATTERN_STEP
             }
+            dataSourceRef={dataSourceRef}
           />
         </EuiPageContent>
       );
@@ -313,6 +323,7 @@ export class CreateIndexPatternWizard extends Component<
             createIndexPattern={this.createIndexPattern}
             indexPatternCreationType={this.state.indexPatternCreationType}
             selectedTimeField={this.state.selectedTimeField}
+            dataSourceRef={dataSourceRef}
           />
         </EuiPageContent>
       );
