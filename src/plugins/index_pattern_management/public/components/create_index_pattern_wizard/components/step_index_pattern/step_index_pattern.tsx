@@ -54,7 +54,7 @@ import { Header } from './components/header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { MatchedItem } from '../../types';
-import { IndexPatternManagmentContextValue } from '../../../../types';
+import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
   allIndices: MatchedItem[];
@@ -63,6 +63,7 @@ interface StepIndexPatternProps {
   goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
+  dataSourceRef?: DataSourceRef;
 }
 
 interface StepIndexPatternState {
@@ -163,7 +164,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   };
 
   fetchIndices = async (query: string) => {
-    const { indexPatternCreationType } = this.props;
+    const { indexPatternCreationType, dataSourceRef } = this.props;
+    const dataSourceId = dataSourceRef?.id;
     const { existingIndexPatterns } = this.state;
     const { http } = this.context.services;
     const getIndexTags = (indexName: string) => indexPatternCreationType.getIndexTags(indexName);
@@ -179,7 +181,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient })
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: query,
+          showAllIndices,
+          searchClient,
+          dataSourceId,
+        })
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -190,8 +199,22 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices({ http, getIndexTags, pattern: `${query}*`, showAllIndices, searchClient }),
-      getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient }),
+      getIndices({
+        http,
+        getIndexTags,
+        pattern: `${query}*`,
+        showAllIndices,
+        searchClient,
+        dataSourceId,
+      }),
+      getIndices({
+        http,
+        getIndexTags,
+        pattern: query,
+        showAllIndices,
+        searchClient,
+        dataSourceId,
+      }),
     ]);
 
     // If the search changed, discard this state

@@ -2,6 +2,7 @@
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
+  "dataSourceRef": undefined,
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,

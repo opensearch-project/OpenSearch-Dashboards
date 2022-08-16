@@ -46,7 +46,7 @@ import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
 import { context } from '../../../../../../opensearch_dashboards_react/public';
-import { IndexPatternManagmentContextValue } from '../../../../types';
+import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
 
 interface StepTimeFieldProps {
@@ -55,6 +55,7 @@ interface StepTimeFieldProps {
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
+  dataSourceRef?: DataSourceRef;
 }
 
 interface StepTimeFieldState {
@@ -116,7 +117,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
   }
 
   fetchTimeFields = async () => {
-    const { indexPattern: pattern } = this.props;
+    const { indexPattern: pattern, dataSourceRef } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
 
     this.setState({ isFetchingTimeFields: true });
@@ -124,6 +125,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
       this.context.services.data.indexPatterns.getFieldsForWildcard({
         pattern,
         ...getFetchForWildcardOptions(),
+        dataSourceId: dataSourceRef?.id,
       })
     );
     const timeFields = extractTimeFields(fields);
