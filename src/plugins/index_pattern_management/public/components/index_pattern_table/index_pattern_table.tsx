@@ -109,7 +109,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
+  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
   setBreadcrumbs(getListBreadcrumbs());
@@ -150,14 +150,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   };
 
   useEffect(() => {
-    getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions, searchClient]);
+    if (!dataSourceEnabled) {
+      getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
+        setSources(dataSources.filter(removeAliases));
+        setIsLoadingSources(false);
+      });
+      getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+      );
+    }
+  }, [http, creationOptions, searchClient, dataSourceEnabled]);
 
   chrome.docTitle.change(title);
 
