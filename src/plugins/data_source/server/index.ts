@@ -8,7 +8,7 @@ import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/serve
 import { DataSourcePlugin } from './plugin';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
