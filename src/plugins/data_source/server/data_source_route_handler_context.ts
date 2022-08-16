@@ -15,7 +15,7 @@ class OpenSearchDataSourceRouteHandlerContext {
     try {
       const client = await this.dataSourceClient.asDataSource(dataSourceId);
       return client;
-    } catch (error) {
+    } catch (error: any) {
       // TODO: convert as audit log when integrate with osd auditing
       // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1986
       this.logger.error(

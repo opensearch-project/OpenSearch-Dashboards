@@ -7,13 +7,10 @@ import { Logger, OpenSearchClient, SavedObjectsClientContract } from 'src/core/s
 import { DataSourceClient } from './client';
 
 export interface IDataSourceService {
-  isEnabled(): boolean;
   getDataSourceClient(
     logger: Logger,
     savedObjectClient: SavedObjectsClientContract
   ): DataSourceClient;
-  addOpenSearchClient(): void;
-  getOpenSearchClient(): OpenSearchClient;
   stop(): void;
 }
 export interface DataSourcePluginRequestContext {
