@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { DataSourceEditPageItem } from '../types';
 
 export function getListBreadcrumbs() {
   return [
@@ -24,6 +25,16 @@ export function getCreateBreadcrumbs() {
         defaultMessage: 'Create data source',
       }),
       href: `/create`,
+    },
+  ];
+}
+
+export function getEditBreadcrumbs(dataSource: DataSourceEditPageItem) {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: dataSource.title,
+      href: `/${dataSource.id}`,
     },
   ];
 }

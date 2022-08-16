@@ -3,37 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiGlobalToastList,
-  EuiGlobalToastListToast,
-  EuiHorizontalRule,
-  EuiPageContent,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { useEffectOnce } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { SavedObjectFinderUi } from '../../../../saved_objects/public';
-import { Header } from './components/header';
-import { DataSourceManagementContext } from '../../types';
+import { DataSourceEditPageItem, DataSourceManagementContext, ToastMessageItem } from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { AuthenticationTabs, AuthenticationTabItem } from './components/authentication_tabs';
-import { CreateNewCredential } from './components/create_new_credential';
-
-interface SelectedSavedObj {
-  id: string;
-  type: string;
-  name?: string;
-}
+import { CreateEditDataSourceWizard } from '../create_edit_data_source_wizard';
+import { MODE_CREATE } from '../../../common';
+import { createSingleDataSource } from '../utils';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
@@ -41,7 +21,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
   props: CreateDataSourceWizardProps
 ) => {
   /* Initialization */
-  const { uiSettings, savedObjects, setBreadcrumbs, docLinks } = useOpenSearchDashboards<
+  const { savedObjects, setBreadcrumbs } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
 
@@ -49,162 +29,71 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
 
   /* State Variables */
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
-  const [dataSourceName, setDataSourceName] = useState('');
-  const [endpoint, setEndpoint] = useState('');
-  const [selectedCredential, setSelectedCredential] = useState<SelectedSavedObj[]>([]);
 
+  /* Set breadcrumb */
   useEffectOnce(() => {
     setBreadcrumbs(getCreateBreadcrumbs());
   });
 
   /* Handle submit - create data source*/
-  const handleSubmit = async () => {
-    /* TODO: Handle Create data source option*/
+  const handleSubmit = async ({
+    title,
+    description,
+    endpoint,
+    credentialId,
+    noAuthentication,
+  }: DataSourceEditPageItem) => {
+    try {
+      // TODO: Add rendering spinner
+
+      const references = [];
+      const attributes = { title, description, endpoint };
+
+      if (credentialId) {
+        references.push({ id: credentialId, type: 'credential', name: 'credential' });
+      }
+      const options = { references };
+
+      await createSingleDataSource(savedObjects.client, attributes, options);
+
+      props.history.push('');
+    } catch (e) {
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.createDataSource.createDataSourceFailMsg',
+        defaultMessage: 'Creation of the Data Source failed with some errors. Please try it again',
+        color: 'warning',
+        iconType: 'alert',
+      });
+    }
   };
 
-  const onSelectExistingCredential = (id: string, selectedType: string, name: string) => {
-    const selected = [{ id, type: selectedType, name }];
-    setSelectedCredential(selected);
+  const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
+    if (id && defaultMessage && color && iconType) {
+      const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
+      setToasts([
+        ...toasts,
+        {
+          title: failureMsg,
+          id: failureMsg.props.id,
+          color,
+          iconType,
+        },
+      ]);
+    }
   };
 
-  /* Render header*/
-  const renderHeader = () => {
-    return <Header docLinks={docLinks} />;
-  };
-
-  /* Render Section header*/
-  const renderSectionHeader = (i18nTitle: string, defaultTitle: string, preSpacer: boolean) => {
+  /* Render the creation wizard */
+  const renderContent = () => {
     return (
-      <>
-        {preSpacer ? <EuiSpacer size="l" /> : null}
-        <EuiText>
-          <h5>
-            <FormattedMessage id={i18nTitle} defaultMessage={defaultTitle} />
-          </h5>
-        </EuiText>
-        <EuiSpacer size="s" />
-      </>
-    );
-  };
-
-  /* Render user existing credential table*/
-  const renderSavedObjectsTable = () => {
-    return (
-      <EuiFormRow>
-        <SavedObjectFinderUi
-          key="searchSavedObjectFinder"
-          onChoose={onSelectExistingCredential}
-          showFilter={false}
-          noItemsMessage={i18n.translate(
-            'dataSources.newDataSource.searchSelection.notFoundLabel',
-            {
-              defaultMessage: 'No credentials have been configured yet.',
-            }
-          )}
-          savedObjectMetaData={[
-            {
-              type: 'credential',
-              getIconForSavedObject: () => 'apps', // todo: this is temp as we need UX to design a icon
-              name: i18n.translate(
-                'dataSources.newDataSource.searchSelection.savedObjectType.credential',
-                {
-                  defaultMessage: 'Credential',
-                }
-              ),
-            },
-          ]}
-          fixedPageSize={5}
-          uiSettings={uiSettings}
-          savedObjects={savedObjects}
-        />
-      </EuiFormRow>
-    );
-  };
-
-  /* Render credentials tabs*/
-  const [selectedTabId, setSelectedTabId] = useState('existing-credentials');
-
-  const authenticationTabs: AuthenticationTabItem[] = [
-    {
-      id: 'existing-credentials',
-      name: 'Use Existing Credential',
-      content: <>{renderSavedObjectsTable()}</>,
-    },
-    {
-      id: 'create-new-credentials',
-      name: 'Create New Credential',
-      content: (
-        <>
-          <CreateNewCredential />
-        </>
-      ),
-    },
-  ];
-
-  const handleAuthenticationTabChanged = (id: string) => {
-    setSelectedTabId(id);
-  };
-
-  const renderAuthenticationTabHeaders = () => {
-    return (
-      <AuthenticationTabs
-        tabs={authenticationTabs}
-        onTabChange={handleAuthenticationTabChanged}
-        selectedTabId={selectedTabId}
+      <CreateEditDataSourceWizard
+        wizardMode={MODE_CREATE}
+        handleSubmit={handleSubmit}
+        displayToastMessage={handleDisplayToastMessage}
       />
     );
   };
 
-  const renderContent = () => {
-    return (
-      <EuiPageContent>
-        {renderHeader()}
-        <EuiHorizontalRule />
-        <EuiForm data-test-subj="todo">
-          {/* Endpoint section */}
-          {renderSectionHeader(
-            'dataSourcesManagement.createDataSource.endpointTitle',
-            'Endpoint',
-            false
-          )}
-          <EuiFormRow helpText="Name of the data source">
-            <EuiFieldText
-              name="dataSourceName"
-              value={dataSourceName || ''}
-              placeholder="Name"
-              onChange={(e) => setDataSourceName(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow helpText="The connection URL">
-            <EuiFieldText
-              name="endPoint"
-              value={endpoint || ''}
-              placeholder="Endpoint"
-              onChange={(e) => setEndpoint(e.target.value)}
-            />
-          </EuiFormRow>
-
-          {/* Authentication Section: */}
-          {renderSectionHeader(
-            'dataSourcesManagement.createDataSource.selectCredentialTitle',
-            'Authentication',
-            true
-          )}
-
-          <EuiPanel grow={false} paddingSize="none">
-            {renderAuthenticationTabHeaders()}
-          </EuiPanel>
-          <EuiSpacer size="m" />
-
-          {/* Create Data Source button*/}
-          <EuiButton type="submit" fill onClick={handleSubmit}>
-            Create
-          </EuiButton>
-        </EuiForm>
-      </EuiPageContent>
-    );
-  };
-
+  /* Remove toast on dismiss*/
   const removeToast = (id: string) => {
     setToasts(toasts.filter((toast) => toast.id !== id));
   };

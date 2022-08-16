@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -59,38 +59,24 @@ const title = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
 });
 
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
-  const {
-    setBreadcrumbs,
-    savedObjects,
-    uiSettings,
-    dataSourceManagementStart,
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { setBreadcrumbs, savedObjects } = useOpenSearchDashboards<
+    DataSourceManagementContext
+  >().services;
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
 
-  /* Update breadcrumb*/
+  /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
+    /* Update breadcrumb*/
     setBreadcrumbs(getListBreadcrumbs());
-  });
 
-  /* Initialize the component state*/
-  useEffect(() => {
+    /* Initialize the component state*/
     (async function () {
-      const fetchedDataSources: DataSourceTableItem[] = await getDataSources(
-        savedObjects.client,
-        uiSettings.get('defaultIndex'),
-        dataSourceManagementStart
-      );
+      const fetchedDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
       setDataSources(fetchedDataSources);
     })();
-  }, [
-    history.push,
-    dataSources.length,
-    dataSourceManagementStart,
-    uiSettings,
-    savedObjects.client,
-  ]);
+  });
 
   /* Table columns */
   const columns = [
@@ -108,7 +94,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `sources/${index.id}`)}>
+          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           &emsp;
