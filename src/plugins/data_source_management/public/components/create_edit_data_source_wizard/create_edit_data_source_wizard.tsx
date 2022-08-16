@@ -171,9 +171,9 @@ export class CreateEditDataSourceWizard extends React.Component<
   /* Events */
 
   /* Create new credentials*/
-  onClickCreateNewCredential() {
-    this.showModal();
-  }
+  onClickCreateNewCredential = () => {
+    this.setState({ showCreateCredentialModal: true });
+  };
 
   onChangeTitle = (e: { target: { value: any } }) => {
     this.setState({ dataSourceTitle: e.target.value }, () => {
@@ -302,13 +302,9 @@ export class CreateEditDataSourceWizard extends React.Component<
 
   /* Show Create Stored Credential modal */
 
-  closeModal() {
+  closeModal = () => {
     this.setState({ showCreateCredentialModal: false });
-  }
-
-  showModal() {
-    this.setState({ showCreateCredentialModal: true });
-  }
+  };
 
   renderCreateStoredCredentialModal() {
     let modal;

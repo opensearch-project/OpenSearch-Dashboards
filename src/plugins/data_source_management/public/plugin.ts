@@ -8,21 +8,16 @@ import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { PLUGIN_NAME } from '../common';
 
 import { ManagementSetup } from '../../management/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
-  urlForwarding: UrlForwardingSetup;
 }
 
 const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
   implements Plugin<void, void, DataSourceManagementSetupDependencies> {
-  public setup(
-    core: CoreSetup,
-    { management, urlForwarding }: DataSourceManagementSetupDependencies
-  ) {
+  public setup(core: CoreSetup, { management }: DataSourceManagementSetupDependencies) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {

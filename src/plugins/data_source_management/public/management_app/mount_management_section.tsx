@@ -17,12 +17,10 @@ import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboa
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
-import { DataSourceStart } from '../../../data_source/public';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
-  dataSource: DataSourceStart;
 }
 
 export async function mountManagementSection(

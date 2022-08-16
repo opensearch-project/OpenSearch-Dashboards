@@ -4,12 +4,11 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import { IDataSource } from '../../common/data_sources/types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return (
     savedObjectsClient
-      .find<IDataSource>({
+      .find({
         type: 'data-source',
         fields: ['id', 'type', 'title'],
         perPage: 10000,

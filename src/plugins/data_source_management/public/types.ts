@@ -13,19 +13,8 @@ import {
   DocLinksStart,
   HttpSetup,
 } from 'src/core/public';
-import { ManagementAppMountParams, ManagementSetup } from 'src/plugins/management/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataSourceManagementPluginStart {}
-
-export interface DataSourceManagementSetupDependencies {
-  management: ManagementSetup;
-}
-
-export interface DataSourceManagementPluginSetup {
-  getGreeting: () => string;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
