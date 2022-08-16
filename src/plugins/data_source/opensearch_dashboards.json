@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": []
 }

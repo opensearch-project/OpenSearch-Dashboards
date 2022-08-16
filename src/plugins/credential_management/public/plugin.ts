@@ -6,12 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-
-import { ManagementSetup } from '../../management/public';
-
-export interface CredentialManagementSetupDependencies {
-  management: ManagementSetup;
-}
+import { CredentialManagementSetupDependencies } from './types';
 
 const sectionsHeader = i18n.translate('credentialManagement.credential.sectionsHeader', {
   defaultMessage: 'Credentials',
