@@ -62,11 +62,17 @@ interface Item {
 
 export interface TableListViewProps {
   createItem?(): void;
+
   deleteItems?(items: object[]): Promise<void>;
+
   editItem?(item: object): void;
+  editItemAvailable?(item: object): boolean;
+
   entityName: string;
   entityNamePlural: string;
+
   findItems(query: string): Promise<{ total: number; hits: object[] }>;
+
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
@@ -440,6 +446,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         type: 'icon',
         enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
+        available: this.props.editItemAvailable,
       },
     ];
 

@@ -34,6 +34,8 @@ import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
+import { Observable } from 'rxjs';
+
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   ChromeStart,
@@ -45,7 +47,6 @@ import {
   AppMountParameters,
 } from 'opensearch-dashboards/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { DashboardListSources } from 'src/plugins/dashboard/public/types';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { DashboardListItem, DashboardListProviderFn, initDashboardApp } from './legacy_app';
@@ -64,6 +65,13 @@ import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/pub
 import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
+
+export interface DashboardListSource {
+  name: string;
+  listProviderFn: () => Observable<DashboardListItem>;
+}
+
+export type DashboardListSources = DashboardListSource[];
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;

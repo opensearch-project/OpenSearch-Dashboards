@@ -58,6 +58,7 @@ export class DashboardListing extends React.Component {
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
           editItem={this.props.hideWriteControls ? null : this.props.editItem}
+          editItemAvailable={this.props.hideWriteControls ? null : this.props.editItemAvailable}
           tableColumns={this.getTableColumns()}
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
@@ -203,6 +204,7 @@ DashboardListing.propTypes = {
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  editItemAvailable: PropTypes.func,
   getViewUrl: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
