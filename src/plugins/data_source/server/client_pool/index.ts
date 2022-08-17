@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { IDataSourceClient, DataSourceClient } from './data_source_client';
+export { OpenSearchClientPool } from './client_pool';

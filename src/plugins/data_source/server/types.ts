@@ -3,16 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Logger, OpenSearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { DataSourceClient } from './client';
+import { OpenSearchClient } from 'src/core/server';
 
-export interface IDataSourceService {
-  getDataSourceClient(
-    logger: Logger,
-    savedObjectClient: SavedObjectsClientContract
-  ): DataSourceClient;
-  stop(): void;
-}
 export interface DataSourcePluginRequestContext {
   opensearch: {
     getClient: (dataSourceId: string) => Promise<OpenSearchClient>;

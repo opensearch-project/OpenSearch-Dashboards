@@ -12,18 +12,20 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  IContextProvider,
+  RequestHandler,
 } from '../../../../src/core/server';
-import { DataSourceService } from './data_source_service';
-import { createDataSourceRouteHandlerContext } from './data_source_route_handler_context';
+import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { CryptographyClient } from './cryptography';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
-  private dataSourceService?: DataSourceService;
+  private readonly dataSourceService: DataSourceService;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
-    this.logger = this.initializerContext.logger.get();
+    this.logger = this.initializerContext.logger.get('dataSource');
+    this.dataSourceService = new DataSourceService(this.logger, this.initializerContext);
   }
 
   public async setup(core: CoreSetup) {
@@ -53,29 +55,12 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       credentialSavedObjectsClientWrapper.wrapperFactory
     );
 
-    this.dataSourceService = new DataSourceService(this.logger, config);
-    this.dataSourceService.setup();
+    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup();
 
-    // Register plugin context to route handler context
+    // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'data_source',
-      createDataSourceRouteHandlerContext(this.dataSourceService, this.logger)
-    );
-
-    /**
-     * TODO: Test purpose ,need removal
-     */
-    const router = core.http.createRouter();
-    router.get(
-      {
-        path: '/data-source/test',
-        validate: false,
-      },
-      async (context, request, response) => {
-        // const client = await context.dataSources.getOpenSearchClient('37df1970-b6b0-11ec-a339-c18008b701cd');
-        const client = await context.data_source.opensearch.getClient('aaa');
-        return response.ok();
-      }
+      this.createDataSourceRouteHandlerContext(dataSourceService, this.logger)
     );
 
     return {};
@@ -89,4 +74,29 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   public stop() {
     this.dataSourceService!.stop();
   }
+
+  private createDataSourceRouteHandlerContext = (
+    dataSourceService: DataSourceServiceSetup,
+    logger: Logger
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'data_source'> => {
+    return (context, req) => {
+      return {
+        opensearch: {
+          getClient: (dataSourceId: string) => {
+            try {
+              return dataSourceService.getDataSourceClient(
+                dataSourceId,
+                context.core.savedObjects.client
+              );
+            } catch (error: any) {
+              logger.error(
+                `Fail to get data source client for dataSourceId: [${dataSourceId}]. Detail: ${error.messages}`
+              );
+              throw error;
+            }
+          },
+        },
+      };
+    };
+  };
 }
