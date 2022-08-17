@@ -8,4 +8,5 @@ import { SavedObjectAttributes } from 'src/core/types';
 export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   endpoint: string;
+  noAuth: boolean;
 }

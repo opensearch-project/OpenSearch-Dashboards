@@ -10,15 +10,21 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
+import { EditDataSourceWithRouter } from '../components/edit_data_source';
+
+export interface DataSourceManagementStartDependencies {
+  data: DataPublicPluginStart;
+}
 
 export async function mountManagementSection(
-  getStartServices: StartServicesAccessor,
+  getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
   params: ManagementAppMountParams
 ) {
   const [
@@ -51,6 +57,9 @@ export async function mountManagementSection(
           <Switch>
             <Route path={['/create']}>
               <CreateDataSourceWizardWithRouter />
+            </Route>
+            <Route path={['/:id']}>
+              <EditDataSourceWithRouter />
             </Route>
             <Route path={['/']}>
               <DataSourceTableWithRouter />
