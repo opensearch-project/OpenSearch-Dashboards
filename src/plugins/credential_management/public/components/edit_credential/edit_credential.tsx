@@ -25,7 +25,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
-import { Credential } from '../../../../data_source/common';
+import { Credential } from '../../../../data_source/public';
 
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../types';

@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["management", "credentialManagement"],
+  "requiredPlugins": ["management", "dataSource"],
   "optionalPlugins": [],
   "requiredBundles": ["opensearchDashboardsReact"]
 }
