@@ -52,6 +52,12 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
         }
       }
       showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
     />
   </EuiPageContent>
   <EuiGlobalToastList
@@ -97,6 +103,12 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
         }
       }
       showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
     />
   </EuiPageContent>
   <EuiGlobalToastList
@@ -139,6 +151,12 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to TI
           "name": "name",
           "showSystemIndices": true,
           "type": "default",
+        }
+      }
+      stepInfo={
+        Object {
+          "currentStepNumber": 2,
+          "totalStepNumber": 2,
         }
       }
     />
@@ -186,6 +204,12 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
         }
       }
       showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
     />
   </EuiPageContent>
   <EuiGlobalToastList
@@ -237,6 +261,12 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
         }
       }
       showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
     />
   </EuiPageContent>
   <EuiGlobalToastList
