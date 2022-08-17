@@ -4,3 +4,4 @@
  */
 
 export { OpenSearchClientPool } from './client_pool';
+export { configureClient } from './configure_client';

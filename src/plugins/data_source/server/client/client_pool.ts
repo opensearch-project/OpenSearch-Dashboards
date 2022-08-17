@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { first } from 'rxjs/operators';
 import { Client } from '@opensearch-project/opensearch';
 import LRUCache from 'lru-cache';
-import { Logger, PluginInitializerContext } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { DataSourcePluginConfigType } from '../../config';
 
 export interface OpenSearchClientPoolSetup {
@@ -27,15 +26,9 @@ export class OpenSearchClientPool {
   private cache?: LRUCache<string, Client>;
   private isClosed = false;
 
-  constructor(
-    private logger: Logger,
-    private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>
-  ) {}
+  constructor(private logger: Logger) {}
 
-  public async setup() {
-    const config$ = this.initializerContext.config.create<DataSourcePluginConfigType>();
-    const config: DataSourcePluginConfigType = await config$.pipe(first()).toPromise();
-
+  public async setup(config: DataSourcePluginConfigType) {
     const logger = this.logger;
     const { size } = config.clientPool;
 
@@ -78,6 +71,6 @@ export class OpenSearchClientPool {
       return;
     }
     this.isClosed = true;
-    Promise.all(this.cache!.values().map((client) => client.close()));
+    await Promise.all(this.cache!.values().map((client) => client.close()));
   }
 }

@@ -25,7 +25,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
     this.logger = this.initializerContext.logger.get('dataSource');
-    this.dataSourceService = new DataSourceService(this.logger, this.initializerContext);
+    this.dataSourceService = new DataSourceService(this.logger);
   }
 
   public async setup(core: CoreSetup) {
@@ -55,11 +55,11 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       credentialSavedObjectsClientWrapper.wrapperFactory
     );
 
-    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup();
+    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
 
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
-      'data_source',
+      'dataSource',
       this.createDataSourceRouteHandlerContext(dataSourceService, this.logger)
     );
 
@@ -78,7 +78,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private createDataSourceRouteHandlerContext = (
     dataSourceService: DataSourceServiceSetup,
     logger: Logger
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'data_source'> => {
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
     return (context, req) => {
       return {
         opensearch: {

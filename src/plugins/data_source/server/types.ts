@@ -12,7 +12,7 @@ export interface DataSourcePluginRequestContext {
 }
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    data_source: DataSourcePluginRequestContext;
+    dataSource: DataSourcePluginRequestContext;
   }
 }
 
