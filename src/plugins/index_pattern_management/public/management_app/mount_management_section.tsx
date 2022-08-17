@@ -65,12 +65,11 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, dataSource },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
-  const dataSourceEnabled = false;
-  // todo: Boolean(application.capabilities.indexPatterns.dataSourceEnabled) or get from plugin constructor; #2111
+  const dataSourceEnabled = !!dataSource;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
