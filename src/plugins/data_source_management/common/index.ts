@@ -5,3 +5,5 @@
 
 export const PLUGIN_ID = 'dataSourceManagement';
 export const PLUGIN_NAME = 'Data Sources';
+export const MODE_CREATE = 'Create Data Source';
+export const MODE_EDIT = 'Edit Data Source';
