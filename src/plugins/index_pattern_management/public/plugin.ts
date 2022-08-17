@@ -31,6 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
@@ -47,6 +48,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  dataSource?: DataSourcePluginStart;
 }
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
