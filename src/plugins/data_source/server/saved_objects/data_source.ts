@@ -24,14 +24,6 @@ export const dataSource: SavedObjectsType = {
       title: {
         type: 'text',
       },
-      endpoint: {
-        type: 'keyword',
-        index: false,
-        doc_values: false,
-      },
-      version: {
-        type: 'integer',
-      },
     },
   },
 };
