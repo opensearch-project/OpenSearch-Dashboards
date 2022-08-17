@@ -12,13 +12,12 @@ import {
   NotificationsStart,
   DocLinksStart,
 } from 'src/core/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
-import { ManagementAppMountParams } from '../../management/public';
+import { ManagementAppMountParams, ManagementSetup } from 'src/plugins/management/public';
 
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface CredentialManagementSetupDependencies {
+  management: ManagementSetup;
 }
 
 export interface CredentialManagementContext {
