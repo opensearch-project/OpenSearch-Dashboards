@@ -59,7 +59,7 @@ export async function getDataSourceById(
         endpoint: attributes.endpoint,
         description: attributes.description || '',
         credentialId,
-        noAuthentication: false, // TODO: get noAuthentication from response
+        noAuthentication: !!attributes.noAuth,
       };
     }) || null
   );
@@ -67,7 +67,7 @@ export async function getDataSourceById(
 
 export async function createSingleDataSource(
   savedObjectsClient: SavedObjectsClientContract,
-  attributes: { title: string; description: string; endpoint: string },
+  attributes: { title: string; description: string; endpoint: string; noAuth: boolean },
   options?: { references: any[] }
 ) {
   return savedObjectsClient.create('data-source', attributes, options);
@@ -76,7 +76,7 @@ export async function createSingleDataSource(
 export async function updateDataSourceById(
   savedObjectsClient: SavedObjectsClientContract,
   id: string,
-  attributes: { title: string; description: string; endpoint: string },
+  attributes: { title: string; description: string; endpoint: string; noAuth: boolean },
   options?: { references: any[] }
 ) {
   return savedObjectsClient.update('data-source', id, attributes, options);
@@ -106,3 +106,11 @@ export async function getExistingCredentials(savedObjectsClient: SavedObjectsCli
       }) || []
   );
 }
+
+export const isValidUrl = (endpoint: string) => {
+  try {
+    return Boolean(new URL(endpoint));
+  } catch (e) {
+    return false;
+  }
+};
