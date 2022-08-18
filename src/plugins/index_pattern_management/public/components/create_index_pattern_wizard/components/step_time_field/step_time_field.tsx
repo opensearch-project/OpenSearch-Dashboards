@@ -48,6 +48,7 @@ import { ActionButtons } from './components/action_buttons';
 import { context } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
+import { StepInfo } from '../../types';
 
 interface StepTimeFieldProps {
   indexPattern: string;
@@ -56,6 +57,7 @@ interface StepTimeFieldProps {
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
   dataSourceRef?: DataSourceRef;
+  stepInfo: StepInfo;
 }
 
 interface StepTimeFieldState {
@@ -220,7 +222,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
       );
     }
 
-    const { indexPattern, goToPreviousStep } = this.props;
+    const { indexPattern, goToPreviousStep, stepInfo } = this.props;
 
     const timeFieldOptions =
       timeFields.length > 0
@@ -256,7 +258,11 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     return (
       <>
-        <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
+        <Header
+          indexPattern={indexPattern}
+          indexPatternName={indexPatternName}
+          stepInfo={stepInfo}
+        />
         <EuiSpacer size="m" />
         <TimeField
           isVisible={showTimeField}

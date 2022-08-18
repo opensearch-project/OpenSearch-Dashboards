@@ -53,7 +53,7 @@ import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedItem } from '../../types';
+import { MatchedItem, StepInfo } from '../../types';
 import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
@@ -64,6 +64,7 @@ interface StepIndexPatternProps {
   initialQuery?: string;
   showSystemIndices: boolean;
   dataSourceRef?: DataSourceRef;
+  stepInfo: StepInfo;
 }
 
 interface StepIndexPatternState {
@@ -351,7 +352,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
-    const { goToNextStep, indexPatternCreationType } = this.props;
+    const { goToNextStep, indexPatternCreationType, stepInfo } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -404,6 +405,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         isIncludingSystemIndices={isIncludingSystemIndices}
         showSystemIndices={this.props.showSystemIndices}
+        stepInfo={stepInfo}
       />
     );
   }

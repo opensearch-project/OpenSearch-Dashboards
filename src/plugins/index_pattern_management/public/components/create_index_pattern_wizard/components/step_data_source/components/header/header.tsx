@@ -15,18 +15,21 @@ import {
 } from 'src/plugins/index_pattern_management/public/types';
 import { SavedObjectFinderUi } from '../../../../../../../../../plugins/saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../../../../../plugins/opensearch_dashboards_react/public';
+import { StepInfo } from '../../../../types';
 
 interface HeaderProps {
   onSearchSelected: (id: string, type: string) => void;
   dataSourceRef: DataSourceRef;
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
+  stepInfo: StepInfo;
 }
 
 const DATA_SOURCE_PAGE_SIZE = 5;
 
 export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
-  const { dataSourceRef, onSearchSelected, goToNextStep, isNextStepDisabled } = props;
+  const { dataSourceRef, onSearchSelected, goToNextStep, isNextStepDisabled, stepInfo } = props;
+  const { currentStepNumber, totalStepNumber } = stepInfo;
 
   const { savedObjects, uiSettings } = useOpenSearchDashboards<
     IndexPatternManagmentContext
@@ -38,7 +41,8 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         <h2>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.stepDataSourceHeader"
-            defaultMessage="Step 0 of 2: Configure data source" // todo: make dynamic: Next PR
+            defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure data source"
+            values={{ currentStepNumber, totalStepNumber }}
           />
         </h2>
       </EuiTitle>
