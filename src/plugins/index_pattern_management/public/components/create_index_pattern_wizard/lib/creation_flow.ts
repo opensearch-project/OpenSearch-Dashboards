@@ -38,43 +38,42 @@ DEFAULT_CREATION_FLOW_MAP.set(TIME_FIELD_STEP, {
 
 export type StepType = 'INDEX_PATTERN_STEP' | 'TIME_FIELD_STEP' | 'DATA_SOURCE_STEP';
 
-export const getInitialStepName = (supportsDataSource: boolean) => {
-  if (supportsDataSource) {
+export const getInitialStepName = (dataSourceEnabled: boolean) => {
+  if (dataSourceEnabled) {
     return DATA_SOURCE_STEP;
   }
 
   return INDEX_PATTERN_STEP;
 };
 
-export const getNextStep = (
-  currentStep: StepType,
-  supportsDataSource: boolean
-): StepType | null => {
-  if (supportsDataSource) {
+export const getNextStep = (currentStep: StepType, dataSourceEnabled: boolean): StepType | null => {
+  if (dataSourceEnabled) {
     return CREATION_FLOW_WITH_DATA_SOURCE_MAP.get(currentStep).next;
   }
 
   return DEFAULT_CREATION_FLOW_MAP.get(currentStep).next;
 };
 
-export const getPrevStep = (
-  currentStep: StepType,
-  supportsDataSource: boolean
-): StepType | null => {
-  if (supportsDataSource) {
+export const getPrevStep = (currentStep: StepType, dataSourceEnabled: boolean): StepType | null => {
+  if (dataSourceEnabled) {
     return CREATION_FLOW_WITH_DATA_SOURCE_MAP.get(currentStep).prev;
   }
 
-  return CREATION_FLOW_WITH_DATA_SOURCE_MAP.get(currentStep).prev;
+  return DEFAULT_CREATION_FLOW_MAP.get(currentStep).prev;
 };
 
-export const getCurrentStepNumber = (
-  currentStep: StepType,
-  supportsDataSource: boolean
-): number => {
-  if (supportsDataSource) {
+export const getCurrentStepNumber = (currentStep: StepType, dataSourceEnabled: boolean): number => {
+  if (dataSourceEnabled) {
     return CREATION_FLOW_WITH_DATA_SOURCE_MAP.get(currentStep).stepNumber;
   }
 
-  return CREATION_FLOW_WITH_DATA_SOURCE_MAP.get(currentStep).stepNumber;
+  return DEFAULT_CREATION_FLOW_MAP.get(currentStep).stepNumber;
+};
+
+export const getTotalStepNumber = (dataSourceEnabled: boolean): number => {
+  if (dataSourceEnabled) {
+    return CREATION_FLOW_WITH_DATA_SOURCE_MAP.size;
+  }
+
+  return DEFAULT_CREATION_FLOW_MAP.size;
 };

@@ -50,10 +50,12 @@ import { getCreateBreadcrumbs } from '../breadcrumbs';
 import {
   DATA_SOURCE_STEP,
   ensureMinimumTime,
+  getCurrentStepNumber,
   getIndices,
   getInitialStepName,
   getNextStep,
   getPrevStep,
+  getTotalStepNumber,
   INDEX_PATTERN_STEP,
   StepType,
   TIME_FIELD_STEP,
@@ -86,6 +88,7 @@ export class CreateIndexPatternWizard extends Component<
   public readonly context!: IndexPatternManagmentContextValue;
 
   dataSourceEnabled: boolean;
+  totalSteps: number;
 
   constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
@@ -95,6 +98,7 @@ export class CreateIndexPatternWizard extends Component<
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
     this.dataSourceEnabled = context.services.dataSourceEnabled;
+    this.totalSteps = getTotalStepNumber(this.dataSourceEnabled);
     const isInitiallyLoadingIndices = !this.dataSourceEnabled;
 
     this.state = {
@@ -272,6 +276,11 @@ export class CreateIndexPatternWizard extends Component<
   renderContent() {
     const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef } = this.state;
 
+    const stepInfo = {
+      totalStepNumber: this.totalSteps,
+      currentStepNumber: getCurrentStepNumber(step, this.dataSourceEnabled),
+    };
+
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
     }
@@ -283,7 +292,7 @@ export class CreateIndexPatternWizard extends Component<
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
-          <StepDataSource goToNextStep={this.goToNextFromDataSource} />
+          <StepDataSource goToNextStep={this.goToNextFromDataSource} stepInfo={stepInfo} />
         </EuiPageContent>
       );
     }
@@ -307,6 +316,7 @@ export class CreateIndexPatternWizard extends Component<
               this.state.step === INDEX_PATTERN_STEP
             }
             dataSourceRef={dataSourceRef}
+            stepInfo={stepInfo}
           />
         </EuiPageContent>
       );
@@ -324,6 +334,7 @@ export class CreateIndexPatternWizard extends Component<
             indexPatternCreationType={this.state.indexPatternCreationType}
             selectedTimeField={this.state.selectedTimeField}
             dataSourceRef={dataSourceRef}
+            stepInfo={stepInfo}
           />
         </EuiPageContent>
       );
