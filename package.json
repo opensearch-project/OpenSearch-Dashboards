@@ -370,7 +370,7 @@
     "exit-hook": "^2.2.0",
     "fetch-mock": "^7.3.9",
     "fp-ts": "^2.3.1",
-    "geckodriver": "^3.0.1",
+    "geckodriver": "^3.0.2",
     "getopts": "^2.2.5",
     "grunt": "^1.5.2",
     "grunt-available-tasks": "^0.6.3",
