@@ -45,8 +45,9 @@ export async function deleteCredentials(
   savedObjectsClient: SavedObjectsClientContract,
   selectedCredentials: CredentialsTableItem[]
 ) {
-  // TODO: Refactor with nonblocking IO
-  for (const credential of selectedCredentials) {
-    await savedObjectsClient.delete('credential', credential.id);
-  }
+  await Promise.all(
+    selectedCredentials.map(async (selectedCredential) => {
+      await savedObjectsClient.delete('credential', selectedCredential.id);
+    })
+  );
 }

@@ -19,6 +19,8 @@ import {
   EuiButton,
   EuiPageContent,
   EuiFieldPassword,
+  EuiLoadingSpinner,
+  EuiOverlayMask,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import { Credential } from '../../../../data_source/public';
@@ -36,6 +38,7 @@ interface CreateCredentialWizardState {
   dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
+  isLoading: boolean;
 }
 
 export class CreateCredentialWizard extends React.Component<
@@ -57,6 +60,7 @@ export class CreateCredentialWizard extends React.Component<
       dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
+      isLoading: false,
     };
   }
 
@@ -159,8 +163,12 @@ export class CreateCredentialWizard extends React.Component<
 
   render() {
     const content = this.renderContent();
-
-    return (
+    const { isLoading } = this.state;
+    return isLoading ? (
+      <EuiOverlayMask>
+        <EuiLoadingSpinner size="xl" />
+      </EuiOverlayMask>
+    ) : (
       <>
         {content}
         <EuiGlobalToastList
@@ -176,8 +184,8 @@ export class CreateCredentialWizard extends React.Component<
 
   createCredential = async () => {
     const { savedObjects } = this.context.services;
+    this.setState({ isLoading: true });
     try {
-      // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
       await savedObjects.client.create('credential', {
         title: this.state.credentialName,
         credentialMaterials: {
@@ -207,6 +215,7 @@ export class CreateCredentialWizard extends React.Component<
         ]),
       }));
     }
+    this.setState({ isLoading: false });
   };
 }
 

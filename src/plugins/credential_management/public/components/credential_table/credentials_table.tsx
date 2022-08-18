@@ -22,6 +22,13 @@ import {
   EuiBadgeGroup,
   EuiPageContent,
   EuiTitle,
+  EuiSearchBar,
+  EuiConfirmModal,
+  EuiLoadingSpinner,
+  EuiOverlayMask,
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  Query,
 } from '@elastic/eui';
 
 import {
@@ -32,6 +39,7 @@ import {
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagementContext } from '../../types';
 import { deleteCredentials, getCredentials } from '../utils';
+import { localizedContent } from '../text_content';
 import { CredentialsTableItem } from '../types';
 import { CreateButton } from '../create_button';
 
@@ -74,6 +82,12 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   useEffectOnce(() => {
     setBreadcrumbs(getListBreadcrumbs());
   });
+
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
+  const [toasts, setToasts] = React.useState<EuiGlobalToastListToast[]>([]);
+  const [searchText, setSearchText] = React.useState('');
 
   const { savedObjects, uiSettings } = useOpenSearchDashboards<
     CredentialManagementContext
@@ -128,69 +142,172 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   };
 
   const renderDeleteButton = () => {
-    if (selectedCredentials.length === 0) {
-      return;
-    }
-
     return (
-      <EuiButton color="danger" iconType="trash" onClick={onClickDelete}>
-        Delete {selectedCredentials.length} Credentials
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={() => {
+          setConfirmDeleteVisible(true);
+        }}
+        disabled={selectedCredentials.length === 0}
+      >
+        Delete {selectedCredentials.length} Credential{selectedCredentials.length >= 2 ? 's' : ''}
       </EuiButton>
     );
   };
 
   const onClickDelete = async () => {
-    await deleteCredentials(savedObjects.client, selectedCredentials);
-    // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2055
-    const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
-    setCredentials(fetchedCredentials);
-    setSelectedCredentials([]);
+    try {
+      setIsDeleting(true);
+      await deleteCredentials(savedObjects.client, selectedCredentials);
+
+      const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
+      setCredentials(fetchedCredentials);
+      setSelectedCredentials([]);
+
+      setIsDeleting(false);
+      setConfirmDeleteVisible(false);
+    } catch (e) {
+      const deleteCredentialsFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.credentialsTable.loadDeleteCredentialsFailMsg"
+          defaultMessage="The credential saved objects delete failed with some errors. Please configure data_source.enabled and try it again."
+        />
+      );
+      setToasts(
+        toasts.concat([
+          {
+            title: deleteCredentialsFailMsg,
+            id: deleteCredentialsFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ])
+      );
+    }
   };
 
   const deleteButton = renderDeleteButton();
 
   React.useEffect(() => {
-    (async function () {
+    (async () => {
+      setIsLoading(true);
+
       const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
-      setCredentials(fetchedCredentials);
+      const fetchedCredentialsResults = fetchedCredentials.filter((row) => {
+        return row.title.includes(searchText);
+      });
+
+      setCredentials(fetchedCredentialsResults);
+      setIsLoading(false);
     })();
-  }, [history.push, credentials.length, uiSettings, savedObjects.client]);
+  }, [history.push, credentials.length, uiSettings, savedObjects.client, searchText]);
 
   const createButton = canSave ? <CreateButton history={history} /> : <></>;
 
+  const tableRenderDeleteModal = () => {
+    return confirmDeleteVisible ? (
+      <EuiConfirmModal
+        title={localizedContent.deleteButtonOnConfirmText}
+        onCancel={() => {
+          setConfirmDeleteVisible(false);
+        }}
+        onConfirm={() => {
+          onClickDelete();
+        }}
+        cancelButtonText={localizedContent.cancelButtonOnDeleteCancelText}
+        confirmButtonText={localizedContent.confirmButtonOnDeleteComfirmText}
+        defaultFocusedButton="confirm"
+      >
+        <p>{localizedContent.deleteCredentialDescribeMsg}</p>
+        <p>{localizedContent.deleteCredentialConfirmMsg}</p>
+        <p>{localizedContent.deleteCredentialWarnMsg}</p>
+      </EuiConfirmModal>
+    ) : null;
+  };
+
+  const onSearchChange = ({
+    query,
+  }: {
+    query: Query | null;
+    error: { message: string } | null;
+  }) => {
+    setSearchText(query!.text);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
+
+  const renderContent = () => {
+    return (
+      <EuiPageContent data-test-subj="credentialsTable" role="region">
+        {isDeleting ? (
+          <EuiOverlayMask>
+            <EuiLoadingSpinner size="xl" />
+          </EuiOverlayMask>
+        ) : (
+          <>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
+                  <h2>{title}</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="credentialManagement.credentialsTable.credentialManagementExplanation"
+                      defaultMessage="Create and manage the credentials that help you retrieve your data from OpenSearch."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSearchBar
+              box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+              onChange={(e) => onSearchChange(e)}
+              toolsRight={[
+                <EuiFlexItem key="delete" grow={false}>
+                  {deleteButton}
+                </EuiFlexItem>,
+              ]}
+            />
+
+            {tableRenderDeleteModal()}
+
+            <EuiSpacer />
+
+            <EuiInMemoryTable
+              allowNeutralSort={false}
+              itemId="id"
+              isSelectable={true}
+              selection={selection}
+              items={credentials}
+              columns={columns}
+              pagination={pagination}
+              sorting={sorting}
+              loading={isLoading}
+            />
+          </>
+        )}
+      </EuiPageContent>
+    );
+  };
+
   return (
-    <EuiPageContent data-test-subj="credentialsTable" role="region">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="credentialManagement.credentialsTable.credentialManagementExplanation"
-                defaultMessage="Create and manage the credentials that help you retrieve your data from OpenSearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={true}
-        selection={selection}
-        items={credentials}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
+    <>
+      {renderContent()}
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={({ id }) => {
+          removeToast(id);
+        }}
+        toastLifeTimeMs={6000}
       />
-    </EuiPageContent>
+    </>
   );
 };
 
