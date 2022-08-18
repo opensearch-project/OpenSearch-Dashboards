@@ -23,6 +23,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiConfirmModal,
+  EuiLoadingSpinner,
+  EuiOverlayMask,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import { Credential } from '../../../../data_source/public';
@@ -43,6 +45,7 @@ interface EditCredentialState {
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
   isVisible: boolean;
+  isLoading: boolean;
 }
 
 export interface EditCredentialProps extends RouteComponentProps {
@@ -69,11 +72,13 @@ export class EditCredentialComponent extends React.Component<
       toasts: [],
       docLinks: context.services.docLinks,
       isVisible: false,
+      isLoading: false,
     };
   }
 
   confirmDelete = async () => {
     const { savedObjects } = this.context.services;
+    this.setState({ isLoading: true });
     try {
       await savedObjects.client.delete('credential', this.props.credential.id);
       this.props.history.push('');
@@ -95,6 +100,7 @@ export class EditCredentialComponent extends React.Component<
         ]),
       }));
     }
+    this.setState({ isLoading: false });
   };
 
   delelteButtonRender() {
@@ -138,7 +144,7 @@ export class EditCredentialComponent extends React.Component<
       </>
     );
   }
-  // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
+
   renderContent() {
     const options = [
       {
@@ -164,6 +170,7 @@ export class EditCredentialComponent extends React.Component<
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
+
           <EuiDescribedFormGroup
             title={<h3>Credential Type</h3>}
             description={
@@ -228,8 +235,12 @@ export class EditCredentialComponent extends React.Component<
 
   render() {
     const content = this.renderContent();
-
-    return (
+    const { isLoading } = this.state;
+    return isLoading ? (
+      <EuiOverlayMask>
+        <EuiLoadingSpinner size="xl" />
+      </EuiOverlayMask>
+    ) : (
       <>
         {content}
         <EuiGlobalToastList
@@ -249,6 +260,7 @@ export class EditCredentialComponent extends React.Component<
 
   updateCredential = async () => {
     const { savedObjects } = this.context.services;
+    this.setState({ isLoading: true });
     try {
       await savedObjects.client.update('credential', this.props.credential.id, {
         title: this.state.credentialName,
@@ -279,6 +291,7 @@ export class EditCredentialComponent extends React.Component<
         ]),
       }));
     }
+    this.setState({ isLoading: false });
   };
 }
 
