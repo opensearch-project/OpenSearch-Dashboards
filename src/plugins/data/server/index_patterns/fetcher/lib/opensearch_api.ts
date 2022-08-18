@@ -62,11 +62,13 @@ export async function callIndexAliasApi(
 ): Promise<IndicesAliasResponse> {
   try {
     if ('transport' in callCluster) {
-      return ((await callCluster.indices.getAlias({
-        index: indices,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })) as unknown) as Promise<IndicesAliasResponse>; // todo: Pending #... verify test
+      return (
+        await callCluster.indices.getAlias({
+          index: indices,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        })
+      ).body as IndicesAliasResponse;
     }
 
     return (await callCluster('indices.getAlias', {
@@ -98,12 +100,14 @@ export async function callFieldCapsApi(
 ) {
   try {
     if ('transport' in callCluster) {
-      return ((await callCluster.fieldCaps({
-        index: indices,
-        fields: '*',
-        ignore_unavailable: true,
-        allow_no_indices: fieldCapsOptions.allowNoIndices,
-      })) as unknown) as FieldCapsResponse; // todo: Pending #... verify test
+      return (
+        await callCluster.fieldCaps({
+          index: indices,
+          fields: '*',
+          ignore_unavailable: true,
+          allow_no_indices: fieldCapsOptions.allowNoIndices,
+        })
+      ).body as FieldCapsResponse;
     }
 
     return (await callCluster('fieldCaps', {

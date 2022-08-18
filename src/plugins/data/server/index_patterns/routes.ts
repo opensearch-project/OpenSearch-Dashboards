@@ -58,7 +58,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context, request, response) => {
-      const callAsCurrentUser = decideClient(context, request);
+      const callAsCurrentUser = await decideClient(context, request);
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
@@ -118,7 +118,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const callAsCurrentUser = decideClient(context, request);
+      const callAsCurrentUser = await decideClient(context, request);
 
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
@@ -151,9 +151,10 @@ export function registerRoutes(http: HttpServiceSetup) {
   );
 }
 
-const decideClient = (context: RequestHandlerContext, request: any) => {
-  if (request.query.data_source) {
-    // todo: # Pending
+const decideClient = async (context: RequestHandlerContext, request: any) => {
+  const dataSourceId = request.query.data_source;
+  if (dataSourceId) {
+    return await context.dataSource.opensearch.getClient(dataSourceId);
   }
 
   return context.core.opensearch.legacy.client.callAsCurrentUser;

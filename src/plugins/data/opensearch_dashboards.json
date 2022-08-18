@@ -7,7 +7,7 @@
     "expressions",
     "uiActions"
   ],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "dataSource"],
   "extraPublicDirs": ["common", "common/utils/abort_utils"],
   "requiredBundles": [
     "usageCollection",
