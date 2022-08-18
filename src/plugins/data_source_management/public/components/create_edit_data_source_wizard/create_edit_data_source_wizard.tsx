@@ -165,7 +165,7 @@ export class CreateEditDataSourceWizard extends React.Component<
     /* Endpoint Validation */
     if (!isValidUrl(this.state.endpoint)) {
       validationByField.endpoint.push('Endpoint is not valid');
-      formErrorMessages.push('Endpoint should not be empty');
+      formErrorMessages.push('Endpoint is not valid');
     }
     /* Credential Validation */
     if (!this.state.noAuthentication && !this.state.selectedCredentials?.length) {
