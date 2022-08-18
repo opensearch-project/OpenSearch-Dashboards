@@ -4,3 +4,4 @@
  */
 
 export { Header } from './header';
+export { AddForm } from './add_form';

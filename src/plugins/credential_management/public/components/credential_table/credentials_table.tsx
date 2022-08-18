@@ -65,7 +65,7 @@ const search = {
 };
 
 const title = i18n.translate('credentialManagement.credentialsTable.title', {
-  defaultMessage: 'Credentials',
+  defaultMessage: 'Stored credentials',
 });
 
 interface Props extends RouteComponentProps {
@@ -122,6 +122,14 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
+    },
+    {
+      field: 'description',
+      name: 'Description',
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
     },
     {
       field: 'credentialMaterialsType',

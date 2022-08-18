@@ -10,6 +10,7 @@ import { SavedObjectAttributes } from 'src/core/types';
  */
 export enum CredentialMaterialsType {
   UsernamePasswordType = 'username_password',
+  NoAuth = 'no_auth',
 }
 
 export interface CredentialSavedObjectAttributes extends SavedObjectAttributes {

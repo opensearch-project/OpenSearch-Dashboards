@@ -6,6 +6,7 @@
 export interface CredentialsTableItem {
   id: string;
   title: string;
+  description: string;
   credentialMaterialsType: string;
   sort: string;
 }

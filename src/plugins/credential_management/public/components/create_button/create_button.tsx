@@ -23,7 +23,7 @@ export const CreateButton = ({ history }: Props) => {
     >
       <FormattedMessage
         id="credentialManagement.credentialsTable.createBtn"
-        defaultMessage="Save your credential"
+        defaultMessage="Create store credential"
       />
     </EuiButton>
   );
