@@ -29,6 +29,9 @@ export const configSchema = schema.object({
       defaultValue: new Array(32).fill(0),
     }),
   }),
+  clientPool: schema.object({
+    size: schema.number({ defaultValue: 5 }),
+  }),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
