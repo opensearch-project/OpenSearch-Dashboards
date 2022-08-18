@@ -58,12 +58,15 @@ export function registerResolveIndexRoute(router: IRouter): void {
         ? { expand_wildcards: req.query.expand_wildcards }
         : null;
 
-      if (req.query.data_source) {
-        // const result = await (await context.data_source.opensearch.getClient(req.query.data_source)).indices.resolveIndex({
-        //   name: encodeURIComponent(req.params.query),
-        //   expand_wildcards: req.query.expand_wildcards,
-        // });
-        // return res.ok({ body: result.body }); //todo: Pending #
+      const dataSourceId = req.query.data_source;
+      if (dataSourceId) {
+        const result = await (
+          await context.dataSource.opensearch.getClient(dataSourceId)
+        ).indices.resolveIndex({
+          name: encodeURIComponent(req.params.query),
+          expand_wildcards: req.query.expand_wildcards,
+        });
+        return res.ok({ body: result.body });
       }
 
       const result = await context.core.opensearch.legacy.client.callAsCurrentUser(
