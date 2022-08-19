@@ -6,18 +6,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 
+type EditorState = 'initial' | 'clean' | 'dirty';
+
 export interface MetadataState {
   editorState: {
     validity: {
       // Validity for each section in the editor
       [key: string]: boolean;
     };
+    state: EditorState;
   };
 }
 
 const initialState: MetadataState = {
   editorState: {
     validity: {},
+    state: 'initial',
   },
 };
 
@@ -38,6 +42,9 @@ export const slice = createSlice({
       const { key, valid } = action.payload;
       state.editorState.validity[key] = valid;
     },
+    setEditorState: (state, action: PayloadAction<{ state: EditorState }>) => {
+      state.editorState.state = action.payload.state;
+    },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
     },
@@ -45,4 +52,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setValidity, setState } = slice.actions;
+export const { setValidity, setEditorState, setState } = slice.actions;

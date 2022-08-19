@@ -9,6 +9,7 @@ import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
 import { WizardServices } from '../../..';
 import { getPreloadedState } from './preload';
+import { setEditorState } from './metadata_slice';
 
 const rootReducer = combineReducers({
   style: styleReducer,
@@ -25,7 +26,39 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
 
 export const getPreloadedStore = async (services: WizardServices) => {
   const preloadedState = await getPreloadedState(services);
-  return configurePreloadedStore(preloadedState);
+  const store = configurePreloadedStore(preloadedState);
+
+  let previousStore = {
+    vizState: store.getState().visualization,
+    styleState: store.getState().style,
+  };
+
+  let previousMetadata = store.getState().metadata;
+
+  // Listen to changes
+  const handleChange = () => {
+    const currentStore = {
+      vizState: store.getState().visualization,
+      styleState: store.getState().style,
+    };
+
+    const metaState = store.getState().metadata;
+
+    if (
+      metaState.editorState.state === 'clean' &&
+      JSON.stringify(currentStore) !== JSON.stringify(previousStore) &&
+      previousMetadata.editorState.state === 'clean'
+    ) {
+      store.dispatch(setEditorState({ state: 'dirty' }));
+    }
+
+    previousStore = currentStore;
+    previousMetadata = metaState;
+  };
+
+  const unsubscribe = store.subscribe(handleChange);
+
+  return store;
 };
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
