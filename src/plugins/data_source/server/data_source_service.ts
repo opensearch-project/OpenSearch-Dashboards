@@ -6,11 +6,13 @@
 import { Logger, OpenSearchClient, SavedObjectsClientContract } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
 import { OpenSearchClientPool, configureClient } from './client';
+import { CryptographyClient } from './cryptography';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (
     dataSourceId: string,
     // this saved objects client is used to fetch data source on behalf of users, caller should pass scoped saved objects client
-    savedObjects: SavedObjectsClientContract
+    savedObjects: SavedObjectsClientContract,
+    cryptographyClient: CryptographyClient
   ) => Promise<OpenSearchClient>;
 }
 export class DataSourceService {
@@ -25,11 +27,13 @@ export class DataSourceService {
 
     const getDataSourceClient = async (
       dataSourceId: string,
-      savedObjects: SavedObjectsClientContract
+      savedObjects: SavedObjectsClientContract,
+      cryptographyClient: CryptographyClient
     ): Promise<OpenSearchClient> => {
       return configureClient(
         dataSourceId,
         savedObjects,
+        cryptographyClient,
         openSearchClientPoolSetup,
         config,
         this.logger
