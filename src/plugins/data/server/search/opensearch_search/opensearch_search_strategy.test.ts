@@ -36,7 +36,7 @@ describe('OpenSearch search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
-  const mockApiCaller = jest.fn().mockResolvedValue({
+  const body = {
     body: {
       _shards: {
         total: 10,
@@ -45,7 +45,19 @@ describe('OpenSearch search strategy', () => {
         successful: 7,
       },
     },
-  });
+  };
+  const mockOpenSearchApiCaller = jest.fn().mockResolvedValue(body);
+  const mockDataSourceApiCaller = jest.fn().mockResolvedValue(body);
+  const dataSourceId = 'test-data-source-id';
+  const mockDataSourceContext = {
+    dataSource: {
+      opensearch: {
+        getClient: () => {
+          return { search: mockDataSourceApiCaller };
+        },
+      },
+    },
+  };
   const mockContext = {
     core: {
       uiSettings: {
@@ -53,13 +65,18 @@ describe('OpenSearch search strategy', () => {
           get: () => {},
         },
       },
-      opensearch: { client: { asCurrentUser: { search: mockApiCaller } } },
+      opensearch: { client: { asCurrentUser: { search: mockOpenSearchApiCaller } } },
     },
+  };
+  const mockDataSourceEnabledContext = {
+    ...mockContext,
+    ...mockDataSourceContext,
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
   beforeEach(() => {
-    mockApiCaller.mockClear();
+    mockOpenSearchApiCaller.mockClear();
+    mockDataSourceApiCaller.mockClear();
   });
 
   it('returns a strategy with `search`', async () => {
@@ -74,8 +91,8 @@ describe('OpenSearch search strategy', () => {
 
     await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toEqual({
+    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       ignore_unavailable: true,
       track_total_hits: true,
@@ -88,8 +105,8 @@ describe('OpenSearch search strategy', () => {
 
     await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toEqual({
+    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
     });
@@ -110,5 +127,36 @@ describe('OpenSearch search strategy', () => {
     expect(response.isPartial).toBe(false);
     expect(response).toHaveProperty('loaded');
     expect(response).toHaveProperty('rawResponse');
+  });
+
+  it('dataSource enabled, send request with dataSourceId get data source client', async () => {
+    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await opensearchSearch.search(
+      (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+      {
+        dataSourceId,
+      }
+    );
+    expect(mockDataSourceApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).not.toBeCalled();
+  });
+
+  it('dataSource disabled, send request with dataSourceId get default client', async () => {
+    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
+      dataSourceId,
+    });
+    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockDataSourceApiCaller).not.toBeCalled();
+  });
+
+  it('dataSource enabled, send request without dataSourceId get default client', async () => {
+    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {});
+    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockDataSourceApiCaller).not.toBeCalled();
   });
 });

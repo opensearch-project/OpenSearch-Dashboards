@@ -475,7 +475,7 @@ export class SearchSource {
     }
   }
 
-  private flatten() {
+  flatten() {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
