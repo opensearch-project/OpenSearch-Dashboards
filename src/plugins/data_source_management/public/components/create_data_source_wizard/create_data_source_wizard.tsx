@@ -47,7 +47,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
       // TODO: Add rendering spinner
 
       const references = [];
-      const attributes = { title, description, endpoint };
+      const attributes = { title, description, endpoint, noAuth: noAuthentication };
 
       if (credentialId) {
         references.push({ id: credentialId, type: 'credential', name: 'credential' });

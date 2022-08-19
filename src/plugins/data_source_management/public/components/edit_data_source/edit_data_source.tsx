@@ -79,7 +79,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
 
       const references = [];
-      const attributes = { title, description, endpoint };
+      const attributes = { title, description, endpoint, noAuth: noAuthentication };
 
       if (credentialId) {
         references.push({ id: credentialId, type: 'credential', name: 'credential' });

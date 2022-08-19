@@ -32,7 +32,7 @@ import {
   ToastMessageItem,
 } from '../../types';
 import { Header } from './components/header';
-import { getExistingCredentials } from '../utils';
+import { getExistingCredentials, isValidUrl } from '../utils';
 import { MODE_CREATE, MODE_EDIT } from '../../../common';
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 
@@ -59,12 +59,14 @@ interface CreateEditDataSourceValidation {
   title: string[];
   description: string[];
   endpoint: string[];
+  credential: string[];
 }
 
 const defaultValidation: CreateEditDataSourceValidation = {
   title: [],
   description: [],
   endpoint: [],
+  credential: [],
 };
 
 export class CreateEditDataSourceWizard extends React.Component<
@@ -147,20 +149,30 @@ export class CreateEditDataSourceWizard extends React.Component<
       title: [],
       description: [],
       endpoint: [],
+      credential: [],
     };
     const formErrorMessages: string[] = [];
+    /* Title validation */
     if (!this.state.dataSourceTitle) {
       validationByField.title.push('Title should not be empty');
       formErrorMessages.push('Title should not be empty');
     }
+    /* Description Validation */
     if (!this.state.dataSourceDescription) {
       validationByField.description.push('Description should not be empty');
       formErrorMessages.push('Description should not be empty');
     }
-    if (!this.state.endpoint) {
-      validationByField.endpoint.push('Endpoint should not be empty');
-      formErrorMessages.push('Endpoint should not be empty');
+    /* Endpoint Validation */
+    if (!isValidUrl(this.state.endpoint)) {
+      validationByField.endpoint.push('Endpoint is not valid');
+      formErrorMessages.push('Endpoint is not valid');
     }
+    /* Credential Validation */
+    if (!this.state.noAuthentication && !this.state.selectedCredentials?.length) {
+      validationByField.credential.push('Please associate a credential');
+      formErrorMessages.push('Please associate a credential');
+    }
+
     this.setState({
       formErrors: formErrorMessages,
       formErrorsByField: { ...validationByField },
@@ -218,7 +230,11 @@ export class CreateEditDataSourceWizard extends React.Component<
   };
 
   onSelectExistingCredentials = (options: CredentialsComboBoxItem[]) => {
-    this.setState({ selectedCredentials: options });
+    this.setState({ selectedCredentials: options }, () => {
+      if (this.state.formErrorsByField.credential.length) {
+        this.isFormValid();
+      }
+    });
   };
 
   onCreateStoredCredential = () => {
@@ -279,8 +295,13 @@ export class CreateEditDataSourceWizard extends React.Component<
       <>
         <EuiFlexGroup style={{ maxWidth: 600 }}>
           <EuiFlexItem>
-            <EuiFormRow hasEmptyLabelSpace>
+            <EuiFormRow
+              hasEmptyLabelSpace
+              isInvalid={!!this.state.formErrorsByField.credential.length}
+              error={this.state.formErrorsByField.credential}
+            >
               <CredentialsComboBox
+                isInvalid={!!this.state.formErrorsByField.credential.length}
                 availableCredentials={this.state.availableCredentials}
                 selectedCredentials={this.state.selectedCredentials}
                 setSelectedCredentials={this.onSelectExistingCredentials}

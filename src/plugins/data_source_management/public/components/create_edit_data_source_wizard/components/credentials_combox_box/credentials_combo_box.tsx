@@ -7,12 +7,14 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { CredentialsComboBoxItem } from '../../../../types';
 
 interface CredentialsComboBoxProps {
+  isInvalid: boolean;
   selectedCredentials: CredentialsComboBoxItem[];
   availableCredentials: CredentialsComboBoxItem[];
   setSelectedCredentials: (selectedOptions: CredentialsComboBoxItem[]) => void;
 }
 
 export const CredentialsComboBox: React.FunctionComponent<CredentialsComboBoxProps> = ({
+  isInvalid,
   availableCredentials,
   selectedCredentials,
   setSelectedCredentials,
@@ -44,6 +46,7 @@ export const CredentialsComboBox: React.FunctionComponent<CredentialsComboBoxPro
       selectedOptions={selectedCredentials}
       onChange={(options: EuiComboBoxOptionOption[]) => onOptionsChanged(options)}
       isClearable={true}
+      isInvalid={isInvalid}
     />
   );
 };
