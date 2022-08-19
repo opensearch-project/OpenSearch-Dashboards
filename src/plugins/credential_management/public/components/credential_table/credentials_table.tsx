@@ -39,7 +39,7 @@ import {
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { CredentialManagementContext } from '../../types';
 import { deleteCredentials, getCredentials } from '../utils';
-import { localizedContent } from '../text_content';
+import { LocalizedContent } from '../common';
 import { CredentialsTableItem } from '../types';
 import { CreateButton } from '../create_button';
 
@@ -55,17 +55,8 @@ const sorting = {
   },
 };
 
-const search = {
-  box: {
-    incremental: true,
-    schema: {
-      fields: { title: { type: 'string' } },
-    },
-  },
-};
-
 const title = i18n.translate('credentialManagement.credentialsTable.title', {
-  defaultMessage: 'Credentials',
+  defaultMessage: 'Stored credentials',
 });
 
 interface Props extends RouteComponentProps {
@@ -96,7 +87,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const columns = [
     {
       field: 'title',
-      name: 'Credential Name',
+      name: 'Title',
       render: (
         name: string,
         index: {
@@ -124,8 +115,16 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
       sortable: ({ sort }: { sort: string }) => sort,
     },
     {
+      field: 'description',
+      name: 'Description',
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
+    },
+    {
       field: 'credentialMaterialsType',
-      name: 'Credential Type',
+      name: 'Type',
       truncateText: true,
       mobileOptions: {
         show: false,
@@ -142,6 +141,13 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   };
 
   const renderDeleteButton = () => {
+    let deleteButtonMsg = 'Delete';
+
+    if (selectedCredentials.length === 1) {
+      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credential`;
+    } else if (selectedCredentials.length > 1) {
+      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credentials`;
+    }
     return (
       <EuiButton
         color="danger"
@@ -151,7 +157,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
         }}
         disabled={selectedCredentials.length === 0}
       >
-        Delete {selectedCredentials.length} Credential{selectedCredentials.length >= 2 ? 's' : ''}
+        {deleteButtonMsg}
       </EuiButton>
     );
   };
@@ -208,20 +214,20 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
   const tableRenderDeleteModal = () => {
     return confirmDeleteVisible ? (
       <EuiConfirmModal
-        title={localizedContent.deleteButtonOnConfirmText}
+        title={LocalizedContent.deleteButtonOnConfirmText}
         onCancel={() => {
           setConfirmDeleteVisible(false);
         }}
         onConfirm={() => {
           onClickDelete();
         }}
-        cancelButtonText={localizedContent.cancelButtonOnDeleteCancelText}
-        confirmButtonText={localizedContent.confirmButtonOnDeleteComfirmText}
+        cancelButtonText={LocalizedContent.cancelButtonOnDeleteCancelText}
+        confirmButtonText={LocalizedContent.confirmButtonOnDeleteComfirmText}
         defaultFocusedButton="confirm"
       >
-        <p>{localizedContent.deleteCredentialDescribeMsg}</p>
-        <p>{localizedContent.deleteCredentialConfirmMsg}</p>
-        <p>{localizedContent.deleteCredentialWarnMsg}</p>
+        <p>{LocalizedContent.deleteCredentialDescribeMsg}</p>
+        <p>{LocalizedContent.deleteCredentialConfirmMsg}</p>
+        <p>{LocalizedContent.deleteCredentialWarnMsg}</p>
       </EuiConfirmModal>
     ) : null;
   };

@@ -19,15 +19,13 @@ import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
 import { CryptographyClient } from '../cryptography';
 
-import { Credential } from '../../common';
+import { CredentialMaterialsType, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
  * which contains the factory used to create Saved Objects Client Wrapper instances
  */
 export class CredentialSavedObjectsClientWrapper {
-  private type: string = 'credential';
-
   constructor(private cryptographyClient: CryptographyClient) {}
 
   /**
@@ -43,7 +41,7 @@ export class CredentialSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      if (this.type !== type) {
+      if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
         return await wrapperOptions.client.create(type, attributes, options);
       }
 
@@ -60,7 +58,7 @@ export class CredentialSavedObjectsClientWrapper {
         objects.map(async (object) => {
           const { type, attributes } = object;
 
-          if (this.type !== type) {
+          if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
             return object;
           }
 
@@ -79,7 +77,7 @@ export class CredentialSavedObjectsClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (this.type !== type) {
+      if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
@@ -98,7 +96,7 @@ export class CredentialSavedObjectsClientWrapper {
         objects.map(async (object) => {
           const { type, attributes } = object;
 
-          if (this.type !== type) {
+          if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
             return object;
           }
 
@@ -197,7 +195,7 @@ export class CredentialSavedObjectsClientWrapper {
     const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
 
     switch (credentialMaterialsType) {
-      case Credential.CredentialMaterialsType.UsernamePasswordType:
+      case CredentialMaterialsType.UsernamePasswordType:
         this.validateUsernamePasswordTypedContent(credentialMaterialsContent);
         return {
           ...attributes,

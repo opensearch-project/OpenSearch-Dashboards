@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CredentialEditPageItem } from './types';
+import { EditCredentialItem } from './types';
 
 export function getListBreadcrumbs() {
   return [
@@ -29,7 +29,7 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(credential: CredentialEditPageItem) {
+export function getEditBreadcrumbs(credential: EditCredentialItem) {
   return [
     ...getListBreadcrumbs(),
     {
