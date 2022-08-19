@@ -11,15 +11,20 @@ import {
   SavedObjectsErrorHelpers,
 } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
-import { CredentialSavedObjectAttributes } from '../../common/credentials/types';
+import {
+  CredentialSavedObjectAttributes,
+  UsernamePasswordTypedContent,
+} from '../../common/credentials/types';
 import { DataSourceAttributes } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
+import { CryptographyClient } from '../cryptography';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
 
 export const configureClient = async (
   dataSourceId: string,
   savedObjects: SavedObjectsClientContract,
+  cryptographyClient: CryptographyClient,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
@@ -27,7 +32,7 @@ export const configureClient = async (
   const dataSource = await getDataSource(dataSourceId, savedObjects);
   const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
 
-  return getQueryClient(rootClient, dataSource, savedObjects);
+  return getQueryClient(rootClient, dataSource, savedObjects, cryptographyClient);
 };
 
 export const getDataSource = async (
@@ -48,13 +53,24 @@ export const getDataSource = async (
 
 export const getCredential = async (
   credentialId: string,
-  savedObjects: SavedObjectsClientContract
-): Promise<SavedObject<CredentialSavedObjectAttributes>> => {
+  savedObjects: SavedObjectsClientContract,
+  cryptographyClient: CryptographyClient
+): Promise<UsernamePasswordTypedContent> => {
   try {
-    const credential = await savedObjects.get<CredentialSavedObjectAttributes>(
+    const credentialSavedObject = await savedObjects.get<CredentialSavedObjectAttributes>(
       CREDENTIAL_SAVED_OBJECT_TYPE,
       credentialId
     );
+    const {
+      username,
+      password,
+    } = credentialSavedObject.attributes.credentialMaterials.credentialMaterialsContent;
+    const decodedPassword = await cryptographyClient.decodeAndDecrypt(password);
+    const credential = {
+      username,
+      password: decodedPassword,
+    };
+
     return credential;
   } catch (error: any) {
     // it will cause 500 error when failed to get saved objects, need to handle such error gracefully
@@ -73,13 +89,18 @@ export const getCredential = async (
 const getQueryClient = async (
   rootClient: Client,
   dataSource: SavedObject<DataSourceAttributes>,
-  savedObjects: SavedObjectsClientContract
+  savedObjects: SavedObjectsClientContract,
+  cryptographyClient: CryptographyClient
 ): Promise<Client> => {
   if (dataSource.attributes.noAuth) {
     return rootClient.child();
   } else {
-    const credential = await getCredential(dataSource.references[0].id, savedObjects);
-    return getBasicAuthClient(rootClient, credential.attributes);
+    const credential = await getCredential(
+      dataSource.references[0].id,
+      savedObjects,
+      cryptographyClient
+    );
+    return getBasicAuthClient(rootClient, credential);
   }
 };
 
@@ -112,9 +133,9 @@ const getRootClient = (
 
 const getBasicAuthClient = (
   rootClient: Client,
-  credentialAttr: CredentialSavedObjectAttributes
+  credential: UsernamePasswordTypedContent
 ): Client => {
-  const { username, password } = credentialAttr.credentialMaterials.credentialMaterialsContent;
+  const { username, password } = credential;
   return rootClient.child({
     auth: {
       username,

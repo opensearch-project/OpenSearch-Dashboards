@@ -4,6 +4,7 @@
  */
 
 import { first } from 'rxjs/operators';
+import { OpenSearchClientError } from '@opensearch-project/opensearch/lib/errors';
 import { dataSource, credential, CredentialSavedObjectsClientWrapper } from './saved_objects';
 import { DataSourcePluginConfigType } from '../config';
 import {
@@ -24,8 +25,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private readonly dataSourceService: DataSourceService;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
-    this.logger = this.initializerContext.logger.get('dataSource');
-    this.dataSourceService = new DataSourceService(this.logger);
+    this.logger = this.initializerContext.logger.get();
+    this.dataSourceService = new DataSourceService(this.logger.get('data-source-service'));
   }
 
   public async setup(core: CoreSetup) {
@@ -44,8 +45,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = config.encryption;
 
     // Create credential saved objects client wrapper
+    const cryptographyClient = new CryptographyClient(
+      wrappingKeyName,
+      wrappingKeyNamespace,
+      wrappingKey
+    );
     const credentialSavedObjectsClientWrapper = new CredentialSavedObjectsClientWrapper(
-      new CryptographyClient(wrappingKeyName, wrappingKeyNamespace, wrappingKey)
+      cryptographyClient
     );
 
     // Add credential saved objects client wrapper factory
@@ -60,7 +66,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',
-      this.createDataSourceRouteHandlerContext(dataSourceService, this.logger)
+      this.createDataSourceRouteHandlerContext(dataSourceService, cryptographyClient, this.logger)
     );
 
     return {};
@@ -77,6 +83,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
   private createDataSourceRouteHandlerContext = (
     dataSourceService: DataSourceServiceSetup,
+    cryptographyClient: CryptographyClient,
     logger: Logger
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
     return (context, req) => {
@@ -86,13 +93,14 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
             try {
               return dataSourceService.getDataSourceClient(
                 dataSourceId,
-                context.core.savedObjects.client
+                context.core.savedObjects.client,
+                cryptographyClient
               );
             } catch (error: any) {
               logger.error(
                 `Fail to get data source client for dataSourceId: [${dataSourceId}]. Detail: ${error.messages}`
               );
-              throw error;
+              throw new OpenSearchClientError(error.message);
             }
           },
         },
