@@ -211,6 +211,20 @@ export class CreateEditDataSourceWizard extends React.Component<
     });
   };
 
+  onChangeNoAuth = () => {
+    this.setState(
+      {
+        noAuthentication: !this.state.noAuthentication,
+      },
+      () => {
+        /* When credential is already selected and user checks the noAuth checkbox, reset previously selected credential*/
+        if (this.state.noAuthentication && this.state.selectedCredentials.length) {
+          this.setState({ selectedCredentials: [] });
+        }
+      }
+    );
+  };
+
   onClickCreateNewDataSource = () => {
     if (this.isFormValid()) {
       const formValues: DataSourceEditPageItem = {
@@ -231,6 +245,10 @@ export class CreateEditDataSourceWizard extends React.Component<
 
   onSelectExistingCredentials = (options: CredentialsComboBoxItem[]) => {
     this.setState({ selectedCredentials: options }, () => {
+      /* When noAuth checkbox is checked and user selects credentials, un-check the noAuth checkbox*/
+      if (options.length && this.state.noAuthentication) {
+        this.onChangeNoAuth();
+      }
       if (this.state.formErrorsByField.credential.length) {
         this.isFormValid();
       }
@@ -435,11 +453,7 @@ export class CreateEditDataSourceWizard extends React.Component<
             id="noAuthentication"
             label="Continue without authentication"
             checked={this.state.noAuthentication}
-            onChange={(e) => {
-              this.setState({
-                noAuthentication: !this.state.noAuthentication,
-              });
-            }}
+            onChange={this.onChangeNoAuth}
             compressed
           />
 
