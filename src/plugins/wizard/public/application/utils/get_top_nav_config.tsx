@@ -38,14 +38,18 @@ import {
 } from '../../../../saved_objects/public';
 import { WizardServices } from '../..';
 import { WizardVisSavedObject } from '../../types';
-import { StyleState, VisualizationState } from './state_management';
+import { StyleState, VisualizationState, AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
+import { setHasChange } from './state_management/metadata_slice';
+
 interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
   visualizationState: VisualizationState;
   styleState: StyleState;
-  hasUnappliedChanges: boolean;
+  canSave: boolean;
+  errMsg: string;
+  dispatch: AppDispatch;
 }
 
 export const getTopNavConfig = (
@@ -54,7 +58,9 @@ export const getTopNavConfig = (
     savedWizardVis,
     visualizationState,
     styleState,
-    hasUnappliedChanges,
+    canSave,
+    errMsg,
+    dispatch,
   }: TopNavConfigParams,
   { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
 ) => {
@@ -71,11 +77,11 @@ export const getTopNavConfig = (
         defaultMessage: 'save',
       }),
       testId: 'wizardSaveButton',
-      disableButton: hasUnappliedChanges,
+      disableButton: !canSave,
       tooltip() {
-        if (hasUnappliedChanges) {
+        if (!canSave) {
           return i18n.translate('wizard.topNavMenu.saveVisualizationDisabledButtonTooltip', {
-            defaultMessage: 'Apply aggregation configuration changes before saving', // TODO: Update text to match agg save flow
+            defaultMessage: errMsg,
           });
         }
       },
@@ -127,6 +133,7 @@ export const getTopNavConfig = (
                   pathname: `${EDIT_PATH}/${id}`,
                 });
               }
+              dispatch(setHasChange({ hasChange: false }));
             } else {
               // reset title if save not successful
               savedWizardVis.title = currentTitle;

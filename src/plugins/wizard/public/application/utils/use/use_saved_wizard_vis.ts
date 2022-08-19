@@ -17,6 +17,7 @@ import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
 import { getSavedWizardVis } from '../get_saved_wizard_vis';
 import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { setFinishLoading } from '../state_management/metadata_slice';
 
 export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) => {
   const { services } = useOpenSearchDashboards<WizardServices>();
@@ -51,6 +52,7 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
         }
 
         setSavedVisState(savedWizardVis);
+        dispatch(setFinishLoading({ finishLoading: true }));
       } catch (error) {
         const managementRedirectTarget = {
           [PLUGIN_ID]: {

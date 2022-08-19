@@ -25,6 +25,7 @@ import wizardIcon from './assets/wizard_icon.svg';
 import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, WIZARD_SAVED_OBJECT } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
+import { setHasChange } from './application/utils/state_management/metadata_slice';
 import {
   setAggService,
   setIndexPatterns,
@@ -91,6 +92,36 @@ export class WizardPlugin
 
         // Instantiate the store
         const store = await getPreloadedStore(services);
+
+        let previousStore = {
+          vizState: store.getState().visualization,
+          styleState: store.getState().style,
+        };
+
+        let previousMetadata = store.getState().metadata;
+
+        // Listen to changes
+        const handleChangee = () => {
+          const currentStore = {
+            vizState: store.getState().visualization,
+            styleState: store.getState().style,
+          };
+
+          const metaState = store.getState().metadata;
+
+          if (
+            metaState.editorState.hasChange === false &&
+            JSON.stringify(currentStore) !== JSON.stringify(previousStore) &&
+            previousMetadata.editorState.finishLoading === true
+          ) {
+            store.dispatch(setHasChange({ hasChange: true }));
+          }
+
+          previousStore = currentStore;
+          previousMetadata = metaState;
+        };
+
+        const unsubscribe = store.subscribe(handleChangee);
 
         // Render the application
         return renderApp(params, services, store);

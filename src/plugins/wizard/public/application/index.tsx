@@ -26,7 +26,7 @@ export const renderApp = (
           <services.i18n.Context>
             <Switch>
               <Route path={[`${EDIT_PATH}/:id`, '/']} exact={false}>
-                <WizardApp />
+                <WizardApp/>
               </Route>
             </Switch>
           </services.i18n.Context>

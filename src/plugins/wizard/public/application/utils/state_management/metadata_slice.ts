@@ -12,12 +12,16 @@ export interface MetadataState {
       // Validity for each section in the editor
       [key: string]: boolean;
     };
+    hasChange: boolean;
+    finishLoading: boolean;
   };
 }
 
 const initialState: MetadataState = {
   editorState: {
     validity: {},
+    hasChange: false,
+    finishLoading: false,
   },
 };
 
@@ -38,6 +42,12 @@ export const slice = createSlice({
       const { key, valid } = action.payload;
       state.editorState.validity[key] = valid;
     },
+    setHasChange: (state, action: PayloadAction<{ hasChange: boolean }>) => {
+      state.editorState.hasChange = action.payload.hasChange;
+    },
+    setFinishLoading: (state, action: PayloadAction<{ finishLoading: boolean }>) => {
+      state.editorState.finishLoading = action.payload.finishLoading;
+    },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
     },
@@ -45,4 +55,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setValidity, setState } = slice.actions;
+export const { setValidity, setHasChange, setFinishLoading, setState } = slice.actions;
