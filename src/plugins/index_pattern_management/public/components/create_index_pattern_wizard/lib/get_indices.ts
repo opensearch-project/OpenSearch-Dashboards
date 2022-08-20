@@ -34,7 +34,11 @@ import { i18n } from '@osd/i18n';
 import { map, scan } from 'rxjs/operators';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-import { DataPublicPluginStart, IOpenSearchSearchResponse } from '../../../../../data/public';
+import {
+  DataPublicPluginStart,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+} from '../../../../../data/public';
 import { MAX_SEARCH_SIZE } from '../constants';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
@@ -80,35 +84,19 @@ export const searchResponseToArray = (
 };
 
 export const getIndicesViaSearch = async ({
-  // todo: #2151
   getIndexTags,
   pattern,
   searchClient,
   showAllIndices,
+  dataSourceId,
 }: {
   getIndexTags: IndexPatternCreationConfig['getIndexTags'];
   pattern: string;
   searchClient: DataPublicPluginStart['search']['search'];
   showAllIndices: boolean;
+  dataSourceId?: string;
 }): Promise<MatchedItem[]> =>
-  searchClient({
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: showAllIndices ? 'all' : 'open',
-      index: pattern,
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: MAX_SEARCH_SIZE,
-            },
-          },
-        },
-      },
-    },
-  })
+  searchClient(buildSearchRequest(showAllIndices, pattern, dataSourceId))
     .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
     .pipe(scan((accumulator = [], value) => accumulator.join(value)))
     .toPromise()
@@ -221,6 +209,7 @@ export async function getIndices({
       pattern,
       searchClient,
       showAllIndices,
+      dataSourceId,
     }).catch(() => []);
     requests.push(promiseSearch);
   }
@@ -284,4 +273,31 @@ const buildQuery = (showAllIndices: boolean, dataSourceId?: string) => {
   }
 
   return query;
+};
+
+const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSourceId?: string) => {
+  const request: IOpenSearchSearchRequest = {
+    params: {
+      ignoreUnavailable: true,
+      expand_wildcards: showAllIndices ? 'all' : 'open',
+      index: pattern,
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: MAX_SEARCH_SIZE,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  if (dataSourceId) {
+    request.dataSourceId = dataSourceId;
+  }
+
+  return request;
 };
