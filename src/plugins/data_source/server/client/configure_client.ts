@@ -141,5 +141,9 @@ const getBasicAuthClient = (
       username,
       password,
     },
+    // Child client doesn't allow auth option, adding null auth header to bypass,
+    // so logic in child() can rebuild the auth header based on the auth input.
+    // See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2182 for details
+    headers: { authorization: null },
   });
 };
