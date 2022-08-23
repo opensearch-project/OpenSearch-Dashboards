@@ -176,7 +176,7 @@ jobs:
       # github virtual env is the latest chrome
       - name: Setup chromedriver
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        run: yarn add --dev chromedriver@102.0.0
+        run: yarn add --dev chromedriver@104.0.0
 
       - name: Run bootstrap
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
