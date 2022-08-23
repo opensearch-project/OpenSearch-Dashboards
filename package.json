@@ -217,7 +217,8 @@
     "uuid": "3.3.2",
     "vision": "^5.3.3",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "url-parse": "1.5.8"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
