@@ -79,10 +79,12 @@ function create(id: string) {
     type,
     version,
     attributes: { timeFieldName, fields, title },
+    reference,
   } = stubbedSavedObjectIndexPattern(id);
 
+  const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -249,6 +251,17 @@ describe('IndexPattern', () => {
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
       expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
+      expect(restoredPattern.dataSourceRef).toEqual(indexPattern.dataSourceRef);
+    });
+  });
+
+  describe('getSaveObjectReference', () => {
+    test('should get index pattern saved object reference', function () {
+      expect(indexPattern.getSaveObjectReference()[0]?.id).toEqual(indexPattern.dataSourceRef?.id);
+      expect(indexPattern.getSaveObjectReference()[0]?.type).toEqual(
+        indexPattern.dataSourceRef?.type
+      );
+      expect(indexPattern.getSaveObjectReference()[0]?.name).toEqual('dataSource');
     });
   });
 });

@@ -44,5 +44,12 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       title: 'title',
     },
     version: '2',
+    reference: [
+      {
+        id: 'id',
+        name: 'name',
+        type: 'data-source',
+      },
+    ],
   };
 }

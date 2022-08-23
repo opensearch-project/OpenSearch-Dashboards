@@ -21,3 +21,29 @@ Object {
   "version": "version",
 }
 `;
+
+exports[`IndexPatterns savedObjectToSpecWithDataSource 1`] = `
+Object {
+  "dataSourceRef": Object {
+    "id": "id",
+    "name": "dataSource",
+    "type": "data-source",
+  },
+  "fields": Object {},
+  "id": "id",
+  "intervalName": undefined,
+  "sourceFilters": Array [
+    Object {
+      "value": "item1",
+    },
+    Object {
+      "value": "item2",
+    },
+  ],
+  "timeFieldName": "@timestamp",
+  "title": "opensearch-dashboards-*",
+  "type": "",
+  "typeMeta": Object {},
+  "version": "version",
+}
+`;
