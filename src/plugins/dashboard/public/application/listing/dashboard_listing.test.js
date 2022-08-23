@@ -71,6 +71,7 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
       createItem={() => {}}
       editItem={() => {}}
       getViewUrl={() => {}}
+      initialPageSize={10}
       listingLimit={1000}
       hideWriteControls={false}
       core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
