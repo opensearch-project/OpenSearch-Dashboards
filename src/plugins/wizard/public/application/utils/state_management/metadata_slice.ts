@@ -6,6 +6,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 
+/*
+ * Initial state: default state when opening wizard plugin
+ * Clean state: when viz finished loading and ready to be edited
+ * Dirty state: when there are changes applied to the viz after it finished loading
+ */
 type EditorState = 'initial' | 'clean' | 'dirty';
 
 export interface MetadataState {

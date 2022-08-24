@@ -44,6 +44,10 @@ export const getPreloadedStore = async (services: WizardServices) => {
 
     const metaState = store.getState().metadata;
 
+    // Need to make sure the editorStates are in the clean states(not the initial states) to indicate the viz finished loading
+    // Because when loading a saved viz from saved object, the previousStore will differ from
+    // the currentStore even tho there is no changes applied ( aggParams will
+    // first be empty, and it then will change to not empty once the viz finished loading)
     if (
       metaState.editorState.state === 'clean' &&
       JSON.stringify(currentStore) !== JSON.stringify(previousStore) &&
@@ -56,6 +60,7 @@ export const getPreloadedStore = async (services: WizardServices) => {
     previousMetadata = metaState;
   };
 
+  // the store subscriber will automatically detect changes and call handleChange funtion
   const unsubscribe = store.subscribe(handleChange);
 
   return store;
