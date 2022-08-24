@@ -224,13 +224,13 @@ export class IndexPattern implements IIndexPattern {
     return {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
+      dataSourceRef: this.dataSourceRef,
     };
   }
 
