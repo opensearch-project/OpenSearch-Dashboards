@@ -5,7 +5,15 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiSpacer, EuiText, EuiFlexItem, EuiFormRow, EuiButton } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiButton,
+  EuiFlexGroup,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -80,7 +88,10 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           uiSettings={uiSettings}
           savedObjects={savedObjects}
         />
-        <EuiFormRow hasEmptyLabelSpace>
+      </EuiFlexItem>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
           <EuiButton
             fill
             iconSide="right"
@@ -93,8 +104,8 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
               defaultMessage="Next step"
             />
           </EuiButton>
-        </EuiFormRow>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

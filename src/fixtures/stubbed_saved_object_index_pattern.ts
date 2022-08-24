@@ -33,8 +33,8 @@ import stubbedLogstashFields from './logstash_fields';
 
 const mockLogstashFields = stubbedLogstashFields();
 
-export function stubbedSavedObjectIndexPattern(id: string | null = null) {
-  return {
+export function stubbedSavedObjectIndexPattern(id: string | null = null, withDataSource?: boolean) {
+  const indexPattern: any = {
     id,
     type: 'index-pattern',
     attributes: {
@@ -44,12 +44,17 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
       title: 'title',
     },
     version: '2',
-    reference: [
+  };
+
+  if (withDataSource) {
+    indexPattern.reference = [
       {
         id: 'id',
         name: 'name',
         type: 'data-source',
       },
-    ],
-  };
+    ];
+  }
+
+  return indexPattern;
 }
