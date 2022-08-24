@@ -3,9 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { EuiTitle, EuiSpacer, EuiText, EuiFlexItem, EuiFormRow, EuiButton } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiButton,
+  EuiFlexGroup,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -31,9 +41,15 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   const { dataSourceRef, onSearchSelected, goToNextStep, isNextStepDisabled, stepInfo } = props;
   const { currentStepNumber, totalStepNumber } = stepInfo;
 
+  const [skipped, setSkipped] = useState(false);
+
   const { savedObjects, uiSettings } = useOpenSearchDashboards<
     IndexPatternManagmentContext
   >().services;
+
+  const onSkipped = (e: EuiSwitchEvent) => {
+    setSkipped(e.target.checked);
+  };
 
   return (
     <div>
@@ -46,6 +62,18 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           />
         </h2>
       </EuiTitle>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiSwitch
+          label={
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.stepDataSource.skipLabel"
+              defaultMessage="skip"
+            />
+          }
+          checked={skipped}
+          onChange={onSkipped}
+        />
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiText>
         <FormattedMessage
@@ -53,48 +81,53 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           defaultMessage="Please pick the data source -- within which to configure index patterns."
         />
       </EuiText>
-      <EuiFlexItem grow={false}>
-        <SavedObjectFinderUi
-          key="searchSavedObjectFinder"
-          onChoose={onSearchSelected}
-          showFilter={false}
-          noItemsMessage={i18n.translate(
-            'indexPatternManagement.createIndexPattern.searchSelection.notFoundLabel',
-            {
-              defaultMessage: 'No data sources have been configured yet.',
-            }
-          )}
-          savedObjectMetaData={[
-            {
-              type: 'data-source',
-              getIconForSavedObject: () => 'apps', // todo: #2034
-              name: i18n.translate(
-                'indexPatternManagement.createIndexPattern.searchSelection.savedObjectType.dataSource',
-                {
-                  defaultMessage: 'Data Source',
-                }
-              ),
-            },
-          ]}
-          fixedPageSize={DATA_SOURCE_PAGE_SIZE}
-          uiSettings={uiSettings}
-          savedObjects={savedObjects}
-        />
-        <EuiFormRow hasEmptyLabelSpace>
+      {!skipped && (
+        <EuiFlexItem grow={false}>
+          <SavedObjectFinderUi
+            key="searchSavedObjectFinder"
+            onChoose={onSearchSelected}
+            showFilter={false}
+            noItemsMessage={i18n.translate(
+              'indexPatternManagement.createIndexPattern.searchSelection.notFoundLabel',
+              {
+                defaultMessage: 'No data sources have been configured yet.',
+              }
+            )}
+            savedObjectMetaData={[
+              {
+                type: 'data-source',
+                getIconForSavedObject: () => 'apps', // todo: #2034
+                name: i18n.translate(
+                  'indexPatternManagement.createIndexPattern.searchSelection.savedObjectType.dataSource',
+                  {
+                    defaultMessage: 'Data Source',
+                  }
+                ),
+              },
+            ]}
+            fixedPageSize={DATA_SOURCE_PAGE_SIZE}
+            uiSettings={uiSettings}
+            savedObjects={savedObjects}
+          />
+        </EuiFlexItem>
+      )}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
           <EuiButton
             fill
             iconSide="right"
             iconType="arrowRight"
             onClick={() => goToNextStep(dataSourceRef)}
-            isDisabled={isNextStepDisabled}
+            isDisabled={isNextStepDisabled && !skipped}
           >
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.step.nextStepButton"
               defaultMessage="Next step"
             />
           </EuiButton>
-        </EuiFormRow>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
