@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client } from '@opensearch-project/opensearch';
-import { Logger, SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
+import { Client } from 'elasticsearch';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { callAPI } from '../../../../../src/core/server/opensearch/legacy/cluster_client';
+import { Headers, LegacyAPICaller, Logger, SavedObject } from '../../../../../src/core/server';
 import {
   AuthType,
   DataSourceAttributes,
@@ -13,53 +14,29 @@ import {
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyClient } from '../cryptography';
-import { DataSourceConfigError } from '../lib/error';
-import { DataSourceClientParams } from '../types';
+import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
+import { OpenSearchClientPoolSetup, getCredential, getDataSource } from '../client';
 import { parseClientOptions } from './client_config';
-import { OpenSearchClientPoolSetup } from './client_pool';
+import { DataSourceConfigError } from '../lib/error';
 
-export const configureClient = async (
+export const configureLegacyClient = async (
   { dataSourceId, savedObjects, cryptographyClient }: DataSourceClientParams,
+  callApiParams: LegacyClientCallAPIParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
-): Promise<Client> => {
+) => {
   try {
     const dataSource = await getDataSource(dataSourceId, savedObjects);
     const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
 
-    return await getQueryClient(rootClient, dataSource, cryptographyClient);
+    return await getQueryClient(rootClient, dataSource, cryptographyClient, callApiParams);
   } catch (error: any) {
     logger.error(`Fail to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
     // Re-throw as DataSourceConfigError
     throw new DataSourceConfigError('Fail to get data source client: ', error);
   }
-};
-
-export const getDataSource = async (
-  dataSourceId: string,
-  savedObjects: SavedObjectsClientContract
-): Promise<SavedObject<DataSourceAttributes>> => {
-  const dataSource = await savedObjects.get<DataSourceAttributes>(
-    DATA_SOURCE_SAVED_OBJECT_TYPE,
-    dataSourceId
-  );
-  return dataSource;
-};
-
-export const getCredential = async (
-  dataSource: SavedObject<DataSourceAttributes>,
-  cryptographyClient: CryptographyClient
-): Promise<UsernamePasswordTypedContent> => {
-  const { username, password } = dataSource.attributes.auth.credentials!;
-  const decodedPassword = await cryptographyClient.decodeAndDecrypt(password);
-  const credential = {
-    username,
-    password: decodedPassword,
-  };
-
-  return credential;
 };
 
 /**
@@ -73,14 +50,14 @@ export const getCredential = async (
 const getQueryClient = async (
   rootClient: Client,
   dataSource: SavedObject<DataSourceAttributes>,
-  cryptographyClient: CryptographyClient
-): Promise<Client> => {
+  cryptographyClient: CryptographyClient,
+  callApiParams: LegacyClientCallAPIParams
+) => {
   if (AuthType.NoAuth === dataSource.attributes.auth.type) {
-    return rootClient.child();
+    return legacyClientWrapper(rootClient, callApiParams);
   } else {
     const credential = await getCredential(dataSource, cryptographyClient);
-
-    return getBasicAuthClient(rootClient, credential);
+    return legacyClientWrapper(rootClient, callApiParams, credential);
   }
 };
 
@@ -102,28 +79,36 @@ const getRootClient = (
   if (cachedClient) {
     return cachedClient as Client;
   } else {
-    const clientOptions = parseClientOptions(config, endpoint);
-
-    const client = new Client(clientOptions);
+    const configOptions = parseClientOptions(config, endpoint);
+    const client = new Client(configOptions);
     addClientToPool(endpoint, client);
 
     return client;
   }
 };
 
-const getBasicAuthClient = (
+/**
+ * Wrapper to expose API that allow calling the OpenSearch API endpoint with the specified
+ * parameters, using legacy client.
+ *
+ * @param client Raw OpenSearch JS client instance to use.
+ * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+ * @param clientParams - A dictionary of parameters that will be passed directly to the OpenSearch JS client.
+ * @param options - Options that affect the way we call the API and process the result.
+ * @param credential - Decrypted credential content
+ */
+const legacyClientWrapper = async (
   rootClient: Client,
-  credential: UsernamePasswordTypedContent
-): Client => {
-  const { username, password } = credential;
-  return rootClient.child({
-    auth: {
-      username,
-      password,
-    },
-    // Child client doesn't allow auth option, adding null auth header to bypass,
-    // so logic in child() can rebuild the auth header based on the auth input.
-    // See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2182 for details
-    headers: { authorization: null },
-  });
+  { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
+  credential?: UsernamePasswordTypedContent
+) => {
+  if (credential) {
+    const headers: Headers = {
+      authorization:
+        'Basic ' + Buffer.from(`${credential.username}:${credential.password}`).toString('base64'),
+    };
+    clientParams.headers = Object.assign({}, clientParams.headers, headers);
+  }
+
+  return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
 };
