@@ -9,14 +9,21 @@ import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@e
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { DocLinksStart } from 'opensearch-dashboards/public';
+import { DocLinksStart } from 'src/core/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { CredentialManagementContext } from '../../../../types';
-export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
+
+export const Header = ({
+  prompt,
+  docLinks,
+}: {
+  prompt?: React.ReactNode;
+  docLinks: DocLinksStart;
+}) => {
   const changeTitle = useOpenSearchDashboards<CredentialManagementContext>().services.chrome
     .docTitle.change;
   const createCredentialHeader = i18n.translate('credentialManagement.createIndexPatternHeader', {
-    defaultMessage: 'Save Your Credential',
+    defaultMessage: 'Create Stored Credential',
   });
 
   changeTitle(createCredentialHeader);

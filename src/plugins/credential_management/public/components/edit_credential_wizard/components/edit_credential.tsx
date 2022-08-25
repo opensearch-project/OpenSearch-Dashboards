@@ -27,14 +27,17 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
-import { Credential } from '../../../../data_source/public';
+import {
+  CredentialMaterialsType,
+  CREDENTIAL_SAVED_OBJECT_TYPE,
+} from '../../../../../data_source/public';
 
-import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { CredentialManagmentContextValue } from '../../types';
+import { getCreateBreadcrumbs } from '../../breadcrumbs';
+import { CredentialManagmentContextValue } from '../../../types';
 // TODO: Add Header https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2051
-import { context as contextType } from '../../../../opensearch_dashboards_react/public';
-import { CredentialEditPageItem } from '../types';
-import { localizedContent } from '../text_content';
+import { context as contextType } from '../../../../../opensearch_dashboards_react/public';
+import { EditCredentialItem } from '../../types';
+import { LocalizedContent } from '../../common/text_content';
 
 interface EditCredentialState {
   credentialName: string;
@@ -49,7 +52,7 @@ interface EditCredentialState {
 }
 
 export interface EditCredentialProps extends RouteComponentProps {
-  credential: CredentialEditPageItem;
+  credential: EditCredentialItem;
 }
 
 export class EditCredentialComponent extends React.Component<
@@ -65,7 +68,7 @@ export class EditCredentialComponent extends React.Component<
 
     this.state = {
       credentialName: props.credential.title,
-      credentialMaterialsType: props.credential.credentialMaterialsType,
+      credentialMaterialsType: CredentialMaterialsType.UsernamePasswordType,
       username: undefined,
       password: undefined,
       dual: true,
@@ -80,7 +83,7 @@ export class EditCredentialComponent extends React.Component<
     const { savedObjects } = this.context.services;
     this.setState({ isLoading: true });
     try {
-      await savedObjects.client.delete('credential', this.props.credential.id);
+      await savedObjects.client.delete(CREDENTIAL_SAVED_OBJECT_TYPE, this.props.credential.id);
       this.props.history.push('');
     } catch (e) {
       const deleteCredentialFailMsg = (
@@ -114,12 +117,12 @@ export class EditCredentialComponent extends React.Component<
           }}
         >
           <EuiFlexItem>
-            <EuiToolTip content={localizedContent.deleteCredentialButtonDescription}>
+            <EuiToolTip content={LocalizedContent.deleteCredentialButtonDescription}>
               <EuiButtonIcon
                 color="danger"
                 onClick={this.removeCredential}
                 iconType="trash"
-                aria-label={localizedContent.deleteCredentialButtonDescription}
+                aria-label={LocalizedContent.deleteCredentialButtonDescription}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -127,18 +130,18 @@ export class EditCredentialComponent extends React.Component<
 
         {this.state.isVisible ? (
           <EuiConfirmModal
-            title={localizedContent.deleteButtonOnConfirmText}
+            title={LocalizedContent.deleteButtonOnConfirmText}
             onCancel={() => {
               this.setState({ isVisible: false });
             }}
             onConfirm={this.confirmDelete}
-            cancelButtonText={localizedContent.cancelButtonOnDeleteCancelText}
-            confirmButtonText={localizedContent.confirmButtonOnDeleteComfirmText}
+            cancelButtonText={LocalizedContent.cancelButtonOnDeleteCancelText}
+            confirmButtonText={LocalizedContent.confirmButtonOnDeleteComfirmText}
             defaultFocusedButton="confirm"
           >
-            <p>{localizedContent.deleteCredentialDescribeMsg}</p>
-            <p>{localizedContent.deleteCredentialConfirmMsg}</p>
-            <p>{localizedContent.deleteCredentialWarnMsg}</p>
+            <p>{LocalizedContent.deleteCredentialDescribeMsg}</p>
+            <p>{LocalizedContent.deleteCredentialConfirmMsg}</p>
+            <p>{LocalizedContent.deleteCredentialWarnMsg}</p>
           </EuiConfirmModal>
         ) : null}
       </>
@@ -148,7 +151,7 @@ export class EditCredentialComponent extends React.Component<
   renderContent() {
     const options = [
       {
-        value: Credential.CredentialMaterialsType.UsernamePasswordType,
+        value: CredentialMaterialsType.UsernamePasswordType,
         text: 'Username and Password Credential',
       },
     ];
