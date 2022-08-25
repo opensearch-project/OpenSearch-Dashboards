@@ -10,7 +10,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiFlexItem,
-  EuiFormRow,
   EuiButton,
   EuiFlexGroup,
   EuiSwitch,
