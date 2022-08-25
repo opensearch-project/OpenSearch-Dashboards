@@ -47,10 +47,7 @@ interface TopNavConfigParams {
   savedWizardVis: WizardVisSavedObject;
   visualizationState: VisualizationState;
   styleState: StyleState;
-  saveState: {
-    canSave: boolean;
-    errorMsg: string;
-  };
+  saveDisabledReason?: string;
   dispatch: AppDispatch;
 }
 
@@ -60,7 +57,7 @@ export const getTopNavConfig = (
     savedWizardVis,
     visualizationState,
     styleState,
-    saveState,
+    saveDisabledReason,
     dispatch,
   }: TopNavConfigParams,
   { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
@@ -78,11 +75,11 @@ export const getTopNavConfig = (
         defaultMessage: 'save',
       }),
       testId: 'wizardSaveButton',
-      disableButton: !saveState.canSave,
+      disableButton: !!saveDisabledReason,
       tooltip() {
-        if (!saveState.canSave) {
+        if (saveDisabledReason) {
           return i18n.translate('wizard.topNavMenu.saveVisualizationDisabledButtonTooltip', {
-            defaultMessage: saveState.errorMsg,
+            defaultMessage: saveDisabledReason,
           });
         }
       },

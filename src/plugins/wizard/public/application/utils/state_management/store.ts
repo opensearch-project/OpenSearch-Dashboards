@@ -28,40 +28,44 @@ export const getPreloadedStore = async (services: WizardServices) => {
   const preloadedState = await getPreloadedState(services);
   const store = configurePreloadedStore(preloadedState);
 
+  const { metadata: metadataState, style: styleState, visualization: vizState } = store.getState();
   let previousStore = {
-    vizState: store.getState().visualization,
-    styleState: store.getState().style,
+    viz: vizState,
+    style: styleState,
   };
-
-  let previousMetadata = store.getState().metadata;
+  let previousMetadata = metadataState;
 
   // Listen to changes
   const handleChange = () => {
+    const {
+      metadata: currentMetadataState,
+      style: currentStyleState,
+      visualization: currentVizState,
+    } = store.getState();
     const currentStore = {
-      vizState: store.getState().visualization,
-      styleState: store.getState().style,
+      viz: currentVizState,
+      style: currentStyleState,
     };
-
-    const metaState = store.getState().metadata;
+    const currentMetadata = currentMetadataState;
 
     // Need to make sure the editorStates are in the clean states(not the initial states) to indicate the viz finished loading
     // Because when loading a saved viz from saved object, the previousStore will differ from
     // the currentStore even tho there is no changes applied ( aggParams will
     // first be empty, and it then will change to not empty once the viz finished loading)
     if (
-      metaState.editorState.state === 'clean' &&
-      JSON.stringify(currentStore) !== JSON.stringify(previousStore) &&
-      previousMetadata.editorState.state === 'clean'
+      previousMetadata.editor.state === 'clean' &&
+      currentMetadata.editor.state === 'clean' &&
+      JSON.stringify(currentStore) !== JSON.stringify(previousStore)
     ) {
       store.dispatch(setEditorState({ state: 'dirty' }));
     }
 
     previousStore = currentStore;
-    previousMetadata = metaState;
+    previousMetadata = currentMetadata;
   };
 
-  // the store subscriber will automatically detect changes and call handleChange funtion
-  const unsubscribe = store.subscribe(handleChange);
+  // the store subscriber will automatically detect changes and call handleChange function
+  store.subscribe(handleChange);
 
   return store;
 };
