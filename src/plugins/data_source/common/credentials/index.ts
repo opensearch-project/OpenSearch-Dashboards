@@ -3,4 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * as Credential from './types';
+export {
+  CredentialMaterialsType,
+  CredentialSavedObjectAttributes,
+  CredentialMaterials,
+  UsernamePasswordTypedContent,
+} from './types';
