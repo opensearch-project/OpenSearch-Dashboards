@@ -19,6 +19,8 @@ import { useTypedDispatch, setStyleState, setVisualizationState } from '../state
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
 
+// This function will get called when instantiating a saved vis or creating a new one
+// using url parameters, embedding and destroying it in DOM
 export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) => {
   const { services } = useOpenSearchDashboards<WizardServices>();
   const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);

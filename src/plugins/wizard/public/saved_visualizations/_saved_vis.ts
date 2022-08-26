@@ -8,6 +8,7 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 import { EDIT_PATH, PLUGIN_ID, WIZARD_SAVED_OBJECT } from '../../common';
+import { injectReferences } from './saved_visualization_references';
 
 export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -32,6 +33,7 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
       super({
         type: SavedWizardVis.type,
         mapping: SavedWizardVis.mapping,
+        injectReferences,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id,

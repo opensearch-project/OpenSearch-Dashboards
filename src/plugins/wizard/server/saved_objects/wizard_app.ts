@@ -47,6 +47,9 @@ export const wizardSavedObjectType: SavedObjectsType = {
         index: false,
       },
       version: { type: 'integer' },
+      kibanaSavedObjectMeta: {
+        properties: { searchSourceJSON: { type: 'text', index: false } },
+      },
     },
   },
 };

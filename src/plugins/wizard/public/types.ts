@@ -10,7 +10,7 @@ import { DashboardStart } from '../../dashboard/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginStart, SearchSourceFields } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart } from '../../../core/public';
@@ -52,6 +52,7 @@ export interface ISavedVis {
   visualizationState?: string;
   styleState?: string;
   version?: number;
+  searchSourceFields?: SearchSourceFields;
 }
 
 export interface WizardVisSavedObject extends SavedObject, ISavedVis {}
