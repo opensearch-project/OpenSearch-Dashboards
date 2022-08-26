@@ -16,7 +16,15 @@ export const dataSource: SavedObjectsType = {
     getTitle(obj) {
       return obj.attributes.title;
     },
-    // todo: update getEditUrl & getInAppUrl after #2021
+    getEditUrl(obj) {
+      return `/management/opensearch-dashboards/dataSources/${encodeURIComponent(obj.id)}`;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/app/management/opensearch-dashboards/dataSources/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'management.opensearchDashboards.dataSources',
+      };
+    },
   },
   mappings: {
     dynamic: false,
