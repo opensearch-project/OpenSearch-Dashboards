@@ -28,91 +28,78 @@
  * under the License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
-// @ts-ignore
-import tableVisTemplate from './table_vis.html';
+import { toExpressionAst } from './to_ast';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 import { TableOptions } from './components/table_vis_options_lazy';
-import { getTableVisualizationControllerClass } from './vis_controller';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
-export function getTableVisTypeDefinition(
-  core: CoreSetup,
-  context: PluginInitializerContext
-): BaseVisTypeOptions {
-  return {
-    name: 'table',
-    title: i18n.translate('visTypeTable.tableVisTitle', {
-      defaultMessage: 'Data Table',
-    }),
-    icon: 'visTable',
-    description: i18n.translate('visTypeTable.tableVisDescription', {
-      defaultMessage: 'Display values in a table',
-    }),
-    visualization: getTableVisualizationControllerClass(core, context),
-    getSupportedTriggers: () => {
-      return [VIS_EVENT_TO_TRIGGER.filter];
+export const getTableVisTypeDefinition = (): BaseVisTypeOptions => ({
+  name: 'table',
+  title: i18n.translate('visTypeTable.tableVisTitle', {
+    defaultMessage: 'Data Table',
+  }),
+  icon: 'visTable',
+  description: i18n.translate('visTypeTable.tableVisDescription', {
+    defaultMessage: 'Display values in a table',
+  }),
+  toExpressionAst,
+  visConfig: {
+    defaults: {
+      perPage: 10,
+      showPartialRows: false,
+      showMetricsAtAllLevels: false,
+      showTotal: false,
+      totalFunc: 'sum',
+      percentageCol: '',
     },
-    visConfig: {
-      defaults: {
-        perPage: 10,
-        showPartialRows: false,
-        showMetricsAtAllLevels: false,
-        sort: {
-          columnIndex: null,
-          direction: null,
-        },
-        showTotal: false,
-        totalFunc: 'sum',
-        percentageCol: '',
-      },
-      template: tableVisTemplate,
-    },
-    editorConfig: {
-      optionsTemplate: TableOptions,
-      schemas: new Schemas([
-        {
-          group: AggGroupNames.Metrics,
-          name: 'metric',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
-            defaultMessage: 'Metric',
-          }),
-          aggFilter: ['!geo_centroid', '!geo_bounds'],
-          aggSettings: {
-            top_hits: {
-              allowStrings: true,
-            },
+  },
+  editorConfig: {
+    optionsTemplate: TableOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
+          defaultMessage: 'Metric',
+        }),
+        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggSettings: {
+          top_hits: {
+            allowStrings: true,
           },
-          min: 1,
-          defaults: [{ type: 'count', schema: 'metric' }],
         },
-        {
-          group: AggGroupNames.Buckets,
-          name: 'bucket',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
-            defaultMessage: 'Split rows',
-          }),
-          aggFilter: ['!filter'],
-        },
-        {
-          group: AggGroupNames.Buckets,
-          name: 'split',
-          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
-            defaultMessage: 'Split table',
-          }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!filter'],
-        },
-      ]),
-    },
-    responseHandler: tableVisResponseHandler,
-    hierarchicalData: (vis) => {
-      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
-    },
-  };
-}
+        min: 1,
+        defaults: [{ type: 'count', schema: 'metric' }],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'bucket',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
+          defaultMessage: 'Split rows',
+        }),
+        aggFilter: ['!filter'],
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
+          defaultMessage: 'Split table',
+        }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!filter'],
+      },
+    ]),
+  },
+  responseHandler: tableVisResponseHandler,
+  getSupportedTriggers: () => {
+    return [VIS_EVENT_TO_TRIGGER.filter];
+  },
+  hierarchicalData: (vis) => {
+    return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
+  },
+});
