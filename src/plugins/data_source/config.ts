@@ -4,6 +4,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
+import { fileAppenderSchema } from './audit_config';
 
 const KEY_NAME_MIN_LENGTH: number = 1;
 const KEY_NAME_MAX_LENGTH: number = 100;
@@ -31,6 +32,10 @@ export const configSchema = schema.object({
   }),
   clientPool: schema.object({
     size: schema.number({ defaultValue: 5 }),
+  }),
+  audit: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    appender: fileAppenderSchema,
   }),
 });
 
