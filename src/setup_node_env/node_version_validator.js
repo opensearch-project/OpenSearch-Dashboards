@@ -44,11 +44,16 @@ var isVersionValid =
 
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid) {
-  var errorMessage =
-    `OpenSearch Dashboards was built with ${requiredVersion} and does not support the current Node.js version ${currentVersion}. ` +
-    `Please use Node.js ${requiredVersion} or a higher patch version.`;
-
-  // Actions to apply when validation fails: error report + exit.
-  console.error(errorMessage);
-  process.exit(1);
+  var errorMessage = `OpenSearch Dashboards was built with ${requiredVersion} and does not support the current Node.js version ${currentVersion}. `;
+  if (!process.env.OSD_NODE_HOME) {
+    // Actions to apply when validation fails: error report + exit.
+    errorMessage += `Please use Node.js ${requiredVersion} or a higher patch version.`;
+    console.error(errorMessage);
+    process.exit(1);
+  } else {
+    errorMessage +=
+      '\nOpenSearch Dashboards is running as OSD_NODE_HOME environment variable is set, ' +
+      'Ignoring any incpatibilities in node version.';
+    console.warn(errorMessage);
+  }
 }

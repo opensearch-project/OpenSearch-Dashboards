@@ -28,10 +28,14 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
 
-if [ -x "${DIR}/node/bin/node" ]; then
-  NODE="${DIR}/node/bin/node"
-else
-  NODE="$(which node)"
+NODE="$OSD_NODE_HOME"
+
+if [ -z "$NODE" ]; then
+  if [ -x "${DIR}/node/bin/node" ]; then
+    NODE="${DIR}/node/bin/node"
+  else
+    NODE="$(which node)"
+  fi
 fi
 
 if [ ! -x "$NODE" ]; then

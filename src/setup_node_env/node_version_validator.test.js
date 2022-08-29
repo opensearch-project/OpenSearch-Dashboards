@@ -51,31 +51,33 @@ describe('NodeVersionValidator', function () {
     );
   });
 
-  it('should run the script WITH error if the major version is higher', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(+1, 0, 0), true);
-  });
+  if (!process.env.OSD_NODE_HOME) {
+    it('should run the script WITH error if the major version is higher', function (done) {
+      testValidateNodeVersion(done, requiredNodeVersionWithDiff(+1, 0, 0), true);
+    });
 
-  it('should run the script WITH error if the major version is lower', function (done) {
-    var lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
-    testValidateNodeVersion(
-      done,
-      lowerMajorVersion,
-      REQUIRED_NODE_JS_VERSION !== lowerMajorVersion
-    );
-  });
+    it('should run the script WITH error if the major version is lower', function (done) {
+      var lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
+      testValidateNodeVersion(
+        done,
+        lowerMajorVersion,
+        REQUIRED_NODE_JS_VERSION !== lowerMajorVersion
+      );
+    });
 
-  it('should run the script WITH error if the minor version is higher', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true);
-  });
+    it('should run the script WITH error if the minor version is higher', function (done) {
+      testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true);
+    });
 
-  it('should run the script WITH error if the minor version is lower', function (done) {
-    var lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
-    testValidateNodeVersion(
-      done,
-      lowerMinorVersion,
-      REQUIRED_NODE_JS_VERSION !== lowerMinorVersion
-    );
-  });
+    it('should run the script WITH error if the minor version is lower', function (done) {
+      var lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
+      testValidateNodeVersion(
+        done,
+        lowerMinorVersion,
+        REQUIRED_NODE_JS_VERSION !== lowerMinorVersion
+      );
+    });
+  }
 });
 
 function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
