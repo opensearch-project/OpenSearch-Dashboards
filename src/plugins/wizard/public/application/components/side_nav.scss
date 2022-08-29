@@ -21,6 +21,7 @@
   &__header {
     padding: $euiSizeS;
     border-bottom: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
   }
 
   &__style {
@@ -45,5 +46,5 @@
 }
 
 .wizDatasourceSelect {
-  max-width: $wizSideNavWidth;
+  max-width: calc(#{$wizSideNavWidth} - 1px);
 }

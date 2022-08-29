@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiIcon } from '@elastic/eui';
+import { EuiSuperSelect, EuiSuperSelectOption, EuiIcon, IconType } from '@elastic/eui';
 import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -21,13 +21,8 @@ export const RightNav = () => {
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
-    inputDisplay: title,
-    dropdownDisplay: (
-      <>
-        <EuiIcon type={icon} className="wizTypeSelector__icon" />
-        <strong>{title}</strong>
-      </>
-    ),
+    inputDisplay: <OptionItem icon={icon} title={title} />,
+    dropdownDisplay: <OptionItem icon={icon} title={title} />,
   }));
 
   return (
@@ -53,3 +48,10 @@ export const RightNav = () => {
     </section>
   );
 };
+
+const OptionItem = ({ icon, title }: { icon: IconType; title: string }) => (
+  <>
+    <EuiIcon type={icon} className="wizTypeSelector__icon" />
+    <span>{title}</span>
+  </>
+);
