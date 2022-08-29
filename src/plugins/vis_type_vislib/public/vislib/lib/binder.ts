@@ -30,7 +30,6 @@
 
 import d3 from 'd3';
 import $ from 'jquery';
-import { IScope } from 'angular';
 
 export interface Emitter {
   on: (...args: any[]) => void;
@@ -41,13 +40,6 @@ export interface Emitter {
 
 export class Binder {
   private disposal: Array<() => void> = [];
-
-  constructor($scope: IScope) {
-    // support auto-binding to $scope objects
-    if ($scope) {
-      $scope.$on('$destroy', () => this.destroy());
-    }
-  }
 
   public on(emitter: Emitter, ...args: any[]) {
     const on = emitter.on || emitter.addListener;
