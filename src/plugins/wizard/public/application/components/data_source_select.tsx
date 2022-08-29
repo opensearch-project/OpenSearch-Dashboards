@@ -29,6 +29,7 @@ export const DataSourceSelect = () => {
   const { indexPatterns, loading, error, selected } = useIndexPatterns();
   const dispatch = useTypedDispatch();
 
+  // TODO: Should be a standard EUI component
   return (
     <SearchableDropdown
       selected={selected !== undefined ? toSearchableDropdownOption(selected) : undefined}
