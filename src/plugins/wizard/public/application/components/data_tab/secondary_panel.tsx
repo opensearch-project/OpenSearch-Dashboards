@@ -20,9 +20,7 @@ const EDITOR_KEY = 'CONFIG_PANEL';
 
 export function SecondaryPanel() {
   const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
-  const isEditorValid = useTypedSelector(
-    (state) => state.metadata.editorState.validity[EDITOR_KEY]
-  );
+  const isEditorValid = useTypedSelector((state) => state.metadata.editor.validity[EDITOR_KEY]);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
