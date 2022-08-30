@@ -1,0 +1,17 @@
+{
+  "cluster.get_component_template": {
+    "url_params": {
+      "master_timeout": "",
+      "cluster_manager_timeout": "",
+      "local": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_component_template",
+      "_component_template/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/"
+  }
+}
