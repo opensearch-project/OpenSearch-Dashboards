@@ -16,23 +16,22 @@ import { CredentialManagementContext } from '../../../../types';
 export const Header = ({
   prompt,
   docLinks,
+  headerTitle,
 }: {
   prompt?: React.ReactNode;
   docLinks: DocLinksStart;
+  headerTitle: string;
 }) => {
   const changeTitle = useOpenSearchDashboards<CredentialManagementContext>().services.chrome
     .docTitle.change;
-  const createCredentialHeader = i18n.translate('credentialManagement.createIndexPatternHeader', {
-    defaultMessage: 'Create Stored Credential',
-  });
 
-  changeTitle(createCredentialHeader);
+  changeTitle(headerTitle);
 
   return (
     <div>
       <EuiTitle>
         <h1>
-          {createCredentialHeader}
+          {headerTitle}
           <>
             {' '}
             <EuiBetaBadge

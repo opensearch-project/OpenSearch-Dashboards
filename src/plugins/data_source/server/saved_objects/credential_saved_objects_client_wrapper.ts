@@ -20,6 +20,7 @@ import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { CryptographyClient } from '../cryptography';
 
 import { CredentialMaterialsType, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
+import { credential } from './credential_saved_objects_type';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -138,15 +139,14 @@ export class CredentialSavedObjectsClientWrapper {
   }
 
   private async validateAndEncryptPartialAttributes<T = unknown>(attributes: T) {
-    this.validateCredentialMaterials(attributes.credentialMaterials);
+    this.validateAttributes(attributes);
 
     return await this.encryptCredentialMaterials(attributes);
   }
 
   private validateAttributes<T = unknown>(attributes: T) {
     const { title, credentialMaterials } = attributes;
-
-    if (title === undefined) {
+    if (!title) {
       throw SavedObjectsErrorHelpers.createBadRequestError('attribute "title" required');
     }
 
@@ -175,39 +175,53 @@ export class CredentialSavedObjectsClientWrapper {
     }
   }
 
-  private validateUsernamePasswordTypedContent<T = unknown>(credentialMaterialsContent: T) {
-    const { username, password } = credentialMaterialsContent;
-
-    if (username === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "username" required');
-    }
-
-    if (password === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "password" required');
-    }
-
-    return;
-  }
-
   private async encryptCredentialMaterials<T = unknown>(attributes: T) {
     const { credentialMaterials } = attributes;
 
     const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
+    const { username, password } = credentialMaterialsContent;
 
     switch (credentialMaterialsType) {
       case CredentialMaterialsType.UsernamePasswordType:
-        this.validateUsernamePasswordTypedContent(credentialMaterialsContent);
+        this.validateUsername(username);
+        if (password !== undefined) {
+          this.validatePassword(password);
+
+          return {
+            ...attributes,
+            credentialMaterials: await this.encryptUsernamePasswordTypedCredentialMaterials(
+              credentialMaterials
+            ),
+          };
+        }
         return {
           ...attributes,
-          credentialMaterials: await this.encryptUsernamePasswordTypedCredentialMaterials(
-            credentialMaterials
-          ),
+          credentialMaterials: {
+            credentialMaterialsType,
+            credentialMaterialsContent: {
+              username,
+            },
+          },
         };
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(
           `Invalid credential materials type: '${credentialMaterialsType}'`
         );
     }
+  }
+
+  private validateUsername<T = unknown>(username: T) {
+    if (!username) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "username" required');
+    }
+    return;
+  }
+
+  private validatePassword<T = unknown>(password: T) {
+    if (!password) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "password" required');
+    }
+    return;
   }
 
   private async encryptUsernamePasswordTypedCredentialMaterials<T = unknown>(

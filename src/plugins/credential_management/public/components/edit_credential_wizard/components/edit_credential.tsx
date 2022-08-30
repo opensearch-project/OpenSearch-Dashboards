@@ -14,8 +14,6 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
-  EuiSelect,
-  EuiLink,
   EuiButton,
   EuiPageContent,
   EuiFieldPassword,
@@ -25,6 +23,16 @@ import {
   EuiConfirmModal,
   EuiLoadingSpinner,
   EuiOverlayMask,
+  EuiFlexGroup,
+  EuiText,
+  EuiSpacer,
+  EuiBottomBar,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import {
@@ -38,21 +46,25 @@ import { CredentialManagmentContextValue } from '../../../types';
 import { context as contextType } from '../../../../../opensearch_dashboards_react/public';
 import { EditCredentialItem } from '../../types';
 import { LocalizedContent } from '../../common/text_content';
+import { EditPageHeader } from '../../common/components/header/edit_page_header';
 
 interface EditCredentialState {
   credentialName: string;
   credentialMaterialsType: string;
+  credentialDescription: string;
   username?: string;
   password?: string;
   dual: boolean;
   toasts: EuiGlobalToastListToast[];
   docLinks: DocLinksStart;
-  isVisible: boolean;
+  isDeleteModalVisible: boolean;
+  isUpdateModalVisible: boolean;
   isLoading: boolean;
 }
 
 export interface EditCredentialProps extends RouteComponentProps {
   credential: EditCredentialItem;
+  originalCredential: EditCredentialItem;
 }
 
 export class EditCredentialComponent extends React.Component<
@@ -63,76 +75,42 @@ export class EditCredentialComponent extends React.Component<
   public readonly context!: CredentialManagmentContextValue;
   constructor(props: EditCredentialProps, context: CredentialManagmentContextValue) {
     super(props, context);
-
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     this.state = {
       credentialName: props.credential.title,
       credentialMaterialsType: CredentialMaterialsType.UsernamePasswordType,
-      username: undefined,
+      credentialDescription: props.credential.description || '',
+      username: props.credential.username || '',
       password: undefined,
       dual: true,
       toasts: [],
       docLinks: context.services.docLinks,
-      isVisible: false,
+      isDeleteModalVisible: false,
+      isUpdateModalVisible: false,
       isLoading: false,
     };
   }
 
-  confirmDelete = async () => {
-    const { savedObjects } = this.context.services;
-    this.setState({ isLoading: true });
-    try {
-      await savedObjects.client.delete(CREDENTIAL_SAVED_OBJECT_TYPE, this.props.credential.id);
-      this.props.history.push('');
-    } catch (e) {
-      const deleteCredentialFailMsg = (
-        <FormattedMessage
-          id="credentialManagement.editCredential.deleteCredentialFailMsg"
-          defaultMessage="The credential delete failed with some errors. Please try it again.'"
-        />
-      );
-      this.setState((prevState) => ({
-        toasts: prevState.toasts.concat([
-          {
-            title: deleteCredentialFailMsg,
-            id: deleteCredentialFailMsg.props.id,
-            color: 'warning',
-            iconType: 'alert',
-          },
-        ]),
-      }));
-    }
-    this.setState({ isLoading: false });
-  };
-
   delelteButtonRender() {
     return (
       <>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'end',
-          }}
-        >
-          <EuiFlexItem>
-            <EuiToolTip content={LocalizedContent.deleteCredentialButtonDescription}>
-              <EuiButtonIcon
-                color="danger"
-                onClick={this.removeCredential}
-                iconType="trash"
-                aria-label={LocalizedContent.deleteCredentialButtonDescription}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </div>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={LocalizedContent.deleteCredentialButtonDescription}>
+            <EuiButtonIcon
+              color="danger"
+              onClick={this.removeCredential}
+              iconType="trash"
+              aria-label={LocalizedContent.deleteCredentialButtonDescription}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
 
-        {this.state.isVisible ? (
+        {this.state.isDeleteModalVisible ? (
           <EuiConfirmModal
             title={LocalizedContent.deleteButtonOnConfirmText}
             onCancel={() => {
-              this.setState({ isVisible: false });
+              this.setState({ isDeleteModalVisible: false });
             }}
             onConfirm={this.confirmDelete}
             cancelButtonText={LocalizedContent.cancelButtonOnDeleteCancelText}
@@ -147,88 +125,166 @@ export class EditCredentialComponent extends React.Component<
       </>
     );
   }
+  renderHeader() {
+    return <EditPageHeader credentialName={this.state.credentialName} />;
+  }
 
-  renderContent() {
+  updatePasswordRender() {
+    const closeModal = () => this.setState({ isUpdateModalVisible: false });
+    return (
+      <>
+        <EuiButton onClick={this.updateCredentialPassword}>Update Password</EuiButton>
+
+        {this.state.isUpdateModalVisible ? (
+          <EuiModal onClose={closeModal}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <h1>Update password</h1>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+
+            <EuiModalBody>
+              <EuiFieldPassword
+                placeholder="Passord field(focus)"
+                type={this.state.dual ? 'dual' : undefined}
+                value={this.state.password || ''}
+                onChange={(e) => this.setState({ password: e.target.value })}
+              />
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+              <EuiButton
+                type="submit"
+                form="modalFormId"
+                onClick={() => this.updateCredential(true)}
+                fill
+              >
+                Update
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        ) : null}
+      </>
+    );
+  }
+
+  renderContent = () => {
     const options = [
       {
         value: CredentialMaterialsType.UsernamePasswordType,
         text: 'Username and Password Credential',
       },
     ];
+    const header = this.renderHeader();
+    const deleteButton = this.delelteButtonRender();
 
     return (
-      <EuiPageContent>
-        {this.delelteButtonRender()}
-        <EuiHorizontalRule />
-        <EuiForm component="form">
+      <EuiForm component="form">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>{header}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+        <EuiPageContent>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h3>Save Credentials</h3>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule />
+
           <EuiDescribedFormGroup
-            title={<h3>Credential Name</h3>}
-            description={<p>The name of credential that you want to create</p>}
+            title={<h4>Credential Details</h4>}
+            description={
+              <p>
+                The credential information is used for reference in tables and when adding to a data
+                source connection
+              </p>
+            }
           >
-            <EuiFormRow label="Credential Name">
+            <EuiFormRow label="Credential Title">
               <EuiFieldText
-                placeholder="Your Credential Name"
+                placeholder="Your credential title"
                 value={this.state.credentialName || ''}
                 onChange={(e) => this.setState({ credentialName: e.target.value })}
               />
             </EuiFormRow>
-          </EuiDescribedFormGroup>
-
-          <EuiDescribedFormGroup
-            title={<h3>Credential Type</h3>}
-            description={
-              <div>
-                <p>
-                  The type of credential that you want to create{' '}
-                  <EuiLink href="#/display/text">
-                    <strong>Credential Types Supported</strong>
-                  </EuiLink>
-                </p>
-                <ul>
-                  <li>
-                    For <b>username_password_credential</b> type: this type can be used for{' '}
-                    credentials in format of username, password.{' '}
-                  </li>
-                  <li> Ex: OpenSearch basic auth </li>
-                </ul>
-                <ul>
-                  <li>
-                    For <b>aws_iam_credential</b> type: this type can only be used for aws iam
-                    credential, with aws_access_key_id, aws_secret_access_key, and region (optional)
-                  </li>
-                </ul>
-              </div>
-            }
-          >
-            <EuiFormRow label="Credential Type">
-              <EuiSelect
-                onChange={(e) => this.setState({ credentialMaterialsType: e.target.value })}
-                options={options}
+            <EuiFormRow label="Credential Description">
+              <EuiFieldText
+                placeholder="Your credential description"
+                value={this.state.credentialDescription || ''}
+                onChange={(e) => this.setState({ credentialDescription: e.target.value })}
               />
             </EuiFormRow>
-            <EuiFormRow label="User Name">
+          </EuiDescribedFormGroup>
+        </EuiPageContent>
+        <br />
+        <EuiPageContent>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h3>Authentication Details</h3>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiHorizontalRule />
+
+          <EuiDescribedFormGroup
+            title={<h4>Authentication Details</h4>}
+            description={
+              <p>Modify these to update the authentication type and associated details</p>
+            }
+          >
+            <EuiFormRow label="Authentication Method">
+              <EuiText size="s">Username & password</EuiText>
+            </EuiFormRow>
+
+            <EuiSpacer />
+            <EuiFormRow label="Username">
               <EuiFieldText
-                placeholder="Your User Name"
-                value={this.state.username || undefined}
+                placeholder="Your username"
+                value={this.state.username || ''}
                 onChange={(e) => this.setState({ username: e.target.value })}
               />
             </EuiFormRow>
             <EuiFormRow label="Password">
-              <EuiFieldPassword
-                placeholder="Your Password"
-                type={this.state.dual ? 'dual' : undefined}
-                value={this.state.password || undefined}
-                onChange={(e) => this.setState({ password: e.target.value })}
-              />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiText size="s">*********</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>{this.updatePasswordRender()}</EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFormRow>
           </EuiDescribedFormGroup>
-          <EuiButton fill onClick={this.updateCredential}>
-            Update
-          </EuiButton>
-        </EuiForm>
-      </EuiPageContent>
+
+          <EuiBottomBar>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty color="ghost" size="s">
+                  Cancel changes
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  fill
+                  size="s"
+                  onClick={() => this.updateCredential(false)}
+                >
+                  Save changes
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiBottomBar>
+        </EuiPageContent>
+      </EuiForm>
     );
-  }
+  };
 
   removeToast = (id: string) => {
     this.setState((prevState) => ({
@@ -258,24 +314,63 @@ export class EditCredentialComponent extends React.Component<
   }
 
   removeCredential = async () => {
-    this.setState({ isVisible: true });
+    this.setState({ isDeleteModalVisible: true });
   };
 
-  updateCredential = async () => {
+  updateCredentialPassword = async () => {
+    this.setState({ isUpdateModalVisible: true });
+  };
+
+  updateCredential = async (isUpdatePassword: boolean) => {
     const { savedObjects } = this.context.services;
-    this.setState({ isLoading: true });
+    const { originalCredential } = this.props;
+
+    this.setState({ isLoading: true, isUpdateModalVisible: false });
+
     try {
-      await savedObjects.client.update('credential', this.props.credential.id, {
-        title: this.state.credentialName,
+      const credentialAttributes = {
+        title: isUpdatePassword ? originalCredential.title : this.state.credentialName,
+        description: isUpdatePassword
+          ? originalCredential.description
+          : this.state.credentialDescription,
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
-            username: this.state.username,
+            username: isUpdatePassword ? originalCredential.username : this.state.username,
             password: this.state.password,
           },
         },
-      });
-      this.props.history.push('');
+      };
+      if (!isUpdatePassword) {
+        delete credentialAttributes.credentialMaterials.credentialMaterialsContent.password;
+      }
+      await savedObjects.client.update(
+        CREDENTIAL_SAVED_OBJECT_TYPE,
+        this.props.credential.id,
+        credentialAttributes
+      );
+      if (isUpdatePassword) {
+        this.setState({ password: '' });
+
+        const editCredentialSuccessMsg = (
+          <FormattedMessage
+            id="credentialManagement.editCredential.loadEditCredentialSuccessMsg"
+            defaultMessage="Success!!"
+          />
+        );
+        this.setState((prevState) => ({
+          toasts: prevState.toasts.concat([
+            {
+              title: editCredentialSuccessMsg,
+              id: editCredentialSuccessMsg.props.id,
+              color: 'success',
+              iconType: 'check',
+            },
+          ]),
+        }));
+      } else {
+        this.props.history.push('');
+      }
     } catch (e) {
       const editCredentialFailMsg = (
         <FormattedMessage
@@ -288,6 +383,33 @@ export class EditCredentialComponent extends React.Component<
           {
             title: editCredentialFailMsg,
             id: editCredentialFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
+      }));
+    }
+    this.setState({ isLoading: false });
+  };
+
+  confirmDelete = async () => {
+    const { savedObjects } = this.context.services;
+    this.setState({ isLoading: true });
+    try {
+      await savedObjects.client.delete(CREDENTIAL_SAVED_OBJECT_TYPE, this.props.credential.id);
+      this.props.history.push('');
+    } catch (e) {
+      const deleteCredentialFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.editCredential.deleteCredentialFailMsg"
+          defaultMessage="The credential delete failed with some errors. Please try it again.'"
+        />
+      );
+      this.setState((prevState) => ({
+        toasts: prevState.toasts.concat([
+          {
+            title: deleteCredentialFailMsg,
+            id: deleteCredentialFailMsg.props.id,
             color: 'warning',
             iconType: 'alert',
           },

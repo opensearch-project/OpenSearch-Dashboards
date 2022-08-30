@@ -28,6 +28,7 @@ const EditCredentialWizard: React.FunctionComponent<RouteComponentProps<{ id: st
 
   /* State Variables */
   const [credential, setCredential] = useState<EditCredentialItem>();
+  const [originalCredential, setOriginalCredential] = useState<EditCredentialItem>();
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
 
   /* Fetch credential by id*/
@@ -49,6 +50,7 @@ const EditCredentialWizard: React.FunctionComponent<RouteComponentProps<{ id: st
           password: '',
         };
         setCredential(object);
+        setOriginalCredential({ ...object });
         setBreadcrumbs(getEditBreadcrumbs(object));
       } catch (e) {
         handleDisplayToastMessage({
@@ -78,8 +80,8 @@ const EditCredentialWizard: React.FunctionComponent<RouteComponentProps<{ id: st
     }
   };
 
-  if (credential) {
-    return <EditCredential credential={credential} />;
+  if (credential && originalCredential) {
+    return <EditCredential credential={credential} originalCredential={originalCredential} />;
   } else {
     return <h1>Credential not found!</h1>;
   }
