@@ -6,18 +6,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
 
+/*
+ * Initial state: default state when opening wizard plugin
+ * Clean state: when viz finished loading and ready to be edited
+ * Dirty state: when there are changes applied to the viz after it finished loading
+ */
+type EditorState = 'loading' | 'clean' | 'dirty';
+
 export interface MetadataState {
-  editorState: {
+  editor: {
     validity: {
       // Validity for each section in the editor
       [key: string]: boolean;
     };
+    state: EditorState;
   };
 }
 
 const initialState: MetadataState = {
-  editorState: {
+  editor: {
     validity: {},
+    state: 'loading',
   },
 };
 
@@ -36,7 +45,10 @@ export const slice = createSlice({
   reducers: {
     setValidity: (state, action: PayloadAction<{ key: string; valid: boolean }>) => {
       const { key, valid } = action.payload;
-      state.editorState.validity[key] = valid;
+      state.editor.validity[key] = valid;
+    },
+    setEditorState: (state, action: PayloadAction<{ state: EditorState }>) => {
+      state.editor.state = action.payload.state;
     },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
@@ -45,4 +57,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setValidity, setState } = slice.actions;
+export const { setValidity, setEditorState, setState } = slice.actions;
