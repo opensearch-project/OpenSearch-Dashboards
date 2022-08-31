@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Logger, OpenSearchClient, SavedObjectsClientContract } from '../../../../src/core/server';
+import {
+  Auditor,
+  Logger,
+  OpenSearchClient,
+  SavedObjectsClientContract,
+} from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
-import { OpenSearchClientPool, configureClient } from './client';
+import { configureClient, OpenSearchClientPool } from './client';
 import { CryptographyClient } from './cryptography';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (
