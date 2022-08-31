@@ -33,7 +33,6 @@ export const TopNav = () => {
   const saveDisabledReason = useCanSave();
   const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
 
-
   const config = useMemo(() => {
     if (savedWizardVis === undefined) return;
 

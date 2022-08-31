@@ -15,11 +15,16 @@ import { WizardServices } from '../../../types';
 import { MetricOptionsDefaults } from '../../../visualizations/metric/metric_viz_type';
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
 import { getSavedWizardVis } from '../get_saved_wizard_vis';
-import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
+import {
+  useTypedDispatch,
+  setStyleState,
+  setVisualizationState,
+  VisualizationState,
+} from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
 
-// This function will get called when instantiating a saved vis or creating a new one
+// This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
 export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) => {
   const { services } = useOpenSearchDashboards<WizardServices>();
@@ -47,7 +52,12 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
 
         if (savedWizardVis.styleState !== '{}' && savedWizardVis.visualizationState !== '{}') {
           const styleState = JSON.parse(savedWizardVis.styleState);
-          const visualizationState = JSON.parse(savedWizardVis.visualizationState);
+          const vizStateWithoutIndex = JSON.parse(savedWizardVis.visualizationState);
+          const visualizationState: VisualizationState = {
+            searchField: vizStateWithoutIndex.searchField,
+            activeVisualization: vizStateWithoutIndex.activeVisualization,
+            indexPattern: savedWizardVis.searchSourceFields.index,
+          };
           // TODO: Add validation and transformation, throw/handle errors
           dispatch(setStyleState<MetricOptionsDefaults>(styleState));
           dispatch(setVisualizationState(visualizationState));
