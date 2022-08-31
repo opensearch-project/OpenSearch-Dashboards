@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPatternField } from '../../../../../data/common';
+import { IndexPatternField, METRIC_TYPES } from '../../../../../data/common';
+
+export const COUNT_FIELD = Symbol.for(METRIC_TYPES.COUNT);
 
 export interface EmptyDragDataType {
   namespace: null;
@@ -11,7 +13,7 @@ export interface EmptyDragDataType {
 }
 export interface FieldDragDataType {
   namespace: 'field-data';
-  value: Pick<IndexPatternField, 'name' | 'displayName' | 'type'> | null;
+  value: IndexPatternField['name'] | null | typeof COUNT_FIELD;
 }
 
 export type DragDataType = EmptyDragDataType | FieldDragDataType;

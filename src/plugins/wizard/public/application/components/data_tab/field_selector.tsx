@@ -73,6 +73,14 @@ export const FieldSelector = () => {
         </form>
       </div>
       <div className="wizFieldSelector__fieldGroups">
+        {/* Count Field */}
+        <FieldSelectorField
+          field={{
+            displayName: 'Count',
+            scripted: false,
+            type: 'number',
+          }}
+        />
         <FieldGroup
           id="categoricalFields"
           header="Categorical Fields"
