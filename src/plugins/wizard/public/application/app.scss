@@ -7,10 +7,9 @@
 .wizLayout {
   padding: 0;
   display: grid;
-  grid-template: min-content 1fr / #{$wizSideNavWidth} 1fr;
-  grid-template-areas:
-    "topNav topNav"
-    "sideNav workspace";
+  grid-template:
+    "topNav topNav topNav" min-content
+    "leftNav workspace rightNav" 1fr / #{$wizSideNavWidth} 1fr #{$wizSideNavWidth};
   height: calc(100vh - #{$osdHeaderOffset});
 }
 
