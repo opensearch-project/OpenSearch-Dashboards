@@ -164,7 +164,7 @@ export class CreateIndexPatternWizard extends Component<
     );
 
     // query local and remote indices, updating state independently
-    const queryLocalAndRemotePromise = ensureMinimumTime(
+    ensureMinimumTime(
       this.catchAndWarn(
         getIndices({ http, getIndexTags, pattern: '*', searchClient, dataSourceId }),
 
@@ -175,7 +175,7 @@ export class CreateIndexPatternWizard extends Component<
       this.setState({ allIndices, isInitiallyLoadingIndices: false })
     );
 
-    const queryWithFallbackPromise = this.catchAndWarn(
+    this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
       getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId }),
@@ -185,8 +185,6 @@ export class CreateIndexPatternWizard extends Component<
     ).then((remoteIndices: string[] | MatchedItem[]) =>
       this.setState({ remoteClustersExist: !!remoteIndices.length })
     );
-
-    await Promise.all([queryLocalAndRemotePromise, queryWithFallbackPromise]);
   };
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
@@ -244,7 +242,7 @@ export class CreateIndexPatternWizard extends Component<
 
   goToNextFromDataSource = (dataSourceRef: DataSourceRef) => {
     this.setState({ isInitiallyLoadingIndices: true, dataSourceRef }, async () => {
-      await this.fetchData();
+      this.fetchData();
       this.goToNextStep();
     });
   };
