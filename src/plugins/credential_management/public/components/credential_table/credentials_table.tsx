@@ -22,13 +22,11 @@ import {
   EuiBadgeGroup,
   EuiPageContent,
   EuiTitle,
-  EuiSearchBar,
   EuiConfirmModal,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiGlobalToastList,
   EuiGlobalToastListToast,
-  Query,
 } from '@elastic/eui';
 
 import {
@@ -66,23 +64,13 @@ interface Props extends RouteComponentProps {
 export const CredentialsTable = ({ canSave, history }: Props) => {
   const [credentials, setCredentials] = React.useState<CredentialsTableItem[]>([]);
   const [selectedCredentials, setSelectedCredentials] = React.useState<CredentialsTableItem[]>([]);
-
   const { setBreadcrumbs } = useOpenSearchDashboards<CredentialManagementContext>().services;
-
-  /* Update breadcrumb*/
-  useEffectOnce(() => {
-    setBreadcrumbs(getListBreadcrumbs());
-  });
-
   const [isLoading, setIsLoading] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
   const [toasts, setToasts] = React.useState<EuiGlobalToastListToast[]>([]);
-  const [searchText, setSearchText] = React.useState('');
 
-  const { savedObjects, uiSettings } = useOpenSearchDashboards<
-    CredentialManagementContext
-  >().services;
+  const { savedObjects } = useOpenSearchDashboards<CredentialManagementContext>().services;
 
   const columns = [
     {
@@ -140,28 +128,6 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
     onSelectionChange,
   };
 
-  const renderDeleteButton = () => {
-    let deleteButtonMsg = 'Delete';
-
-    if (selectedCredentials.length === 1) {
-      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credential`;
-    } else if (selectedCredentials.length > 1) {
-      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credentials`;
-    }
-    return (
-      <EuiButton
-        color="danger"
-        iconType="trash"
-        onClick={() => {
-          setConfirmDeleteVisible(true);
-        }}
-        disabled={selectedCredentials.length === 0}
-      >
-        {deleteButtonMsg}
-      </EuiButton>
-    );
-  };
-
   const onClickDelete = async () => {
     try {
       setIsDeleting(true);
@@ -193,25 +159,72 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
     }
   };
 
-  const deleteButton = renderDeleteButton();
+  const removeToast = (id: string) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
 
-  React.useEffect(() => {
+  const createButton = canSave ? <CreateButton history={history} /> : <></>;
+
+  const renderDeleteButton = () => {
+    let deleteButtonMsg = 'Delete';
+
+    if (selectedCredentials.length === 1) {
+      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credential`;
+    } else if (selectedCredentials.length > 1) {
+      deleteButtonMsg = `${deleteButtonMsg} ${selectedCredentials.length} Credentials`;
+    }
+    return (
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={() => {
+          setConfirmDeleteVisible(true);
+        }}
+        disabled={selectedCredentials.length === 0}
+      >
+        {deleteButtonMsg}
+      </EuiButton>
+    );
+  };
+
+  /* create a button to the right of search bar*/
+  const renderToolsRight = () => {
+    return (
+      <EuiFlexItem key="delete" grow={false}>
+        {renderDeleteButton()}
+      </EuiFlexItem>
+    );
+  };
+
+  const search = {
+    toolsRight: renderToolsRight(),
+    box: {
+      incremental: true,
+      schema: {
+        fields: { title: { type: 'string' } },
+      },
+    },
+  };
+
+  /* Update breadcrumb*/
+  useEffectOnce(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
+
+  /* fetch credential*/
+  useEffectOnce(() => {
     (async () => {
       setIsLoading(true);
 
       const fetchedCredentials: CredentialsTableItem[] = await getCredentials(savedObjects.client);
-      const fetchedCredentialsResults = fetchedCredentials.filter((row) => {
-        return row.title.includes(searchText);
-      });
+      setCredentials(fetchedCredentials);
 
-      setCredentials(fetchedCredentialsResults);
       setIsLoading(false);
     })();
-  }, [history.push, credentials.length, uiSettings, savedObjects.client, searchText]);
+  });
 
-  const createButton = canSave ? <CreateButton history={history} /> : <></>;
-
-  const tableRenderDeleteModal = () => {
+  /* render delete modal*/
+  const renderTableDeleteModal = () => {
     return confirmDeleteVisible ? (
       <EuiConfirmModal
         title={LocalizedContent.deleteButtonOnConfirmText}
@@ -230,19 +243,6 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
         <p>{LocalizedContent.deleteCredentialWarnMsg}</p>
       </EuiConfirmModal>
     ) : null;
-  };
-
-  const onSearchChange = ({
-    query,
-  }: {
-    query: Query | null;
-    error: { message: string } | null;
-  }) => {
-    setSearchText(query!.text);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts(toasts.filter((toast) => toast.id !== id));
   };
 
   const renderContent = () => {
@@ -272,17 +272,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
               <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
             </EuiFlexGroup>
 
-            <EuiSearchBar
-              box={{ 'data-test-subj': 'savedObjectSearchBar' }}
-              onChange={(e) => onSearchChange(e)}
-              toolsRight={[
-                <EuiFlexItem key="delete" grow={false}>
-                  {deleteButton}
-                </EuiFlexItem>,
-              ]}
-            />
-
-            {tableRenderDeleteModal()}
+            {renderTableDeleteModal()}
 
             <EuiSpacer />
 
@@ -295,6 +285,7 @@ export const CredentialsTable = ({ canSave, history }: Props) => {
               columns={columns}
               pagination={pagination}
               sorting={sorting}
+              search={search}
               loading={isLoading}
             />
           </>

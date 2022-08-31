@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'src/core/public';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -150,11 +151,14 @@ export class CredentialForm extends React.Component<CredentialFormProps, Credent
     }
   };
 
+  createCredentialHeader = i18n.translate('credentialManagement.createIndexPatternHeader', {
+    defaultMessage: 'Create Stored Credential',
+  });
   /* Render methods */
 
   renderHeader() {
     const { docLinks } = this.props;
-    return <Header docLinks={docLinks} />;
+    return <Header docLinks={docLinks} headerTitle={this.createCredentialHeader} />;
   }
 
   renderContent = () => {
