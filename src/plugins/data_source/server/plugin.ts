@@ -3,30 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { first } from 'rxjs/operators';
 import { OpenSearchClientError } from '@opensearch-project/opensearch/lib/errors';
-import { dataSource, credential, CredentialSavedObjectsClientWrapper } from './saved_objects';
-import { DataSourcePluginConfigType } from '../config';
+import { Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import {
-  PluginInitializerContext,
+  Auditor,
+  AuditorFactory,
   CoreSetup,
   CoreStart,
-  Plugin,
-  Logger,
   IContextProvider,
+  Logger,
+  LoggerContextConfigInput,
+  OpenSearchDashboardsRequest,
+  Plugin,
+  PluginInitializerContext,
   RequestHandler,
 } from '../../../../src/core/server';
-import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
-import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+import { DataSourcePluginConfigType } from '../config';
+import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyClient } from './cryptography';
-
+import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
+import { credential, CredentialSavedObjectsClientWrapper, dataSource } from './saved_objects';
+import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { ensureRawRequest } from '../../../../src/core/server/http/router';
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
   private readonly dataSourceService: DataSourceService;
+  private readonly config$: Observable<DataSourcePluginConfigType>;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
     this.logger = this.initializerContext.logger.get();
     this.dataSourceService = new DataSourceService(this.logger.get('data-source-service'));
+    this.config$ = this.initializerContext.config.create<DataSourcePluginConfigType>();
   }
 
   public async setup(core: CoreSetup) {
@@ -38,8 +47,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
 
-    const config$ = this.initializerContext.config.create<DataSourcePluginConfigType>();
-    const config: DataSourcePluginConfigType = await config$.pipe(first()).toPromise();
+    const config: DataSourcePluginConfigType = await this.config$.pipe(first()).toPromise();
 
     // Fetch configs used to create credential saved objects client wrapper
     const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = config.encryption;
@@ -63,10 +71,40 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
 
+    core.logging.configure(
+      this.config$.pipe<LoggerContextConfigInput>(
+        map((dataSourceConfig) => ({
+          appenders: {
+            auditTrailAppender: dataSourceConfig.audit.appender,
+          },
+          loggers: [
+            {
+              context: 'audit',
+              level: dataSourceConfig.audit.enabled ? 'info' : 'off',
+              appenders: ['auditTrailAppender'],
+            },
+          ],
+        }))
+      )
+    );
+
+    const auditorFactory: AuditorFactory = {
+      asScoped: (request: OpenSearchDashboardsRequest) => {
+        return new LoggingAuditor(request, this.logger.get('audit'));
+      },
+    };
+    core.auditTrail.register(auditorFactory);
+    const auditTrailPromise = core.getStartServices().then(([coreStart]) => coreStart.auditTrail);
+
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',
-      this.createDataSourceRouteHandlerContext(dataSourceService, cryptographyClient, this.logger)
+      this.createDataSourceRouteHandlerContext(
+        dataSourceService,
+        cryptographyClient,
+        this.logger,
+        auditTrailPromise
+      )
     );
 
     return {};
@@ -74,6 +112,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
   public start(core: CoreStart) {
     this.logger.debug('data_source: Started');
+
     return {};
   }
 
@@ -84,13 +123,17 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private createDataSourceRouteHandlerContext = (
     dataSourceService: DataSourceServiceSetup,
     cryptographyClient: CryptographyClient,
-    logger: Logger
+    logger: Logger,
+    auditTrailPromise: Promise<AuditorFactory>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
     return (context, req) => {
       return {
         opensearch: {
           getClient: (dataSourceId: string) => {
             try {
+              const auditor = auditTrailPromise.then((auditTrail) => auditTrail.asScoped(req));
+              this.logAuditMessage(auditor, dataSourceId, req);
+
               return dataSourceService.getDataSourceClient(
                 dataSourceId,
                 context.core.savedObjects.client,
@@ -107,4 +150,28 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       };
     };
   };
+
+  private async logAuditMessage(
+    auditorPromise: Promise<Auditor>,
+    dataSourceId: string,
+    request: OpenSearchDashboardsRequest
+  ) {
+    const auditor = await auditorPromise;
+    const auditMessage = this.getAuditMessage(request, dataSourceId);
+
+    auditor.add({
+      message: auditMessage,
+      type: 'opensearch.dataSourceClient.fetchClient',
+    });
+  }
+
+  private getAuditMessage(request: OpenSearchDashboardsRequest, dataSourceId: string) {
+    const rawRequest = ensureRawRequest(request);
+    const remoteAddress = rawRequest?.info?.remoteAddress;
+    const xForwardFor = request.headers['x-forwarded-for'];
+
+    return xForwardFor
+      ? `${remoteAddress} attempted accessing through ${xForwardFor} on data source: ${dataSourceId}`
+      : `${remoteAddress} attempted accessing on data source: ${dataSourceId}`;
+  }
 }
