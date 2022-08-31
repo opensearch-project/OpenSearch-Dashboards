@@ -6,6 +6,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
 import { WizardServices } from '../../../types';
+import { setActiveVisualization } from './shared_actions';
 
 export interface VisualizationState {
   indexPattern?: string;
@@ -46,12 +47,6 @@ export const slice = createSlice({
   name: 'visualization',
   initialState,
   reducers: {
-    setActiveVisualization: (
-      state,
-      action: PayloadAction<VisualizationState['activeVisualization']>
-    ) => {
-      state.activeVisualization = action.payload;
-    },
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
       state.activeVisualization!.aggConfigParams = [];
@@ -106,11 +101,18 @@ export const slice = createSlice({
       return action.payload;
     },
   },
+  extraReducers(builder) {
+    builder.addCase(setActiveVisualization, (state, action) => {
+      state.activeVisualization = {
+        name: action.payload.name,
+        aggConfigParams: [],
+      };
+    });
+  },
 });
 
 export const { reducer } = slice;
 export const {
-  setActiveVisualization,
   setIndexPattern,
   setSearchField,
   editDraftAgg,

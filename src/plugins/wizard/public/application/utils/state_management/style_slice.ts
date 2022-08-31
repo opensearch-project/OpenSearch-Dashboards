@@ -5,6 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { WizardServices } from '../../../types';
+import { setActiveVisualization } from './shared_actions';
 
 export type StyleState<T = any> = T;
 
@@ -35,6 +36,11 @@ export const styleSlice = createSlice({
         ...action.payload,
       };
     },
+  },
+  extraReducers(builder) {
+    builder.addCase(setActiveVisualization, (state, action) => {
+      return action.payload.style;
+    });
   },
 });
 

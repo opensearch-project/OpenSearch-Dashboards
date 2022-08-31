@@ -8,8 +8,29 @@
 .wizSidenav {
   @include scrollNavParent(auto 1fr);
 
-  grid-area: sideNav;
-  border-right: $euiBorderThin;
+  &.left {
+    border-right: $euiBorderThin;
+    grid-area: leftNav;
+  }
+
+  &.right {
+    border-left: $euiBorderThin;
+    grid-area: rightNav;
+  }
+
+  &__header {
+    padding: $euiSizeS;
+    border-bottom: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &__style {
+    @include euiYScrollWithShadows;
+  }
+}
+
+.wizTypeSelector__icon {
+  margin-right: $euiSizeS;
 }
 
 .wizSidenavTabs {
@@ -25,6 +46,5 @@
 }
 
 .wizDatasourceSelect {
-  max-width: $wizSideNavWidth;
-  padding: $euiSize $euiSize 0 $euiSize;
+  max-width: calc(#{$wizSideNavWidth} - 1px);
 }

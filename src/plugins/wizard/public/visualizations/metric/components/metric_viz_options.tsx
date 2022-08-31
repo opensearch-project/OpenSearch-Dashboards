@@ -5,8 +5,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import produce from 'immer';
 import { Draft } from 'immer';
 import {
@@ -17,10 +16,14 @@ import {
   RangeOption,
   SwitchOption,
 } from '../../../../../charts/public';
-import { useTypedDispatch, useTypedSelector } from '../../../application/utils/state_management';
+import {
+  useTypedDispatch,
+  useTypedSelector,
+  setStyleState,
+} from '../../../application/utils/state_management';
 import { MetricOptionsDefaults } from '../metric_viz_type';
-import { setState } from '../../../application/utils/state_management/style_slice';
 import { PersistedState } from '../../../../../visualizations/public';
+import { Option } from '../../../application/app';
 
 const METRIC_COLOR_MODES = [
   {
@@ -51,7 +54,7 @@ function MetricVizOptions() {
   const setOption = useCallback(
     (callback: (draft: Draft<typeof styleState>) => void) => {
       const newState = produce(styleState, callback);
-      dispatch(setState<MetricOptionsDefaults>(newState));
+      dispatch(setStyleState<MetricOptionsDefaults>(newState));
     },
     [dispatch, styleState]
   );
@@ -61,15 +64,11 @@ function MetricVizOptions() {
   });
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="transparent">
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage id="visTypeMetric.params.settingsTitle" defaultMessage="Settings" />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
+    <>
+      <Option
+        title={i18n.translate('visTypeMetric.params.settingsTitle', { defaultMessage: 'Settings' })}
+        initialIsOpen
+      >
         <SwitchOption
           label={i18n.translate('visTypeMetric.params.percentageModeLabel', {
             defaultMessage: 'Percentage mode',
@@ -95,18 +94,10 @@ function MetricVizOptions() {
             })
           }
         />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage id="visTypeMetric.params.rangesTitle" defaultMessage="Ranges" />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
+      </Option>
+      <Option
+        title={i18n.translate('visTypeMetric.params.rangesTitle', { defaultMessage: 'Ranges' })}
+      >
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={metric.colorsRange}
@@ -150,18 +141,10 @@ function MetricVizOptions() {
           // uistate here is used for custom colors which is not currently supported. Update when supported
           uiState={new PersistedState({})}
         />
-      </EuiPanel>
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage id="visTypeMetric.params.style.styleTitle" defaultMessage="Style" />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
+      </Option>
+      <Option
+        title={i18n.translate('visTypeMetric.params.style.styleTitle', { defaultMessage: 'Style' })}
+      >
         <RangeOption
           label={i18n.translate('visTypeMetric.params.style.fontSizeLabel', {
             defaultMessage: 'Metric font size in points',
@@ -179,8 +162,8 @@ function MetricVizOptions() {
           showLabels={true}
           showValue={false}
         />
-      </EuiPanel>
-    </EuiPanel>
+      </Option>
+    </>
   );
 }
 
