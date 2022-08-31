@@ -28,3 +28,5 @@ export const WizardApp = () => {
     </I18nProvider>
   );
 };
+
+export { Option } from './components/option';
