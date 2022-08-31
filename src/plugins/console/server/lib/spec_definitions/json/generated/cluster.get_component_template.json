@@ -1,7 +1,6 @@
 {
   "cluster.get_component_template": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "local": "__flag__"
     },

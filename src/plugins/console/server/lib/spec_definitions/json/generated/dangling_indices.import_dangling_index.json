@@ -3,7 +3,6 @@
     "url_params": {
       "accept_data_loss": "__flag__",
       "timeout": "",
-      "master_timeout": "",
       "cluster_manager_timeout": ""
     },
     "methods": [

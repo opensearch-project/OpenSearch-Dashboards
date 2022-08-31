@@ -15,7 +15,6 @@
         "p",
         "pb"
       ],
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "h": [],
       "help": "__flag__",

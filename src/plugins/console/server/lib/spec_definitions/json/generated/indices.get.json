@@ -13,7 +13,6 @@
       ],
       "flat_settings": "__flag__",
       "include_defaults": "__flag__",
-      "master_timeout": "",
       "cluster_manager_timeout": ""
     },
     "methods": [
