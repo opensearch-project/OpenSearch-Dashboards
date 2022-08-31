@@ -93,7 +93,7 @@ export class OpenSearchService
 
     const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
       internalClient: this.client.asInternalUser,
-      optimizedHealthcheckId: config.optimizedHealthcheckId,
+      optimizedHealthcheck: config.optimizedHealthcheck,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       opensearchVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
