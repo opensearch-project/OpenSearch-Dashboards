@@ -17,10 +17,14 @@ export const Header = ({
   prompt,
   docLinks,
   headerTitle,
+  isBeta = false,
+  isCreateCredential = false,
 }: {
   prompt?: React.ReactNode;
-  docLinks: DocLinksStart;
+  docLinks?: DocLinksStart;
   headerTitle: string;
+  isBeta?: boolean;
+  isCreateCredential: boolean;
 }) => {
   const changeTitle = useOpenSearchDashboards<CredentialManagementContext>().services.chrome
     .docTitle.change;
@@ -32,41 +36,50 @@ export const Header = ({
       <EuiTitle>
         <h1>
           {headerTitle}
-          <>
-            {' '}
-            <EuiBetaBadge
-              label={i18n.translate('credentialManagement.createCredential.betaLabel', {
-                defaultMessage: 'Beta',
-              })}
-            />
-          </>
+
+          {isBeta ? (
+            <>
+              <EuiBetaBadge
+                label={i18n.translate('credentialManagement.createCredential.betaLabel', {
+                  defaultMessage: 'Beta',
+                })}
+              />
+            </>
+          ) : null}
         </h1>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="credentialManagement.createCredential.description"
-            defaultMessage="A credential can be attached to multiple sources. For example, {credential} can be attached to two data sources {first} and {second}."
-            values={{
-              credential: <EuiCode>username-password-credential</EuiCode>,
-              first: <EuiCode>os-service-log</EuiCode>,
-              second: <EuiCode>os-application-log</EuiCode>,
-            }}
-          />
-          <br />
-          <EuiLink
-            href={docLinks.links.noDocumentation.indexPatterns.introduction}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="credentialManagement.createCredential.documentation"
-              defaultMessage="Read documentation"
-            />
-          </EuiLink>
-        </p>
-      </EuiText>
+
+      {isCreateCredential ? (
+        <>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="credentialManagement.createCredential.description"
+                defaultMessage="A credential can be attached to multiple sources. For example, {credential} can be attached to two data sources {first} and {second}."
+                values={{
+                  credential: <EuiCode>username-password-credential</EuiCode>,
+                  first: <EuiCode>os-service-log</EuiCode>,
+                  second: <EuiCode>os-application-log</EuiCode>,
+                }}
+              />
+              <br />
+
+              <EuiLink
+                href={docLinks?.links.noDocumentation.indexPatterns.introduction}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="credentialManagement.createCredential.documentation"
+                  defaultMessage="Read documentation"
+                />
+              </EuiLink>
+            </p>
+          </EuiText>
+        </>
+      ) : null}
+
       {prompt ? (
         <>
           <EuiSpacer size="m" />

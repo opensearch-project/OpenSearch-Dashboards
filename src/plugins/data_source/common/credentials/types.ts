@@ -25,5 +25,5 @@ export interface CredentialMaterials extends SavedObjectAttributes {
 
 export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
   username: string;
-  password?: string;
+  password: string;
 }

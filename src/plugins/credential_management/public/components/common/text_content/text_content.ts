@@ -54,3 +54,24 @@ export const confirmButtonOnDeleteComfirmText = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const credentialEditPageAuthType = i18n.translate(
+  'credentialManagement.textContent.credentialEditPageAuthType',
+  {
+    defaultMessage: 'Username & password',
+  }
+);
+
+export const credentialEditPageAuthTitle = i18n.translate(
+  'credentialManagement.textContent.credentialEditPageAuthTitle',
+  {
+    defaultMessage: 'Authentication Details',
+  }
+);
+
+export const credentialEditPageInfoTitle = i18n.translate(
+  'credentialManagement.textContent.credentialEditPageInfoTitle',
+  {
+    defaultMessage: 'Saved Credential Information',
+  }
+);

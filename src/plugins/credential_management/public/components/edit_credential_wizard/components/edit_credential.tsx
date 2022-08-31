@@ -42,11 +42,10 @@ import {
 
 import { getCreateBreadcrumbs } from '../../breadcrumbs';
 import { CredentialManagmentContextValue } from '../../../types';
-// TODO: Add Header https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2051
 import { context as contextType } from '../../../../../opensearch_dashboards_react/public';
 import { EditCredentialItem } from '../../types';
 import { LocalizedContent } from '../../common/text_content';
-import { EditPageHeader } from '../../common/components/header/edit_page_header';
+import { Header } from '../../common/components/header';
 
 interface EditCredentialState {
   credentialName: string;
@@ -64,7 +63,6 @@ interface EditCredentialState {
 
 export interface EditCredentialProps extends RouteComponentProps {
   credential: EditCredentialItem;
-  originalCredential: EditCredentialItem;
 }
 
 export class EditCredentialComponent extends React.Component<
@@ -91,8 +89,8 @@ export class EditCredentialComponent extends React.Component<
       isLoading: false,
     };
   }
-
-  delelteButtonRender() {
+  /* Render methods */
+  renderDelelteButton() {
     return (
       <>
         <EuiFlexItem grow={false}>
@@ -126,10 +124,10 @@ export class EditCredentialComponent extends React.Component<
     );
   }
   renderHeader() {
-    return <EditPageHeader credentialName={this.state.credentialName} />;
+    return <Header headerTitle={this.state.credentialName} isCreateCredential={false} />;
   }
 
-  updatePasswordRender() {
+  renderUpdatePasswordModal() {
     const closeModal = () => this.setState({ isUpdateModalVisible: false });
     return (
       <>
@@ -157,7 +155,7 @@ export class EditCredentialComponent extends React.Component<
               <EuiButton
                 type="submit"
                 form="modalFormId"
-                onClick={() => this.updateCredential(true)}
+                onClick={this.updateCredentialPasswordField}
                 fill
               >
                 Update
@@ -170,28 +168,23 @@ export class EditCredentialComponent extends React.Component<
   }
 
   renderContent = () => {
-    const options = [
-      {
-        value: CredentialMaterialsType.UsernamePasswordType,
-        text: 'Username and Password Credential',
-      },
-    ];
     const header = this.renderHeader();
-    const deleteButton = this.delelteButtonRender();
+    const deleteButton = this.renderDelelteButton();
 
     return (
       <EuiForm component="form">
+        <EuiSpacer size="l" />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>{header}</EuiFlexItem>
           <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
         <EuiPageContent>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h3>Save Credentials</h3>
+                <h3>{LocalizedContent.credentialEditPageInfoTitle}</h3>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -227,7 +220,7 @@ export class EditCredentialComponent extends React.Component<
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h3>Authentication Details</h3>
+                <h3>{LocalizedContent.credentialEditPageAuthTitle}</h3>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -241,7 +234,7 @@ export class EditCredentialComponent extends React.Component<
             }
           >
             <EuiFormRow label="Authentication Method">
-              <EuiText size="s">Username & password</EuiText>
+              <EuiText size="s">{LocalizedContent.credentialEditPageAuthType}</EuiText>
             </EuiFormRow>
 
             <EuiSpacer />
@@ -255,9 +248,9 @@ export class EditCredentialComponent extends React.Component<
             <EuiFormRow label="Password">
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiText size="s">*********</EuiText>
+                  <EuiText size="s">*************</EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem>{this.updatePasswordRender()}</EuiFlexItem>
+                <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -270,12 +263,7 @@ export class EditCredentialComponent extends React.Component<
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="success"
-                  fill
-                  size="s"
-                  onClick={() => this.updateCredential(false)}
-                >
+                <EuiButton color="success" fill size="s" onClick={this.updateCredentialInformation}>
                   Save changes
                 </EuiButton>
               </EuiFlexItem>
@@ -284,12 +272,6 @@ export class EditCredentialComponent extends React.Component<
         </EuiPageContent>
       </EuiForm>
     );
-  };
-
-  removeToast = (id: string) => {
-    this.setState((prevState) => ({
-      toasts: prevState.toasts.filter((toast) => toast.id !== id),
-    }));
   };
 
   render() {
@@ -312,6 +294,12 @@ export class EditCredentialComponent extends React.Component<
       </>
     );
   }
+  /* Events */
+  removeToast = (id: string) => {
+    this.setState((prevState) => ({
+      toasts: prevState.toasts.filter((toast) => toast.id !== id),
+    }));
+  };
 
   removeCredential = async () => {
     this.setState({ isDeleteModalVisible: true });
@@ -321,61 +309,70 @@ export class EditCredentialComponent extends React.Component<
     this.setState({ isUpdateModalVisible: true });
   };
 
-  updateCredential = async (isUpdatePassword: boolean) => {
+  updateCredentialInformation = async () => {
     const { savedObjects } = this.context.services;
-    const { originalCredential } = this.props;
-
-    this.setState({ isLoading: true, isUpdateModalVisible: false });
+    this.setState({ isLoading: true });
 
     try {
       const credentialAttributes = {
-        title: isUpdatePassword ? originalCredential.title : this.state.credentialName,
-        description: isUpdatePassword
-          ? originalCredential.description
-          : this.state.credentialDescription,
+        title: this.state.credentialName,
+        description: this.state.credentialDescription,
         credentialMaterials: {
           credentialMaterialsType: this.state.credentialMaterialsType,
           credentialMaterialsContent: {
-            username: isUpdatePassword ? originalCredential.username : this.state.username,
-            password: this.state.password,
+            username: this.state.username,
           },
         },
       };
-      if (!isUpdatePassword) {
-        delete credentialAttributes.credentialMaterials.credentialMaterialsContent.password;
-      }
       await savedObjects.client.update(
         CREDENTIAL_SAVED_OBJECT_TYPE,
         this.props.credential.id,
         credentialAttributes
       );
-      if (isUpdatePassword) {
-        this.setState({ password: '' });
-
-        const editCredentialSuccessMsg = (
-          <FormattedMessage
-            id="credentialManagement.editCredential.loadEditCredentialSuccessMsg"
-            defaultMessage="Success!!"
-          />
-        );
-        this.setState((prevState) => ({
-          toasts: prevState.toasts.concat([
-            {
-              title: editCredentialSuccessMsg,
-              id: editCredentialSuccessMsg.props.id,
-              color: 'success',
-              iconType: 'check',
-            },
-          ]),
-        }));
-      } else {
-        this.props.history.push('');
-      }
+      this.props.history.push('');
     } catch (e) {
       const editCredentialFailMsg = (
         <FormattedMessage
           id="credentialManagement.editCredential.loadEditCredentialFailMsg"
-          defaultMessage="The credential saved object edit failed with some errors. Please configure data_source.enabled and try it again."
+          defaultMessage="Credential information update failed"
+        />
+      );
+      this.setState((prevState) => ({
+        toasts: prevState.toasts.concat([
+          {
+            title: editCredentialFailMsg,
+            id: editCredentialFailMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
+      }));
+    }
+    this.setState({ isLoading: false });
+  };
+
+  updateCredentialPasswordField = async () => {
+    const { savedObjects } = this.context.services;
+    this.setState({ isLoading: true, isUpdateModalVisible: false });
+    try {
+      const credentialAttributes = {
+        credentialMaterials: {
+          credentialMaterialsContent: {
+            password: this.state.password,
+          },
+        },
+      };
+      await savedObjects.client.update(
+        CREDENTIAL_SAVED_OBJECT_TYPE,
+        this.props.credential.id,
+        credentialAttributes
+      );
+      this.props.history.push('');
+    } catch (e) {
+      const editCredentialFailMsg = (
+        <FormattedMessage
+          id="credentialManagement.editCredential.loadEditCredentialFailMsg"
+          defaultMessage="Change password failed"
         />
       );
       this.setState((prevState) => ({

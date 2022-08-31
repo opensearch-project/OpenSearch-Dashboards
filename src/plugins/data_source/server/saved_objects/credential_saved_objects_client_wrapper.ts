@@ -20,7 +20,6 @@ import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { CryptographyClient } from '../cryptography';
 
 import { CredentialMaterialsType, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
-import { credential } from './credential_saved_objects_type';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -139,7 +138,20 @@ export class CredentialSavedObjectsClientWrapper {
   }
 
   private async validateAndEncryptPartialAttributes<T = unknown>(attributes: T) {
-    this.validateAttributes(attributes);
+    const { credentialMaterials } = attributes;
+    const { credentialMaterialsContent } = credentialMaterials;
+
+    if ('password' in credentialMaterialsContent) {
+      this.validatePassword(credentialMaterialsContent.password);
+      return {
+        ...attributes,
+        credentialMaterials: await this.encryptUsernamePasswordTypedCredentialMaterials(
+          credentialMaterials
+        ),
+      };
+    } else {
+      this.validateAttributes(attributes);
+    }
 
     return await this.encryptCredentialMaterials(attributes);
   }
@@ -179,21 +191,12 @@ export class CredentialSavedObjectsClientWrapper {
     const { credentialMaterials } = attributes;
 
     const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
-    const { username, password } = credentialMaterialsContent;
+    const { username } = credentialMaterialsContent;
 
     switch (credentialMaterialsType) {
       case CredentialMaterialsType.UsernamePasswordType:
         this.validateUsername(username);
-        if (password !== undefined) {
-          this.validatePassword(password);
 
-          return {
-            ...attributes,
-            credentialMaterials: await this.encryptUsernamePasswordTypedCredentialMaterials(
-              credentialMaterials
-            ),
-          };
-        }
         return {
           ...attributes,
           credentialMaterials: {
