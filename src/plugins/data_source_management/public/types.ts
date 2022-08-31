@@ -34,22 +34,35 @@ export interface DataSourceManagementContext {
 export interface DataSourceTableItem {
   id: string;
   title: string;
+  description: string;
   sort: string;
 }
 
 export interface CredentialsComboBoxItem {
+  checked: boolean | 'on' | 'off' | null;
   id: string;
   title: string;
+  description: string;
+  credentialtype: string;
   label: string;
 }
 
-export interface DataSourceEditPageItem {
+export interface CreateDataSourceFormType {
+  title: string;
+  description: string;
+  endpoint: string;
+  credentialId: string;
+  credentialType: string;
+  newCredential?: CreateNewCredentialType;
+}
+
+export interface EditDataSourceFormType {
   id: string;
   title: string;
   description: string;
   endpoint: string;
   credentialId: string;
-  noAuthentication: boolean;
+  credentialType: string;
 }
 
 export interface ToastMessageItem {
@@ -62,3 +75,21 @@ export interface ToastMessageItem {
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<
   DataSourceManagementContext
 >;
+
+export enum CredentialSourceType {
+  CreateCredential = 'createCredential',
+  ExistingCredential = 'existingCredential',
+  NoAuth = 'noAuth',
+}
+
+export interface CreateNewCredentialType {
+  title: string;
+  description: string;
+  credentialMaterials: {
+    credentialMaterialsType: string;
+    credentialMaterialsContent: {
+      username: string;
+      password: string;
+    };
+  };
+}

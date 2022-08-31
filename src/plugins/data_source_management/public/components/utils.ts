@@ -4,13 +4,14 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
+import { CreateNewCredentialType, CredentialSourceType, DataSourceTableItem } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return (
     savedObjectsClient
       .find({
         type: 'data-source',
-        fields: ['id', 'type', 'title'],
+        fields: ['id', 'description', 'title'],
         perPage: 10000,
       })
       .then((response) =>
@@ -18,10 +19,12 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           .map((source) => {
             const id = source.id;
             const title = source.get('title');
+            const description = source.get('description');
 
             return {
               id,
               title,
+              description,
               sort: `${title}`,
             };
           })
@@ -58,8 +61,10 @@ export async function getDataSourceById(
         title: attributes.title,
         endpoint: attributes.endpoint,
         description: attributes.description || '',
-        credentialId,
-        noAuthentication: !!attributes.noAuth,
+        credentialId: attributes.noAuth ? CredentialSourceType.NoAuth : credentialId,
+        credentialType: credentialId
+          ? CredentialSourceType.ExistingCredential
+          : CredentialSourceType.NoAuth,
       };
     }) || null
   );
@@ -89,19 +94,45 @@ export async function deleteDataSourceById(
   return savedObjectsClient.delete('data-source', id);
 }
 
+export async function deleteMultipleDataSources(
+  savedObjectsClient: SavedObjectsClientContract,
+  selectedDataSources: DataSourceTableItem[]
+) {
+  await Promise.all(
+    selectedDataSources.map(async (selectedDataSource) => {
+      await deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
+    })
+  );
+}
+
+export async function createNewCredential(
+  savedObjectsClient: SavedObjectsClientContract,
+  newCredential: CreateNewCredentialType
+) {
+  return (
+    savedObjectsClient.create('credential', newCredential).then((response) => response.id || '') ||
+    null
+  );
+}
+
 export async function getExistingCredentials(savedObjectsClient: SavedObjectsClientContract) {
   const type: string = 'credential';
-  const fields: string[] = ['id', 'title'];
+  const fields: string[] = ['id', 'description', 'title', 'credentialMaterials'];
   const perPage: number = 10000;
   return savedObjectsClient.find({ type, fields, perPage }).then(
     (response) =>
       response.savedObjects.map((source) => {
         const id = source.id;
         const title = source.get('title');
+        const description = source.get('description');
+        const credentialtype = source.get('credentialMaterials')?.credentialMaterialsType;
         return {
           id,
           title,
+          description,
+          credentialtype,
           label: `${title}`,
+          checked: null,
         };
       }) || []
   );
