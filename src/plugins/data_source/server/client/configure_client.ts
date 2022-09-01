@@ -12,7 +12,11 @@ import {
 } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 
-import { DataSourceAttributes, UsernamePasswordTypedContent } from '../../common/data_sources';
+import {
+  AuthType,
+  DataSourceAttributes,
+  UsernamePasswordTypedContent,
+} from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyClient } from '../cryptography';
 import { parseClientOptions } from './client_config';
@@ -53,7 +57,7 @@ export const getCredential = async (
   cryptographyClient: CryptographyClient
 ): Promise<UsernamePasswordTypedContent> => {
   try {
-    const { username, password } = dataSource.attributes.credentials!.credentialsContent;
+    const { username, password } = dataSource.attributes.auth.credentials!;
     const decodedPassword = await cryptographyClient.decodeAndDecrypt(password);
     const credential = {
       username,
@@ -72,7 +76,7 @@ export const getCredential = async (
  *
  * @param rootClient root client for the connection with given data source endpoint.
  * @param dataSource data source saved object
- * @param savedObjects scoped saved object client
+ * @param cryptographyClient cryptography client for password encryption / decrpytion
  * @returns child client.
  */
 const getQueryClient = async (
@@ -80,7 +84,7 @@ const getQueryClient = async (
   dataSource: SavedObject<DataSourceAttributes>,
   cryptographyClient: CryptographyClient
 ): Promise<Client> => {
-  if (dataSource.attributes.noAuth) {
+  if (AuthType.NoAuth === dataSource.attributes.auth.type) {
     return rootClient.child();
   } else {
     const credential = await getCredential(dataSource, cryptographyClient);

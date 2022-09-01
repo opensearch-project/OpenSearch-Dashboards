@@ -9,10 +9,9 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint: string;
-  noAuth: boolean;
-  credentials?: {
-    type: CredentialsType;
-    credentialsContent: UsernamePasswordTypedContent;
+  auth: {
+    type: AuthType;
+    credentials: UsernamePasswordTypedContent | undefined;
   };
 }
 
@@ -21,6 +20,7 @@ export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
   password: string;
 }
 
-export enum CredentialsType {
+export enum AuthType {
+  NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
 }

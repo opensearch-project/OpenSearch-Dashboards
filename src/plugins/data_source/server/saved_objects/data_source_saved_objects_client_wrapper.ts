@@ -20,7 +20,7 @@ import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { CryptographyClient } from '../cryptography';
 
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { CredentialsType } from '../../common/data_sources';
+import { AuthType } from '../../common/data_sources';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -137,65 +137,52 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private dropCredentials<T = unknown>(attributes: Omit<T, 'credentials'>) {
-    return attributes;
-  }
-
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     this.validateAttributes(attributes);
 
-    const { noAuth } = attributes;
+    const { auth } = attributes;
 
-    // Drop credentials when no Auth
-    if (!noAuth) {
-      return this.dropCredentials(attributes);
-    }
-
-    const { type, credentialsContent } = attributes.credentials;
-
-    switch (type) {
-      case CredentialsType.UsernamePasswordType:
-        const { username, password } = credentialsContent;
+    switch (auth.type) {
+      case AuthType.NoAuth:
         return {
           ...attributes,
-          credentials: {
-            type,
-            credentialsContent: {
-              username,
-              password: await this.cryptographyClient.encryptAndEncode(password),
-            },
-          },
+          // Drop the credentials attribute for no_auth
+          credentials: undefined,
+        };
+      case AuthType.UsernamePasswordType:
+        return {
+          ...attributes,
+          auth: await this.encryptCredentials(auth),
         };
       default:
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          `Invalid credential materials type: '${type}'`
-        );
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
     }
   }
 
   private async validateAndUpdatePartialAttributes<T = unknown>(attributes: T) {
-    const { noAuth, credentials } = attributes;
+    const { auth } = attributes;
 
-    // Drop credentials when no Auth
-    if (!noAuth) {
-      return this.dropCredentials(attributes);
+    if (auth === undefined) {
+      return attributes;
     }
 
-    const { type, credentialsContent } = credentials;
+    const {
+      type,
+      credentials: { password },
+    } = auth;
 
     switch (type) {
-      case CredentialsType.UsernamePasswordType:
-        if ('password' in credentialsContent) {
-          const { username, password } = credentialsContent;
+      case AuthType.NoAuth:
+        return {
+          ...attributes,
+          // Drop the credentials attribute for no_auth
+          credentials: undefined,
+        };
+      case AuthType.UsernamePasswordType:
+        if (password) {
           return {
             ...attributes,
-            credentials: {
-              type,
-              credentialsContent: {
-                username,
-                password: await this.cryptographyClient.encryptAndEncode(password),
-              },
-            },
+            auth: await this.encryptCredentials(auth),
           };
         } else {
           return attributes;
@@ -206,61 +193,78 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateAttributes<T = unknown>(attributes: T) {
-    const { title, endpoint, noAuth, credentials } = attributes;
+    const { title, endpoint, auth } = attributes;
     if (!title) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "title" required');
-    }
-
-    if (!this.isValidUrl(endpoint)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "endpoint" is not valid');
-    }
-
-    if (noAuth) {
-      this.validateCredentials(credentials);
-    }
-  }
-
-  private validateCredentials<T = unknown>(credentials: T) {
-    if (credentials === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "credentials" required');
-    }
-
-    const { type, credentialsContent } = credentials;
-
-    if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "type" required for "credentials"'
+        'attribute "title" required for "data source" saved object'
       );
     }
 
-    if (credentialsContent === undefined) {
+    if (!this.isValidUrl(endpoint)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "credentialsContent" required for "credentials"'
+        'attribute "endpoint" is not valid for "data source" saved object'
+      );
+    }
+
+    if (auth === undefined) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'attribute "auth" required for "data source" saved object'
+      );
+    }
+
+    this.validateAuth(auth);
+  }
+
+  private validateAuth<T = unknown>(auth: T) {
+    const { type, credentials } = auth;
+
+    if (!type) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'attribute "auth.type" required for "data source" saved object'
       );
     }
 
     switch (type) {
-      case CredentialsType.UsernamePasswordType:
-        const { username, password } = credentialsContent;
+      case AuthType.NoAuth:
+        break;
+      case AuthType.UsernamePasswordType:
+        if (credentials === undefined) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'attribute "auth.credentials" required for "data source" saved object'
+          );
+        }
 
-        this.validateUsername(username);
-        this.validatePassword(password);
+        const { username, password } = credentials;
+
+        if (!username) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'attribute "auth.credentials.username" required for "data source" saved object'
+          );
+        }
+
+        if (!password) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'attribute "auth.credentials.password" required for "data source" saved object'
+          );
+        }
+
+        break;
       default:
-        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid credentials type: '${type}'`);
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
     }
   }
 
-  private validateUsername<T = unknown>(username: T) {
-    if (!username) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "username" required');
-    }
-    return;
-  }
+  private async encryptCredentials<T = unknown>(auth: T) {
+    const {
+      credentials: { username, password },
+    } = auth;
 
-  private validatePassword<T = unknown>(password: T) {
-    if (!password) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "password" required');
-    }
-    return;
+    return {
+      ...auth,
+      credentials: {
+        username,
+        password: await this.cryptographyClient.encryptAndEncode(password),
+      },
+    };
   }
 }
