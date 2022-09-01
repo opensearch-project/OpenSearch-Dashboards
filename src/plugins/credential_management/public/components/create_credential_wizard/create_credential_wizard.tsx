@@ -11,6 +11,7 @@ import {
   EuiGlobalToastListToast,
   EuiLoadingSpinner,
   EuiOverlayMask,
+  EuiPageContent,
 } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 
@@ -104,10 +105,12 @@ export class CreateCredentialWizard extends React.Component<
       </EuiOverlayMask>
     ) : (
       <>
-        <CredentialForm
-          docLinks={this.context.services.docLinks}
-          handleSubmit={this.createCredential}
-        />
+        <EuiPageContent>
+          <CredentialForm
+            docLinks={this.context.services.docLinks}
+            handleSubmit={this.createCredential}
+          />
+        </EuiPageContent>
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={({ id }) => {

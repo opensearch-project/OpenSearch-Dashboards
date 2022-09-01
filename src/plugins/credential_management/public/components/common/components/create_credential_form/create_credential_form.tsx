@@ -11,7 +11,6 @@ import {
   EuiFieldText,
   EuiButton,
   EuiFieldPassword,
-  EuiPageContent,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
@@ -28,6 +27,8 @@ import { Header } from '../header';
 export interface CredentialFormProps {
   docLinks: DocLinksStart;
   handleSubmit: (formValues: CreateCredentialItem) => void;
+  hideSubmit?: boolean;
+  callSubmit?: boolean;
 }
 
 export interface CredentialFormState {
@@ -70,6 +71,16 @@ export class CredentialForm extends React.Component<CredentialFormProps, Credent
       password: '',
       dual: true,
     };
+  }
+
+  componentDidUpdate(
+    prevProps: Readonly<CredentialFormProps>,
+    prevState: Readonly<CredentialFormState>,
+    snapshot?: any
+  ) {
+    if (prevProps.callSubmit !== this.props.callSubmit) {
+      this.onClickSubmitForm();
+    }
   }
 
   /* Validations */
@@ -165,7 +176,7 @@ export class CredentialForm extends React.Component<CredentialFormProps, Credent
     const header = this.renderHeader();
 
     return (
-      <EuiPageContent>
+      <>
         {header}
         <EuiHorizontalRule />
         <EuiForm
@@ -251,11 +262,13 @@ export class CredentialForm extends React.Component<CredentialFormProps, Credent
           <EuiSpacer size="xl" />
 
           {/* Create Credential button*/}
-          <EuiButton type="submit" fill onClick={this.onClickSubmitForm}>
-            Create stored credential
-          </EuiButton>
+          {this.props.hideSubmit ? null : (
+            <EuiButton type="submit" fill onClick={this.onClickSubmitForm}>
+              Create stored credential
+            </EuiButton>
+          )}
         </EuiForm>
-      </EuiPageContent>
+      </>
     );
   };
 

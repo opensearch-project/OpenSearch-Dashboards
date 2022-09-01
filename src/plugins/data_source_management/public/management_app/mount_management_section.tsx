@@ -6,7 +6,6 @@
 import { StartServicesAccessor } from 'src/core/public';
 
 import { I18nProvider } from '@osd/i18n/react';
-import { i18n } from '@osd/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
@@ -42,13 +41,6 @@ export async function mountManagementSection(
     docLinks,
     setBreadcrumbs: params.setBreadcrumbs,
   };
-
-  /* Browser - Page Title */
-  const title = i18n.translate('dataSourcesManagement.objects.dataSourcesTitle', {
-    defaultMessage: 'Data Sources',
-  });
-
-  chrome.docTitle.change(title);
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>

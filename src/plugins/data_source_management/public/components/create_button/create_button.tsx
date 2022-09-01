@@ -23,7 +23,7 @@ export const CreateButton = ({ history }: Props) => {
     >
       <FormattedMessage
         id="dataSourcesManagement.dataSourcesTable.createBtn"
-        defaultMessage="Create Data Source"
+        defaultMessage="Create data source connection"
       />
     </EuiButton>
   );
