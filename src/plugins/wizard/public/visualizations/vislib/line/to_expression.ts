@@ -5,14 +5,14 @@
 
 import { Vis, buildVislibDimensions } from '../../../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../../../expressions/public';
-import { HistogramOptionsDefaults } from './histogram_vis_type';
+import { LineOptionsDefaults } from './line_vis_type';
 import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState } from '../common/types';
 
 export const toExpression = async ({
   style: styleState,
   visualization,
-}: VislibRootState<HistogramOptionsDefaults>) => {
+}: VislibRootState<LineOptionsDefaults>) => {
   const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization);
   const { addLegend, addTooltip, legendPosition, type } = styleState;
   const pipelineConfigs = {
