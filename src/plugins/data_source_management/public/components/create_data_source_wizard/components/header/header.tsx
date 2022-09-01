@@ -5,15 +5,7 @@
 
 import React from 'react';
 
-import {
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiLink,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -21,13 +13,7 @@ import { DocLinksStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
 
-export const Header = ({
-  isBeta = false,
-  docLinks,
-}: {
-  isBeta?: boolean;
-  docLinks: DocLinksStart;
-}) => {
+export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
 
@@ -42,18 +28,7 @@ export const Header = ({
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle>
-            <h1>
-              {createDataSourceHeader}
-              {isBeta ? (
-                <>
-                  <EuiBetaBadge
-                    label={i18n.translate('dataSourcesManagement.createDataSource.betaLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                  />
-                </>
-              ) : null}
-            </h1>
+            <h1>{createDataSourceHeader}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>

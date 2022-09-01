@@ -53,8 +53,6 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
   }: CreateDataSourceFormType) => {
     setIsLoading(true);
     try {
-      // TODO: Add rendering spinner
-
       /* Create new credential, if user selects that option*/
       if (credentialType === CredentialSourceType.CreateCredential && newCredential?.title) {
         credentialId = await createCredential(newCredential);

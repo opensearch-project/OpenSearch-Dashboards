@@ -181,9 +181,9 @@ export class CreateDataSourceForm extends React.Component<
   resetExistingCredentialSelection = () => {
     this.setState({
       selectedCredentials: [],
-      availableCredentials: this.state.availableCredentials?.map((rec) => {
-        rec.checked = false;
-        return rec;
+      availableCredentials: this.state.availableCredentials?.map((credential) => {
+        credential.checked = false;
+        return credential;
       }),
     });
   };
@@ -211,9 +211,9 @@ export class CreateDataSourceForm extends React.Component<
 
   onSelectExistingCredentials = (options: CredentialsComboBoxItem[]) => {
     const selectedCredentials: CredentialsComboBoxItem[] = [];
-    options.forEach((rec) => {
-      if (rec.checked === 'on') {
-        selectedCredentials.push(rec);
+    options.forEach((credential) => {
+      if (credential.checked === 'on') {
+        selectedCredentials.push(credential);
       }
     });
     this.setState({ availableCredentials: options, selectedCredentials }, () => {
