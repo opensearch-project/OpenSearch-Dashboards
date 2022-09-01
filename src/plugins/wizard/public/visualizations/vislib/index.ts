@@ -5,3 +5,4 @@
 
 export { createHistogramConfig } from './histogram';
 export { createLineConfig } from './line';
+export { createAreaConfig } from './area';
