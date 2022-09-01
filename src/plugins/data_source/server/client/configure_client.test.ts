@@ -5,12 +5,8 @@
 
 import { SavedObjectsClientContract } from '../../../../core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
-import {
-  CredentialMaterialsType,
-  CredentialSavedObjectAttributes,
-} from '../../common/credentials/types';
-import { DataSourceAttributes } from '../../common/data_sources';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
+import { DataSourceAttributes, CredentialsType } from '../../common/data_sources/types';
 import { DataSourcePluginConfigType } from '../../config';
 import { ClientMock, parseClientOptionsMock } from './configure_client.test.mocks';
 import { OpenSearchClientPoolSetup } from './client_pool';
@@ -21,7 +17,6 @@ import { opensearchClientMock } from '../../../../core/server/opensearch/client/
 import { CryptographyClient } from '../cryptography';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
-const CREDENETIAL_ID = 'a54dsaadasfasfwe22d23d23d2453df3';
 const cryptoClient = new CryptographyClient('test', 'test', new Array(32).fill(0));
 
 // TODO: improve UT
@@ -55,6 +50,13 @@ describe('configureClient', () => {
       title: 'title',
       endpoint: 'http://localhost',
       noAuth: false,
+      credentials: {
+        type: CredentialsType.UsernamePasswordType,
+        credentialsContent: {
+          username: 'username',
+          password: 'password',
+        },
+      },
     } as DataSourceAttributes;
 
     clientPoolSetup = {
@@ -62,30 +64,12 @@ describe('configureClient', () => {
       addClientToPool: jest.fn(),
     };
 
-    const crendentialAttr = {
-      title: 'cred',
-      credentialMaterials: {
-        credentialMaterialsType: CredentialMaterialsType.UsernamePasswordType,
-        credentialMaterialsContent: {
-          username: 'username',
-          password: 'password',
-        },
-      },
-    } as CredentialSavedObjectAttributes;
-
-    savedObjectsMock.get
-      .mockResolvedValueOnce({
-        id: DATA_SOURCE_ID,
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        attributes: dataSourceAttr,
-        references: [{ name: 'user', type: CREDENTIAL_SAVED_OBJECT_TYPE, id: CREDENETIAL_ID }],
-      })
-      .mockResolvedValueOnce({
-        id: CREDENETIAL_ID,
-        type: CREDENTIAL_SAVED_OBJECT_TYPE,
-        attributes: crendentialAttr,
-        references: [],
-      });
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: dataSourceAttr,
+      references: [],
+    });
 
     ClientMock.mockImplementation(() => {
       return dsClient;
@@ -135,7 +119,7 @@ describe('configureClient', () => {
     );
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(savedObjectsMock.get).toHaveBeenCalledTimes(2);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
   });
