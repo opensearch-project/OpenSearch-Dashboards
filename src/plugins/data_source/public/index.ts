@@ -12,11 +12,3 @@ export function plugin() {
 }
 
 export { DataSourcePublicPluginSetup, DataSourcePublicPluginStart } from './types';
-
-export {
-  CredentialMaterialsType,
-  CredentialSavedObjectAttributes,
-  CredentialMaterials,
-  UsernamePasswordTypedContent,
-  CREDENTIAL_SAVED_OBJECT_TYPE,
-} from '../common';

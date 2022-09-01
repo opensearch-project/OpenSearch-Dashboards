@@ -23,8 +23,10 @@ import { DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyClient } from './cryptography';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
-import { credential, CredentialSavedObjectsClientWrapper, dataSource } from './saved_objects';
+import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
+
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
@@ -41,9 +43,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   public async setup(core: CoreSetup) {
     this.logger.debug('data_source: Setup');
 
-    // Register credential saved object type
-    core.savedObjects.registerType(credential);
-
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
 
@@ -52,21 +51,21 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     // Fetch configs used to create credential saved objects client wrapper
     const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = config.encryption;
 
-    // Create credential saved objects client wrapper
+    // Create data source saved objects client wrapper
     const cryptographyClient = new CryptographyClient(
       wrappingKeyName,
       wrappingKeyNamespace,
       wrappingKey
     );
-    const credentialSavedObjectsClientWrapper = new CredentialSavedObjectsClientWrapper(
+    const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
       cryptographyClient
     );
 
-    // Add credential saved objects client wrapper factory
+    // Add data source saved objects client wrapper factory
     core.savedObjects.addClientWrapper(
       1,
-      'credential',
-      credentialSavedObjectsClientWrapper.wrapperFactory
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
+      dataSourceSavedObjectsClientWrapper.wrapperFactory
     );
 
     const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
