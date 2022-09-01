@@ -19,29 +19,27 @@ import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
 import { CryptographyClient } from '../cryptography';
 
-import { CredentialMaterialsType, CREDENTIAL_SAVED_OBJECT_TYPE } from '../../common';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
+import { CredentialsType } from '../../common/data_sources';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
  * which contains the factory used to create Saved Objects Client Wrapper instances
  */
-export class CredentialSavedObjectsClientWrapper {
+export class DataSourceSavedObjectsClientWrapper {
   constructor(private cryptographyClient: CryptographyClient) {}
 
   /**
    * Describes the factory used to create instances of Saved Objects Client Wrappers
-   * for credential spcific operations such as encryption
-   * Check {@link Credential.CredentialSavedObjectAttributes} for attributes type details
-   * Check {@link Credential.CredentialMaterials} for credential materials type and
-   * credential materials content details
+   * for data source spcific operations such as credntials encryption
    */
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
-    const createWithCredentialMaterialsEncryption = async <T = unknown>(
+    const createWithCredentialsEncryption = async <T = unknown>(
       type: string,
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
         return await wrapperOptions.client.create(type, attributes, options);
       }
 
@@ -50,7 +48,7 @@ export class CredentialSavedObjectsClientWrapper {
       return await wrapperOptions.client.create(type, encryptedAttributes, options);
     };
 
-    const bulkCreateWithCredentialMaterialsEncryption = async <T = unknown>(
+    const bulkCreateWithCredentialsEncryption = async <T = unknown>(
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options?: SavedObjectsCreateOptions
     ): Promise<SavedObjectsBulkResponse<T>> => {
@@ -58,7 +56,7 @@ export class CredentialSavedObjectsClientWrapper {
         objects.map(async (object) => {
           const { type, attributes } = object;
 
-          if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
+          if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
             return object;
           }
 
@@ -71,24 +69,24 @@ export class CredentialSavedObjectsClientWrapper {
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
 
-    const updateWithCredentialMaterialsEncryption = async <T = unknown>(
+    const updateWithCredentialsEncryption = async <T = unknown>(
       type: string,
       id: string,
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
-      const encryptedAttributes: Partial<T> = await this.validateAndEncryptPartialAttributes(
+      const encryptedAttributes: Partial<T> = await this.validateAndUpdatePartialAttributes(
         attributes
       );
 
       return await wrapperOptions.client.update(type, id, encryptedAttributes, options);
     };
 
-    const bulkUpdateWithCredentialMaterialsEncryption = async <T = unknown>(
+    const bulkUpdateWithCredentialsEncryption = async <T = unknown>(
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
@@ -96,11 +94,11 @@ export class CredentialSavedObjectsClientWrapper {
         objects.map(async (object) => {
           const { type, attributes } = object;
 
-          if (CREDENTIAL_SAVED_OBJECT_TYPE !== type) {
+          if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
             return object;
           }
 
-          const encryptedAttributes: Partial<T> = await this.validateAndEncryptPartialAttributes(
+          const encryptedAttributes: Partial<T> = await this.validateAndUpdatePartialAttributes(
             attributes
           );
 
@@ -116,100 +114,139 @@ export class CredentialSavedObjectsClientWrapper {
 
     return {
       ...wrapperOptions.client,
-      create: createWithCredentialMaterialsEncryption,
-      bulkCreate: bulkCreateWithCredentialMaterialsEncryption,
+      create: createWithCredentialsEncryption,
+      bulkCreate: bulkCreateWithCredentialsEncryption,
       checkConflicts: wrapperOptions.client.checkConflicts,
       delete: wrapperOptions.client.delete,
       find: wrapperOptions.client.find,
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
-      update: updateWithCredentialMaterialsEncryption,
-      bulkUpdate: bulkUpdateWithCredentialMaterialsEncryption,
+      update: updateWithCredentialsEncryption,
+      bulkUpdate: bulkUpdateWithCredentialsEncryption,
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
     };
   };
 
+  private isValidUrl(endpoint: string) {
+    try {
+      return Boolean(new URL(endpoint));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  private dropCredentials<T = unknown>(attributes: Omit<T, 'credentials'>) {
+    return attributes;
+  }
+
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     this.validateAttributes(attributes);
 
-    return await this.encryptCredentialMaterials(attributes);
-  }
+    const { noAuth } = attributes;
 
-  private async validateAndEncryptPartialAttributes<T = unknown>(attributes: T) {
-    const { credentialMaterials } = attributes;
-    const { credentialMaterialsContent } = credentialMaterials;
-
-    if ('password' in credentialMaterialsContent) {
-      this.validatePassword(credentialMaterialsContent.password);
-      return {
-        ...attributes,
-        credentialMaterials: await this.encryptUsernamePasswordTypedCredentialMaterials(
-          credentialMaterials
-        ),
-      };
-    } else {
-      this.validateAttributes(attributes);
+    // Drop credentials when no Auth
+    if (!noAuth) {
+      return this.dropCredentials(attributes);
     }
 
-    return await this.encryptCredentialMaterials(attributes);
-  }
+    const { type, credentialsContent } = attributes.credentials;
 
-  private validateAttributes<T = unknown>(attributes: T) {
-    const { title, credentialMaterials } = attributes;
-    if (!title) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "title" required');
-    }
-
-    this.validateCredentialMaterials(credentialMaterials);
-  }
-
-  private validateCredentialMaterials<T = unknown>(credentialMaterials: T) {
-    if (credentialMaterials === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "credentialMaterials" required'
-      );
-    }
-
-    const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
-
-    if (credentialMaterialsType === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "credentialMaterialsType" required for "credentialMaterials"'
-      );
-    }
-
-    if (credentialMaterialsContent === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "credentialMaterialsContent" required for "credentialMaterials"'
-      );
-    }
-  }
-
-  private async encryptCredentialMaterials<T = unknown>(attributes: T) {
-    const { credentialMaterials } = attributes;
-
-    const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
-    const { username } = credentialMaterialsContent;
-
-    switch (credentialMaterialsType) {
-      case CredentialMaterialsType.UsernamePasswordType:
-        this.validateUsername(username);
-
+    switch (type) {
+      case CredentialsType.UsernamePasswordType:
+        const { username, password } = credentialsContent;
         return {
           ...attributes,
-          credentialMaterials: {
-            credentialMaterialsType,
-            credentialMaterialsContent: {
+          credentials: {
+            type,
+            credentialsContent: {
               username,
+              password: await this.cryptographyClient.encryptAndEncode(password),
             },
           },
         };
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(
-          `Invalid credential materials type: '${credentialMaterialsType}'`
+          `Invalid credential materials type: '${type}'`
         );
+    }
+  }
+
+  private async validateAndUpdatePartialAttributes<T = unknown>(attributes: T) {
+    const { noAuth, credentials } = attributes;
+
+    // Drop credentials when no Auth
+    if (!noAuth) {
+      return this.dropCredentials(attributes);
+    }
+
+    const { type, credentialsContent } = credentials;
+
+    switch (type) {
+      case CredentialsType.UsernamePasswordType:
+        if ('password' in credentialsContent) {
+          const { username, password } = credentialsContent;
+          return {
+            ...attributes,
+            credentials: {
+              type,
+              credentialsContent: {
+                username,
+                password: await this.cryptographyClient.encryptAndEncode(password),
+              },
+            },
+          };
+        } else {
+          return attributes;
+        }
+      default:
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid credentials type: '${type}'`);
+    }
+  }
+
+  private validateAttributes<T = unknown>(attributes: T) {
+    const { title, endpoint, noAuth, credentials } = attributes;
+    if (!title) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "title" required');
+    }
+
+    if (!this.isValidUrl(endpoint)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "endpoint" is not valid');
+    }
+
+    if (noAuth) {
+      this.validateCredentials(credentials);
+    }
+  }
+
+  private validateCredentials<T = unknown>(credentials: T) {
+    if (credentials === undefined) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('attribute "credentials" required');
+    }
+
+    const { type, credentialsContent } = credentials;
+
+    if (!type) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'attribute "type" required for "credentials"'
+      );
+    }
+
+    if (credentialsContent === undefined) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'attribute "credentialsContent" required for "credentials"'
+      );
+    }
+
+    switch (type) {
+      case CredentialsType.UsernamePasswordType:
+        const { username, password } = credentialsContent;
+
+        this.validateUsername(username);
+        this.validatePassword(password);
+      default:
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid credentials type: '${type}'`);
     }
   }
 
@@ -225,20 +262,5 @@ export class CredentialSavedObjectsClientWrapper {
       throw SavedObjectsErrorHelpers.createBadRequestError('attribute "password" required');
     }
     return;
-  }
-
-  private async encryptUsernamePasswordTypedCredentialMaterials<T = unknown>(
-    credentialMaterials: T
-  ) {
-    const { credentialMaterialsType, credentialMaterialsContent } = credentialMaterials;
-    return {
-      credentialMaterialsType,
-      credentialMaterialsContent: {
-        username: credentialMaterialsContent.username,
-        password: await this.cryptographyClient.encryptAndEncode(
-          credentialMaterialsContent.password
-        ),
-      },
-    };
   }
 }
