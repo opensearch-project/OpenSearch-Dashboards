@@ -34,7 +34,7 @@ export const toExpression = async ({ style: styleState, visualization }: Histogr
     }
   );
 
-  // ----------  START  -----------
+  const { addLegend, addTooltip, legendPosition } = styleState;
 
   const pipelineConfigs = {
     // todo: this will blow up for time x dimensions
@@ -46,11 +46,12 @@ export const toExpression = async ({ style: styleState, visualization }: Histogr
 
   const dimensions = await buildVislibDimensions(histogramVisObj, pipelineConfigs as any);
 
-  // what do we put in this "vis config"?
+  // TODO: what do we want to put in this "vis config"?
   const visConfig = {
-    addLegend: true,
+    addLegend,
+    legendPosition,
     addTimeMarker: false,
-    addTooltip: true,
+    addTooltip,
     dimensions,
   };
 
@@ -58,10 +59,6 @@ export const toExpression = async ({ style: styleState, visualization }: Histogr
     type: 'histogram',
     visConfig: JSON.stringify(visConfig),
   });
-
-  // What does vislib need?
-
-  // ------------------  END  ----------
 
   const ast = buildExpression([opensearchaggs, histogramVis]);
 

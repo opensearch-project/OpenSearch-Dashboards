@@ -4,9 +4,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { RangeValues, Schemas } from '../../../../../vis_default_editor/public';
+import { Schemas } from '../../../../../vis_default_editor/public';
+import { Positions } from '../../../../../vis_type_vislib/public';
 import { AggGroupNames } from '../../../../../data/public';
-import { ColorModes, ColorSchemas } from '../../../../../charts/public';
 import { HistogramVisOptions } from './components/histogram_vis_options';
 import { VisualizationTypeOptions } from '../../../services/type_service';
 import { toExpression } from './to_expression';
@@ -14,6 +14,7 @@ import { toExpression } from './to_expression';
 export interface HistogramOptionsDefaults {
   addTooltip: boolean;
   addLegend: boolean;
+  legendPosition: Positions;
   type: 'histogram';
 }
 
@@ -56,7 +57,8 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
       style: {
         defaults: {
           addTooltip: true,
-          addLegend: false,
+          addLegend: true,
+          legendPosition: Positions.RIGHT,
           type: 'histogram',
         },
         render: HistogramVisOptions,
