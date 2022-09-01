@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["management", "dataSource"],
   "optionalPlugins": [],
-  "requiredBundles": ["opensearchDashboardsReact"]
+  "requiredBundles": ["opensearchDashboardsReact", "credentialManagement"]
 }

@@ -9,19 +9,24 @@ import { useEffectOnce } from 'react-use';
 import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceEditPageItem, DataSourceManagementContext, ToastMessageItem } from '../../types';
-import { CreateEditDataSourceWizard } from '../create_edit_data_source_wizard';
-import { MODE_EDIT } from '../../../common';
+import {
+  CredentialSourceType,
+  DataSourceManagementContext,
+  EditDataSourceFormType,
+  ToastMessageItem,
+} from '../../types';
 import { deleteDataSourceById, getDataSourceById, updateDataSourceById } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
+import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
+import { LoadingMask } from '../loading_mask';
 
-const defaultDataSource: DataSourceEditPageItem = {
+const defaultDataSource: EditDataSourceFormType = {
   id: '',
   title: '',
   description: '',
   endpoint: '',
   credentialId: '',
-  noAuthentication: false,
+  credentialType: CredentialSourceType.NoAuth,
 };
 
 const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
@@ -33,7 +38,8 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   >().services;
 
   /* State Variables */
-  const [dataSource, setDataSource] = useState<DataSourceEditPageItem>(defaultDataSource);
+  const [dataSource, setDataSource] = useState<EditDataSourceFormType>(defaultDataSource);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const toastLifeTimeMs: number = 6000;
 
@@ -43,6 +49,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   /* Fetch data source by id*/
   useEffectOnce(() => {
     (async function () {
+      setIsLoading(true);
       try {
         const fetchDataSourceById = await getDataSourceById(
           props.match.params.id,
@@ -63,6 +70,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
 
         props.history.push('');
       }
+      setIsLoading(false);
     })();
   });
 
@@ -73,15 +81,19 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     endpoint,
     id,
     credentialId,
-    noAuthentication,
-  }: DataSourceEditPageItem) => {
+    credentialType,
+  }: EditDataSourceFormType) => {
+    setIsLoading(true);
     try {
-      // TODO: Add rendering spanner https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2050
-
       const references = [];
-      const attributes = { title, description, endpoint, noAuth: noAuthentication };
+      const attributes = {
+        title,
+        description,
+        endpoint,
+        noAuth: credentialType === CredentialSourceType.NoAuth,
+      };
 
-      if (credentialId) {
+      if (!attributes.noAuth && credentialId) {
         references.push({ id: credentialId, type: 'credential', name: 'credential' });
       }
       const options = { references };
@@ -97,6 +109,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         iconType: 'alert',
       });
     }
+    setIsLoading(false);
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
@@ -116,6 +129,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
 
   /* Handle delete - data source*/
   const handleDelete = async () => {
+    setIsLoading(true);
     try {
       await deleteDataSourceById(props.match.params.id, savedObjects.client);
       props.history.push('');
@@ -127,18 +141,30 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         iconType: 'alert',
       });
     }
+    setIsLoading(false);
+  };
+
+  /* Render Loading Mask */
+  const handleDisplayLoading = (show: boolean) => {
+    setIsLoading(show);
   };
 
   /* Render the edit wizard */
   const renderContent = () => {
+    if (!isLoading && (!dataSource || !dataSource.id)) {
+      return <h1>Data Source not found!</h1>;
+    }
     return (
-      <CreateEditDataSourceWizard
-        wizardMode={MODE_EDIT}
-        handleSubmit={handleSubmit}
-        existingDataSource={dataSource}
-        onDeleteDataSource={handleDelete}
-        displayToastMessage={handleDisplayToastMessage}
-      />
+      <>
+        <EditDataSourceForm
+          existingDataSource={dataSource}
+          displayToastMessage={handleDisplayToastMessage}
+          displayLoadingMask={handleDisplayLoading}
+          onDeleteDataSource={handleDelete}
+          handleSubmit={handleSubmit}
+        />
+        {isLoading ? <LoadingMask /> : null}
+      </>
     );
   };
 

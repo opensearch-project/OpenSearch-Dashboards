@@ -9,11 +9,17 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceEditPageItem, DataSourceManagementContext, ToastMessageItem } from '../../types';
+import {
+  CreateDataSourceFormType,
+  CreateNewCredentialType,
+  CredentialSourceType,
+  DataSourceManagementContext,
+  ToastMessageItem,
+} from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { CreateEditDataSourceWizard } from '../create_edit_data_source_wizard';
-import { MODE_CREATE } from '../../../common';
-import { createSingleDataSource } from '../utils';
+import { CreateDataSourceForm } from './components/create_form';
+import { createNewCredential, createSingleDataSource } from '../utils';
+import { LoadingMask } from '../loading_mask';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
@@ -29,6 +35,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
 
   /* State Variables */
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* Set breadcrumb */
   useEffectOnce(() => {
@@ -41,13 +48,23 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
     description,
     endpoint,
     credentialId,
-    noAuthentication,
-  }: DataSourceEditPageItem) => {
+    credentialType,
+    newCredential,
+  }: CreateDataSourceFormType) => {
+    setIsLoading(true);
     try {
-      // TODO: Add rendering spinner
+      /* Create new credential, if user selects that option*/
+      if (credentialType === CredentialSourceType.CreateCredential && newCredential?.title) {
+        credentialId = await createCredential(newCredential);
+      }
 
       const references = [];
-      const attributes = { title, description, endpoint, noAuth: noAuthentication };
+      const attributes = {
+        title,
+        description,
+        endpoint,
+        noAuth: credentialType === CredentialSourceType.NoAuth,
+      };
 
       if (credentialId) {
         references.push({ id: credentialId, type: 'credential', name: 'credential' });
@@ -65,6 +82,26 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
         iconType: 'alert',
       });
     }
+    setIsLoading(false);
+  };
+
+  /* Create credential on form submit */
+  const createCredential = async (newCredential: CreateNewCredentialType) => {
+    let newCredentialId = '';
+    setIsLoading(true);
+    try {
+      newCredentialId = await createNewCredential(savedObjects.client, newCredential);
+    } catch (e) {
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.createDataSource.createNewCredentialsFailMsg',
+        defaultMessage:
+          'The credential saved object creation failed with some errors. Please configure data_source.enabled and try it again.',
+        color: 'warning',
+        iconType: 'alert',
+      });
+    }
+    setIsLoading(false);
+    return newCredentialId;
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
@@ -82,14 +119,22 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
     }
   };
 
+  /* Render Loading Mask */
+  const handleDisplayLoading = (show: boolean) => {
+    setIsLoading(show);
+  };
+
   /* Render the creation wizard */
   const renderContent = () => {
     return (
-      <CreateEditDataSourceWizard
-        wizardMode={MODE_CREATE}
-        handleSubmit={handleSubmit}
-        displayToastMessage={handleDisplayToastMessage}
-      />
+      <>
+        <CreateDataSourceForm
+          handleSubmit={handleSubmit}
+          displayLoadingMask={handleDisplayLoading}
+          displayToastMessage={handleDisplayToastMessage}
+        />
+        {isLoading ? <LoadingMask /> : null}
+      </>
     );
   };
 

@@ -6,9 +6,13 @@
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiButton,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
   EuiInMemoryTable,
   EuiPageContent,
   EuiSpacer,
@@ -25,9 +29,10 @@ import {
   reactRouterNavigate,
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, DataSourceTableItem } from '../../types';
+import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import { CreateButton } from '../create_button';
-import { getDataSources } from '../utils';
+import { deleteMultipleDataSources, getDataSources } from '../utils';
+import { LoadingMask } from '../loading_mask';
 
 /* Table config */
 const pagination = {
@@ -42,41 +47,99 @@ const sorting = {
   },
 };
 
-const search = {
-  box: {
-    incremental: true,
-    schema: {
-      fields: { title: { type: 'string' } },
-    },
-  },
-};
-
 const ariaRegion = i18n.translate('dataSourcesManagement.createDataSourcesLiveRegionAriaLabel', {
   defaultMessage: 'Data Sources',
 });
 const title = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
   defaultMessage: 'Data Sources',
 });
+/* Browser - Page Title */
+const pageTitle = i18n.translate('dataSourcesManagement.objects.dataSourcesTitle', {
+  defaultMessage: 'Data Sources',
+});
+
+const toastLifeTimeMs = 6000;
 
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
-  const { setBreadcrumbs, savedObjects } = useOpenSearchDashboards<
+  const { chrome, setBreadcrumbs, savedObjects } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
+  const [selectedDataSources, setSelectedDataSources] = useState<DataSourceTableItem[]>([]);
+  const [toasts, setToasts] = React.useState<EuiGlobalToastListToast[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
     /* Update breadcrumb*/
     setBreadcrumbs(getListBreadcrumbs());
 
-    /* Initialize the component state*/
-    (async function () {
-      const fetchedDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
-      setDataSources(fetchedDataSources);
-    })();
+    /* Browser - Page Title */
+    chrome.docTitle.change(pageTitle);
+
+    /* fetch data sources*/
+    fetchDataSources();
   });
+
+  const fetchDataSources = () => {
+    setIsLoading(true);
+    getDataSources(savedObjects.client)
+      .then((response: DataSourceTableItem[]) => {
+        setDataSources(response);
+      })
+      .catch(() => {
+        setDataSources([]);
+        handleDisplayToastMessage({
+          id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
+          defaultMessage:
+            'Error occurred while fetching the records for Data sources. Please try it again',
+          color: 'warning',
+          iconType: 'alert',
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  /* Table search config */
+  const renderDeleteButton = () => {
+    return (
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={() => {
+          setConfirmDeleteVisible(true);
+        }}
+        disabled={selectedDataSources.length === 0}
+      >
+        Delete {selectedDataSources.length || ''} connection
+        {selectedDataSources.length >= 2 ? 's' : ''}
+      </EuiButton>
+    );
+  };
+
+  const renderToolsRight = () => {
+    return (
+      <EuiFlexItem key="delete" grow={false}>
+        {renderDeleteButton()}
+      </EuiFlexItem>
+    );
+  };
+
+  const search = {
+    toolsRight: renderToolsRight(),
+    box: {
+      incremental: true,
+      schema: {
+        fields: { title: { type: 'string' } },
+      },
+    },
+  };
 
   /* Table columns */
   const columns = [
@@ -109,14 +172,105 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
+    {
+      field: 'description',
+      name: 'Description',
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
+      dataType: 'string' as const,
+      sortable: ({ sort }: { sort: string }) => sort,
+    },
   ];
 
+  /* render delete modal*/
+  const tableRenderDeleteModal = () => {
+    return confirmDeleteVisible ? (
+      <EuiConfirmModal
+        title="Delete Data Source connection(s) permanently?"
+        onCancel={() => {
+          setConfirmDeleteVisible(false);
+        }}
+        onConfirm={() => {
+          setConfirmDeleteVisible(false);
+          onClickDelete();
+        }}
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete"
+        defaultFocusedButton="confirm"
+      >
+        <p>
+          This will delete data source connections(s) and all Index Patterns using this credential
+          will be invalid for access.
+        </p>
+        <p>To confirm deletion, click delete button.</p>
+        <p>Note: this action is irrevocable!</p>
+      </EuiConfirmModal>
+    ) : null;
+  };
+
+  /* Delete selected data sources*/
+  const onClickDelete = () => {
+    setIsDeleting(true);
+
+    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
+      .then(() => {
+        setSelectedDataSources([]);
+        // Fetch data sources
+        fetchDataSources();
+        setConfirmDeleteVisible(false);
+      })
+      .catch(() => {
+        handleDisplayToastMessage({
+          id: 'dataSourcesManagement.dataSourceListing.deleteDataSourceFailMsg',
+          defaultMessage:
+            'Error occurred while deleting few/all selected records for Data sources. Please try it again',
+          color: 'warning',
+          iconType: 'alert',
+        });
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
+  };
+
+  /* Table selection handlers */
+  const onSelectionChange = (selected: DataSourceTableItem[]) => {
+    setSelectedDataSources(selected);
+  };
+
+  const selection = {
+    onSelectionChange,
+  };
+
+  /* Toast Handlers */
+  const removeToast = (id: string) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
+
+  const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
+    if (id && defaultMessage && color && iconType) {
+      const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
+      setToasts([
+        ...toasts,
+        {
+          title: failureMsg,
+          id: failureMsg.props.id,
+          color,
+          iconType,
+        },
+      ]);
+    }
+  };
+
+  /* Render Ui elements*/
   /* Create Data Source button */
   const createButton = <CreateButton history={history} />;
 
-  /* UI Elements */
-  return (
-    <EuiPageContent data-test-subj="dataSourceTable" role="region" aria-label={ariaRegion}>
+  /* Render header*/
+  const renderHeader = () => {
+    return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
@@ -134,18 +288,61 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={false}
-        items={dataSources}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
+    );
+  };
+
+  /* Render table */
+  const renderTableContent = () => {
+    return (
+      <>
+        <EuiPageContent data-test-subj="dataSourceTable" role="region" aria-label={ariaRegion}>
+          {/* Header */}
+          {renderHeader()}
+
+          <EuiSpacer />
+
+          {/* Delete confirmation modal*/}
+          {tableRenderDeleteModal()}
+
+          {/* Data sources table*/}
+          <EuiInMemoryTable
+            allowNeutralSort={false}
+            itemId="id"
+            isSelectable={true}
+            selection={selection}
+            items={dataSources}
+            columns={columns}
+            pagination={pagination}
+            sorting={sorting}
+            search={search}
+            loading={isLoading}
+          />
+        </EuiPageContent>
+        {isDeleting ? <LoadingMask /> : null}
+      </>
+    );
+  };
+
+  const renderContent = () => {
+    return (
+      <>
+        {renderTableContent()}
+        {}
+      </>
+    );
+  };
+
+  return (
+    <>
+      {renderContent()}
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={({ id }) => {
+          removeToast(id);
+        }}
+        toastLifeTimeMs={toastLifeTimeMs}
       />
-    </EuiPageContent>
+    </>
   );
 };
 
