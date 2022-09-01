@@ -10,6 +10,7 @@ import {
   WizardSavedObjectAttributes,
   WIZARD_SAVED_OBJECT,
 } from '../../common';
+import { wizardSavedObjectTypeMigrations } from './wizard_migration';
 
 export const wizardSavedObjectType: SavedObjectsType = {
   name: WIZARD_SAVED_OBJECT,
@@ -29,7 +30,7 @@ export const wizardSavedObjectType: SavedObjectsType = {
       };
     },
   },
-  migrations: {},
+  migrations: wizardSavedObjectTypeMigrations,
   mappings: {
     properties: {
       title: {
