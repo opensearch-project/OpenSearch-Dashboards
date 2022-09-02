@@ -60,7 +60,7 @@
  export const getNodeId = async (
    internalClient: OpenSearchClient,
    healthcheckAttributeName: string
- ): Promise<string | null> => {
+ ): Promise<string | string[] |null> => {
    try {
 
      console.log('getNodeID');
