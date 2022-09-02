@@ -9,7 +9,7 @@
   display: grid;
   grid-template:
     "topNav topNav topNav" min-content
-    "leftNav workspace rightNav" 1fr / #{$wizSideNavWidth} 1fr #{$wizSideNavWidth};
+    "leftNav workspace rightNav" 1fr / #{$wizLeftNavWidth} 1fr #{$wizRightNavWidth};
   height: calc(100vh - #{$osdHeaderOffset});
 }
 
