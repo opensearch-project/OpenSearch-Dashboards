@@ -44,7 +44,7 @@ export function createSavedWizardVisClass(services: SavedObjectOpenSearchDashboa
           description: '',
           visualizationState: '{}',
           styleState: '{}',
-          version: 1,
+          version: 2,
         },
       });
       this.showInRecentlyAccessed = true;

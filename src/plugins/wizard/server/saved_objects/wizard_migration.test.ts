@@ -8,9 +8,9 @@ import { wizardSavedObjectTypeMigrations } from './wizard_migration';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
-describe('3.0.0', () => {
+describe('2.3.0', () => {
   const migrate = (doc: any) =>
-    wizardSavedObjectTypeMigrations['3.0.0'](
+    wizardSavedObjectTypeMigrations['2.3.0'](
       doc as Parameters<SavedObjectMigrationFn>[0],
       savedObjectMigrationContext
     );
@@ -76,6 +76,7 @@ describe('3.0.0', () => {
           activeVisualization: {},
           indexPattern: 'indexPatternId',
         }),
+        version: 1,
       },
       references: [],
     });
@@ -87,6 +88,7 @@ describe('3.0.0', () => {
           searchFields: {},
           activeVisualization: {},
         }),
+        version: 2,
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
             indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',

@@ -57,9 +57,14 @@ export const getTopNavConfig = (
     visualizationState,
     styleState,
     saveDisabledReason,
-    dispatch
+    dispatch,
   }: TopNavConfigParams,
-  { history, toastNotifications, i18n: { Context: I18nContext }, data: { indexPatterns } }: WizardServices
+  {
+    history,
+    toastNotifications,
+    i18n: { Context: I18nContext },
+    data: { indexPatterns },
+  }: WizardServices
 ) => {
   const topNavConfig: TopNavMenuData[] = [
     {

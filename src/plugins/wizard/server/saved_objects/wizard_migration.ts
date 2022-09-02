@@ -28,6 +28,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
         type: 'index-pattern',
         id: indexPatternId,
       });
+      doc.attributes.version = 2;
 
       return {
         ...doc,
@@ -46,5 +47,5 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 export const wizardSavedObjectTypeMigrations = {
-  '3.0.0': flow(migrateIndexPattern),
+  '2.3.0': flow(migrateIndexPattern),
 };
