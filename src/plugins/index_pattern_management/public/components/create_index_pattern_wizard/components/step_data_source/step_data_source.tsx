@@ -21,7 +21,7 @@ export const StepDataSource = (props: StepDataSourceProps) => {
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceRef>();
   const [isNextStepDisabled, setIsNextStepDisabled] = useState(true);
 
-  const onSearchSelected = (id: string, selectedType: string) => {
+  const onDataSourceSelected = (id: string, selectedType: string) => {
     const selected = { id, type: selectedType };
 
     setSelectedDataSource(selected);
@@ -32,7 +32,7 @@ export const StepDataSource = (props: StepDataSourceProps) => {
     return (
       <EuiPageContent>
         <Header
-          onSearchSelected={onSearchSelected}
+          onDataSourceSelected={onDataSourceSelected}
           dataSourceRef={selectedDataSource!}
           goToNextStep={() => goToNextStep(selectedDataSource!)}
           isNextStepDisabled={isNextStepDisabled}
