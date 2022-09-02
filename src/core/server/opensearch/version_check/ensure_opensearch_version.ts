@@ -100,7 +100,7 @@
      );
 
      if (findIfNodeDINumberDoesnMatch) {
-       return null;
+       return nodeIds;
      }
      return '_local';
    } catch (e) {
