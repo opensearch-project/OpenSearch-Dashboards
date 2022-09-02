@@ -32,7 +32,7 @@ import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
 import { createHashHistory } from 'history';
 import { from, Observable, concat } from 'rxjs';
-import { map, mergeMap, reduce } from 'rxjs/operators';
+import { filter, map, mergeMap, reduce } from 'rxjs/operators';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
@@ -164,6 +164,20 @@ export function initDashboardApp(app, deps) {
             );
 
             const combined$ = concat(dashboardListItems$, otherDashboardLists$).pipe(
+              map((item) => item as DashboardListItem)
+            );
+
+            const searchRx = new RegExp(search, 'i');
+            const matchSearchToItem: (item: DashboardListItem) => boolean = (item) => {
+              const matchedTitle = !!item.title.match(searchRx);
+              const matchedDescription = !!item.description.match(searchRx);
+
+              return matchedTitle || matchedDescription;
+            };
+
+            const searchFiltered$ = combined$.pipe(filter(matchSearchToItem));
+
+            const dashboardDisplay$ = searchFiltered$.pipe(
               reduce<DashboardListItem, DashboardDisplay>(
                 (acc: DashboardDisplay, item: DashboardListItem) => {
                   return { hits: [...acc.hits, item], total: acc.total + 1 };
@@ -172,7 +186,7 @@ export function initDashboardApp(app, deps) {
               )
             );
 
-            return combined$.toPromise();
+            return dashboardDisplay$.toPromise();
           };
           $scope.editItem = ({ editUrl }) => {
             history.push(editUrl);
