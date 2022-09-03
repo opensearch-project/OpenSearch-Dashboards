@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepDataSource should render normally 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      goToNextStep={[Function]}
+      isNextStepDisabled={true}
+      onDataSourceSelected={[Function]}
+      stepInfo={
+        Object {
+          "currentStepNumber": 0,
+          "totalStepNumber": 0,
+        }
+      }
+    />
+  </EuiPageContent>
+</Fragment>
+`;
