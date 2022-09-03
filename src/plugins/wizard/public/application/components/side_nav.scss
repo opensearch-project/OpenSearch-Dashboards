@@ -16,6 +16,7 @@
   &.right {
     border-left: $euiBorderThin;
     grid-area: rightNav;
+    height: 100%;
   }
 
   &__header {
