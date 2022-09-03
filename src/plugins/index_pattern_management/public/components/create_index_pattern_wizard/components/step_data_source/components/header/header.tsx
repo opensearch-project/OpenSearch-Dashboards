@@ -27,7 +27,7 @@ import { useOpenSearchDashboards } from '../../../../../../../../../plugins/open
 import { StepInfo } from '../../../../types';
 
 interface HeaderProps {
-  onSearchSelected: (id: string, type: string) => void;
+  onDataSourceSelected: (id: string, type: string) => void;
   dataSourceRef: DataSourceRef;
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
@@ -37,7 +37,7 @@ interface HeaderProps {
 const DATA_SOURCE_PAGE_SIZE = 5;
 
 export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
-  const { dataSourceRef, onSearchSelected, goToNextStep, isNextStepDisabled, stepInfo } = props;
+  const { dataSourceRef, onDataSourceSelected, goToNextStep, isNextStepDisabled, stepInfo } = props;
   const { currentStepNumber, totalStepNumber } = stepInfo;
 
   const [defaultChecked, setDefaultChecked] = useState(true);
@@ -74,10 +74,9 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           defaultMessage="Please pick the data source -- within which to configure index patterns."
         />
       </EuiText>
-
       <EuiSpacer size="m" />
-
       <EuiRadio
+        data-test-subj="createIndexPatternStepDataSourceUseDefaultRadio"
         id={'useDefault'}
         label={
           <FormattedMessage
@@ -97,6 +96,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
       </EuiText>
       <EuiSpacer size="l" />
       <EuiRadio
+        data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
         id={'useDataSource'}
         label={
           <FormattedMessage
@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           <EuiSpacer size="m" />
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
-            onChoose={onSearchSelected}
+            onChoose={onDataSourceSelected}
             showFilter={false}
             noItemsMessage={i18n.translate(
               'indexPatternManagement.createIndexPattern.searchSelection.notFoundLabel',
@@ -149,6 +149,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="createIndexPatternStepDataSourceNextStepButton"
             fill
             iconSide="right"
             iconType="arrowRight"
