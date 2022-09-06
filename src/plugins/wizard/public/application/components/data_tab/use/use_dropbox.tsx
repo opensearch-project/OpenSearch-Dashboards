@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../data/common';
 import { Schema } from '../../../../../../vis_default_editor/public';
-import { FieldDragDataType } from '../../../utils/drag_drop/types';
+import { COUNT_FIELD, FieldDragDataType } from '../../../utils/drag_drop/types';
 import { useTypedDispatch, useTypedSelector } from '../../../utils/state_management';
 import { DropboxDisplay, DropboxProps } from '../dropbox';
 import { useDrop } from '../../../utils/drag_drop';
@@ -119,10 +119,10 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     (data: FieldDragDataType['value']) => {
       if (!data || !validAggTypes.length) return;
 
-      const { name: fieldName } = data;
+      const fieldName = data;
       const schemaAggTypes = (schema.defaults as any).aggTypes;
       const allowedAggTypes = schemaAggTypes
-        ? schemaAggTypes.filter((type) => validAggTypes.includes(type))
+        ? schemaAggTypes.filter((type: string) => validAggTypes.includes(type))
         : [];
 
       aggConfigs?.createAggConfig({
@@ -160,14 +160,21 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   useEffect(() => {
     const getValidAggTypes = () => {
       if (!dragData || schema.group === 'none') return [];
+      const isCountField = dragData === COUNT_FIELD;
 
-      const indexField = getIndexPatternField(dragData.name, indexPattern?.fields ?? []);
+      const indexField = isCountField
+        ? { type: 'count' }
+        : getIndexPatternField(dragData, indexPattern?.fields ?? []);
 
       if (!indexField) return [];
 
       // Get all aggTypes allowed by the schema and get a list of all the aggTypes that the dragged index field can use
       const aggTypes = aggService.types.getAll();
-      const allowedAggTypes = filterByName(aggTypes[schema.group], schema.aggFilter);
+      // `types` can be either a Bucket or Metric aggType, but both types have the name property.
+      const allowedAggTypes = filterByName(
+        aggTypes[schema.group] as BucketAggType[],
+        schema.aggFilter
+      );
 
       return (
         allowedAggTypes
@@ -175,8 +182,9 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
             const allowedFieldTypes = aggType.paramByName('field')?.filterFieldTypes;
             return filterByType([indexField], allowedFieldTypes).length !== 0;
           })
+          .filter((aggType) => (isCountField ? true : aggType.name !== 'count'))
           // `types` can be either a Bucket or Metric aggType, but both types have the name property.
-          .map((agg) => (agg as BucketAggType).name)
+          .map((aggType) => (aggType as BucketAggType).name)
       );
     };
 
