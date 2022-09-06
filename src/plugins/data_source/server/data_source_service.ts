@@ -30,7 +30,7 @@ export class DataSourceService {
   async setup(config: DataSourcePluginConfigType) {
     const openSearchClientPoolSetup = await this.openSearchClientPool.setup(config);
 
-    const getDataSourceClient = async (
+    const getDataSourceClient = (
       dataSourceId: string,
       savedObjects: SavedObjectsClientContract,
       cryptographyClient: CryptographyClient

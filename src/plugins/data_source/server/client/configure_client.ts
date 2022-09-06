@@ -4,14 +4,8 @@
  */
 
 import { Client } from '@opensearch-project/opensearch';
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+import { Logger, SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-
 import {
   AuthType,
   DataSourceAttributes,
@@ -19,6 +13,7 @@ import {
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyClient } from '../cryptography';
+import { DataSourceConfigError } from '../lib/error';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
 
@@ -30,45 +25,42 @@ export const configureClient = async (
   config: DataSourcePluginConfigType,
   logger: Logger
 ): Promise<Client> => {
-  const dataSource = await getDataSource(dataSourceId, savedObjects);
-  const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
+  try {
+    const dataSource = await getDataSource(dataSourceId, savedObjects);
+    const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
 
-  return getQueryClient(rootClient, dataSource, cryptographyClient);
+    return await getQueryClient(rootClient, dataSource, cryptographyClient);
+  } catch (error: any) {
+    logger.error(`Fail to get data source client for dataSourceId: [${dataSourceId}]`);
+    logger.error(error);
+    // Re-throw as DataSourceConfigError
+    throw new DataSourceConfigError('Fail to get data source client: ', error);
+  }
 };
 
 export const getDataSource = async (
   dataSourceId: string,
   savedObjects: SavedObjectsClientContract
 ): Promise<SavedObject<DataSourceAttributes>> => {
-  try {
-    const dataSource = await savedObjects.get<DataSourceAttributes>(
-      DATA_SOURCE_SAVED_OBJECT_TYPE,
-      dataSourceId
-    );
-    return dataSource;
-  } catch (error: any) {
-    // it will cause 500 error when failed to get saved objects, need to handle such error gracefully
-    throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
-  }
+  const dataSource = await savedObjects.get<DataSourceAttributes>(
+    DATA_SOURCE_SAVED_OBJECT_TYPE,
+    dataSourceId
+  );
+  return dataSource;
 };
 
 export const getCredential = async (
   dataSource: SavedObject<DataSourceAttributes>,
   cryptographyClient: CryptographyClient
 ): Promise<UsernamePasswordTypedContent> => {
-  try {
-    const { username, password } = dataSource.attributes.auth.credentials!;
-    const decodedPassword = await cryptographyClient.decodeAndDecrypt(password);
-    const credential = {
-      username,
-      password: decodedPassword,
-    };
+  const { username, password } = dataSource.attributes.auth.credentials!;
+  const decodedPassword = await cryptographyClient.decodeAndDecrypt(password);
+  const credential = {
+    username,
+    password: decodedPassword,
+  };
 
-    return credential;
-  } catch (error: any) {
-    // it will cause 500 error when failed to get saved objects, need to handle such error gracefully
-    throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
-  }
+  return credential;
 };
 
 /**
