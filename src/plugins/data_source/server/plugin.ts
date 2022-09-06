@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenSearchClientError } from '@opensearch-project/opensearch/lib/errors';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import {
@@ -129,21 +128,14 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       return {
         opensearch: {
           getClient: (dataSourceId: string) => {
-            try {
-              const auditor = auditTrailPromise.then((auditTrail) => auditTrail.asScoped(req));
-              this.logAuditMessage(auditor, dataSourceId, req);
+            const auditor = auditTrailPromise.then((auditTrail) => auditTrail.asScoped(req));
+            this.logAuditMessage(auditor, dataSourceId, req);
 
-              return dataSourceService.getDataSourceClient(
-                dataSourceId,
-                context.core.savedObjects.client,
-                cryptographyClient
-              );
-            } catch (error: any) {
-              logger.error(
-                `Fail to get data source client for dataSourceId: [${dataSourceId}]. Detail: ${error.messages}`
-              );
-              throw new OpenSearchClientError(error.message);
-            }
+            return dataSourceService.getDataSourceClient(
+              dataSourceId,
+              context.core.savedObjects.client,
+              cryptographyClient
+            );
           },
         },
       };
