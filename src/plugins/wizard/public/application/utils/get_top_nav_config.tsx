@@ -41,7 +41,6 @@ import { WizardVisSavedObject } from '../../types';
 import { StyleState, VisualizationState, AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
-
 interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
@@ -60,7 +59,12 @@ export const getTopNavConfig = (
     saveDisabledReason,
     dispatch,
   }: TopNavConfigParams,
-  { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
+  {
+    history,
+    toastNotifications,
+    i18n: { Context: I18nContext },
+    data: { indexPatterns },
+  }: WizardServices
 ) => {
   const topNavConfig: TopNavMenuData[] = [
     {
@@ -96,7 +100,15 @@ export const getTopNavConfig = (
             return;
           }
           const currentTitle = savedWizardVis.title;
-          savedWizardVis.visualizationState = JSON.stringify(visualizationState);
+          const indexPattern = await indexPatterns.get(visualizationState.indexPattern || '');
+          savedWizardVis.searchSourceFields = {
+            index: indexPattern,
+          };
+          const vizStateWithoutIndex = {
+            searchField: visualizationState.searchField,
+            activeVisualization: visualizationState.activeVisualization,
+          };
+          savedWizardVis.visualizationState = JSON.stringify(vizStateWithoutIndex);
           savedWizardVis.styleState = JSON.stringify(styleState);
           savedWizardVis.title = newTitle;
           savedWizardVis.description = newDescription;
