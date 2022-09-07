@@ -54,10 +54,10 @@ export const RightNav = () => {
       {newVisType && (
         <EuiConfirmModal
           title={i18n.translate('wizard.rightNav.changeVisType.modalTitle', {
-            defaultMessage: 'Change Visualization type',
+            defaultMessage: 'Change visualization type',
           })}
           confirmButtonText={i18n.translate('wizard.rightNav.changeVisType.confirmText', {
-            defaultMessage: 'Ok',
+            defaultMessage: 'Change type',
           })}
           cancelButtonText={i18n.translate('wizard.rightNav.changeVisType.cancelText', {
             defaultMessage: 'Cancel',
@@ -79,7 +79,7 @@ export const RightNav = () => {
           <p>
             <FormattedMessage
               id="wizard.rightNav.changeVisType.modalDescription"
-              defaultMessage="Changing the visualization type will reset all field selections. Are you sure you want to continue?"
+              defaultMessage="Changing the visualization type will reset all field selections. Do you want to continue?"
             />
           </p>
         </EuiConfirmModal>
