@@ -31,6 +31,7 @@
  */
 
 import compactStringify from 'json-stringify-pretty-compact';
+import { validateObject } from '@osd/std';
 
 export class Utils {
   /**
@@ -60,5 +61,42 @@ export class Utils {
       error = error.message;
     }
     return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
+  }
+
+  static handleNonStringIndex(index: unknown): string | undefined {
+    return typeof index === 'string' ? index : undefined;
+  }
+
+  static handleInvalidQuery(query: unknown): object | null {
+    if (Utils.isObject(query) && !Utils.checkForFunctionProperty(query as object)) {
+      // Validating object against prototype pollution
+      validateObject(query);
+      return JSON.parse(JSON.stringify(query));
+    }
+    return null;
+  }
+
+  static isObject(object: unknown): boolean {
+    return !!(object && typeof object === 'object' && !Array.isArray(object));
+  }
+
+  static checkForFunctionProperty(object: object): boolean {
+    let result = false;
+    Object.values(object).forEach((value) => {
+      result =
+        typeof value === 'function'
+          ? true
+          : Utils.isObject(value) && Utils.checkForFunctionProperty(value);
+    });
+    return result;
+  }
+
+  static handleInvalidDate(date: unknown): number | string | Date | null {
+    if (typeof date === 'number') {
+      return !isNaN(date) ? date : null;
+    } else if (date instanceof Date || typeof date === 'string') {
+      return date;
+    }
+    return null;
   }
 }
