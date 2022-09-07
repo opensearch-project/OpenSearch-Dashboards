@@ -79,7 +79,7 @@ export const RightNav = () => {
           <p>
             <FormattedMessage
               id="wizard.rightNav.changeVisType.modalDescription"
-              defaultMessage="Currently, changing the visualization type clears the existing selection of fields. Are you sure you want to change the visualization type?"
+              defaultMessage="Changing the visualization type will reset all field selections. Are you sure you want to continue?"
             />
           </p>
         </EuiConfirmModal>

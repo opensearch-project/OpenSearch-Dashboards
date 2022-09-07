@@ -34,7 +34,7 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
             }),
             min: 1,
             max: 3,
-            aggFilter: ['!geo_centroid', '!geo_bounds'], // '!geo_centroid', '!geo_bounds'
+            aggFilter: ['!geo_centroid', '!geo_bounds'],
             defaults: { aggTypes: ['median'] },
           },
           {

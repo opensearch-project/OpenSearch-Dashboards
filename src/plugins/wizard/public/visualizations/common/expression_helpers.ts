@@ -16,6 +16,7 @@ export const getAggExpressionFunctions = async (visualization: VisualizationStat
 
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
+  // aggConfigParams is the serealizeable aggConfigs that need to be reconstructed here using the agg servce
   const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
