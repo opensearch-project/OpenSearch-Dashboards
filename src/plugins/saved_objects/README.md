@@ -1,14 +1,14 @@
-# Saved Object
+# Saved object
 
-The saved object plugin provides all the core services and functionalities of the saved objects, and is utilized by many other plugins such as visualizaton plugin, dashboard plugin and wizard plugin etc.
+The saved object plugin provides all the core services and functionalities of saved objects, and is utilized by many core plugins such as [`visualizaton`](../visualizations/), [`dashboard`](../dashboard/) and [`wizard`](../wizard/), as well as external plugins.
 
-## Save Relationships to Index Pattern
+## Save relationships to index pattern
 
-The relationships to index patterns are saved using the kibanaSavedObjectMeta attribute and the references array structure. Functions from the data plugin are utilized by the saved object plugin to manage this index pattern relationships. 
+Saved objects that have relationships to index patterns are saved using the [`kibanaSavedObjectMeta`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/saved_objects/public/saved_object/helpers/serialize_saved_object.ts#L59) attribute and the [`references`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/saved_objects/public/saved_object/helpers/serialize_saved_object.ts#L60) array structure. Functions from the data plugin are utilized by the saved object plugin to manage this index pattern relationships. 
 
 A standard saved object and its index pattern relationship:
 
-```.ts
+```ts
 
 "kibanaSavedObjectMeta" : {
     "searchSourceJSON" : """{"filter":[],"query":{"query":"","language":"kuery"},"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}"""
@@ -29,12 +29,12 @@ A standard saved object and its index pattern relationship:
 
 When saving a saved object and its relationship to the index pattern: 
 
-1. A saved object will be built using `buildSavedObject` function, services such as hydrating index pattern, initializing and serializing the saved object are set and configs such as saved object id, migration version are defined.
+1. A saved object will be built using [`buildSavedObject`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/saved_objects/public/saved_object/helpers/build_saved_object.ts#L46) function, which hydrates index pattern, initializes the saved object, and defines configs such as saved object id and migration version.
 2. The saved object will then be serialized by three steps: 
 
-    a. By using `extractReferences` function from the data plugin, the index pattern information will be extracted using the index pattern id within the kibanaSavedObjectMeta, and the id will be replaced by a reference name, such as `indexRefName`; a corresponding index pattern object will then be created to include more detailed information of the index pattern: name (`kibanaSavedObjectMeta.searchSourceJSON.index`), type and id.
+    a. By using [`extractReferences`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/data/common/search/search_source/extract_references.ts#L35) function from the data plugin, the index pattern information will be extracted using the index pattern id within the `kibanaSavedObjectMeta`, and the id will be replaced by a reference name, such as `indexRefName`; a corresponding index pattern object will then be created to include more detailed information of the index pattern: name (`kibanaSavedObjectMeta.searchSourceJSON.index`), type and id.
 
-    ```.ts
+    ```ts
      let searchSourceFields = { ...state };
     const references = [];
 
@@ -53,28 +53,28 @@ When saving a saved object and its relationship to the index pattern:
     }
     ```
 
-    b. The indexRefName along with other information will be stringfied and saved into `kibanaSavedObjectMeta.searchSourceJSON`. 
+    b. The `indexRefName` along with other information will be stringfied and saved into `kibanaSavedObjectMeta.searchSourceJSON`. 
     
     c. Saved object client will create the reference array attribute, and the index pattern object will be pushed into the  reference array.
 
 
-### Loading an existing/Creating a new saved object
+### Loading an existing/creating a new saved object
 
-1. When loading an existing object or creating a new, `initializeSavedObject` function will be called. 
-2. The saved object will be deserialized in the `applyOpenSearchResp` function.
+1. When loading an existing object or creating a new, [`initializeSavedObject`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/saved_objects/public/saved_object/helpers/initialize_saved_object.ts#L38) function will be called. 
+2. The saved object will be deserialized in the [`applyOpenSearchResp`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/saved_objects/public/saved_object/helpers/apply_opensearch_resp.ts#L50) function.
 
-    a. Using `injectReferences` function from the data plugin, the index pattern reference name within the kibanaSavedObject will be subsituted by the index pattern id and the corerresponding index pattern reference object will be deleted if there are filters applied.
+    a. Using [`injectReferences`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/data/common/search/search_source/inject_references.ts#L34) function from the data plugin, the index pattern reference name within the `kibanaSavedObject` will be substituted by the index pattern id and the corresponding index pattern reference object will be deleted if there are filters applied.
 
-    ```.ts
+    ```ts
     searchSourceReturnFields.index = reference.id;
     delete searchSourceReturnFields.indexRefName;
     ```
 
 ### Others
  
-If a saved object type wishes to have addtional custom functionalities when extracting/injecting references, or after opensearch's response, it can define functions in the class constructor when extending the SavedObjectClass. For example, visualization plugin's SavedVis class has addtional extractReferences, injectReferences and afterOpenSearchResp functions defined.
+If a saved object type wishes to have addtional custom functionalities when extracting/injecting references, or after opensearch's response, it can define functions in the class constructor when extending the `SavedObjectClass`. For example, visualization plugin's [`SavedVis`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/4a06f5a6fe404a65b11775d292afaff4b8677c33/src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts#L91) class has addtional `extractReferences`, `injectReferences` and `afterOpenSearchResp` functions defined in [`_saved_vis.ts`](../visualizations/public/saved_visualizations/_saved_vis.ts).
 
-```.ts
+```ts
 class SavedVis extends SavedObjectClass {
     constructor(opts: Record<string, unknown> | string = {}) {
       super({
@@ -94,7 +94,7 @@ class SavedVis extends SavedObjectClass {
 
 When a saved object is created using a previous version, the migration will trigger if there is a new way of saving the saved object, and the migration functions alter the structure of the old saved object to follow the new structure. Migrations can be defined in the specific saved object type in the server folder of the plugin. For example, 
 
-```.ts
+```ts
 export const visualizationSavedObjectType: SavedObjectsType = {
   name: 'visualization',
   management: {},
@@ -103,17 +103,17 @@ export const visualizationSavedObjectType: SavedObjectsType = {
 };
 ```
 
-```.ts
+```ts
 const visualizationSavedObjectTypeMigrations = {
   '7.0.0': flow(migrateIndexPattern),
 ```
 
 The migraton version will be saved as a `migrationVersion` attribute in the saved object, not to be confused with the other `verson` attribute.
 
-```.ts
+```ts
 "migrationVersion" : {
     "visualization" : "1.0.0"
 },
 ```
 
-For a more detailed explanation on the migration, please refer to `src/core/server/saved_objects/migrations/README.md`.
+For a more detailed explanation on the migration, please refer to [``](src/core/server/saved_objects/migrations/README.md).
