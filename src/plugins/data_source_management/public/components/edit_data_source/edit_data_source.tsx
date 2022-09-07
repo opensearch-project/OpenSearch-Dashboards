@@ -9,24 +9,22 @@ import { useEffectOnce } from 'react-use';
 import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import {
-  CredentialSourceType,
-  DataSourceManagementContext,
-  EditDataSourceFormType,
-  ToastMessageItem,
-} from '../../types';
+import { DataSourceManagementContext, ToastMessageItem } from '../../types';
 import { deleteDataSourceById, getDataSourceById, updateDataSourceById } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
+import { AuthType, DataSourceAttributes } from '../../types';
+import { dataSourceNotFound } from '../text_content';
 
-const defaultDataSource: EditDataSourceFormType = {
-  id: '',
+const defaultDataSource: DataSourceAttributes = {
   title: '',
   description: '',
   endpoint: '',
-  credentialId: '',
-  credentialType: CredentialSourceType.NoAuth,
+  auth: {
+    type: AuthType.NoAuth,
+    credentials: undefined,
+  },
 };
 
 const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
@@ -36,26 +34,21 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   const { savedObjects, setBreadcrumbs } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
+  const dataSourceID: string = props.match.params.id;
 
   /* State Variables */
-  const [dataSource, setDataSource] = useState<EditDataSourceFormType>(defaultDataSource);
+  const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
 
   const toastLifeTimeMs: number = 6000;
-
-  /* State Variables */
-  const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
     (async function () {
       setIsLoading(true);
       try {
-        const fetchDataSourceById = await getDataSourceById(
-          props.match.params.id,
-          savedObjects.client
-        );
-
+        const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
         if (fetchDataSourceById) {
           setDataSource(fetchDataSourceById);
           setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
@@ -69,39 +62,20 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         });
 
         props.history.push('');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     })();
   });
 
   /* Handle submit - create data source*/
-  const handleSubmit = async ({
-    title,
-    description,
-    endpoint,
-    id,
-    credentialId,
-    credentialType,
-  }: EditDataSourceFormType) => {
+  const handleSubmit = async (attributes: DataSourceAttributes) => {
     setIsLoading(true);
     try {
-      const references = [];
-      const attributes = {
-        title,
-        description,
-        endpoint,
-        noAuth: credentialType === CredentialSourceType.NoAuth,
-      };
-
-      if (!attributes.noAuth && credentialId) {
-        references.push({ id: credentialId, type: 'credential', name: 'credential' });
-      }
-      const options = { references };
-
-      await updateDataSourceById(savedObjects.client, id, attributes, options);
-
+      await updateDataSourceById(savedObjects.client, dataSourceID, attributes);
       props.history.push('');
     } catch (e) {
+      setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
         defaultMessage: 'Updating the Data Source failed with some errors. Please try it again.',
@@ -109,7 +83,6 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         iconType: 'alert',
       });
     }
-    setIsLoading(false);
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
@@ -134,6 +107,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       await deleteDataSourceById(props.match.params.id, savedObjects.client);
       props.history.push('');
     } catch (e) {
+      setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',
         defaultMessage: 'Unable to delete the Data Source due to some errors. Please try it again.',
@@ -141,12 +115,6 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         iconType: 'alert',
       });
     }
-    setIsLoading(false);
-  };
-
-  /* Render Loading Mask */
-  const handleDisplayLoading = (show: boolean) => {
-    setIsLoading(show);
   };
 
   /* Render the edit wizard */
@@ -156,14 +124,14 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     }
     return (
       <>
-        <EditDataSourceForm
-          existingDataSource={dataSource}
-          displayToastMessage={handleDisplayToastMessage}
-          displayLoadingMask={handleDisplayLoading}
-          onDeleteDataSource={handleDelete}
-          handleSubmit={handleSubmit}
-        />
-        {isLoading ? <LoadingMask /> : null}
+        {dataSource && dataSource.endpoint ? (
+          <EditDataSourceForm
+            existingDataSource={dataSource}
+            onDeleteDataSource={handleDelete}
+            handleSubmit={handleSubmit}
+          />
+        ) : null}
+        {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
       </>
     );
   };
@@ -173,8 +141,8 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     setToasts(toasts.filter((toast) => toast.id !== id));
   };
 
-  if (!dataSource?.id || !dataSource?.title) {
-    return <h1>Data Source not found!</h1>;
+  if (!isLoading && !dataSource?.endpoint) {
+    return <h1>{dataSourceNotFound}</h1>;
   }
 
   return (

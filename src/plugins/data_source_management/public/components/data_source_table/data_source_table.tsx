@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useEffectOnce } from 'react-use';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -33,6 +32,18 @@ import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } fr
 import { CreateButton } from '../create_button';
 import { deleteMultipleDataSources, getDataSources } from '../utils';
 import { LoadingMask } from '../loading_mask';
+import {
+  cancelText,
+  deleteText,
+  dsListingAriaRegion,
+  dsListingDeleteDataSourceConfirmation,
+  dsListingDeleteDataSourceDescription,
+  dsListingDeleteDataSourceTitle,
+  dsListingDeleteDataSourceWarning,
+  dsListingDescription,
+  dsListingPageTitle,
+  dsListingTitle,
+} from '../text_content/text_content';
 
 /* Table config */
 const pagination = {
@@ -46,17 +57,6 @@ const sorting = {
     direction: 'asc' as const,
   },
 };
-
-const ariaRegion = i18n.translate('dataSourcesManagement.createDataSourcesLiveRegionAriaLabel', {
-  defaultMessage: 'Data Sources',
-});
-const title = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
-  defaultMessage: 'Data Sources',
-});
-/* Browser - Page Title */
-const pageTitle = i18n.translate('dataSourcesManagement.objects.dataSourcesTitle', {
-  defaultMessage: 'Data Sources',
-});
 
 const toastLifeTimeMs = 6000;
 
@@ -79,7 +79,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setBreadcrumbs(getListBreadcrumbs());
 
     /* Browser - Page Title */
-    chrome.docTitle.change(pageTitle);
+    chrome.docTitle.change(dsListingPageTitle);
 
     /* fetch data sources*/
     fetchDataSources();
@@ -188,7 +188,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const tableRenderDeleteModal = () => {
     return confirmDeleteVisible ? (
       <EuiConfirmModal
-        title="Delete Data Source connection(s) permanently?"
+        title={dsListingDeleteDataSourceTitle}
         onCancel={() => {
           setConfirmDeleteVisible(false);
         }}
@@ -196,16 +196,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           setConfirmDeleteVisible(false);
           onClickDelete();
         }}
-        cancelButtonText="Cancel"
-        confirmButtonText="Delete"
+        cancelButtonText={cancelText}
+        confirmButtonText={deleteText}
         defaultFocusedButton="confirm"
       >
-        <p>
-          This will delete data source connections(s) and all Index Patterns using this credential
-          will be invalid for access.
-        </p>
-        <p>To confirm deletion, click delete button.</p>
-        <p>Note: this action is irrevocable!</p>
+        <p>{dsListingDeleteDataSourceDescription}</p>
+        <p>{dsListingDeleteDataSourceConfirmation}</p>
+        <p>{dsListingDeleteDataSourceWarning}</p>
       </EuiConfirmModal>
     ) : null;
   };
@@ -274,16 +271,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h2>{title}</h2>
+            <h2>{dsListingTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>
-            <p>
-              <FormattedMessage
-                id="dataSourceManagement.dataSourceTable.dataSourceExplanation"
-                defaultMessage="Create and manage the data sources that help you retrieve your data from multiple Elasticsearch clusters."
-              />
-            </p>
+            <p>{dsListingDescription}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
@@ -295,7 +287,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const renderTableContent = () => {
     return (
       <>
-        <EuiPageContent data-test-subj="dataSourceTable" role="region" aria-label={ariaRegion}>
+        <EuiPageContent
+          data-test-subj="dataSourceTable"
+          role="region"
+          aria-label={dsListingAriaRegion}
+        >
           {/* Header */}
           {renderHeader()}
 

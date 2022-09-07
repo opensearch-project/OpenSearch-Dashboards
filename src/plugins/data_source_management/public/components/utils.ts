@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
-import { CreateNewCredentialType, CredentialSourceType, DataSourceTableItem } from '../types';
+import { DataSourceTableItem, DataSourceAttributes } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return (
@@ -48,23 +48,12 @@ export async function getDataSourceById(
   return (
     savedObjectsClient.get('data-source', id).then((response) => {
       const attributes: any = response?.attributes || {};
-      let credentialId: string = '';
-      if (response?.references?.length) {
-        response.references.forEach((rec) => {
-          if (rec.name === 'credential') {
-            credentialId = rec.id;
-          }
-        });
-      }
       return {
         id: response.id,
         title: attributes.title,
         endpoint: attributes.endpoint,
         description: attributes.description || '',
-        credentialId: attributes.noAuth ? CredentialSourceType.NoAuth : credentialId,
-        credentialType: credentialId
-          ? CredentialSourceType.ExistingCredential
-          : CredentialSourceType.NoAuth,
+        auth: attributes.auth,
       };
     }) || null
   );
@@ -72,19 +61,17 @@ export async function getDataSourceById(
 
 export async function createSingleDataSource(
   savedObjectsClient: SavedObjectsClientContract,
-  attributes: { title: string; description: string; endpoint: string; noAuth: boolean },
-  options?: { references: any[] }
+  attributes: DataSourceAttributes
 ) {
-  return savedObjectsClient.create('data-source', attributes, options);
+  return savedObjectsClient.create('data-source', attributes);
 }
 
 export async function updateDataSourceById(
   savedObjectsClient: SavedObjectsClientContract,
   id: string,
-  attributes: { title: string; description: string; endpoint: string; noAuth: boolean },
-  options?: { references: any[] }
+  attributes: DataSourceAttributes
 ) {
-  return savedObjectsClient.update('data-source', id, attributes, options);
+  return savedObjectsClient.update('data-source', id, attributes);
 }
 
 export async function deleteDataSourceById(
@@ -102,39 +89,6 @@ export async function deleteMultipleDataSources(
     selectedDataSources.map(async (selectedDataSource) => {
       await deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
     })
-  );
-}
-
-export async function createNewCredential(
-  savedObjectsClient: SavedObjectsClientContract,
-  newCredential: CreateNewCredentialType
-) {
-  return (
-    savedObjectsClient.create('credential', newCredential).then((response) => response.id || '') ||
-    null
-  );
-}
-
-export async function getExistingCredentials(savedObjectsClient: SavedObjectsClientContract) {
-  const type: string = 'credential';
-  const fields: string[] = ['id', 'description', 'title', 'credentialMaterials'];
-  const perPage: number = 10000;
-  return savedObjectsClient.find({ type, fields, perPage }).then(
-    (response) =>
-      response.savedObjects.map((source) => {
-        const id = source.id;
-        const title = source.get('title');
-        const description = source.get('description');
-        const credentialtype = source.get('credentialMaterials')?.credentialMaterialsType;
-        return {
-          id,
-          title,
-          description,
-          credentialtype,
-          label: `${title}`,
-          checked: null,
-        };
-      }) || []
   );
 }
 

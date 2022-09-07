@@ -8,7 +8,6 @@ import {
   EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
-  EuiCard,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -16,67 +15,73 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
   EuiPanel,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import {
-  CreateNewCredentialType,
-  CredentialsComboBoxItem,
-  CredentialSourceType,
+  AuthType,
+  credentialSourceOptions,
+  DataSourceAttributes,
   DataSourceManagementContextValue,
-  EditDataSourceFormType,
-  ToastMessageItem,
+  UpdatePasswordFormType,
+  UsernamePasswordTypedContent,
 } from '../../../../types';
 import { Header } from '../header';
-import { createNewCredential, getExistingCredentials } from '../../../utils';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import {
   CreateEditDataSourceValidation,
   defaultValidation,
   performDataSourceFormValidation,
-} from '../../../validation/datasource_form_validation';
-import { CredentialsComboBox } from '../credentials_combox_box/credentials_combo_box';
+} from '../../../validation';
+import { UpdatePasswordModal } from '../update_password_modal';
 import {
-  CredentialForm,
-  CreateCredentialItem,
-} from '../../../../../../credential_management/public';
+  authenticationDetailsDescription,
+  authenticationDetailsText,
+  authenticationMethodTitle,
+  authenticationTitle,
+  cancelChangesText,
+  connectionDetailsText,
+  createDataSourceDescriptionPlaceholder,
+  createDataSourceEndpointURL,
+  createDataSourcePasswordPlaceholder,
+  createDataSourceUsernamePlaceholder,
+  descriptionText,
+  endpointDescription,
+  endpointTitle,
+  objectDetailsDescription,
+  objectDetailsText,
+  passwordText,
+  saveChangesText,
+  titleText,
+  updatePasswordText,
+  usernameText,
+  validationErrorTooltipText,
+} from '../../../text_content';
 
 export interface EditDataSourceProps {
-  existingDataSource: EditDataSourceFormType;
-  handleSubmit: (formValues: EditDataSourceFormType) => void;
-  displayToastMessage: (msg: ToastMessageItem) => void;
-  displayLoadingMask: (show: boolean) => void;
+  existingDataSource: DataSourceAttributes;
+  handleSubmit: (formValues: DataSourceAttributes) => void;
   onDeleteDataSource?: () => void;
 }
 export interface EditDataSourceState {
   formErrors: string[];
   formErrorsByField: CreateEditDataSourceValidation;
-  dataSourceTitle: string;
-  dataSourceDescription: string;
+  title: string;
+  description: string;
   endpoint: string;
-  selectedCredentialSourceType: string;
-  selectedCredentials: CredentialsComboBoxItem[];
-  availableCredentials: CredentialsComboBoxItem[];
-  showCreateCredentialModal: boolean;
+  auth: {
+    type: AuthType;
+    credentials: UsernamePasswordTypedContent;
+  };
+  showUpdatePasswordModal: boolean;
   showUpdateOptions: boolean;
-  onClickNewCredential: boolean;
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
-
-const noAuthOption: CredentialsComboBoxItem = {
-  title: 'No Authentication',
-  description: 'No Authentication',
-  checked: null,
-  id: CredentialSourceType.NoAuth,
-  credentialtype: CredentialSourceType.NoAuth,
-  label: 'No Authentication',
-};
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
   static contextType = contextType;
@@ -88,88 +93,51 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.state = {
       formErrors: [],
       formErrorsByField: { ...defaultValidation },
-      dataSourceTitle: '',
-      dataSourceDescription: '',
+      title: '',
+      description: '',
       endpoint: '',
-      selectedCredentialSourceType: CredentialSourceType.NoAuth,
-      selectedCredentials: [],
-      availableCredentials: [],
-      showCreateCredentialModal: false,
+      auth: {
+        type: AuthType.NoAuth,
+        credentials: {
+          username: '',
+          password: '',
+        },
+      },
+      showUpdatePasswordModal: false,
       showUpdateOptions: false,
-      onClickNewCredential: false,
+      oldPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
     };
   }
 
   componentDidMount() {
     this.setFormValuesForEditMode();
-    this.fetchAvailableCredentials(this.props.existingDataSource.credentialId);
-  }
-
-  fetchAvailableCredentials(selectedCredentialId: string) {
-    const { savedObjects } = this.context.services;
-    this.props.displayLoadingMask(true);
-    getExistingCredentials(savedObjects.client)
-      .then((fetchedCredentials: CredentialsComboBoxItem[]) => {
-        if (fetchedCredentials?.length) {
-          this.setState({ availableCredentials: [{ ...noAuthOption }, ...fetchedCredentials] });
-          this.setSelectedCredential(fetchedCredentials, selectedCredentialId);
-        }
-      })
-      .catch(() => {
-        this.props.displayToastMessage({
-          id: 'dataSourcesManagement.createEditDataSource.fetchExistingCredentialsFailMsg',
-          defaultMessage: 'Error while finding existing credentials.',
-          color: 'warning',
-          iconType: 'alert',
-        });
-      })
-      .finally(() => {
-        this.props.displayLoadingMask(false);
-      });
-  }
-
-  findCredentialById(id: string, credentials: CredentialsComboBoxItem[]) {
-    return credentials?.find((rec) => rec.id === id);
   }
 
   resetFormValues = () => {
     this.setFormValuesForEditMode();
-    if (this.state.availableCredentials.length) {
-      this.setSelectedCredential(
-        this.state.availableCredentials,
-        this.props.existingDataSource.credentialId
-      );
-    }
-    this.setState({ showUpdateOptions: false });
+    this.setState({ showUpdateOptions: false }, this.checkValidation);
   };
 
   setFormValuesForEditMode() {
     if (this.props.existingDataSource) {
-      const { title, description, endpoint } = this.props.existingDataSource;
+      const { title, description, endpoint, auth } = this.props.existingDataSource;
+
       this.setState({
-        dataSourceTitle: title,
-        dataSourceDescription: description,
+        title,
+        description: description || '',
         endpoint,
+        auth: {
+          type: auth.type,
+          credentials: {
+            username: auth.type === AuthType.NoAuth ? '' : auth.credentials?.username || '',
+            password: auth.type === AuthType.NoAuth ? '' : '********',
+          },
+        },
       });
     }
   }
-
-  setSelectedCredential = (fetchedCredentials: CredentialsComboBoxItem[], selectedId: string) => {
-    if (selectedId !== CredentialSourceType.NoAuth) {
-      const foundCredential = this.findCredentialById(selectedId, fetchedCredentials);
-      this.setState({
-        selectedCredentials: foundCredential && foundCredential.id ? [foundCredential] : [],
-        selectedCredentialSourceType:
-          foundCredential && foundCredential.id ? CredentialSourceType.ExistingCredential : '',
-      });
-    } else {
-      this.setState({
-        selectedCredentials: [{ ...this.state.availableCredentials[0] }],
-        selectedCredentialSourceType: CredentialSourceType.NoAuth,
-      });
-    }
-    this.onChangeFormValues();
-  };
 
   /* Validations */
 
@@ -187,59 +155,73 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   /* Events */
 
   onChangeTitle = (e: { target: { value: any } }) => {
-    this.setState({ dataSourceTitle: e.target.value }, () => {
+    this.setState({ title: e.target.value }, () => {
       if (this.state.formErrorsByField.title.length) {
         this.isFormValid();
       }
     });
   };
 
-  onChangeDescription = (e: { target: { value: any } }) => {
-    this.setState({ dataSourceDescription: e.target.value }, () => {
-      if (this.state.formErrorsByField.description.length) {
-        this.isFormValid();
-      }
+  onChangeAuthType = (value: AuthType) => {
+    this.setState({ auth: { ...this.state.auth, type: value } }, () => {
+      this.onChangeFormValues();
+      this.checkValidation();
     });
   };
 
-  onChangeEndpoint = (e: { target: { value: any } }) => {
-    this.setState({ endpoint: e.target.value }, () => {
-      if (this.state.formErrorsByField.endpoint.length) {
-        this.isFormValid();
-      }
-    });
+  onChangeDescription = (e: { target: { value: any } }) => {
+    this.setState({ description: e.target.value });
+  };
+
+  onChangeUsername = (e: { target: { value: any } }) => {
+    this.setState(
+      {
+        auth: {
+          ...this.state.auth,
+          credentials: { ...this.state.auth.credentials, username: e.target.value },
+        },
+      },
+      this.checkValidation
+    );
+  };
+
+  onChangePassword = (e: { target: { value: any } }) => {
+    this.setState(
+      {
+        auth: {
+          ...this.state.auth,
+          credentials: { ...this.state.auth.credentials, password: e.target.value },
+        },
+      },
+      this.checkValidation
+    );
+  };
+
+  checkValidation = () => {
+    if (this.state.formErrors.length) {
+      this.isFormValid();
+    }
   };
 
   onClickUpdateDataSource = () => {
     if (this.isFormValid()) {
-      const formValues: EditDataSourceFormType = {
-        id: this.props.existingDataSource.id,
-        title: this.state.dataSourceTitle,
-        description: this.state.dataSourceDescription,
-        endpoint: this.state.endpoint,
-        credentialType: this.state.selectedCredentialSourceType,
-        credentialId: this.state.selectedCredentials?.length
-          ? this.state.selectedCredentials[0].id
-          : '',
+      const formValues: DataSourceAttributes = {
+        title: this.state.title,
+        description: this.state.description,
+        endpoint: this.props.existingDataSource.endpoint,
+        auth: this.state.auth,
       };
+      /* Remove credentials object for NoAuth */
+      if (this.state.auth.type === AuthType.NoAuth) {
+        delete formValues.auth.credentials;
+      } else if (this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType) {
+        /* Remove password if previously & currently username & password method is selected*/
+        delete formValues.auth.credentials?.password;
+      }
 
+      /* Submit */
       this.props.handleSubmit(formValues);
     }
-  };
-
-  onSelectExistingCredentials = (options: CredentialsComboBoxItem[]) => {
-    this.setState(
-      {
-        selectedCredentials: options,
-        selectedCredentialSourceType: options?.length ? options[0].credentialtype : '',
-      },
-      () => {
-        this.onChangeFormValues();
-        if (this.state.formErrorsByField.credential.length) {
-          this.isFormValid();
-        }
-      }
-    );
   };
 
   onClickDeleteDataSource = () => {
@@ -255,85 +237,36 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   /* Create new credentials*/
-  onClickCreateNewCredential = () => {
-    this.setState({ showCreateCredentialModal: true });
+  onClickUpdatePassword = () => {
+    this.setState({ showUpdatePasswordModal: true });
   };
 
-  handleCreateNewCredential = ({
-    title,
-    description,
-    username,
-    password,
-  }: CreateCredentialItem) => {
-    const { savedObjects } = this.context.services;
-    this.setState({ showCreateCredentialModal: false });
-    const attributes: CreateNewCredentialType = {
-      title,
-      description: description || '',
-      credentialMaterials: {
-        credentialMaterialsType: 'username_password',
-        credentialMaterialsContent: {
-          username,
-          password,
-        },
-      },
-    };
-    createNewCredential(savedObjects.client, attributes)
-      .then((response) => {
-        this.fetchAvailableCredentials(response);
-      })
-      .catch(() => {
-        this.props.displayToastMessage({
-          id: 'dataSourcesManagement.editDataSource.createCredentialsFailMsg',
-          defaultMessage: 'Error while creating new credential.',
-          color: 'warning',
-          iconType: 'alert',
-        });
-      });
-  };
-
-  /* Create new credentials*/
-  onCreateNewCredential = () => {
-    const value = !this.state.onClickNewCredential;
-    this.setState({ onClickNewCredential: value });
+  updatePassword = (passwords: UpdatePasswordFormType) => {
+    // TODO: update password when API is ready
+    this.closePasswordModal();
   };
 
   /* Render methods */
 
   /* Render Modal for new credential */
-  closeModal = () => {
-    this.setState({ showCreateCredentialModal: false });
+  closePasswordModal = () => {
+    this.setState({ showUpdatePasswordModal: false });
   };
-  renderCreateStoredCredentialModal() {
-    let modal;
-    const { docLinks } = this.context.services;
 
-    if (this.state.showCreateCredentialModal) {
-      modal = (
-        <EuiModal onClose={this.closeModal}>
-          <EuiModalHeader />
+  renderUpdatePasswordModal = () => {
+    return (
+      <>
+        <EuiButton onClick={this.onClickUpdatePassword}>{updatePasswordText}</EuiButton>
 
-          <EuiModalBody>
-            <CredentialForm
-              docLinks={docLinks}
-              handleSubmit={this.handleCreateNewCredential}
-              hideSubmit={true}
-              callSubmit={this.state.onClickNewCredential}
-            />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.closeModal}>Cancel</EuiButtonEmpty>
-
-            <EuiButton onClick={this.onCreateNewCredential} fill>
-              Create & Add
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      );
-    }
-    return <div>{modal}</div>;
-  }
+        {this.state.showUpdatePasswordModal ? (
+          <UpdatePasswordModal
+            handleUpdatePassword={this.updatePassword}
+            closeUpdatePasswordModal={this.closePasswordModal}
+          />
+        ) : null}
+      </>
+    );
+  };
   /* Render header*/
   renderHeader = () => {
     return (
@@ -349,44 +282,34 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderConnectionDetailsSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> Connection Details </EuiText>
+        <EuiText size="m"> {connectionDetailsText} </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>Object Details</h4>}
-          description={
-            <p>
-              This connection information is used for reference in tables and when adding to a data
-              source connection
-            </p>
-          }
+          title={<h4>{objectDetailsText}</h4>}
+          description={<p>{objectDetailsDescription}</p>}
         >
           {/* Title */}
           <EuiFormRow
-            label="Title"
+            label={titleText}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
           >
             <EuiFieldText
               name="dataSourceTitle"
-              value={this.state.dataSourceTitle || ''}
-              placeholder="Title"
+              value={this.state.title || ''}
+              placeholder={titleText}
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
             />
           </EuiFormRow>
           {/* Description */}
-          <EuiFormRow
-            label="Description"
-            isInvalid={!!this.state.formErrorsByField.description.length}
-            error={this.state.formErrorsByField.description}
-          >
+          <EuiFormRow label={descriptionText}>
             <EuiFieldText
               name="dataSourceDescription"
-              value={this.state.dataSourceDescription || ''}
-              placeholder="Description of the data source"
-              isInvalid={!!this.state.formErrorsByField.description.length}
+              value={this.state.description || ''}
+              placeholder={createDataSourceDescriptionPlaceholder}
               onChange={this.onChangeDescription}
             />
           </EuiFormRow>
@@ -399,31 +322,21 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderEndpointSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> Endpoint </EuiText>
+        <EuiText size="m"> {endpointTitle} </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>Endpoint URL</h4>}
-          description={
-            <p>
-              This connection information is used for reference in tables and when adding to a data
-              source connection
-            </p>
-          }
+          title={<h4>{createDataSourceEndpointURL}</h4>}
+          description={<p>{endpointDescription}</p>}
         >
           {/* Endpoint */}
-          <EuiFormRow
-            label="Endpoint URL"
-            isInvalid={!!this.state.formErrorsByField.endpoint.length}
-            error={this.state.formErrorsByField.endpoint}
-          >
+          <EuiFormRow label={createDataSourceEndpointURL}>
             <EuiFieldText
               name="endpoint"
-              value={this.state.endpoint || ''}
-              placeholder="The connection URL"
-              isInvalid={!!this.state.formErrorsByField.endpoint.length}
-              onChange={this.onChangeEndpoint}
+              value={this.props.existingDataSource.endpoint}
+              disabled={true}
+              aria-disabled={true}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -435,25 +348,15 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderAuthenticationSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> Authentication </EuiText>
+        <EuiText size="m"> {authenticationTitle} </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>Associated Credential</h4>}
-          description={
-            <p>
-              Remove or replace the associated credential. To edit an existing credential, visit
-            </p>
-          }
+          title={<h4>{authenticationDetailsText}</h4>}
+          description={<p>{authenticationDetailsDescription}</p>}
         >
-          {/* Existing Credential*/}
           {this.renderCredentialsSection()}
-
-          <EuiSpacer size="m" />
-
-          {/* Credential Card */}
-          {this.renderCredentialCard()}
         </EuiDescribedFormGroup>
       </EuiPanel>
     );
@@ -463,104 +366,87 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderCredentialsSection = () => {
     return (
       <>
-        <EuiFlexGroup style={{ maxWidth: 600 }}>
-          <EuiFlexItem>
-            <EuiFormRow
-              hasEmptyLabelSpace
-              isInvalid={!!this.state.formErrorsByField.credential.length}
-              error={this.state.formErrorsByField.credential}
-            >
-              <CredentialsComboBox
-                isInvalid={!!this.state.formErrorsByField.credential.length}
-                availableCredentials={this.state.availableCredentials}
-                selectedCredentials={this.state.selectedCredentials}
-                setSelectedCredentials={this.onSelectExistingCredentials}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton onClick={this.onClickCreateNewCredential} fill>
-                Create
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {this.renderCreateStoredCredentialModal()}
+        {/* Auth type select */}
+        <EuiFormRow label={authenticationMethodTitle}>
+          <EuiSuperSelect
+            options={credentialSourceOptions}
+            valueOfSelected={this.state.auth.type}
+            onChange={(value) => this.onChangeAuthType(value)}
+          />
+        </EuiFormRow>
+
+        <EuiSpacer />
+
+        {this.state.auth.type !== AuthType.NoAuth ? this.renderUsernamePasswordFields() : null}
       </>
     );
   };
 
-  /* Render Credential Card */
-
-  renderCredentialCardTitle = () => {
-    return !this.state.selectedCredentials?.length
-      ? 'No Credential Associated'
-      : this.state.selectedCredentials[0].title;
-  };
-
-  renderCredentialCardDescriptionByType = () => {
-    if (!this.state.selectedCredentials?.length) {
-      return <p>A credential has not been associated or the credential object has been removed</p>;
-    } else {
-      const { title } = this.state.selectedCredentials[0];
-      if (title === 'No Authentication') {
-        return <p>No authentication is required</p>;
-      } else {
-        return (
-          <div>
-            <EuiText grow={false} autoCapitalize="false">
-              <h6>Credential Description</h6>
-              <p>{this.state.selectedCredentials[0].description}</p>
-              <h6>Authentication Method</h6>
-              <p>
-                {this.state.selectedCredentials[0].credentialtype.includes('username_password')
-                  ? 'Username & Password'
-                  : 'Other'}
-              </p>
-              <h6>Credential Source</h6>
-              <p>Stored Credentials</p>
-            </EuiText>
-          </div>
-        );
-      }
-    }
-  };
-
-  renderCredentialCard = () => {
+  renderUsernamePasswordFields = () => {
     return (
-      <EuiCard textAlign="left" title={this.renderCredentialCardTitle()}>
-        {this.renderCredentialCardDescriptionByType()}
-      </EuiCard>
+      <>
+        {/* Username */}
+        <EuiFormRow label={usernameText}>
+          <EuiFieldText
+            placeholder={createDataSourceUsernamePlaceholder}
+            value={this.state.auth.credentials.username || ''}
+            onChange={this.onChangeUsername}
+          />
+        </EuiFormRow>
+
+        {/* Password */}
+        {this.props.existingDataSource.auth.type === AuthType.NoAuth
+          ? this.renderEmptyPasswordField()
+          : this.renderDisabledPasswordField()}
+      </>
+    );
+  };
+
+  renderDisabledPasswordField = () => {
+    return (
+      <EuiFormRow label={passwordText}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText size="s">*************</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    );
+  };
+
+  renderEmptyPasswordField = () => {
+    return (
+      <EuiFormRow label={passwordText}>
+        <EuiFieldText
+          placeholder={createDataSourcePasswordPlaceholder}
+          value={this.state.auth.credentials.password || ''}
+          onChange={this.onChangePassword}
+        />
+      </EuiFormRow>
     );
   };
 
   didFormValuesChange = () => {
-    const formValues: EditDataSourceFormType = {
-      id: this.props.existingDataSource.id,
-      title: this.state.dataSourceTitle,
-      description: this.state.dataSourceDescription,
-      endpoint: this.state.endpoint,
-      credentialType: this.state.selectedCredentialSourceType,
-      credentialId: this.state.selectedCredentials?.length
-        ? this.state.selectedCredentials[0].id
-        : '',
+    const formValues: DataSourceAttributes = {
+      title: this.state.title,
+      description: this.state.description,
+      endpoint: this.props.existingDataSource.endpoint,
+      auth: this.state.auth,
     };
 
-    const {
-      title,
-      description,
-      endpoint,
-      credentialType,
-      credentialId,
-    } = this.props.existingDataSource;
+    const { title, description, endpoint, auth } = this.props.existingDataSource;
+    const isUsernameChanged: boolean =
+      auth.type === formValues.auth.type &&
+      auth.type === AuthType.UsernamePasswordType &&
+      formValues.auth.credentials?.username !== auth.credentials?.username;
 
     if (
       formValues.title !== title ||
       formValues.description !== description ||
       formValues.endpoint !== endpoint ||
-      formValues.credentialId !== credentialId ||
-      formValues.credentialType !== credentialType
+      formValues.auth.type !== auth.type ||
+      isUsernameChanged
     ) {
       this.setState({ showUpdateOptions: true });
     } else {
@@ -573,7 +459,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
     if (this.state.showUpdateOptions) {
       bottomBar = (
-        <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
+        <EuiBottomBar data-test-subj="datasource-edit-bottomBar" affordForDisplacement={true}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
@@ -589,22 +475,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 iconType="cross"
                 onClick={() => this.resetFormValues()}
                 aria-describedby="aria-describedby.countOfUnsavedSettings"
-                data-test-subj="advancedSetting-cancelButton"
+                data-test-subj="datasource-edit-cancelButton"
               >
-                {i18n.translate('advancedSettings.form.cancelButtonLabel', {
-                  defaultMessage: 'Cancel changes',
-                })}
+                {cancelChangesText}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  this.state.formErrors?.length &&
-                  i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
-                    defaultMessage: 'Fix invalid settings before saving.',
-                  })
-                }
-              >
+              <EuiToolTip content={this.state.formErrors?.length && validationErrorTooltipText}>
                 <EuiButton
                   className="mgtAdvancedSettingsForm__button"
                   disabled={!!this.state.formErrors?.length}
@@ -613,13 +490,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                   size="s"
                   iconType="check"
                   onClick={this.onClickUpdateDataSource}
-                  aria-describedby="aria-describedby.countOfUnsavedSettings"
-                  /* isLoading={this.state.loading}*/
-                  data-test-subj="advancedSetting-saveButton"
+                  data-test-subj="datasource-edit-saveButton"
                 >
-                  {i18n.translate('advancedSettings.form.saveButtonLabel', {
-                    defaultMessage: 'Save changes',
-                  })}
+                  {saveChangesText}
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
@@ -636,7 +509,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         {this.renderHeader()}
         <EuiForm
           onChange={() => this.onChangeFormValues()}
-          data-test-subj="data-source-creation"
+          data-test-subj="data-source-edit"
           isInvalid={!!this.state.formErrors.length}
           error={this.state.formErrors}
         >

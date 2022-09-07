@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 
 import {
-  EuiBetaBadge,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
@@ -16,19 +15,25 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 
-import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
+import {
+  cancelText,
+  deleteText,
+  deleteThisDataSource,
+  dsListingDeleteDataSourceConfirmation,
+  dsListingDeleteDataSourceDescription,
+  dsListingDeleteDataSourceTitle,
+  dsListingDeleteDataSourceWarning,
+} from '../../../text_content';
 
 export const Header = ({
   showDeleteIcon,
   onClickDeleteIcon,
-  isBeta = false,
   dataSourceName,
 }: {
   showDeleteIcon: boolean;
   onClickDeleteIcon: () => void;
-  isBeta?: boolean;
   dataSourceName: string;
 }) => {
   /* State Variables */
@@ -42,7 +47,7 @@ export const Header = ({
   const renderDeleteButton = () => {
     return (
       <>
-        <EuiToolTip content="Delete this Data Source">
+        <EuiToolTip content={deleteThisDataSource}>
           <EuiButtonIcon
             color="danger"
             onClick={() => {
@@ -51,13 +56,13 @@ export const Header = ({
             iconType="trash"
             iconSize="m"
             size="m"
-            aria-label="Delete this data source"
+            aria-label={deleteThisDataSource}
           />
         </EuiToolTip>
 
         {isDeleteModalVisible ? (
           <EuiConfirmModal
-            title="Delete Data Source permanently?"
+            title={dsListingDeleteDataSourceTitle}
             onCancel={() => {
               setIsDeleteModalVisible(false);
             }}
@@ -65,16 +70,13 @@ export const Header = ({
               setIsDeleteModalVisible(false);
               onClickDeleteIcon();
             }}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={cancelText}
+            confirmButtonText={deleteText}
             defaultFocusedButton="confirm"
           >
-            <p>
-              This will delete data source and all Index Patterns using this credential will be
-              invalid for access.
-            </p>
-            <p>To confirm deletion, click delete button.</p>
-            <p>Note: this action is irrevocable!</p>
+            <p>{dsListingDeleteDataSourceDescription}</p>
+            <p>{dsListingDeleteDataSourceConfirmation}</p>
+            <p>{dsListingDeleteDataSourceWarning}</p>
           </EuiConfirmModal>
         ) : null}
       </>
@@ -86,18 +88,7 @@ export const Header = ({
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle>
-            <h1>
-              {dataSourceName}
-              {isBeta ? (
-                <>
-                  <EuiBetaBadge
-                    label={i18n.translate('dataSourcesManagement.createDataSource.betaLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                  />
-                </>
-              ) : null}
-            </h1>
+            <h1>{dataSourceName}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
         </div>
