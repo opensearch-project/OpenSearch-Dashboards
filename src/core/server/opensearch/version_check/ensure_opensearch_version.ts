@@ -35,7 +35,6 @@
 
 import { timer, of, from, Observable } from 'rxjs';
 import { map, distinctUntilChanged, catchError, exhaustMap, mergeMap } from 'rxjs/operators';
-import { get } from 'lodash';
 import { ApiResponse } from '@opensearch-project/opensearch';
 import {
   opensearchVersionCompatibleWithOpenSearchDashboards,
@@ -49,67 +48,66 @@ import type { OpenSearchClient } from '../client';
  * that is supplied through the healthcheck param. This node attribute is configurable
  * in opensearch_dashboards.yml. It can also filter attributes out by key-value pair.
  * If all nodes have the same cluster id then we do not fan out the healthcheck and use '_local' node
- * If there are multiple cluster ids then we use the default fan out behavior
+ * If there are multiple cluster ids then we return an array of node ids to check.
  * If the supplied node attribute is missing then we return null and use default fan out behavior
  * @param {OpenSearchClient} internalClient
  * @param {OptimizedHealthcheck} healthcheck
- * @returns {string|null} '_local' if all nodes have the same cluster_id, otherwise null
+ * @returns {string|string[]|null} '_local' if all nodes have the same cluster_id, array of node ids if different cluster_id, null if no cluster_id or nodes returned
  */
 export const getNodeId = async (
   internalClient: OpenSearchClient,
   healthcheck: OptimizedHealthcheck
-): Promise<string | null> => {
+): Promise<'_local' | string[] | null> => {
   try {
+    // If missing an id, we have nothing to check
+    if (!healthcheck.id) return null;
+
     let path = `nodes.*.attributes.${healthcheck.id}`;
     const filters = healthcheck.filters;
-    if (filters) {
-      Object.keys(filters).forEach((key) => {
-        path += `,nodes.*.attributes.${key}`;
-      });
+    const filterKeys = filters ? Object.keys(filters) : [];
+
+    for (const key of filterKeys) {
+      path += `,nodes.*.attributes.${key}`;
     }
 
+    /*
+     * Using _cluster/state/nodes to retrieve the cluster_id of each node from cluster manager node which
+     * is considered to be a lightweight operation to aggegrate different cluster_ids from the OpenSearch nodes.
+     */
     const state = (await internalClient.cluster.state({
       metric: 'nodes',
       filter_path: [path],
     })) as ApiResponse;
-    /* Aggregate different cluster_ids from the OpenSearch nodes
-     * if all the nodes have the same cluster_id, retrieve nodes.info from _local node only
-     * Using _cluster/state/nodes to retrieve the cluster_id of each node from cluster manager node which is considered to be a lightweight operation
-     * else if the nodes have different cluster_ids then fan out the request to all nodes
-     * else there are no nodes in the cluster
-     */
+
     const nodes = state.body.nodes;
-    let nodeIds = Object.keys(nodes);
-    if (nodeIds.length === 0) {
-      return null;
-    }
+    const nodeIds = new Set(Object.keys(nodes));
 
     /*
      * If filters are set look for the key and value and filter out any node that matches
      * the value for that attribute.
      */
-    if (filters) {
-      nodeIds.forEach((id) => {
-        Object.keys(filters).forEach((key) => {
-          const attributeValue = get(nodes[id], `attributes.${key}`, null);
-          if (attributeValue === filters[key]) {
-            delete nodes[id];
-          }
-        });
-      });
+    for (const id of nodeIds) {
+      for (const key of filterKeys) {
+        const attributeValue = nodes[id].attributes?.[key] ?? null;
 
-      nodeIds = Object.keys(nodes);
-      if (nodeIds.length === 0) {
-        return null;
+        if (attributeValue === filters![key]) nodeIds.delete(id);
       }
     }
 
-    const sharedClusterId = get(nodes[nodeIds[0]], `attributes.${healthcheck.id}`, null);
+    if (nodeIds.size === 0) return null;
 
-    return sharedClusterId === null ||
-      nodes.find((node: any) => sharedClusterId !== get(node, `attributes.${healthcheck.id}`, null))
-      ? null
-      : '_local';
+    const [firstNodeId] = nodeIds;
+    const sharedClusterId = nodes[firstNodeId].attributes?.[healthcheck.id] ?? null;
+    // If cluster_id is not set then fan out
+    if (sharedClusterId === null) return null;
+
+    // If a node is found to have a different cluster_id, return node ids
+    for (const id of nodeIds) {
+      if (nodes[id].attributes?.[healthcheck.id] !== sharedClusterId) return Array.from(nodeIds);
+    }
+
+    // When all nodes share the same cluster_id, return _local
+    return '_local';
   } catch (e) {
     return null;
   }
