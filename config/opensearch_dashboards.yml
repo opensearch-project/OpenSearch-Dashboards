@@ -42,7 +42,10 @@
 # This node attribute should assign all nodes of the same cluster an integer value that increments with each new cluster that is spun up
 # e.g. in opensearch.yml file you would set the value to a setting using node.attr.cluster_id: 
 # Should only be enabled if there is a corresponding node attribute created in your OpenSearch config that matches the value here
-#opensearch.optimizedHealthcheckId: "cluster_id"
+#opensearch.optimizedHealthcheck.id: "cluster_id"
+#opensearch.optimizedHealthcheck.filters: {
+#  attribute_key: "attribute_value",
+#}
 
 # If your OpenSearch is protected with basic authentication, these settings provide
 # the username and password that the OpenSearch Dashboards server uses to perform maintenance on the OpenSearch Dashboards
