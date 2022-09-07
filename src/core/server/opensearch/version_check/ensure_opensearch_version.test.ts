@@ -253,18 +253,18 @@ describe('pollOpenSearchNodesVersion', () => {
   it('returns compatibility results and isCompatible=true with filters', (done) => {
     expect.assertions(2);
     const target = {
-      id: '0',
+      cluster_id: '0',
       attribute: 'foo',
     };
     const filter = {
-      id: '1',
+      cluster_id: '1',
       attribute: 'bar',
     };
 
     // will filter out every odd index
     const nodes = createNodesWithAttribute(
-      target.id,
-      filter.id,
+      target.cluster_id,
+      filter.cluster_id,
       target.attribute,
       filter.attribute,
       '5.1.0',
@@ -273,6 +273,10 @@ describe('pollOpenSearchNodesVersion', () => {
       '5.1.1-Beta1'
     );
 
+    const filteredNodes = nodes;
+    delete filteredNodes.nodes['node-1'];
+    delete filteredNodes.nodes['node-3'];
+
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
 
@@ -280,7 +284,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
-      optimizedHealthcheck: { id: target.id, filters: { custom_attribute: filter.attribute } },
+      optimizedHealthcheck: { id: 'cluster_id', filters: { custom_attribute: filter.attribute } },
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -290,7 +294,7 @@ describe('pollOpenSearchNodesVersion', () => {
       .subscribe({
         next: (result) => {
           expect(result).toEqual(
-            mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+            mapNodesVersionCompatibility(filteredNodes, OPENSEARCH_DASHBOARDS_VERSION, false)
           );
           expect(result.isCompatible).toBe(true);
         },
@@ -302,18 +306,18 @@ describe('pollOpenSearchNodesVersion', () => {
   it('returns compatibility results and isCompatible=false with filters', (done) => {
     expect.assertions(2);
     const target = {
-      id: '0',
+      cluster_id: '0',
       attribute: 'foo',
     };
     const filter = {
-      id: '1',
+      cluster_id: '1',
       attribute: 'bar',
     };
 
     // will filter out every odd index
     const nodes = createNodesWithAttribute(
-      target.id,
-      filter.id,
+      target.cluster_id,
+      filter.cluster_id,
       target.attribute,
       filter.attribute,
       '5.1.0',
@@ -322,6 +326,10 @@ describe('pollOpenSearchNodesVersion', () => {
       '5.1.1-Beta1'
     );
 
+    const filteredNodes = nodes;
+    delete filteredNodes.nodes['node-1'];
+    delete filteredNodes.nodes['node-3'];
+
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
 
@@ -329,7 +337,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
-      optimizedHealthcheck: { id: target.id, filters: { custom_attribute: filter.attribute } },
+      optimizedHealthcheck: { id: 'cluster_id', filters: { custom_attribute: filter.attribute } },
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -339,7 +347,7 @@ describe('pollOpenSearchNodesVersion', () => {
       .subscribe({
         next: (result) => {
           expect(result).toEqual(
-            mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+            mapNodesVersionCompatibility(filteredNodes, OPENSEARCH_DASHBOARDS_VERSION, false)
           );
           expect(result.isCompatible).toBe(false);
         },
