@@ -84,7 +84,14 @@ export const configSchema = schema.object({
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
-  optimizedHealthcheckId: schema.maybe(schema.string()),
+  optimizedHealthcheck: schema.maybe(
+    schema.object({
+      id: schema.string(),
+      filters: schema.maybe(
+        schema.recordOf(schema.string(), schema.string(), { defaultValue: {} })
+      ),
+    })
+  ),
   ssl: schema.object(
     {
       verificationMode: schema.oneOf(
@@ -148,7 +155,8 @@ const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
   renameFromRoot('elasticsearch.requestTimeout', 'opensearch.requestTimeout'),
   renameFromRoot('elasticsearch.pingTimeout', 'opensearch.pingTimeout'),
   renameFromRoot('elasticsearch.logQueries', 'opensearch.logQueries'),
-  renameFromRoot('elasticsearch.optimizedHealthcheckId', 'opensearch.optimizedHealthcheckId'),
+  renameFromRoot('elasticsearch.optimizedHealthcheckId', 'opensearch.optimizedHealthcheck.id'),
+  renameFromRoot('opensearch.optimizedHealthcheckId', 'opensearch.optimizedHealthcheck.id'),
   renameFromRoot('elasticsearch.ssl', 'opensearch.ssl'),
   renameFromRoot('elasticsearch.apiVersion', 'opensearch.apiVersion'),
   renameFromRoot('elasticsearch.healthCheck', 'opensearch.healthCheck'),
@@ -216,7 +224,7 @@ export class OpenSearchConfig {
    * Specifies whether Dashboards should only query the local OpenSearch node when
    * all nodes in the cluster have the same node attribute value
    */
-  public readonly optimizedHealthcheckId?: string;
+  public readonly optimizedHealthcheck?: OpenSearchConfigType['optimizedHealthcheck'];
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
@@ -297,7 +305,7 @@ export class OpenSearchConfig {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
-    this.optimizedHealthcheckId = rawConfig.optimizedHealthcheckId;
+    this.optimizedHealthcheck = rawConfig.optimizedHealthcheck;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
