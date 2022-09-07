@@ -7,7 +7,7 @@ import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'wizard']);
+  const PageObjects = getPageObjects(['visualize', 'wizard', 'visChart']);
   const log = getService('log');
   const retry = getService('retry');
 
@@ -28,11 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show visualization when a field is added', async () => {
       await PageObjects.wizard.addField('metric', 'Average', 'machine.ram');
-      const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
 
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.wizard.getMetric();
-        expect(avgMachineRam).to.eql(metricValue);
+      await retry.try(async () => {
+        const data = await PageObjects.visChart.getBarChartData('Average machine.ram');
+        expect(data).to.eql([13104038093]);
       });
     });
 

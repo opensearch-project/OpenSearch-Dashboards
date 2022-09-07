@@ -8,6 +8,7 @@ import { buildExpression, buildExpressionFunction } from '../../../../../express
 import { LineOptionsDefaults } from './line_vis_type';
 import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState } from '../common/types';
+import { getValueAxes } from '../common/get_value_axes';
 
 export const toExpression = async ({
   style: styleState,
@@ -24,6 +25,7 @@ export const toExpression = async ({
   vis.data.aggs = aggConfigs;
 
   const dimensions = await buildVislibDimensions(vis, pipelineConfigs as any);
+  const valueAxes = getValueAxes(dimensions.y);
 
   // TODO: what do we want to put in this "vis config"?
   const visConfig = {
@@ -32,6 +34,7 @@ export const toExpression = async ({
     addTimeMarker: false,
     addTooltip,
     dimensions,
+    valueAxes,
   };
 
   const vislib = buildExpressionFunction<any>('vislib', {
