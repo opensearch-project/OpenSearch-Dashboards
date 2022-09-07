@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'wizard', 'visChart']);
+  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
 
@@ -27,21 +28,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show visualization when a field is added', async () => {
-      await PageObjects.wizard.addField('metric', 'Average', 'machine.ram');
+      const expectedData = [2858, 2904, 2814, 1322, 2784];
+      await PageObjects.wizard.addField('metric', 'Count');
+      await PageObjects.wizard.addField('segment', 'Terms', 'machine.os.raw');
 
-      await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Average machine.ram');
-        expect(data).to.eql([13104038093]);
-      });
+      const data = await PageObjects.visChart.getBarChartData();
+      expect(data).to.eql(expectedData);
     });
 
     it('should clear visualization when field is deleted', async () => {
       await PageObjects.wizard.removeField('metric', 0);
 
-      await retry.try(async function tryingForTime() {
-        const isEmptyWorkspace = await PageObjects.wizard.isEmptyWorkspace();
-        expect(isEmptyWorkspace).to.be(true);
-      });
+      const isEmptyWorkspace = await PageObjects.wizard.isEmptyWorkspace();
+      expect(isEmptyWorkspace).to.be(true);
+    });
+
+    it('should show warning before changing visualization type', async () => {
+      await PageObjects.wizard.selectVisType('metric', false);
+      const confirmModalExists = await testSubjects.exists('confirmVisChangeModal');
+      expect(confirmModalExists).to.be(true);
+
+      await testSubjects.click('confirmModalCancelButton');
+    });
+
+    it('should change visualization type', async () => {
+      const pickerValue = await PageObjects.wizard.selectVisType('metric');
+
+      expect(pickerValue).to.eql('Metric');
     });
   });
 }

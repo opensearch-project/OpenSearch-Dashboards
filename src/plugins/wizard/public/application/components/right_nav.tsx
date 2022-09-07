@@ -32,6 +32,7 @@ export const RightNav = () => {
     value: name,
     inputDisplay: <OptionItem icon={icon} title={title} />,
     dropdownDisplay: <OptionItem icon={icon} title={title} />,
+    'data-test-subj': `visType-${name}`,
   }));
 
   return (
@@ -44,6 +45,7 @@ export const RightNav = () => {
             setNewVisType(name);
           }}
           fullWidth
+          data-test-subj="chartPicker"
         />
       </div>
       <div className="wizSidenav__style">
@@ -72,6 +74,7 @@ export const RightNav = () => {
             setNewVisType(undefined);
           }}
           maxWidth="300px"
+          data-test-subj="confirmVisChangeModal"
         >
           <p>
             <FormattedMessage
