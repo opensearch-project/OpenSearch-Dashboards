@@ -67,6 +67,35 @@ function createNodes(...versions: string[]): NodesInfo {
   return { nodes };
 }
 
+function createNodesWithAttribute(
+  targetId: string,
+  filterId: string,
+  targetAttributeValue: string,
+  filterAttributeValue: string,
+  ...versions: string[]
+): NodesInfo {
+  const nodes = {} as any;
+  versions
+    .map((version, i) => {
+      return {
+        version,
+        http: {
+          publish_address: 'http_address',
+        },
+        ip: 'ip',
+        attributes: {
+          cluster_id: i % 2 === 0 ? targetId : filterId,
+          custom_attribute: i % 2 === 0 ? targetAttributeValue : filterAttributeValue,
+        },
+      };
+    })
+    .forEach((node, i) => {
+      nodes[`node-${i}`] = node;
+    });
+
+  return { nodes };
+}
+
 describe('mapNodesVersionCompatibility', () => {
   function createNodesInfoWithoutHTTP(version: string): NodesInfo {
     return { nodes: { 'node-without-http': { version, ip: 'ip' } } } as any;
@@ -180,7 +209,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
-      optimizedHealthcheckId: 'cluster_id',
+      optimizedHealthcheck: { id: 'cluster_id' },
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -204,7 +233,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
-      optimizedHealthcheckId: 'cluster_id',
+      optimizedHealthcheck: { id: 'cluster_id' },
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -222,6 +251,104 @@ describe('pollOpenSearchNodesVersion', () => {
       });
   });
 
+  it('returns compatibility results and isCompatible=true with filters', (done) => {
+    expect.assertions(2);
+    const target = {
+      id: '0',
+      attribute: 'foo',
+    };
+    const filter = {
+      id: '1',
+      attribute: 'bar',
+    };
+
+    // will filter out every odd index
+    const nodes = createNodesWithAttribute(
+      target.id,
+      filter.id,
+      target.attribute,
+      filter.attribute,
+      '5.1.0',
+      '6.2.0',
+      '5.1.0',
+      '5.1.1-Beta1'
+    );
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
+
+    nodeInfosSuccessOnce(nodes);
+
+    pollOpenSearchNodesVersion({
+      internalClient,
+      optimizedHealthcheck: { id: target.id, filters: { custom_attribute: filter.attribute } },
+      opensearchVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual(
+            mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+          );
+          expect(result.isCompatible).toBe(true);
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns compatibility results and isCompatible=false with filters', (done) => {
+    expect.assertions(2);
+    const target = {
+      id: '0',
+      attribute: 'foo',
+    };
+    const filter = {
+      id: '1',
+      attribute: 'bar',
+    };
+
+    // will filter out every odd index
+    const nodes = createNodesWithAttribute(
+      target.id,
+      filter.id,
+      target.attribute,
+      filter.attribute,
+      '5.1.0',
+      '5.1.0',
+      '6.2.0',
+      '5.1.1-Beta1'
+    );
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
+
+    nodeInfosSuccessOnce(nodes);
+
+    pollOpenSearchNodesVersion({
+      internalClient,
+      optimizedHealthcheck: { id: target.id, filters: { custom_attribute: filter.attribute } },
+      opensearchVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual(
+            mapNodesVersionCompatibility(nodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+          );
+          expect(result.isCompatible).toBe(false);
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
   it('only emits if the node versions changed since the previous poll', (done) => {
     expect.assertions(4);
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
@@ -233,7 +360,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
     pollOpenSearchNodesVersion({
       internalClient,
-      optimizedHealthcheckId: 'cluster_id',
+      optimizedHealthcheck: { id: 'cluster_id' },
       opensearchVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -269,7 +396,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
       const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
-        optimizedHealthcheckId: 'cluster_id',
+        optimizedHealthcheck: { id: 'cluster_id' },
         opensearchVersionCheckInterval: 100,
         ignoreVersionMismatch: false,
         opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
@@ -309,7 +436,7 @@ describe('pollOpenSearchNodesVersion', () => {
 
       const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
         internalClient,
-        optimizedHealthcheckId: 'cluster_id',
+        optimizedHealthcheck: { id: 'cluster_id' },
         opensearchVersionCheckInterval: 10,
         ignoreVersionMismatch: false,
         opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
