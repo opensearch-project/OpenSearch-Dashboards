@@ -7,19 +7,15 @@ import React from 'react';
 
 import { EuiSpacer, EuiTitle, EuiText, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
+import { createDataSourceHeader } from '../../../text_content/text_content';
 
 export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
-
-  const createDataSourceHeader = i18n.translate('dataSourcesManagement.createDataSourceHeader', {
-    defaultMessage: 'Create data source connection',
-  });
 
   changeTitle(createDataSourceHeader);
 
