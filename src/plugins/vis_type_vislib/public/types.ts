@@ -106,3 +106,5 @@ export interface BasicVislibParams extends CommonVislibParams {
   times: TimeMarker[];
   type: string;
 }
+
+export { Positions };

@@ -11,6 +11,7 @@ import { WizardServices } from '../../types';
 import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedSelector } from '../utils/state_management';
 import { useVisualizationType } from '../utils/use';
+import { PersistedState } from '../../../../visualizations/public';
 
 import hand_field from '../../assets/hand_field.svg';
 import fields_bg from '../../assets/fields_bg.svg';
@@ -34,6 +35,8 @@ export const Workspace: FC = ({ children }) => {
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
   const rootState = useTypedSelector((state) => state);
+  // Visualizations require the uiState to persist even when the expression changes
+  const uiState = useMemo(() => new PersistedState(), []);
 
   useEffect(() => {
     async function loadExpression() {
@@ -77,7 +80,11 @@ export const Workspace: FC = ({ children }) => {
       </EuiFlexGroup>
       <EuiPanel className="wizCanvas" data-test-subj="visualizationLoader">
         {expression ? (
-          <ReactExpressionRenderer expression={expression} searchContext={searchContext} />
+          <ReactExpressionRenderer
+            expression={expression}
+            searchContext={searchContext}
+            uiState={uiState}
+          />
         ) : (
           <EuiFlexItem className="wizWorkspace__empty" data-test-subj="emptyWorkspace">
             <EuiEmptyPrompt

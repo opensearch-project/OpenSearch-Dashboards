@@ -3,8 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiIcon, IconType } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+  EuiIcon,
+  IconType,
+  EuiConfirmModal,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -12,6 +20,7 @@ import { WizardServices } from '../../types';
 import { setActiveVisualization, useTypedDispatch } from '../utils/state_management';
 
 export const RightNav = () => {
+  const [newVisType, setNewVisType] = useState<string>();
   const {
     services: { types },
   } = useOpenSearchDashboards<WizardServices>();
@@ -23,6 +32,7 @@ export const RightNav = () => {
     value: name,
     inputDisplay: <OptionItem icon={icon} title={title} />,
     dropdownDisplay: <OptionItem icon={icon} title={title} />,
+    'data-test-subj': `visType-${name}`,
   }));
 
   return (
@@ -32,19 +42,48 @@ export const RightNav = () => {
           options={options}
           valueOfSelected={activeVisName}
           onChange={(name) => {
-            dispatch(
-              setActiveVisualization({
-                name,
-                style: types.get(name)?.ui.containerConfig.style.defaults,
-              })
-            );
+            setNewVisType(name);
           }}
           fullWidth
+          data-test-subj="chartPicker"
         />
       </div>
       <div className="wizSidenav__style">
         <StyleSection />
       </div>
+      {newVisType && (
+        <EuiConfirmModal
+          title={i18n.translate('wizard.rightNav.changeVisType.modalTitle', {
+            defaultMessage: 'Change visualization type',
+          })}
+          confirmButtonText={i18n.translate('wizard.rightNav.changeVisType.confirmText', {
+            defaultMessage: 'Change type',
+          })}
+          cancelButtonText={i18n.translate('wizard.rightNav.changeVisType.cancelText', {
+            defaultMessage: 'Cancel',
+          })}
+          onCancel={() => setNewVisType(undefined)}
+          onConfirm={() => {
+            dispatch(
+              setActiveVisualization({
+                name: newVisType,
+                style: types.get(newVisType)?.ui.containerConfig.style.defaults,
+              })
+            );
+
+            setNewVisType(undefined);
+          }}
+          maxWidth="300px"
+          data-test-subj="confirmVisChangeModal"
+        >
+          <p>
+            <FormattedMessage
+              id="wizard.rightNav.changeVisType.modalDescription"
+              defaultMessage="Changing the visualization type will reset all field selections. Do you want to continue?"
+            />
+          </p>
+        </EuiConfirmModal>
+      )}
     </section>
   );
 };

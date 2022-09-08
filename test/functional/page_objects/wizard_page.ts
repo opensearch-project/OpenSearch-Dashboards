@@ -50,10 +50,22 @@ export function WizardPageProvider({ getService, getPageObjects }: FtrProviderCo
       return await dataSourceDropdown.getVisibleText();
     }
 
+    public async selectVisType(type: string, confirm = true) {
+      const chartPicker = await testSubjects.find('chartPicker');
+      await chartPicker.click();
+      await testSubjects.click(`visType-${type}`);
+
+      if (confirm) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      return chartPicker.getVisibleText();
+    }
+
     public async addField(
       dropBoxId: string,
       aggValue: string,
-      fieldValue: string,
+      fieldValue?: string,
       returnToMainPanel = true
     ) {
       await testSubjects.click(`dropBoxAddField-${dropBoxId} > dropBoxAddBtn`);
@@ -61,9 +73,12 @@ export function WizardPageProvider({ getService, getPageObjects }: FtrProviderCo
       const aggComboBoxElement = await testSubjects.find('defaultEditorAggSelect');
       await comboBox.setElement(aggComboBoxElement, aggValue);
       await common.sleep(500);
-      const fieldComboBoxElement = await testSubjects.find('visDefaultEditorField');
-      await comboBox.setElement(fieldComboBoxElement, fieldValue);
-      await common.sleep(500);
+
+      if (fieldValue) {
+        const fieldComboBoxElement = await testSubjects.find('visDefaultEditorField');
+        await comboBox.setElement(fieldComboBoxElement, fieldValue);
+        await common.sleep(500);
+      }
 
       if (returnToMainPanel) {
         await testSubjects.click('panelCloseBtn');
