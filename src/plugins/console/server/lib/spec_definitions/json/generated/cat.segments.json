@@ -5,7 +5,7 @@
       "bytes": [
         "b",
         "k",
-        "osd",
+        "kb",
         "m",
         "mb",
         "g",
@@ -15,6 +15,7 @@
         "p",
         "pb"
       ],
+      "cluster_manager_timeout": "",
       "h": [],
       "help": "__flag__",
       "s": [],

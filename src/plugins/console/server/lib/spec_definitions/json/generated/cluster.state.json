@@ -2,7 +2,6 @@
   "cluster.state": {
     "url_params": {
       "local": "__flag__",
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "flat_settings": "__flag__",
       "wait_for_metadata_version": "",

@@ -1,7 +1,6 @@
 {
   "snapshot.get": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "ignore_unavailable": "__flag__",
       "verbose": "__flag__"
