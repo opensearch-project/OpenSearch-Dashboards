@@ -14,6 +14,7 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { SavedObjectAttributes } from 'src/core/types';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -38,33 +39,6 @@ export interface DataSourceTableItem {
   sort: string;
 }
 
-export interface CredentialsComboBoxItem {
-  checked: boolean | 'on' | 'off' | null;
-  id: string;
-  title: string;
-  description: string;
-  credentialtype: string;
-  label: string;
-}
-
-export interface CreateDataSourceFormType {
-  title: string;
-  description: string;
-  endpoint: string;
-  credentialId: string;
-  credentialType: string;
-  newCredential?: CreateNewCredentialType;
-}
-
-export interface EditDataSourceFormType {
-  id: string;
-  title: string;
-  description: string;
-  endpoint: string;
-  credentialId: string;
-  credentialType: string;
-}
-
 export interface ToastMessageItem {
   id: string;
   defaultMessage: string;
@@ -76,20 +50,34 @@ export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextV
   DataSourceManagementContext
 >;
 
-export enum CredentialSourceType {
-  CreateCredential = 'createCredential',
-  ExistingCredential = 'existingCredential',
-  NoAuth = 'noAuth',
+export interface UpdatePasswordFormType {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
-export interface CreateNewCredentialType {
+/* Datasource types */
+export enum AuthType {
+  NoAuth = 'no_auth',
+  UsernamePasswordType = 'username_password',
+}
+
+export const credentialSourceOptions = [
+  { value: AuthType.UsernamePasswordType, inputDisplay: 'Username & Password' },
+  { value: AuthType.NoAuth, inputDisplay: 'No authentication' },
+];
+
+export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
-  description: string;
-  credentialMaterials: {
-    credentialMaterialsType: string;
-    credentialMaterialsContent: {
-      username: string;
-      password: string;
-    };
+  description?: string;
+  endpoint: string;
+  auth: {
+    type: AuthType;
+    credentials: UsernamePasswordTypedContent | undefined;
   };
+}
+
+export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
+  username: string;
+  password?: string;
 }

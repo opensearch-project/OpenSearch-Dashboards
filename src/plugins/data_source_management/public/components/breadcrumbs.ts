@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { DataSourceEditPageItem } from '../types';
+import { DataSourceAttributes } from '../types';
 
 export function getListBreadcrumbs() {
   return [
@@ -29,7 +29,7 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(dataSource: DataSourceEditPageItem) {
+export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [
     ...getListBreadcrumbs(),
     {
