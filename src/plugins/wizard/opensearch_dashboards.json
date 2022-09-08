@@ -16,7 +16,8 @@
     "dashboard",
     "visualizations",
     "opensearchUiShared",
-    "visDefaultEditor"
+    "visDefaultEditor",
+    "visTypeVislib"
   ],
   "optionalPlugins": []
 }

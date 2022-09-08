@@ -22,7 +22,7 @@
   }
 
   &--fixedWidthChild {
-    width: calc(#{$wizSideNavWidth} - #{$euiSizeXL} * 2);
+    width: calc(#{$wizLeftNavWidth} - #{$euiSizeXL} * 2);
   }
 
   &--selectableWrapper .euiSelectableList {
