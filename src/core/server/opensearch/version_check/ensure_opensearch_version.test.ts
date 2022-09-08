@@ -251,7 +251,7 @@ describe('pollOpenSearchNodesVersion', () => {
   });
 
   it('returns compatibility results and isCompatible=true with filters', (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const target = {
       cluster_id: '0',
       attribute: 'foo',
@@ -293,6 +293,11 @@ describe('pollOpenSearchNodesVersion', () => {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
+          expect(internalClient.nodes.info).toBeCalledWith({
+            node_id: '_local',
+            metric: 'process',
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          });
           expect(result).toEqual(
             mapNodesVersionCompatibility(filteredNodes, OPENSEARCH_DASHBOARDS_VERSION, false)
           );
@@ -304,7 +309,7 @@ describe('pollOpenSearchNodesVersion', () => {
   });
 
   it('returns compatibility results and isCompatible=false with filters', (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const target = {
       cluster_id: '0',
       attribute: 'foo',
@@ -346,8 +351,161 @@ describe('pollOpenSearchNodesVersion', () => {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
+          expect(internalClient.nodes.info).toBeCalledWith({
+            node_id: '_local',
+            metric: 'process',
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          });
           expect(result).toEqual(
             mapNodesVersionCompatibility(filteredNodes, OPENSEARCH_DASHBOARDS_VERSION, false)
+          );
+          expect(result.isCompatible).toBe(false);
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns compatibility results and isCompatible=true with filters and multiple cluster ids', (done) => {
+    expect.assertions(3);
+    const nodes = {} as any;
+    nodes['node-0'] = {
+      version: '5.1.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '0',
+        custom_attribute: 'foo',
+      },
+    };
+    nodes['node-1'] = {
+      version: '5.1.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '1',
+        custom_attribute: 'foo',
+      },
+    };
+    nodes['node-2'] = {
+      version: '6.2.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '2',
+        custom_attribute: 'bar',
+      },
+    };
+    const filteredNodes = nodes;
+    delete filteredNodes['node-2'];
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.cluster.state.mockReturnValueOnce({ body: { nodes } });
+
+    nodeInfosSuccessOnce({ nodes: filteredNodes });
+
+    pollOpenSearchNodesVersion({
+      internalClient,
+      optimizedHealthcheck: { id: 'cluster_id', filters: { custom_attribute: 'bar' } },
+      opensearchVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(internalClient.nodes.info).toBeCalledWith({
+            node_id: ['node-0', 'node-1'],
+            metric: 'process',
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          });
+          expect(result).toEqual(
+            mapNodesVersionCompatibility(
+              { nodes: filteredNodes },
+              OPENSEARCH_DASHBOARDS_VERSION,
+              false
+            )
+          );
+          expect(result.isCompatible).toBe(true);
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns compatibility results and isCompatible=false with filters and multiple cluster ids', (done) => {
+    expect.assertions(3);
+    const nodes = {} as any;
+    nodes['node-0'] = {
+      version: '5.1.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '0',
+        custom_attribute: 'foo',
+      },
+    };
+    nodes['node-1'] = {
+      version: '6.2.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '1',
+        custom_attribute: 'foo',
+      },
+    };
+    nodes['node-2'] = {
+      version: '6.2.0',
+      http: {
+        publish_address: 'http_address',
+      },
+      ip: 'ip',
+      attributes: {
+        cluster_id: '2',
+        custom_attribute: 'bar',
+      },
+    };
+    const filteredNodes = nodes;
+    delete filteredNodes['node-2'];
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.cluster.state.mockReturnValueOnce({ body: { nodes } });
+
+    nodeInfosSuccessOnce({ nodes: filteredNodes });
+
+    pollOpenSearchNodesVersion({
+      internalClient,
+      optimizedHealthcheck: { id: 'cluster_id', filters: { custom_attribute: 'bar' } },
+      opensearchVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      opensearchDashboardsVersion: OPENSEARCH_DASHBOARDS_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(internalClient.nodes.info).toBeCalledWith({
+            node_id: ['node-0', 'node-1'],
+            metric: 'process',
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          });
+          expect(result).toEqual(
+            mapNodesVersionCompatibility(
+              { nodes: filteredNodes },
+              OPENSEARCH_DASHBOARDS_VERSION,
+              false
+            )
           );
           expect(result.isCompatible).toBe(false);
         },
