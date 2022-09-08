@@ -82,7 +82,7 @@ test('set correct defaults', () => {
         "enabled": false,
         "maxPercentage": 1,
       },
-      "optimizedHealthcheckId": undefined,
+      "optimizedHealthcheck": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
@@ -491,11 +491,20 @@ describe('deprecations', () => {
     `);
   });
 
-  it('logs a warning if elasticsearch.optimizedHealthcheckId is set and opensearch.optimizedHealthcheckId is not', () => {
+  it('logs a warning if elasticsearch.optimizedHealthcheckId is set and opensearch.optimizedHealthcheck.id is not', () => {
     const { messages } = applyLegacyDeprecations({ optimizedHealthcheckId: '' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"elasticsearch.optimizedHealthcheckId\\" is deprecated and has been replaced by \\"opensearch.optimizedHealthcheckId\\"",
+        "\\"elasticsearch.optimizedHealthcheckId\\" is deprecated and has been replaced by \\"opensearch.optimizedHealthcheck.id\\"",
+      ]
+    `);
+  });
+
+  it('logs a warning if opensearch.optimizedHealthcheckId is set and opensearch.optimizedHealthcheck.id is not', () => {
+    const { messages } = applyOpenSearchDeprecations({ optimizedHealthcheckId: '' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"opensearch.optimizedHealthcheckId\\" is deprecated and has been replaced by \\"opensearch.optimizedHealthcheck.id\\"",
       ]
     `);
   });
