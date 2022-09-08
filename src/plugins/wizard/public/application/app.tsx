@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
-import { EuiPage } from '@elastic/eui';
+import { EuiPage, EuiResizableContainer } from '@elastic/eui';
 import { DragDropProvider } from './utils/drag_drop/drag_drop_context';
 import { LeftNav } from './components/left_nav';
 import { TopNav } from './components/top_nav';
@@ -21,8 +21,37 @@ export const WizardApp = () => {
         <EuiPage className="wizLayout">
           <TopNav />
           <LeftNav />
-          <Workspace />
-          <RightNav />
+          <EuiResizableContainer className="wizLayout__resizeContainer">
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  className="wizLayout__workspaceResize"
+                  paddingSize="none"
+                  initialSize={80}
+                  minSize="300px"
+                  mode="main"
+                >
+                  <Workspace />
+                </EuiResizablePanel>
+                <EuiResizableButton className="wizLayout__resizeButton" />
+                <EuiResizablePanel
+                  className="wizLayout__rightNavResize"
+                  paddingSize="none"
+                  initialSize={20}
+                  minSize="250px"
+                  mode={[
+                    'collapsible',
+                    {
+                      position: 'top',
+                    },
+                  ]}
+                  id="wizRightResize"
+                >
+                  <RightNav />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
         </EuiPage>
       </DragDropProvider>
     </I18nProvider>

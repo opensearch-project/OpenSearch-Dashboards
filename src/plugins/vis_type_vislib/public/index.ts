@@ -35,4 +35,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
+export { getConfigCollections } from './utils/collections';
+
 export * from './types';
