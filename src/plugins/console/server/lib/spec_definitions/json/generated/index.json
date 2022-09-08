@@ -21,7 +21,8 @@
       ],
       "if_seq_no": "",
       "if_primary_term": "",
-      "pipeline": ""
+      "pipeline": "",
+      "require_alias": "__flag__"
     },
     "methods": [
       "PUT",
@@ -29,9 +30,7 @@
     ],
     "patterns": [
       "{indices}/_doc/{id}",
-      "{indices}/_doc",
-      "{indices}/{type}",
-      "{indices}/{type}/{id}"
+      "{indices}/_doc"
     ],
     "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/index-document/"
   }

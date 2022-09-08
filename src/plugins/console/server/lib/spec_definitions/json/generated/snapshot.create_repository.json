@@ -1,7 +1,6 @@
 {
   "snapshot.create_repository": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "timeout": "",
       "verify": "__flag__"

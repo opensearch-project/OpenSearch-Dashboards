@@ -3,7 +3,6 @@
     "url_params": {
       "wait_for_active_shards": "",
       "timeout": "",
-      "master_timeout": "",
       "cluster_manager_timeout": ""
     },
     "methods": [

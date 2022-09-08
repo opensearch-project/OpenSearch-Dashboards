@@ -11,7 +11,6 @@
         "p"
       ],
       "local": "__flag__",
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "h": [],
       "help": "__flag__",
