@@ -1,7 +1,6 @@
 {
   "snapshot.create": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "wait_for_completion": "__flag__"
     },

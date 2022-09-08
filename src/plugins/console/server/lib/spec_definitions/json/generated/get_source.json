@@ -20,8 +20,7 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_source/{id}",
-      "{indices}/{type}/{id}/_source"
+      "{indices}/_source/{id}"
     ],
     "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/get-documents/"
   }

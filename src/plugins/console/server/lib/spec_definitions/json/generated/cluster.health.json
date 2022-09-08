@@ -14,7 +14,6 @@
         "shards"
       ],
       "local": "__flag__",
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "timeout": "",
       "wait_for_active_shards": "",

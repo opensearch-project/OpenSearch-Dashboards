@@ -10,7 +10,6 @@
         "none",
         "all"
       ],
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "local": "__flag__"
     },

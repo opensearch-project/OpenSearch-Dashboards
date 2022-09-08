@@ -2,7 +2,6 @@
   "indices.put_mapping": {
     "url_params": {
       "timeout": "",
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",

@@ -66,8 +66,7 @@
     ],
     "patterns": [
       "_search",
-      "{indices}/_search",
-      "{indices}/{type}/_search"
+      "{indices}/_search"
     ],
     "documentation": "https://opensearch.org/docs/latest/opensearch/ux/"
   }

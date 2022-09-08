@@ -1,7 +1,6 @@
 {
   "get_script": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": ""
     },
     "methods": [

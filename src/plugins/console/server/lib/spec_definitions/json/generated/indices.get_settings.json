@@ -1,7 +1,6 @@
 {
   "indices.get_settings": {
     "url_params": {
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
