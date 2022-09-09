@@ -208,6 +208,7 @@
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
+    "vega-interpreter": "^1.0.4",
     "whatwg-fetch": "^3.0.0",
     "yauzl": "^2.10.0"
   },

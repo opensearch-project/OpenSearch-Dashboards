@@ -138,7 +138,7 @@ export class VegaMapView extends VegaBaseView {
     }
 
     const vegaMapLayer = new VegaMapLayer(
-      this._parser.spec,
+      (this._parser.spec, null, { ast: true }),
       {
         vega,
         bindingsContainer: this._$controls.get(0),
