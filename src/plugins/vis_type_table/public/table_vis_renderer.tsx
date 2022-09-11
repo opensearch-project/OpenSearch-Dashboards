@@ -6,11 +6,15 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { CoreStart } from 'opensearch-dashboards/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TableVisRenderValue } from './table_vis_fn';
+import { TableVisApp } from './components/table_vis_app';
 
-export const tableVisRenderer: () => ExpressionRenderDefinition<TableVisRenderValue> = () => ({
+export const getTableVisRenderer: (
+  core: CoreStart
+) => ExpressionRenderDefinition<TableVisRenderValue> = (core) => ({
   name: 'table_vis',
   displayName: 'table visualization',
   reuseDomNode: true,
@@ -25,7 +29,7 @@ export const tableVisRenderer: () => ExpressionRenderDefinition<TableVisRenderVa
 
     render(
       <VisualizationContainer className="tableVis" showNoResult={showNoResult}>
-        <></> //toDo: add TableVisComponent
+        <TableVisApp services={core} visData={visData} visConfig={visConfig} handlers={handlers} />
       </VisualizationContainer>,
       domNode
     );

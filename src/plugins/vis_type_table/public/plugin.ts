@@ -17,7 +17,7 @@ import { getTableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
 import { ConfigSchema } from '../config';
-import { tableVisRenderer } from './table_vis_renderer';
+import { getTableVisRenderer } from './table_vis_renderer';
 
 /** @internal */
 export interface TableVisPluginSetupDependencies {
@@ -30,6 +30,16 @@ export interface TableVisPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
+const setupTableVis = async (
+  core: CoreSetup,
+  { expressions, visualizations }: TableVisPluginSetupDependencies
+) => {
+  const [coreStart] = await core.getStartServices();
+  expressions.registerFunction(createTableVisFn);
+  expressions.registerRenderer(getTableVisRenderer(coreStart));
+  visualizations.createBaseVisualization(getTableVisTypeDefinition());
+};
+
 /** @internal */
 export class TableVisPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
@@ -38,10 +48,8 @@ export class TableVisPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { expressions, visualizations }: TableVisPluginSetupDependencies) {
-    expressions.registerFunction(createTableVisFn);
-    expressions.registerRenderer(tableVisRenderer);
-    visualizations.createBaseVisualization(getTableVisTypeDefinition());
+  public async setup(core: CoreSetup, dependencies: TableVisPluginSetupDependencies) {
+    setupTableVis(core, dependencies);
   }
 
   public start(core: CoreStart, { data }: TableVisPluginStartDependencies) {
