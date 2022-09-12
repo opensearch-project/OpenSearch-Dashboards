@@ -80,13 +80,7 @@ export const getTopNavConfig = (
       }),
       testId: 'wizardSaveButton',
       disableButton: !!saveDisabledReason,
-      tooltip() {
-        if (saveDisabledReason) {
-          return i18n.translate('wizard.topNavMenu.saveVisualizationDisabledButtonTooltip', {
-            defaultMessage: saveDisabledReason,
-          });
-        }
-      },
+      tooltip: saveDisabledReason,
       run: (_anchorElement) => {
         const onSave = async ({
           newTitle,
