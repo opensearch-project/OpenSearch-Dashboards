@@ -14,18 +14,18 @@
 - Fix maps wms zoom limitation ([#1915](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1915))
 - [Visualizations] Add visConfig.title and uiState to build pipeline function (([#2192](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2192))
 - Custom healthcheck with filters ([#2232](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2232))
-- [BUG] fix healthcheck logic to expect object and return ids ([#2277](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2277))
+- [BUG] Fix healthcheck logic to expect object and return ids ([#2277](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2277))
 
 ### 🚞 Refactor
 
-- [DeAngular][visualization][vislib] remove angular from vislib ([#2138](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2138))
+- [DeAngular][visualization][vislib] Remove angular from vislib ([#2138](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2138))
 - Change timeline icon ([#2162](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2162))
 
 ### 🛠 Maintenance
 
-- increment from 2.2 to 2.3. ([#2096](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2096))
+- Increment from 2.2 to 2.3. ([#2096](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2096))
 
 ### 🔩 Tests
 
-- [CI][tests] add BWC tests for 2.3.0 ([#2281](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2281))
-- fix 2.x bwc by restoring 1.3.2 ([#2284](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2284))
+- [CI][tests] Add backwards compatibility (BWC) tests for 2.3.0 ([#2281](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2281))
+- Fix 2.x backwards compatibility (BWC) tests by restoring 1.3.2 ([#2284](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2284))
