@@ -18,7 +18,7 @@ import { DataSourceAttributes } from '../../types';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
-const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProps> = (
+export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProps> = (
   props: CreateDataSourceWizardProps
 ) => {
   /* Initialization */
@@ -55,18 +55,16 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
-    if (id && defaultMessage && color && iconType) {
-      const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
-      setToasts([
-        ...toasts,
-        {
-          title: failureMsg,
-          id: failureMsg.props.id,
-          color,
-          iconType,
-        },
-      ]);
-    }
+    const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
+    setToasts([
+      ...toasts,
+      {
+        title: failureMsg,
+        id: failureMsg.props.id,
+        color,
+        iconType,
+      },
+    ]);
   };
 
   /* Render the creation wizard */
@@ -88,6 +86,7 @@ const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWizardProp
     <>
       {renderContent()}
       <EuiGlobalToastList
+        data-test-subj="createDataSourceToast"
         toasts={toasts}
         dismissToast={({ id }) => {
           removeToast(id);

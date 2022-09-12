@@ -24,7 +24,7 @@ export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle>
-            <h1>{createDataSourceHeader}</h1>
+            <h1 data-test-subj="createDataSourceHeader">{createDataSourceHeader}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>
