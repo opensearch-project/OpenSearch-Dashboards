@@ -35,7 +35,7 @@ export const DownloadNodeBuilds: GlobalTask = {
   async run(config, log) {
     const shasums = await getNodeShasums(log, config.getNodeVersion());
     await Promise.all(
-      config.getNodePlatforms().map(async (platform) => {
+      config.getTargetPlatforms().map(async (platform) => {
         const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
         await download({
           log,

@@ -45,10 +45,25 @@ const versionInfo = jest.requireMock('./version_info').getVersionInfo();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boolean } = {}) => {
+const setup = async ({
+  targetAllPlatforms = true,
+  targetPlatforms = {
+    darwin: false,
+    linux: false,
+    linuxArm: false,
+  },
+}: {
+  targetAllPlatforms?: boolean;
+  targetPlatforms?: {
+    darwin: boolean;
+    linux: boolean;
+    linuxArm: boolean;
+  };
+} = {}) => {
   return await Config.create({
     isRelease: true,
     targetAllPlatforms,
+    targetPlatforms,
   });
 };
 
@@ -89,6 +104,51 @@ describe('#resolveFromRepo()', () => {
   });
 });
 
+describe('#hasSpecifiedPlatform', () => {
+  it('return true if darwin is specified', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: false,
+      },
+    });
+    expect(config.hasSpecifiedPlatform() === true);
+  });
+
+  it('return true if linux arm64 is specified', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        linux: false,
+        linuxArm: true,
+      },
+    });
+    expect(config.hasSpecifiedPlatform() === true);
+  });
+
+  it('return true if linux is specified', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        linux: true,
+        linuxArm: false,
+      },
+    });
+    expect(config.hasSpecifiedPlatform() === true);
+  });
+
+  it('return false if no platform is specified', async () => {
+    const config = await setup({
+      targetAllPlatforms: true,
+    });
+    expect(config.hasSpecifiedPlatform() === false);
+  });
+});
+
 describe('#getPlatform()', () => {
   it('throws error when platform does not exist', async () => {
     const config = await setup();
@@ -118,7 +178,7 @@ describe('#getPlatform()', () => {
 });
 
 describe('#getTargetPlatforms()', () => {
-  it('returns an array of all platform objects', async () => {
+  it('returns an array of all platform objects if config.targetAllPlatforms is true', async () => {
     const config = await setup();
     expect(
       config
@@ -131,6 +191,95 @@ describe('#getTargetPlatforms()', () => {
         "linux-arm64",
         "linux-x64",
         "win32-x64",
+      ]
+    `);
+  });
+
+  it('returns just darwin x64 platform when darwin = true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: false,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "darwin-x64",
+      ]
+    `);
+  });
+
+  it('returns just linux x64 platform when linux = true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        linux: true,
+        linuxArm: false,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "linux-x64",
+      ]
+    `);
+  });
+
+  it('returns just linux arm64 platform when linuxArm64 = true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: false,
+        linux: false,
+        linuxArm: true,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "linux-arm64",
+      ]
+    `);
+  });
+
+  it('returns both linux arm64 and darwin x64 platforms when linuxArm64 and darwin equal to true', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetPlatforms: {
+        darwin: true,
+        linux: false,
+        linuxArm: true,
+      },
+    });
+
+    expect(
+      config
+        .getTargetPlatforms()
+        .map((p) => p.getNodeArch())
+        .sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "darwin-x64",
+        "linux-arm64",
       ]
     `);
   });
