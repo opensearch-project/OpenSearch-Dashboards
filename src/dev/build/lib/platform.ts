@@ -28,6 +28,12 @@
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
 
+export interface TargetPlatforms {
+  darwin: boolean;
+  linuxArm: boolean;
+  linux: boolean;
+}
+
 export class Platform {
   constructor(
     private name: PlatformName,

@@ -183,7 +183,7 @@ export const CleanExtraBinScripts: Task = {
   description: 'Cleaning extra bin/* scripts from platform-specific builds',
 
   async run(config, log, build) {
-    for (const platform of config.getNodePlatforms()) {
+    for (const platform of config.getTargetPlatforms()) {
       if (platform.isWindows()) {
         await deleteAll(
           [
