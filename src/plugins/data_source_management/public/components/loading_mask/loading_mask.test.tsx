@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import { LoadingMask } from './loading_mask';
 
 describe('Datasource Management: Header', () => {
-  it('should render normally', () => {
+  test('should render normally', () => {
     const component = shallow(<LoadingMask />);
     expect(component).toMatchSnapshot();
   });

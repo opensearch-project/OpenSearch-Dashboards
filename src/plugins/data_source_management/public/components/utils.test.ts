@@ -6,6 +6,7 @@
 import {
   createSingleDataSource,
   deleteDataSourceById,
+  deleteMultipleDataSources,
   getDataSourceById,
   getDataSources,
   isValidUrl,
@@ -16,6 +17,7 @@ import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
   getDataSourcesResponse,
+  getMappedDataSources,
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
@@ -31,6 +33,11 @@ describe('DataSourceManagement: Utils.ts', () => {
       const fetchDataSources = await getDataSources(savedObjects.client);
       expect(fetchDataSources.length).toBe(getDataSourcesResponse.savedObjects.length);
       expect(fetchDataSources[0].title).toBe('alpha-test');
+    });
+    test('Success but no data sources found: getting data sources', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', {});
+      const fetchDataSources = await getDataSources(savedObjects.client);
+      expect(fetchDataSources.length).toBe(0);
     });
     test('failure: getting data sources', async () => {
       try {
@@ -58,6 +65,11 @@ describe('DataSourceManagement: Utils.ts', () => {
       const dsById = await getDataSourceById('alpha-test', savedObjects.client);
       expect(dsById.title).toBe('alpha-test');
       expect(dsById.auth.type).toBe(AuthType.NoAuth);
+    });
+    test('Success but no data: getting data source by ID without credential', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'get', {});
+      const dsById = await getDataSourceById('alpha-test', savedObjects.client);
+      expect(dsById?.description).toBe('');
     });
     test('failure: getting data source by ID', async () => {
       try {
@@ -122,6 +134,27 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
         await deleteDataSourceById('ds-1234', savedObjects.client);
+      } catch (e) {
+        expect(e).toBeTruthy();
+      }
+    });
+  });
+
+  describe('Delete multiple data sources by id', () => {
+    test('Success: deleting multiple data source', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(savedObjects.client, 'delete', {});
+        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
+        expect(true).toBe(true); // This will be executed if multiple delete call is successful.
+      } catch (e) {
+        // this block should not execute as the test case name suggests
+        expect(e).toBeFalsy();
+      }
+    });
+    test('failure: deleting multiple data sources', async () => {
+      try {
+        mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
+        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
       } catch (e) {
         expect(e).toBeTruthy();
       }

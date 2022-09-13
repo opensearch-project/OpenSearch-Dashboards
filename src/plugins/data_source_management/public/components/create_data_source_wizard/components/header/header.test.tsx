@@ -16,7 +16,7 @@ describe('Datasource Management: Header', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const mockedDocLinks = docLinks as DocLinksStart;
 
-  it('should render normally', () => {
+  test('should render normally', () => {
     const component = shallow(wrapWithIntl(<Header docLinks={mockedDocLinks} />), {
       wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {

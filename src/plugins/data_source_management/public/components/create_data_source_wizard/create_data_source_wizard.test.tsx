@@ -38,10 +38,10 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       }
     );
   });
-  it('should render normally', () => {
+  test('should render normally', () => {
     expect(component).toMatchSnapshot();
   });
-  it('should create datasource successfully', async () => {
+  test('should create datasource successfully', async () => {
     spyOn(utils, 'createSingleDataSource').and.returnValue({});
 
     await act(async () => {
@@ -53,7 +53,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     expect(utils.createSingleDataSource).toHaveBeenCalled();
     expect(history.push).toBeCalledWith('');
   });
-  it('should fail to create datasource', async () => {
+  test('should fail to create datasource', async () => {
     spyOn(utils, 'createSingleDataSource').and.throwError('error');
     await act(async () => {
       // @ts-ignore

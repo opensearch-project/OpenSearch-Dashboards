@@ -66,13 +66,13 @@ describe('Datasource Management: Create Datasource form', () => {
   });
 
   /* Scenario 1: Should render the page normally*/
-  it('should render normally', () => {
+  test('should render normally', () => {
     expect(component).toMatchSnapshot();
   });
 
   /* Scenario 2: submit without any input from user - should display validation error messages*/
   /* Default option: Username & Password*/
-  it('should validate when submit button is clicked without any user input on any field', () => {
+  test('should validate when submit button is clicked without any user input on any field', () => {
     findTestSubject(component, 'createDataSourceButton').simulate('click');
     const { title, description, endpoint, authType, username, password } = getFields(component);
     expect(component).toMatchSnapshot();
@@ -85,7 +85,7 @@ describe('Datasource Management: Create Datasource form', () => {
   });
 
   /* Change option: No Authentication */
-  it('should validate when auth type changed & previously submit button clicked', () => {
+  test('should validate when auth type changed & previously submit button clicked', () => {
     /* Update Eui Super Select Value to No Auth*/
     setAuthTypeValue(component, AuthType.NoAuth);
     component.update();
@@ -104,7 +104,7 @@ describe('Datasource Management: Create Datasource form', () => {
     expect(password.exists()).toBeFalsy(); // password field does not exist when No Auth option is selected
   });
 
-  it('should throw validation error when title is not valid & remove error on update valid title', () => {
+  test('should throw validation error when title is not valid & remove error on update valid title', () => {
     changeTextFieldValue(descriptionIdentifier, 'test');
     changeTextFieldValue(endpointIdentifier, 'https://test');
     changeTextFieldValue(usernameIdentifier, 'test123');
@@ -131,7 +131,7 @@ describe('Datasource Management: Create Datasource form', () => {
 
   /* Create data source with no errors */
   /* Username & Password */
-  it('should create data source with username & password when all fields are valid', () => {
+  test('should create data source with username & password when all fields are valid', () => {
     /* set form fields */
     setAuthTypeValue(component, AuthType.UsernamePasswordType);
     changeTextFieldValue(titleIdentifier, 'test');
@@ -147,7 +147,7 @@ describe('Datasource Management: Create Datasource form', () => {
   });
 
   /* No Auth - Username & Password */
-  it('should create data source with No Auth when all fields are valid', () => {
+  test('should create data source with No Auth when all fields are valid', () => {
     /* set form fields */
     setAuthTypeValue(component, AuthType.NoAuth); // No auth
     changeTextFieldValue(titleIdentifier, 'test');

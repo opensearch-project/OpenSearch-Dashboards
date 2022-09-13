@@ -64,6 +64,16 @@ export const getDataSourcesResponse = {
       },
     },
     {
+      id: 'test2',
+      type: 'data-source',
+      description: 'test datasource2',
+      title: 'test',
+      get(field: string) {
+        const me: any = this || {};
+        return me[field];
+      },
+    },
+    {
       id: 'alpha-test',
       type: 'data-source',
       description: 'alpha test datasource',
@@ -85,6 +95,33 @@ export const getDataSourcesResponse = {
     },
   ],
 };
+
+export const getMappedDataSources = [
+  {
+    id: 'test',
+    description: 'test datasource',
+    title: 'test',
+    sort: 'test',
+  },
+  {
+    id: 'test2',
+    description: 'test datasource2',
+    title: 'test',
+    sort: 'test',
+  },
+  {
+    id: 'alpha-test',
+    description: 'alpha test datasource',
+    title: 'alpha-test',
+    sort: 'alpha-test',
+  },
+  {
+    id: 'beta-test',
+    description: 'beta test datasource',
+    title: 'beta-test',
+    sort: 'beta-test',
+  },
+];
 
 export const mockDataSourceAttributesWithAuth = {
   id: 'test',
