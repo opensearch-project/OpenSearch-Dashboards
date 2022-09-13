@@ -36,7 +36,12 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 const config = new Config(
   true,
   {
-    version: '8.0.0',
+    darwin: false,
+    linux: false,
+    linuxArm: false,
+  },
+  {
+    version: '1.0.0',
     engines: {
       node: '*',
     },
@@ -49,7 +54,7 @@ const config = new Config(
   {
     buildNumber: 1234,
     buildSha: 'abcd1234',
-    buildVersion: '8.0.0',
+    buildVersion: '1.0.0',
   },
   true
 );
@@ -93,7 +98,7 @@ describe('#resolvePath()', () => {
 describe('#resolvePathForPlatform()', () => {
   it('uses config.resolveFromRepo(), config.getBuildVersion(), and platform.getBuildName() to create path', () => {
     expect(build.resolvePathForPlatform(linuxPlatform, 'foo', 'bar')).toMatchInlineSnapshot(
-      `<absolute path>/build/opensearch-dashboards-8.0.0-linux-x64/foo/bar`
+      `<absolute path>/build/opensearch-dashboards-1.0.0-linux-x64/foo/bar`
     );
   });
 });
@@ -101,13 +106,13 @@ describe('#resolvePathForPlatform()', () => {
 describe('#getPlatformArchivePath()', () => {
   it('creates correct path for different platforms', () => {
     expect(build.getPlatformArchivePath(linuxPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-8.0.0-linux-x64.tar.gz`
+      `<absolute path>/target/opensearch-dashboards-1.0.0-linux-x64.tar.gz`
     );
     expect(build.getPlatformArchivePath(linuxArmPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-8.0.0-linux-arm64.tar.gz`
+      `<absolute path>/target/opensearch-dashboards-1.0.0-linux-arm64.tar.gz`
     );
     expect(build.getPlatformArchivePath(windowsPlatform)).toMatchInlineSnapshot(
-      `<absolute path>/target/opensearch-dashboards-8.0.0-windows-x64.zip`
+      `<absolute path>/target/opensearch-dashboards-1.0.0-windows-x64.zip`
     );
   });
 });

@@ -40,7 +40,6 @@ export const CreateArchives: Task = {
 
   async run(config, log, build) {
     const archives = [];
-
     // archive one at a time, parallel causes OOM sometimes
     for (const platform of config.getTargetPlatforms()) {
       const source = build.resolvePathForPlatform(platform, '.');
