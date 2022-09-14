@@ -15731,10 +15731,10 @@ leaflet-responsive-popup@0.6.4:
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.6.4.tgz#b93d9368ef9f96d6dc911cf5b96d90e08601c6b3"
   integrity sha512-2D8G9aQA6NHkulDBPN9kqbUCkCpWQQ6dF0xFL11AuEIWIbsL4UC/ZPP5m8GYM0dpU6YTlmyyCh1Tz+cls5Q4dg==
 
-leaflet-vega@^0.8.6:
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.8.6.tgz#dd4090a6123cb983c2b732d53ec9e4daa53736b2"
-  integrity sha1-3UCQphI8uYPCtzLVPsnk2qU3NrI=
+"leaflet-vega@npm:@amoo-miki/leaflet-vega@0.8.8":
+  version "0.8.8"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/leaflet-vega/-/leaflet-vega-0.8.8.tgz#675abf37d72fbea859755e982f4fd19dea776557"
+  integrity sha512-W2gGgFDxzy/XUx+fQJfz0NYVXsKl7V+G6QywiMcOV5NEodDId9c60up7NNf+cfM7ggpo+5BuLqrKmosuGO1CsA==
   dependencies:
     vega-spec-injector "^0.0.2"
 
@@ -24431,6 +24431,11 @@ vega-hierarchy@~4.0.9:
     d3-hierarchy "^2.0.0"
     vega-dataflow "^5.7.3"
     vega-util "^1.15.2"
+
+"vega-interpreter@npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/vega-forced-csp-compliant-interpreter/-/vega-forced-csp-compliant-interpreter-1.0.6.tgz#5cffdf12b7fe12dc936194edd9e8519506c38716"
+  integrity sha512-9S5nTTVd8JVKobcWp5iwirIeePiamwH1J9uSZPuG5kcF0TUBvGu++ERKjNdst5Qck7e4R6/7vjx2wVf58XUarg==
 
 vega-label@~1.0.0:
   version "1.0.0"

@@ -38,7 +38,10 @@ export class VegaView extends VegaBaseView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._$container) return;
 
-    const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
+    const view = new vega.View(
+      vega.parse(this._parser.spec, null, this._vegaViewOptions),
+      this._vegaViewConfig
+    );
 
     view.warn = this.onWarn.bind(this);
     view.error = this.onError.bind(this);
