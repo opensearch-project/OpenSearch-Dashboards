@@ -68,13 +68,18 @@ test('includes namespace in failure', () => {
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = new Stream();
-    expect(schema.stream({ defaultValue: value }).validate(undefined)).toMatchInlineSnapshot(`
-      Stream {
-        "_events": Object {},
-        "_eventsCount": 0,
-        "_maxListeners": undefined,
-      }
-    `);
+    expect(schema.stream({ defaultValue: value }).validate(undefined)).toHaveProperty(
+      '_events',
+      {}
+    );
+    expect(schema.stream({ defaultValue: value }).validate(undefined)).toHaveProperty(
+      '_eventsCount',
+      0
+    );
+    expect(schema.stream({ defaultValue: value }).validate(undefined)).toHaveProperty(
+      '_maxListeners',
+      undefined
+    );
   });
 
   test('returns value when specified', () => {
