@@ -70,7 +70,7 @@ export class OpenSearchClientPool {
     if (this.isClosed) {
       return;
     }
-    this.isClosed = true;
     await Promise.all(this.cache!.values().map((client) => client.close()));
+    this.isClosed = true;
   }
 }

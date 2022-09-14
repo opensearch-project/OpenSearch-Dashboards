@@ -1,8 +1,8 @@
 # data_source
 
-A OpenSearch Dashboards plugin
+An OpenSearch Dashboards plugin
 
-This plugin introduce OpenSearch data source into OpenSearch Dashboards, and provides related functions to connect to OpenSearch data sources.
+This plugin introduces OpenSearch data source into OpenSearch Dashboards, and provides related functions to connect to OpenSearch data sources.
 
 ---
 
