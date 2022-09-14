@@ -7,8 +7,12 @@ name: Build and test
 on:
   push:
     branches: [ '**', '!feature/**', '!backport/**' ]
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches: [ '**', '!feature/**' ]
+    paths-ignore:
+      - '**/*.md'
 
 env:
   TEST_BROWSER_HEADLESS: 1
