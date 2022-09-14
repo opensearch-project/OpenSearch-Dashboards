@@ -145,6 +145,7 @@
     "@types/yauzl": "^2.9.1",
     "JSONStream": "1.3.5",
     "abortcontroller-polyfill": "^1.4.0",
+    "ajv": "^8.11.0",
     "angular": "^1.8.2",
     "angular-elastic": "^2.5.1",
     "angular-sanitize": "^1.8.0",
