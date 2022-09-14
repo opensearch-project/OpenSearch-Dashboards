@@ -61,6 +61,9 @@ export async function callIndexAliasApi(
   indices: string[] | string
 ): Promise<IndicesAliasResponse> {
   try {
+    // This approach of identify between OpenSearchClient vs LegacyAPICaller
+    // will be deprecated after support data client with legacy client
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
     if ('transport' in callCluster) {
       return (
         await callCluster.indices.getAlias({
@@ -99,6 +102,9 @@ export async function callFieldCapsApi(
   fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
 ) {
   try {
+    // This approach of identify between OpenSearchClient vs LegacyAPICaller
+    // will be deprecated after support data client with legacy client
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
     if ('transport' in callCluster) {
       return (
         await callCluster.fieldCaps({
