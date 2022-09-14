@@ -31,7 +31,7 @@
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { vega, vegaLite } from '../lib/vega';
+import { vega, vegaLite, vegaExpressionInterpreter } from '../lib/vega';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -79,6 +79,7 @@ export class VegaBaseView {
     this._timefilter = opts.timefilter;
     this._view = null;
     this._vegaViewConfig = null;
+    this._vegaViewOptions = null;
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
@@ -130,6 +131,7 @@ export class VegaBaseView {
       });
 
       this._vegaViewConfig = this.createViewConfig();
+      this._vegaViewOptions = { ast: true };
 
       // The derived class should create this method
       await this._initViewCustomizations();
@@ -185,6 +187,7 @@ export class VegaBaseView {
       // eslint-disable-next-line import/namespace
       logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
+      expr: vegaExpressionInterpreter,
     };
 
     // Override URL sanitizer to prevent external data loading (if disabled)
