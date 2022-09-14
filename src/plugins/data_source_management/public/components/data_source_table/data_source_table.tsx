@@ -4,8 +4,6 @@
  */
 
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -115,6 +113,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         onClick={() => {
           setConfirmDeleteVisible(true);
         }}
+        data-test-subj="deleteDataSourceConnections"
         disabled={selectedDataSources.length === 0}
       >
         Delete {selectedDataSources.length || ''} connection
@@ -160,13 +159,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
             {name}
           </EuiButtonEmpty>
-          &emsp;
-          <EuiBadgeGroup gutterSize="s">
-            {index.tags &&
-              index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiBadge key={tagKey}>{tagName}</EuiBadge>
-              ))}
-          </EuiBadgeGroup>
         </>
       ),
       dataType: 'string' as const,
@@ -247,18 +239,16 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
-    if (id && defaultMessage && color && iconType) {
-      const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
-      setToasts([
-        ...toasts,
-        {
-          title: failureMsg,
-          id: failureMsg.props.id,
-          color,
-          iconType,
-        },
-      ]);
-    }
+    const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
+    setToasts([
+      ...toasts,
+      {
+        title: failureMsg,
+        id: failureMsg.props.id,
+        color,
+        iconType,
+      },
+    ]);
   };
 
   /* Render Ui elements*/
