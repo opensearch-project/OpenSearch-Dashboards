@@ -8880,7 +8880,7 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-geckodriver@^3.0.2:
+geckodriver@^3.0.1:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-3.0.2.tgz#6bd69166a24859c5edbc6ece9868339378b6c97b"
   integrity sha512-GHOQzQnTeZOJdcdEXLuzmcRwkbHuei1VivXkn2BLyleKiT6lTvl0T7vm+d0wvr/EZC7jr0m1u1pBHSfqtuFuNQ==
