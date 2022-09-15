@@ -15,28 +15,18 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     })
     .then(
       (response) =>
-        response?.savedObjects
-          ?.map((source) => {
-            const id = source.id;
-            const title = source.get('title');
-            const description = source.get('description');
+        response?.savedObjects?.map((source) => {
+          const id = source.id;
+          const title = source.get('title');
+          const description = source.get('description');
 
-            return {
-              id,
-              title,
-              description,
-              sort: `${title}`,
-            };
-          })
-          .sort((a, b) => {
-            if (a.sort < b.sort) {
-              return -1;
-            } else if (a.sort > b.sort) {
-              return 1;
-            } else {
-              return 0;
-            }
-          }) || []
+          return {
+            id,
+            title,
+            description,
+            sort: `${title}`,
+          };
+        }) || []
     );
 }
 

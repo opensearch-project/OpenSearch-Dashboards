@@ -162,7 +162,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         </>
       ),
       dataType: 'string' as const,
-      sortable: ({ sort }: { sort: string }) => sort,
+      sortable: ({ title }: { title: string }) => title,
     },
     {
       field: 'description',
@@ -172,7 +172,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         show: false,
       },
       dataType: 'string' as const,
-      sortable: ({ sort }: { sort: string }) => sort,
+      sortable: ({ description }: { description: string }) => description,
     },
   ];
 
