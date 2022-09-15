@@ -146,6 +146,7 @@ export class VegaMapView extends VegaBaseView {
         bindingsContainer: this._$controls.get(0),
         delayRepaint: mapConfig.delayRepaint,
         viewConfig: this._vegaViewConfig,
+        viewOptions: this._vegaViewOptions,
         onWarning: this.onWarn.bind(this),
         onError: this.onError.bind(this),
       },
