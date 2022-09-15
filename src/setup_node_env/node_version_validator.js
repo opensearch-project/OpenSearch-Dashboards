@@ -37,10 +37,12 @@ var rawRequiredVersion = (pkg && pkg.engines && pkg.engines.node) || null;
 var requiredVersion = rawRequiredVersion ? 'v' + rawRequiredVersion : rawRequiredVersion;
 var currentVersionMajorMinorPatch = currentVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
 var requiredVersionMajorMinorPatch = requiredVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
+var currentMinorPatch =  currentVersionMajorMinorPatch[2].concat(".", currentVersionMajorMinorPatch[3]);
+var requiredMinorPatch = requiredVersionMajorMinorPatch[2].concat(".", requiredVersionMajorMinorPatch[3]);
 var isVersionValid =
   currentVersionMajorMinorPatch[1] === requiredVersionMajorMinorPatch[1] &&
-  currentVersionMajorMinorPatch[2] === requiredVersionMajorMinorPatch[2] &&
-  parseInt(currentVersionMajorMinorPatch[3], 10) >= parseInt(requiredVersionMajorMinorPatch[3], 10);
+  parseFloat(currentMinorPatch) >= parseFloat(requiredMinorPatch);
+var isMinorValid = currentVersionMajorMinorPatch[2] === requiredVersionMajorMinorPatch[2];
 
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid) {
@@ -51,4 +53,11 @@ if (!isVersionValid) {
   // Actions to apply when validation fails: error report + exit.
   console.error(errorMessage);
   process.exit(1);
+} else if (!isMinorValid) {
+  // Validates Minor version of the NodeJS
+  var warnMessage =
+    `OpenSearch Dashboards was built with ${requiredVersion}. ` +
+    `The current Minor version of Node.js ${currentVersion} didn't test completely.`; 
+  
+  console.warn(warnMessage); 
 }
