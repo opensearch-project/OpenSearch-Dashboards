@@ -18,7 +18,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 "type": "username_password",
               },
               "description": "test",
-              "endpoint": "https://test",
+              "endpoint": "https://test.com",
               "title": "test",
             },
           ],
@@ -32,7 +32,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 "type": "username_password",
               },
               "description": "test",
-              "endpoint": "https://test",
+              "endpoint": "https://test.com",
               "title": "test",
             },
           ],
@@ -42,7 +42,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 "type": "no_auth",
               },
               "description": "test",
-              "endpoint": "https://test",
+              "endpoint": "https://test.com",
               "title": "test",
             },
           ],
@@ -432,7 +432,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="The connection URL"
-                      value="https://test"
+                      value="https://test.com"
                     >
                       <EuiFormControlLayout
                         fullWidth={false}
@@ -457,7 +457,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onFocus={[Function]}
                                 placeholder="The connection URL"
                                 type="text"
-                                value="https://test"
+                                value="https://test.com"
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons />
@@ -850,7 +850,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 "type": "username_password",
               },
               "description": "test",
-              "endpoint": "https://test",
+              "endpoint": "https://test.com",
               "title": "test",
             },
           ],
@@ -864,7 +864,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 "type": "username_password",
               },
               "description": "test",
-              "endpoint": "https://test",
+              "endpoint": "https://test.com",
               "title": "test",
             },
           ],
@@ -1250,7 +1250,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="The connection URL"
-                      value="https://test"
+                      value="https://test.com"
                     >
                       <EuiFormControlLayout
                         fullWidth={false}
@@ -1275,7 +1275,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onFocus={[Function]}
                                 placeholder="The connection URL"
                                 type="text"
-                                value="https://test"
+                                value="https://test.com"
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons />
@@ -3361,7 +3361,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="The connection URL"
-                      value="https://test"
+                      value="https://test.com"
                     >
                       <EuiFormControlLayout
                         fullWidth={false}
@@ -3386,7 +3386,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                                 onFocus={[Function]}
                                 placeholder="The connection URL"
                                 type="text"
-                                value="https://test"
+                                value="https://test.com"
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons />

@@ -106,7 +106,7 @@ describe('Datasource Management: Create Datasource form', () => {
 
   test('should throw validation error when title is not valid & remove error on update valid title', () => {
     changeTextFieldValue(descriptionIdentifier, 'test');
-    changeTextFieldValue(endpointIdentifier, 'https://test');
+    changeTextFieldValue(endpointIdentifier, 'https://test.com');
     changeTextFieldValue(usernameIdentifier, 'test123');
     changeTextFieldValue(passwordIdentifier, 'test123');
 
@@ -136,7 +136,7 @@ describe('Datasource Management: Create Datasource form', () => {
     setAuthTypeValue(component, AuthType.UsernamePasswordType);
     changeTextFieldValue(titleIdentifier, 'test');
     changeTextFieldValue(descriptionIdentifier, 'test');
-    changeTextFieldValue(endpointIdentifier, 'https://test');
+    changeTextFieldValue(endpointIdentifier, 'https://test.com');
     changeTextFieldValue(usernameIdentifier, 'test123');
     changeTextFieldValue(passwordIdentifier, 'test123');
 
@@ -152,7 +152,7 @@ describe('Datasource Management: Create Datasource form', () => {
     setAuthTypeValue(component, AuthType.NoAuth); // No auth
     changeTextFieldValue(titleIdentifier, 'test');
     changeTextFieldValue(descriptionIdentifier, 'test');
-    changeTextFieldValue(endpointIdentifier, 'https://test');
+    changeTextFieldValue(endpointIdentifier, 'https://test.com');
 
     findTestSubject(component, 'createDataSourceButton').simulate('click');
 
