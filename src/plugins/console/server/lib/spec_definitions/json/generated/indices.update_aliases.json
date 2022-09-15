@@ -2,7 +2,6 @@
   "indices.update_aliases": {
     "url_params": {
       "timeout": "",
-      "master_timeout": "",
       "cluster_manager_timeout": ""
     },
     "methods": [

@@ -7,11 +7,19 @@
 .wizLayout {
   padding: 0;
   display: grid;
-  grid-template: min-content 1fr / #{$wizSideNavWidth} 1fr;
-  grid-template-areas:
-    "topNav topNav"
-    "sideNav workspace";
+  grid-template:
+    "topNav topNav" min-content
+    "leftNav workspaceNav" 1fr / #{$wizLeftNavWidth} 1fr;
   height: calc(100vh - #{$osdHeaderOffset});
+
+  &__resizeContainer {
+    min-height: 0;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &__resizeButton {
+    transform: translateX(-$euiSizeM / 2);
+  }
 }
 
 .headerIsExpanded .wizLayout {

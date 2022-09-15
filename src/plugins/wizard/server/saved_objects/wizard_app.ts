@@ -10,6 +10,7 @@ import {
   WizardSavedObjectAttributes,
   WIZARD_SAVED_OBJECT,
 } from '../../common';
+import { wizardSavedObjectTypeMigrations } from './wizard_migration';
 
 export const wizardSavedObjectType: SavedObjectsType = {
   name: WIZARD_SAVED_OBJECT,
@@ -29,7 +30,7 @@ export const wizardSavedObjectType: SavedObjectsType = {
       };
     },
   },
-  migrations: {},
+  migrations: wizardSavedObjectTypeMigrations,
   mappings: {
     properties: {
       title: {
@@ -47,6 +48,12 @@ export const wizardSavedObjectType: SavedObjectsType = {
         index: false,
       },
       version: { type: 'integer' },
+      // Need to add a kibanaSavedObjectMeta attribute here to follow the current saved object flow
+      // When we save a saved object, the saved object plugin will extract the search source into two parts
+      // Some information will be put into kibanaSavedObjectMeta while others will be created as a reference object and pushed to the reference array
+      kibanaSavedObjectMeta: {
+        properties: { searchSourceJSON: { type: 'text', index: false } },
+      },
     },
   },
 };

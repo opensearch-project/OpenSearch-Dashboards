@@ -5,7 +5,6 @@
       "explain": "__flag__",
       "retry_failed": "__flag__",
       "metric": [],
-      "master_timeout": "",
       "cluster_manager_timeout": "",
       "timeout": ""
     },

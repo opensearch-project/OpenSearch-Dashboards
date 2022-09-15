@@ -3,18 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { cloneDeep } from 'lodash';
 import { SchemaConfig } from '../../../../visualizations/public';
 import { MetricVisExpressionFunctionDefinition } from '../../../../vis_type_metric/public';
-import {
-  AggConfigs,
-  IAggConfig,
-  OpenSearchaggsExpressionFunctionDefinition,
-} from '../../../../data/common';
+import { AggConfigs, IAggConfig } from '../../../../data/common';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
 import { RootState } from '../../application/utils/state_management';
 import { MetricOptionsDefaults } from './metric_viz_type';
-import { getAggService, getIndexPatterns } from '../../plugin_services';
+import { getAggExpressionFunctions } from '../common/expression_helpers';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -92,24 +87,7 @@ export interface MetricRootState extends RootState {
 }
 
 export const toExpression = async ({ style: styleState, visualization }: MetricRootState) => {
-  const { activeVisualization, indexPattern: indexId = '' } = visualization;
-  const { aggConfigParams } = activeVisualization || {};
-
-  const indexPatternsService = getIndexPatterns();
-  const indexPattern = await indexPatternsService.get(indexId);
-  const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
-
-  // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
-  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
-    'opensearchaggs',
-    {
-      index: indexId,
-      metricsAtAllLevels: false,
-      partialRows: false,
-      aggConfigs: JSON.stringify(aggConfigs.aggs),
-      includeFormatHints: false,
-    }
-  );
+  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization);
 
   // TODO: Update to use the getVisSchemas function from the Visualizations plugin
   // const schemas = getVisSchemas(vis, params);
@@ -169,7 +147,5 @@ export const toExpression = async ({ style: styleState, visualization }: MetricR
     metricVis.addArgument('metric', prepareDimension(metric));
   });
 
-  const ast = buildExpression([opensearchaggs, metricVis]);
-
-  return `opensearchDashboards | opensearch_dashboards_context | ${ast.toString()}`;
+  return buildExpression([...expressionFns, metricVis]).toString();
 };

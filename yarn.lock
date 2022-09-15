@@ -5421,9 +5421,9 @@ camelize@^1.0.0:
   integrity sha1-FkpUg+Yw+kMh5a8HAg5TGDGyYJs=
 
 caniuse-lite@^1.0.30001317:
-  version "1.0.30001322"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001322.tgz#2e4c09d11e1e8f852767dab287069a8d0c29d623"
-  integrity sha512-neRmrmIrCGuMnxGSoh+x7zYtQFFgnSY2jaomjU56sCkTA6JINqQrxutF459JpWcWRajvoyn95sOXq4Pqrnyjew==
+  version "1.0.30001397"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001397.tgz"
+  integrity sha512-SW9N2TbCdLf0eiNDRrrQXx2sOkaakNZbCjgNpPyMJJbiOrU5QzMIrXOVMRM1myBXTD5iTkdrtU/EguCrBocHlA==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -7025,6 +7025,11 @@ detect-indent@^5.0.0:
   resolved "https://registry.yarnpkg.com/detect-indent/-/detect-indent-5.0.0.tgz#3871cc0a6a002e8c3e5b3cf7f336264675f06b9d"
   integrity sha1-OHHMCmoALow+Wzz38zYmRnXwa50=
 
+detect-libc@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
+  integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
+
 detect-newline@2.X:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-2.1.0.tgz#f41f1c10be4b00e87b5f13da680759f2c5bfd3e2"
@@ -8405,6 +8410,13 @@ fetch-mock@^7.3.9:
     lodash.isequal "^4.5.0"
     path-to-regexp "^2.2.1"
     whatwg-url "^6.5.0"
+
+fibers@^5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/fibers/-/fibers-5.0.3.tgz#2fd03acb255db66fe693d15beafbf5ae92193fd7"
+  integrity sha512-/qYTSoZydQkM21qZpGLDLuCq8c+B8KhuCQ1kLPvnRNhxhVbvrpmH9l2+Lblf5neDuEsY4bfT7LeO553TXQDvJw==
+  dependencies:
+    detect-libc "^1.0.3"
 
 figgy-pudding@^3.5.1:
   version "3.5.2"
@@ -11628,10 +11640,10 @@ leaflet-responsive-popup@0.6.4:
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.6.4.tgz#b93d9368ef9f96d6dc911cf5b96d90e08601c6b3"
   integrity sha512-2D8G9aQA6NHkulDBPN9kqbUCkCpWQQ6dF0xFL11AuEIWIbsL4UC/ZPP5m8GYM0dpU6YTlmyyCh1Tz+cls5Q4dg==
 
-leaflet-vega@^0.8.6:
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.8.6.tgz#dd4090a6123cb983c2b732d53ec9e4daa53736b2"
-  integrity sha1-3UCQphI8uYPCtzLVPsnk2qU3NrI=
+"leaflet-vega@npm:@amoo-miki/leaflet-vega@0.8.7":
+  version "0.8.7"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/leaflet-vega/-/leaflet-vega-0.8.7.tgz#8faca1b4b8e2ef7d48667ac6faad9204f4da7153"
+  integrity sha512-T4M5yziwj3Fi9Adsbce+cdWqPjON0BRwEjwqLlPMoirU1vhifA6YKrlZkVzJrK0IIm+hdfMCLkBz33gD8fdxzQ==
   dependencies:
     vega-spec-injector "^0.0.2"
 
@@ -14306,9 +14318,9 @@ punycode@^1.2.4, punycode@^1.3.2:
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
 qs@6.9.3, qs@^6.10.1, qs@^6.10.3, qs@~6.5.2:
-  version "6.10.3"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.3.tgz#d6cde1b2ffca87b5aa57889816c5f81535e22e8e"
-  integrity sha512-wr7M2E0OFRfIfJZjKGieI8lBKb7fRCH4Fv5KNPEs7gJ8jadvotdsS08PzOKR7opXhZ/Xkjtt3WF9g38drmyRqQ==
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
+  integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
   dependencies:
     side-channel "^1.0.4"
 
@@ -17987,6 +17999,11 @@ vega-hierarchy@~4.1.0:
     d3-hierarchy "^3.1.0"
     vega-dataflow "^5.7.3"
     vega-util "^1.15.2"
+
+"vega-interpreter@npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/vega-forced-csp-compliant-interpreter/-/vega-forced-csp-compliant-interpreter-1.0.5.tgz#49970be9b00ca7e45ced0617fbf373c77a28aab4"
+  integrity sha512-lfeU77lVoUbSCC6N1ywdKg+I6K08xpkd82TLon+LebtKyC8aLCe7P5Dd/89zAPyFwRyobKftHu8z0xpV7R7a4Q==
 
 vega-label@~1.2.0:
   version "1.2.0"
