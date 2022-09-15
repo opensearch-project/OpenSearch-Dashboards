@@ -206,10 +206,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
   onClickUpdateDataSource = () => {
     if (this.isFormValid()) {
+      // update data source endpoint is currently not supported/allowed
       const formValues: DataSourceAttributes = {
         title: this.state.title,
         description: this.state.description,
-        endpoint: this.props.existingDataSource.endpoint,
         auth: this.state.auth,
       };
       /* Remove credentials object for NoAuth */
