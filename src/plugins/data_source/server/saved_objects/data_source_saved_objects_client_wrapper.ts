@@ -160,16 +160,19 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async validateAndUpdatePartialAttributes<T = unknown>(attributes: T) {
-    const { auth } = attributes;
+    const { auth, endpoint } = attributes;
+
+    if (endpoint) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Update data source endpoint is not supported`
+      );
+    }
 
     if (auth === undefined) {
       return attributes;
     }
 
-    const {
-      type,
-      credentials: { password },
-    } = auth;
+    const { type, credentials } = auth;
 
     switch (type) {
       case AuthType.NoAuth:
@@ -179,7 +182,7 @@ export class DataSourceSavedObjectsClientWrapper {
           credentials: undefined,
         };
       case AuthType.UsernamePasswordType:
-        if (password) {
+        if (credentials && credentials.password) {
           return {
             ...attributes,
             auth: await this.encryptCredentials(auth),
