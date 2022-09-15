@@ -1,6 +1,6 @@
 # dataSourceManagement
 
-A OpenSearch Dashboards plugin
+An OpenSearch Dashboards plugin
 
 ---
 

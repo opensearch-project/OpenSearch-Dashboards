@@ -32,7 +32,6 @@ describe('DataSourceManagement: Utils.ts', () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
       const fetchDataSources = await getDataSources(savedObjects.client);
       expect(fetchDataSources.length).toBe(getDataSourcesResponse.savedObjects.length);
-      expect(fetchDataSources[0].title).toBe('alpha-test');
     });
     test('Success but no data sources found: getting data sources', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', {});
