@@ -127,7 +127,7 @@ export const mockDataSourceAttributesWithAuth = {
   id: 'test',
   title: 'create-test-ds',
   description: 'jest testing',
-  endpoint: 'https://test',
+  endpoint: 'https://test.com',
   auth: {
     type: AuthType.UsernamePasswordType,
     credentials: {
@@ -140,7 +140,7 @@ export const getDataSourceByIdWithCredential = {
   attributes: {
     id: 'alpha-test',
     title: 'alpha-test',
-    endpoint: 'https://test',
+    endpoint: 'https://test.com',
     description: 'alpha test data source',
     auth: {
       type: AuthType.UsernamePasswordType,

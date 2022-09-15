@@ -164,16 +164,11 @@ describe('DataSourceManagement: Utils.ts', () => {
     /* False cases */
     expect(isValidUrl('')).toBeFalsy();
     expect(isValidUrl('test')).toBeFalsy();
-    expect(isValidUrl('www.test')).toBeFalsy();
     expect(isValidUrl('https://')).toBeFalsy();
     expect(isValidUrl('http://')).toBeFalsy();
     expect(isValidUrl('http://www.test.com:123456')).toBeFalsy(); // fails if port number is greater than 5 digits
 
     /* True cases */
-    expect(isValidUrl('https://www.test')).toBeTruthy();
-    expect(isValidUrl('http://www.test')).toBeTruthy();
-    expect(isValidUrl('https://test')).toBeTruthy();
-    expect(isValidUrl('http://test')).toBeTruthy();
     expect(isValidUrl('https://test.com')).toBeTruthy();
     expect(isValidUrl('http://test.com')).toBeTruthy();
     expect(isValidUrl('https://test.com:2345')).toBeTruthy();
