@@ -70,7 +70,7 @@ export const credentialSourceOptions = [
 export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
-  endpoint: string;
+  endpoint?: string;
   auth: {
     type: AuthType;
     credentials: UsernamePasswordTypedContent | undefined;
