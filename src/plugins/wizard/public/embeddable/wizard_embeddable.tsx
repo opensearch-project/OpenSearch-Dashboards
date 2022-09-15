@@ -116,8 +116,15 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
       return;
     }
     const { visualization, style } = this.serializedState;
+
+    const vizStateWithoutIndex = JSON.parse(visualization);
+    const visualizationState = {
+      searchField: vizStateWithoutIndex.searchField,
+      activeVisualization: vizStateWithoutIndex.activeVisualization,
+      indexPattern: this.savedWizard?.searchSourceFields?.index,
+    };
     const rootState = {
-      visualization: JSON.parse(visualization),
+      visualization: visualizationState,
       style: JSON.parse(style),
     };
     const visualizationName = rootState.visualization?.activeVisualization?.name ?? '';
