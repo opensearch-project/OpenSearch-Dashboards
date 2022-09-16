@@ -13,4 +13,7 @@ export interface WizardSavedObjectAttributes extends SavedObjectAttributes {
   visualizationState?: string;
   styleState?: string;
   version: number;
+  searchSourceFields?: {
+    index?: string;
+  };
 }
