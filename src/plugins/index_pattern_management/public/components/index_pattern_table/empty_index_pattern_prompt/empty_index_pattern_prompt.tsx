@@ -37,6 +37,7 @@ import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
+import { useMount } from 'react-use';
 import { getListBreadcrumbs } from '../../breadcrumbs';
 import { IndexPatternCreationOption } from '../../types';
 import { CreateButton } from '../../create_button';
@@ -56,7 +57,9 @@ export const EmptyIndexPatternPrompt = ({
   docLinksIndexPatternIntro,
   setBreadcrumbs,
 }: Props) => {
-  setBreadcrumbs(getListBreadcrumbs());
+  useMount(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
 
   return (
     <EuiPageContent
