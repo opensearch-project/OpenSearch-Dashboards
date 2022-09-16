@@ -44,6 +44,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import { useMount } from 'react-use';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -111,7 +112,10 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
-  setBreadcrumbs(getListBreadcrumbs());
+  useMount(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
+
   useEffect(() => {
     (async function () {
       const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
