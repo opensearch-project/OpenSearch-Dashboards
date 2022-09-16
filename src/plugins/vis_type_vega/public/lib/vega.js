@@ -30,5 +30,6 @@
 
 import * as vegaLite from 'vega-lite/build-es5/vega-lite';
 import * as vega from 'vega/build-es5/vega';
+import { expressionInterpreter as vegaExpressionInterpreter } from 'vega-interpreter/build/vega-interpreter.module';
 
-export { vega, vegaLite };
+export { vega, vegaLite, vegaExpressionInterpreter };
