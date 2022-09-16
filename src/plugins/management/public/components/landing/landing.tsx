@@ -39,6 +39,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { useMount } from 'react-use';
 
 interface ManagementLandingPageProps {
   version: string;
@@ -46,7 +47,9 @@ interface ManagementLandingPageProps {
 }
 
 export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLandingPageProps) => {
-  setBreadcrumbs();
+  useMount(() => {
+    setBreadcrumbs();
+  });
 
   return (
     <EuiPageContent horizontalPosition="center" data-test-subj="managementHome">
