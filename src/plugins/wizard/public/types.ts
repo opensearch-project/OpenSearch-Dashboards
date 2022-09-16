@@ -13,7 +13,7 @@ import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { AppMountParameters, CoreStart, ToastsStart } from '../../../core/public';
+import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../../../core/public';
 
 export type WizardSetup = TypeServiceSetup;
 export interface WizardStart extends TypeServiceStart {
@@ -43,6 +43,8 @@ export interface WizardServices extends CoreStart {
   types: TypeServiceStart;
   expressions: ExpressionsStart;
   history: History;
+  embeddable: EmbeddableStart;
+  scopedHistory: ScopedHistory;
 }
 
 export interface ISavedVis {

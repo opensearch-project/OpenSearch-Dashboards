@@ -41,11 +41,15 @@ import { WizardVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
+  originatingApp?: string;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
+  stateTransfer: EmbeddableStateTransfer;
 }
 
 export const getTopNavConfig = (
@@ -79,6 +83,7 @@ export const getTopNavConfig = (
           if (!savedWizardVis) {
             return;
           }
+          const newlyCreated = !Boolean(savedWizardVis.id) || savedWizardVis.copyOnSave;
           const currentTitle = savedWizardVis.title;
           savedWizardVis.title = newTitle;
           savedWizardVis.description = newDescription;
@@ -105,6 +110,24 @@ export const getTopNavConfig = (
                 ),
                 'data-test-subj': 'saveVisualizationSuccess',
               });
+
+              if (originatingApp && returnToOrigin) {
+                // create or edit wizard directly from a dashboard
+                if (newlyCreated && stateTransfer) {
+                  // create and add a new wizard to the dashboard
+                  stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+                    state: { type: 'wizard', input: { savedObjectId: id } },
+                  });
+                } else {
+                  // edit an existing wizard from the dashboard
+                  application.navigateToApp(originatingApp);
+                }
+              } else {
+                // create wizard from creating visualization page, not related to any dashboard
+                if (setOriginatingApp && originatingApp && newlyCreated) {
+                  setOriginatingApp(undefined);
+                }
+              }
 
               // Update URL
               if (id !== visualizationIdFromUrl) {
@@ -148,6 +171,8 @@ export const getTopNavConfig = (
             onSave={onSave}
             objectType={'wizard'}
             onClose={() => {}}
+            originatingApp={originatingApp}
+            getAppNameFromId={stateTransfer.getAppNameFromId}
           />
         );
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
 import { PLUGIN_ID } from '../../../common';
@@ -40,6 +40,9 @@ export const TopNav = () => {
 
     return getTopNavConfig(
       {
+        originatingApp,
+        setOriginatingApp,
+        stateTransfer,
         visualizationIdFromUrl,
         savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
         saveDisabledReason,
@@ -56,6 +59,7 @@ export const TopNav = () => {
     dispatch,
     services,
   ]);
+
 
   // reset validity before component destroyed
   useUnmount(() => {
