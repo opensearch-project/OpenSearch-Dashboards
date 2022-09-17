@@ -47,7 +47,7 @@ exports[`Header should render data source finder when choose to use data source 
     size="s"
   >
     <FormattedMessage
-      defaultMessage="Uses the default data source configured by the OpenSearch dashboards administrator."
+      defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
       id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
       values={Object {}}
     />
@@ -177,7 +177,7 @@ exports[`Header should render normally 1`] = `
     size="s"
   >
     <FormattedMessage
-      defaultMessage="Uses the default data source configured by the OpenSearch dashboards administrator."
+      defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
       id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
       values={Object {}}
     />
