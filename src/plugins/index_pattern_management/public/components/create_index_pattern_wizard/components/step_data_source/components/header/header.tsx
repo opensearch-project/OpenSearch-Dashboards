@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
       <EuiText size="s" className="dataSourceRadioHelperText">
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
-          defaultMessage="Uses the default data source configured by the OpenSearch dashboards administrator."
+          defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
         />
       </EuiText>
       <EuiSpacer size="l" />

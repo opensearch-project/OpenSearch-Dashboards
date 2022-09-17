@@ -60,7 +60,7 @@ export const performDataSourceFormValidation = (
   };
   const formErrorMessages: string[] = [];
   /* Title validation */
-  if (!formValues.title) {
+  if (!formValues.title?.trim?.().length) {
     validationByField.title.push(dataSourceValidationTitleEmpty);
     formErrorMessages.push(dataSourceValidationTitleEmpty);
   }

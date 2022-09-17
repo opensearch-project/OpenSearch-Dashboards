@@ -40,7 +40,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   }
 
   public async setup(core: CoreSetup) {
-    this.logger.debug('data_source: Setup');
+    this.logger.debug('dataSource: Setup');
 
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
@@ -109,7 +109,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('data_source: Started');
+    this.logger.debug('dataSource: Started');
 
     return {};
   }
@@ -160,9 +160,11 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const rawRequest = ensureRawRequest(request);
     const remoteAddress = rawRequest?.info?.remoteAddress;
     const xForwardFor = request.headers['x-forwarded-for'];
+    const forwarded = request.headers.forwarded;
+    const forwardedInfo = forwarded ? forwarded : xForwardFor;
 
-    return xForwardFor
-      ? `${remoteAddress} attempted accessing through ${xForwardFor} on data source: ${dataSourceId}`
+    return forwardedInfo
+      ? `${remoteAddress} attempted accessing through ${forwardedInfo} on data source: ${dataSourceId}`
       : `${remoteAddress} attempted accessing on data source: ${dataSourceId}`;
   }
 }
