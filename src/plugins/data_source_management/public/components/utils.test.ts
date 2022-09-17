@@ -164,27 +164,12 @@ describe('DataSourceManagement: Utils.ts', () => {
     /* False cases */
     expect(isValidUrl('')).toBeFalsy();
     expect(isValidUrl('test')).toBeFalsy();
-    expect(isValidUrl('https://')).toBeFalsy();
-    expect(isValidUrl('http://')).toBeFalsy();
-    expect(isValidUrl('http://www.test.com:123456')).toBeFalsy(); // fails if port number is greater than 5 digits
 
     /* True cases */
     expect(isValidUrl('https://test.com')).toBeTruthy();
     expect(isValidUrl('http://test.com')).toBeTruthy();
-    expect(isValidUrl('https://test.com:2345')).toBeTruthy();
-    expect(isValidUrl('http://test.com:2314')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com')).toBeTruthy();
-    expect(isValidUrl('http://www.test.com')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com:2345')).toBeTruthy();
-    expect(isValidUrl('http://www.test.com:2314')).toBeTruthy();
-    expect(isValidUrl('https://test.com:23456')).toBeTruthy();
-    expect(isValidUrl('http://test.com:231')).toBeTruthy();
+
     /* True cases: port number scenario*/
-    expect(isValidUrl('https://www.test.com:')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com:1')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com:12')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com:123')).toBeTruthy();
-    expect(isValidUrl('https://www.test.com:1234')).toBeTruthy();
-    expect(isValidUrl('http://www.test.com:12345')).toBeTruthy();
+    expect(isValidUrl('http://192.168.1.1:1234/')).toBeTruthy();
   });
 });

@@ -164,7 +164,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
     if (endpoint) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Update data source endpoint is not supported`
+        `Updating a dataSource endpoint is not supported`
       );
     }
 
@@ -197,22 +197,18 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
-    if (!title) {
+    if (!title?.trim?.().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "title" required for "data source" saved object'
+        '"title" attribute must be a non-empty string'
       );
     }
 
     if (!this.isValidUrl(endpoint)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "endpoint" is not valid for "data source" saved object'
-      );
+      throw SavedObjectsErrorHelpers.createBadRequestError('"endpoint" attribute is not valid');
     }
 
     if (auth === undefined) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "auth" required for "data source" saved object'
-      );
+      throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
     this.validateAuth(auth);

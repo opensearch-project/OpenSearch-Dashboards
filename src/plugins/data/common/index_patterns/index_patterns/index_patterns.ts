@@ -29,7 +29,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { isEmpty } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -364,7 +363,7 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
-    const dataSourceRef = !isEmpty(references) ? references[0] : undefined;
+    const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {

@@ -15,7 +15,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     })
     .then(
       (response) =>
-        response?.savedObjects?.map((source) => {
+        response?.savedObjects?.map?.((source) => {
           const id = source.id;
           const title = source.get('title');
           const description = source.get('description');
@@ -81,7 +81,8 @@ export async function deleteMultipleDataSources(
 
 export const isValidUrl = (endpoint: string) => {
   try {
-    return Boolean(new URL(endpoint));
+    const url = new URL(endpoint);
+    return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
   } catch (e) {
     return false;
   }
