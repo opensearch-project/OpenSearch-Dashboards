@@ -34,7 +34,11 @@ import { i18n } from '@osd/i18n';
 import { map, scan } from 'rxjs/operators';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-import { DataPublicPluginStart, IOpenSearchSearchResponse } from '../../../../../data/public';
+import {
+  DataPublicPluginStart,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+} from '../../../../../data/public';
 import { MAX_SEARCH_SIZE } from '../constants';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
@@ -84,30 +88,15 @@ export const getIndicesViaSearch = async ({
   pattern,
   searchClient,
   showAllIndices,
+  dataSourceId,
 }: {
   getIndexTags: IndexPatternCreationConfig['getIndexTags'];
   pattern: string;
   searchClient: DataPublicPluginStart['search']['search'];
   showAllIndices: boolean;
+  dataSourceId?: string;
 }): Promise<MatchedItem[]> =>
-  searchClient({
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: showAllIndices ? 'all' : 'open',
-      index: pattern,
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: MAX_SEARCH_SIZE,
-            },
-          },
-        },
-      },
-    },
-  })
+  searchClient(buildSearchRequest(showAllIndices, pattern, dataSourceId))
     .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
     .pipe(scan((accumulator = [], value) => accumulator.join(value)))
     .toPromise()
@@ -118,15 +107,19 @@ export const getIndicesViaResolve = async ({
   getIndexTags,
   pattern,
   showAllIndices,
+  dataSourceId,
 }: {
   http: HttpStart;
   getIndexTags: IndexPatternCreationConfig['getIndexTags'];
   pattern: string;
   showAllIndices: boolean;
-}) =>
-  http
+  dataSourceId?: string;
+}) => {
+  const query = buildQuery(showAllIndices, dataSourceId);
+
+  return http
     .get<ResolveIndexResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
-      query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+      query,
     })
     .then((response) => {
       if (!response) {
@@ -135,6 +128,7 @@ export const getIndicesViaResolve = async ({
         return responseToItemArray(response, getIndexTags);
       }
     });
+};
 
 /**
  * Takes two MatchedItem[]s and returns a merged set, with the second set prrioritized over the first based on name
@@ -168,12 +162,14 @@ export async function getIndices({
   pattern: rawPattern,
   showAllIndices = false,
   searchClient,
+  dataSourceId,
 }: {
   http: HttpStart;
   getIndexTags?: IndexPatternCreationConfig['getIndexTags'];
   pattern: string;
   showAllIndices?: boolean;
   searchClient: DataPublicPluginStart['search']['search'];
+  dataSourceId?: string;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
   const isCCS = pattern.indexOf(':') !== -1;
@@ -202,6 +198,7 @@ export async function getIndices({
     getIndexTags,
     pattern,
     showAllIndices,
+    dataSourceId,
   }).catch(() => []);
   requests.push(promiseResolve);
 
@@ -212,6 +209,7 @@ export async function getIndices({
       pattern,
       searchClient,
       showAllIndices,
+      dataSourceId,
     }).catch(() => []);
     requests.push(promiseSearch);
   }
@@ -263,4 +261,43 @@ export const responseToItemArray = (
   });
 
   return sortBy(source, 'name');
+};
+
+const buildQuery = (showAllIndices: boolean, dataSourceId?: string) => {
+  const query = {} as any;
+  if (showAllIndices) {
+    query.expand_wildcards = 'all';
+  }
+  if (dataSourceId) {
+    query.data_source = dataSourceId;
+  }
+
+  return query;
+};
+
+const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSourceId?: string) => {
+  const request: IOpenSearchSearchRequest = {
+    params: {
+      ignoreUnavailable: true,
+      expand_wildcards: showAllIndices ? 'all' : 'open',
+      index: pattern,
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: MAX_SEARCH_SIZE,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  if (dataSourceId) {
+    request.dataSourceId = dataSourceId;
+  }
+
+  return request;
 };

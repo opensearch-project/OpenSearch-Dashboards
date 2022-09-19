@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -77,7 +77,7 @@ jobs:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
     name: Run functional tests
-    strategy: 
+    strategy:
       matrix:
         group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ]
     steps:
@@ -89,7 +89,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -125,7 +125,7 @@ jobs:
     defaults:
       run:
         working-directory: ./artifacts
-    strategy: 
+    strategy:
       matrix:
         include:
           - name: Linux x64
@@ -145,7 +145,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version-file: "./artifacts/.nvmrc"
+          node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -173,9 +173,9 @@ jobs:
           name: ${{ matrix.suffix }}-${{ env.VERSION }}
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
           retention-days: 1
-    
+
   bwc-tests:
-    needs: [ build-min-artifact-tests ]
+    needs: [build-min-artifact-tests]
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
@@ -184,7 +184,7 @@ jobs:
     defaults:
       run:
         working-directory: ./artifacts
-    strategy: 
+    strategy:
       matrix:
         version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0 ]
     steps:
@@ -199,7 +199,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version-file: "./artifacts/.nvmrc"
+          node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
@@ -221,7 +221,7 @@ jobs:
           if curl -I -L ${{ env.OPENSEARCH_URL }}; then
             echo "::set-output name=version-exists::true"
           fi
-      
+
       - name: Skipping tests
         if: steps.verify-opensearch-exists.outputs.version-exists != 'true'
         run: echo Tests were skipped because an OpenSearch release build does not exist for this version yet!
@@ -229,7 +229,7 @@ jobs:
       - name: Setting environment variable to run tests for ${{ matrix.version }}
         if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
         run: echo "BWC_VERSIONS=${{ matrix.version }}" >> $GITHUB_ENV
-    
+
       - name: Download OpenSearch Dashboards
         uses: actions/download-artifact@v3
         id: download
@@ -242,7 +242,7 @@ jobs:
         if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
         run: |
           ./bwctest.sh -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz
-      
+
       - uses: actions/upload-artifact@v3
         if: ${{ failure() && steps.verify-opensearch-exists.outputs.version-exists == 'true' }}
         with:

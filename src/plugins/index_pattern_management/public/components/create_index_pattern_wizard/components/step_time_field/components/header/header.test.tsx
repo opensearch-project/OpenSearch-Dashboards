@@ -34,7 +34,13 @@ import { shallow } from 'enzyme';
 
 describe('Header', () => {
   it('should render normally', () => {
-    const component = shallow(<Header indexPattern="ki*" indexPatternName="ki*" />);
+    const component = shallow(
+      <Header
+        indexPattern="ki*"
+        indexPatternName="ki*"
+        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });

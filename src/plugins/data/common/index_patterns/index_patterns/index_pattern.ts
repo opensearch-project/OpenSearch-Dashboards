@@ -43,7 +43,13 @@ import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields'
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
+import {
+  IndexPatternSpec,
+  TypeMeta,
+  SourceFilter,
+  IndexPatternFieldMap,
+  SavedObjectReference,
+} from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
@@ -67,6 +73,7 @@ interface SavedObjectBody {
 
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
 
+const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
@@ -86,6 +93,7 @@ export class IndexPattern implements IIndexPattern {
   // savedObject version
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
+  public dataSourceRef?: SavedObjectReference;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -128,6 +136,7 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
+    this.dataSourceRef = spec.dataSourceRef;
   }
 
   /**
@@ -215,13 +224,13 @@ export class IndexPattern implements IIndexPattern {
     return {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
+      dataSourceRef: this.dataSourceRef,
     };
   }
 
@@ -355,6 +364,17 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
     };
+  }
+
+  getSaveObjectReference() {
+    return this.dataSourceRef
+      ? [
+          {
+            ...this.dataSourceRef,
+            name: DATA_SOURCE_REFERNECE_NAME,
+          },
+        ]
+      : [];
   }
 
   /**
