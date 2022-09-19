@@ -30,7 +30,7 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { callFieldCapsApi } from '../opensearch_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -47,7 +47,7 @@ import { FieldDescriptor } from '../../index_patterns_fetcher';
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
-  callCluster: LegacyAPICaller,
+  callCluster: LegacyAPICaller | OpenSearchClient,
   indices: string | string[] = [],
   metaFields: string[] = [],
   fieldCapsOptions?: { allowNoIndices: boolean }

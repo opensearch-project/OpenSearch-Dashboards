@@ -31,7 +31,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi, IndicesAliasResponse } from './opensearch_api';
@@ -47,7 +47,10 @@ import { callIndexAliasApi, IndicesAliasResponse } from './opensearch_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster: LegacyAPICaller, timePattern: string) {
+export async function resolveTimePattern(
+  callCluster: LegacyAPICaller | OpenSearchClient,
+  timePattern: string
+) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
   const allIndexDetails = chain<IndicesAliasResponse>(aliases)
