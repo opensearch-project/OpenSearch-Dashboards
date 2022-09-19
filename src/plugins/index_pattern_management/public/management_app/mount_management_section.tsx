@@ -65,10 +65,11 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, dataSource },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const dataSourceEnabled = !!dataSource;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -87,6 +88,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    dataSourceEnabled,
   };
 
   ReactDOM.render(

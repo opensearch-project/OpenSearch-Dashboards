@@ -49,6 +49,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
               schema.literal('none'),
             ])
           ),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
@@ -56,6 +57,18 @@ export function registerResolveIndexRoute(router: IRouter): void {
       const queryString = req.query.expand_wildcards
         ? { expand_wildcards: req.query.expand_wildcards }
         : null;
+
+      const dataSourceId = req.query.data_source;
+      if (dataSourceId) {
+        const result = await (
+          await context.dataSource.opensearch.getClient(dataSourceId)
+        ).indices.resolveIndex({
+          name: encodeURIComponent(req.params.query),
+          expand_wildcards: req.query.expand_wildcards,
+        });
+        return res.ok({ body: result.body });
+      }
+
       const result = await context.core.opensearch.legacy.client.callAsCurrentUser(
         'transport.request',
         {

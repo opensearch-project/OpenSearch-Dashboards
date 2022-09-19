@@ -42,6 +42,7 @@ import {
   getShardTimeout,
   shimAbortSignal,
 } from '..';
+import { decideClient } from './decide_client';
 
 export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -70,10 +71,9 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const promise = shimAbortSignal(
-          context.core.opensearch.client.asCurrentUser.search(params),
-          options?.abortSignal
-        );
+        const client = await decideClient(context, request);
+        const promise = shimAbortSignal(client.search(params), options?.abortSignal);
+
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
         if (usage) usage.trackSuccess(rawResponse.took);

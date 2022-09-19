@@ -7,9 +7,14 @@ exports[`Header should mark the input as invalid 1`] = `
   >
     <h2>
       <FormattedMessage
-        defaultMessage="Step 1 of 2: Define an index pattern"
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
         id="indexPatternManagement.createIndexPattern.stepHeader"
-        values={Object {}}
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
       />
     </h2>
   </EuiTitle>
@@ -119,9 +124,14 @@ exports[`Header should render normally 1`] = `
   >
     <h2>
       <FormattedMessage
-        defaultMessage="Step 1 of 2: Define an index pattern"
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
         id="indexPatternManagement.createIndexPattern.stepHeader"
-        values={Object {}}
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
       />
     </h2>
   </EuiTitle>

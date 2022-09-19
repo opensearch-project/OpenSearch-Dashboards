@@ -1,0 +1,9 @@
+{
+  "id": "dataSourceManagement",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["management", "dataSource"],
+  "optionalPlugins": [],
+  "requiredBundles": ["opensearchDashboardsReact"]
+}

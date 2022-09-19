@@ -104,12 +104,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     getMlCardState,
     data,
+    dataSourceEnabled,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
+  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
   useMount(() => {
@@ -153,14 +154,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   };
 
   useEffect(() => {
-    getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions, searchClient]);
+    if (!dataSourceEnabled) {
+      getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
+        setSources(dataSources.filter(removeAliases));
+        setIsLoadingSources(false);
+      });
+      getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+      );
+    }
+  }, [http, creationOptions, searchClient, dataSourceEnabled]);
 
   chrome.docTitle.change(title);
 
@@ -214,16 +217,18 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
   if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
-          canSave={canSave}
-        />
-      );
+    if (!dataSourceEnabled) {
+      if (!hasDataIndices && !remoteClustersExist) {
+        return (
+          <EmptyState
+            onRefresh={loadSources}
+            docLinks={docLinks}
+            navigateToApp={application.navigateToApp}
+            getMlCardState={getMlCardState}
+            canSave={canSave}
+          />
+        );
+      }
     } else {
       return (
         <EmptyIndexPatternPrompt

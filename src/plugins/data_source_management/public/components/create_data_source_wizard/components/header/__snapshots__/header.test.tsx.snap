@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Datasource Management: Header should render normally 1`] = `
+<Header
+  docLinks={
+    Object {
+      "links": Object {
+        "noDocumentation": Object {
+          "indexPatterns": Object {
+            "introduction": "",
+          },
+          "scriptedFields": Object {},
+        },
+      },
+    }
+  }
+/>
+`;

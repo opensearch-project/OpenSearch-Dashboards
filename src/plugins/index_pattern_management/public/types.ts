@@ -37,6 +37,7 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  SavedObjectReference,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
@@ -56,6 +57,7 @@ export interface IndexPatternManagmentContext {
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
+  dataSourceEnabled: boolean;
 }
 
 export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<
@@ -67,3 +69,5 @@ export enum MlCardState {
   DISABLED,
   ENABLED,
 }
+
+export type DataSourceRef = Pick<SavedObjectReference, 'type' | 'id'>;

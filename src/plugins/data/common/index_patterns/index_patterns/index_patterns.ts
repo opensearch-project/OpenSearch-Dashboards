@@ -30,7 +30,6 @@
 
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientCommon } from '../..';
-
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
 import {
@@ -238,6 +237,7 @@ export class IndexPatternsService {
       metaFields,
       type: options.type,
       params: options.params || {},
+      dataSourceId: options.dataSourceId,
     });
   };
 
@@ -254,6 +254,7 @@ export class IndexPatternsService {
       ...options,
       type: indexPattern.type,
       params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+      dataSourceId: indexPattern.dataSourceRef?.id,
     });
 
   /**
@@ -355,12 +356,14 @@ export class IndexPatternsService {
         typeMeta,
         type,
       },
+      references,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {
@@ -373,6 +376,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      dataSourceRef,
     };
   };
 
@@ -401,7 +405,7 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta } = spec;
+    const { title, type, typeMeta, dataSourceRef } = spec;
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
@@ -415,6 +419,7 @@ export class IndexPatternsService {
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
             params: typeMeta && typeMeta.params,
+            dataSourceId: dataSourceRef?.id,
           })
         : spec.fields;
     } catch (err) {
@@ -562,8 +567,11 @@ export class IndexPatternsService {
     }
 
     const body = indexPattern.getAsSavedObjectBody();
+    const references = indexPattern.getSaveObjectReference();
+
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
+      references,
     });
     indexPattern.id = response.id;
     indexPatternCache.set(indexPattern.id, indexPattern);

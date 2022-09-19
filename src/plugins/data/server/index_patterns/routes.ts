@@ -53,11 +53,12 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.opensearch.legacy.client;
+      const callAsCurrentUser = await decideClient(context, request);
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
@@ -112,11 +113,13 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const { callAsCurrentUser } = context.core.opensearch.legacy.client;
+      const callAsCurrentUser = await decideClient(context, request);
+
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
@@ -147,3 +150,12 @@ export function registerRoutes(http: HttpServiceSetup) {
     }
   );
 }
+
+const decideClient = async (context: RequestHandlerContext, request: any) => {
+  const dataSourceId = request.query.data_source;
+  if (dataSourceId) {
+    return await context.dataSource.opensearch.getClient(dataSourceId);
+  }
+
+  return context.core.opensearch.legacy.client.callAsCurrentUser;
+};

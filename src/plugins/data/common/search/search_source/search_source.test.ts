@@ -59,6 +59,16 @@ const indexPattern2 = ({
   getSourceFiltering: () => mockSource2,
 } as unknown) as IndexPattern;
 
+const dataSourceId = 'dataSourceId';
+const indexPattern3 = ({
+  dataSourceRef: {
+    id: dataSourceId,
+    type: 'dataSource',
+  },
+  getComputedFields,
+  getSourceFiltering: () => mockSource,
+} as unknown) as IndexPattern;
+
 describe('SearchSource', () => {
   let mockSearchMethod: any;
   let searchSourceDependencies: SearchSourceDependencies;
@@ -208,6 +218,16 @@ describe('SearchSource', () => {
 
       await searchSource.fetch(options);
       expect(mockSearchMethod).toBeCalledTimes(1);
+    });
+
+    test('index pattern with dataSourceId will generate request with dataSourceId', async () => {
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern3);
+      const options = {};
+      await searchSource.fetch(options);
+      const request = searchSource.history[0];
+      expect(mockSearchMethod).toBeCalledTimes(1);
+      expect(request.dataSourceId).toEqual(dataSourceId);
     });
   });
 

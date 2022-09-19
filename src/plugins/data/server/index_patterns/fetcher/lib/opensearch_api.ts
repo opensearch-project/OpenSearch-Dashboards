@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { convertOpenSearchError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
@@ -57,10 +57,23 @@ export interface IndexAliasResponse {
  *  @return {Promise<IndexAliasResponse>}
  */
 export async function callIndexAliasApi(
-  callCluster: LegacyAPICaller,
+  callCluster: LegacyAPICaller | OpenSearchClient,
   indices: string[] | string
 ): Promise<IndicesAliasResponse> {
   try {
+    // This approach of identify between OpenSearchClient vs LegacyAPICaller
+    // will be deprecated after support data client with legacy client
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
+    if ('transport' in callCluster) {
+      return (
+        await callCluster.indices.getAlias({
+          index: indices,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        })
+      ).body as IndicesAliasResponse;
+    }
+
     return (await callCluster('indices.getAlias', {
       index: indices,
       ignoreUnavailable: true,
@@ -84,11 +97,25 @@ export async function callIndexAliasApi(
  *  @return {Promise<FieldCapsResponse>}
  */
 export async function callFieldCapsApi(
-  callCluster: LegacyAPICaller,
+  callCluster: LegacyAPICaller | OpenSearchClient,
   indices: string[] | string,
   fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
 ) {
   try {
+    // This approach of identify between OpenSearchClient vs LegacyAPICaller
+    // will be deprecated after support data client with legacy client
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
+    if ('transport' in callCluster) {
+      return (
+        await callCluster.fieldCaps({
+          index: indices,
+          fields: '*',
+          ignore_unavailable: true,
+          allow_no_indices: fieldCapsOptions.allowNoIndices,
+        })
+      ).body as FieldCapsResponse;
+    }
+
     return (await callCluster('fieldCaps', {
       index: indices,
       fields: '*',

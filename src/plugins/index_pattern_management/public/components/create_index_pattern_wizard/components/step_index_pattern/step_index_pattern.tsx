@@ -29,7 +29,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiCallOut,
+  EuiSwitchEvent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { indexPatterns, IndexPatternAttributes, UI_SETTINGS } from '../../../../../../data/public';
@@ -46,15 +53,18 @@ import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedItem } from '../../types';
-import { IndexPatternManagmentContextValue } from '../../../../types';
+import { MatchedItem, StepInfo } from '../../types';
+import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
   allIndices: MatchedItem[];
   indexPatternCreationType: IndexPatternCreationConfig;
+  goToPreviousStep: () => void;
   goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
+  dataSourceRef?: DataSourceRef;
+  stepInfo: StepInfo;
 }
 
 interface StepIndexPatternState {
@@ -116,6 +126,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
+  dataSrouceEnabled: boolean;
+
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
     const { indexPatternCreationType, initialQuery } = this.props;
@@ -123,6 +135,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.state.query =
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
+    this.dataSrouceEnabled = context.services.dataSourceEnabled;
   }
 
   lastQuery = '';
@@ -152,7 +165,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   };
 
   fetchIndices = async (query: string) => {
-    const { indexPatternCreationType } = this.props;
+    const { indexPatternCreationType, dataSourceRef } = this.props;
+    const dataSourceId = dataSourceRef?.id;
     const { existingIndexPatterns } = this.state;
     const { http } = this.context.services;
     const getIndexTags = (indexName: string) => indexPatternCreationType.getIndexTags(indexName);
@@ -168,7 +182,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient })
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: query,
+          showAllIndices,
+          searchClient,
+          dataSourceId,
+        })
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -179,8 +200,22 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices({ http, getIndexTags, pattern: `${query}*`, showAllIndices, searchClient }),
-      getIndices({ http, getIndexTags, pattern: query, showAllIndices, searchClient }),
+      getIndices({
+        http,
+        getIndexTags,
+        pattern: `${query}*`,
+        showAllIndices,
+        searchClient,
+        dataSourceId,
+      }),
+      getIndices({
+        http,
+        getIndexTags,
+        pattern: query,
+        showAllIndices,
+        searchClient,
+        dataSourceId,
+      }),
     ]);
 
     // If the search changed, discard this state
@@ -229,6 +264,23 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
         <EuiSpacer />
       </>
+    );
+  }
+
+  renderGoToPrevious() {
+    const { goToPreviousStep } = this.props;
+
+    return (
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.stepIndexPattern.backButton"
+              defaultMessage="Back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -300,7 +352,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
-    const { goToNextStep, indexPatternCreationType } = this.props;
+    const { goToNextStep, indexPatternCreationType, stepInfo } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -353,6 +405,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         isIncludingSystemIndices={isIncludingSystemIndices}
         showSystemIndices={this.props.showSystemIndices}
+        stepInfo={stepInfo}
       />
     );
   }
@@ -383,6 +436,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer />
         {this.renderList(matchedIndices)}
+        {this.dataSrouceEnabled && this.renderGoToPrevious()}
       </>
     );
   }

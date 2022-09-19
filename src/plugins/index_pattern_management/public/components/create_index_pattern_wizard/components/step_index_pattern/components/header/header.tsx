@@ -45,6 +45,7 @@ import {
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { StepInfo } from '../../../../types';
 
 interface HeaderProps {
   isInputInvalid: boolean;
@@ -57,6 +58,7 @@ interface HeaderProps {
   showSystemIndices?: boolean;
   onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isIncludingSystemIndices: boolean;
+  stepInfo: StepInfo;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -70,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
   showSystemIndices = false,
   onChangeIncludingSystemIndices,
   isIncludingSystemIndices,
+  stepInfo,
   ...rest
 }) => (
   <div {...rest}>
@@ -77,7 +80,11 @@ export const Header: React.FC<HeaderProps> = ({
       <h2>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepHeader"
-          defaultMessage="Step 1 of 2: Define an index pattern"
+          defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
+          values={{
+            currentStepNumber: stepInfo.currentStepNumber,
+            totalStepNumber: stepInfo.totalStepNumber,
+          }}
         />
       </h2>
     </EuiTitle>
