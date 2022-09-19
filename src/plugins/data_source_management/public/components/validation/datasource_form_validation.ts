@@ -76,13 +76,13 @@ export const performDataSourceFormValidation = (
   /* Username & Password */
   if (formValues?.auth?.type === AuthType.UsernamePasswordType) {
     /* Username */
-    if (!formValues.auth?.credentials?.username) {
+    if (!formValues.auth.credentials?.username) {
       validationByField.createCredential.username.push(dataSourceValidationUsernameEmpty);
       formErrorMessages.push(dataSourceValidationUsernameEmpty);
     }
 
     /* password */
-    if (!formValues.auth?.credentials?.password) {
+    if (!formValues.auth.credentials?.password) {
       validationByField.createCredential.password.push(dataSourceValidationPasswordEmpty);
       formErrorMessages.push(dataSourceValidationPasswordEmpty);
     }
