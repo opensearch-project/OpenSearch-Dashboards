@@ -131,7 +131,8 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private isValidUrl(endpoint: string) {
     try {
-      return Boolean(new URL(endpoint));
+      const url = new URL(endpoint);
+      return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
     } catch (e) {
       return false;
     }
@@ -182,7 +183,7 @@ export class DataSourceSavedObjectsClientWrapper {
           credentials: undefined,
         };
       case AuthType.UsernamePasswordType:
-        if (credentials && credentials.password) {
+        if (credentials?.password) {
           return {
             ...attributes,
             auth: await this.encryptCredentials(auth),
@@ -218,9 +219,7 @@ export class DataSourceSavedObjectsClientWrapper {
     const { type, credentials } = auth;
 
     if (!type) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'attribute "auth.type" required for "data source" saved object'
-      );
+      throw SavedObjectsErrorHelpers.createBadRequestError('"auth.type" attribute is required');
     }
 
     switch (type) {
@@ -229,7 +228,7 @@ export class DataSourceSavedObjectsClientWrapper {
       case AuthType.UsernamePasswordType:
         if (credentials === undefined) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'attribute "auth.credentials" required for "data source" saved object'
+            '"auth.credentials" attribute is required'
           );
         }
 
@@ -237,13 +236,13 @@ export class DataSourceSavedObjectsClientWrapper {
 
         if (!username) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'attribute "auth.credentials.username" required for "data source" saved object'
+            '"auth.credentials.username" attribute is required'
           );
         }
 
         if (!password) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'attribute "auth.credentials.password" required for "data source" saved object'
+            '"auth.credentials.password" attribute is required'
           );
         }
 
