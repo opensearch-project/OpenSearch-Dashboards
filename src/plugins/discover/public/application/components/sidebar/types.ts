@@ -33,10 +33,17 @@ export interface IndexPatternRef {
   title: string;
 }
 
+export interface FieldValueCounts {
+  error?: string;
+  exists?: number;
+  total?: number;
+  buckets?: Bucket[];
+  missing?: number;
+}
 export interface FieldDetails {
   error: string;
   exists: number;
-  total: boolean;
+  total: number;
   buckets: Bucket[];
   columns: string[];
 }

@@ -29,7 +29,8 @@
  */
 
 // @ts-ignore
-import { fieldCalculator } from './field_calculator';
+import { i18n } from '@osd/i18n';
+import { getFieldValueCounts } from './field_calculator';
 import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 
 export function getDetails(
@@ -38,18 +39,30 @@ export function getDetails(
   columns: string[],
   indexPattern?: IndexPattern
 ) {
+  const defaultDetails = {
+    error: '',
+    exists: 0,
+    total: 0,
+    buckets: [],
+    columns,
+  };
   if (!indexPattern) {
-    return {};
+    return {
+      ...defaultDetails,
+      error: i18n.translate('discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
+        defaultMessage: 'Index pattern not specified.',
+      }),
+    };
   }
   const details = {
-    ...fieldCalculator.getFieldValueCounts({
+    ...defaultDetails,
+    ...getFieldValueCounts({
       hits,
       field,
       indexPattern,
       count: 5,
       grouped: false,
     }),
-    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {

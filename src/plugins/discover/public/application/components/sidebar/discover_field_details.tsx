@@ -60,23 +60,20 @@ export function DiscoverFieldDetails({
   const [visualizeLink, setVisualizeLink] = useState<string>('');
 
   useEffect(() => {
-    isFieldVisualizable(field, indexPattern.id, details.columns).then(
-      (flag) => {
-        setShowVisualizeLink(flag);
-        // get href only if Visualize button is enabled
-        getVisualizeHref(field, indexPattern.id, details.columns).then(
-          (uri) => {
-            if (uri) setVisualizeLink(uri);
-          },
-          () => {
-            setVisualizeLink('');
-          }
+    const checkIfVisualizable = async () => {
+      const visualizable = await isFieldVisualizable(field, indexPattern.id, details.columns).catch(
+        () => false
+      );
+
+      setShowVisualizeLink(visualizable);
+      if (visualizable) {
+        const href = await getVisualizeHref(field, indexPattern.id, details.columns).catch(
+          () => ''
         );
-      },
-      () => {
-        setShowVisualizeLink(false);
+        setVisualizeLink(href || '');
       }
-    );
+    };
+    checkIfVisualizable();
   }, [field, indexPattern.id, details.columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -87,10 +84,15 @@ export function DiscoverFieldDetails({
 
   return (
     <>
-      <div className="dscFieldDetails">
-        {details.error && <EuiText size="xs">{details.error}</EuiText>}
-        {!details.error && (
-          <div style={{ marginTop: '4px' }}>
+      <div className="dscFieldDetails" data-test-subj={`fieldVisualizeContainer`}>
+        {details.error && (
+          <EuiText size="xs" data-test-subj={`fieldVisualizeError`}>
+            {details.error}
+          </EuiText>
+        )}
+
+        {!details.error && details.buckets.length > 0 && (
+          <div style={{ marginTop: '4px' }} data-test-subj={`fieldVisualizeBucketContainer`}>
             {details.buckets.map((bucket: Bucket, idx: number) => (
               <DiscoverFieldBucket
                 key={`bucket${idx}`}
@@ -102,8 +104,8 @@ export function DiscoverFieldDetails({
           </div>
         )}
 
-        {showVisualizeLink && (
-          <>
+        {showVisualizeLink && visualizeLink && (
+          <div data-test-subj={`fieldVisualizeLink`}>
             <EuiSpacer size="xs" />
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
@@ -121,7 +123,7 @@ export function DiscoverFieldDetails({
             {warnings.length > 0 && (
               <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
             )}
-          </>
+          </div>
         )}
       </div>
       {!details.error && (
