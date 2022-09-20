@@ -41,21 +41,22 @@ import { WizardVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
-import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
-  originatingApp?: string;
-  setOriginatingApp?: (originatingApp: string | undefined) => void;
-  stateTransfer: EmbeddableStateTransfer;
 }
 
 export const getTopNavConfig = (
   { visualizationIdFromUrl, savedWizardVis, saveDisabledReason, dispatch }: TopNavConfigParams,
-  { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
+  { application, history, toastNotifications, i18n: { Context: I18nContext }, embeddable, scopedHistory }: WizardServices
 ) => {
+  const { originatingApp: originatingApp } = embeddable
+      .getStateTransfer(scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+  const stateTransfer = embeddable.getStateTransfer();
+
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
@@ -118,14 +119,15 @@ export const getTopNavConfig = (
                   stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
                     state: { type: 'wizard', input: { savedObjectId: id } },
                   });
+                  return {id};
                 } else {
                   // edit an existing wizard from the dashboard
                   application.navigateToApp(originatingApp);
                 }
               } else {
                 // create wizard from creating visualization page, not related to any dashboard
-                if (setOriginatingApp && originatingApp && newlyCreated) {
-                  setOriginatingApp(undefined);
+                if ( originatingApp && newlyCreated) {
+                  //setOriginatingApp(undefined);
                 }
               }
 
