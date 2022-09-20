@@ -33,19 +33,25 @@ import React from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
+import { StepInfo } from '../../../../types';
 
 interface HeaderProps {
   indexPattern: string;
   indexPatternName: string;
+  stepInfo: StepInfo;
 }
 
-export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }) => (
+export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName, stepInfo }) => (
   <div>
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTimeHeader"
-          defaultMessage="Step 2 of 2: Configure settings"
+          defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure settings"
+          values={{
+            currentStepNumber: stepInfo.currentStepNumber,
+            totalStepNumber: stepInfo.totalStepNumber,
+          }}
         />
       </h2>
     </EuiTitle>

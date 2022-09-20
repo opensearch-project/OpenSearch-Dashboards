@@ -44,6 +44,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import { useMount } from 'react-use';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -103,15 +104,19 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     getMlCardState,
     data,
+    dataSourceEnabled,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
+  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
-  setBreadcrumbs(getListBreadcrumbs());
+  useMount(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  });
+
   useEffect(() => {
     (async function () {
       const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
@@ -149,14 +154,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   };
 
   useEffect(() => {
-    getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions, searchClient]);
+    if (!dataSourceEnabled) {
+      getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
+        setSources(dataSources.filter(removeAliases));
+        setIsLoadingSources(false);
+      });
+      getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+      );
+    }
+  }, [http, creationOptions, searchClient, dataSourceEnabled]);
 
   chrome.docTitle.change(title);
 
@@ -210,16 +217,18 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
 
   if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
-          canSave={canSave}
-        />
-      );
+    if (!dataSourceEnabled) {
+      if (!hasDataIndices && !remoteClustersExist) {
+        return (
+          <EmptyState
+            onRefresh={loadSources}
+            docLinks={docLinks}
+            navigateToApp={application.navigateToApp}
+            getMlCardState={getMlCardState}
+            canSave={canSave}
+          />
+        );
+      }
     } else {
       return (
         <EmptyIndexPatternPrompt

@@ -79,3 +79,8 @@ export interface Tag {
   key: string;
   color: string;
 }
+
+export interface StepInfo {
+  totalStepNumber: number;
+  currentStepNumber: number;
+}
