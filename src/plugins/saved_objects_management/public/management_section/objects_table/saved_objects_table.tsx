@@ -109,6 +109,7 @@ export interface SavedObjectsTableProps {
   perPageConfig: number;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  dateFormat: string;
 }
 
 export interface SavedObjectsTableState {
@@ -811,6 +812,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
+            dateFormat={this.props.dateFormat}
           />
         </RedirectAppLinks>
       </EuiPageContent>

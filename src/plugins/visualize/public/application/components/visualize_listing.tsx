@@ -109,7 +109,11 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history), [application, history]);
+  const tableColumns = useMemo(() => getTableColumns(application, history, uiSettings), [
+    application,
+    history,
+    uiSettings,
+  ]);
 
   const fetchItems = useCallback(
     (filter) => {

@@ -67,4 +67,11 @@ describe('SimpleSavedObject', () => {
     const savedObject = new SimpleSavedObject(client, { version } as SavedObject);
     expect(savedObject._version).toEqual(version);
   });
+
+  it('persists updated_at', () => {
+    const updatedAt = new Date().toString();
+
+    const savedObject = new SimpleSavedObject(client, { updated_at: updatedAt } as SavedObject);
+    expect(savedObject.updated_at).toEqual(updatedAt);
+  });
 });

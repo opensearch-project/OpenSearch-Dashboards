@@ -59,6 +59,7 @@ const SavedObjectsTablePage = ({
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+  const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
 
   useEffect(() => {
     setBreadcrumbs([
@@ -93,6 +94,7 @@ const SavedObjectsTablePage = ({
           );
         }
       }}
+      dateFormat={dateFormat}
       canGoInApp={(savedObject) => {
         const { inAppUrl } = savedObject.meta;
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;

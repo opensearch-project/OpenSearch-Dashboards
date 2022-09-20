@@ -45,13 +45,34 @@ exports[`after fetch hideWriteControls 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
@@ -147,13 +168,34 @@ exports[`after fetch initialFilter 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
@@ -249,13 +291,34 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
@@ -351,13 +414,34 @@ exports[`after fetch renders table rows 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
@@ -453,13 +537,34 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
@@ -554,13 +659,34 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "data-test-subj": "updated-at",
+          "dataType": "date",
+          "description": "Last update of the saved object",
+          "field": "updated_at",
+          "name": "Last updated",
+          "render": [Function],
+          "sortable": true,
+        },
       ]
     }
     tableListTitle="Dashboards"
     toastNotifications={Object {}}
     uiSettings={
       Object {
-        "get": [MockFunction],
+        "get": [MockFunction] {
+          "calls": Array [
+            Array [
+              "dateFormat",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": 10,
+            },
+          ],
+        },
       }
     }
   />
