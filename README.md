@@ -8,7 +8,7 @@
 
 ## Welcome
 
-OpenSearch Dashboards is an open source search and analytics visualization. We aim to to be the best community-driven platform and provide all the contributors a great open source experience.
+OpenSearch Dashboards is an open source search and analytics visualization. We aim to be the best community-driven platform and provide all the contributors a great open source experience.
 
 Feel free to take a look at what the community has been up to, and then head over to the [Project Board](https://github.com/opensearch-project/OpenSearch-Dashboards/projects) to track release targets, or jump in and [start opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose), [set up your development environment](DEVELOPER_GUIDE.md#getting-started), or [start contributing](CONTRIBUTING.md).
 
