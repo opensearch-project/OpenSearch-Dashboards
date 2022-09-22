@@ -102,7 +102,7 @@ export const getTableColumns = (application: ApplicationStart, history: History)
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
         <EuiLink
-          href={`#${editApp ? application.getUrlForApp(editApp, { path: editUrl }) : editUrl}`}
+          href={editApp ? application.getUrlForApp(editApp, { path: editUrl }) : `#${editUrl}`}
           data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
         >
           {field}
