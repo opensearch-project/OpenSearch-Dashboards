@@ -30,6 +30,7 @@
 
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
+import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -80,6 +81,7 @@ export interface TableProps {
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  dateFormat: string;
 }
 
 interface TableState {
@@ -172,6 +174,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      dateFormat,
     } = this.props;
 
     const pagination = {
@@ -250,6 +253,20 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      {
+        field: `updated_at`,
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnUpdatedAtName', {
+          defaultMessage: 'Last updated',
+        }),
+        dataType: 'date',
+        sortable: true,
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.table.columnUpdatedAtDescription',
+          { defaultMessage: 'Last update of the saved object' }
+        ),
+        'data-test-subj': 'updated-at',
+        render: (updatedAt: string) => updatedAt && moment(updatedAt).format(dateFormat),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...columnRegistry.getAll().map((column) => {
         return {
