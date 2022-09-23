@@ -10,6 +10,7 @@ import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';
 import { getDataGridColumns } from './table_vis_grid_columns';
+import { usePagination } from '../utils';
 
 interface TableVisComponentProps {
   table: Table;
@@ -19,15 +20,8 @@ interface TableVisComponentProps {
 
 export const TableVisComponent = ({ table, visConfig, handlers }: TableVisComponentProps) => {
   const { rows, columns } = table;
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
-  const onChangeItemsPerPage = useCallback(
-    (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
-    [setPagination]
-  );
 
-  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
-    setPagination,
-  ]);
+  const pagination = usePagination(visConfig, rows.length);
 
   // toDo: it is a sample renderCellValue to render a data grid component
   // will check on it and it might be replaced
@@ -37,15 +31,16 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
 
       // If we are doing the pagination (instead of leaving that to the grid)
       // then the row index must be adjusted as `data` has already been pruned to the page size
-      adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+      adjustedRowIndex = rowIndex - pagination!.pageIndex * pagination!.pageSize;
 
       return rows.hasOwnProperty(adjustedRowIndex)
         ? rows[adjustedRowIndex][columnId] || null
         : null;
     }) as EuiDataGridProps['renderCellValue'];
-  }, [rows, pagination.pageIndex, pagination.pageSize]);
+  }, [rows, pagination]);
 
   const dataGridColumns = getDataGridColumns(table, visConfig, handlers);
+
   return (
     <EuiDataGrid
       aria-label="tableVis"
@@ -56,11 +51,7 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
       }}
       rowCount={rows.length}
       renderCellValue={renderCellValue}
-      pagination={{
-        ...pagination,
-        onChangeItemsPerPage,
-        onChangePage,
-      }}
+      pagination={pagination}
     />
   );
 };
