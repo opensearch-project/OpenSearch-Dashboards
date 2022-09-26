@@ -59,6 +59,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛠 Maintenance
 
 * Increment from 2.3 to 2.4. ([#2295](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2295))
+* Adding @zengyan-amazon as maintainer.
 
 ### 🪛 Refactoring
 
