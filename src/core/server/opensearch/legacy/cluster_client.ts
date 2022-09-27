@@ -65,7 +65,7 @@ const noop = () => undefined;
  * OpenSearch JS client.
  * @param options Options that affect the way we call the API and process the result.
  */
-export const callAPI = async (
+const callAPI = async (
   client: Client,
   endpoint: string,
   clientParams: Record<string, any> = {},

@@ -4,9 +4,15 @@
  */
 
 import { Client } from 'elasticsearch';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { callAPI } from '../../../../../src/core/server/opensearch/legacy/cluster_client';
-import { Headers, LegacyAPICaller, Logger, SavedObject } from '../../../../../src/core/server';
+import { get } from 'lodash';
+import {
+  Headers,
+  LegacyAPICaller,
+  LegacyCallAPIOptions,
+  LegacyOpenSearchErrorHelpers,
+  Logger,
+  SavedObject,
+} from '../../../../../src/core/server';
 import {
   AuthType,
   DataSourceAttributes,
@@ -84,6 +90,48 @@ const getRootClient = (
     addClientToPool(endpoint, client);
 
     return client;
+  }
+};
+
+/**
+ * Calls the OpenSearch API endpoint with the specified parameters.
+ * @param client Raw OpenSearch JS client instance to use.
+ * @param endpoint Name of the API endpoint to call.
+ * @param clientParams Parameters that will be directly passed to the
+ * OpenSearch JS client.
+ * @param options Options that affect the way we call the API and process the result.
+ * make wrap401Errors default to false, because we don't want browser login pop-up
+ */
+const callAPI = async (
+  client: Client,
+  endpoint: string,
+  clientParams: Record<string, any> = {},
+  options: LegacyCallAPIOptions = { wrap401Errors: false }
+) => {
+  const clientPath = endpoint.split('.');
+  const api: any = get(client, clientPath);
+  if (!api) {
+    throw new Error(`called with an invalid endpoint: ${endpoint}`);
+  }
+
+  const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
+  try {
+    return await new Promise((resolve, reject) => {
+      const request = api.call(apiContext, clientParams);
+      if (options.signal) {
+        options.signal.addEventListener('abort', () => {
+          request.abort();
+          reject(new Error('Request was aborted'));
+        });
+      }
+      return request.then(resolve, reject);
+    });
+  } catch (err) {
+    if (!options.wrap401Errors || err.statusCode !== 401) {
+      throw err;
+    }
+
+    throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 };
 
