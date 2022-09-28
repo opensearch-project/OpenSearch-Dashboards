@@ -23,7 +23,7 @@ export interface DataSourceServiceSetup {
       endpoint: string,
       clientParams?: Record<string, any>,
       options?: LegacyCallAPIOptions
-    ) => Promise<any>;
+    ) => Promise<unknown>;
   };
 }
 export class DataSourceService {

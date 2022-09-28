@@ -34,7 +34,7 @@ export interface DataSourcePluginRequestContext {
           endpoint: string,
           clientParams: Record<string, any>,
           options?: LegacyCallAPIOptions
-        ) => Promise<any>;
+        ) => Promise<unknown>;
       };
     };
   };
