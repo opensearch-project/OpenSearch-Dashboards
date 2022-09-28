@@ -26,7 +26,7 @@ import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, WIZARD_SAVED_OBJECT } from '../commo
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import {
-  setAggService,
+  setSearchService,
   setIndexPatterns,
   setHttp,
   setSavedWizardLoader,
@@ -150,7 +150,7 @@ export class WizardPlugin
     });
 
     // Register plugin services
-    setAggService(data.search.aggs);
+    setSearchService(data.search);
     setExpressionLoader(expressions.ExpressionLoader);
     setReactExpressionRenderer(expressions.ReactExpressionRenderer);
     setHttp(core.http);
