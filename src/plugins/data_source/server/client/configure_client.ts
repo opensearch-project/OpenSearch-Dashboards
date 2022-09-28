@@ -75,12 +75,18 @@ const getQueryClient = async (
   dataSource: SavedObject<DataSourceAttributes>,
   cryptographyClient: CryptographyClient
 ): Promise<Client> => {
-  if (AuthType.NoAuth === dataSource.attributes.auth.type) {
-    return rootClient.child();
-  } else {
-    const credential = await getCredential(dataSource, cryptographyClient);
+  const authType = dataSource.attributes.auth.type;
 
-    return getBasicAuthClient(rootClient, credential);
+  switch (authType) {
+    case AuthType.NoAuth:
+      return rootClient.child();
+
+    case AuthType.UsernamePasswordType:
+      const credential = await getCredential(dataSource, cryptographyClient);
+      return getBasicAuthClient(rootClient, credential);
+
+    default:
+      throw Error(`${authType} is not a supported auth type for data source`);
   }
 };
 

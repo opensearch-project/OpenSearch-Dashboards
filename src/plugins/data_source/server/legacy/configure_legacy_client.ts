@@ -46,7 +46,7 @@ export const configureLegacyClient = async (
 };
 
 /**
- * Create a child client object with given auth info.
+ * With given auth info, wrap the rootClient and return
  *
  * @param rootClient root client for the connection with given data source endpoint.
  * @param dataSource data source saved object
@@ -57,13 +57,23 @@ const getQueryClient = async (
   rootClient: Client,
   dataSource: SavedObject<DataSourceAttributes>,
   cryptographyClient: CryptographyClient,
-  callApiParams: LegacyClientCallAPIParams
+  { endpoint, clientParams, options }: LegacyClientCallAPIParams
 ) => {
-  if (AuthType.NoAuth === dataSource.attributes.auth.type) {
-    return legacyClientWrapper(rootClient, callApiParams);
-  } else {
-    const credential = await getCredential(dataSource, cryptographyClient);
-    return legacyClientWrapper(rootClient, callApiParams, credential);
+  const authType = dataSource.attributes.auth.type;
+
+  switch (authType) {
+    case AuthType.NoAuth:
+      return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(
+        endpoint,
+        clientParams,
+        options
+      );
+    case AuthType.UsernamePasswordType:
+      const credential = await getCredential(dataSource, cryptographyClient);
+      return getBasicAuthClient(rootClient, { endpoint, clientParams, options }, credential);
+
+    default:
+      throw Error(`${authType} is not a supported auth type for data source`);
   }
 };
 
@@ -73,7 +83,7 @@ const getQueryClient = async (
  *
  * @param dataSourceAttr data source saved objects attributes.
  * @param config data source config
- * @returns OpenSearch client for the given data source endpoint.
+ * @returns Legacy client for the given data source endpoint.
  */
 const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
@@ -95,12 +105,12 @@ const getRootClient = (
 
 /**
  * Calls the OpenSearch API endpoint with the specified parameters.
- * @param client Raw OpenSearch JS client instance to use.
+ * @param client Raw legacy JS client instance to use.
  * @param endpoint Name of the API endpoint to call.
  * @param clientParams Parameters that will be directly passed to the
- * OpenSearch JS client.
+ * legacy JS client.
  * @param options Options that affect the way we call the API and process the result.
- * make wrap401Errors default to false, because we don't want browser login pop-up
+ * make wrap401Errors default to false, because we don't want login pop-up from browser
  */
 const callAPI = async (
   client: Client,
@@ -136,27 +146,22 @@ const callAPI = async (
 };
 
 /**
- * Wrapper to expose API that allow calling the OpenSearch API endpoint with the specified
- * parameters, using legacy client.
+ * Get a legacy client that configured with basic auth
  *
- * @param client Raw OpenSearch JS client instance to use.
+ * @param rootClient Raw legacy client instance to use.
  * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
- * @param clientParams - A dictionary of parameters that will be passed directly to the OpenSearch JS client.
+ * @param clientParams - A dictionary of parameters that will be passed directly to the legacy JS client.
  * @param options - Options that affect the way we call the API and process the result.
- * @param credential - Decrypted credential content
  */
-const legacyClientWrapper = async (
+const getBasicAuthClient = async (
   rootClient: Client,
   { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
-  credential?: UsernamePasswordTypedContent
+  { username, password }: UsernamePasswordTypedContent
 ) => {
-  if (credential) {
-    const headers: Headers = {
-      authorization:
-        'Basic ' + Buffer.from(`${credential.username}:${credential.password}`).toString('base64'),
-    };
-    clientParams.headers = Object.assign({}, clientParams.headers, headers);
-  }
+  const headers: Headers = {
+    authorization: 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64'),
+  };
+  clientParams.headers = Object.assign({}, clientParams.headers, headers);
 
   return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
 };
