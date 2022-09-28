@@ -36,6 +36,10 @@
     position: absolute;
     top: 0;
     left: 100%;
+
+    .visEditorAggParam--half {
+      margin: $euiSize 0;
+    }
   }
 
   &.showSecondary > .wizConfig__section {

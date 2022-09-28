@@ -16,6 +16,7 @@ import { useIndexPatterns, useSavedWizardVis } from '../utils/use';
 import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
 import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
+import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -32,26 +33,29 @@ export const TopNav = () => {
 
   const saveDisabledReason = useCanSave();
   const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
+  const { selected: indexPattern } = useIndexPatterns();
 
   const config = useMemo(() => {
-    if (savedWizardVis === undefined) return;
-
-    const { visualization: visualizationState, style: styleState } = rootState;
+    if (!savedWizardVis || !indexPattern) return;
 
     return getTopNavConfig(
       {
         visualizationIdFromUrl,
-        savedWizardVis,
-        visualizationState,
-        styleState,
+        savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
         saveDisabledReason,
         dispatch,
       },
       services
     );
-  }, [rootState, savedWizardVis, services, visualizationIdFromUrl, saveDisabledReason, dispatch]);
-
-  const indexPattern = useIndexPatterns().selected;
+  }, [
+    savedWizardVis,
+    visualizationIdFromUrl,
+    rootState,
+    indexPattern,
+    saveDisabledReason,
+    dispatch,
+    services,
+  ]);
 
   // reset validity before component destroyed
   useUnmount(() => {
@@ -65,6 +69,7 @@ export const TopNav = () => {
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
+        showDatePicker={!!indexPattern?.timeFieldName ?? true}
         showSearchBar
         showSaveQuery
         useDefaultBehaviors

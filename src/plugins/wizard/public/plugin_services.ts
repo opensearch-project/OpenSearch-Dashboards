@@ -10,9 +10,9 @@ import { HttpStart, IUiSettingsClient } from '../../../core/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
 
-export const [getAggService, setAggService] = createGetterSetter<
-  DataPublicPluginStart['search']['aggs']
->('data.search.aggs');
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('data.search');
 
 export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<
   ExpressionsStart['ExpressionLoader']

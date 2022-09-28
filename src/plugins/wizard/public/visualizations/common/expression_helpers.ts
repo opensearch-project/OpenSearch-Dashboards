@@ -8,7 +8,7 @@ import { OpenSearchaggsExpressionFunctionDefinition } from '../../../../data/pub
 import { ExpressionFunctionOpenSearchDashboards } from '../../../../expressions';
 import { buildExpressionFunction } from '../../../../expressions/public';
 import { VisualizationState } from '../../application/utils/state_management';
-import { getAggService, getIndexPatterns } from '../../plugin_services';
+import { getSearchService, getIndexPatterns } from '../../plugin_services';
 
 export const getAggExpressionFunctions = async (visualization: VisualizationState) => {
   const { activeVisualization, indexPattern: indexId = '' } = visualization;
@@ -17,7 +17,10 @@ export const getAggExpressionFunctions = async (visualization: VisualizationStat
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
   // aggConfigParams is the serealizeable aggConfigs that need to be reconstructed here using the agg servce
-  const aggConfigs = getAggService().createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
+  const aggConfigs = getSearchService().aggs.createAggConfigs(
+    indexPattern,
+    cloneDeep(aggConfigParams)
+  );
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
     'opensearchDashboards',
@@ -38,6 +41,7 @@ export const getAggExpressionFunctions = async (visualization: VisualizationStat
 
   return {
     aggConfigs,
+    indexPattern,
     expressionFns: [opensearchDashboards, opensearchaggs],
   };
 };

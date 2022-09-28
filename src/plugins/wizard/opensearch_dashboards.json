@@ -5,19 +5,19 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "navigation",
-    "charts",
+    "dashboard",
     "data",
-    "opensearchDashboardsReact",
-    "opensearchDashboardsUtils",
-    "savedObjects",
     "embeddable",
     "expressions",
-    "dashboard",
-    "visualizations",
-    "opensearchUiShared",
+    "navigation",
+    "savedObjects",
+    "visualizations"
+  ],
+  "requiredBundles": [
+    "charts",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
     "visDefaultEditor",
     "visTypeVislib"
-  ],
-  "optionalPlugins": []
+  ]
 }

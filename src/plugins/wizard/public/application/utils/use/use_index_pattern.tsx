@@ -17,7 +17,7 @@ export const useIndexPatterns = () => {
     services: { data },
   } = useOpenSearchDashboards<WizardServices>();
 
-  let foundSelected: IndexPattern;
+  let foundSelected: IndexPattern | undefined;
   if (!loading && !error) {
     foundSelected = indexPatterns.filter((p) => p.id === indexId)[0];
     if (foundSelected === undefined) {
@@ -47,6 +47,6 @@ export const useIndexPatterns = () => {
     indexPatterns,
     error,
     loading,
-    selected: foundSelected!,
+    selected: foundSelected,
   };
 };

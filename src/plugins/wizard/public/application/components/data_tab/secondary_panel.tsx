@@ -19,7 +19,9 @@ import { setValidity } from '../../utils/state_management/metadata_slice';
 const EDITOR_KEY = 'CONFIG_PANEL';
 
 export function SecondaryPanel() {
-  const draftAgg = useTypedSelector((state) => state.visualization.activeVisualization!.draftAgg);
+  const { draftAgg, aggConfigParams } = useTypedSelector(
+    (state) => state.visualization.activeVisualization!
+  );
   const isEditorValid = useTypedSelector((state) => state.metadata.editor.validity[EDITOR_KEY]);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
@@ -39,8 +41,20 @@ export function SecondaryPanel() {
       indexPattern && draftAgg && aggService.createAggConfigs(indexPattern, [cloneDeep(draftAgg)])
     );
   }, [draftAgg, aggService, indexPattern]);
-
   const aggConfig = aggConfigs?.aggs[0];
+
+  const metricAggs = useMemo(
+    () =>
+      indexPattern
+        ? aggService.createAggConfigs(
+            indexPattern,
+            cloneDeep(
+              aggConfigParams.filter((aggConfigParam) => aggConfigParam.schema === 'metric')
+            )
+          ).aggs
+        : [],
+    [aggConfigParams, aggService, indexPattern]
+  );
 
   const selectedSchema = useMemo(
     () => schemas.find((schema) => schema.name === aggConfig?.schema),
@@ -93,7 +107,7 @@ export function SecondaryPanel() {
           schemas={schemas}
           formIsTouched={touched}
           groupName={selectedSchema?.group ?? 'none'}
-          metricAggs={[]}
+          metricAggs={metricAggs}
           state={{
             data: {},
             description: '',
