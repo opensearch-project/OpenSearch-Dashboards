@@ -34,6 +34,7 @@ import { createHashHistory } from 'history';
 import { from, Observable, concat } from 'rxjs';
 import { filter, map, mergeMap, reduce } from 'rxjs/operators';
 
+import { DashboardCreatorFn } from 'src/plugins/dashboard/public/types';
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
@@ -50,18 +51,18 @@ import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
 
 export interface DashboardListItem {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  url: string;
-  listType: string;
+  id: string; // plugin identifier
+  title: string; // item title
+  type: string; // item type display string
+  description: string; // item description
+  url: string; // redirect url to item detail
+  listType: string; // item type key
 }
 
 export type DashboardListItems = DashboardListItem[];
 export type DashboardListProviderFn = () => Observable<DashboardListItems>;
 export interface DashboardDisplay {
-  hits: DashboardListItem[];
+  hits: DashboardListItems;
   total: number;
 }
 
@@ -72,6 +73,8 @@ export function initDashboardApp(app, deps) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
+      ['dashboardItemCreators', { watchDepth: 'reference' }],
+      ['dashboardItemCreatorClickHandler', { watchDepth: 'reference' }],
       ['getViewUrl', { watchDepth: 'reference' }],
       ['editItem', { watchDepth: 'reference' }],
       ['editItemAvailable', { watchDepth: 'reference' }],
@@ -147,6 +150,21 @@ export function initDashboardApp(app, deps) {
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
+          $scope.dashboardItemCreators = () => {
+            return deps.dashboardItemCreators.map((creator) => ({
+              ...creator,
+              creatorFn: (event) => creator.creatorFn(event, history),
+            }));
+          };
+          $scope.dashboardItemCreatorClickHandler = (
+            creatorFn: DashboardCreatorFn
+          ): ((evt: any) => void) => {
+            const wrappedCreatorFn = (evt: any) => {
+              creatorFn(evt, history);
+            };
+            return wrappedCreatorFn;
+          };
+
           $scope.editItemAvailable = (item) => !!item.editUrl;
           $scope.find = (search) => {
             const dashboardList$ = from(service.find(search, $scope.listingLimit));

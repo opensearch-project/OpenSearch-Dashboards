@@ -143,21 +143,3 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
-
-export interface DashboardListSource {
-  name: string;
-  listProviderFn: () => Observable<DashboardListItem>;
-}
-
-export type DashboardListSources = DashboardListSource[];
-
-export interface DashboardListItem {
-  id: string;
-  title: string;
-  type: string;
-  description: string;
-  url: string;
-  listType: string;
-}
-
-export type DashboardListItems = DashboardListItem[];

@@ -55,6 +55,10 @@ export class DashboardListing extends React.Component {
         <TableListView
           headingId="dashboardListingHeading"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
+          dashboardItemCreators={
+            this.props.hideWriteControls ? [] : this.props.dashboardItemCreators
+          }
+          dashboardItemCreatorClickHandler={this.props.dashboardItemCreatorClickHandler}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
           editItem={this.props.hideWriteControls ? null : this.props.editItem}
@@ -201,6 +205,8 @@ export class DashboardListing extends React.Component {
 
 DashboardListing.propTypes = {
   createItem: PropTypes.func.isRequired,
+  dashboardItemCreators: PropTypes.func.isRequired,
+  dashboardItemCreatorClickHandler: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,

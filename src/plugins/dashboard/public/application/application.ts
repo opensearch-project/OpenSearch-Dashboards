@@ -46,7 +46,7 @@ import {
   AppMountParameters,
 } from 'opensearch-dashboards/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { DashboardListSources } from 'src/plugins/dashboard/public/types';
+import { DashboardListSources, DashboardCreators } from 'src/plugins/dashboard/public/types';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { DashboardListItem, DashboardListProviderFn, initDashboardApp } from './legacy_app';
@@ -74,6 +74,7 @@ export interface RenderDeps {
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
   dashboardListSources: DashboardListSources;
+  dashboardItemCreators: DashboardCreators;
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {

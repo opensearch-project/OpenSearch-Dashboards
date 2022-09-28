@@ -48,7 +48,12 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
+import {
+  DashboardCreators,
+  DashboardItemCreatorClickHandler,
+} from 'src/plugins/dashboard/common/types';
 import { toMountPoint } from '../util';
+import { CreateButton } from './components/create_button_menu';
 
 interface Column {
   name: string;
@@ -62,6 +67,8 @@ interface Item {
 
 export interface TableListViewProps {
   createItem?(): void;
+  dashboardItemCreators: () => DashboardCreators;
+  dashboardItemCreatorClickHandler: DashboardItemCreatorClickHandler;
 
   deleteItems?(items: object[]): Promise<void>;
 
@@ -99,6 +106,7 @@ export interface TableListViewState {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  isCreatePopoverOpen: boolean;
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -128,6 +136,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      isCreatePopoverOpen: false,
     };
   }
 
@@ -505,25 +514,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderListing() {
-    let createButton;
-    if (this.props.createItem) {
-      createButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.props.createItem}
-            data-test-subj="newItemButton"
-            iconType="plusInCircle"
-            fill
-          >
-            <FormattedMessage
-              id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName: this.props.entityName }}
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      );
-    }
     return (
       <div>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
@@ -535,7 +525,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             </EuiTitle>
           </EuiFlexItem>
 
-          {createButton}
+          <CreateButton
+            dashboardItemCreatorClickHandler={this.props.dashboardItemCreatorClickHandler}
+            dashboardItemCreators={this.props.dashboardItemCreators}
+          />
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
