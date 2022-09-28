@@ -3,23 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Vis, buildVislibDimensions } from '../../../../../visualizations/public';
+import { buildVislibDimensions } from '../../../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../../../expressions/public';
 import { LineOptionsDefaults } from './line_vis_type';
 import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState, getValueAxes, getPipelineParams } from '../common';
+import { createVis } from '../common/create_vis';
 
 export const toExpression = async ({
   style: styleState,
   visualization,
 }: VislibRootState<LineOptionsDefaults>) => {
-  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization);
+  const { aggConfigs, expressionFns, indexPattern } = await getAggExpressionFunctions(
+    visualization
+  );
   const { addLegend, addTooltip, legendPosition, type } = styleState;
+
+  const vis = await createVis(type, aggConfigs, indexPattern);
+
   const params = getPipelineParams();
-
-  const vis = new Vis(type);
-  vis.data.aggs = aggConfigs;
-
   const dimensions = await buildVislibDimensions(vis, params);
   const valueAxes = getValueAxes(dimensions.y);
 
