@@ -131,11 +131,20 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
             const auditor = auditTrailPromise.then((auditTrail) => auditTrail.asScoped(req));
             this.logAuditMessage(auditor, dataSourceId, req);
 
-            return dataSourceService.getDataSourceClient(
+            return dataSourceService.getDataSourceClient({
               dataSourceId,
-              context.core.savedObjects.client,
-              cryptographyClient
-            );
+              savedObjects: context.core.savedObjects.client,
+              cryptographyClient,
+            });
+          },
+          legacy: {
+            getClient: (dataSourceId: string) => {
+              return dataSourceService.getDataSourceLegacyClient({
+                dataSourceId,
+                savedObjects: context.core.savedObjects.client,
+                cryptographyClient,
+              });
+            },
           },
         },
       };
