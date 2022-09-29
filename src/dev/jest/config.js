@@ -105,9 +105,9 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|d3-color))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
