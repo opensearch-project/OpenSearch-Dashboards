@@ -1,0 +1,238 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render data source finder when choose to use data source 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure data source"
+        id="indexPatternManagement.createIndexPattern.stepDataSourceHeader"
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
+      />
+    </h2>
+  </EuiTitle>
+  <EuiText>
+    <FormattedMessage
+      defaultMessage="Please pick the data source -- within which to configure index patterns."
+      id="indexPatternManagement.createIndexPattern.stepDataSourceLabel"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiRadio
+    checked={false}
+    compressed={true}
+    data-test-subj="createIndexPatternStepDataSourceUseDefaultRadio"
+    id="useDefault"
+    label={
+      <FormattedMessage
+        defaultMessage="Use default"
+        id="indexPatternManagement.createIndexPattern.stepDataSource.useDefaultLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />
+  <EuiText
+    className="dataSourceRadioHelperText"
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
+      id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiRadio
+    checked={true}
+    compressed={true}
+    data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
+    id="useDataSource"
+    label={
+      <FormattedMessage
+        defaultMessage="Choose data source"
+        id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSourceLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />
+  <EuiText
+    className="dataSourceRadioHelperText"
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Connect to an existing external data source."
+      id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSource.helperText"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <SavedObjectFinderUi
+      fixedPageSize={5}
+      key="searchSavedObjectFinder"
+      noItemsMessage="No data sources have been configured yet."
+      onChoose={[Function]}
+      savedObjectMetaData={
+        Array [
+          Object {
+            "getIconForSavedObject": [Function],
+            "name": "Data Source",
+            "type": "data-source",
+          },
+        ]
+      }
+      showFilter={false}
+    />
+  </EuiFlexItem>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="createIndexPatternStepDataSourceNextStepButton"
+        fill={true}
+        iconSide="right"
+        iconType="arrowRight"
+        isDisabled={true}
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Next step"
+          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure data source"
+        id="indexPatternManagement.createIndexPattern.stepDataSourceHeader"
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
+      />
+    </h2>
+  </EuiTitle>
+  <EuiText>
+    <FormattedMessage
+      defaultMessage="Please pick the data source -- within which to configure index patterns."
+      id="indexPatternManagement.createIndexPattern.stepDataSourceLabel"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiRadio
+    checked={true}
+    compressed={true}
+    data-test-subj="createIndexPatternStepDataSourceUseDefaultRadio"
+    id="useDefault"
+    label={
+      <FormattedMessage
+        defaultMessage="Use default"
+        id="indexPatternManagement.createIndexPattern.stepDataSource.useDefaultLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />
+  <EuiText
+    className="dataSourceRadioHelperText"
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
+      id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiRadio
+    checked={false}
+    compressed={true}
+    data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
+    id="useDataSource"
+    label={
+      <FormattedMessage
+        defaultMessage="Choose data source"
+        id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSourceLabel"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />
+  <EuiText
+    className="dataSourceRadioHelperText"
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Connect to an existing external data source."
+      id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSource.helperText"
+      values={Object {}}
+    />
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="createIndexPatternStepDataSourceNextStepButton"
+        fill={true}
+        iconSide="right"
+        iconType="arrowRight"
+        isDisabled={false}
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Next step"
+          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

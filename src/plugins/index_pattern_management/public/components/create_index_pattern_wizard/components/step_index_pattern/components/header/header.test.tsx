@@ -45,6 +45,7 @@ describe('Header', () => {
         isNextStepDisabled={false}
         onChangeIncludingSystemIndices={() => {}}
         isIncludingSystemIndices={false}
+        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
       />
     );
 
@@ -63,6 +64,7 @@ describe('Header', () => {
         isNextStepDisabled={true}
         onChangeIncludingSystemIndices={() => {}}
         isIncludingSystemIndices={false}
+        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
       />
     );
 
