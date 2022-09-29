@@ -13,6 +13,7 @@
 | Josh Romero | [joshuarrrr](https://github.com/joshuarrrr) | Amazon |
 | Abby Hu | [abbyhu2000](https://github.com/abbyhu2000) | Amazon |
 | Yan Zeng | [zengyan-amazon](https://github.com/zengyan-amazon) | Amazon |
+| Kristen Tian | [kristenTian](https://github.com/kristenTian) | Amazon |
 
 ## Emeritus
 
