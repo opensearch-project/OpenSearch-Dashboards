@@ -14,8 +14,8 @@ export class DataSourceConfigError extends OsdError {
       ? error.output.payload.message
       : error.message;
     super(messagePrefix + messageContent);
-    // Cast all 5xx error returned by saveObjectClient to 500, 400 for both savedObject client
-    // 4xx errors, and other errors
+    // Cast all 5xx error returned by saveObjectClient to 500.
+    // Cast both savedObject client 4xx errors, and other errors to 400
     this.statusCode = SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error) ? 500 : 400;
   }
 }
