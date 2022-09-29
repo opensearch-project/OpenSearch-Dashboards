@@ -29,6 +29,7 @@
  */
 
 import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { IFieldFormat } from 'src/plugins/data/public';
 
 export enum AggTypes {
   SUM = 'sum',
@@ -52,4 +53,14 @@ export interface TableVisParams {
   showTotal: boolean;
   totalFunc: AggTypes;
   percentageCol: string;
+}
+
+export interface FormattedColumn {
+  id: string;
+  title: string;
+  formatter: IFieldFormat | undefined;
+  filterable: boolean;
+  formattedTotal?: string | number;
+  sumTotal?: number;
+  total?: number;
 }

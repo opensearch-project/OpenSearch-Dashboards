@@ -9,6 +9,7 @@ import { EuiDataGridProps, EuiDataGrid } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';
+import { getDataGridColumns } from './table_vis_grid_columns';
 
 interface TableVisComponentProps {
   table: Table;
@@ -44,10 +45,11 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
     }) as EuiDataGridProps['renderCellValue'];
   }, [rows, pagination.pageIndex, pagination.pageSize]);
 
+  const dataGridColumns = getDataGridColumns(table, visConfig, handlers);
   return (
     <EuiDataGrid
       aria-label="tableVis"
-      columns={columns}
+      columns={dataGridColumns}
       columnVisibility={{
         visibleColumns: columns.map(({ id }) => id),
         setVisibleColumns: () => {},
