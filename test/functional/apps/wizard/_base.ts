@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show visualization when a field is added', async () => {
-      const expectedData = [2858, 2904, 2814, 1322, 2784];
+      const expectedData = [2904, 2858, 2814, 2784, 1322];
       await PageObjects.wizard.addField('metric', 'Count');
       await PageObjects.wizard.addField('segment', 'Terms', 'machine.os.raw');
 
