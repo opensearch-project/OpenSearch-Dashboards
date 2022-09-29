@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
 import { SavedObject } from '../../../../../saved_objects/public';
 import {
+  InvalidJSONProperty,
   redirectWhenMissing,
   SavedObjectNotFound,
 } from '../../../../../opensearch_dashboards_utils/public';
@@ -23,6 +24,7 @@ import {
 } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
+import { validateWizardState } from '../wizard_state_validation';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
@@ -39,6 +41,14 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
       http: { basePath },
       toastNotifications,
     } = services;
+    const toastNotification = (message) => {
+      toastNotifications.addDanger({
+        title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
+          defaultMessage: 'Failed to load the visualization',
+        }),
+        text: message,
+      });
+    };
     const loadSavedWizardVis = async () => {
       try {
         const savedWizardVis = await getSavedWizardVis(services, visualizationIdFromUrl);
@@ -58,7 +68,16 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
             activeVisualization: vizStateWithoutIndex.activeVisualization,
             indexPattern: savedWizardVis.searchSourceFields.index,
           };
-          // TODO: Add validation and transformation, throw/handle errors
+
+          const validateResult = validateWizardState({ styleState, visualizationState });
+          if (!validateResult.valid) {
+            const err = validateResult.errors;
+            if (err) {
+              const errMsg = err[0].instancePath + ' ' + err[0].message;
+              throw new InvalidJSONProperty(errMsg);
+            }
+          }
+
           dispatch(setStyleState<MetricOptionsDefaults>(styleState));
           dispatch(setVisualizationState(visualizationState));
         }
@@ -83,14 +102,12 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
               mapping: managementRedirectTarget,
             })(error);
           }
+          if (error instanceof InvalidJSONProperty) {
+            toastNotification(error.message);
+          }
         } catch (e) {
           const message = e instanceof Error ? e.message : '';
-          toastNotifications.addWarning({
-            title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
-              defaultMessage: 'Failed to load the visualization',
-            }),
-            text: message,
-          });
+          toastNotification(message);
           history.replace(EDIT_PATH);
         }
       }
