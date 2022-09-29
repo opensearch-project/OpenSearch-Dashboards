@@ -57,23 +57,10 @@ export interface IndexAliasResponse {
  *  @return {Promise<IndexAliasResponse>}
  */
 export async function callIndexAliasApi(
-  callCluster: LegacyAPICaller | OpenSearchClient,
+  callCluster: LegacyAPICaller,
   indices: string[] | string
 ): Promise<IndicesAliasResponse> {
   try {
-    // This approach of identify between OpenSearchClient vs LegacyAPICaller
-    // will be deprecated after support data client with legacy client
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
-    if ('transport' in callCluster) {
-      return (
-        await callCluster.indices.getAlias({
-          index: indices,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        })
-      ).body as IndicesAliasResponse;
-    }
-
     return (await callCluster('indices.getAlias', {
       index: indices,
       ignoreUnavailable: true,
@@ -97,25 +84,11 @@ export async function callIndexAliasApi(
  *  @return {Promise<FieldCapsResponse>}
  */
 export async function callFieldCapsApi(
-  callCluster: LegacyAPICaller | OpenSearchClient,
+  callCluster: LegacyAPICaller,
   indices: string[] | string,
   fieldCapsOptions: { allowNoIndices: boolean } = { allowNoIndices: false }
 ) {
   try {
-    // This approach of identify between OpenSearchClient vs LegacyAPICaller
-    // will be deprecated after support data client with legacy client
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2133
-    if ('transport' in callCluster) {
-      return (
-        await callCluster.fieldCaps({
-          index: indices,
-          fields: '*',
-          ignore_unavailable: true,
-          allow_no_indices: fieldCapsOptions.allowNoIndices,
-        })
-      ).body as FieldCapsResponse;
-    }
-
     return (await callCluster('fieldCaps', {
       index: indices,
       fields: '*',

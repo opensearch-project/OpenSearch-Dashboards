@@ -5,47 +5,66 @@
 
 import {
   Auditor,
+  LegacyCallAPIOptions,
   Logger,
   OpenSearchClient,
-  SavedObjectsClientContract,
 } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
 import { configureClient, OpenSearchClientPool } from './client';
-import { CryptographyClient } from './cryptography';
+import { configureLegacyClient } from './legacy';
+import { DataSourceClientParams } from './types';
 export interface DataSourceServiceSetup {
-  getDataSourceClient: (
-    dataSourceId: string,
-    // this saved objects client is used to fetch data source on behalf of users, caller should pass scoped saved objects client
-    savedObjects: SavedObjectsClientContract,
-    cryptographyClient: CryptographyClient
-  ) => Promise<OpenSearchClient>;
+  getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
+
+  getDataSourceLegacyClient: (
+    params: DataSourceClientParams
+  ) => {
+    callAPI: (
+      endpoint: string,
+      clientParams?: Record<string, any>,
+      options?: LegacyCallAPIOptions
+    ) => Promise<unknown>;
+  };
 }
 export class DataSourceService {
   private readonly openSearchClientPool: OpenSearchClientPool;
+  private readonly legacyClientPool: OpenSearchClientPool;
+  private readonly legacyLogger: Logger;
 
   constructor(private logger: Logger) {
+    this.legacyLogger = logger.get('legacy');
     this.openSearchClientPool = new OpenSearchClientPool(logger);
+    this.legacyClientPool = new OpenSearchClientPool(this.legacyLogger);
   }
 
-  async setup(config: DataSourcePluginConfigType) {
-    const openSearchClientPoolSetup = await this.openSearchClientPool.setup(config);
+  async setup(config: DataSourcePluginConfigType): Promise<DataSourceServiceSetup> {
+    const opensearchClientPoolSetup = await this.openSearchClientPool.setup(config);
+    const legacyClientPoolSetup = await this.legacyClientPool.setup(config);
 
-    const getDataSourceClient = (
-      dataSourceId: string,
-      savedObjects: SavedObjectsClientContract,
-      cryptographyClient: CryptographyClient
+    const getDataSourceClient = async (
+      params: DataSourceClientParams
     ): Promise<OpenSearchClient> => {
-      return configureClient(
-        dataSourceId,
-        savedObjects,
-        cryptographyClient,
-        openSearchClientPoolSetup,
-        config,
-        this.logger
-      );
+      return configureClient(params, opensearchClientPoolSetup, config, this.logger);
     };
 
-    return { getDataSourceClient };
+    const getDataSourceLegacyClient = (params: DataSourceClientParams) => {
+      return {
+        callAPI: (
+          endpoint: string,
+          clientParams?: Record<string, any>,
+          options?: LegacyCallAPIOptions
+        ) =>
+          configureLegacyClient(
+            params,
+            { endpoint, clientParams, options },
+            legacyClientPoolSetup,
+            config,
+            this.legacyLogger
+          ),
+      };
+    };
+
+    return { getDataSourceClient, getDataSourceLegacyClient };
   }
 
   start() {}

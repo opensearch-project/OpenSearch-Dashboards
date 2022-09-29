@@ -15,6 +15,7 @@ import { ClientOptions } from '@opensearch-project/opensearch';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { CryptographyClient } from '../cryptography';
+import { DataSourceClientParams } from '../types';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 const cryptoClient = new CryptographyClient('test', 'test', new Array(32).fill(0));
@@ -28,6 +29,7 @@ describe('configureClient', () => {
   let clientOptions: ClientOptions;
   let dataSourceAttr: DataSourceAttributes;
   let dsClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  let dataSourceClientParams: DataSourceClientParams;
 
   beforeEach(() => {
     dsClient = opensearchClientMock.createInternalClient();
@@ -70,9 +72,13 @@ describe('configureClient', () => {
       references: [],
     });
 
-    ClientMock.mockImplementation(() => {
-      return dsClient;
-    });
+    dataSourceClientParams = {
+      dataSourceId: DATA_SOURCE_ID,
+      savedObjects: savedObjectsMock,
+      cryptographyClient: cryptoClient,
+    };
+
+    ClientMock.mockImplementation(() => dsClient);
   });
 
   afterEach(() => {
@@ -94,14 +100,7 @@ describe('configureClient', () => {
 
     parseClientOptionsMock.mockReturnValue(clientOptions);
 
-    const client = await configureClient(
-      DATA_SOURCE_ID,
-      savedObjectsMock,
-      cryptoClient,
-      clientPoolSetup,
-      config,
-      logger
-    );
+    const client = await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
 
     expect(parseClientOptionsMock).toHaveBeenCalled();
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -113,14 +112,7 @@ describe('configureClient', () => {
   test('configure client with auth.type == username_password, will first call decrypt()', async () => {
     const spy = jest.spyOn(cryptoClient, 'decodeAndDecrypt').mockResolvedValue('password');
 
-    const client = await configureClient(
-      DATA_SOURCE_ID,
-      savedObjectsMock,
-      cryptoClient,
-      clientPoolSetup,
-      config,
-      logger
-    );
+    const client = await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);

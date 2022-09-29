@@ -306,7 +306,6 @@ export class Router implements IRouter {
           opensearchDashboardsResponseFactory.badRequest({ body: e.message })
         );
       }
-      // TODO: add legacy data source client config error handling
 
       return hapiResponseAdapter.toInternalError();
     }
