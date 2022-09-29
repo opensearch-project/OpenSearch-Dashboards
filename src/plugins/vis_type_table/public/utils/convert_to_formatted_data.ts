@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { chain, findIndex } from 'lodash';
+import { chain } from 'lodash';
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { AggTypes, TableVisConfig } from '../types';
@@ -160,7 +160,9 @@ export const convertToFormattedData = (
     .filter((column) => column);
 
   if (visConfig.percentageCol) {
-    const insertAtIndex = findIndex(formattedColumns, { title: visConfig.percentageCol });
+    const insertAtIndex = formattedColumns.findIndex(
+      (col) => col.title === visConfig.percentageCol
+    );
 
     // column to show percentage for was removed
     if (insertAtIndex < 0) return;

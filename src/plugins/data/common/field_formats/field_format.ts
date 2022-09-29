@@ -99,7 +99,7 @@ export abstract class FieldFormat {
    * @property {boolean} - allow numeric aggregation
    * @private
    */
-  public allowsNumericalAggregations?: boolean;
+  allowsNumericalAggregations?: boolean;
 
   protected readonly _params: any;
   protected getConfig: FieldFormatsGetConfigFn | undefined;

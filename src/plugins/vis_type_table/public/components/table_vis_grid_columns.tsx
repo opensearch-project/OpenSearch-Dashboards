@@ -9,7 +9,7 @@ import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eu
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';
-import { convertToFormattedData } from '../utils/convert_to_formatted_data';
+import { convertToFormattedData } from '../utils';
 
 export const getDataGridColumns = (
   table: Table,
