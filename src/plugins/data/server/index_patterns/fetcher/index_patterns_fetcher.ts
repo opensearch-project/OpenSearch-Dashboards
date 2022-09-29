@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 
 import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
 
@@ -48,9 +48,9 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private _callDataCluster: LegacyAPICaller;
+  private _callDataCluster: LegacyAPICaller | OpenSearchClient;
 
-  constructor(callDataCluster: LegacyAPICaller) {
+  constructor(callDataCluster: LegacyAPICaller | OpenSearchClient) {
     this._callDataCluster = callDataCluster;
   }
 
