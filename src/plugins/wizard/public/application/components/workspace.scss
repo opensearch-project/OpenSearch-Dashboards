@@ -2,6 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+$animation-time: 3;
+$animation-multiplier: 5;
+$total-duartion: $animation-time * $animation-multiplier;
+$keyframe-multiplier: 1 / $animation-multiplier;
+
 .wizWorkspace {
   display: grid;
   -ms-grid-rows: auto $euiSizeM 1fr;
@@ -21,9 +27,15 @@
   }
 
   &__handFieldSvg {
-    animation: wizDragAnimation 6s ease-in-out infinite forwards;
+    animation: wizDragAnimation #{$total-duartion}s ease-in-out infinite forwards;
     position: absolute;
     top: 34.5%;
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .wizWorkspace__handFieldSvg {
+    animation: none;
   }
 }
 
@@ -32,11 +44,11 @@
     transform: none;
   }
 
-  30% {
+  #{$keyframe-multiplier * 50%} {
     transform: translate(116%, -80%);
   }
 
-  60% {
+  #{$keyframe-multiplier * 100%} {
     transform: none;
   }
 
