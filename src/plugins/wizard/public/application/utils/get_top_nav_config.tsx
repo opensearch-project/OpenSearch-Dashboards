@@ -38,33 +38,19 @@ import {
 } from '../../../../saved_objects/public';
 import { WizardServices } from '../..';
 import { WizardVisSavedObject } from '../../types';
-import { StyleState, VisualizationState, AppDispatch } from './state_management';
+import { AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
-  visualizationState: VisualizationState;
-  styleState: StyleState;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
 }
 
 export const getTopNavConfig = (
-  {
-    visualizationIdFromUrl,
-    savedWizardVis,
-    visualizationState,
-    styleState,
-    saveDisabledReason,
-    dispatch,
-  }: TopNavConfigParams,
-  {
-    history,
-    toastNotifications,
-    i18n: { Context: I18nContext },
-    data: { indexPatterns },
-  }: WizardServices
+  { visualizationIdFromUrl, savedWizardVis, saveDisabledReason, dispatch }: TopNavConfigParams,
+  { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
 ) => {
   const topNavConfig: TopNavMenuData[] = [
     {
@@ -94,16 +80,6 @@ export const getTopNavConfig = (
             return;
           }
           const currentTitle = savedWizardVis.title;
-          const indexPattern = await indexPatterns.get(visualizationState.indexPattern || '');
-          savedWizardVis.searchSourceFields = {
-            index: indexPattern,
-          };
-          const vizStateWithoutIndex = {
-            searchField: visualizationState.searchField,
-            activeVisualization: visualizationState.activeVisualization,
-          };
-          savedWizardVis.visualizationState = JSON.stringify(vizStateWithoutIndex);
-          savedWizardVis.styleState = JSON.stringify(styleState);
           savedWizardVis.title = newTitle;
           savedWizardVis.description = newDescription;
           savedWizardVis.copyOnSave = newCopyOnSave;
