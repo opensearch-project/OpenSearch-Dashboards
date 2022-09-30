@@ -43,3 +43,25 @@ export interface BuildContext {
   buildDir: string;
   opensearchDashboardsVersion: string;
 }
+
+export interface VersionContext {
+  log: ToolingLog;
+  sourceDir: string;
+  pluginVersion?: string;
+  compatibilityVersion?: string;
+}
+
+interface NestedObject {
+  [key: string]: NestedObject | string | undefined;
+}
+
+export interface FileUpdateContext {
+  log: ToolingLog;
+  file: string;
+  updates: NestedObject;
+}
+
+export interface ObjectUpdateContext {
+  original: { [key: string]: any };
+  updates: NestedObject;
+}
