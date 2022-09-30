@@ -53,7 +53,15 @@ export const TopNav = () => {
     };
 
     setConfig(getConfig());
-  }, [rootState, savedWizardVis, services, visualizationIdFromUrl, saveDisabledReason, dispatch, indexPattern]);
+  }, [
+    rootState,
+    savedWizardVis,
+    services,
+    visualizationIdFromUrl,
+    saveDisabledReason,
+    dispatch,
+    indexPattern,
+  ]);
 
   // reset validity before component destroyed
   useUnmount(() => {

@@ -120,7 +120,7 @@ describe('getOnSave', () => {
   });
 
   test('create a new wizard from dashboard', async () => {
-    savedWizardVis.id = null;
+    savedWizardVis.id = undefined;
     savedWizardVis.save = jest.fn().mockReturnValue('2');
     originatingApp = 'dashboard';
     onSaveProps.returnToOrigin = true;
@@ -139,6 +139,7 @@ describe('getOnSave', () => {
 
   test('edit an exising wizard from dashboard', async () => {
     savedWizardVis.copyOnSave = false;
+    onSaveProps.newDescription = 'new description after editing';
     originatingApp = 'dashboard';
     onSaveProps.returnToOrigin = true;
     const onSave = getOnSave(
@@ -151,5 +152,6 @@ describe('getOnSave', () => {
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('1');
     expect(mockServices.application.navigateToApp).toBeCalledTimes(1);
+    expect(savedWizardVis.description).toBe('new description after editing');
   });
 });

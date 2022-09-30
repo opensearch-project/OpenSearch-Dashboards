@@ -58,7 +58,7 @@ export const getTopNavConfig = (
     scopedHistory,
   } = services;
 
-  const { originatingApp: originatingApp } =
+  const { originatingApp } =
     embeddable
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
@@ -126,7 +126,7 @@ export const getOnSave = (
     if (!savedWizardVis) {
       return;
     }
-    const newlyCreated = !Boolean(savedWizardVis.id) || savedWizardVis.copyOnSave;
+    const newlyCreated = !savedWizardVis.id || savedWizardVis.copyOnSave;
     const currentTitle = savedWizardVis.title;
     savedWizardVis.title = newTitle;
     savedWizardVis.description = newDescription;
@@ -152,15 +152,15 @@ export const getOnSave = (
         });
 
         if (originatingApp && returnToOrigin) {
-          // create or edit wizard directly from a dashboard
+          // create or edit wizard directly from another app, such as `dashboard`
           if (newlyCreated && stateTransfer) {
-            // create and add a new wizard to the dashboard
+            // create new embeddable to transfer to originatingApp
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
               state: { type: 'wizard', input: { savedObjectId: id } },
             });
             return { id };
           } else {
-            // edit an existing wizard from the dashboard
+            // update an existing wizard from another app
             application.navigateToApp(originatingApp);
           }
         }

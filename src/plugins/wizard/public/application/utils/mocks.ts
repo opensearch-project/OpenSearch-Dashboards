@@ -18,7 +18,6 @@ export const createWizardServicesMock = () => {
   const i18nContextMock = coreStartMock.i18n.Context;
   const indexPatternMock = dataPluginMock.createStartContract().indexPatterns;
   const embeddableMock = embeddablePluginMock.createStartContract();
-  const scopedhistoryMock = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   const navigationMock = navigationPluginMock.createStartContract();
   const expressionMock = expressionsPluginMock.createStartContract();
 
@@ -39,7 +38,7 @@ export const createWizardServicesMock = () => {
     i18n: i18nContextMock,
     data: indexPatternMock,
     embeddable: embeddableMock,
-    scopedHistory: scopedhistoryMock,
+    scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
   };
 
   return (wizardServicesMock as unknown) as jest.Mocked<WizardServices>;
