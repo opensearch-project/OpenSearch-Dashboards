@@ -25,10 +25,13 @@ yarn osd bootstrap
 
 ## Usage
 
-This simple CLI has a build task that plugin devs can run from to easily package OpenSearch Dashboards plugins.
+This CLI has a `build` command that plugin devs can run to easily package OpenSearch Dashboards plugins. It also has a `version`
+command which updates a plugin's `version` and `opensearchDashboardsVersion` in the `opensearch_dashboards.json` and the `version`,
+`opensearchDashboards.version`, and `opensearchDashboards.templateVersion` in the `package.json` files to match the version of 
+OpenSearch Dashboards or ones supplied.
 
-Previously you could also use that tool to start and test your plugin. Currently you can run 
-your plugin along with OpenSearch Dashboards running `yarn start` in the OpenSearch Dashboards repository root folder. Finally to test 
+Previously you could also use that tool to start and test your plugin. Currently, you can run 
+your plugin along with OpenSearch Dashboards running `yarn start` in the OpenSearch Dashboards repository root folder. Finally, to test 
 your plugin you should now configure and use your own tools.
 
 ```sh
@@ -37,37 +40,76 @@ $ plugin-helpers help
   Usage: plugin-helpers [command] [options]
 
   Commands:
-      build
-        Copies files from the source into a zip archive that can be distributed for
-        installation into production OpenSearch Dashboards installs. The archive includes the non-
-        development npm dependencies and builds itself using raw files in the source
-        directory so make sure they are clean/up to date. The resulting archive can
-        be found at:
-  
-          build/{plugin.id}-{opensearchDashboardsVersion}.zip
-  
-        Options:
-          --skip-archive        Don't create the zip file, just create the build/opensearch-dashboards directory
-          --opensearch-dashboards-version, -v  OpenSearch Dashboards version that the
+    build
+      Copies files from the source into a zip archive that can be distributed for installation into production
+      OpenSearch Dashboards installs. The archive includes the non-development npm dependencies and builds itself using
+      raw files in the source directory so make sure they are clean/up to date. The resulting archive can be found at:
+
+        build/{plugin.id}-{opensearchDashboardsVersion}.zip
+
+      Options:
+        --skip-archive                       Don't create the zip file, just create the build/opensearch-dashboards directory
+        --opensearch-dashboards-version, -v  OpenSearch Dashboards version that the built plugin will target
     
+     
+    version
+      Without any options, it would display information about the versions found in the manifest file. With options, it 
+      updates the version and opensearchDashboardsVersion in the opensearch_dashboards.json and the version, 
+      opensearchDashboards.version, and opensearchDashboards.templateVersion in the package.json files to the values 
+      provided or syncs them with the version of OpenSearch Dashboards. The versions are expected to start with #.#.#
+      where # are numbers.
+  
+      Options:
+        --sync                               Update the versions to match OpenSearch Dashboards'
+        --plugin-version                     Update the plugin's version to the one specified
+        --compatibility-version              Update the plugin's compatibility version to the one specified
+   
 
   Global options:
-      --verbose, -v      Log verbosely
-      --debug            Log debug messages (less than verbose)
-      --quiet            Only log errors
-      --silent           Don't log anything
-      --help             Show this message
+    --verbose, -v      Log verbosely
+    --debug            Log debug messages (less than verbose)
+    --quiet            Only log errors
+    --silent           Don't log anything
+    --help             Show this message
 
+```
+
+### Examples
+
+To produce build artifacts of a plugin in the `build/opensearch-dashboards` directory, without generating a zip archive, and while targeting OpenSearch Dashboards 3.0.0:
+```
+yarn plugin-helpers build --skip-archive --opensearch-dashboards-version="3.0.0"
+```
+
+To synchronize the versions used in a plugin's `opensearch_dashboards.json` and `package.json` files with the version of OpenSearch Dashboards:
+```
+yarn plugin-helpers version --sync
+```
+If legacy plugin versions are required:
+```
+yarn plugin-helpers version --sync legacy
+```
+
+To update the compatibility version of the plugin in the `opensearch_dashboards.json` and `package.json` files:
+```
+yarn plugin-helpers version --compatibility-version="3.0.0"
+// or
+yarn plugin-helpers version --compatibility-version 3.0.0
+```
+
+To synchronize the compatibility version of the plugin with the version of OpenSearch Dashboards but set a specific version for the plugin:
+```
+yarn plugin-helpers version --sync --plugin-version 1.1.0
 ```
 
 ## Versions
 
-The plugins helpers in the OpenSearch Dashboards repo are available for OpenSearch Dashboards 1.0 and greater. Just checkout the branch of OpenSearch Dashboards you want to build against and the plugin helpers should be up to date for that version of OpenSearch Dashboards.
+The plugins helpers in the OpenSearch Dashboards repo are available for OpenSearch Dashboards 1.0 and greater. Just checkout the branch of OpenSearch Dashboards you want to build against and the plugin helpers should be up-to-date for that version of OpenSearch Dashboards.
 
 
 ## Configuration
 
-`plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.opensearch_dashboards-plugin-helpers.json` file if you'd like to bundle those settings with your project.
+`plugin-helpers` accepts a number of settings for the `build` command which can be specified at runtime or included in a `.opensearch_dashboards-plugin-helpers.json` file if you'd like to bundle those settings with your project.
 
 It will also observe a `.opensearch_dashboards-plugin-helpers.dev.json`, much like OpenSearch Dashboards does, which we encourage you to add to your `.gitignore` file and use for local settings that you don't intend to share. These "dev" settings will override any settings in the normal json config.
 
@@ -83,6 +125,13 @@ Setting | Description
 `skipArchive` | Don't create the zip file, leave the build path alone
 `skipInstallDependencies` | Don't install dependencies defined in package.json into build output
 `opensearchDashboardsVersion` | OpenSearch Dashboards version for the build output (added to package.json)
+
+### Settings for `version`
+
+Setting | Description
+------- | -----------
+`sync` | As the default behavior, it uses the version of OpenSearch Dashboards to update the plugin's `opensearch_dashboards.json` and `package.json` files.
+`set` | Defines the version to be used in the plugin's `opensearch_dashboards.json` and `package.json` files.
 
 ## TypeScript support
 
