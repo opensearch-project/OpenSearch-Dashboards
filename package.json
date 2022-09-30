@@ -82,6 +82,7 @@
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/axios": "^0.27.2",
+    "**/d3-color": "^3.1.0",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
