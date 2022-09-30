@@ -32,8 +32,8 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuData } from '../../../../navigation/public';
 import {
-  OnSaveProps,
   SavedObjectSaveModalOrigin,
+  SavedObjectSaveOpts,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { WizardServices } from '../..';
@@ -58,7 +58,7 @@ export const getTopNavConfig = (
     scopedHistory,
   } = services;
 
-  const { originatingApp } =
+  const { originatingApp, embeddableId } =
     embeddable
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
@@ -67,15 +67,20 @@ export const getTopNavConfig = (
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
-      iconType: 'save',
+      iconType: savedWizardVis?.id && originatingApp ? undefined : ('save' as const),
       emphasize: savedWizardVis && !savedWizardVis.id,
       description: i18n.translate('wizard.topNavMenu.saveVisualizationButtonAriaLabel', {
         defaultMessage: 'Save Visualization',
       }),
-      className: 'saveButton',
-      label: i18n.translate('wizard.topNavMenu.saveVisualizationButtonLabel', {
-        defaultMessage: 'save',
-      }),
+      className: savedWizardVis?.id && originatingApp ? 'saveAsButton' : '',
+      label:
+        savedWizardVis?.id && originatingApp
+          ? i18n.translate('wizard.topNavMenu.saveVisualizationAsButtonLabel', {
+              defaultMessage: 'save as',
+            })
+          : i18n.translate('wizard.topNavMenu.saveVisualizationButtonLabel', {
+              defaultMessage: 'save',
+            }),
       testId: 'wizardSaveButton',
       disableButton: !!saveDisabledReason,
       tooltip: saveDisabledReason,
@@ -100,6 +105,46 @@ export const getTopNavConfig = (
         showSaveModal(saveModal, I18nContext);
       },
     },
+    ...(originatingApp && ((savedWizardVis && savedWizardVis.id) || embeddableId)
+      ? [
+          {
+            id: 'saveAndReturn',
+            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+              defaultMessage: 'Save and return',
+            }),
+            emphasize: true,
+            iconType: 'checkInCircleFilled' as const,
+            description: i18n.translate(
+              'wizard.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Finish editing wizard and return to the last app',
+              }
+            ),
+            testId: 'wizardsaveAndReturnButton',
+            disableButton: !!saveDisabledReason,
+            tooltip: saveDisabledReason,
+            run: async () => {
+              const saveOptions = {
+                newTitle: savedWizardVis.title,
+                newCopyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+                newDescription: savedWizardVis.description,
+                returnToOrigin: true,
+              };
+
+              const onSave = getOnSave(
+                savedWizardVis,
+                originatingApp,
+                visualizationIdFromUrl,
+                dispatch,
+                services
+              );
+
+              return onSave(saveOptions);
+            },
+          },
+        ]
+      : []),
   ];
 
   return topNavConfig;
@@ -119,18 +164,24 @@ export const getOnSave = (
     onTitleDuplicate,
     newDescription,
     returnToOrigin,
-  }: OnSaveProps & { returnToOrigin: boolean }) => {
+  }: SavedObjectSaveOpts & {
+    newTitle: string;
+    newCopyOnSave: boolean;
+    returnToOrigin: boolean;
+    newDescription?: string;
+  }) => {
     const { embeddable, toastNotifications, application, history } = services;
     const stateTransfer = embeddable.getStateTransfer();
 
     if (!savedWizardVis) {
       return;
     }
-    const newlyCreated = !savedWizardVis.id || savedWizardVis.copyOnSave;
+
     const currentTitle = savedWizardVis.title;
     savedWizardVis.title = newTitle;
     savedWizardVis.description = newDescription;
     savedWizardVis.copyOnSave = newCopyOnSave;
+    const newlyCreated = !savedWizardVis.id || savedWizardVis.copyOnSave;
 
     try {
       const id = await savedWizardVis.save({
