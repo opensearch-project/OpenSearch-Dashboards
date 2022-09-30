@@ -5,8 +5,11 @@
 [List any issues this PR will resolve]
  
 ### Check List
+- [ ] All tests pass
+  - [ ] `yarn test:jest`
+  - [ ] `yarn test:jest_integration`
+  - [ ] `yarn test:ftr`
 - [ ] New functionality includes testing.
-  - [ ] All tests pass
 - [ ] New functionality has been documented.
-  - [ ] New functionality has javadoc added
+- [ ] Update [CHANGELOG.md](./../CHANGELOG.md)
 - [ ] Commits are signed per the DCO using --signoff 
