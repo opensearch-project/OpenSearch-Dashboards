@@ -33,7 +33,7 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const asyncPipeline = promisify(pipeline);
 
