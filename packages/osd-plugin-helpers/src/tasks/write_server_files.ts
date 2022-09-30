@@ -34,7 +34,7 @@ import { promisify } from 'util';
 import vfs from 'vinyl-fs';
 import { transformFileWithBabel, transformFileStream } from '@osd/dev-utils';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const asyncPipeline = promisify(pipeline);
 
