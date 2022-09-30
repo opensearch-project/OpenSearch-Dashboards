@@ -37,7 +37,7 @@ import { promisify } from 'util';
 import { REPO_ROOT } from '@osd/utils';
 import { OptimizerConfig, runOptimizer, logOptimizerState } from '@osd/optimizer';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const asyncRename = promisify(Fs.rename);
 

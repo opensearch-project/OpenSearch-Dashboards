@@ -35,7 +35,7 @@ import Path from 'path';
 
 import execa from 'execa';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
 
