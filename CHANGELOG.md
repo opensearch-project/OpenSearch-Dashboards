@@ -35,6 +35,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🐛 Bug Fixes
 
+* Plugin helpers fix related to fs promises module ([#2486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2486))
+
 ### 🚞 Infrastructure
 
 ### 📝 Documentation
