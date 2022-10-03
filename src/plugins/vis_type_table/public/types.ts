@@ -69,3 +69,8 @@ export interface ColumnWidth {
   colIndex: number;
   width: number;
 }
+
+export interface SortColumn {
+  colIndex: number;
+  direction: 'asc' | 'desc';
+}
