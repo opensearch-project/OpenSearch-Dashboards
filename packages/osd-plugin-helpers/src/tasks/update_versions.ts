@@ -4,10 +4,12 @@
  */
 
 // @ts-ignore
-import { readFile, writeFile } from 'fs/promises';
+import { promises } from 'fs';
 import path from 'path';
 import { createFailError } from '@osd/dev-utils';
 import { FileUpdateContext, ObjectUpdateContext, VersionContext } from '../contexts';
+
+const { readFile, writeFile } = promises;
 
 export async function updateVersions({
   log,
