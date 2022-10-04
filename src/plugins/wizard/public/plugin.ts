@@ -87,6 +87,8 @@ export class WizardPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
           savedWizardLoader: selfStart.savedWizardLoader,
+          embeddable: pluginsStart.embeddable,
+          scopedHistory: params.history,
         };
 
         // Instantiate the store
