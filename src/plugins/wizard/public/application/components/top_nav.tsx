@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
 import { PLUGIN_ID } from '../../../common';
@@ -17,6 +17,7 @@ import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
 import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
+import { TopNavMenuData } from '../../../../navigation/public';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -34,27 +35,32 @@ export const TopNav = () => {
   const saveDisabledReason = useCanSave();
   const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
   const { selected: indexPattern } = useIndexPatterns();
+  const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
 
-  const config = useMemo(() => {
-    if (!savedWizardVis || !indexPattern) return;
+  useEffect(() => {
+    const getConfig = () => {
+      if (!savedWizardVis || !indexPattern) return;
 
-    return getTopNavConfig(
-      {
-        visualizationIdFromUrl,
-        savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
-        saveDisabledReason,
-        dispatch,
-      },
-      services
-    );
+      return getTopNavConfig(
+        {
+          visualizationIdFromUrl,
+          savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
+          saveDisabledReason,
+          dispatch,
+        },
+        services
+      );
+    };
+
+    setConfig(getConfig());
   }, [
-    savedWizardVis,
-    visualizationIdFromUrl,
     rootState,
-    indexPattern,
+    savedWizardVis,
+    services,
+    visualizationIdFromUrl,
     saveDisabledReason,
     dispatch,
-    services,
+    indexPattern,
   ]);
 
   // reset validity before component destroyed
