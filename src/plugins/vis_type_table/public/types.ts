@@ -47,7 +47,7 @@ export interface TableVisConfig extends TableVisParams {
 }
 
 export interface TableVisParams {
-  perPage: number | '';
+  perPage: number;
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
   showTotal: boolean;
