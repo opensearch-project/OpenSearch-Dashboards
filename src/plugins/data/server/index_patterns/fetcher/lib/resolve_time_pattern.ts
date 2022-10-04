@@ -47,10 +47,7 @@ import { callIndexAliasApi, IndicesAliasResponse } from './opensearch_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(
-  callCluster: LegacyAPICaller | OpenSearchClient,
-  timePattern: string
-) {
+export async function resolveTimePattern(callCluster: LegacyAPICaller, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
   const allIndexDetails = chain<IndicesAliasResponse>(aliases)
