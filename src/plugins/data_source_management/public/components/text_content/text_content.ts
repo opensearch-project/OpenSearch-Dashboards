@@ -14,22 +14,25 @@ export const deleteText = i18n.translate('delete', {
   defaultMessage: 'Delete',
 });
 
-export const titleText = i18n.translate('title', {
+export const TITLE = i18n.translate('title', {
   defaultMessage: 'Title',
 });
 
-export const descriptionText = i18n.translate('description', {
+export const DESCRIPTION = i18n.translate('description', {
   defaultMessage: 'Description',
 });
 
-export const usernameText = i18n.translate('username', {
+export const USERNAME = i18n.translate('username', {
   defaultMessage: 'Username',
 });
 
-export const passwordText = i18n.translate('password', {
+export const PASSWORD = i18n.translate('password', {
   defaultMessage: 'Password',
 });
 
+export const OPTIONAL = i18n.translate('optional', {
+  defaultMessage: 'optional',
+});
 /* Datasource listing page */
 export const dsListingAriaRegion = i18n.translate(
   'dataSourcesManagement.createDataSourcesLiveRegionAriaLabel',
@@ -86,46 +89,50 @@ export const dsListingDeleteDataSourceWarning = i18n.translate(
 );
 
 /* CREATE DATA SOURCE */
-export const createDataSourceHeader = i18n.translate(
+export const CREATE_DATA_SOURCE_HEADER = i18n.translate(
   'dataSourcesManagement.createDataSourceHeader',
   {
     defaultMessage: 'Create data source connection',
   }
 );
-export const createDataSourceDescriptionPlaceholder = i18n.translate(
+export const DATA_SOURCE_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.descriptionPlaceholder',
   {
     defaultMessage: 'Description of the data source',
   }
 );
-export const createDataSourceEndpointURL = i18n.translate(
-  'dataSourcesManagement.createDataSource.endpointURL',
-  {
-    defaultMessage: 'Endpoint URL',
-  }
-);
-export const createDataSourceEndpointPlaceholder = i18n.translate(
+export const ENDPOINT_URL = i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
+  defaultMessage: 'Endpoint URL',
+});
+export const ENDPOINT_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.endpointPlaceholder',
   {
     defaultMessage: 'The connection URL',
   }
 );
-export const createDataSourceUsernamePlaceholder = i18n.translate(
+export const USERNAME_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.usernamePlaceholder',
   {
     defaultMessage: 'Username to connect to data source',
   }
 );
-export const createDataSourcePasswordPlaceholder = i18n.translate(
+export const DATA_SOURCE_PASSWORD_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.passwordPlaceholder',
   {
     defaultMessage: 'Password to connect to data source',
   }
 );
-export const createDataSourceCredentialSource = i18n.translate(
-  'dataSourcesManagement.createDataSource.credentialSource',
+export const AUTHENTICATION_METHOD_DESCRIPTION = i18n.translate(
+  'dataSourcesManagement.createDataSource.authenicationMethodDescription',
   {
-    defaultMessage: 'Credential Source',
+    defaultMessage:
+      'Provide authentication details require to gain access to the endpoint. If no authentication is required, choose ',
+  }
+);
+export const NO_AUTHENTICATION = i18n.translate(
+  'dataSourcesManagement.createDataSource.noAuthentication',
+  {
+    defaultMessage: 'No authentication',
   }
 );
 
@@ -279,5 +286,32 @@ export const dataSourceValidationPasswordEmpty = i18n.translate(
   'dataSourcesManagement.validation.passwordEmpty',
   {
     defaultMessage: 'Password should not be empty',
+  }
+);
+
+/* Experimental call out text */
+export const EXPERIMENTAL_FEATURE = i18n.translate('experimentalFeature', {
+  defaultMessage: 'Experimental Feature',
+});
+
+export const EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION = i18n.translate(
+  'dataSourcesManagement.experimentalFeatureCallout.description',
+  {
+    defaultMessage:
+      'The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see ',
+  }
+);
+
+export const DATA_SOURCE_DOCUMENTATION_TEXT = i18n.translate(
+  'dataSourcesManagement.experimentalFeatureCallout.documentationText',
+  {
+    defaultMessage: 'Data Source Documentation',
+  }
+);
+
+export const DATA_SOURCE_LEAVE_FEEDBACK_TEXT = i18n.translate(
+  'dataSourcesManagement.experimentalFeatureCallout.feedbackText',
+  {
+    defaultMessage: 'To leave feedback, visit ',
   }
 );
