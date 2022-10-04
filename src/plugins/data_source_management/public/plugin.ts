@@ -27,6 +27,7 @@ export class DataSourceManagementPlugin
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
+      showExperimentalBadge: true,
       order: 1,
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');

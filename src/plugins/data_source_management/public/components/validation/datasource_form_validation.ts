@@ -7,15 +7,11 @@ import { isValidUrl } from '../utils';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
 import { AuthType } from '../../types';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
-import { UpdatePasswordFormType } from '../../types';
 import {
-  dataSourceValidationEndpointNotValid,
-  dataSourceValidationNewPasswordEmpty,
-  dataSourceValidationNoPasswordMatch,
-  dataSourceValidationOldPasswordEmpty,
-  dataSourceValidationPasswordEmpty,
-  dataSourceValidationTitleEmpty,
-  dataSourceValidationUsernameEmpty,
+  DATA_SOURCE_VALIDATION_USERNAME_EMPTY,
+  DATA_SOURCE_VALIDATION_PASSWORD_EMPTY,
+  DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID,
+  DATA_SOURCE_VALIDATION_TITLE_EMPTY,
 } from '../text_content';
 
 export interface CreateEditDataSourceValidation {
@@ -61,14 +57,14 @@ export const performDataSourceFormValidation = (
   const formErrorMessages: string[] = [];
   /* Title validation */
   if (!formValues?.title?.trim?.().length) {
-    validationByField.title.push(dataSourceValidationTitleEmpty);
-    formErrorMessages.push(dataSourceValidationTitleEmpty);
+    validationByField.title.push(DATA_SOURCE_VALIDATION_TITLE_EMPTY);
+    formErrorMessages.push(DATA_SOURCE_VALIDATION_TITLE_EMPTY);
   }
 
   /* Endpoint Validation */
   if (!isValidUrl(formValues?.endpoint)) {
-    validationByField.endpoint.push(dataSourceValidationEndpointNotValid);
-    formErrorMessages.push(dataSourceValidationEndpointNotValid);
+    validationByField.endpoint.push(DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID);
+    formErrorMessages.push(DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID);
   }
 
   /* Credential Validation */
@@ -77,46 +73,19 @@ export const performDataSourceFormValidation = (
   if (formValues?.auth?.type === AuthType.UsernamePasswordType) {
     /* Username */
     if (!formValues.auth.credentials?.username) {
-      validationByField.createCredential.username.push(dataSourceValidationUsernameEmpty);
-      formErrorMessages.push(dataSourceValidationUsernameEmpty);
+      validationByField.createCredential.username.push(DATA_SOURCE_VALIDATION_USERNAME_EMPTY);
+      formErrorMessages.push(DATA_SOURCE_VALIDATION_USERNAME_EMPTY);
     }
 
     /* password */
     if (!formValues.auth.credentials?.password) {
-      validationByField.createCredential.password.push(dataSourceValidationPasswordEmpty);
-      formErrorMessages.push(dataSourceValidationPasswordEmpty);
+      validationByField.createCredential.password.push(DATA_SOURCE_VALIDATION_PASSWORD_EMPTY);
+      formErrorMessages.push(DATA_SOURCE_VALIDATION_PASSWORD_EMPTY);
     }
   }
 
   return {
     formErrors: formErrorMessages,
     formErrorsByField: { ...validationByField },
-  };
-};
-
-export const validateUpdatePassword = (passwords: UpdatePasswordFormType) => {
-  const validationByField: UpdatePasswordValidation = {
-    oldPassword: [],
-    newPassword: [],
-    confirmNewPassword: [],
-  };
-
-  const formErrorMessages: string[] = [];
-
-  if (!passwords.oldPassword) {
-    validationByField.oldPassword.push(dataSourceValidationOldPasswordEmpty);
-    formErrorMessages.push(dataSourceValidationOldPasswordEmpty);
-  }
-  if (!passwords.newPassword) {
-    validationByField.newPassword.push(dataSourceValidationNewPasswordEmpty);
-    formErrorMessages.push(dataSourceValidationNewPasswordEmpty);
-  } else if (passwords.confirmNewPassword !== passwords.newPassword) {
-    validationByField.confirmNewPassword.push(dataSourceValidationNoPasswordMatch);
-    formErrorMessages.push(dataSourceValidationNoPasswordMatch);
-  }
-
-  return {
-    formValidationErrors: formErrorMessages,
-    formValidationErrorsByField: { ...validationByField },
   };
 };

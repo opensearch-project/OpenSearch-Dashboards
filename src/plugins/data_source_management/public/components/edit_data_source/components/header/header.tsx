@@ -18,13 +18,12 @@ import {
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
 import {
-  cancelText,
-  deleteText,
-  deleteThisDataSource,
-  dsListingDeleteDataSourceConfirmation,
-  dsListingDeleteDataSourceDescription,
-  dsListingDeleteDataSourceTitle,
-  dsListingDeleteDataSourceWarning,
+  CANCEL_TEXT,
+  DELETE_TEXT,
+  DS_LISTING_DATA_SOURCE_DELETE_IMPACT,
+  DS_LISTING_DATA_SOURCE_DELETE_WARNING,
+  DELETE_THIS_DATA_SOURCE,
+  DS_UPDATE_DATA_SOURCE_DELETE_TITLE,
 } from '../../../text_content';
 
 export const Header = ({
@@ -47,7 +46,7 @@ export const Header = ({
   const renderDeleteButton = () => {
     return (
       <>
-        <EuiToolTip content={deleteThisDataSource}>
+        <EuiToolTip content={DELETE_THIS_DATA_SOURCE}>
           <EuiButtonIcon
             color="danger"
             onClick={() => {
@@ -56,13 +55,13 @@ export const Header = ({
             iconType="trash"
             iconSize="m"
             size="m"
-            aria-label={deleteThisDataSource}
+            aria-label={DELETE_THIS_DATA_SOURCE}
           />
         </EuiToolTip>
 
         {isDeleteModalVisible ? (
           <EuiConfirmModal
-            title={dsListingDeleteDataSourceTitle}
+            title={DS_UPDATE_DATA_SOURCE_DELETE_TITLE}
             onCancel={() => {
               setIsDeleteModalVisible(false);
             }}
@@ -70,13 +69,12 @@ export const Header = ({
               setIsDeleteModalVisible(false);
               onClickDeleteIcon();
             }}
-            cancelButtonText={cancelText}
-            confirmButtonText={deleteText}
+            cancelButtonText={CANCEL_TEXT}
+            confirmButtonText={DELETE_TEXT}
             defaultFocusedButton="confirm"
           >
-            <p>{dsListingDeleteDataSourceDescription}</p>
-            <p>{dsListingDeleteDataSourceConfirmation}</p>
-            <p>{dsListingDeleteDataSourceWarning}</p>
+            <p>{DS_LISTING_DATA_SOURCE_DELETE_IMPACT}</p>
+            <p>{DS_LISTING_DATA_SOURCE_DELETE_WARNING}</p>
           </EuiConfirmModal>
         ) : null}
       </>

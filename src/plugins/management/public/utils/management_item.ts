@@ -36,18 +36,28 @@ export class ManagementItem {
   public readonly title: string;
   public readonly tip?: string;
   public readonly order: number;
+  public readonly showExperimentalBadge: boolean;
   public readonly euiIconType?: EuiIconType;
   public readonly icon?: string;
 
   public enabled: boolean = true;
 
-  constructor({ id, title, tip, order = 100, euiIconType, icon }: CreateManagementItemArgs) {
+  constructor({
+    id,
+    title,
+    tip,
+    order = 100,
+    euiIconType,
+    icon,
+    showExperimentalBadge,
+  }: CreateManagementItemArgs) {
     this.id = id;
     this.title = title;
     this.tip = tip;
     this.order = order;
     this.euiIconType = euiIconType;
     this.icon = icon;
+    this.showExperimentalBadge = !!showExperimentalBadge;
   }
 
   disable() {

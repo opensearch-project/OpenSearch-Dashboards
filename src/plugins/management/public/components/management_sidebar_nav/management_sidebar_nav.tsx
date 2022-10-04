@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
@@ -40,8 +40,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { AppMountParameters } from 'opensearch-dashboards/public';
+import { FormattedMessage } from '@osd/i18n/react';
 import { ManagementApp, ManagementSection } from '../../utils';
 
 import './management_sidebar_nav.scss';
@@ -99,7 +101,7 @@ export const ManagementSidebarNav = ({
     }));
 
   interface TooltipWrapperProps {
-    text: string;
+    text: ReactNode | string;
     tip?: string;
   }
 
@@ -115,15 +117,28 @@ export const ManagementSidebarNav = ({
     </EuiToolTip>
   );
 
+  const TitleWithExperimentalBadge = ({ title }: any) => (
+    <>
+      {title}
+      <EuiBadge className="mgtSideBarNavItemExperimentalBadge">
+        <FormattedMessage id="management.navItem.experimental" defaultMessage="Experimental" />
+      </EuiBadge>
+    </>
+  );
+
   const createNavItem = <T extends ManagementItem>(
     item: T,
     customParams: Partial<EuiSideNavItemType<any>> = {}
   ) => {
     const iconType = item.euiIconType || item.icon;
-
+    const name = item.showExperimentalBadge ? (
+      <TitleWithExperimentalBadge title={item.title} />
+    ) : (
+      item.title
+    );
     return {
       id: item.id,
-      name: item.tip ? <TooltipWrapper text={item.title} tip={item.tip} /> : item.title,
+      name: item.tip ? <TooltipWrapper text={name} tip={item.tip} /> : name,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
       'data-test-subj': item.id,

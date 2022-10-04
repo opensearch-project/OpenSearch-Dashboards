@@ -16,8 +16,8 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
+  EuiRadioGroup,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -26,7 +26,6 @@ import {
   credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
-  UpdatePasswordFormType,
   UsernamePasswordTypedContent,
 } from '../../../../types';
 import { Header } from '../header';
@@ -38,27 +37,27 @@ import {
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
 import {
-  authenticationDetailsDescription,
-  authenticationDetailsText,
-  authenticationMethodTitle,
-  authenticationTitle,
-  cancelChangesText,
-  connectionDetailsText,
-  createDataSourceDescriptionPlaceholder,
-  createDataSourceEndpointURL,
-  createDataSourcePasswordPlaceholder,
-  createDataSourceUsernamePlaceholder,
-  descriptionText,
-  endpointDescription,
-  endpointTitle,
-  objectDetailsDescription,
-  objectDetailsText,
-  passwordText,
-  saveChangesText,
-  titleText,
-  updatePasswordText,
-  usernameText,
-  validationErrorTooltipText,
+  AUTHENTICATION_METHOD,
+  AUTHENTICATION_TITLE,
+  CANCEL_CHANGES,
+  CONNECTION_DETAILS_TITLE,
+  DATA_SOURCE_DESCRIPTION_PLACEHOLDER,
+  DATA_SOURCE_PASSWORD_PLACEHOLDER,
+  USERNAME_PLACEHOLDER,
+  CREDENTIAL,
+  DESCRIPTION,
+  ENDPOINT_DESCRIPTION,
+  ENDPOINT_TITLE,
+  ENDPOINT_URL,
+  OBJECT_DETAILS_DESCRIPTION,
+  OBJECT_DETAILS_TITLE,
+  OPTIONAL,
+  PASSWORD,
+  SAVE_CHANGES,
+  TITLE,
+  UPDATE_STORED_PASSWORD,
+  USERNAME,
+  VALIDATION_ERROR_TOOLTIP,
 } from '../../../text_content';
 
 export interface EditDataSourceProps {
@@ -163,8 +162,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (value: AuthType) => {
-    this.setState({ auth: { ...this.state.auth, type: value } }, () => {
+  onChangeAuthType = (value: string) => {
+    const valueToSave =
+      value === AuthType.UsernamePasswordType ? AuthType.UsernamePasswordType : AuthType.NoAuth;
+    this.setState({ auth: { ...this.state.auth, type: valueToSave } }, () => {
       this.onChangeFormValues();
       this.checkValidation();
     });
@@ -242,7 +243,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.setState({ showUpdatePasswordModal: true });
   };
 
-  updatePassword = (passwords: UpdatePasswordFormType) => {
+  updatePassword = (password: string) => {
     // TODO: update password when API is ready
     this.closePasswordModal();
   };
@@ -257,10 +258,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderUpdatePasswordModal = () => {
     return (
       <>
-        <EuiButton onClick={this.onClickUpdatePassword}>{updatePasswordText}</EuiButton>
+        <EuiButton onClick={this.onClickUpdatePassword}>{UPDATE_STORED_PASSWORD}</EuiButton>
 
         {this.state.showUpdatePasswordModal ? (
           <UpdatePasswordModal
+            username={this.state.auth?.credentials?.username || ''}
             handleUpdatePassword={this.updatePassword}
             closeUpdatePasswordModal={this.closePasswordModal}
           />
@@ -279,38 +281,49 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     );
   };
 
+  /* Render field label with Optional text*/
+  renderFieldLabelAsOptional = (label: string) => {
+    return (
+      <>
+        {label} <i style={{ fontWeight: 'normal' }}>- {OPTIONAL}</i>
+      </>
+    );
+  };
+
   /* Render Connection Details Panel */
   renderConnectionDetailsSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> {connectionDetailsText} </EuiText>
+        <EuiText size="m">
+          <h3> {CONNECTION_DETAILS_TITLE} </h3>
+        </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>{objectDetailsText}</h4>}
-          description={<p>{objectDetailsDescription}</p>}
+          title={<h4>{OBJECT_DETAILS_TITLE}</h4>}
+          description={<p>{OBJECT_DETAILS_DESCRIPTION}</p>}
         >
           {/* Title */}
           <EuiFormRow
-            label={titleText}
+            label={TITLE}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
           >
             <EuiFieldText
               name="dataSourceTitle"
               value={this.state.title || ''}
-              placeholder={titleText}
+              placeholder={TITLE}
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
             />
           </EuiFormRow>
           {/* Description */}
-          <EuiFormRow label={descriptionText}>
+          <EuiFormRow label={this.renderFieldLabelAsOptional(DESCRIPTION)}>
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
-              placeholder={createDataSourceDescriptionPlaceholder}
+              placeholder={DATA_SOURCE_DESCRIPTION_PLACEHOLDER}
               onChange={this.onChangeDescription}
             />
           </EuiFormRow>
@@ -323,16 +336,18 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderEndpointSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> {endpointTitle} </EuiText>
+        <EuiText size="m">
+          <h3> {ENDPOINT_TITLE} </h3>
+        </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>{createDataSourceEndpointURL}</h4>}
-          description={<p>{endpointDescription}</p>}
+          title={<h4>{ENDPOINT_URL}</h4>}
+          description={<p>{ENDPOINT_DESCRIPTION}</p>}
         >
           {/* Endpoint */}
-          <EuiFormRow label={createDataSourceEndpointURL}>
+          <EuiFormRow label={ENDPOINT_URL}>
             <EuiFieldText
               name="endpoint"
               value={this.props.existingDataSource.endpoint}
@@ -349,14 +364,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderAuthenticationSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m"> {authenticationTitle} </EuiText>
+        <EuiText size="m">
+          <h3> {AUTHENTICATION_TITLE} </h3>
+        </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
-        <EuiDescribedFormGroup
-          title={<h4>{authenticationDetailsText}</h4>}
-          description={<p>{authenticationDetailsDescription}</p>}
-        >
+        <EuiDescribedFormGroup title={<h4>{AUTHENTICATION_METHOD}</h4>}>
           {this.renderCredentialsSection()}
         </EuiDescribedFormGroup>
       </EuiPanel>
@@ -368,11 +382,12 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <>
         {/* Auth type select */}
-        <EuiFormRow label={authenticationMethodTitle}>
-          <EuiSuperSelect
+        <EuiFormRow label={CREDENTIAL}>
+          <EuiRadioGroup
             options={credentialSourceOptions}
-            valueOfSelected={this.state.auth.type}
-            onChange={(value) => this.onChangeAuthType(value)}
+            idSelected={this.state.auth.type}
+            onChange={(id) => this.onChangeAuthType(id)}
+            name="Credential"
           />
         </EuiFormRow>
 
@@ -387,44 +402,35 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <>
         {/* Username */}
-        <EuiFormRow label={usernameText}>
+        <EuiFormRow label={USERNAME}>
           <EuiFieldText
-            placeholder={createDataSourceUsernamePlaceholder}
+            placeholder={USERNAME_PLACEHOLDER}
             value={this.state.auth.credentials.username || ''}
             onChange={this.onChangeUsername}
           />
         </EuiFormRow>
 
         {/* Password */}
-        {this.props.existingDataSource.auth.type === AuthType.NoAuth
-          ? this.renderEmptyPasswordField()
-          : this.renderDisabledPasswordField()}
+        <EuiFormRow label={PASSWORD}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFieldText
+                placeholder={DATA_SOURCE_PASSWORD_PLACEHOLDER}
+                value={
+                  this.props.existingDataSource.auth.type !== AuthType.NoAuth
+                    ? '********'
+                    : this.state.auth.credentials.password
+                }
+                onChange={this.onChangePassword}
+                disabled={this.props.existingDataSource.auth.type !== AuthType.NoAuth}
+              />
+            </EuiFlexItem>
+            {this.props.existingDataSource.auth.type !== AuthType.NoAuth ? (
+              <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFormRow>
       </>
-    );
-  };
-
-  renderDisabledPasswordField = () => {
-    return (
-      <EuiFormRow label={passwordText}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText size="s">*************</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    );
-  };
-
-  renderEmptyPasswordField = () => {
-    return (
-      <EuiFormRow label={passwordText}>
-        <EuiFieldText
-          placeholder={createDataSourcePasswordPlaceholder}
-          value={this.state.auth.credentials.password || ''}
-          onChange={this.onChangePassword}
-        />
-      </EuiFormRow>
     );
   };
 
@@ -478,11 +484,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 aria-describedby="aria-describedby.countOfUnsavedSettings"
                 data-test-subj="datasource-edit-cancelButton"
               >
-                {cancelChangesText}
+                {CANCEL_CHANGES}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={this.state.formErrors?.length && validationErrorTooltipText}>
+              <EuiToolTip content={this.state.formErrors?.length && VALIDATION_ERROR_TOOLTIP}>
                 <EuiButton
                   className="mgtAdvancedSettingsForm__button"
                   disabled={!!this.state.formErrors?.length}
@@ -493,7 +499,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                   onClick={this.onClickUpdateDataSource}
                   data-test-subj="datasource-edit-saveButton"
                 >
-                  {saveChangesText}
+                  {SAVE_CHANGES}
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>

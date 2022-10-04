@@ -6,7 +6,13 @@
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, ToastMessageItem } from '../../types';
@@ -15,7 +21,13 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
-import { dataSourceNotFound } from '../text_content';
+import {
+  DATA_SOURCE_DOCUMENTATION_TEXT,
+  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
+  DATA_SOURCE_NOT_FOUND,
+  EXPERIMENTAL_FEATURE,
+  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
+} from '../text_content';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -117,6 +129,20 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     }
   };
 
+  /* Render Experimental callout */
+  const renderExperimentalCallout = () => {
+    return (
+      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
+        <p>
+          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
+          <EuiLink href="#">{DATA_SOURCE_DOCUMENTATION_TEXT}</EuiLink>.{' '}
+          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
+          <EuiLink href="#">forums.opensearch.com</EuiLink>.
+        </p>
+      </EuiCallOut>
+    );
+  };
+
   /* Render the edit wizard */
   const renderContent = () => {
     if (!isLoading && (!dataSource || !dataSource.id)) {
@@ -142,11 +168,13 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   };
 
   if (!isLoading && !dataSource?.endpoint) {
-    return <h1>{dataSourceNotFound}</h1>;
+    return <h1>{DATA_SOURCE_NOT_FOUND}</h1>;
   }
 
   return (
     <>
+      {renderExperimentalCallout()}
+      <EuiSpacer size="m" />
       {renderContent()}
       <EuiGlobalToastList
         toasts={toasts}

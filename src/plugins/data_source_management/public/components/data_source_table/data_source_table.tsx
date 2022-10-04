@@ -6,12 +6,14 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
   EuiGlobalToastListToast,
   EuiInMemoryTable,
+  EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -31,16 +33,20 @@ import { CreateButton } from '../create_button';
 import { deleteMultipleDataSources, getDataSources } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import {
-  cancelText,
-  deleteText,
-  dsListingAriaRegion,
-  dsListingDeleteDataSourceConfirmation,
-  dsListingDeleteDataSourceDescription,
-  dsListingDeleteDataSourceTitle,
-  dsListingDeleteDataSourceWarning,
-  dsListingDescription,
-  dsListingPageTitle,
-  dsListingTitle,
+  CANCEL_TEXT,
+  DATA_SOURCE_DOCUMENTATION_TEXT,
+  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
+  DELETE_TEXT,
+  DS_LISTING_ARIA_REGION,
+  DS_LISTING_DATA_SOURCE_DELETE_ACTION,
+  DS_LISTING_DATA_SOURCE_DELETE_IMPACT,
+  DS_LISTING_DATA_SOURCE_DELETE_WARNING,
+  DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE,
+  DS_LISTING_DESCRIPTION,
+  DS_LISTING_PAGE_TITLE,
+  DS_LISTING_TITLE,
+  EXPERIMENTAL_FEATURE,
+  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
 } from '../text_content/text_content';
 
 /* Table config */
@@ -77,7 +83,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setBreadcrumbs(getListBreadcrumbs());
 
     /* Browser - Page Title */
-    chrome.docTitle.change(dsListingPageTitle);
+    chrome.docTitle.change(DS_LISTING_PAGE_TITLE);
 
     /* fetch data sources*/
     fetchDataSources();
@@ -109,14 +115,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     return (
       <EuiButton
         color="danger"
-        iconType="trash"
         onClick={() => {
           setConfirmDeleteVisible(true);
         }}
         data-test-subj="deleteDataSourceConnections"
         disabled={selectedDataSources.length === 0}
       >
-        Delete {selectedDataSources.length || ''} connection
+        Delete {selectedDataSources.length || ''} {selectedDataSources.length ? 'connection' : ''}
         {selectedDataSources.length >= 2 ? 's' : ''}
       </EuiButton>
     );
@@ -180,7 +185,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const tableRenderDeleteModal = () => {
     return confirmDeleteVisible ? (
       <EuiConfirmModal
-        title={dsListingDeleteDataSourceTitle}
+        title={DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE}
         onCancel={() => {
           setConfirmDeleteVisible(false);
         }}
@@ -188,13 +193,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           setConfirmDeleteVisible(false);
           onClickDelete();
         }}
-        cancelButtonText={cancelText}
-        confirmButtonText={deleteText}
+        cancelButtonText={CANCEL_TEXT}
+        confirmButtonText={DELETE_TEXT}
         defaultFocusedButton="confirm"
       >
-        <p>{dsListingDeleteDataSourceDescription}</p>
-        <p>{dsListingDeleteDataSourceConfirmation}</p>
-        <p>{dsListingDeleteDataSourceWarning}</p>
+        <p>{DS_LISTING_DATA_SOURCE_DELETE_ACTION}</p>
+        <p>{DS_LISTING_DATA_SOURCE_DELETE_IMPACT}</p>
+        <p>{DS_LISTING_DATA_SOURCE_DELETE_WARNING}</p>
       </EuiConfirmModal>
     ) : null;
   };
@@ -261,11 +266,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h2>{dsListingTitle}</h2>
+            <h2>{DS_LISTING_TITLE}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>
-            <p>{dsListingDescription}</p>
+            <p>{DS_LISTING_DESCRIPTION}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
@@ -280,7 +285,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         <EuiPageContent
           data-test-subj="dataSourceTable"
           role="region"
-          aria-label={dsListingAriaRegion}
+          aria-label={DS_LISTING_ARIA_REGION}
         >
           {/* Header */}
           {renderHeader()}
@@ -309,6 +314,20 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
+  /* Render Experimental callout */
+  const renderExperimentalCallout = () => {
+    return (
+      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
+        <p>
+          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
+          <EuiLink href="#">{DATA_SOURCE_DOCUMENTATION_TEXT}</EuiLink>.{' '}
+          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
+          <EuiLink href="#">forums.opensearch.com</EuiLink>.
+        </p>
+      </EuiCallOut>
+    );
+  };
+
   const renderContent = () => {
     return (
       <>
@@ -320,6 +339,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   return (
     <>
+      {renderExperimentalCallout()}
+      <EuiSpacer size="m" />
       {renderContent()}
       <EuiGlobalToastList
         toasts={toasts}
