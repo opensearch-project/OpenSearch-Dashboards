@@ -38,6 +38,7 @@ export const capabilitiesProvider = () => ({
       settings: true,
       indexPatterns: true,
       objects: true,
+      dataSources: true,
     },
   },
 });

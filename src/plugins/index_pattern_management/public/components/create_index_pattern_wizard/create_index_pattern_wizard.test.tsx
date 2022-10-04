@@ -33,6 +33,7 @@ import { IndexPattern } from '../../../../../plugins/data/public';
 import { mockManagementPlugin } from '../../mocks';
 import { IndexPatternCreationConfig } from '../../';
 import { createComponentWithContext } from '../test_utils';
+import { TIME_FIELD_STEP } from './lib';
 
 jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
@@ -136,7 +137,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('renders time field step when step is set to 2', async () => {
+  test('renders time field step when step is set to TIME_FIELD_STEP', async () => {
     const component = createComponentWithContext(
       CreateIndexPatternWizard,
       { ...routeComponentPropsMock },
@@ -146,7 +147,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [{ name: 'myIndexPattern' }],
-      step: 2,
+      step: TIME_FIELD_STEP,
     });
 
     await component.update();

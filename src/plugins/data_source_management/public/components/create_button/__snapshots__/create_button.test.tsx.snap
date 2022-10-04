@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateButton should render normally 1`] = `
+<EuiButton
+  data-test-subj="createDataSourceButton"
+  fill={true}
+  iconType="plusInCircle"
+  onClick={[Function]}
+>
+  <FormattedMessage
+    defaultMessage="Create data source connection"
+    id="dataSourcesManagement.dataSourcesTable.createBtn"
+    values={Object {}}
+  />
+</EuiButton>
+`;
