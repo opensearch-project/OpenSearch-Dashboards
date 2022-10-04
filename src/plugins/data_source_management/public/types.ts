@@ -50,6 +50,12 @@ export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextV
   DataSourceManagementContext
 >;
 
+export interface UpdatePasswordFormType {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 /* Datasource types */
 export enum AuthType {
   NoAuth = 'no_auth',
