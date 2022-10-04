@@ -14,13 +14,12 @@ import {
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyClient } from '../cryptography';
 import { DataSourceConfigError } from '../lib/error';
+import { DataSourceClientParams } from '../types';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
 
 export const configureClient = async (
-  dataSourceId: string,
-  savedObjects: SavedObjectsClientContract,
-  cryptographyClient: CryptographyClient,
+  { dataSourceId, savedObjects, cryptographyClient }: DataSourceClientParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
@@ -68,7 +67,7 @@ export const getCredential = async (
  *
  * @param rootClient root client for the connection with given data source endpoint.
  * @param dataSource data source saved object
- * @param cryptographyClient cryptography client for password encryption / decrpytion
+ * @param cryptographyClient cryptography client for password encryption / decryption
  * @returns child client.
  */
 const getQueryClient = async (
@@ -76,12 +75,18 @@ const getQueryClient = async (
   dataSource: SavedObject<DataSourceAttributes>,
   cryptographyClient: CryptographyClient
 ): Promise<Client> => {
-  if (AuthType.NoAuth === dataSource.attributes.auth.type) {
-    return rootClient.child();
-  } else {
-    const credential = await getCredential(dataSource, cryptographyClient);
+  const authType = dataSource.attributes.auth.type;
 
-    return getBasicAuthClient(rootClient, credential);
+  switch (authType) {
+    case AuthType.NoAuth:
+      return rootClient.child();
+
+    case AuthType.UsernamePasswordType:
+      const credential = await getCredential(dataSource, cryptographyClient);
+      return getBasicAuthClient(rootClient, credential);
+
+    default:
+      throw Error(`${authType} is not a supported auth type for data source`);
   }
 };
 
@@ -101,7 +106,7 @@ const getRootClient = (
   const endpoint = dataSourceAttr.endpoint;
   const cachedClient = getClientFromPool(endpoint);
   if (cachedClient) {
-    return cachedClient;
+    return cachedClient as Client;
   } else {
     const clientOptions = parseClientOptions(config, endpoint);
 
