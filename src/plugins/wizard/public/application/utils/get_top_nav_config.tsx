@@ -41,7 +41,7 @@ import { WizardVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
-interface TopNavConfigParams {
+export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
   saveDisabledReason?: string;
@@ -50,8 +50,20 @@ interface TopNavConfigParams {
 
 export const getTopNavConfig = (
   { visualizationIdFromUrl, savedWizardVis, saveDisabledReason, dispatch }: TopNavConfigParams,
-  { history, toastNotifications, i18n: { Context: I18nContext } }: WizardServices
+  services: WizardServices
 ) => {
+  const {
+    i18n: { Context: I18nContext },
+    embeddable,
+    scopedHistory,
+  } = services;
+
+  const { originatingApp } =
+    embeddable
+      .getStateTransfer(scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+  const stateTransfer = embeddable.getStateTransfer();
+
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
@@ -68,86 +80,20 @@ export const getTopNavConfig = (
       disableButton: !!saveDisabledReason,
       tooltip: saveDisabledReason,
       run: (_anchorElement) => {
-        const onSave = async ({
-          newTitle,
-          newCopyOnSave,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          newDescription,
-          returnToOrigin,
-        }: OnSaveProps & { returnToOrigin: boolean }) => {
-          if (!savedWizardVis) {
-            return;
-          }
-          const currentTitle = savedWizardVis.title;
-          savedWizardVis.title = newTitle;
-          savedWizardVis.description = newDescription;
-          savedWizardVis.copyOnSave = newCopyOnSave;
-
-          try {
-            const id = await savedWizardVis.save({
-              confirmOverwrite: false,
-              isTitleDuplicateConfirmed,
-              onTitleDuplicate,
-              returnToOrigin,
-            });
-
-            if (id) {
-              toastNotifications.addSuccess({
-                title: i18n.translate(
-                  'wizard.topNavMenu.saveVisualization.successNotificationText',
-                  {
-                    defaultMessage: `Saved '{visTitle}'`,
-                    values: {
-                      visTitle: savedWizardVis.title,
-                    },
-                  }
-                ),
-                'data-test-subj': 'saveVisualizationSuccess',
-              });
-
-              // Update URL
-              if (id !== visualizationIdFromUrl) {
-                history.push({
-                  ...history.location,
-                  pathname: `${EDIT_PATH}/${id}`,
-                });
-              }
-              dispatch(setEditorState({ state: 'clean' }));
-            } else {
-              // reset title if save not successful
-              savedWizardVis.title = currentTitle;
-            }
-
-            // Even if id='', which it will be for a duplicate title warning, we still want to return it, to avoid closing the modal
-            return { id };
-          } catch (error: any) {
-            // eslint-disable-next-line no-console
-            console.error(error);
-
-            toastNotifications.addDanger({
-              title: i18n.translate('wizard.topNavMenu.saveVisualization.failureNotificationText', {
-                defaultMessage: `Error on saving '{visTitle}'`,
-                values: {
-                  visTitle: newTitle,
-                },
-              }),
-              text: error.message,
-              'data-test-subj': 'saveVisualizationError',
-            });
-
-            // reset title if save not successful
-            savedWizardVis.title = currentTitle;
-            return { error };
-          }
-        };
-
         const saveModal = (
           <SavedObjectSaveModalOrigin
             documentInfo={savedWizardVis}
-            onSave={onSave}
+            onSave={getOnSave(
+              savedWizardVis,
+              originatingApp,
+              visualizationIdFromUrl,
+              dispatch,
+              services
+            )}
             objectType={'wizard'}
             onClose={() => {}}
+            originatingApp={originatingApp}
+            getAppNameFromId={stateTransfer.getAppNameFromId}
           />
         );
 
@@ -157,4 +103,102 @@ export const getTopNavConfig = (
   ];
 
   return topNavConfig;
+};
+
+export const getOnSave = (
+  savedWizardVis,
+  originatingApp,
+  visualizationIdFromUrl,
+  dispatch,
+  services
+) => {
+  const onSave = async ({
+    newTitle,
+    newCopyOnSave,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+    newDescription,
+    returnToOrigin,
+  }: OnSaveProps & { returnToOrigin: boolean }) => {
+    const { embeddable, toastNotifications, application, history } = services;
+    const stateTransfer = embeddable.getStateTransfer();
+
+    if (!savedWizardVis) {
+      return;
+    }
+    const newlyCreated = !savedWizardVis.id || savedWizardVis.copyOnSave;
+    const currentTitle = savedWizardVis.title;
+    savedWizardVis.title = newTitle;
+    savedWizardVis.description = newDescription;
+    savedWizardVis.copyOnSave = newCopyOnSave;
+
+    try {
+      const id = await savedWizardVis.save({
+        confirmOverwrite: false,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate,
+        returnToOrigin,
+      });
+
+      if (id) {
+        toastNotifications.addSuccess({
+          title: i18n.translate('wizard.topNavMenu.saveVisualization.successNotificationText', {
+            defaultMessage: `Saved '{visTitle}'`,
+            values: {
+              visTitle: savedWizardVis.title,
+            },
+          }),
+          'data-test-subj': 'saveVisualizationSuccess',
+        });
+
+        if (originatingApp && returnToOrigin) {
+          // create or edit wizard directly from another app, such as `dashboard`
+          if (newlyCreated && stateTransfer) {
+            // create new embeddable to transfer to originatingApp
+            stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+              state: { type: 'wizard', input: { savedObjectId: id } },
+            });
+            return { id };
+          } else {
+            // update an existing wizard from another app
+            application.navigateToApp(originatingApp);
+          }
+        }
+
+        // Update URL
+        if (id !== visualizationIdFromUrl) {
+          history.push({
+            ...history.location,
+            pathname: `${EDIT_PATH}/${id}`,
+          });
+        }
+        dispatch(setEditorState({ state: 'clean' }));
+      } else {
+        // reset title if save not successful
+        savedWizardVis.title = currentTitle;
+      }
+
+      // Even if id='', which it will be for a duplicate title warning, we still want to return it, to avoid closing the modal
+      return { id };
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+
+      toastNotifications.addDanger({
+        title: i18n.translate('wizard.topNavMenu.saveVisualization.failureNotificationText', {
+          defaultMessage: `Error on saving '{visTitle}'`,
+          values: {
+            visTitle: newTitle,
+          },
+        }),
+        text: error.message,
+        'data-test-subj': 'saveVisualizationError',
+      });
+
+      // reset title if save not successful
+      savedWizardVis.title = currentTitle;
+      return { error };
+    }
+  };
+  return onSave;
 };
