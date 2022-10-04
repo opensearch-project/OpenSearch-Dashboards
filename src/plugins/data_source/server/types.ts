@@ -8,7 +8,8 @@ import {
   OpenSearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { CryptographyClient } from './cryptography';
+
+import { CryptographyServiceSetup } from './cryptography_service';
 
 export interface LegacyClientCallAPIParams {
   endpoint: string;
@@ -20,7 +21,7 @@ export interface DataSourceClientParams {
   dataSourceId: string;
   // this saved objects client is used to fetch data source on behalf of users, caller should pass scoped saved objects client
   savedObjects: SavedObjectsClientContract;
-  cryptographyClient: CryptographyClient;
+  cryptography: CryptographyServiceSetup;
 }
 
 export interface DataSourcePluginRequestContext {

@@ -19,14 +19,14 @@ import {
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
-import { CryptographyClient } from '../cryptography';
+import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup, getCredential, getDataSource } from '../client';
 import { parseClientOptions } from './client_config';
 import { DataSourceConfigError } from '../lib/error';
 
 export const configureLegacyClient = async (
-  { dataSourceId, savedObjects, cryptographyClient }: DataSourceClientParams,
+  { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
   callApiParams: LegacyClientCallAPIParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
@@ -36,7 +36,7 @@ export const configureLegacyClient = async (
     const dataSource = await getDataSource(dataSourceId, savedObjects);
     const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
 
-    return await getQueryClient(rootClient, dataSource, cryptographyClient, callApiParams);
+    return await getQueryClient(rootClient, dataSource, cryptography, callApiParams);
   } catch (error: any) {
     logger.error(`Fail to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
@@ -50,13 +50,13 @@ export const configureLegacyClient = async (
  *
  * @param rootClient root client for the connection with given data source endpoint.
  * @param dataSource data source saved object
- * @param cryptographyClient cryptography client for password encryption / decryption
+ * @param cryptography cryptography service for password encryption / decryption
  * @returns child client.
  */
 const getQueryClient = async (
   rootClient: Client,
   dataSource: SavedObject<DataSourceAttributes>,
-  cryptographyClient: CryptographyClient,
+  cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams
 ) => {
   const authType = dataSource.attributes.auth.type;
@@ -69,7 +69,7 @@ const getQueryClient = async (
         options
       );
     case AuthType.UsernamePasswordType:
-      const credential = await getCredential(dataSource, cryptographyClient);
+      const credential = await getCredential(dataSource, cryptography);
       return getBasicAuthClient(rootClient, { endpoint, clientParams, options }, credential);
 
     default:
