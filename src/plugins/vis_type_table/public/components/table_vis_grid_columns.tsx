@@ -8,13 +8,14 @@ import { i18n } from '@osd/i18n';
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig } from '../types';
+import { TableVisConfig, ColumnWidth } from '../types';
 import { convertToFormattedData } from '../utils';
 
 export const getDataGridColumns = (
   table: Table,
   visConfig: TableVisConfig,
-  handlers: IInterpreterRenderHandlers
+  handlers: IInterpreterRenderHandlers,
+  columnsWidth: ColumnWidth[]
 ) => {
   const { formattedRows, formattedColumns } = convertToFormattedData(table, visConfig);
 
@@ -117,6 +118,8 @@ export const getDataGridColumns = (
         ]
       : undefined;
 
+    const initialWidth = columnsWidth.find((c) => c.colIndex === colIndex);
+
     const dataGridColumn: EuiDataGridColumn = {
       id: col.id,
       display: col.title,
@@ -138,6 +141,9 @@ export const getDataGridColumns = (
       },
       cellActions,
     };
+    if (initialWidth) {
+      dataGridColumn.initialWidth = initialWidth.width;
+    }
     return dataGridColumn;
   });
 };

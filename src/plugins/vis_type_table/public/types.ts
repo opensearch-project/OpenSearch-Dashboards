@@ -64,3 +64,8 @@ export interface FormattedColumn {
   sumTotal?: number;
   total?: number;
 }
+
+export interface ColumnWidth {
+  colIndex: number;
+  width: number;
+}
