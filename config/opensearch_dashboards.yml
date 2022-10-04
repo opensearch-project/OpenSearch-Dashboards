@@ -223,3 +223,12 @@
 # Set the value of this setting to true to start exploring wizard
 # functionality in Visualization.
 # wizard.enabled: false
+
+# Set the value of this setting to true to enables the experimental multiple data source
+# support feature. Use with caution.
+#data_source.enabled: false
+# Set the value of these settings to custermize crypto materials to encryption saved credentials
+# in data sources.
+#data_source.encryption.wrappingKeyName: 'changeme'
+#data_source.encryption.wrappingKeyNamespace: 'changeme'
+#data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
