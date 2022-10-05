@@ -1,0 +1,100 @@
+name: Run cypress tests
+
+# trigger on every PR for all branches except feature branches
+on:
+  pull_request:
+    branches: [ '**', '!feature/**' ]
+    paths-ignore:
+      - '**/*.md'
+
+env:
+  FTR_PATH: 'ftr'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
+  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
+  SPEC: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/*.js,'
+
+jobs:
+  cypress-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001
+    env:
+      # prevents extra Cypress installation progress messages
+      CI: 1
+      # avoid warnings like "tput: No value for $TERM and no -T specified"
+      TERM: xterm
+    name: Run cypress tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.FTR_PATH }}
+          repository: opensearch-project/opensearch-dashboards-functional-test
+          ref: '${{ github.base_ref }}'
+
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          echo "::set-output name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')"
+
+      - name: Cache Cypress
+        id: cache-cypress
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
+        env:
+          CYPRESS_INSTALL_BINARY: ${{ steps.cypress_version.outputs.cypress_version }}
+      - run: npx cypress cache list
+      - run: npx cypress cache path
+
+      - name: Run tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ${{ env.FTR_PATH }}
+          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          wait-on: 'http://localhost:9200, http://localhost:5601'
+          command: yarn cypress:run-without-security --browser chromium --spec ${{ env.SPEC }}
+
+      # Screenshots are only captured on failure, will change this once we do visual regression tests
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: ftr-cypress-screenshots
+          path: ${{ env.FTR_PATH }}/cypress/screenshots
+          retention-days: 1
+      
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ftr-cypress-videos
+          path: ${{ env.FTR_PATH }}/cypress/videos
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ftr-cypress-results
+          path: ${{ env.FTR_PATH }}/cypress/results
+          retention-days: 1
