@@ -119,7 +119,7 @@ describe('getIndices', () => {
     expect(result[1].name).toBe('foo');
   });
 
-  it('should make two calls in cross cluser case', async () => {
+  it('should make two calls in cross cluster case', async () => {
     http.get.mockResolvedValue(successfulResolveResponse);
     const result = await getIndices({
       http,
@@ -201,9 +201,23 @@ describe('getIndices', () => {
         getIndexTags,
         pattern: 'opensearch-dashboards',
         searchClient,
-        dataSourceId,
       });
       expect(result.length).toBe(0);
+    });
+
+    it('should throw error with data source use case', async () => {
+      http.get.mockImplementationOnce(() => {
+        throw new Error('Test error');
+      });
+      expect(
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: 'opensearch-dashboards',
+          searchClient,
+          dataSourceId,
+        })
+      ).rejects.toThrowError();
     });
   });
 });
