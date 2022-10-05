@@ -46,7 +46,7 @@ export async function mountManagementSection(
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
-        <ExperimentalCallOut />
+        <ExperimentalCallOut docLinks={docLinks} />
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
