@@ -14,8 +14,6 @@ import {
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { credentialSourceOptions, DataSourceManagementContextValue } from '../../../../types';
@@ -37,12 +35,10 @@ import {
   TITLE,
   USERNAME,
   ENDPOINT_URL,
-  EXPERIMENTAL_FEATURE,
   OPTIONAL,
-  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
-  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
   AUTHENTICATION_METHOD_DESCRIPTION,
   NO_AUTHENTICATION,
+  CREATE_DATA_SOURCE_BUTTON_TEXT,
 } from '../../../text_content';
 
 export interface CreateDataSourceProps {
@@ -171,39 +167,6 @@ export class CreateDataSourceForm extends React.Component<
 
   /* Render methods */
 
-  /* Render experimental callout*/
-  renderExperimentalCallout = () => {
-    const { docLinks } = this.context.services;
-    return (
-      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
-        <p>
-          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
-          <EuiLink
-            href={docLinks.links.noDocumentation.indexPatterns.introduction}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.createDataSource.documentation"
-              defaultMessage="Documentation"
-            />
-          </EuiLink>{' '}
-          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
-          <EuiLink
-            href={docLinks.links.noDocumentation.indexPatterns.introduction}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.createDataSource.documentation"
-              defaultMessage="OpenSearch Forum"
-            />
-          </EuiLink>
-        </p>
-      </EuiCallOut>
-    );
-  };
-
   /* Render header*/
   renderHeader = () => {
     return <Header />;
@@ -268,9 +231,6 @@ export class CreateDataSourceForm extends React.Component<
   renderContent = () => {
     return (
       <>
-        {this.renderExperimentalCallout()}
-        <EuiSpacer size="l" />
-
         <EuiPageContent>
           {this.renderHeader()}
           <EuiForm
@@ -371,7 +331,7 @@ export class CreateDataSourceForm extends React.Component<
               onClick={this.onClickCreateNewDataSource}
               data-test-subj="createDataSourceButton"
             >
-              Create a data source connection
+              {CREATE_DATA_SOURCE_BUTTON_TEXT}
             </EuiButton>
           </EuiForm>
         </EuiPageContent>

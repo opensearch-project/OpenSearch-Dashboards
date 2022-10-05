@@ -107,7 +107,7 @@ export const ENDPOINT_URL = i18n.translate('dataSourcesManagement.createDataSour
 export const ENDPOINT_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.endpointPlaceholder',
   {
-    defaultMessage: 'The connection URL',
+    defaultMessage: 'Sample URL: https://connectionurl.com',
   }
 );
 export const USERNAME_PLACEHOLDER = i18n.translate(
@@ -133,6 +133,12 @@ export const NO_AUTHENTICATION = i18n.translate(
   'dataSourcesManagement.createDataSource.noAuthentication',
   {
     defaultMessage: 'No authentication',
+  }
+);
+export const CREATE_DATA_SOURCE_BUTTON_TEXT = i18n.translate(
+  'dataSourcesManagement.createDataSource.createDataSourceButtonText',
+  {
+    defaultMessage: 'Create a data source connection',
   }
 );
 
@@ -293,7 +299,6 @@ export const dataSourceValidationPasswordEmpty = i18n.translate(
 export const EXPERIMENTAL_FEATURE = i18n.translate('experimentalFeature', {
   defaultMessage: 'Experimental Feature',
 });
-
 export const EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION = i18n.translate(
   'dataSourcesManagement.experimentalFeatureCallout.description',
   {
@@ -301,17 +306,21 @@ export const EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION = i18n.translate(
       'The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see ',
   }
 );
-
 export const DATA_SOURCE_DOCUMENTATION_TEXT = i18n.translate(
   'dataSourcesManagement.experimentalFeatureCallout.documentationText',
   {
     defaultMessage: 'Data Source Documentation',
   }
 );
-
 export const DATA_SOURCE_LEAVE_FEEDBACK_TEXT = i18n.translate(
   'dataSourcesManagement.experimentalFeatureCallout.feedbackText',
   {
     defaultMessage: 'To leave feedback, visit ',
+  }
+);
+export const DATA_SOURCE_OPEN_FORUM_TEXT = i18n.translate(
+  'dataSourcesManagement.experimentalFeatureCallout.openForumText',
+  {
+    defaultMessage: 'OpenSearch Forum',
   }
 );
