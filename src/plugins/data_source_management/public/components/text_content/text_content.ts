@@ -234,30 +234,3 @@ export const DATA_SOURCE_VALIDATION_TITLE_EXISTS = i18n.translate(
     defaultMessage: 'This title is already in use',
   }
 );
-
-/* Experimental call out text */
-export const EXPERIMENTAL_FEATURE = i18n.translate('experimentalFeature', {
-  defaultMessage: 'Experimental Feature',
-});
-
-export const EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION = i18n.translate(
-  'dataSourcesManagement.experimentalFeatureCallout.description',
-  {
-    defaultMessage:
-      'The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see ',
-  }
-);
-
-export const DATA_SOURCE_DOCUMENTATION_TEXT = i18n.translate(
-  'dataSourcesManagement.experimentalFeatureCallout.documentationText',
-  {
-    defaultMessage: 'Data Source Documentation',
-  }
-);
-
-export const DATA_SOURCE_LEAVE_FEEDBACK_TEXT = i18n.translate(
-  'dataSourcesManagement.experimentalFeatureCallout.feedbackText',
-  {
-    defaultMessage: 'To leave feedback, visit ',
-  }
-);
