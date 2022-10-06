@@ -16,7 +16,6 @@ import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dash
 import { getMappedDataSources, mockManagementPlugin } from '../../mocks';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
-const toastsIdentifier = 'EuiGlobalToastList';
 const tableIdentifier = 'EuiInMemoryTable';
 const confirmModalIndentifier = 'EuiConfirmModal';
 const tableColumnHeaderIdentifier = 'EuiTableHeaderCell';
@@ -26,7 +25,6 @@ describe('DataSourceTable', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-
   describe('should get datasources failed', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.reject({}));
@@ -47,24 +45,6 @@ describe('DataSourceTable', () => {
           }
         );
       });
-    });
-
-    it('should show toast and remove toast normally', () => {
-      expect(component).toMatchSnapshot();
-      expect(utils.getDataSources).toHaveBeenCalled();
-      component.update();
-      // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(1);
-
-      act(() => {
-        // @ts-ignore
-        component.find(toastsIdentifier).first().prop('dismissToast')({
-          id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-        });
-      });
-      component.update();
-      // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(0); // failure toast
     });
   });
 
@@ -88,6 +68,7 @@ describe('DataSourceTable', () => {
           }
         );
       });
+      component.update();
     });
 
     it('should render normally', () => {
@@ -153,7 +134,7 @@ describe('DataSourceTable', () => {
       expect(component.find(confirmModalIndentifier).exists()).toBe(false);
     });
 
-    it('should show toast when delete datasources failed', async () => {
+    it('should delete datasources & fail', async () => {
       spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
       act(() => {
         // @ts-ignore
@@ -171,7 +152,6 @@ describe('DataSourceTable', () => {
       component.update();
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
       // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(1);
       expect(component.find(confirmModalIndentifier).exists()).toBe(false);
     });
   });
