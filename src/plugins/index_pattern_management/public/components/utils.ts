@@ -30,6 +30,7 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { IndexPatternManagementStart } from '../plugin';
 
 export async function getIndexPatterns(
@@ -76,6 +77,34 @@ export async function getIndexPatterns(
               return 0;
             }
           })
+      ) || []
+  );
+}
+
+export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
+  return (
+    savedObjectsClient
+      .find<DataSourceAttributes>({
+        type: 'data-source',
+        fields: ['title', 'type'],
+        perPage: 10000,
+      })
+      .then((response) =>
+        response.savedObjects
+          .map((dataSource) => {
+            const id = dataSource.id;
+            const type = dataSource.type;
+            const title = dataSource.get('title');
+
+            return {
+              id,
+              title,
+              type,
+              label: title,
+              sort: `${title}`,
+            };
+          })
+          .sort((a, b) => a.sort.localeCompare(b.sort))
       ) || []
   );
 }
