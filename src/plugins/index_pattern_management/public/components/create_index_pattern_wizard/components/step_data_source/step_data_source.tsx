@@ -21,8 +21,8 @@ export const StepDataSource = (props: StepDataSourceProps) => {
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceRef>();
   const [isNextStepDisabled, setIsNextStepDisabled] = useState(true);
 
-  const onDataSourceSelected = (id: string, selectedType: string) => {
-    const selected = { id, type: selectedType };
+  const onDataSourceSelected = (id: string, selectedType: string, title: string) => {
+    const selected = { id, type: selectedType, title };
 
     setSelectedDataSource(selected);
     setIsNextStepDisabled(false);

@@ -352,7 +352,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
-    const { goToNextStep, indexPatternCreationType, stepInfo } = this.props;
+    const { goToNextStep, indexPatternCreationType, stepInfo, dataSourceRef } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -406,6 +406,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         isIncludingSystemIndices={isIncludingSystemIndices}
         showSystemIndices={this.props.showSystemIndices}
         stepInfo={stepInfo}
+        dataSourceRef={dataSourceRef}
       />
     );
   }
