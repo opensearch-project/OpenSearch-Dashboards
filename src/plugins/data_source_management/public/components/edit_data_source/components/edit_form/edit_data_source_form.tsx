@@ -148,7 +148,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateTitle = () => {
-    const isValid = isTitleValid(this.state.title, this.props.existingDatasourceNamesList, '');
+    const isValid = isTitleValid(
+      this.state.title,
+      this.props.existingDatasourceNamesList,
+      this.props.existingDataSource.title
+    );
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,

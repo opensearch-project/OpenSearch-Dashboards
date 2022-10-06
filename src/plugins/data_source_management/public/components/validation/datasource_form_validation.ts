@@ -40,7 +40,7 @@ export const isTitleValid = (
   if (!title?.trim?.().length) {
     isValid.valid = false;
   } else if (
-    title.toLowerCase() !== existingTitle &&
+    title.toLowerCase() !== existingTitle.toLowerCase() &&
     Array.isArray(existingDatasourceNamesList) &&
     existingDatasourceNamesList.includes(title.toLowerCase())
   ) {

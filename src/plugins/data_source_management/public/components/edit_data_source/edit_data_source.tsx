@@ -61,7 +61,9 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
           setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
         }
         if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
-          setExistingDatasourceNamesList(listOfDataSources.map((datasource) => datasource.title));
+          setExistingDatasourceNamesList(
+            listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
+          );
         }
       } catch (e) {
         handleDisplayToastMessage({
