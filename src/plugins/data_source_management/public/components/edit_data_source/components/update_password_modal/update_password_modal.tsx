@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,12 +17,7 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import {
-  DATA_SOURCE_VALIDATION_PASSWORD_EMPTY,
-  NEW_PASSWORD_TEXT,
-  UPDATE_STORED_PASSWORD,
-  USERNAME,
-} from '../../../text_content';
+import { NEW_PASSWORD_TEXT, UPDATE_STORED_PASSWORD, USERNAME } from '../../../text_content';
 
 export interface UpdatePasswordModalProps {
   username: string;
@@ -36,35 +31,13 @@ export const UpdatePasswordModal = ({
   closeUpdatePasswordModal,
 }: UpdatePasswordModalProps) => {
   /* State Variables */
-  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [newPassword, setNewPassword] = useState<string>('');
 
-  const getFormValues = useCallback(() => newPassword, [newPassword]);
-
   const onClickUpdatePassword = () => {
-    if (isFormValid()) {
-      handleUpdatePassword(getFormValues());
+    if (!!newPassword) {
+      handleUpdatePassword(newPassword);
     }
   };
-
-  /* Validations */
-  const isFormValid = useCallback(() => {
-    const errors = [];
-
-    if (!newPassword) {
-      errors.push(DATA_SOURCE_VALIDATION_PASSWORD_EMPTY);
-    }
-
-    setFormErrors([...errors]);
-
-    return formErrors.length === 0;
-  }, [formErrors.length, newPassword]);
-
-  useEffect(() => {
-    if (formErrors.length) {
-      isFormValid();
-    }
-  }, [newPassword, formErrors.length, isFormValid]);
 
   const renderUpdatePasswordModal = () => {
     return (
@@ -76,26 +49,17 @@ export const UpdatePasswordModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiForm
-            data-test-subj="data-source-update-password"
-            isInvalid={!!formErrors.length}
-            error={formErrors}
-          >
+          <EuiForm data-test-subj="data-source-update-password">
             {/* Username */}
             <EuiFormRow label={USERNAME}>
               <EuiText size="s">{username}</EuiText>
             </EuiFormRow>
             {/* Password */}
-            <EuiFormRow
-              label={NEW_PASSWORD_TEXT}
-              isInvalid={!!formErrors.length}
-              error={formErrors}
-            >
+            <EuiFormRow label={NEW_PASSWORD_TEXT}>
               <EuiFieldPassword
                 placeholder={NEW_PASSWORD_TEXT}
                 type={'dual'}
                 value={newPassword}
-                isInvalid={!!formErrors.length}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
             </EuiFormRow>
@@ -104,7 +68,13 @@ export const UpdatePasswordModal = ({
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeUpdatePasswordModal}>Cancel</EuiButtonEmpty>
-          <EuiButton type="submit" form="modalFormId" onClick={onClickUpdatePassword} fill>
+          <EuiButton
+            type="submit"
+            form="modalFormId"
+            onClick={onClickUpdatePassword}
+            fill={!!newPassword}
+            disabled={!newPassword}
+          >
             Update
           </EuiButton>
         </EuiModalFooter>
