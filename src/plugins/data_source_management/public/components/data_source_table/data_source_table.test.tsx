@@ -88,6 +88,7 @@ describe('DataSourceTable', () => {
           }
         );
       });
+      component.update();
     });
 
     it('should render normally', () => {

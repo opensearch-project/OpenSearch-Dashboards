@@ -4,7 +4,11 @@
  */
 
 import React from 'react';
-import { mockDataSourceAttributesWithAuth, mockManagementPlugin } from '../../mocks';
+import {
+  getMappedDataSources,
+  mockDataSourceAttributesWithAuth,
+  mockManagementPlugin,
+} from '../../mocks';
 import { mount, ReactWrapper } from 'enzyme';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
@@ -21,22 +25,26 @@ describe('Datasource Management: Create Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-  beforeEach(() => {
-    component = mount(
-      wrapWithIntl(
-        <CreateDataSourceWizard
-          history={history}
-          location={({} as unknown) as RouteComponentProps['location']}
-          match={({} as unknown) as RouteComponentProps['match']}
-        />
-      ),
-      {
-        wrappingComponent: OpenSearchDashboardsContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+  beforeEach(async () => {
+    spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+    await act(async () => {
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceWizard
+            history={history}
+            location={({} as unknown) as RouteComponentProps['location']}
+            match={({} as unknown) as RouteComponentProps['match']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+    });
+    component.update();
   });
   test('should render normally', () => {
     expect(component).toMatchSnapshot();

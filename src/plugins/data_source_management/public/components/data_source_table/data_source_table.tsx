@@ -6,15 +6,14 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
   EuiGlobalToastListToast,
   EuiInMemoryTable,
-  EuiLink,
   EuiPageContent,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -34,8 +33,6 @@ import { deleteMultipleDataSources, getDataSources } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import {
   CANCEL_TEXT,
-  DATA_SOURCE_DOCUMENTATION_TEXT,
-  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
   DELETE_TEXT,
   DS_LISTING_ARIA_REGION,
   DS_LISTING_DATA_SOURCE_DELETE_ACTION,
@@ -43,10 +40,9 @@ import {
   DS_LISTING_DATA_SOURCE_DELETE_WARNING,
   DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE,
   DS_LISTING_DESCRIPTION,
+  DS_LISTING_NO_DATA,
   DS_LISTING_PAGE_TITLE,
   DS_LISTING_TITLE,
-  EXPERIMENTAL_FEATURE,
-  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
 } from '../text_content/text_content';
 
 /* Table config */
@@ -282,6 +278,40 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const renderTableContent = () => {
     return (
       <>
+        {/* Data sources table*/}
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={true}
+          selection={selection}
+          items={dataSources}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+          loading={isLoading}
+        />
+      </>
+    );
+  };
+
+  const renderEmptyState = () => {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <EuiPanel hasBorder={false} hasShadow={false} style={{ textAlign: 'center' }}>
+          <EuiText>{DS_LISTING_NO_DATA}</EuiText>
+          <EuiSpacer />
+          {createButton}
+        </EuiPanel>
+        <EuiSpacer size="l" />
+      </>
+    );
+  };
+
+  const renderContent = () => {
+    return (
+      <>
         <EuiPageContent
           data-test-subj="dataSourceTable"
           role="region"
@@ -295,52 +325,17 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           {/* Delete confirmation modal*/}
           {tableRenderDeleteModal()}
 
-          {/* Data sources table*/}
-          <EuiInMemoryTable
-            allowNeutralSort={false}
-            itemId="id"
-            isSelectable={true}
-            selection={selection}
-            items={dataSources}
-            columns={columns}
-            pagination={pagination}
-            sorting={sorting}
-            search={search}
-            loading={isLoading}
-          />
+          {!isLoading && (!dataSources || !dataSources.length)
+            ? renderEmptyState()
+            : renderTableContent()}
         </EuiPageContent>
         {isDeleting ? <LoadingMask /> : null}
       </>
     );
   };
 
-  /* Render Experimental callout */
-  const renderExperimentalCallout = () => {
-    return (
-      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
-        <p>
-          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
-          <EuiLink href="#">{DATA_SOURCE_DOCUMENTATION_TEXT}</EuiLink>.{' '}
-          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
-          <EuiLink href="#">forums.opensearch.com</EuiLink>.
-        </p>
-      </EuiCallOut>
-    );
-  };
-
-  const renderContent = () => {
-    return (
-      <>
-        {renderTableContent()}
-        {}
-      </>
-    );
-  };
-
   return (
     <>
-      {renderExperimentalCallout()}
-      <EuiSpacer size="m" />
       {renderContent()}
       <EuiGlobalToastList
         toasts={toasts}

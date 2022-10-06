@@ -6,28 +6,21 @@
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import {
-  EuiCallOut,
-  EuiGlobalToastList,
-  EuiGlobalToastListToast,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, ToastMessageItem } from '../../types';
-import { deleteDataSourceById, getDataSourceById, updateDataSourceById } from '../utils';
+import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
+import {
+  deleteDataSourceById,
+  getDataSourceById,
+  getDataSources,
+  updateDataSourceById,
+} from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
-import {
-  DATA_SOURCE_DOCUMENTATION_TEXT,
-  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
-  DATA_SOURCE_NOT_FOUND,
-  EXPERIMENTAL_FEATURE,
-  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
-} from '../text_content';
+import { DATA_SOURCE_NOT_FOUND } from '../text_content';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -50,6 +43,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
 
   /* State Variables */
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
+  const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
 
@@ -61,9 +55,13 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       setIsLoading(true);
       try {
         const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
+        const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
         if (fetchDataSourceById) {
           setDataSource(fetchDataSourceById);
           setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
+        }
+        if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
+          setExistingDatasourceNamesList(listOfDataSources.map((datasource) => datasource.title));
         }
       } catch (e) {
         handleDisplayToastMessage({
@@ -129,20 +127,6 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     }
   };
 
-  /* Render Experimental callout */
-  const renderExperimentalCallout = () => {
-    return (
-      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
-        <p>
-          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
-          <EuiLink href="#">{DATA_SOURCE_DOCUMENTATION_TEXT}</EuiLink>.{' '}
-          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
-          <EuiLink href="#">forums.opensearch.com</EuiLink>.
-        </p>
-      </EuiCallOut>
-    );
-  };
-
   /* Render the edit wizard */
   const renderContent = () => {
     if (!isLoading && (!dataSource || !dataSource.id)) {
@@ -153,6 +137,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
         {dataSource && dataSource.endpoint ? (
           <EditDataSourceForm
             existingDataSource={dataSource}
+            existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={handleDelete}
             handleSubmit={handleSubmit}
           />
@@ -173,7 +158,6 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
 
   return (
     <>
-      {renderExperimentalCallout()}
       <EuiSpacer size="m" />
       {renderContent()}
       <EuiGlobalToastList

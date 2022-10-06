@@ -4,15 +4,10 @@
  */
 
 import { isValidUrl } from '../utils';
+import { DATA_SOURCE_VALIDATION_TITLE_EXISTS } from '../text_content';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
-import { AuthType } from '../../types';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
-import {
-  DATA_SOURCE_VALIDATION_USERNAME_EMPTY,
-  DATA_SOURCE_VALIDATION_PASSWORD_EMPTY,
-  DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID,
-  DATA_SOURCE_VALIDATION_TITLE_EMPTY,
-} from '../text_content';
+import { AuthType } from '../../types';
 
 export interface CreateEditDataSourceValidation {
   title: string[];
@@ -23,12 +18,6 @@ export interface CreateEditDataSourceValidation {
   };
 }
 
-export interface UpdatePasswordValidation {
-  oldPassword: string[];
-  newPassword: string[];
-  confirmNewPassword: string[];
-}
-
 export const defaultValidation: CreateEditDataSourceValidation = {
   title: [],
   endpoint: [],
@@ -37,34 +26,46 @@ export const defaultValidation: CreateEditDataSourceValidation = {
     password: [],
   },
 };
-export const defaultPasswordValidationByField: UpdatePasswordValidation = {
-  oldPassword: [],
-  newPassword: [],
-  confirmNewPassword: [],
+
+export const isTitleValid = (
+  title: string,
+  existingDatasourceNamesList: string[],
+  existingTitle: string
+) => {
+  const isValid = {
+    valid: true,
+    error: '',
+  };
+  /* Title validation */
+  if (!title?.trim?.().length) {
+    isValid.valid = false;
+  } else if (
+    title.toLowerCase() !== existingTitle &&
+    Array.isArray(existingDatasourceNamesList) &&
+    existingDatasourceNamesList.includes(title.toLowerCase())
+  ) {
+    /* title already exists */
+    isValid.valid = false;
+    isValid.error = DATA_SOURCE_VALIDATION_TITLE_EXISTS;
+  }
+  return isValid;
 };
 
 export const performDataSourceFormValidation = (
-  formValues: CreateDataSourceState | EditDataSourceState
+  formValues: CreateDataSourceState | EditDataSourceState,
+  existingDatasourceNamesList: string[],
+  existingTitle: string
 ) => {
-  const validationByField: CreateEditDataSourceValidation = {
-    title: [],
-    endpoint: [],
-    createCredential: {
-      username: [],
-      password: [],
-    },
-  };
-  const formErrorMessages: string[] = [];
   /* Title validation */
-  if (!formValues?.title?.trim?.().length) {
-    validationByField.title.push(DATA_SOURCE_VALIDATION_TITLE_EMPTY);
-    formErrorMessages.push(DATA_SOURCE_VALIDATION_TITLE_EMPTY);
+  const titleValid = isTitleValid(formValues?.title, existingDatasourceNamesList, existingTitle);
+
+  if (!titleValid.valid) {
+    return false;
   }
 
   /* Endpoint Validation */
   if (!isValidUrl(formValues?.endpoint)) {
-    validationByField.endpoint.push(DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID);
-    formErrorMessages.push(DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID);
+    return false;
   }
 
   /* Credential Validation */
@@ -73,19 +74,14 @@ export const performDataSourceFormValidation = (
   if (formValues?.auth?.type === AuthType.UsernamePasswordType) {
     /* Username */
     if (!formValues.auth.credentials?.username) {
-      validationByField.createCredential.username.push(DATA_SOURCE_VALIDATION_USERNAME_EMPTY);
-      formErrorMessages.push(DATA_SOURCE_VALIDATION_USERNAME_EMPTY);
+      return false;
     }
 
     /* password */
     if (!formValues.auth.credentials?.password) {
-      validationByField.createCredential.password.push(DATA_SOURCE_VALIDATION_PASSWORD_EMPTY);
-      formErrorMessages.push(DATA_SOURCE_VALIDATION_PASSWORD_EMPTY);
+      return false;
     }
   }
 
-  return {
-    formErrors: formErrorMessages,
-    formErrorsByField: { ...validationByField },
-  };
+  return true;
 };

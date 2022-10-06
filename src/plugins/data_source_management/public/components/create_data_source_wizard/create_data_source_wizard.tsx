@@ -9,10 +9,10 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, ToastMessageItem } from '../../types';
+import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
-import { createSingleDataSource } from '../utils';
+import { createSingleDataSource, getDataSources } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import { DataSourceAttributes } from '../../types';
 
@@ -29,13 +29,39 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const toastLifeTimeMs: number = 6000;
 
   /* State Variables */
+  const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* Set breadcrumb */
   useEffectOnce(() => {
     setBreadcrumbs(getCreateBreadcrumbs());
+    getExistingDataSourceNames();
   });
+
+  /* fetch datasources */
+  const getExistingDataSourceNames = async () => {
+    setIsLoading(true);
+    try {
+      const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
+
+      if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
+        setExistingDatasourceNamesList(
+          listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
+        );
+      }
+    } catch (e) {
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.createDataSource.existingDatasourceNames',
+        defaultMessage: 'Unable to fetch some resources. Please try again.',
+        color: 'warning',
+        iconType: 'alert',
+      });
+      props.history.push('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -71,7 +97,10 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const renderContent = () => {
     return (
       <>
-        <CreateDataSourceForm handleSubmit={handleSubmit} />
+        <CreateDataSourceForm
+          handleSubmit={handleSubmit}
+          existingDatasourceNamesList={existingDatasourceNamesList}
+        />
         {isLoading ? <LoadingMask /> : null}
       </>
     );

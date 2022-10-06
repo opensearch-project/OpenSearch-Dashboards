@@ -60,6 +60,10 @@ export const DS_LISTING_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const DS_LISTING_NO_DATA = i18n.translate('dataSourcesManagement.dataSourcesTable.noData', {
+  defaultMessage: 'No Data Source Connections have been created yet.',
+});
+
 export const DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.multiDeleteTitle',
   {
@@ -223,37 +227,11 @@ export const SAVE_CHANGES = i18n.translate('dataSourcesManagement.editDataSource
   defaultMessage: 'Save changes',
 });
 
-export const VALIDATION_ERROR_TOOLTIP = i18n.translate(
-  'dataSourcesManagement.editDataSource.saveButtonTooltipWithInvalidChanges',
-  {
-    defaultMessage: 'Fix invalid settings before saving.',
-  }
-);
-
 /* Create/Edit validation */
-
-export const DATA_SOURCE_VALIDATION_TITLE_EMPTY = i18n.translate(
-  'dataSourcesManagement.validation.titleEmpty',
+export const DATA_SOURCE_VALIDATION_TITLE_EXISTS = i18n.translate(
+  'dataSourcesManagement.validation.titleExists',
   {
-    defaultMessage: 'Title must not be empty',
-  }
-);
-export const DATA_SOURCE_VALIDATION_ENDPOINT_NOT_VALID = i18n.translate(
-  'dataSourcesManagement.validation.endpointNotValid',
-  {
-    defaultMessage: 'Endpoint is not valid',
-  }
-);
-export const DATA_SOURCE_VALIDATION_USERNAME_EMPTY = i18n.translate(
-  'dataSourcesManagement.validation.usernameEmpty',
-  {
-    defaultMessage: 'Username should not be empty',
-  }
-);
-export const DATA_SOURCE_VALIDATION_PASSWORD_EMPTY = i18n.translate(
-  'dataSourcesManagement.validation.passwordEmpty',
-  {
-    defaultMessage: 'Password should not be empty',
+    defaultMessage: 'This title is already in use',
   }
 );
 

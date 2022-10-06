@@ -19,7 +19,6 @@ export const CreateButton = ({ history }: Props) => {
       data-test-subj="createDataSourceButton"
       fill={true}
       onClick={() => history.push('/create')}
-      iconType="plusInCircle"
     >
       {CREATE_DATA_SOURCE_BUTTON_TEXT}
     </EuiButton>

@@ -12,7 +12,6 @@ import { mockDataSourceAttributesWithAuth } from '../../mocks';
 describe('DataSourceManagement: Form Validation', () => {
   describe('validate create/edit datasource', () => {
     let form: CreateDataSourceState | EditDataSourceState = {
-      formErrors: [],
       formErrorsByField: { ...defaultValidation },
       title: '',
       description: '',
@@ -25,21 +24,46 @@ describe('DataSourceManagement: Form Validation', () => {
         },
       },
     };
-    test('should fail validation on all fields', () => {
-      const result = performDataSourceFormValidation(form);
-      expect(result.formErrors.length).toBe(4);
+    test('should fail validation when title is empty', () => {
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
+    });
+    test('should fail validation on duplicate title', () => {
+      form.title = 'test';
+      const result = performDataSourceFormValidation(form, ['oldTitle', 'test'], 'oldTitle');
+      expect(result).toBe(false);
+    });
+    test('should fail validation when endpoint is not valid', () => {
+      form.endpoint = mockDataSourceAttributesWithAuth.endpoint;
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
+    });
+    test('should fail validation when username is empty', () => {
+      form.endpoint = 'test';
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
+    });
+    test('should fail validation when password is empty', () => {
+      form.auth.credentials.username = 'test';
+      form.auth.credentials.password = '';
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
     });
     test('should NOT fail validation on empty username/password when  No Auth is selected', () => {
       form.auth.type = AuthType.NoAuth;
-      const result = performDataSourceFormValidation(form);
-      expect(result.formErrors.length).toBe(2);
-      expect(result.formErrorsByField.createCredential.username.length).toBe(0);
-      expect(result.formErrorsByField.createCredential.password.length).toBe(0);
+      form.title = 'test';
+      form.endpoint = mockDataSourceAttributesWithAuth.endpoint;
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(true);
     });
     test('should NOT fail validation on all fields', () => {
       form = { ...form, ...mockDataSourceAttributesWithAuth };
-      const result = performDataSourceFormValidation(form);
-      expect(result.formErrors.length).toBe(0);
+      const result = performDataSourceFormValidation(
+        form,
+        [mockDataSourceAttributesWithAuth.title],
+        mockDataSourceAttributesWithAuth.title
+      );
+      expect(result).toBe(true);
     });
   });
 });
