@@ -58,10 +58,9 @@ export const getCredential = async (
 
   const { decryptedText, encryptionContext } = await cryptography
     .decodeAndDecrypt(password)
-    .catch(() => {
-      throw new Error(
-        'Encrypted "auth.credentials.password" contaminated. Please delete and create another data source.'
-      );
+    .catch((err: any) => {
+      // Re-throw as DataSourceConfigError
+      throw new DataSourceConfigError('Unable to decrypt "auth.credentials.password".', err);
     });
 
   if (encryptionContext!.endpoint !== endpoint) {

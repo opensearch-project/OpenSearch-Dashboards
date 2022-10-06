@@ -79,7 +79,7 @@ a. Envelope encryption - has multiple benefits including strong protection on da
 
 b. Key derivation algorithm - HKDF with SHA-384, which “helps you avoid accidental reuse of a data encryption key and reduces the risk of overusing a data key.”
 
-c. Signature algorithm - ECDSA with P-384 and SHA-384. Under multiple data source case, data source indices stored on OpenSearch can be modified / replaced by attacker. With ECDSA signature, ciphertext decryption will fail if it’s getting pullted. No one will be able to create another signature that verifies with the public key because the private key has been dropped.
+c. Signature algorithm - ECDSA with P-384 and SHA-384. Under multiple data source case, data source documents stored on OpenSearch can be modified / replaced by attacker. With ECDSA signature, ciphertext decryption will fail if it’s getting pullted. No one will be able to create another signature that verifies with the public key because the private key has been dropped.
 
 ---
 

@@ -9,9 +9,7 @@ import {
   RawAesKeyringNode,
   RawAesWrappingSuiteIdentifier,
 } from '@aws-crypto/client-node';
-
 import { Logger } from '../../../../src/core/server';
-
 import { DataSourcePluginConfigType } from '../config';
 
 export const ENCODING_STRATEGY: BufferEncoding = 'base64';
@@ -44,7 +42,7 @@ export class CryptographyService {
     const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = config.encryption;
 
     if (wrappingKey.length !== WRAPPING_KEY_SIZE) {
-      const wrappingKeySizeMismatchMsg = `Wrapping key size shoule be 32 bytes, as used in envelope encryption. Current wrapping key size: '${wrappingKey.length}' bytes`;
+      const wrappingKeySizeMismatchMsg = `Wrapping key size should be 32 bytes, as used in envelope encryption. Current wrapping key size: '${wrappingKey.length}' bytes`;
       this.logger.error(wrappingKeySizeMismatchMsg);
       throw new Error(wrappingKeySizeMismatchMsg);
     }

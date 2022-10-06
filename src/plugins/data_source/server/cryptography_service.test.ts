@@ -33,7 +33,7 @@ describe('Cryptography Service', () => {
         },
       } as DataSourcePluginConfigType;
 
-      const expectedErrorMsg = `Wrapping key size shoule be 32 bytes, as used in envelope encryption. Current wrapping key size: '${config.encryption.wrappingKey.length}' bytes`;
+      const expectedErrorMsg = `Wrapping key size should be 32 bytes, as used in envelope encryption. Current wrapping key size: '${config.encryption.wrappingKey.length}' bytes`;
 
       expect(() => {
         service.setup(config);

@@ -15,12 +15,9 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'opensearch-dashboards/server';
-
 import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import { AuthType } from '../../common/data_sources';
-
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 
 /**
@@ -296,8 +293,10 @@ export class DataSourceSavedObjectsClientWrapper {
       });
       attributes = savedObject.attributes;
     } catch (err: any) {
-      // this.logger.error(err);
-      throw err;
+      const errMsg = `Fail to fetch existing data source for dataSourceId [${id}]`;
+      this.logger.error(errMsg);
+      this.logger.error(err);
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
     }
 
     if (!attributes) {
@@ -350,10 +349,11 @@ export class DataSourceSavedObjectsClientWrapper {
 
         const { encryptionContext } = await this.cryptography
           .decodeAndDecrypt(password)
-          .catch(() => {
-            throw SavedObjectsErrorHelpers.createBadRequestError(
-              'Update failed due to deprecated data source: encrypted "auth.credentials.password" contaminated. Please delete and create another data source.'
-            );
+          .catch((err: any) => {
+            const errMsg = `Fail to update existing data source for dataSourceId [${id}]: unable to decrypt "auth.credentials.password"`;
+            this.logger.error(errMsg);
+            this.logger.error(err);
+            throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
           });
 
         if (encryptionContext.endpoint !== endpoint) {
