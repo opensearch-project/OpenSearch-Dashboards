@@ -24,6 +24,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🔩 Tests
 
+* bump chromedriver to 106 to fix function test fail issue ([#2514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2514))
+
 ## [1.x]
 ### 💥 Breaking Changes
 
