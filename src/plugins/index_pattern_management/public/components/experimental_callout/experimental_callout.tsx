@@ -10,9 +10,14 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 export const ExperimentalCallout = () => {
   return (
     <>
-      <EuiCallOut title={TITLE} iconType="alert" color="warning">
+      <EuiCallOut
+        title={TITLE}
+        iconType="alert"
+        color="warning"
+        data-test-subj="index-pattern-experimental-callout"
+      >
         <p>
-          <EuiText>
+          <EuiText data-test-subj="index-pattern-experimental-callout-text">
             {DESCRIPTION_FIRST_PART}
             <b>{DATASOURCE_CONNECTION}</b>
             {DESCRIPTION_SECOND_PART}

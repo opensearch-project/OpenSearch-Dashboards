@@ -244,7 +244,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <ExperimentalCallout />
+      {dataSourceEnabled ? <ExperimentalCallout /> : null}
       <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

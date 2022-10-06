@@ -353,7 +353,7 @@ export class CreateIndexPatternWizard extends Component<
 
     return (
       <>
-        <ExperimentalCallout />
+        {this.dataSourceEnabled ? <ExperimentalCallout /> : null}
         {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}
