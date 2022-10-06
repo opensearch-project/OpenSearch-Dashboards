@@ -134,6 +134,7 @@ export class CreateIndexPatternWizard extends Component<
             id: errorMsg.props.id,
             color: 'warning',
             iconType: 'alert',
+            text: errors.body.message,
           },
         ]),
       }));
