@@ -5,6 +5,7 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
+    existingDatasourceNamesList={Array []}
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -194,8 +195,6 @@ exports[`Datasource Management: Create Datasource form should create data source
           </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
-            error={Array []}
-            isInvalid={false}
           >
             <div
               className="euiForm"
@@ -534,235 +533,97 @@ exports[`Datasource Management: Create Datasource form should create data source
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
-                    <EuiSuperSelect
-                      compressed={false}
+                    <EuiRadioGroup
                       data-test-subj="createDataSourceFormAuthTypeSelect"
-                      fullWidth={false}
-                      hasDividers={false}
                       id="generated-id"
-                      isInvalid={false}
-                      isLoading={false}
+                      idSelected="no_auth"
+                      name="Credential"
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
                       options={
                         Array [
                           Object {
-                            "inputDisplay": "Username & Password",
-                            "value": "username_password",
+                            "id": "no_auth",
+                            "label": "No authentication",
                           },
                           Object {
-                            "inputDisplay": "No authentication",
-                            "value": "no_auth",
+                            "id": "username_password",
+                            "label": "Username & Password",
                           },
                         ]
                       }
-                      valueOfSelected="no_auth"
                     >
-                      <EuiInputPopover
-                        anchorPosition="downLeft"
-                        attachToAnchor={true}
-                        className="euiSuperSelect"
-                        closePopover={[Function]}
-                        display="block"
-                        fullWidth={false}
-                        input={
-                          <EuiSuperSelectControl
-                            className=""
-                            compressed={false}
-                            data-test-subj="createDataSourceFormAuthTypeSelect"
-                            fullWidth={false}
-                            id="generated-id"
-                            isInvalid={false}
-                            isLoading={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            onKeyDown={[Function]}
-                            options={
-                              Array [
-                                Object {
-                                  "inputDisplay": "Username & Password",
-                                  "value": "username_password",
-                                },
-                                Object {
-                                  "inputDisplay": "No authentication",
-                                  "value": "no_auth",
-                                },
-                              ]
-                            }
-                            value="no_auth"
-                          />
-                        }
-                        isOpen={false}
-                        panelPaddingSize="none"
+                      <div
+                        data-test-subj="createDataSourceFormAuthTypeSelect"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          button={
-                            <EuiResizeObserver
-                              onResize={[Function]}
-                            >
-                              [Function]
-                            </EuiResizeObserver>
-                          }
-                          buttonRef={[Function]}
-                          className="euiInputPopover euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={false}
-                          panelPaddingSize="none"
-                          panelRef={[Function]}
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          id="no_auth"
+                          key="0"
+                          label="No authentication"
+                          name="Credential"
+                          onChange={[Function]}
                         >
-                          <EuiOutsideClickDetector
-                            onOutsideClick={[Function]}
+                          <div
+                            className="euiRadio euiRadioGroup__item"
                           >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              id="no_auth"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
                             <div
-                              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                              onKeyDown={[Function]}
-                              onMouseDown={[Function]}
-                              onMouseUp={[Function]}
-                              onTouchEnd={[Function]}
-                              onTouchStart={[Function]}
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="no_auth"
                             >
-                              <div
-                                className="euiPopover__anchor"
-                              >
-                                <EuiResizeObserver
-                                  onResize={[Function]}
-                                >
-                                  <div>
-                                    <EuiSuperSelectControl
-                                      className=""
-                                      compressed={false}
-                                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                                      fullWidth={false}
-                                      id="generated-id"
-                                      isInvalid={false}
-                                      isLoading={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      onKeyDown={[Function]}
-                                      options={
-                                        Array [
-                                          Object {
-                                            "inputDisplay": "Username & Password",
-                                            "value": "username_password",
-                                          },
-                                          Object {
-                                            "inputDisplay": "No authentication",
-                                            "value": "no_auth",
-                                          },
-                                        ]
-                                      }
-                                      value="no_auth"
-                                    >
-                                      <input
-                                        id="generated-id"
-                                        type="hidden"
-                                        value="no_auth"
-                                      />
-                                      <EuiFormControlLayout
-                                        compressed={false}
-                                        fullWidth={false}
-                                        icon={
-                                          Object {
-                                            "side": "right",
-                                            "type": "arrowDown",
-                                          }
-                                        }
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayout"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <EuiScreenReaderOnly>
-                                              <span
-                                                className="euiScreenReaderOnly"
-                                                id="generated-id"
-                                              >
-                                                <EuiI18n
-                                                  default="Select an option: {selectedValue}, is selected"
-                                                  token="euiSuperSelectControl.selectAnOption"
-                                                  values={
-                                                    Object {
-                                                      "selectedValue": "No authentication",
-                                                    }
-                                                  }
-                                                >
-                                                  Select an option: No authentication, is selected
-                                                </EuiI18n>
-                                              </span>
-                                            </EuiScreenReaderOnly>
-                                            <button
-                                              aria-haspopup="true"
-                                              aria-labelledby="generated-id generated-id"
-                                              className="euiSuperSelectControl"
-                                              data-test-subj="createDataSourceFormAuthTypeSelect"
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              type="button"
-                                            >
-                                              No authentication
-                                            </button>
-                                            <EuiFormControlLayoutIcons
-                                              compressed={false}
-                                              icon={
-                                                Object {
-                                                  "side": "right",
-                                                  "type": "arrowDown",
-                                                }
-                                              }
-                                              isLoading={false}
-                                            >
-                                              <div
-                                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                              >
-                                                <EuiFormControlLayoutCustomIcon
-                                                  size="m"
-                                                  type="arrowDown"
-                                                >
-                                                  <span
-                                                    className="euiFormControlLayoutCustomIcon"
-                                                  >
-                                                    <EuiIcon
-                                                      aria-hidden="true"
-                                                      className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <span
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        data-euiicon-type="arrowDown"
-                                                        size="m"
-                                                      />
-                                                    </EuiIcon>
-                                                  </span>
-                                                </EuiFormControlLayoutCustomIcon>
-                                              </div>
-                                            </EuiFormControlLayoutIcons>
-                                          </div>
-                                        </div>
-                                      </EuiFormControlLayout>
-                                    </EuiSuperSelectControl>
-                                  </div>
-                                </EuiResizeObserver>
-                              </div>
-                            </div>
-                          </EuiOutsideClickDetector>
-                        </EuiPopover>
-                      </EuiInputPopover>
-                    </EuiSuperSelect>
+                              No authentication
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          id="username_password"
+                          key="1"
+                          label="Username & Password"
+                          name="Credential"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadioGroup__item"
+                          >
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              id="username_password"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="username_password"
+                            >
+                              Username & Password
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </div>
+                    </EuiRadioGroup>
                   </div>
                 </div>
               </EuiFormRow>
@@ -775,6 +636,7 @@ exports[`Datasource Management: Create Datasource form should create data source
               </EuiSpacer>
               <EuiButton
                 data-test-subj="createDataSourceButton"
+                disabled={false}
                 fill={true}
                 onClick={[Function]}
                 type="submit"
@@ -837,6 +699,7 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
+    existingDatasourceNamesList={Array []}
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -1012,8 +875,6 @@ exports[`Datasource Management: Create Datasource form should create data source
           </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
-            error={Array []}
-            isInvalid={false}
           >
             <div
               className="euiForm"
@@ -1352,235 +1213,97 @@ exports[`Datasource Management: Create Datasource form should create data source
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
-                    <EuiSuperSelect
-                      compressed={false}
+                    <EuiRadioGroup
                       data-test-subj="createDataSourceFormAuthTypeSelect"
-                      fullWidth={false}
-                      hasDividers={false}
                       id="generated-id"
-                      isInvalid={false}
-                      isLoading={false}
+                      idSelected="username_password"
+                      name="Credential"
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
                       options={
                         Array [
                           Object {
-                            "inputDisplay": "Username & Password",
-                            "value": "username_password",
+                            "id": "no_auth",
+                            "label": "No authentication",
                           },
                           Object {
-                            "inputDisplay": "No authentication",
-                            "value": "no_auth",
+                            "id": "username_password",
+                            "label": "Username & Password",
                           },
                         ]
                       }
-                      valueOfSelected="username_password"
                     >
-                      <EuiInputPopover
-                        anchorPosition="downLeft"
-                        attachToAnchor={true}
-                        className="euiSuperSelect"
-                        closePopover={[Function]}
-                        display="block"
-                        fullWidth={false}
-                        input={
-                          <EuiSuperSelectControl
-                            className=""
-                            compressed={false}
-                            data-test-subj="createDataSourceFormAuthTypeSelect"
-                            fullWidth={false}
-                            id="generated-id"
-                            isInvalid={false}
-                            isLoading={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            onKeyDown={[Function]}
-                            options={
-                              Array [
-                                Object {
-                                  "inputDisplay": "Username & Password",
-                                  "value": "username_password",
-                                },
-                                Object {
-                                  "inputDisplay": "No authentication",
-                                  "value": "no_auth",
-                                },
-                              ]
-                            }
-                            value="username_password"
-                          />
-                        }
-                        isOpen={false}
-                        panelPaddingSize="none"
+                      <div
+                        data-test-subj="createDataSourceFormAuthTypeSelect"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          button={
-                            <EuiResizeObserver
-                              onResize={[Function]}
-                            >
-                              [Function]
-                            </EuiResizeObserver>
-                          }
-                          buttonRef={[Function]}
-                          className="euiInputPopover euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={false}
-                          panelPaddingSize="none"
-                          panelRef={[Function]}
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          id="no_auth"
+                          key="0"
+                          label="No authentication"
+                          name="Credential"
+                          onChange={[Function]}
                         >
-                          <EuiOutsideClickDetector
-                            onOutsideClick={[Function]}
+                          <div
+                            className="euiRadio euiRadioGroup__item"
                           >
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              id="no_auth"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
                             <div
-                              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                              onKeyDown={[Function]}
-                              onMouseDown={[Function]}
-                              onMouseUp={[Function]}
-                              onTouchEnd={[Function]}
-                              onTouchStart={[Function]}
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="no_auth"
                             >
-                              <div
-                                className="euiPopover__anchor"
-                              >
-                                <EuiResizeObserver
-                                  onResize={[Function]}
-                                >
-                                  <div>
-                                    <EuiSuperSelectControl
-                                      className=""
-                                      compressed={false}
-                                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                                      fullWidth={false}
-                                      id="generated-id"
-                                      isInvalid={false}
-                                      isLoading={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      onKeyDown={[Function]}
-                                      options={
-                                        Array [
-                                          Object {
-                                            "inputDisplay": "Username & Password",
-                                            "value": "username_password",
-                                          },
-                                          Object {
-                                            "inputDisplay": "No authentication",
-                                            "value": "no_auth",
-                                          },
-                                        ]
-                                      }
-                                      value="username_password"
-                                    >
-                                      <input
-                                        id="generated-id"
-                                        type="hidden"
-                                        value="username_password"
-                                      />
-                                      <EuiFormControlLayout
-                                        compressed={false}
-                                        fullWidth={false}
-                                        icon={
-                                          Object {
-                                            "side": "right",
-                                            "type": "arrowDown",
-                                          }
-                                        }
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayout"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <EuiScreenReaderOnly>
-                                              <span
-                                                className="euiScreenReaderOnly"
-                                                id="generated-id"
-                                              >
-                                                <EuiI18n
-                                                  default="Select an option: {selectedValue}, is selected"
-                                                  token="euiSuperSelectControl.selectAnOption"
-                                                  values={
-                                                    Object {
-                                                      "selectedValue": "Username & Password",
-                                                    }
-                                                  }
-                                                >
-                                                  Select an option: Username & Password, is selected
-                                                </EuiI18n>
-                                              </span>
-                                            </EuiScreenReaderOnly>
-                                            <button
-                                              aria-haspopup="true"
-                                              aria-labelledby="generated-id generated-id"
-                                              className="euiSuperSelectControl"
-                                              data-test-subj="createDataSourceFormAuthTypeSelect"
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              type="button"
-                                            >
-                                              Username & Password
-                                            </button>
-                                            <EuiFormControlLayoutIcons
-                                              compressed={false}
-                                              icon={
-                                                Object {
-                                                  "side": "right",
-                                                  "type": "arrowDown",
-                                                }
-                                              }
-                                              isLoading={false}
-                                            >
-                                              <div
-                                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                              >
-                                                <EuiFormControlLayoutCustomIcon
-                                                  size="m"
-                                                  type="arrowDown"
-                                                >
-                                                  <span
-                                                    className="euiFormControlLayoutCustomIcon"
-                                                  >
-                                                    <EuiIcon
-                                                      aria-hidden="true"
-                                                      className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <span
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        data-euiicon-type="arrowDown"
-                                                        size="m"
-                                                      />
-                                                    </EuiIcon>
-                                                  </span>
-                                                </EuiFormControlLayoutCustomIcon>
-                                              </div>
-                                            </EuiFormControlLayoutIcons>
-                                          </div>
-                                        </div>
-                                      </EuiFormControlLayout>
-                                    </EuiSuperSelectControl>
-                                  </div>
-                                </EuiResizeObserver>
-                              </div>
-                            </div>
-                          </EuiOutsideClickDetector>
-                        </EuiPopover>
-                      </EuiInputPopover>
-                    </EuiSuperSelect>
+                              No authentication
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          id="username_password"
+                          key="1"
+                          label="Username & Password"
+                          name="Credential"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadioGroup__item"
+                          >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              id="username_password"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="username_password"
+                            >
+                              Username & Password
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </div>
+                    </EuiRadioGroup>
                   </div>
                 </div>
               </EuiFormRow>
@@ -1834,6 +1557,7 @@ exports[`Datasource Management: Create Datasource form should create data source
               </EuiSpacer>
               <EuiButton
                 data-test-subj="createDataSourceButton"
+                disabled={false}
                 fill={true}
                 onClick={[Function]}
                 type="submit"
@@ -1896,6 +1620,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
   locale="en"
 >
   <CreateDataSourceForm
+    existingDatasourceNamesList={Array []}
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
@@ -2028,8 +1753,6 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
           </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
-            error={Array []}
-            isInvalid={false}
           >
             <div
               className="euiForm"
@@ -2368,235 +2091,97 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
-                    <EuiSuperSelect
-                      compressed={false}
+                    <EuiRadioGroup
                       data-test-subj="createDataSourceFormAuthTypeSelect"
-                      fullWidth={false}
-                      hasDividers={false}
                       id="generated-id"
-                      isInvalid={false}
-                      isLoading={false}
+                      idSelected="username_password"
+                      name="Credential"
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
                       options={
                         Array [
                           Object {
-                            "inputDisplay": "Username & Password",
-                            "value": "username_password",
+                            "id": "no_auth",
+                            "label": "No authentication",
                           },
                           Object {
-                            "inputDisplay": "No authentication",
-                            "value": "no_auth",
+                            "id": "username_password",
+                            "label": "Username & Password",
                           },
                         ]
                       }
-                      valueOfSelected="username_password"
                     >
-                      <EuiInputPopover
-                        anchorPosition="downLeft"
-                        attachToAnchor={true}
-                        className="euiSuperSelect"
-                        closePopover={[Function]}
-                        display="block"
-                        fullWidth={false}
-                        input={
-                          <EuiSuperSelectControl
-                            className=""
-                            compressed={false}
-                            data-test-subj="createDataSourceFormAuthTypeSelect"
-                            fullWidth={false}
-                            id="generated-id"
-                            isInvalid={false}
-                            isLoading={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            onKeyDown={[Function]}
-                            options={
-                              Array [
-                                Object {
-                                  "inputDisplay": "Username & Password",
-                                  "value": "username_password",
-                                },
-                                Object {
-                                  "inputDisplay": "No authentication",
-                                  "value": "no_auth",
-                                },
-                              ]
-                            }
-                            value="username_password"
-                          />
-                        }
-                        isOpen={false}
-                        panelPaddingSize="none"
+                      <div
+                        data-test-subj="createDataSourceFormAuthTypeSelect"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          button={
-                            <EuiResizeObserver
-                              onResize={[Function]}
-                            >
-                              [Function]
-                            </EuiResizeObserver>
-                          }
-                          buttonRef={[Function]}
-                          className="euiInputPopover euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={false}
-                          panelPaddingSize="none"
-                          panelRef={[Function]}
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          id="no_auth"
+                          key="0"
+                          label="No authentication"
+                          name="Credential"
+                          onChange={[Function]}
                         >
-                          <EuiOutsideClickDetector
-                            onOutsideClick={[Function]}
+                          <div
+                            className="euiRadio euiRadioGroup__item"
                           >
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              id="no_auth"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
                             <div
-                              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                              onKeyDown={[Function]}
-                              onMouseDown={[Function]}
-                              onMouseUp={[Function]}
-                              onTouchEnd={[Function]}
-                              onTouchStart={[Function]}
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="no_auth"
                             >
-                              <div
-                                className="euiPopover__anchor"
-                              >
-                                <EuiResizeObserver
-                                  onResize={[Function]}
-                                >
-                                  <div>
-                                    <EuiSuperSelectControl
-                                      className=""
-                                      compressed={false}
-                                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                                      fullWidth={false}
-                                      id="generated-id"
-                                      isInvalid={false}
-                                      isLoading={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      onKeyDown={[Function]}
-                                      options={
-                                        Array [
-                                          Object {
-                                            "inputDisplay": "Username & Password",
-                                            "value": "username_password",
-                                          },
-                                          Object {
-                                            "inputDisplay": "No authentication",
-                                            "value": "no_auth",
-                                          },
-                                        ]
-                                      }
-                                      value="username_password"
-                                    >
-                                      <input
-                                        id="generated-id"
-                                        type="hidden"
-                                        value="username_password"
-                                      />
-                                      <EuiFormControlLayout
-                                        compressed={false}
-                                        fullWidth={false}
-                                        icon={
-                                          Object {
-                                            "side": "right",
-                                            "type": "arrowDown",
-                                          }
-                                        }
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayout"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <EuiScreenReaderOnly>
-                                              <span
-                                                className="euiScreenReaderOnly"
-                                                id="generated-id"
-                                              >
-                                                <EuiI18n
-                                                  default="Select an option: {selectedValue}, is selected"
-                                                  token="euiSuperSelectControl.selectAnOption"
-                                                  values={
-                                                    Object {
-                                                      "selectedValue": "Username & Password",
-                                                    }
-                                                  }
-                                                >
-                                                  Select an option: Username & Password, is selected
-                                                </EuiI18n>
-                                              </span>
-                                            </EuiScreenReaderOnly>
-                                            <button
-                                              aria-haspopup="true"
-                                              aria-labelledby="generated-id generated-id"
-                                              className="euiSuperSelectControl"
-                                              data-test-subj="createDataSourceFormAuthTypeSelect"
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              type="button"
-                                            >
-                                              Username & Password
-                                            </button>
-                                            <EuiFormControlLayoutIcons
-                                              compressed={false}
-                                              icon={
-                                                Object {
-                                                  "side": "right",
-                                                  "type": "arrowDown",
-                                                }
-                                              }
-                                              isLoading={false}
-                                            >
-                                              <div
-                                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                              >
-                                                <EuiFormControlLayoutCustomIcon
-                                                  size="m"
-                                                  type="arrowDown"
-                                                >
-                                                  <span
-                                                    className="euiFormControlLayoutCustomIcon"
-                                                  >
-                                                    <EuiIcon
-                                                      aria-hidden="true"
-                                                      className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <span
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        data-euiicon-type="arrowDown"
-                                                        size="m"
-                                                      />
-                                                    </EuiIcon>
-                                                  </span>
-                                                </EuiFormControlLayoutCustomIcon>
-                                              </div>
-                                            </EuiFormControlLayoutIcons>
-                                          </div>
-                                        </div>
-                                      </EuiFormControlLayout>
-                                    </EuiSuperSelectControl>
-                                  </div>
-                                </EuiResizeObserver>
-                              </div>
-                            </div>
-                          </EuiOutsideClickDetector>
-                        </EuiPopover>
-                      </EuiInputPopover>
-                    </EuiSuperSelect>
+                              No authentication
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          id="username_password"
+                          key="1"
+                          label="Username & Password"
+                          name="Credential"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadioGroup__item"
+                          >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              id="username_password"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="username_password"
+                            >
+                              Username & Password
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </div>
+                    </EuiRadioGroup>
                   </div>
                 </div>
               </EuiFormRow>
@@ -2850,24 +2435,25 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
               </EuiSpacer>
               <EuiButton
                 data-test-subj="createDataSourceButton"
-                fill={true}
+                disabled={true}
+                fill={false}
                 onClick={[Function]}
                 type="submit"
               >
                 <EuiButtonDisplay
                   baseClassName="euiButton"
                   data-test-subj="createDataSourceButton"
-                  disabled={false}
+                  disabled={true}
                   element="button"
-                  fill={true}
-                  isDisabled={false}
+                  fill={false}
+                  isDisabled={true}
                   onClick={[Function]}
                   type="submit"
                 >
                   <button
-                    className="euiButton euiButton--primary euiButton--fill"
+                    className="euiButton euiButton--primary euiButton-isDisabled"
                     data-test-subj="createDataSourceButton"
-                    disabled={false}
+                    disabled={true}
                     onClick={[Function]}
                     style={
                       Object {
@@ -2912,6 +2498,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
   locale="en"
 >
   <CreateDataSourceForm
+    existingDatasourceNamesList={Array []}
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
@@ -3044,73 +2631,11 @@ exports[`Datasource Management: Create Datasource form should throw validation e
           </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
-            error={
-              Array [
-                "Title must not be empty",
-              ]
-            }
-            isInvalid={true}
           >
             <div
               className="euiForm"
               data-test-subj="data-source-creation"
             >
-              <EuiI18n
-                default="Please address the highlighted errors."
-                token="euiForm.addressFormErrors"
-              >
-                <EuiCallOut
-                  aria-live="assertive"
-                  className="euiForm__errors"
-                  color="danger"
-                  role="alert"
-                  tabIndex={-1}
-                  title="Please address the highlighted errors."
-                >
-                  <div
-                    aria-live="assertive"
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                    role="alert"
-                    tabIndex={-1}
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the highlighted errors.
-                      </span>
-                    </div>
-                    <EuiText
-                      color="default"
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <EuiTextColor
-                          color="default"
-                          component="div"
-                        >
-                          <div
-                            className="euiTextColor euiTextColor--default"
-                          >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="0"
-                              >
-                                Title must not be empty
-                              </li>
-                            </ul>
-                          </div>
-                        </EuiTextColor>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
-              </EuiI18n>
               <EuiText
                 grow={false}
               >
@@ -3142,7 +2667,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 display="row"
                 error={
                   Array [
-                    "Title must not be empty",
+                    "",
                   ]
                 }
                 fullWidth={false}
@@ -3226,15 +2751,13 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                     <EuiFormErrorText
                       className="euiFormRow__text"
                       id="generated-id-error-0"
-                      key="Title must not be empty"
+                      key=""
                     >
                       <div
                         aria-live="polite"
                         className="euiFormErrorText euiFormRow__text"
                         id="generated-id-error-0"
-                      >
-                        Title must not be empty
-                      </div>
+                      />
                     </EuiFormErrorText>
                   </div>
                 </div>
@@ -3463,235 +2986,97 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
-                    <EuiSuperSelect
-                      compressed={false}
+                    <EuiRadioGroup
                       data-test-subj="createDataSourceFormAuthTypeSelect"
-                      fullWidth={false}
-                      hasDividers={false}
                       id="generated-id"
-                      isInvalid={false}
-                      isLoading={false}
+                      idSelected="username_password"
+                      name="Credential"
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
                       options={
                         Array [
                           Object {
-                            "inputDisplay": "Username & Password",
-                            "value": "username_password",
+                            "id": "no_auth",
+                            "label": "No authentication",
                           },
                           Object {
-                            "inputDisplay": "No authentication",
-                            "value": "no_auth",
+                            "id": "username_password",
+                            "label": "Username & Password",
                           },
                         ]
                       }
-                      valueOfSelected="username_password"
                     >
-                      <EuiInputPopover
-                        anchorPosition="downLeft"
-                        attachToAnchor={true}
-                        className="euiSuperSelect"
-                        closePopover={[Function]}
-                        display="block"
-                        fullWidth={false}
-                        input={
-                          <EuiSuperSelectControl
-                            className=""
-                            compressed={false}
-                            data-test-subj="createDataSourceFormAuthTypeSelect"
-                            fullWidth={false}
-                            id="generated-id"
-                            isInvalid={false}
-                            isLoading={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            onKeyDown={[Function]}
-                            options={
-                              Array [
-                                Object {
-                                  "inputDisplay": "Username & Password",
-                                  "value": "username_password",
-                                },
-                                Object {
-                                  "inputDisplay": "No authentication",
-                                  "value": "no_auth",
-                                },
-                              ]
-                            }
-                            value="username_password"
-                          />
-                        }
-                        isOpen={false}
-                        panelPaddingSize="none"
+                      <div
+                        data-test-subj="createDataSourceFormAuthTypeSelect"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          button={
-                            <EuiResizeObserver
-                              onResize={[Function]}
-                            >
-                              [Function]
-                            </EuiResizeObserver>
-                          }
-                          buttonRef={[Function]}
-                          className="euiInputPopover euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={false}
-                          panelPaddingSize="none"
-                          panelRef={[Function]}
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          id="no_auth"
+                          key="0"
+                          label="No authentication"
+                          name="Credential"
+                          onChange={[Function]}
                         >
-                          <EuiOutsideClickDetector
-                            onOutsideClick={[Function]}
+                          <div
+                            className="euiRadio euiRadioGroup__item"
                           >
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              id="no_auth"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
                             <div
-                              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                              onKeyDown={[Function]}
-                              onMouseDown={[Function]}
-                              onMouseUp={[Function]}
-                              onTouchEnd={[Function]}
-                              onTouchStart={[Function]}
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="no_auth"
                             >
-                              <div
-                                className="euiPopover__anchor"
-                              >
-                                <EuiResizeObserver
-                                  onResize={[Function]}
-                                >
-                                  <div>
-                                    <EuiSuperSelectControl
-                                      className=""
-                                      compressed={false}
-                                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                                      fullWidth={false}
-                                      id="generated-id"
-                                      isInvalid={false}
-                                      isLoading={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      onKeyDown={[Function]}
-                                      options={
-                                        Array [
-                                          Object {
-                                            "inputDisplay": "Username & Password",
-                                            "value": "username_password",
-                                          },
-                                          Object {
-                                            "inputDisplay": "No authentication",
-                                            "value": "no_auth",
-                                          },
-                                        ]
-                                      }
-                                      value="username_password"
-                                    >
-                                      <input
-                                        id="generated-id"
-                                        type="hidden"
-                                        value="username_password"
-                                      />
-                                      <EuiFormControlLayout
-                                        compressed={false}
-                                        fullWidth={false}
-                                        icon={
-                                          Object {
-                                            "side": "right",
-                                            "type": "arrowDown",
-                                          }
-                                        }
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayout"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <EuiScreenReaderOnly>
-                                              <span
-                                                className="euiScreenReaderOnly"
-                                                id="generated-id"
-                                              >
-                                                <EuiI18n
-                                                  default="Select an option: {selectedValue}, is selected"
-                                                  token="euiSuperSelectControl.selectAnOption"
-                                                  values={
-                                                    Object {
-                                                      "selectedValue": "Username & Password",
-                                                    }
-                                                  }
-                                                >
-                                                  Select an option: Username & Password, is selected
-                                                </EuiI18n>
-                                              </span>
-                                            </EuiScreenReaderOnly>
-                                            <button
-                                              aria-haspopup="true"
-                                              aria-labelledby="generated-id generated-id"
-                                              className="euiSuperSelectControl"
-                                              data-test-subj="createDataSourceFormAuthTypeSelect"
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              type="button"
-                                            >
-                                              Username & Password
-                                            </button>
-                                            <EuiFormControlLayoutIcons
-                                              compressed={false}
-                                              icon={
-                                                Object {
-                                                  "side": "right",
-                                                  "type": "arrowDown",
-                                                }
-                                              }
-                                              isLoading={false}
-                                            >
-                                              <div
-                                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                              >
-                                                <EuiFormControlLayoutCustomIcon
-                                                  size="m"
-                                                  type="arrowDown"
-                                                >
-                                                  <span
-                                                    className="euiFormControlLayoutCustomIcon"
-                                                  >
-                                                    <EuiIcon
-                                                      aria-hidden="true"
-                                                      className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <span
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        data-euiicon-type="arrowDown"
-                                                        size="m"
-                                                      />
-                                                    </EuiIcon>
-                                                  </span>
-                                                </EuiFormControlLayoutCustomIcon>
-                                              </div>
-                                            </EuiFormControlLayoutIcons>
-                                          </div>
-                                        </div>
-                                      </EuiFormControlLayout>
-                                    </EuiSuperSelectControl>
-                                  </div>
-                                </EuiResizeObserver>
-                              </div>
-                            </div>
-                          </EuiOutsideClickDetector>
-                        </EuiPopover>
-                      </EuiInputPopover>
-                    </EuiSuperSelect>
+                              No authentication
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          id="username_password"
+                          key="1"
+                          label="Username & Password"
+                          name="Credential"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadioGroup__item"
+                          >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              id="username_password"
+                              name="Credential"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="username_password"
+                            >
+                              Username & Password
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </div>
+                    </EuiRadioGroup>
                   </div>
                 </div>
               </EuiFormRow>
@@ -3945,1197 +3330,25 @@ exports[`Datasource Management: Create Datasource form should throw validation e
               </EuiSpacer>
               <EuiButton
                 data-test-subj="createDataSourceButton"
-                fill={true}
+                disabled={true}
+                fill={false}
                 onClick={[Function]}
                 type="submit"
               >
                 <EuiButtonDisplay
                   baseClassName="euiButton"
                   data-test-subj="createDataSourceButton"
-                  disabled={false}
+                  disabled={true}
                   element="button"
-                  fill={true}
-                  isDisabled={false}
+                  fill={false}
+                  isDisabled={true}
                   onClick={[Function]}
                   type="submit"
                 >
                   <button
-                    className="euiButton euiButton--primary euiButton--fill"
+                    className="euiButton euiButton--primary euiButton-isDisabled"
                     data-test-subj="createDataSourceButton"
-                    disabled={false}
-                    onClick={[Function]}
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
-                    type="submit"
-                  >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconSide="left"
-                      textProps={
-                        Object {
-                          "className": "euiButton__text",
-                        }
-                      }
-                    >
-                      <span
-                        className="euiButtonContent euiButton__content"
-                      >
-                        <span
-                          className="euiButton__text"
-                        >
-                          Create a data source connection
-                        </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonDisplay>
-              </EuiButton>
-            </div>
-          </EuiForm>
-        </div>
-      </EuiPanel>
-    </EuiPageContent>
-  </CreateDataSourceForm>
-</IntlProvider>
-`;
-
-exports[`Datasource Management: Create Datasource form should validate when submit button is clicked without any user input on any field 1`] = `
-<IntlProvider
-  locale="en"
->
-  <CreateDataSourceForm
-    handleSubmit={[MockFunction]}
-  >
-    <EuiPageContent>
-      <EuiPanel
-        className="euiPageContent"
-        paddingSize="l"
-        role="main"
-      >
-        <div
-          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
-          role="main"
-        >
-          <Header
-            docLinks={
-              Object {
-                "links": Object {
-                  "noDocumentation": Object {
-                    "indexPatterns": Object {
-                      "introduction": "",
-                    },
-                    "scriptedFields": Object {},
-                  },
-                },
-              }
-            }
-          >
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <div>
-                      <EuiTitle>
-                        <h1
-                          className="euiTitle euiTitle--medium"
-                          data-test-subj="createDataSourceHeader"
-                        >
-                          Create data source connection
-                        </h1>
-                      </EuiTitle>
-                      <EuiSpacer
-                        size="s"
-                      >
-                        <div
-                          className="euiSpacer euiSpacer--s"
-                        />
-                      </EuiSpacer>
-                      <EuiText>
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <p>
-                            <FormattedMessage
-                              defaultMessage="A data source is an OpenSearch cluster endpoint (for now) to query against."
-                              id="dataSourcesManagement.createDataSource.description"
-                              values={Object {}}
-                            >
-                              <span>
-                                A data source is an OpenSearch cluster endpoint (for now) to query against.
-                              </span>
-                            </FormattedMessage>
-                            <br />
-                            <EuiLink
-                              external={true}
-                              href=""
-                              target="_blank"
-                            >
-                              <a
-                                className="euiLink euiLink--primary"
-                                href=""
-                                rel="noopener noreferrer"
-                                target="_blank"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Read documentation"
-                                  id="dataSourcesManagement.createDataSource.documentation"
-                                  values={Object {}}
-                                >
-                                  <span>
-                                    Read documentation
-                                  </span>
-                                </FormattedMessage>
-                                <EuiIcon
-                                  aria-label="External link"
-                                  className="euiLink__externalIcon"
-                                  size="s"
-                                  type="popout"
-                                >
-                                  <span
-                                    aria-label="External link"
-                                    className="euiLink__externalIcon"
-                                    data-euiicon-type="popout"
-                                    size="s"
-                                  />
-                                </EuiIcon>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="(opens in a new tab or window)"
-                                      token="euiLink.newTarget.screenReaderOnlyText"
-                                    >
-                                      (opens in a new tab or window)
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </a>
-                            </EuiLink>
-                          </p>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-          </Header>
-          <EuiHorizontalRule>
-            <hr
-              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-            />
-          </EuiHorizontalRule>
-          <EuiForm
-            data-test-subj="data-source-creation"
-            error={
-              Array [
-                "Title must not be empty",
-                "Endpoint is not valid",
-                "Username should not be empty",
-                "Password should not be empty",
-              ]
-            }
-            isInvalid={true}
-          >
-            <div
-              className="euiForm"
-              data-test-subj="data-source-creation"
-            >
-              <EuiI18n
-                default="Please address the highlighted errors."
-                token="euiForm.addressFormErrors"
-              >
-                <EuiCallOut
-                  aria-live="assertive"
-                  className="euiForm__errors"
-                  color="danger"
-                  role="alert"
-                  tabIndex={-1}
-                  title="Please address the highlighted errors."
-                >
-                  <div
-                    aria-live="assertive"
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                    role="alert"
-                    tabIndex={-1}
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the highlighted errors.
-                      </span>
-                    </div>
-                    <EuiText
-                      color="default"
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <EuiTextColor
-                          color="default"
-                          component="div"
-                        >
-                          <div
-                            className="euiTextColor euiTextColor--default"
-                          >
-                            <ul>
-                              <li
-                                className="euiForm__error"
-                                key="0"
-                              >
-                                Title must not be empty
-                              </li>
-                              <li
-                                className="euiForm__error"
-                                key="1"
-                              >
-                                Endpoint is not valid
-                              </li>
-                              <li
-                                className="euiForm__error"
-                                key="2"
-                              >
-                                Username should not be empty
-                              </li>
-                              <li
-                                className="euiForm__error"
-                                key="3"
-                              >
-                                Password should not be empty
-                              </li>
-                            </ul>
-                          </div>
-                        </EuiTextColor>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
-              </EuiI18n>
-              <EuiText
-                grow={false}
-              >
-                <div
-                  className="euiText euiText--medium euiText--constrainedWidth"
-                >
-                  <h5>
-                    <FormattedMessage
-                      defaultMessage="Connection Details"
-                      id="dataSourceManagement.connectToDataSource.connectionDetails"
-                      values={Object {}}
-                    >
-                      <span>
-                        Connection Details
-                      </span>
-                    </FormattedMessage>
-                  </h5>
-                </div>
-              </EuiText>
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                error={
-                  Array [
-                    "Title must not be empty",
-                  ]
-                }
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                isInvalid={true}
-                label="Title"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      aria-invalid={true}
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      isInvalid={true}
-                      type="label"
-                    >
-                      <label
-                        aria-invalid={true}
-                        className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-                        htmlFor="generated-id"
-                      >
-                        Title
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiFieldText
-                      aria-describedby="generated-id-error-0"
-                      data-test-subj="createDataSourceFormTitleField"
-                      id="generated-id"
-                      isInvalid={true}
-                      name="dataSourceTitle"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="Title"
-                      value=""
-                    >
-                      <EuiFormControlLayout
-                        fullWidth={false}
-                        inputId="generated-id"
-                      >
-                        <div
-                          className="euiFormControlLayout"
-                        >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl
-                              isInvalid={true}
-                            >
-                              <input
-                                aria-describedby="generated-id-error-0"
-                                className="euiFieldText"
-                                data-test-subj="createDataSourceFormTitleField"
-                                id="generated-id"
-                                name="dataSourceTitle"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                placeholder="Title"
-                                type="text"
-                                value=""
-                              />
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons />
-                          </div>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiFieldText>
-                    <EuiFormErrorText
-                      className="euiFormRow__text"
-                      id="generated-id-error-0"
-                      key="Title must not be empty"
-                    >
-                      <div
-                        aria-live="polite"
-                        className="euiFormErrorText euiFormRow__text"
-                        id="generated-id-error-0"
-                      >
-                        Title must not be empty
-                      </div>
-                    </EuiFormErrorText>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                label="Description"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
-                    >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
-                      >
-                        Description
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiFieldText
-                      data-test-subj="createDataSourceFormDescriptionField"
-                      id="generated-id"
-                      name="dataSourceDescription"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="Description of the data source"
-                      value=""
-                    >
-                      <EuiFormControlLayout
-                        fullWidth={false}
-                        inputId="generated-id"
-                      >
-                        <div
-                          className="euiFormControlLayout"
-                        >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl>
-                              <input
-                                className="euiFieldText"
-                                data-test-subj="createDataSourceFormDescriptionField"
-                                id="generated-id"
-                                name="dataSourceDescription"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                placeholder="Description of the data source"
-                                type="text"
-                                value=""
-                              />
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons />
-                          </div>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiFieldText>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                error={
-                  Array [
-                    "Endpoint is not valid",
-                  ]
-                }
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                isInvalid={true}
-                label="Endpoint URL"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      aria-invalid={true}
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      isInvalid={true}
-                      type="label"
-                    >
-                      <label
-                        aria-invalid={true}
-                        className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-                        htmlFor="generated-id"
-                      >
-                        Endpoint URL
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiFieldText
-                      aria-describedby="generated-id-error-0"
-                      data-test-subj="createDataSourceFormEndpointField"
-                      id="generated-id"
-                      isInvalid={true}
-                      name="endpoint"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="The connection URL"
-                      value=""
-                    >
-                      <EuiFormControlLayout
-                        fullWidth={false}
-                        inputId="generated-id"
-                      >
-                        <div
-                          className="euiFormControlLayout"
-                        >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl
-                              isInvalid={true}
-                            >
-                              <input
-                                aria-describedby="generated-id-error-0"
-                                className="euiFieldText"
-                                data-test-subj="createDataSourceFormEndpointField"
-                                id="generated-id"
-                                name="endpoint"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                placeholder="The connection URL"
-                                type="text"
-                                value=""
-                              />
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons />
-                          </div>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiFieldText>
-                    <EuiFormErrorText
-                      className="euiFormRow__text"
-                      id="generated-id-error-0"
-                      key="Endpoint is not valid"
-                    >
-                      <div
-                        aria-live="polite"
-                        className="euiFormErrorText euiFormRow__text"
-                        id="generated-id-error-0"
-                      >
-                        Endpoint is not valid
-                      </div>
-                    </EuiFormErrorText>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-              <EuiText
-                grow={false}
-              >
-                <div
-                  className="euiText euiText--medium euiText--constrainedWidth"
-                >
-                  <h5>
-                    <FormattedMessage
-                      defaultMessage="Authentication"
-                      id="dataSourceManagement.connectToDataSource.authenticationHeader"
-                      values={Object {}}
-                    >
-                      <span>
-                        Authentication
-                      </span>
-                    </FormattedMessage>
-                  </h5>
-                </div>
-              </EuiText>
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                label="Credential Source"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
-                    >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
-                      >
-                        Credential Source
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiSuperSelect
-                      compressed={false}
-                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                      fullWidth={false}
-                      hasDividers={false}
-                      id="generated-id"
-                      isInvalid={false}
-                      isLoading={false}
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      options={
-                        Array [
-                          Object {
-                            "inputDisplay": "Username & Password",
-                            "value": "username_password",
-                          },
-                          Object {
-                            "inputDisplay": "No authentication",
-                            "value": "no_auth",
-                          },
-                        ]
-                      }
-                      valueOfSelected="username_password"
-                    >
-                      <EuiInputPopover
-                        anchorPosition="downLeft"
-                        attachToAnchor={true}
-                        className="euiSuperSelect"
-                        closePopover={[Function]}
-                        display="block"
-                        fullWidth={false}
-                        input={
-                          <EuiSuperSelectControl
-                            className=""
-                            compressed={false}
-                            data-test-subj="createDataSourceFormAuthTypeSelect"
-                            fullWidth={false}
-                            id="generated-id"
-                            isInvalid={false}
-                            isLoading={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            onKeyDown={[Function]}
-                            options={
-                              Array [
-                                Object {
-                                  "inputDisplay": "Username & Password",
-                                  "value": "username_password",
-                                },
-                                Object {
-                                  "inputDisplay": "No authentication",
-                                  "value": "no_auth",
-                                },
-                              ]
-                            }
-                            value="username_password"
-                          />
-                        }
-                        isOpen={false}
-                        panelPaddingSize="none"
-                      >
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          attachToAnchor={true}
-                          button={
-                            <EuiResizeObserver
-                              onResize={[Function]}
-                            >
-                              [Function]
-                            </EuiResizeObserver>
-                          }
-                          buttonRef={[Function]}
-                          className="euiInputPopover euiSuperSelect"
-                          closePopover={[Function]}
-                          display="block"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={false}
-                          panelPaddingSize="none"
-                          panelRef={[Function]}
-                        >
-                          <EuiOutsideClickDetector
-                            onOutsideClick={[Function]}
-                          >
-                            <div
-                              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
-                              onKeyDown={[Function]}
-                              onMouseDown={[Function]}
-                              onMouseUp={[Function]}
-                              onTouchEnd={[Function]}
-                              onTouchStart={[Function]}
-                            >
-                              <div
-                                className="euiPopover__anchor"
-                              >
-                                <EuiResizeObserver
-                                  onResize={[Function]}
-                                >
-                                  <div>
-                                    <EuiSuperSelectControl
-                                      className=""
-                                      compressed={false}
-                                      data-test-subj="createDataSourceFormAuthTypeSelect"
-                                      fullWidth={false}
-                                      id="generated-id"
-                                      isInvalid={false}
-                                      isLoading={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      onKeyDown={[Function]}
-                                      options={
-                                        Array [
-                                          Object {
-                                            "inputDisplay": "Username & Password",
-                                            "value": "username_password",
-                                          },
-                                          Object {
-                                            "inputDisplay": "No authentication",
-                                            "value": "no_auth",
-                                          },
-                                        ]
-                                      }
-                                      value="username_password"
-                                    >
-                                      <input
-                                        id="generated-id"
-                                        type="hidden"
-                                        value="username_password"
-                                      />
-                                      <EuiFormControlLayout
-                                        compressed={false}
-                                        fullWidth={false}
-                                        icon={
-                                          Object {
-                                            "side": "right",
-                                            "type": "arrowDown",
-                                          }
-                                        }
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayout"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout__childrenWrapper"
-                                          >
-                                            <EuiScreenReaderOnly>
-                                              <span
-                                                className="euiScreenReaderOnly"
-                                                id="generated-id"
-                                              >
-                                                <EuiI18n
-                                                  default="Select an option: {selectedValue}, is selected"
-                                                  token="euiSuperSelectControl.selectAnOption"
-                                                  values={
-                                                    Object {
-                                                      "selectedValue": "Username & Password",
-                                                    }
-                                                  }
-                                                >
-                                                  Select an option: Username & Password, is selected
-                                                </EuiI18n>
-                                              </span>
-                                            </EuiScreenReaderOnly>
-                                            <button
-                                              aria-haspopup="true"
-                                              aria-labelledby="generated-id generated-id"
-                                              className="euiSuperSelectControl"
-                                              data-test-subj="createDataSourceFormAuthTypeSelect"
-                                              onBlur={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              type="button"
-                                            >
-                                              Username & Password
-                                            </button>
-                                            <EuiFormControlLayoutIcons
-                                              compressed={false}
-                                              icon={
-                                                Object {
-                                                  "side": "right",
-                                                  "type": "arrowDown",
-                                                }
-                                              }
-                                              isLoading={false}
-                                            >
-                                              <div
-                                                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                              >
-                                                <EuiFormControlLayoutCustomIcon
-                                                  size="m"
-                                                  type="arrowDown"
-                                                >
-                                                  <span
-                                                    className="euiFormControlLayoutCustomIcon"
-                                                  >
-                                                    <EuiIcon
-                                                      aria-hidden="true"
-                                                      className="euiFormControlLayoutCustomIcon__icon"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <span
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        data-euiicon-type="arrowDown"
-                                                        size="m"
-                                                      />
-                                                    </EuiIcon>
-                                                  </span>
-                                                </EuiFormControlLayoutCustomIcon>
-                                              </div>
-                                            </EuiFormControlLayoutIcons>
-                                          </div>
-                                        </div>
-                                      </EuiFormControlLayout>
-                                    </EuiSuperSelectControl>
-                                  </div>
-                                </EuiResizeObserver>
-                              </div>
-                            </div>
-                          </EuiOutsideClickDetector>
-                        </EuiPopover>
-                      </EuiInputPopover>
-                    </EuiSuperSelect>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                error={
-                  Array [
-                    "Username should not be empty",
-                  ]
-                }
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                isInvalid={true}
-                label="Username"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      aria-invalid={true}
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      isInvalid={true}
-                      type="label"
-                    >
-                      <label
-                        aria-invalid={true}
-                        className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-                        htmlFor="generated-id"
-                      >
-                        Username
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiFieldText
-                      aria-describedby="generated-id-error-0"
-                      data-test-subj="createDataSourceFormUsernameField"
-                      id="generated-id"
-                      isInvalid={true}
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="Username to connect to data source"
-                      value=""
-                    >
-                      <EuiFormControlLayout
-                        fullWidth={false}
-                        inputId="generated-id"
-                      >
-                        <div
-                          className="euiFormControlLayout"
-                        >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl
-                              isInvalid={true}
-                            >
-                              <input
-                                aria-describedby="generated-id-error-0"
-                                className="euiFieldText"
-                                data-test-subj="createDataSourceFormUsernameField"
-                                id="generated-id"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                placeholder="Username to connect to data source"
-                                type="text"
-                                value=""
-                              />
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons />
-                          </div>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiFieldText>
-                    <EuiFormErrorText
-                      className="euiFormRow__text"
-                      id="generated-id-error-0"
-                      key="Username should not be empty"
-                    >
-                      <div
-                        aria-live="polite"
-                        className="euiFormErrorText euiFormRow__text"
-                        id="generated-id-error-0"
-                      >
-                        Username should not be empty
-                      </div>
-                    </EuiFormErrorText>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                describedByIds={Array []}
-                display="row"
-                error={
-                  Array [
-                    "Password should not be empty",
-                  ]
-                }
-                fullWidth={false}
-                hasChildLabel={true}
-                hasEmptyLabelSpace={false}
-                isInvalid={true}
-                label="Password"
-                labelType="label"
-              >
-                <div
-                  className="euiFormRow"
-                  id="generated-id-row"
-                >
-                  <div
-                    className="euiFormRow__labelWrapper"
-                  >
-                    <EuiFormLabel
-                      aria-invalid={true}
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      isInvalid={true}
-                      type="label"
-                    >
-                      <label
-                        aria-invalid={true}
-                        className="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-                        htmlFor="generated-id"
-                      >
-                        Password
-                      </label>
-                    </EuiFormLabel>
-                  </div>
-                  <div
-                    className="euiFormRow__fieldWrapper"
-                  >
-                    <EuiFieldPassword
-                      aria-describedby="generated-id-error-0"
-                      compressed={false}
-                      data-test-subj="createDataSourceFormPasswordField"
-                      fullWidth={false}
-                      id="generated-id"
-                      isInvalid={true}
-                      isLoading={false}
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="Password to connect to data source"
-                      type="dual"
-                      value=""
-                    >
-                      <EuiFormControlLayout
-                        append={
-                          Array [
-                            <EuiButtonIcon
-                              aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                              iconType="eye"
-                              onClick={[Function]}
-                              title="Show password as plain text. Note: this will visually expose your password on the screen."
-                            />,
-                          ]
-                        }
-                        compressed={false}
-                        fullWidth={false}
-                        icon="lock"
-                        isLoading={false}
-                      >
-                        <div
-                          className="euiFormControlLayout euiFormControlLayout--group"
-                        >
-                          <div
-                            className="euiFormControlLayout__childrenWrapper"
-                          >
-                            <EuiValidatableControl
-                              isInvalid={true}
-                            >
-                              <input
-                                aria-describedby="generated-id-error-0"
-                                className="euiFieldPassword euiFieldPassword--inGroup euiFieldPassword--withToggle"
-                                data-test-subj="createDataSourceFormPasswordField"
-                                id="generated-id"
-                                onBlur={[Function]}
-                                onChange={[Function]}
-                                onFocus={[Function]}
-                                placeholder="Password to connect to data source"
-                                type="password"
-                                value=""
-                              />
-                            </EuiValidatableControl>
-                            <EuiFormControlLayoutIcons
-                              compressed={false}
-                              icon="lock"
-                              isLoading={false}
-                            >
-                              <div
-                                className="euiFormControlLayoutIcons"
-                              >
-                                <EuiFormControlLayoutCustomIcon
-                                  size="m"
-                                  type="lock"
-                                >
-                                  <span
-                                    className="euiFormControlLayoutCustomIcon"
-                                  >
-                                    <EuiIcon
-                                      aria-hidden="true"
-                                      className="euiFormControlLayoutCustomIcon__icon"
-                                      size="m"
-                                      type="lock"
-                                    >
-                                      <span
-                                        aria-hidden="true"
-                                        className="euiFormControlLayoutCustomIcon__icon"
-                                        data-euiicon-type="lock"
-                                        size="m"
-                                      />
-                                    </EuiIcon>
-                                  </span>
-                                </EuiFormControlLayoutCustomIcon>
-                              </div>
-                            </EuiFormControlLayoutIcons>
-                          </div>
-                          <EuiButtonIcon
-                            aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                            className="euiFormControlLayout__append"
-                            iconType="eye"
-                            key="0/.0"
-                            onClick={[Function]}
-                            title="Show password as plain text. Note: this will visually expose your password on the screen."
-                          >
-                            <button
-                              aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiFormControlLayout__append"
-                              onClick={[Function]}
-                              title="Show password as plain text. Note: this will visually expose your password on the screen."
-                              type="button"
-                            >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonIcon__icon"
-                                color="inherit"
-                                size="m"
-                                type="eye"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  data-euiicon-type="eye"
-                                  size="m"
-                                />
-                              </EuiIcon>
-                            </button>
-                          </EuiButtonIcon>
-                        </div>
-                      </EuiFormControlLayout>
-                    </EuiFieldPassword>
-                    <EuiFormErrorText
-                      className="euiFormRow__text"
-                      id="generated-id-error-0"
-                      key="Password should not be empty"
-                    >
-                      <div
-                        aria-live="polite"
-                        className="euiFormErrorText euiFormRow__text"
-                        id="generated-id-error-0"
-                      >
-                        Password should not be empty
-                      </div>
-                    </EuiFormErrorText>
-                  </div>
-                </div>
-              </EuiFormRow>
-              <EuiSpacer
-                size="xl"
-              >
-                <div
-                  className="euiSpacer euiSpacer--xl"
-                />
-              </EuiSpacer>
-              <EuiButton
-                data-test-subj="createDataSourceButton"
-                fill={true}
-                onClick={[Function]}
-                type="submit"
-              >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
-                  data-test-subj="createDataSourceButton"
-                  disabled={false}
-                  element="button"
-                  fill={true}
-                  isDisabled={false}
-                  onClick={[Function]}
-                  type="submit"
-                >
-                  <button
-                    className="euiButton euiButton--primary euiButton--fill"
-                    data-test-subj="createDataSourceButton"
-                    disabled={false}
+                    disabled={true}
                     onClick={[Function]}
                     style={
                       Object {
