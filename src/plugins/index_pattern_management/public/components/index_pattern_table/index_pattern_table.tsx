@@ -58,6 +58,7 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
+import { ExperimentalCallout } from '../experimental_callout';
 
 const pagination = {
   initialPageSize: 10,
@@ -242,36 +243,39 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   }
 
   return (
-    <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={false}
-        items={indexPatterns}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
-      />
-    </EuiPageContent>
+    <>
+      <ExperimentalCallout />
+      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>{title}</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
+                  defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={false}
+          items={indexPatterns}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </EuiPageContent>
+    </>
   );
 };
 
