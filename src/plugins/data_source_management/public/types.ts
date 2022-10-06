@@ -42,8 +42,6 @@ export interface DataSourceTableItem {
 export interface ToastMessageItem {
   id: string;
   defaultMessage: string;
-  color: 'primary' | 'success' | 'warning' | 'danger';
-  iconType: string;
 }
 
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<

@@ -9,8 +9,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiGlobalToastList,
-  EuiGlobalToastListToast,
   EuiInMemoryTable,
   EuiPageContent,
   EuiPanel,
@@ -20,8 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { FormattedMessage } from '@osd/i18n/react';
 import { useEffectOnce } from 'react-use';
+import { i18n } from '@osd/i18n';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import {
   reactRouterNavigate,
@@ -58,17 +56,17 @@ const sorting = {
   },
 };
 
-const toastLifeTimeMs = 6000;
-
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
-  const { chrome, setBreadcrumbs, savedObjects } = useOpenSearchDashboards<
-    DataSourceManagementContext
-  >().services;
+  const {
+    chrome,
+    setBreadcrumbs,
+    savedObjects,
+    notifications: { toasts },
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
   const [selectedDataSources, setSelectedDataSources] = useState<DataSourceTableItem[]>([]);
-  const [toasts, setToasts] = React.useState<EuiGlobalToastListToast[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
@@ -95,10 +93,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         setDataSources([]);
         handleDisplayToastMessage({
           id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-          defaultMessage:
-            'Error occurred while fetching the records for Data sources. Please try it again',
-          color: 'warning',
-          iconType: 'alert',
+          defaultMessage: 'Error occurred while fetching the records for Data sources.',
         });
       })
       .finally(() => {
@@ -215,9 +210,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         handleDisplayToastMessage({
           id: 'dataSourcesManagement.dataSourceListing.deleteDataSourceFailMsg',
           defaultMessage:
-            'Error occurred while deleting few/all selected records for Data sources. Please try it again',
-          color: 'warning',
-          iconType: 'alert',
+            'Error occurred while deleting selected records for Data sources. Please try it again',
         });
       })
       .finally(() => {
@@ -235,21 +228,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   /* Toast Handlers */
-  const removeToast = (id: string) => {
-    setToasts(toasts.filter((toast) => toast.id !== id));
-  };
 
-  const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
-    const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
-    setToasts([
-      ...toasts,
-      {
-        title: failureMsg,
-        id: failureMsg.props.id,
-        color,
-        iconType,
-      },
-    ]);
+  const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
+    toasts.addWarning(
+      i18n.translate(id, {
+        defaultMessage,
+      })
+    );
   };
 
   /* Render Ui elements*/
@@ -334,18 +319,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
-  return (
-    <>
-      {renderContent()}
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={({ id }) => {
-          removeToast(id);
-        }}
-        toastLifeTimeMs={toastLifeTimeMs}
-      />
-    </>
-  );
+  return renderContent();
 };
 
 export const DataSourceTableWithRouter = withRouter(DataSourceTable);
