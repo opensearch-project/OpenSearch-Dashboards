@@ -908,20 +908,6 @@ exports[`Datasource Management: Create Datasource Wizard should render normally 
         </EuiPanel>
       </EuiPageContent>
     </CreateDataSourceForm>
-    <EuiGlobalToastList
-      data-test-subj="createDataSourceToast"
-      dismissToast={[Function]}
-      side="right"
-      toastLifeTimeMs={6000}
-      toasts={Array []}
-    >
-      <div
-        aria-live="polite"
-        className="euiGlobalToastList euiGlobalToastList--right"
-        data-test-subj="createDataSourceToast"
-        role="region"
-      />
-    </EuiGlobalToastList>
   </CreateDataSourceWizard>
 </IntlProvider>
 `;

@@ -20,7 +20,6 @@ import { act } from 'react-dom/test-utils';
 import * as utils from '../utils';
 
 const formIdentifier = 'CreateDataSourceForm';
-const toastsIdentifier = 'EuiGlobalToastList';
 describe('Datasource Management: Create Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -71,19 +70,5 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
     component.update();
     expect(utils.createSingleDataSource).toHaveBeenCalled();
-    // @ts-ignore
-    expect(component.find(toastsIdentifier).props().toasts.length).toBe(1); // failure toast
-
-    // remove toast message after failure of creating datasource
-
-    act(() => {
-      // @ts-ignore
-      component.find(toastsIdentifier).first().prop('dismissToast')({
-        id: 'dataSourcesManagement.createDataSource.createDataSourceFailMsg',
-      });
-    });
-    component.update();
-    // @ts-ignore
-    expect(component.find(toastsIdentifier).props().toasts.length).toBe(0); // failure toast
   });
 });
