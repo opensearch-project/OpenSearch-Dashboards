@@ -17,7 +17,7 @@ import { CreateDataSourceWizardWithRouter } from '../components/create_data_sour
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
-import { ExperimentalCallOut } from './compoenent/experimental_call_out';
+import { ExperimentalCallout } from './compoenent/experimental_callout';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -46,7 +46,7 @@ export async function mountManagementSection(
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
-        <ExperimentalCallOut docLinks={docLinks} />
+        <ExperimentalCallout docLinks={docLinks} />
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>

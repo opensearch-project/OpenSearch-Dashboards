@@ -14,10 +14,14 @@ import {
   DATA_SOURCE_OPEN_FORUM_TEXT,
 } from '../../../components/text_content';
 
-export const ExperimentalCallOut = ({ docLinks }: { docLinks: DocLinksStart }) => {
+export const ExperimentalCallout = ({ docLinks }: { docLinks: DocLinksStart }) => {
   return (
     <>
-      <EuiCallOut title={EXPERIMENTAL_FEATURE} iconType="iInCircle">
+      <EuiCallOut
+        title={EXPERIMENTAL_FEATURE}
+        iconType="iInCircle"
+        data-test-subj="data-source-experimental-call"
+      >
         <p>
           {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
           <EuiLink href={docLinks.links.noDocumentation.indexPatterns.introduction} target="_blank">

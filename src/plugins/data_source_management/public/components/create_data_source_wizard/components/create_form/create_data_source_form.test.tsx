@@ -74,12 +74,11 @@ describe('Datasource Management: Create Datasource form', () => {
   /* Default option: Username & Password*/
   test('should validate when submit button is clicked without any user input on any field', () => {
     findTestSubject(component, 'createDataSourceButton').simulate('click');
-    const { title, description, endpoint, authType, username, password } = getFields(component);
+    const { title, description, endpoint, username, password } = getFields(component);
     expect(component).toMatchSnapshot();
     expect(title.prop('isInvalid')).toBe(true);
     expect(description.prop('isInvalid')).toBe(undefined);
     expect(endpoint.prop('isInvalid')).toBe(true);
-    expect(authType.prop('isInvalid')).toBe(false);
     expect(username.prop('isInvalid')).toBe(true);
     expect(password.prop('isInvalid')).toBe(true);
   });
@@ -93,13 +92,11 @@ describe('Datasource Management: Create Datasource form', () => {
     /* Click on submit without any user input */
     findTestSubject(component, 'createDataSourceButton').simulate('click');
 
-    const { title, description, endpoint, authType, username, password } = getFields(component);
+    const { title, description, endpoint, username, password } = getFields(component);
 
-    expect(authType.prop('valueOfSelected')).toBe(AuthType.NoAuth);
     expect(title.prop('isInvalid')).toBe(true);
     expect(description.prop('isInvalid')).toBe(undefined);
     expect(endpoint.prop('isInvalid')).toBe(true);
-    expect(authType.prop('isInvalid')).toBe(false);
     expect(username.exists()).toBeFalsy(); // username field does not exist when No Auth option is selected
     expect(password.exists()).toBeFalsy(); // password field does not exist when No Auth option is selected
   });
@@ -112,13 +109,12 @@ describe('Datasource Management: Create Datasource form', () => {
 
     findTestSubject(component, 'createDataSourceButton').simulate('click');
 
-    const { title, description, endpoint, authType, username, password } = getFields(component);
+    const { title, description, endpoint, username, password } = getFields(component);
 
     expect(component).toMatchSnapshot();
     expect(title.prop('isInvalid')).toBe(true);
     expect(description.prop('isInvalid')).toBe(undefined);
     expect(endpoint.prop('isInvalid')).toBe(false);
-    expect(authType.prop('isInvalid')).toBe(false);
     expect(username.prop('isInvalid')).toBe(false);
     expect(password.prop('isInvalid')).toBe(false);
 
