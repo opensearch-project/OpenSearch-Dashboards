@@ -12,39 +12,46 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPageContent,
+  EuiRadioGroup,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { credentialSourceOptions, DataSourceManagementContextValue } from '../../../../types';
+import {
+  AuthType,
+  credentialSourceOptions,
+  DataSourceAttributes,
+  DataSourceManagementContextValue,
+  UsernamePasswordTypedContent,
+} from '../../../../types';
 import { Header } from '../header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import {
   CreateEditDataSourceValidation,
   defaultValidation,
+  isTitleValid,
   performDataSourceFormValidation,
 } from '../../../validation';
-import { AuthType, DataSourceAttributes, UsernamePasswordTypedContent } from '../../../../types';
 import {
-  createDataSourceCredentialSource,
-  createDataSourceDescriptionPlaceholder,
-  createDataSourceEndpointPlaceholder,
-  createDataSourceEndpointURL,
-  createDataSourcePasswordPlaceholder,
-  createDataSourceUsernamePlaceholder,
-  descriptionText,
-  passwordText,
-  titleText,
-  usernameText,
+  CREDENTIAL_SOURCE,
+  DATA_SOURCE_DESCRIPTION_PLACEHOLDER,
+  DATA_SOURCE_PASSWORD_PLACEHOLDER,
+  DESCRIPTION,
+  ENDPOINT_PLACEHOLDER,
+  ENDPOINT_URL,
+  PASSWORD,
+  TITLE,
+  USERNAME,
+  USERNAME_PLACEHOLDER,
 } from '../../../text_content';
+import { isValidUrl } from '../../../utils';
 
 export interface CreateDataSourceProps {
+  existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
 }
 export interface CreateDataSourceState {
   /* Validation */
-  formErrors: string[];
   formErrorsByField: CreateEditDataSourceValidation;
   /* Inputs */
   title: string;
@@ -67,7 +74,6 @@ export class CreateDataSourceForm extends React.Component<
     super(props, context);
 
     this.state = {
-      formErrors: [],
       formErrorsByField: { ...defaultValidation },
       title: '',
       description: '',
@@ -85,62 +91,102 @@ export class CreateDataSourceForm extends React.Component<
   /* Validations */
 
   isFormValid = () => {
-    const { formErrors, formErrorsByField } = performDataSourceFormValidation(this.state);
-
-    this.setState({
-      formErrors,
-      formErrorsByField,
-    });
-
-    return formErrors.length === 0;
+    return performDataSourceFormValidation(this.state, this.props.existingDatasourceNamesList, '');
   };
 
   /* Events */
 
   onChangeTitle = (e: { target: { value: any } }) => {
-    this.setState({ title: e.target.value }, this.checkValidation);
+    this.setState({ title: e.target.value });
+  };
+
+  validateTitle = () => {
+    const isValid = isTitleValid(this.state.title, this.props.existingDatasourceNamesList, '');
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        title: isValid.valid ? [] : [isValid.error],
+      },
+    });
   };
 
   onChangeDescription = (e: { target: { value: any } }) => {
-    this.setState({ description: e.target.value }, this.checkValidation);
+    this.setState({ description: e.target.value });
   };
 
   onChangeEndpoint = (e: { target: { value: any } }) => {
-    this.setState({ endpoint: e.target.value }, this.checkValidation);
+    this.setState({ endpoint: e.target.value });
   };
 
-  onChangeAuthType = (value: AuthType) => {
-    this.setState({ auth: { ...this.state.auth, type: value } }, this.checkValidation);
+  validateEndpoint = () => {
+    const isValid = isValidUrl(this.state.endpoint);
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        endpoint: isValid ? [] : [''],
+      },
+    });
+  };
+
+  onChangeAuthType = (value: string) => {
+    const valueToSave =
+      value === AuthType.UsernamePasswordType ? AuthType.UsernamePasswordType : AuthType.NoAuth;
+
+    const formErrorsByField = {
+      ...this.state.formErrorsByField,
+      createCredential: { ...this.state.formErrorsByField.createCredential },
+    };
+    if (valueToSave === AuthType.NoAuth) {
+      formErrorsByField.createCredential = {
+        username: [],
+        password: [],
+      };
+    }
+    this.setState({ auth: { ...this.state.auth, type: valueToSave }, formErrorsByField });
   };
 
   onChangeUsername = (e: { target: { value: any } }) => {
-    this.setState(
-      {
-        auth: {
-          ...this.state.auth,
-          credentials: { ...this.state.auth.credentials, username: e.target.value },
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, username: e.target.value },
+      },
+    });
+  };
+
+  validateUsername = () => {
+    const isValid = !!this.state.auth.credentials.username?.trim().length;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        createCredential: {
+          ...this.state.formErrorsByField.createCredential,
+          username: isValid ? [] : [''],
         },
       },
-      this.checkValidation
-    );
+    });
   };
 
   onChangePassword = (e: { target: { value: any } }) => {
-    this.setState(
-      {
-        auth: {
-          ...this.state.auth,
-          credentials: { ...this.state.auth.credentials, password: e.target.value },
-        },
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, password: e.target.value },
       },
-      this.checkValidation
-    );
+    });
   };
 
-  checkValidation = () => {
-    if (this.state.formErrors.length) {
-      this.isFormValid();
-    }
+  validatePassword = () => {
+    const isValid = !!this.state.auth.credentials.password;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        createCredential: {
+          ...this.state.formErrorsByField.createCredential,
+          password: isValid ? [] : [''],
+        },
+      },
+    });
   };
 
   onClickCreateNewDataSource = () => {
@@ -187,29 +233,31 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <>
         <EuiFormRow
-          label={usernameText}
+          label={USERNAME}
           isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
           error={this.state.formErrorsByField.createCredential.username}
         >
           <EuiFieldText
-            placeholder={createDataSourceUsernamePlaceholder}
+            placeholder={USERNAME_PLACEHOLDER}
             isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
             value={this.state.auth.credentials.username || ''}
             onChange={this.onChangeUsername}
+            onBlur={this.validateUsername}
             data-test-subj="createDataSourceFormUsernameField"
           />
         </EuiFormRow>
         <EuiFormRow
-          label={passwordText}
+          label={PASSWORD}
           isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
           error={this.state.formErrorsByField.createCredential.password}
         >
           <EuiFieldPassword
             isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
-            placeholder={createDataSourcePasswordPlaceholder}
+            placeholder={DATA_SOURCE_PASSWORD_PLACEHOLDER}
             type={'dual'}
             value={this.state.auth.credentials.password || ''}
             onChange={this.onChangePassword}
+            onBlur={this.validatePassword}
             data-test-subj="createDataSourceFormPasswordField"
           />
         </EuiFormRow>
@@ -222,11 +270,7 @@ export class CreateDataSourceForm extends React.Component<
       <EuiPageContent>
         {this.renderHeader()}
         <EuiHorizontalRule />
-        <EuiForm
-          data-test-subj="data-source-creation"
-          isInvalid={!!this.state.formErrors.length}
-          error={this.state.formErrors}
-        >
+        <EuiForm data-test-subj="data-source-creation">
           {/* Endpoint section */}
           {this.renderSectionHeader(
             'dataSourceManagement.connectToDataSource.connectionDetails',
@@ -236,26 +280,27 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Title */}
           <EuiFormRow
-            label={titleText}
+            label={TITLE}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
           >
             <EuiFieldText
               name="dataSourceTitle"
               value={this.state.title || ''}
-              placeholder={titleText}
+              placeholder={TITLE}
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
+              onBlur={this.validateTitle}
               data-test-subj="createDataSourceFormTitleField"
             />
           </EuiFormRow>
 
           {/* Description */}
-          <EuiFormRow label={descriptionText}>
+          <EuiFormRow label={DESCRIPTION}>
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
-              placeholder={createDataSourceDescriptionPlaceholder}
+              placeholder={DATA_SOURCE_DESCRIPTION_PLACEHOLDER}
               onChange={this.onChangeDescription}
               data-test-subj="createDataSourceFormDescriptionField"
             />
@@ -263,16 +308,17 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Endpoint URL */}
           <EuiFormRow
-            label={createDataSourceEndpointURL}
+            label={ENDPOINT_URL}
             isInvalid={!!this.state.formErrorsByField.endpoint.length}
             error={this.state.formErrorsByField.endpoint}
           >
             <EuiFieldText
               name="endpoint"
               value={this.state.endpoint || ''}
-              placeholder={createDataSourceEndpointPlaceholder}
+              placeholder={ENDPOINT_PLACEHOLDER}
               isInvalid={!!this.state.formErrorsByField.endpoint.length}
               onChange={this.onChangeEndpoint}
+              onBlur={this.validateEndpoint}
               data-test-subj="createDataSourceFormEndpointField"
             />
           </EuiFormRow>
@@ -288,11 +334,12 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Credential source */}
           <EuiSpacer size="s" />
-          <EuiFormRow label={createDataSourceCredentialSource}>
-            <EuiSuperSelect
+          <EuiFormRow label={CREDENTIAL_SOURCE}>
+            <EuiRadioGroup
               options={credentialSourceOptions}
-              valueOfSelected={this.state.auth.type}
-              onChange={(value) => this.onChangeAuthType(value)}
+              idSelected={this.state.auth.type}
+              onChange={(id) => this.onChangeAuthType(id)}
+              name="Credential"
               data-test-subj="createDataSourceFormAuthTypeSelect"
             />
           </EuiFormRow>
@@ -306,7 +353,8 @@ export class CreateDataSourceForm extends React.Component<
           {/* Create Data Source button*/}
           <EuiButton
             type="submit"
-            fill
+            fill={this.isFormValid()}
+            disabled={!this.isFormValid()}
             onClick={this.onClickCreateNewDataSource}
             data-test-subj="createDataSourceButton"
           >
