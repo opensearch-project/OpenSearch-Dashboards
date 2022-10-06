@@ -70,4 +70,4 @@ export enum MlCardState {
   ENABLED,
 }
 
-export type DataSourceRef = Pick<SavedObjectReference, 'type' | 'id'>;
+export type DataSourceRef = { title: string } & Pick<SavedObjectReference, 'type' | 'id'>;
