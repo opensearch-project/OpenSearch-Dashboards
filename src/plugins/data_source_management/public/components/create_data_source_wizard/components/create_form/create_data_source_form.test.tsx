@@ -9,6 +9,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 import { CreateDataSourceForm } from './create_data_source_form';
+// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { AuthType } from '../../../../types';
 
@@ -18,6 +19,7 @@ const endpointIdentifier = '[data-test-subj="createDataSourceFormEndpointField"]
 const authTypeIdentifier = '[data-test-subj="createDataSourceFormAuthTypeSelect"]';
 const usernameIdentifier = '[data-test-subj="createDataSourceFormUsernameField"]';
 const passwordIdentifier = '[data-test-subj="createDataSourceFormPasswordField"]';
+const createButtonIdentifier = '[data-test-subj="createDataSourceButton"]';
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -57,12 +59,17 @@ describe('Datasource Management: Create Datasource form', () => {
   };
 
   beforeEach(() => {
-    component = mount(wrapWithIntl(<CreateDataSourceForm handleSubmit={mockSubmitHandler} />), {
-      wrappingComponent: OpenSearchDashboardsContextProvider,
-      wrappingComponentProps: {
-        services: mockedContext,
-      },
-    });
+    component = mount(
+      wrapWithIntl(
+        <CreateDataSourceForm handleSubmit={mockSubmitHandler} existingDatasourceNamesList={[]} />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
   });
 
   /* Scenario 1: Should render the page normally*/
@@ -72,16 +79,9 @@ describe('Datasource Management: Create Datasource form', () => {
 
   /* Scenario 2: submit without any input from user - should display validation error messages*/
   /* Default option: Username & Password*/
-  test('should validate when submit button is clicked without any user input on any field', () => {
-    findTestSubject(component, 'createDataSourceButton').simulate('click');
-    const { title, description, endpoint, authType, username, password } = getFields(component);
-    expect(component).toMatchSnapshot();
-    expect(title.prop('isInvalid')).toBe(true);
-    expect(description.prop('isInvalid')).toBe(undefined);
-    expect(endpoint.prop('isInvalid')).toBe(true);
-    expect(authType.prop('isInvalid')).toBe(false);
-    expect(username.prop('isInvalid')).toBe(true);
-    expect(password.prop('isInvalid')).toBe(true);
+  test('should disable submit button when there is no user input on any field', () => {
+    const createBtn = component.find(createButtonIdentifier).last();
+    expect(createBtn.prop('disabled')).toBe(true);
   });
 
   /* Change option: No Authentication */
@@ -93,13 +93,9 @@ describe('Datasource Management: Create Datasource form', () => {
     /* Click on submit without any user input */
     findTestSubject(component, 'createDataSourceButton').simulate('click');
 
-    const { title, description, endpoint, authType, username, password } = getFields(component);
+    const { authType, username, password } = getFields(component);
 
-    expect(authType.prop('valueOfSelected')).toBe(AuthType.NoAuth);
-    expect(title.prop('isInvalid')).toBe(true);
-    expect(description.prop('isInvalid')).toBe(undefined);
-    expect(endpoint.prop('isInvalid')).toBe(true);
-    expect(authType.prop('isInvalid')).toBe(false);
+    expect(authType.prop('idSelected')).toBe(AuthType.NoAuth);
     expect(username.exists()).toBeFalsy(); // username field does not exist when No Auth option is selected
     expect(password.exists()).toBeFalsy(); // password field does not exist when No Auth option is selected
   });
@@ -110,21 +106,20 @@ describe('Datasource Management: Create Datasource form', () => {
     changeTextFieldValue(usernameIdentifier, 'test123');
     changeTextFieldValue(passwordIdentifier, 'test123');
 
-    findTestSubject(component, 'createDataSourceButton').simulate('click');
+    component.find(titleIdentifier).last().simulate('blur');
 
-    const { title, description, endpoint, authType, username, password } = getFields(component);
+    const { title, description, endpoint, username, password } = getFields(component);
 
     expect(component).toMatchSnapshot();
     expect(title.prop('isInvalid')).toBe(true);
     expect(description.prop('isInvalid')).toBe(undefined);
     expect(endpoint.prop('isInvalid')).toBe(false);
-    expect(authType.prop('isInvalid')).toBe(false);
     expect(username.prop('isInvalid')).toBe(false);
     expect(password.prop('isInvalid')).toBe(false);
 
     /* Update title & remove validation*/
-    findTestSubject(component, 'createDataSourceButton').simulate('click');
     changeTextFieldValue(titleIdentifier, 'test');
+    component.find(titleIdentifier).last().simulate('blur');
     findTestSubject(component, 'createDataSourceButton').simulate('click');
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
   });
