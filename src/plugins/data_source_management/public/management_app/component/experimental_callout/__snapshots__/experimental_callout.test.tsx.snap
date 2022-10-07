@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dataasource experimental callout component should render normally 1`] = `
+<Fragment>
+  <EuiCallOut
+    data-test-subj="data-source-experimental-call"
+    iconType="iInCircle"
+    title="Experimental Feature"
+  >
+    <p>
+      The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see 
+      <EuiLink
+        href=""
+        target="_blank"
+      >
+        Data Source Documentation
+      </EuiLink>
+       
+      To leave feedback, visit 
+      <EuiLink
+        target="_blank"
+      >
+        OpenSearch Forum
+      </EuiLink>
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;

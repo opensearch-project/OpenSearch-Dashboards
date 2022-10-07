@@ -87,6 +87,7 @@ https://opensearch.org/cool/path
 https://opensearch.org/redirect
 http://www.opensearch.org/painlessDocs
 https://www.hostedgraphite.com/
+https://connectionurl.com
 
 # External urls
 https://www.zeek.org/
@@ -114,3 +115,4 @@ https://a.tile.openstreetmap.org/
 http://www.creedthoughts.gov
 https://media-for-the-masses.theacademyofperformingartsandscience.org/
 https://yarnpkg.com/latest.msi
+https://forum.opensearch.org/t/feedback-experimental-feature-connect-to-external-data-sources/11144
