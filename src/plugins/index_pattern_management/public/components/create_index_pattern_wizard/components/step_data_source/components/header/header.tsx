@@ -4,7 +4,6 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import './header.scss';
 
 import {
   EuiButton,
@@ -111,7 +110,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         <EuiText>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.stepDataSourceLabel"
-            defaultMessage="Please pick the data source -- within which to configure index patterns."
+            defaultMessage="Pick a data source within which to configure index patterns."
           />
         </EuiText>
         <EuiSpacer size="m" />
@@ -121,49 +120,37 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepDataSource.useDefaultLabel"
-              defaultMessage="Use default"
+              defaultMessage="Use default data source"
             />
           }
           checked={defaultChecked}
           onChange={(e) => onChangeDefaultChecked(e)}
           compressed
         />
-        <EuiText size="s" className="dataSourceRadioHelperText">
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.stepDataSource.useDefault.helperText"
-            defaultMessage="Uses the default data source configured by the OpenSearch Dashboards administrator."
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiRadio
           data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
           id={'useDataSource'}
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSourceLabel"
-              defaultMessage="Choose data source"
+              defaultMessage="Use external data source connection"
             />
           }
           checked={dataSourceChecked}
           onChange={(e) => onChangeDataSourceChecked(e)}
           compressed
         />
-        <EuiText size="s" className="dataSourceRadioHelperText">
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSource.helperText"
-            defaultMessage="Connect to an existing external data source."
-          />
-        </EuiText>
         {dataSourceChecked && (
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
             <EuiSelectable
-              aria-label={
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.stepDataSource.searchLabel"
-                  defaultMessage="Search data sources"
-                />
-              }
+              aria-label={i18n.translate(
+                'indexPatternManagement.createIndexPattern.stepDataSource.searchlabel',
+                {
+                  defaultMessage: 'Search data sources',
+                }
+              )}
               searchable
               searchProps={{
                 'data-test-subj': 'selectDataSources',
