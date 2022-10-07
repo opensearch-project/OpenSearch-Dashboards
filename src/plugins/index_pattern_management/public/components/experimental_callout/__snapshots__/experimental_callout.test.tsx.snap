@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Index pattern experimental callout component should render normally 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="warning"
+    data-test-subj="index-pattern-experimental-callout"
+    iconType="alert"
+    title="Experimental feature active"
+  >
+    <p>
+      <EuiText
+        data-test-subj="index-pattern-experimental-callout-text"
+      >
+        The experimental feature 
+        <b>
+          Data Source Connection 
+        </b>
+        is active. To create an index pattern without using data from an external source, use 
+        <b>
+          default
+        </b>
+        . Any index pattern created using an external data source will result in an error if the experimental feature is deactivated.
+      </EuiText>
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
