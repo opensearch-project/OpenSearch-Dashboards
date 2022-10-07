@@ -15,9 +15,18 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { NEW_PASSWORD_TEXT, UPDATE_STORED_PASSWORD, USERNAME } from '../../../text_content';
+import {
+  CANCEL_TEXT,
+  CONFIRM_NEW_PASSWORD_TEXT,
+  NEW_PASSWORD_TEXT,
+  PASSWORD_NO_MATCH,
+  UPDATE_STORED_PASSWORD,
+  UPDATE_STORED_PASSWORD_DESCRIPTION,
+  USERNAME,
+} from '../../../text_content';
 
 export interface UpdatePasswordModalProps {
   username: string;
@@ -32,11 +41,32 @@ export const UpdatePasswordModal = ({
 }: UpdatePasswordModalProps) => {
   /* State Variables */
   const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState<string>('');
+  const [isNewPasswordValid, setIsNewPasswordValid] = useState<boolean>(true);
+  const [isConfirmNewPasswordValid, setIsConfirmNewPasswordValid] = useState<string[]>([]);
 
   const onClickUpdatePassword = () => {
-    if (!!newPassword) {
+    if (isFormValid()) {
       handleUpdatePassword(newPassword);
     }
+  };
+
+  const isFormValid = () => {
+    return !!(newPassword && confirmNewPassword && confirmNewPassword === newPassword);
+  };
+
+  const validateNewPassword = () => {
+    setIsNewPasswordValid(!!newPassword);
+  };
+
+  const validateConfirmNewPassword = () => {
+    const invalidReason: string[] = [];
+    if (!confirmNewPassword) {
+      invalidReason.push('');
+    } else if (confirmNewPassword !== newPassword) {
+      invalidReason.push(PASSWORD_NO_MATCH);
+    }
+    setIsConfirmNewPasswordValid(invalidReason);
   };
 
   const renderUpdatePasswordModal = () => {
@@ -49,33 +79,59 @@ export const UpdatePasswordModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
+          <EuiFormRow>
+            <EuiText size="m" style={{ fontWeight: 300 }}>
+              {UPDATE_STORED_PASSWORD_DESCRIPTION}
+            </EuiText>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+
           <EuiForm data-test-subj="data-source-update-password">
             {/* Username */}
             <EuiFormRow label={USERNAME}>
               <EuiText size="s">{username}</EuiText>
             </EuiFormRow>
-            {/* Password */}
-            <EuiFormRow label={NEW_PASSWORD_TEXT}>
+            {/* updated Password */}
+            <EuiFormRow label={NEW_PASSWORD_TEXT} isInvalid={!isNewPasswordValid}>
               <EuiFieldPassword
+                name="updatedPassword"
                 placeholder={NEW_PASSWORD_TEXT}
                 type={'dual'}
                 value={newPassword}
+                isInvalid={!isNewPasswordValid}
                 onChange={(e) => setNewPassword(e.target.value)}
+                onBlur={validateNewPassword}
+              />
+            </EuiFormRow>
+            {/* Password */}
+            <EuiFormRow
+              label={CONFIRM_NEW_PASSWORD_TEXT}
+              isInvalid={!!isConfirmNewPasswordValid.length}
+              error={isConfirmNewPasswordValid}
+            >
+              <EuiFieldPassword
+                name="confirmUpdatedPassword"
+                placeholder={CONFIRM_NEW_PASSWORD_TEXT}
+                type={'dual'}
+                value={confirmNewPassword}
+                isInvalid={!!isConfirmNewPasswordValid.length}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                onBlur={validateConfirmNewPassword}
               />
             </EuiFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeUpdatePasswordModal}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={closeUpdatePasswordModal}>{CANCEL_TEXT}</EuiButtonEmpty>
           <EuiButton
             type="submit"
             form="modalFormId"
             onClick={onClickUpdatePassword}
-            fill={!!newPassword}
-            disabled={!newPassword}
+            fill={isFormValid()}
+            disabled={!isFormValid()}
           >
-            Update
+            {UPDATE_STORED_PASSWORD}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

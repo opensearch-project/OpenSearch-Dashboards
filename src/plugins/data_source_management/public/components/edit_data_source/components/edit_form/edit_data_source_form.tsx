@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -459,8 +460,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         >
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFieldText
+              <EuiFieldPassword
                 placeholder={DATA_SOURCE_PASSWORD_PLACEHOLDER}
+                type={'dual'}
                 value={
                   this.props.existingDataSource.auth.type !== AuthType.NoAuth
                     ? '********'
@@ -470,6 +472,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
                 disabled={this.props.existingDataSource.auth.type !== AuthType.NoAuth}
+                data-test-subj="updateDataSourceFormPasswordField"
               />
             </EuiFlexItem>
             {this.props.existingDataSource.auth.type !== AuthType.NoAuth ? (
