@@ -370,7 +370,8 @@ export class IndexPattern implements IIndexPattern {
     return this.dataSourceRef
       ? [
           {
-            ...this.dataSourceRef,
+            id: this.dataSourceRef.id,
+            type: this.dataSourceRef.type,
             name: DATA_SOURCE_REFERNECE_NAME,
           },
         ]
