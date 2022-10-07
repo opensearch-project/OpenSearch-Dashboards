@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { Header } from '../header';
-import { shallow } from 'enzyme';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../../../../../../../plugins/opensearch_dashboards_react/public', () => ({
