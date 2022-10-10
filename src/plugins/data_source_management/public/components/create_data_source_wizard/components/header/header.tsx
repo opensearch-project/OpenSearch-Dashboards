@@ -11,20 +11,20 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
-import { createDataSourceHeader } from '../../../text_content/text_content';
+import { CREATE_DATA_SOURCE_HEADER } from '../../../text_content';
 
 export const Header = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
 
-  changeTitle(createDataSourceHeader);
+  changeTitle(CREATE_DATA_SOURCE_HEADER);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle>
-            <h1 data-test-subj="createDataSourceHeader">{createDataSourceHeader}</h1>
+            <h1 data-test-subj="createDataSourceHeader">{CREATE_DATA_SOURCE_HEADER}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>
