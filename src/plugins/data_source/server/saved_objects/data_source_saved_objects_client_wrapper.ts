@@ -293,7 +293,7 @@ export class DataSourceSavedObjectsClientWrapper {
       });
       attributes = savedObject.attributes;
     } catch (err: any) {
-      const errMsg = `Fail to fetch existing data source for dataSourceId [${id}]`;
+      const errMsg = `Failed to fetch existing data source for dataSourceId [${id}]`;
       this.logger.error(errMsg);
       this.logger.error(err);
       throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
@@ -350,7 +350,7 @@ export class DataSourceSavedObjectsClientWrapper {
         const { encryptionContext } = await this.cryptography
           .decodeAndDecrypt(password)
           .catch((err: any) => {
-            const errMsg = `Fail to update existing data source for dataSourceId [${id}]: unable to decrypt "auth.credentials.password"`;
+            const errMsg = `Failed to update existing data source for dataSourceId [${id}]: unable to decrypt "auth.credentials.password"`;
             this.logger.error(errMsg);
             this.logger.error(err);
             throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);

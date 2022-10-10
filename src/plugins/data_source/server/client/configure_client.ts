@@ -30,10 +30,10 @@ export const configureClient = async (
 
     return await getQueryClient(rootClient, dataSource, cryptography);
   } catch (error: any) {
-    logger.error(`Fail to get data source client for dataSourceId: [${dataSourceId}]`);
+    logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
     // Re-throw as DataSourceConfigError
-    throw new DataSourceConfigError('Fail to get data source client: ', error);
+    throw new DataSourceConfigError('Failed to get data source client: ', error);
   }
 };
 

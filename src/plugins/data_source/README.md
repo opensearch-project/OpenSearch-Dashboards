@@ -73,13 +73,15 @@ The data source saved object client wrapper overrides the write related action f
 
 ### Cryptography service
 
-The cryptography service performs encryption / decryption on data source credentials (support no_auth and username_password for now). Highlight the following security best practices (see more details on https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1756)
+The cryptography service encrypts and decrypts data source credentials (support no_auth and username_password credential types). Highlight the best security practices listed below:
 
-a. Envelope encryption - has multiple benefits including strong protection on data keys, encryption the same data with multiple wrappign keys, etc
+a. Envelope encryption - provides strong protection on data keys. Read more details [here](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption)
 
-b. Key derivation algorithm - HKDF with SHA-384, which “helps you avoid accidental reuse of a data encryption key and reduces the risk of overusing a data key.”
+b. Key derivation with HMAC - KDF with SHA-384 protects against accidental reuse of a data encryption keys and reduces the risk of overusing data keys.
 
 c. Signature algorithm - ECDSA with P-384 and SHA-384. Under multiple data source case, data source documents stored on OpenSearch can be modified / replaced by attacker. With ECDSA signature, ciphertext decryption will fail if it’s getting pullted. No one will be able to create another signature that verifies with the public key because the private key has been dropped.
+
+Please check https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1756 for more details.
 
 ---
 
