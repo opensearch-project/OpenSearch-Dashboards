@@ -16,15 +16,15 @@ export const ExperimentalCallout = () => {
         color="warning"
         data-test-subj="index-pattern-experimental-callout"
       >
-        <p>
-          <EuiText data-test-subj="index-pattern-experimental-callout-text">
+        <EuiText data-test-subj="index-pattern-experimental-callout-text">
+          <p>
             {DESCRIPTION_FIRST_PART}
             <b>{DATASOURCE_CONNECTION}</b>
             {DESCRIPTION_SECOND_PART}
             <b>{DEFAULT}</b>
             {DESCRIPTION_THIRD_PART}
-          </EuiText>
-        </p>
+          </p>
+        </EuiText>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
