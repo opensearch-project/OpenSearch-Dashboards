@@ -176,13 +176,32 @@ export const DELETE_THIS_DATA_SOURCE = i18n.translate(
 export const NEW_PASSWORD_TEXT = i18n.translate(
   'dataSourcesManagement.editDataSource.newPassword',
   {
-    defaultMessage: 'New password',
+    defaultMessage: 'Updated password',
+  }
+);
+export const CONFIRM_NEW_PASSWORD_TEXT = i18n.translate(
+  'dataSourcesManagement.editDataSource.confirmNewPassword',
+  {
+    defaultMessage: 'Confirm Updated password',
+  }
+);
+export const PASSWORD_NO_MATCH = i18n.translate(
+  'dataSourcesManagement.editDataSource.passwordNoMatch',
+  {
+    defaultMessage: 'Passwords do not match',
   }
 );
 export const UPDATE_STORED_PASSWORD = i18n.translate(
   'dataSourcesManagement.editDataSource.updateStoredPassword',
   {
     defaultMessage: 'Update stored password',
+  }
+);
+export const UPDATE_STORED_PASSWORD_DESCRIPTION = i18n.translate(
+  'dataSourcesManagement.editDataSource.updateStoredPasswordDescription',
+  {
+    defaultMessage:
+      'Update credential password to reflect accurate password to gain access to the endpoint.',
   }
 );
 export const CONNECTION_DETAILS_TITLE = i18n.translate(
