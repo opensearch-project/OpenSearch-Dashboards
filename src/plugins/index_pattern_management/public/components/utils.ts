@@ -50,18 +50,22 @@ export async function getIndexPatterns(
           .map((pattern) => {
             const id = pattern.id;
             const title = pattern.get('title');
+            const references = pattern.references;
             const isDefault = defaultIndex === id;
 
             const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
               pattern,
               isDefault
             );
+            const reference = Array.isArray(references) ? references[0] : undefined;
+            const referenceId = reference?.id;
 
             return {
               id,
               title,
               default: isDefault,
               tags,
+              referenceId,
               // the prepending of 0 at the default pattern takes care of prioritization
               // so the sorting will but the default index on top
               // or on bottom of a the table
