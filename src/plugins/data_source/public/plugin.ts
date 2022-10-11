@@ -4,15 +4,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { DataSourcePublicPluginSetup, DataSourcePublicPluginStart } from './types';
+import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
 
-export class DataSourcePublicPlugin
-  implements Plugin<DataSourcePublicPluginSetup, DataSourcePublicPluginStart> {
-  public setup(core: CoreSetup): DataSourcePublicPluginSetup {
+export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
+  public setup(core: CoreSetup): DataSourcePluginSetup {
     return {};
   }
 
-  public start(core: CoreStart): DataSourcePublicPluginStart {
+  public start(core: CoreStart): DataSourcePluginStart {
     return {};
   }
 
