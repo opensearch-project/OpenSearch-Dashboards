@@ -10,7 +10,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiPageContent,
   EuiRadioGroup,
   EuiSpacer,
@@ -33,16 +32,19 @@ import {
   performDataSourceFormValidation,
 } from '../../../validation';
 import {
-  CREDENTIAL_SOURCE,
+  ENDPOINT_PLACEHOLDER,
   DATA_SOURCE_DESCRIPTION_PLACEHOLDER,
   DATA_SOURCE_PASSWORD_PLACEHOLDER,
+  USERNAME_PLACEHOLDER,
   DESCRIPTION,
-  ENDPOINT_PLACEHOLDER,
-  ENDPOINT_URL,
   PASSWORD,
   TITLE,
   USERNAME,
-  USERNAME_PLACEHOLDER,
+  ENDPOINT_URL,
+  OPTIONAL,
+  AUTHENTICATION_METHOD_DESCRIPTION,
+  NO_AUTHENTICATION,
+  CREATE_DATA_SOURCE_BUTTON_TEXT,
 } from '../../../text_content';
 import { isValidUrl } from '../../../utils';
 
@@ -211,8 +213,7 @@ export class CreateDataSourceForm extends React.Component<
 
   /* Render header*/
   renderHeader = () => {
-    const { docLinks } = this.context.services;
-    return <Header docLinks={docLinks} />;
+    return <Header />;
   };
 
   /* Render Section header*/
@@ -220,10 +221,18 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <>
         <EuiText grow={false}>
-          <h5>
+          <h4>
             <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h5>
+          </h4>
         </EuiText>
+      </>
+    );
+  };
+  /* Render field label with Optional text*/
+  renderFieldLabelAsOptional = (label: string) => {
+    return (
+      <>
+        {label} <i style={{ fontWeight: 'normal' }}>- {OPTIONAL}</i>
       </>
     );
   };
@@ -269,7 +278,6 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <EuiPageContent>
         {this.renderHeader()}
-        <EuiHorizontalRule />
         <EuiForm data-test-subj="data-source-creation">
           {/* Endpoint section */}
           {this.renderSectionHeader(
@@ -296,7 +304,7 @@ export class CreateDataSourceForm extends React.Component<
           </EuiFormRow>
 
           {/* Description */}
-          <EuiFormRow label={DESCRIPTION}>
+          <EuiFormRow label={this.renderFieldLabelAsOptional(DESCRIPTION)}>
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
@@ -329,12 +337,20 @@ export class CreateDataSourceForm extends React.Component<
 
           {this.renderSectionHeader(
             'dataSourceManagement.connectToDataSource.authenticationHeader',
-            'Authentication'
+            'Authentication Method'
           )}
+          <EuiSpacer size="m" />
+
+          <EuiFormRow>
+            <EuiText>
+              {AUTHENTICATION_METHOD_DESCRIPTION}
+              <b>{NO_AUTHENTICATION}</b>
+            </EuiText>
+          </EuiFormRow>
 
           {/* Credential source */}
-          <EuiSpacer size="s" />
-          <EuiFormRow label={CREDENTIAL_SOURCE}>
+          <EuiSpacer size="l" />
+          <EuiFormRow>
             <EuiRadioGroup
               options={credentialSourceOptions}
               idSelected={this.state.auth.type}
@@ -358,7 +374,7 @@ export class CreateDataSourceForm extends React.Component<
             onClick={this.onClickCreateNewDataSource}
             data-test-subj="createDataSourceButton"
           >
-            Create a data source connection
+            {CREATE_DATA_SOURCE_BUTTON_TEXT}
           </EuiButton>
         </EuiForm>
       </EuiPageContent>
