@@ -227,7 +227,7 @@
 # Set the value of this setting to true to enables the experimental multiple data source
 # support feature. Use with caution.
 #data_source.enabled: false
-# Set the value of these settings to custermize crypto materials to encryption saved credentials
+# Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
 #data_source.encryption.wrappingKeyNamespace: 'changeme'
