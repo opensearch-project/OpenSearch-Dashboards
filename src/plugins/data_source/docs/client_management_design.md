@@ -1,8 +1,8 @@
-# [OSD Multi Data Source] Client Management
+# [OpenSearch Dashboards Multi Data Source] Client Management
 
 ## 1. Problem Statement
 
-This design is part of the OSD multi data source project [[RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1388)], where we need to manage and expose clients. Connections are established through creating OpenSearch clients. Then clients can be used by caller to interact with any data source(OpenSearch is the only data source type in scope at this phase).
+This design is part of the OpenSearch Dashboards multi data source project [[RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1388)], where we need to manage and expose clients. Connections are established through creating OpenSearch clients. Then clients can be used by caller to interact with any data source(OpenSearch is the only data source type in scope at this phase).
 
 **Overall the critical problems we are solving are:**
 
@@ -14,7 +14,7 @@ This design is part of the OSD multi data source project [[RFC](https://github.c
 ## 2. Requirements
 
 1. **Accessibility**:
-   1. Clients need to be accessible by other OSD plugins or modules through interfaces, in all stages of the plugin lifecycle. E.g “Setup”, and “Start”
+   1. Clients need to be accessible by other OpenSearch Dashboards plugins or modules through interfaces, in all stages of the plugin lifecycle. E.g “Setup”, and “Start”
    2. Clients should be accessible by plugin through request handler context.
 2. **Client Management**: Clients needs to be reused in a resource-efficient way to not harm the performance (P1)
 3. **Backwards compatibility**: if user enables this feature and later disabled it. Any related logic should be able to take in this config change, and deal with any user cases.
@@ -40,7 +40,7 @@ This design is part of the OSD multi data source project [[RFC](https://github.c
 ### 4.0 Answer some critical design questions
 
 **1.** **How to set up connection(clients) for different datasources?**
-Similar to how current OSD talks to default OS by creating opensearch node.js client using [opensearch-js](https://github.com/opensearch-project/opensearch-js) library, for datasources we also create clients for each. Critical params that differentiate data sources are `url` and `auth`
+Similar to how current OpenSearch Dashboards talks to default OS by creating opensearch node.js client using [opensearch-js](https://github.com/opensearch-project/opensearch-js) library, for datasources we also create clients for each. Critical params that differentiate data sources are `url` and `auth`
 
 ```ts
 const { Client } = require(['@opensearch-project/opensearch'](https://github.com/opensearch-project/opensearch-js));
@@ -70,7 +70,7 @@ const dataSourceClient: OpenSearchClient = core.openearchData.client
 ```
 
 **3.How to maintain backwards compatibility if user turn off this feature?**
-Context is user can only turn off this feature by updating `osd.yml` and reboot. Configs are accessible from `ConfigService` in core.
+Context is user can only turn off this feature by updating `opensearch_dashboards.yml` and reboot. Configs are accessible from `ConfigService` in core.
 
 1. **Browser side**, is datasource feature is turned off, browser should detect the config change and update UI not allowing request to submit to datasource. If the request is not submitted to a datasource, the logic won’t return a datasource client at all.
 2. **Server side**, if user submits the request to datasource manually, on purpose. Or the plugin tries to access datasource client from server side. In the corresponding core service we’ll have a **flag** that maps to the **enable_multi_datasource** boolean config, and throw error if API is called while this feature is turned off.
@@ -110,7 +110,7 @@ Currently [`core-opensearch`](https://github.com/opensearch-project/OpenSearch-D
 
 - **opensearch_service**: hold a `ClusterClient` instance
 - **[client module](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/d7004dc5b0392477fdd54ac66b29d231975a173b/src/core/server/opensearch/client)**: the utilities and interfaces for creating `ClusterClient`
-  - internalClient: read only. (create as OSD internal user, system user)
+  - internalClient: read only. (create as OpenSearch Dashboards internal user, system user)
   - ScopedClient: read only. (as current user)
   - asScoped(): function that create child clients of the read only ScopeClient for current user
 
@@ -140,7 +140,7 @@ export interface IDataSourceClient {
 
 - extends `IDataSourceClient`
 - Add local variable **isDataSourceEnabled**
-  - The value of flag is mapped to the boolean configuration “enable_multi_datasource” in osd.yml. Flag to determine if feature is enabled. If turned off, any access to dataSourceClient will be rejected and throw error
+  - The value of flag is mapped to the boolean configuration “enable_multi_datasource” in `opensearch_dashboards.yml`. Flag to determine if feature is enabled. If turned off, any access to dataSourceClient will be rejected and throw error
 - Add local variable **rootDataSourceClientCollection**
   - Map<datasource id, Client> (initialize as empty or take user config to add Clients)
 - Implement the new function `asDataSource` as shown in above `IDataSourceClient` interface. Params and return type is clear
@@ -148,10 +148,10 @@ export interface IDataSourceClient {
   - **Functionality**
     - Throw error if **isDataSourceEnabled == false**
     - Look up Client Pool by datasource id, return client if existed
-    - Use `Saved_Object` Client to retrieve datas source info from OSD system index and parse to `DataSource` object
+    - Use `Saved_Object` Client to retrieve datas source info from OpenSearch Dashboards system index and parse to `DataSource` object
     - Call credential manager utilities to **decrypt** user credentials from `DataSource` Object
     - Create Client using dataSource metadata, and decrypted user credential
-      - \*Optimization: If same endpoint but different user credential, we’ll leverage the openearch-js connection pooling strategy to create client by `.child()`
+      - Optimization: If same endpoint but different user credential, we’ll leverage the openearch-js connection pooling strategy to create client by `.child()`
 
 ### 4.3 Register datasource client to core context
 
