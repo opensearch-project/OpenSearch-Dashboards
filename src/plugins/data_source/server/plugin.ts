@@ -20,7 +20,7 @@ import {
 } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
-import { CryptographyClient } from './cryptography';
+import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
 import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
 import { DataSourcePluginSetup, DataSourcePluginStart } from './types';
@@ -30,11 +30,13 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
+  private readonly cryptographyService: CryptographyService;
   private readonly dataSourceService: DataSourceService;
   private readonly config$: Observable<DataSourcePluginConfigType>;
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
     this.logger = this.initializerContext.logger.get();
+    this.cryptographyService = new CryptographyService(this.logger.get('cryptography-service'));
     this.dataSourceService = new DataSourceService(this.logger.get('data-source-service'));
     this.config$ = this.initializerContext.config.create<DataSourcePluginConfigType>();
   }
@@ -47,17 +49,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const config: DataSourcePluginConfigType = await this.config$.pipe(first()).toPromise();
 
-    // Fetch configs used to create credential saved objects client wrapper
-    const { wrappingKeyName, wrappingKeyNamespace, wrappingKey } = config.encryption;
-
-    // Create data source saved objects client wrapper
-    const cryptographyClient = new CryptographyClient(
-      wrappingKeyName,
-      wrappingKeyNamespace,
-      wrappingKey
+    const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
+      config
     );
+
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
-      cryptographyClient
+      cryptographyServiceSetup,
+      this.logger.get('data-source-saved-objects-client-wrapper-factory')
     );
 
     // Add data source saved objects client wrapper factory
@@ -66,8 +64,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       DATA_SOURCE_SAVED_OBJECT_TYPE,
       dataSourceSavedObjectsClientWrapper.wrapperFactory
     );
-
-    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
 
     core.logging.configure(
       this.config$.pipe<LoggerContextConfigInput>(
@@ -94,12 +90,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     core.auditTrail.register(auditorFactory);
     const auditTrailPromise = core.getStartServices().then(([coreStart]) => coreStart.auditTrail);
 
+    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',
       this.createDataSourceRouteHandlerContext(
         dataSourceService,
-        cryptographyClient,
+        cryptographyServiceSetup,
         this.logger,
         auditTrailPromise
       )
@@ -120,7 +117,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
   private createDataSourceRouteHandlerContext = (
     dataSourceService: DataSourceServiceSetup,
-    cryptographyClient: CryptographyClient,
+    cryptography: CryptographyServiceSetup,
     logger: Logger,
     auditTrailPromise: Promise<AuditorFactory>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
@@ -129,12 +126,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
         opensearch: {
           getClient: (dataSourceId: string) => {
             const auditor = auditTrailPromise.then((auditTrail) => auditTrail.asScoped(req));
+
             this.logAuditMessage(auditor, dataSourceId, req);
 
             return dataSourceService.getDataSourceClient({
               dataSourceId,
               savedObjects: context.core.savedObjects.client,
-              cryptographyClient,
+              cryptography,
             });
           },
           legacy: {
@@ -142,7 +140,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
               return dataSourceService.getDataSourceLegacyClient({
                 dataSourceId,
                 savedObjects: context.core.savedObjects.client,
-                cryptographyClient,
+                cryptography,
               });
             },
           },

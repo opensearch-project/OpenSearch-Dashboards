@@ -8,7 +8,8 @@ import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/serv
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import { AuthType, DataSourceAttributes } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
-import { CryptographyClient } from '../cryptography';
+import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
+import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
@@ -16,13 +17,13 @@ import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.te
 import { configureLegacyClient } from './configure_legacy_client';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
-const cryptographyClient = new CryptographyClient('test', 'test', new Array(32).fill(0));
 
 // TODO: improve UT
 describe('configureLegacyClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;
+  let cryptographyMock: jest.Mocked<CryptographyServiceSetup>;
   let clientPoolSetup: OpenSearchClientPoolSetup;
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
@@ -33,7 +34,6 @@ describe('configureLegacyClient', () => {
   };
   let dataSourceClientParams: DataSourceClientParams;
   let callApiParams: LegacyClientCallAPIParams;
-  let decodeAndDecryptSpy: jest.SpyInstance<Promise<string>, [encrypted: string]>;
 
   const mockResponse = { data: 'ping' };
 
@@ -44,6 +44,7 @@ describe('configureLegacyClient', () => {
     };
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
+    cryptographyMock = cryptographyServiceSetupMock.create();
     config = {
       enabled: true,
       clientPool: {
@@ -89,7 +90,7 @@ describe('configureLegacyClient', () => {
     dataSourceClientParams = {
       dataSourceId: DATA_SOURCE_ID,
       savedObjects: savedObjectsMock,
-      cryptographyClient,
+      cryptography: cryptographyMock,
     };
 
     ClientMock.mockImplementation(() => mockOpenSearchClientInstance);
@@ -100,10 +101,6 @@ describe('configureLegacyClient', () => {
         response: mockResponse,
       });
     });
-
-    decodeAndDecryptSpy = jest
-      .spyOn(cryptographyClient, 'decodeAndDecrypt')
-      .mockResolvedValue('password');
   });
 
   afterEach(() => {
@@ -140,7 +137,12 @@ describe('configureLegacyClient', () => {
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
   });
 
-  test('configure client with auth.type == no_auth, will first call decrypt()', async () => {
+  test('configure client with auth.type == username_password, will first call decrypt()', async () => {
+    const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'password',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+
     const mockResult = await configureLegacyClient(
       dataSourceClientParams,
       callApiParams,
@@ -155,7 +157,43 @@ describe('configureLegacyClient', () => {
     expect(mockResult).toBeDefined();
   });
 
+  test('configure client with auth.type == username_password and password contaminated', async () => {
+    const decodeAndDecryptSpy = jest
+      .spyOn(cryptographyMock, 'decodeAndDecrypt')
+      .mockImplementation(() => {
+        throw new Error();
+      });
+
+    await expect(
+      configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
+    ).rejects.toThrowError();
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('configure client with auth.type == username_password and endpoint contaminated', async () => {
+    const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'password',
+      encryptionContext: { endpoint: 'http://dummy.com' },
+    });
+
+    await expect(
+      configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
+    ).rejects.toThrowError();
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
+  });
+
   test('correctly called with endpoint and params', async () => {
+    jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'password',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+
     const mockParams = { param: 'ping' };
     const mockResult = await configureLegacyClient(
       dataSourceClientParams,
