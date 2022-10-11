@@ -397,6 +397,8 @@ export class DocLinksService {
           functionbeat: `https://opensearch.org/docs/latest/downloads/beats/functionbeat`,
           winlogbeat: `${OPENSEARCH_WEBSITE_DOCS}`,
           siem: `${OPENSEARCH_WEBSITE_DOCS}`,
+          openSearchForum:
+            'https://forum.opensearch.org/t/feedback-experimental-feature-connect-to-external-data-sources/11144',
           indexPatterns: {
             loadingData: `${OPENSEARCH_WEBSITE_DOCS}`,
             introduction: `${OPENSEARCH_WEBSITE_DOCS}`,
@@ -752,6 +754,7 @@ export interface DocLinksStart {
       readonly functionbeat: string;
       readonly winlogbeat: string;
       readonly siem: string;
+      readonly openSearchForum: string;
       readonly indexPatterns: {
         readonly loadingData: string;
         readonly introduction: string;
