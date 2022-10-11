@@ -199,7 +199,14 @@ export async function getIndices({
     pattern,
     showAllIndices,
     dataSourceId,
-  }).catch(() => []);
+  }).catch((error) => {
+    // swallow the errors to be backwards compatible with non-data-source use case
+    if (dataSourceId) {
+      throw error;
+    } else {
+      return [];
+    }
+  });
   requests.push(promiseResolve);
 
   if (isCCS) {
