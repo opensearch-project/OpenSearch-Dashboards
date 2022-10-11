@@ -5,6 +5,7 @@ Array [
   Object {
     "default": true,
     "id": "test",
+    "referenceId": undefined,
     "sort": "0test name",
     "tags": undefined,
     "title": "test name",
@@ -12,6 +13,7 @@ Array [
   Object {
     "default": false,
     "id": "test1",
+    "referenceId": undefined,
     "sort": "1test name 1",
     "tags": undefined,
     "title": "test name 1",

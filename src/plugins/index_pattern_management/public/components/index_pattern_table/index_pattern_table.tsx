@@ -44,7 +44,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { useMount } from 'react-use';
+import { useEffectOnce, useMount } from 'react-use';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -112,6 +112,9 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
+
+  const { columns: columnRegistry } = indexPatternManagementStart;
 
   useMount(() => {
     setBreadcrumbs(getListBreadcrumbs());
@@ -153,6 +156,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   };
 
+  const loadColumnData = async () => {
+    await Promise.all(columnRegistry.getAll().map((column) => column.loadData()));
+    setIsColumnDataLoaded(true);
+  };
+
   useEffect(() => {
     if (!dataSourceEnabled) {
       getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
@@ -164,6 +172,10 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       );
     }
   }, [http, creationOptions, searchClient, dataSourceEnabled]);
+
+  useEffectOnce(() => {
+    loadColumnData();
+  });
 
   chrome.docTitle.change(title);
 
@@ -197,6 +209,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
+    ...columnRegistry.getAll().map((column) => {
+      return {
+        ...column.euiColumn,
+        sortable: false,
+        'data-test-subj': `indexPatternTableColumn-${column.id}`,
+      };
+    }),
   ];
 
   const createButton = canSave ? (

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataSourcePublicPlugin } from './plugin';
+import { DataSourcePlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 export function plugin() {
-  return new DataSourcePublicPlugin();
+  return new DataSourcePlugin();
 }
 
-export { DataSourcePublicPluginSetup, DataSourcePublicPluginStart } from './types';
+export { DataSourcePluginSetup, DataSourcePluginStart } from './types';
