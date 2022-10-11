@@ -6,123 +6,141 @@
 import { i18n } from '@osd/i18n';
 
 /* Generic */
-export const cancelText = i18n.translate('cancel', {
+export const CANCEL_TEXT = i18n.translate('cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const deleteText = i18n.translate('delete', {
+export const DELETE_TEXT = i18n.translate('delete', {
   defaultMessage: 'Delete',
 });
 
-export const titleText = i18n.translate('title', {
+export const TITLE = i18n.translate('title', {
   defaultMessage: 'Title',
 });
 
-export const descriptionText = i18n.translate('description', {
+export const DESCRIPTION = i18n.translate('description', {
   defaultMessage: 'Description',
 });
 
-export const usernameText = i18n.translate('username', {
+export const OPTIONAL = i18n.translate('optional', {
+  defaultMessage: 'optional',
+});
+
+export const USERNAME = i18n.translate('username', {
   defaultMessage: 'Username',
 });
 
-export const passwordText = i18n.translate('password', {
+export const PASSWORD = i18n.translate('password', {
   defaultMessage: 'Password',
 });
 
 /* Datasource listing page */
-export const dsListingAriaRegion = i18n.translate(
+export const DS_LISTING_ARIA_REGION = i18n.translate(
   'dataSourcesManagement.createDataSourcesLiveRegionAriaLabel',
   {
     defaultMessage: 'Data Sources',
   }
 );
-export const dsListingTitle = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
+export const DS_LISTING_TITLE = i18n.translate('dataSourcesManagement.dataSourcesTable.title', {
   defaultMessage: 'Data Sources',
 });
 
-export const dsListingDescription = i18n.translate(
+export const DS_LISTING_DESCRIPTION = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.description',
   {
     defaultMessage:
-      'Create and manage the data sources that help you retrieve your data from multiple Elasticsearch clusters',
+      'Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources.',
   }
 );
 
-export const dsListingPageTitle = i18n.translate(
+export const DS_LISTING_PAGE_TITLE = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.dataSourcesTitle',
   {
     defaultMessage: 'Data Sources',
   }
 );
 
-export const dsListingDeleteDataSourceTitle = i18n.translate(
-  'dataSourcesManagement.dataSourcesTable.deleteTitle',
+export const DS_LISTING_NO_DATA = i18n.translate('dataSourcesManagement.dataSourcesTable.noData', {
+  defaultMessage: 'No Data Source Connections have been created yet.',
+});
+
+export const DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE = i18n.translate(
+  'dataSourcesManagement.dataSourcesTable.multiDeleteTitle',
   {
-    defaultMessage: 'Delete Data Source connection(s) permanently?',
+    defaultMessage: 'Delete data source connection(s)',
   }
 );
 
-export const dsListingDeleteDataSourceDescription = i18n.translate(
+export const DS_UPDATE_DATA_SOURCE_DELETE_TITLE = i18n.translate(
+  'dataSourcesManagement.dataSourcesUpdate.deleteTitle',
+  {
+    defaultMessage: 'Delete data source connection',
+  }
+);
+
+export const DS_LISTING_DATA_SOURCE_DELETE_ACTION = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.deleteDescription',
   {
-    defaultMessage:
-      'This will delete data source connections(s) and all Index Patterns using this credential will be invalid for access.',
+    defaultMessage: 'This action will delete the selected data source connections',
   }
 );
 
-export const dsListingDeleteDataSourceConfirmation = i18n.translate(
+export const DS_LISTING_DATA_SOURCE_DELETE_IMPACT = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.deleteConfirmation',
   {
-    defaultMessage: 'To confirm deletion, click delete button.',
+    defaultMessage:
+      'Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted.',
   }
 );
 
-export const dsListingDeleteDataSourceWarning = i18n.translate(
+export const DS_LISTING_DATA_SOURCE_DELETE_WARNING = i18n.translate(
   'dataSourcesManagement.dataSourcesTable.deleteWarning',
   {
-    defaultMessage: 'Note: this action is irrevocable!',
+    defaultMessage: 'This action cannot be undone.',
   }
 );
 
 /* CREATE DATA SOURCE */
-export const createDataSourceHeader = i18n.translate(
+export const CREATE_DATA_SOURCE_BUTTON_TEXT = i18n.translate(
+  'dataSourcesManagement.dataSourceListing.createButton',
+  {
+    defaultMessage: 'Create data source connection',
+  }
+);
+export const CREATE_DATA_SOURCE_HEADER = i18n.translate(
   'dataSourcesManagement.createDataSourceHeader',
   {
     defaultMessage: 'Create data source connection',
   }
 );
-export const createDataSourceDescriptionPlaceholder = i18n.translate(
+export const DATA_SOURCE_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.descriptionPlaceholder',
   {
     defaultMessage: 'Description of the data source',
   }
 );
-export const createDataSourceEndpointURL = i18n.translate(
-  'dataSourcesManagement.createDataSource.endpointURL',
-  {
-    defaultMessage: 'Endpoint URL',
-  }
-);
-export const createDataSourceEndpointPlaceholder = i18n.translate(
+export const ENDPOINT_URL = i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
+  defaultMessage: 'Endpoint URL',
+});
+export const ENDPOINT_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.endpointPlaceholder',
   {
     defaultMessage: 'The connection URL',
   }
 );
-export const createDataSourceUsernamePlaceholder = i18n.translate(
+export const USERNAME_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.usernamePlaceholder',
   {
     defaultMessage: 'Username to connect to data source',
   }
 );
-export const createDataSourcePasswordPlaceholder = i18n.translate(
+export const DATA_SOURCE_PASSWORD_PLACEHOLDER = i18n.translate(
   'dataSourcesManagement.createDataSource.passwordPlaceholder',
   {
     defaultMessage: 'Password to connect to data source',
   }
 );
-export const createDataSourceCredentialSource = i18n.translate(
+export const CREDENTIAL_SOURCE = i18n.translate(
   'dataSourcesManagement.createDataSource.credentialSource',
   {
     defaultMessage: 'Credential Source',
@@ -130,83 +148,68 @@ export const createDataSourceCredentialSource = i18n.translate(
 );
 
 /* Edit data source */
-export const dataSourceNotFound = i18n.translate(
+export const DATA_SOURCE_NOT_FOUND = i18n.translate(
   'dataSourcesManagement.editDataSource.dataSourceNotFound',
   {
     defaultMessage: 'Data Source not found!',
   }
 );
-export const deleteThisDataSource = i18n.translate(
+export const DELETE_THIS_DATA_SOURCE = i18n.translate(
   'dataSourcesManagement.editDataSource.deleteThisDataSource',
   {
     defaultMessage: 'Delete this Data Source',
   }
 );
-export const oldPasswordText = i18n.translate('dataSourcesManagement.editDataSource.oldPassword', {
-  defaultMessage: 'Old password',
-});
-export const newPasswordText = i18n.translate('dataSourcesManagement.editDataSource.newPassword', {
-  defaultMessage: 'New password',
-});
-export const confirmNewPasswordText = i18n.translate(
-  'dataSourcesManagement.editDataSource.confirmNewPassword',
+export const NEW_PASSWORD_TEXT = i18n.translate(
+  'dataSourcesManagement.editDataSource.newPassword',
   {
-    defaultMessage: 'Confirm new password',
+    defaultMessage: 'New password',
   }
 );
-export const updatePasswordText = i18n.translate(
-  'dataSourcesManagement.editDataSource.updatePasswordText',
+export const UPDATE_STORED_PASSWORD = i18n.translate(
+  'dataSourcesManagement.editDataSource.updateStoredPassword',
   {
-    defaultMessage: 'Update password',
+    defaultMessage: 'Update stored password',
   }
 );
-export const connectionDetailsText = i18n.translate(
+export const CONNECTION_DETAILS_TITLE = i18n.translate(
   'dataSourcesManagement.editDataSource.connectionDetailsText',
   {
     defaultMessage: 'Connection Details',
   }
 );
-export const objectDetailsText = i18n.translate(
+export const OBJECT_DETAILS_TITLE = i18n.translate(
   'dataSourcesManagement.editDataSource.objectDetailsText',
   {
     defaultMessage: 'Object Details',
   }
 );
-export const objectDetailsDescription = i18n.translate(
+export const OBJECT_DETAILS_DESCRIPTION = i18n.translate(
   'dataSourcesManagement.editDataSource.objectDetailsDescription',
   {
     defaultMessage:
       'This connection information is used for reference in tables and when adding to a data source connection',
   }
 );
-export const authenticationMethodTitle = i18n.translate(
-  'dataSourcesManagement.editDataSource.authenticationMethodTitle',
-  {
-    defaultMessage: 'Authentication Method',
-  }
-);
-export const authenticationTitle = i18n.translate(
+export const CREDENTIAL = i18n.translate('dataSourcesManagement.editDataSource.credential', {
+  defaultMessage: 'Credential',
+});
+export const AUTHENTICATION_TITLE = i18n.translate(
   'dataSourcesManagement.editDataSource.authenticationTitle',
   {
     defaultMessage: 'Authentication',
   }
 );
-export const authenticationDetailsText = i18n.translate(
-  'dataSourcesManagement.editDataSource.authenticationDetailsText',
+export const AUTHENTICATION_METHOD = i18n.translate(
+  'dataSourcesManagement.editDataSource.authenticationMethod',
   {
-    defaultMessage: 'Authentication Details',
+    defaultMessage: 'Authentication Method',
   }
 );
-export const authenticationDetailsDescription = i18n.translate(
-  'dataSourcesManagement.editDataSource.authenticationDetailsDescription',
-  {
-    defaultMessage: 'Modify these to update the authentication type and associated details',
-  }
-);
-export const endpointTitle = i18n.translate('dataSourcesManagement.editDataSource.endpointTitle', {
+export const ENDPOINT_TITLE = i18n.translate('dataSourcesManagement.editDataSource.endpointTitle', {
   defaultMessage: 'Endpoint',
 });
-export const endpointDescription = i18n.translate(
+export const ENDPOINT_DESCRIPTION = i18n.translate(
   'dataSourcesManagement.editDataSource.endpointDescription',
   {
     defaultMessage:
@@ -214,70 +217,20 @@ export const endpointDescription = i18n.translate(
   }
 );
 
-export const cancelChangesText = i18n.translate(
+export const CANCEL_CHANGES = i18n.translate(
   'dataSourcesManagement.editDataSource.cancelButtonLabel',
   {
     defaultMessage: 'Cancel changes',
   }
 );
-export const saveChangesText = i18n.translate(
-  'dataSourcesManagement.editDataSource.saveButtonLabel',
-  {
-    defaultMessage: 'Save changes',
-  }
-);
-
-export const validationErrorTooltipText = i18n.translate(
-  'dataSourcesManagement.editDataSource.saveButtonTooltipWithInvalidChanges',
-  {
-    defaultMessage: 'Fix invalid settings before saving.',
-  }
-);
-
-/* Password validation */
-
-export const dataSourceValidationOldPasswordEmpty = i18n.translate(
-  'dataSourcesManagement.validation.oldPasswordEmpty',
-  {
-    defaultMessage: 'Old password cannot be empty',
-  }
-);
-export const dataSourceValidationNewPasswordEmpty = i18n.translate(
-  'dataSourcesManagement.validation.newPasswordEmpty',
-  {
-    defaultMessage: 'New password cannot be empty',
-  }
-);
-export const dataSourceValidationNoPasswordMatch = i18n.translate(
-  'dataSourcesManagement.validation.noPasswordMatch',
-  {
-    defaultMessage: 'Passwords do not match',
-  }
-);
+export const SAVE_CHANGES = i18n.translate('dataSourcesManagement.editDataSource.saveButtonLabel', {
+  defaultMessage: 'Save changes',
+});
 
 /* Create/Edit validation */
-
-export const dataSourceValidationTitleEmpty = i18n.translate(
-  'dataSourcesManagement.validation.titleEmpty',
+export const DATA_SOURCE_VALIDATION_TITLE_EXISTS = i18n.translate(
+  'dataSourcesManagement.validation.titleExists',
   {
-    defaultMessage: 'Title must not be empty',
-  }
-);
-export const dataSourceValidationEndpointNotValid = i18n.translate(
-  'dataSourcesManagement.validation.endpointNotValid',
-  {
-    defaultMessage: 'Endpoint is not valid',
-  }
-);
-export const dataSourceValidationUsernameEmpty = i18n.translate(
-  'dataSourcesManagement.validation.usernameEmpty',
-  {
-    defaultMessage: 'Username should not be empty',
-  }
-);
-export const dataSourceValidationPasswordEmpty = i18n.translate(
-  'dataSourcesManagement.validation.passwordEmpty',
-  {
-    defaultMessage: 'Password should not be empty',
+    defaultMessage: 'This title is already in use',
   }
 );
