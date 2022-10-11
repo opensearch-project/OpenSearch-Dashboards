@@ -43,6 +43,9 @@ To run specific integration tests, pass the path to the test:
 `yarn test:jest_integration [test path]`
 
 ### Functional tests
+
+Functional testing in OpenSearch Dashboards is migrating to the [opensearch-dashboards-functional-test](https://github.com/opensearch-project/opensearch-dashboards-functional-test) repository. All new functional tests should be written there. When modifying a file that affects an existing functional test, the old test should be migrated to the new repository. The rest of this section outlines how to run the existing functional tests in the repository.
+
 To run all functional tests:
 `yarn test:ftr`
 To run specific functional tests, you can run by CI group:

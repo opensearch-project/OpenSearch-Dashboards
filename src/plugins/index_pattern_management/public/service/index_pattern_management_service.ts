@@ -47,6 +47,7 @@ import {
   TruncateFormatEditor,
   UrlFormatEditor,
 } from '../components/field_editor/components/field_format_editor';
+import { IndexPatternTableColumnService } from './column_service';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
@@ -62,12 +63,14 @@ export class IndexPatternManagementService {
   indexPatternListConfig: IndexPatternListManager;
   fieldFormatEditors: FieldFormatEditors;
   environmentService: EnvironmentService;
+  columnService: IndexPatternTableColumnService;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
     this.fieldFormatEditors = new FieldFormatEditors();
     this.environmentService = new EnvironmentService();
+    this.columnService = new IndexPatternTableColumnService();
   }
 
   public setup({ httpClient }: SetupDependencies) {
@@ -98,6 +101,7 @@ export class IndexPatternManagementService {
       list: indexPatternListConfigSetup,
       fieldFormatEditors: fieldFormatEditorsSetup,
       environment: this.environmentService.setup(),
+      columns: this.columnService.setup(),
     };
   }
 
@@ -106,6 +110,7 @@ export class IndexPatternManagementService {
       creation: this.indexPatternCreationManager.start(),
       list: this.indexPatternListConfig.start(),
       fieldFormatEditors: this.fieldFormatEditors.start(),
+      columns: this.columnService.start(),
     };
   }
 
