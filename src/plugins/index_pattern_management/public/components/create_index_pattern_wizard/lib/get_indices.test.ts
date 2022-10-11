@@ -201,7 +201,6 @@ describe('getIndices', () => {
         getIndexTags,
         pattern: 'opensearch-dashboards',
         searchClient,
-        dataSourceId,
       });
       expect(result.length).toBe(0);
     });
