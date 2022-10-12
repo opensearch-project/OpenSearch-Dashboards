@@ -48,14 +48,6 @@ We will need to
 - add a new data source entry in the stack management Nav app, with a data source list table
 - a data source detail page, to show detailed information of a specific data source, such as URL, auth type, endpoint capabilities etc.
 
-### Credential management
-
-![img](./img/cm_flow.png)
-
-Credential is used to establish an authenticated connection to other data source. Typical credentials are User/Password for basic auth. IAM auth for AWS specific authentication.
-
-Credential management is provided way for user to add/edit/remove the credential to be used in datasource management
-
 ### Index Pattern
 
 - Index pattern creation flow: With the data sources, users will need to specify which data source to use when creating a new index pattern.
@@ -66,8 +58,8 @@ Credential management is provided way for user to add/edit/remove the credential
 
 ### Data source security
 
-For the initial launch with OpenSearch 3.0 preview, we do not plan to change security design of OpenSearch.
+For the initial launch with OpenSearch 2.4 preview, we do not plan to change security design of OpenSearch.
 
-Users need to provide endpoint URL, username and password when creating a data source. OpenSearch Dashboards service will encrypt the username and password when storing it into metadata store.
+When creating a data source, users need to provide endpoint URL, username and password(if using basic authentication). OpenSearch Dashboards service will encrypt the username and password when storing it into metadata store.
 
 Data source is a new type of OpenSearch Dashboards saved objects. In current OpenSearch security model, access control on data source document is the same as other saved objects documents. Basically data source docs will be accessible by any user who has access to the tenant.

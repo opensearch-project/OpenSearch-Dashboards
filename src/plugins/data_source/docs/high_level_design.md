@@ -19,7 +19,7 @@ From very high level, we propose to introduce `data-source` as a new OpenSearch 
 
 ## Scope
 
-We are targeting to release the multiple data source support in OpenSearch 3.0 preview as an experimental feature, and make it GA over a few minor version throughout 3.x versions.
+We are targeting to release the multiple data source support in OpenSearch 2.x preview as an experimental feature, and make it GA over a few minor version throughout 2.x versions.
 
 ### Preview Scope
 
@@ -35,7 +35,7 @@ We are targeting to release the multiple data source support in OpenSearch 3.0 p
 
 ### GA Scope
 
-- Support all Elasticsearch 7.10 DSL/API compatible data sources, including customer self managed Elasticsearch 7.10, OpenSearch 3.x clusters, AWS managed OpenSearch and Elasticsearch 7.10 domains. OpenSearch Serverless collections.
+- Support all Elasticsearch 7.10 DSL/API compatible data sources, including customer self managed Elasticsearch 7.10, OpenSearch 2.x clusters, AWS managed OpenSearch and Elasticsearch 7.10 domains. OpenSearch Serverless collections.
   - Support Basic auth, AWS SigV4 signing with Data sources
 - OpenSearch Dashboards plugins such as Alerting/AD etc. can work with each data source depending on the data source capability
 - Observability visualizations are out of scope
@@ -138,7 +138,7 @@ Based on existing OpenSearch and OpenSearch Dashboards security implementations,
 
 Credentials is part of the data source object, and will be saved in OpenSearch Dashboards metadata index. OpenSearch Dashboards will use that credentials to authenticate with the data source when executing queries. This credentials will need to be encrypted regardless OpenSearch Dashboards has access control or not.
 
-We will use a symmetric key to encrypt the credentials before saving data source into OpenSearch Dashboards metadata index, and use the same key to decrypt it when OpenSearch Dashboards needs to authenticate with corresponding data source. For open source release, we will allow admins to configure the encryption key in the `opensearch_dashboards.yml` file. And we will also provide the option to integrate with a key store, such as AWS KMS, to use keys with the key store.
+We will use a symmetric key to encrypt the credentials before saving data source into OpenSearch Dashboards metadata index, and use the same key to decrypt it when OpenSearch Dashboards needs to authenticate with corresponding data source. For open source release, we will allow admins to configure the encryption key in the `opensearch_dashboards.yml` file.
 
 For more about credential encryption/decryption strategy, refer to [#1756](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1756)
 
