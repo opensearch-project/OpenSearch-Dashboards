@@ -7,20 +7,19 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig, ColumnWidth } from '../types';
-import { convertToFormattedData } from '../utils';
+import { ColumnWidth, FormattedColumn } from '../types';
 
 export const getDataGridColumns = (
+  rows: OpenSearchDashboardsDatatableRow[],
+  cols: FormattedColumn[],
   table: Table,
-  visConfig: TableVisConfig,
   handlers: IInterpreterRenderHandlers,
   columnsWidth: ColumnWidth[]
 ) => {
-  const { formattedRows, formattedColumns } = convertToFormattedData(table, visConfig);
-
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
-    const foramttedColumnId = formattedColumns[columnIndex].id;
+    const foramttedColumnId = cols[columnIndex].id;
     const rawColumnIndex = table.columns.findIndex((col) => col.id === foramttedColumnId);
     handlers.event({
       name: 'filterBucket',
@@ -29,7 +28,7 @@ export const getDataGridColumns = (
           {
             table: {
               columns: table.columns,
-              rows: formattedRows,
+              rows,
             },
             row: rowIndex,
             column: rawColumnIndex,
@@ -40,12 +39,12 @@ export const getDataGridColumns = (
     });
   };
 
-  return formattedColumns.map((col, colIndex) => {
+  return cols.map((col, colIndex) => {
     const cellActions = col.filterable
       ? [
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = formattedRows[rowIndex][columnId];
-            const filterContent = col.formatter?.convert(formattedRows[rowIndex][columnId]);
+            const filterValue = rows[rowIndex][columnId];
+            const filterContent = col.formatter?.convert(filterValue);
 
             const filterForValueText = i18n.translate(
               'visTypeTable.tableVisFilter.filterForValue',
@@ -80,7 +79,7 @@ export const getDataGridColumns = (
             );
           },
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = formattedRows[rowIndex][columnId];
+            const filterValue = rows[rowIndex][columnId];
             const filterContent = col.formatter?.convert(filterValue);
 
             const filterOutValueText = i18n.translate(
