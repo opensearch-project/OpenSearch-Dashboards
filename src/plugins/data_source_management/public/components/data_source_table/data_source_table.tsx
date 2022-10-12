@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import {
   reactRouterNavigate,
@@ -29,19 +30,6 @@ import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } fr
 import { CreateButton } from '../create_button';
 import { deleteMultipleDataSources, getDataSources } from '../utils';
 import { LoadingMask } from '../loading_mask';
-import {
-  CANCEL_TEXT,
-  DELETE_TEXT,
-  DS_LISTING_ARIA_REGION,
-  DS_LISTING_DATA_SOURCE_DELETE_ACTION,
-  DS_LISTING_DATA_SOURCE_DELETE_IMPACT,
-  DS_LISTING_DATA_SOURCE_DELETE_WARNING,
-  DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE,
-  DS_LISTING_DESCRIPTION,
-  DS_LISTING_NO_DATA,
-  DS_LISTING_PAGE_TITLE,
-  DS_LISTING_TITLE,
-} from '../text_content/text_content';
 
 /* Table config */
 const pagination = {
@@ -77,7 +65,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setBreadcrumbs(getListBreadcrumbs());
 
     /* Browser - Page Title */
-    chrome.docTitle.change(DS_LISTING_PAGE_TITLE);
+    chrome.docTitle.change(
+      i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourcesTitle', {
+        defaultMessage: 'Data Sources',
+      })
+    );
 
     /* fetch data sources*/
     fetchDataSources();
@@ -176,7 +168,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const tableRenderDeleteModal = () => {
     return confirmDeleteVisible ? (
       <EuiConfirmModal
-        title={DS_LISTING_DATA_SOURCE_MULTI_DELETE_TITLE}
+        title={i18n.translate('dataSourcesManagement.dataSourcesTable.multiDeleteTitle', {
+          defaultMessage: 'Delete data source connection(s)',
+        })}
         onCancel={() => {
           setConfirmDeleteVisible(false);
         }}
@@ -184,13 +178,38 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           setConfirmDeleteVisible(false);
           onClickDelete();
         }}
-        cancelButtonText={CANCEL_TEXT}
-        confirmButtonText={DELETE_TEXT}
+        cancelButtonText={i18n.translate('dataSourcesManagement.dataSourcesTable.cancel', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('dataSourcesManagement.dataSourcesTable.delete', {
+          defaultMessage: 'Delete',
+        })}
         defaultFocusedButton="confirm"
       >
-        <p>{DS_LISTING_DATA_SOURCE_DELETE_ACTION}</p>
-        <p>{DS_LISTING_DATA_SOURCE_DELETE_IMPACT}</p>
-        <p>{DS_LISTING_DATA_SOURCE_DELETE_WARNING}</p>
+        <p>
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.dataSourcesTable.deleteDescription"
+              defaultMessage="This action will delete the selected data source connections"
+            />
+          }
+        </p>
+        <p>
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.dataSourcesTable.deleteConfirmation"
+              defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+            />
+          }
+        </p>
+        <p>
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.dataSourcesTable.deleteWarning"
+              defaultMessage="This action cannot be undone."
+            />
+          }
+        </p>
       </EuiConfirmModal>
     ) : null;
   };
@@ -247,11 +266,25 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h2>{DS_LISTING_TITLE}</h2>
+            <h2>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.dataSourcesTable.title"
+                  defaultMessage="Data Sources"
+                />
+              }
+            </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>
-            <p>{DS_LISTING_DESCRIPTION}</p>
+            <p>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.dataSourcesTable.description"
+                  defaultMessage="Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources."
+                />
+              }
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
@@ -285,7 +318,14 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       <>
         <EuiSpacer size="l" />
         <EuiPanel hasBorder={false} hasShadow={false} style={{ textAlign: 'center' }}>
-          <EuiText>{DS_LISTING_NO_DATA}</EuiText>
+          <EuiText>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.dataSourcesTable.noData"
+                defaultMessage="No Data Source Connections have been created yet."
+              />
+            }
+          </EuiText>
           <EuiSpacer />
           {createButton}
         </EuiPanel>
@@ -300,7 +340,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         <EuiPageContent
           data-test-subj="dataSourceTable"
           role="region"
-          aria-label={DS_LISTING_ARIA_REGION}
+          aria-label={i18n.translate('dataSourcesManagement.createDataSourcesLiveRegionAriaLabel', {
+            defaultMessage: 'Data Sources',
+          })}
         >
           {/* Header */}
           {renderHeader()}

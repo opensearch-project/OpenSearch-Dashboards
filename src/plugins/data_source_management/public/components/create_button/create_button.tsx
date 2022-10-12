@@ -7,7 +7,7 @@ import React from 'react';
 import { History } from 'history';
 
 import { EuiButton } from '@elastic/eui';
-import { CREATE_DATA_SOURCE_BUTTON_TEXT } from '../text_content';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
   history: History;
@@ -20,7 +20,10 @@ export const CreateButton = ({ history }: Props) => {
       fill={true}
       onClick={() => history.push('/create')}
     >
-      {CREATE_DATA_SOURCE_BUTTON_TEXT}
+      <FormattedMessage
+        id="dataSourcesManagement.dataSourceListing.createButton"
+        defaultMessage="Create data source connection"
+      />
     </EuiButton>
   );
 };

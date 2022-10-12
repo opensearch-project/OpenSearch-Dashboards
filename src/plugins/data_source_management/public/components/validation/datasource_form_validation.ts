@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { isValidUrl } from '../utils';
-import { DATA_SOURCE_VALIDATION_TITLE_EXISTS } from '../text_content';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
 import { AuthType } from '../../types';
@@ -46,7 +46,9 @@ export const isTitleValid = (
   ) {
     /* title already exists */
     isValid.valid = false;
-    isValid.error = DATA_SOURCE_VALIDATION_TITLE_EXISTS;
+    isValid.error = i18n.translate('dataSourcesManagement.validation.titleExists', {
+      defaultMessage: 'This title is already in use',
+    });
   }
   return isValid;
 };
