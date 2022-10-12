@@ -509,10 +509,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
+        await log.debug('filter by "Sep 18, 2015 @ 7:52" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(
           scriptedPainlessFieldName2,
-          '1442531297065'
+          '1442562775953'
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
