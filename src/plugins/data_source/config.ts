@@ -8,7 +8,7 @@ import { fileAppenderSchema } from './audit_config';
 
 const KEY_NAME_MIN_LENGTH: number = 1;
 const KEY_NAME_MAX_LENGTH: number = 100;
-// Wrapping key size shoule be 32 bytes, as used in envelope encryption algorithms.
+// Wrapping key size should be 32 bytes, as used in envelope encryption algorithms.
 const WRAPPING_KEY_SIZE: number = 32;
 
 export const configSchema = schema.object({
