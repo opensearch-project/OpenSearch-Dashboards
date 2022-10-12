@@ -75,20 +75,7 @@ exports[`Datasource Management: Create Datasource form should create data source
           className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
           role="main"
         >
-          <Header
-            docLinks={
-              Object {
-                "links": Object {
-                  "noDocumentation": Object {
-                    "indexPatterns": Object {
-                      "introduction": "",
-                    },
-                    "scriptedFields": Object {},
-                  },
-                },
-              }
-            }
-          >
+          <Header>
             <EuiFlexGroup
               justifyContent="spaceBetween"
             >
@@ -123,62 +110,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         >
                           <p>
                             <FormattedMessage
-                              defaultMessage="A data source is an OpenSearch cluster endpoint (for now) to query against."
+                              defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
                               id="dataSourcesManagement.createDataSource.description"
                               values={Object {}}
                             >
                               <span>
-                                A data source is an OpenSearch cluster endpoint (for now) to query against.
+                                Create a new data source connection to help you retrieve data from an external OpenSearch compatible source.
                               </span>
                             </FormattedMessage>
                             <br />
-                            <EuiLink
-                              external={true}
-                              href=""
-                              target="_blank"
-                            >
-                              <a
-                                className="euiLink euiLink--primary"
-                                href=""
-                                rel="noopener noreferrer"
-                                target="_blank"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Read documentation"
-                                  id="dataSourcesManagement.createDataSource.documentation"
-                                  values={Object {}}
-                                >
-                                  <span>
-                                    Read documentation
-                                  </span>
-                                </FormattedMessage>
-                                <EuiIcon
-                                  aria-label="External link"
-                                  className="euiLink__externalIcon"
-                                  size="s"
-                                  type="popout"
-                                >
-                                  <span
-                                    aria-label="External link"
-                                    className="euiLink__externalIcon"
-                                    data-euiicon-type="popout"
-                                    size="s"
-                                  />
-                                </EuiIcon>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="(opens in a new tab or window)"
-                                      token="euiLink.newTarget.screenReaderOnlyText"
-                                    >
-                                      (opens in a new tab or window)
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </a>
-                            </EuiLink>
                           </p>
                         </div>
                       </EuiText>
@@ -188,11 +128,6 @@ exports[`Datasource Management: Create Datasource form should create data source
               </div>
             </EuiFlexGroup>
           </Header>
-          <EuiHorizontalRule>
-            <hr
-              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-            />
-          </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -206,7 +141,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
                       defaultMessage="Connection Details"
                       id="dataSourceManagement.connectToDataSource.connectionDetails"
@@ -216,7 +151,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                         Connection Details
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
@@ -315,7 +250,22 @@ exports[`Datasource Management: Create Datasource form should create data source
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Description"
+                label={
+                  <React.Fragment>
+                    Description
+                     
+                    <i
+                      style={
+                        Object {
+                          "fontWeight": "normal",
+                        }
+                      }
+                    >
+                      - 
+                      optional
+                    </i>
+                  </React.Fragment>
+                }
                 labelType="label"
               >
                 <div
@@ -336,6 +286,17 @@ exports[`Datasource Management: Create Datasource form should create data source
                         htmlFor="generated-id"
                       >
                         Description
+                         
+                        <i
+                          style={
+                            Object {
+                              "fontWeight": "normal",
+                            }
+                          }
+                        >
+                          - 
+                          optional
+                        </i>
                       </label>
                     </EuiFormLabel>
                   </div>
@@ -430,7 +391,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="The connection URL"
+                      placeholder="Sample URL: https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -454,7 +415,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="The connection URL"
+                                placeholder="Sample URL: https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
@@ -480,24 +441,24 @@ exports[`Datasource Management: Create Datasource form should create data source
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
-                      defaultMessage="Authentication"
+                      defaultMessage="Authentication Method"
                       id="dataSourceManagement.connectToDataSource.authenticationHeader"
                       values={Object {}}
                     >
                       <span>
-                        Authentication
+                        Authentication Method
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
-                size="s"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
               <EuiFormRow
@@ -506,7 +467,6 @@ exports[`Datasource Management: Create Datasource form should create data source
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Credential Source"
                 labelType="label"
               >
                 <div
@@ -514,22 +474,47 @@ exports[`Datasource Management: Create Datasource form should create data source
                   id="generated-id-row"
                 >
                   <div
-                    className="euiFormRow__labelWrapper"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
+                    <EuiText
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
+                      <div
+                        className="euiText euiText--medium"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        Credential Source
-                      </label>
-                    </EuiFormLabel>
+                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <b>
+                          No authentication
+                        </b>
+                      </div>
+                    </EuiText>
                   </div>
+                </div>
+              </EuiFormRow>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <div
+                  className="euiFormRow"
+                  id="generated-id-row"
+                >
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
@@ -678,7 +663,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                         <span
                           className="euiButton__text"
                         >
-                          Create a data source connection
+                          Create data source connection
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -755,20 +740,7 @@ exports[`Datasource Management: Create Datasource form should create data source
           className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
           role="main"
         >
-          <Header
-            docLinks={
-              Object {
-                "links": Object {
-                  "noDocumentation": Object {
-                    "indexPatterns": Object {
-                      "introduction": "",
-                    },
-                    "scriptedFields": Object {},
-                  },
-                },
-              }
-            }
-          >
+          <Header>
             <EuiFlexGroup
               justifyContent="spaceBetween"
             >
@@ -803,62 +775,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         >
                           <p>
                             <FormattedMessage
-                              defaultMessage="A data source is an OpenSearch cluster endpoint (for now) to query against."
+                              defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
                               id="dataSourcesManagement.createDataSource.description"
                               values={Object {}}
                             >
                               <span>
-                                A data source is an OpenSearch cluster endpoint (for now) to query against.
+                                Create a new data source connection to help you retrieve data from an external OpenSearch compatible source.
                               </span>
                             </FormattedMessage>
                             <br />
-                            <EuiLink
-                              external={true}
-                              href=""
-                              target="_blank"
-                            >
-                              <a
-                                className="euiLink euiLink--primary"
-                                href=""
-                                rel="noopener noreferrer"
-                                target="_blank"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Read documentation"
-                                  id="dataSourcesManagement.createDataSource.documentation"
-                                  values={Object {}}
-                                >
-                                  <span>
-                                    Read documentation
-                                  </span>
-                                </FormattedMessage>
-                                <EuiIcon
-                                  aria-label="External link"
-                                  className="euiLink__externalIcon"
-                                  size="s"
-                                  type="popout"
-                                >
-                                  <span
-                                    aria-label="External link"
-                                    className="euiLink__externalIcon"
-                                    data-euiicon-type="popout"
-                                    size="s"
-                                  />
-                                </EuiIcon>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="(opens in a new tab or window)"
-                                      token="euiLink.newTarget.screenReaderOnlyText"
-                                    >
-                                      (opens in a new tab or window)
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </a>
-                            </EuiLink>
                           </p>
                         </div>
                       </EuiText>
@@ -868,11 +793,6 @@ exports[`Datasource Management: Create Datasource form should create data source
               </div>
             </EuiFlexGroup>
           </Header>
-          <EuiHorizontalRule>
-            <hr
-              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-            />
-          </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -886,7 +806,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
                       defaultMessage="Connection Details"
                       id="dataSourceManagement.connectToDataSource.connectionDetails"
@@ -896,7 +816,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                         Connection Details
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
@@ -995,7 +915,22 @@ exports[`Datasource Management: Create Datasource form should create data source
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Description"
+                label={
+                  <React.Fragment>
+                    Description
+                     
+                    <i
+                      style={
+                        Object {
+                          "fontWeight": "normal",
+                        }
+                      }
+                    >
+                      - 
+                      optional
+                    </i>
+                  </React.Fragment>
+                }
                 labelType="label"
               >
                 <div
@@ -1016,6 +951,17 @@ exports[`Datasource Management: Create Datasource form should create data source
                         htmlFor="generated-id"
                       >
                         Description
+                         
+                        <i
+                          style={
+                            Object {
+                              "fontWeight": "normal",
+                            }
+                          }
+                        >
+                          - 
+                          optional
+                        </i>
                       </label>
                     </EuiFormLabel>
                   </div>
@@ -1110,7 +1056,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="The connection URL"
+                      placeholder="Sample URL: https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -1134,7 +1080,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="The connection URL"
+                                placeholder="Sample URL: https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
@@ -1160,24 +1106,24 @@ exports[`Datasource Management: Create Datasource form should create data source
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
-                      defaultMessage="Authentication"
+                      defaultMessage="Authentication Method"
                       id="dataSourceManagement.connectToDataSource.authenticationHeader"
                       values={Object {}}
                     >
                       <span>
-                        Authentication
+                        Authentication Method
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
-                size="s"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
               <EuiFormRow
@@ -1186,7 +1132,6 @@ exports[`Datasource Management: Create Datasource form should create data source
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Credential Source"
                 labelType="label"
               >
                 <div
@@ -1194,22 +1139,47 @@ exports[`Datasource Management: Create Datasource form should create data source
                   id="generated-id-row"
                 >
                   <div
-                    className="euiFormRow__labelWrapper"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
+                    <EuiText
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
+                      <div
+                        className="euiText euiText--medium"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        Credential Source
-                      </label>
-                    </EuiFormLabel>
+                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <b>
+                          No authentication
+                        </b>
+                      </div>
+                    </EuiText>
                   </div>
+                </div>
+              </EuiFormRow>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <div
+                  className="euiFormRow"
+                  id="generated-id-row"
+                >
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
@@ -1599,7 +1569,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                         <span
                           className="euiButton__text"
                         >
-                          Create a data source connection
+                          Create data source connection
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -1633,20 +1603,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
           className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
           role="main"
         >
-          <Header
-            docLinks={
-              Object {
-                "links": Object {
-                  "noDocumentation": Object {
-                    "indexPatterns": Object {
-                      "introduction": "",
-                    },
-                    "scriptedFields": Object {},
-                  },
-                },
-              }
-            }
-          >
+          <Header>
             <EuiFlexGroup
               justifyContent="spaceBetween"
             >
@@ -1681,62 +1638,15 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         >
                           <p>
                             <FormattedMessage
-                              defaultMessage="A data source is an OpenSearch cluster endpoint (for now) to query against."
+                              defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
                               id="dataSourcesManagement.createDataSource.description"
                               values={Object {}}
                             >
                               <span>
-                                A data source is an OpenSearch cluster endpoint (for now) to query against.
+                                Create a new data source connection to help you retrieve data from an external OpenSearch compatible source.
                               </span>
                             </FormattedMessage>
                             <br />
-                            <EuiLink
-                              external={true}
-                              href=""
-                              target="_blank"
-                            >
-                              <a
-                                className="euiLink euiLink--primary"
-                                href=""
-                                rel="noopener noreferrer"
-                                target="_blank"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Read documentation"
-                                  id="dataSourcesManagement.createDataSource.documentation"
-                                  values={Object {}}
-                                >
-                                  <span>
-                                    Read documentation
-                                  </span>
-                                </FormattedMessage>
-                                <EuiIcon
-                                  aria-label="External link"
-                                  className="euiLink__externalIcon"
-                                  size="s"
-                                  type="popout"
-                                >
-                                  <span
-                                    aria-label="External link"
-                                    className="euiLink__externalIcon"
-                                    data-euiicon-type="popout"
-                                    size="s"
-                                  />
-                                </EuiIcon>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="(opens in a new tab or window)"
-                                      token="euiLink.newTarget.screenReaderOnlyText"
-                                    >
-                                      (opens in a new tab or window)
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </a>
-                            </EuiLink>
                           </p>
                         </div>
                       </EuiText>
@@ -1746,11 +1656,6 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
               </div>
             </EuiFlexGroup>
           </Header>
-          <EuiHorizontalRule>
-            <hr
-              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-            />
-          </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -1764,7 +1669,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
                       defaultMessage="Connection Details"
                       id="dataSourceManagement.connectToDataSource.connectionDetails"
@@ -1774,7 +1679,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         Connection Details
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
@@ -1873,7 +1778,22 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Description"
+                label={
+                  <React.Fragment>
+                    Description
+                     
+                    <i
+                      style={
+                        Object {
+                          "fontWeight": "normal",
+                        }
+                      }
+                    >
+                      - 
+                      optional
+                    </i>
+                  </React.Fragment>
+                }
                 labelType="label"
               >
                 <div
@@ -1894,6 +1814,17 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         htmlFor="generated-id"
                       >
                         Description
+                         
+                        <i
+                          style={
+                            Object {
+                              "fontWeight": "normal",
+                            }
+                          }
+                        >
+                          - 
+                          optional
+                        </i>
                       </label>
                     </EuiFormLabel>
                   </div>
@@ -1988,7 +1919,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="The connection URL"
+                      placeholder="Sample URL: https://connectionurl.com"
                       value=""
                     >
                       <EuiFormControlLayout
@@ -2012,7 +1943,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="The connection URL"
+                                placeholder="Sample URL: https://connectionurl.com"
                                 type="text"
                                 value=""
                               />
@@ -2038,24 +1969,24 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
-                      defaultMessage="Authentication"
+                      defaultMessage="Authentication Method"
                       id="dataSourceManagement.connectToDataSource.authenticationHeader"
                       values={Object {}}
                     >
                       <span>
-                        Authentication
+                        Authentication Method
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
-                size="s"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
               <EuiFormRow
@@ -2064,7 +1995,6 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Credential Source"
                 labelType="label"
               >
                 <div
@@ -2072,22 +2002,47 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                   id="generated-id-row"
                 >
                   <div
-                    className="euiFormRow__labelWrapper"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
+                    <EuiText
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
+                      <div
+                        className="euiText euiText--medium"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        Credential Source
-                      </label>
-                    </EuiFormLabel>
+                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <b>
+                          No authentication
+                        </b>
+                      </div>
+                    </EuiText>
                   </div>
+                </div>
+              </EuiFormRow>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <div
+                  className="euiFormRow"
+                  id="generated-id-row"
+                >
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
@@ -2477,7 +2432,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         <span
                           className="euiButton__text"
                         >
-                          Create a data source connection
+                          Create data source connection
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -2511,20 +2466,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
           className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
           role="main"
         >
-          <Header
-            docLinks={
-              Object {
-                "links": Object {
-                  "noDocumentation": Object {
-                    "indexPatterns": Object {
-                      "introduction": "",
-                    },
-                    "scriptedFields": Object {},
-                  },
-                },
-              }
-            }
-          >
+          <Header>
             <EuiFlexGroup
               justifyContent="spaceBetween"
             >
@@ -2559,62 +2501,15 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         >
                           <p>
                             <FormattedMessage
-                              defaultMessage="A data source is an OpenSearch cluster endpoint (for now) to query against."
+                              defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
                               id="dataSourcesManagement.createDataSource.description"
                               values={Object {}}
                             >
                               <span>
-                                A data source is an OpenSearch cluster endpoint (for now) to query against.
+                                Create a new data source connection to help you retrieve data from an external OpenSearch compatible source.
                               </span>
                             </FormattedMessage>
                             <br />
-                            <EuiLink
-                              external={true}
-                              href=""
-                              target="_blank"
-                            >
-                              <a
-                                className="euiLink euiLink--primary"
-                                href=""
-                                rel="noopener noreferrer"
-                                target="_blank"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Read documentation"
-                                  id="dataSourcesManagement.createDataSource.documentation"
-                                  values={Object {}}
-                                >
-                                  <span>
-                                    Read documentation
-                                  </span>
-                                </FormattedMessage>
-                                <EuiIcon
-                                  aria-label="External link"
-                                  className="euiLink__externalIcon"
-                                  size="s"
-                                  type="popout"
-                                >
-                                  <span
-                                    aria-label="External link"
-                                    className="euiLink__externalIcon"
-                                    data-euiicon-type="popout"
-                                    size="s"
-                                  />
-                                </EuiIcon>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="(opens in a new tab or window)"
-                                      token="euiLink.newTarget.screenReaderOnlyText"
-                                    >
-                                      (opens in a new tab or window)
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
-                              </a>
-                            </EuiLink>
                           </p>
                         </div>
                       </EuiText>
@@ -2624,11 +2519,6 @@ exports[`Datasource Management: Create Datasource form should throw validation e
               </div>
             </EuiFlexGroup>
           </Header>
-          <EuiHorizontalRule>
-            <hr
-              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-            />
-          </EuiHorizontalRule>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -2642,7 +2532,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
                       defaultMessage="Connection Details"
                       id="dataSourceManagement.connectToDataSource.connectionDetails"
@@ -2652,7 +2542,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         Connection Details
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
@@ -2768,7 +2658,22 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Description"
+                label={
+                  <React.Fragment>
+                    Description
+                     
+                    <i
+                      style={
+                        Object {
+                          "fontWeight": "normal",
+                        }
+                      }
+                    >
+                      - 
+                      optional
+                    </i>
+                  </React.Fragment>
+                }
                 labelType="label"
               >
                 <div
@@ -2789,6 +2694,17 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         htmlFor="generated-id"
                       >
                         Description
+                         
+                        <i
+                          style={
+                            Object {
+                              "fontWeight": "normal",
+                            }
+                          }
+                        >
+                          - 
+                          optional
+                        </i>
                       </label>
                     </EuiFormLabel>
                   </div>
@@ -2883,7 +2799,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="The connection URL"
+                      placeholder="Sample URL: https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -2907,7 +2823,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="The connection URL"
+                                placeholder="Sample URL: https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
@@ -2933,24 +2849,24 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 <div
                   className="euiText euiText--medium euiText--constrainedWidth"
                 >
-                  <h5>
+                  <h4>
                     <FormattedMessage
-                      defaultMessage="Authentication"
+                      defaultMessage="Authentication Method"
                       id="dataSourceManagement.connectToDataSource.authenticationHeader"
                       values={Object {}}
                     >
                       <span>
-                        Authentication
+                        Authentication Method
                       </span>
                     </FormattedMessage>
-                  </h5>
+                  </h4>
                 </div>
               </EuiText>
               <EuiSpacer
-                size="s"
+                size="m"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--m"
                 />
               </EuiSpacer>
               <EuiFormRow
@@ -2959,7 +2875,6 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 fullWidth={false}
                 hasChildLabel={true}
                 hasEmptyLabelSpace={false}
-                label="Credential Source"
                 labelType="label"
               >
                 <div
@@ -2967,22 +2882,47 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                   id="generated-id-row"
                 >
                   <div
-                    className="euiFormRow__labelWrapper"
+                    className="euiFormRow__fieldWrapper"
                   >
-                    <EuiFormLabel
-                      className="euiFormRow__label"
-                      htmlFor="generated-id"
-                      isFocused={false}
-                      type="label"
+                    <EuiText
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <label
-                        className="euiFormLabel euiFormRow__label"
-                        htmlFor="generated-id"
+                      <div
+                        className="euiText euiText--medium"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
                       >
-                        Credential Source
-                      </label>
-                    </EuiFormLabel>
+                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <b>
+                          No authentication
+                        </b>
+                      </div>
+                    </EuiText>
                   </div>
+                </div>
+              </EuiFormRow>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                labelType="label"
+              >
+                <div
+                  className="euiFormRow"
+                  id="generated-id-row"
+                >
                   <div
                     className="euiFormRow__fieldWrapper"
                   >
@@ -3372,7 +3312,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         <span
                           className="euiButton__text"
                         >
-                          Create a data source connection
+                          Create data source connection
                         </span>
                       </span>
                     </EuiButtonContent>
