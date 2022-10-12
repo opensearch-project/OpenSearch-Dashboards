@@ -40,6 +40,7 @@ export enum AggTypes {
 }
 
 export interface TableVisConfig extends TableVisParams {
+  title: string;
   metrics: SchemaConfig[];
   buckets: SchemaConfig[];
   splitRow?: SchemaConfig[];

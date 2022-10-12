@@ -12,6 +12,7 @@
     "opensearchDashboardsUtils",
     "opensearchDashboardsReact",
     "charts",
+    "share",
     "visDefaultEditor"
   ]
 }
