@@ -96,7 +96,13 @@ export const getDataSourcesResponse = {
   ],
 };
 
-export const existingDatasourceNamesList = ['test123', 'testTest20', 'TeSt', 'duplicateTest', 'dup20'];
+export const existingDatasourceNamesList = [
+  'test123',
+  'testTest20',
+  'TeSt',
+  'duplicateTest',
+  'dup20',
+];
 
 export const getMappedDataSources = [
   {
