@@ -5,24 +5,54 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const ExperimentalCallout = () => {
   return (
     <>
       <EuiCallOut
-        title={TITLE}
+        title={i18n.translate('indexPatternManagement.experimentalFeatureCallout.title', {
+          defaultMessage: 'Experimental Feature',
+        })}
         iconType="alert"
         color="warning"
         data-test-subj="index-pattern-experimental-callout"
       >
         <EuiText data-test-subj="index-pattern-experimental-callout-text">
           <p>
-            {DESCRIPTION_FIRST_PART}
-            <b>{DATASOURCE_CONNECTION}</b>
-            {DESCRIPTION_SECOND_PART}
-            <b>{DEFAULT}</b>
-            {DESCRIPTION_THIRD_PART}
+            <FormattedMessage
+              id="indexPatternManagement.experimentalFeatureCallout.description"
+              defaultMessage="The experimental feature {dataSourceConnection} is active. "
+              values={{
+                dataSourceConnection: (
+                  <b>
+                    <FormattedMessage
+                      id="indexPatternManagement.experimentalFeatureCallout.dataSourceConnection"
+                      defaultMessage="Data Source Connection"
+                    />
+                  </b>
+                ),
+              }}
+            />
+            <FormattedMessage
+              id="indexPatternManagement.experimentalFeatureCallout.instruction"
+              defaultMessage="To create an index pattern without using data from an external source, use {default}. "
+              values={{
+                default: (
+                  <b>
+                    <FormattedMessage
+                      id="indexPatternManagement.experimentalFeatureCallout.default"
+                      defaultMessage="default"
+                    />
+                  </b>
+                ),
+              }}
+            />
+            <FormattedMessage
+              id="indexPatternManagement.experimentalFeatureCallout.instruction"
+              defaultMessage="Any index pattern created using an external data source will result in an error if the experimental feature is deactivated."
+            />
           </p>
         </EuiText>
       </EuiCallOut>
@@ -30,37 +60,3 @@ export const ExperimentalCallout = () => {
     </>
   );
 };
-
-const TITLE = i18n.translate('indexPatternManagement.experimentalFeatureCallout.title', {
-  defaultMessage: 'Experimental feature active',
-});
-
-const DESCRIPTION_FIRST_PART = i18n.translate(
-  'indexPatternManagement.experimentalFeatureCallout.descriptionPartOne',
-  {
-    defaultMessage: 'The experimental feature ',
-  }
-);
-const DATASOURCE_CONNECTION = i18n.translate(
-  'indexPatternManagement.experimentalFeatureCallout.datasourceConnection',
-  {
-    defaultMessage: 'Data Source Connection ',
-  }
-);
-const DESCRIPTION_SECOND_PART = i18n.translate(
-  'indexPatternManagement.experimentalFeatureCallout.descriptionPartTwo',
-  {
-    defaultMessage:
-      'is active. To create an index pattern without using data from an external source, use ',
-  }
-);
-const DEFAULT = i18n.translate('indexPatternManagement.experimentalFeatureCallout.default', {
-  defaultMessage: 'default',
-});
-const DESCRIPTION_THIRD_PART = i18n.translate(
-  'indexPatternManagement.experimentalFeatureCallout.descriptionPartThree',
-  {
-    defaultMessage:
-      '. Any index pattern created using an external data source will result in an error if the experimental feature is deactivated.',
-  }
-);
