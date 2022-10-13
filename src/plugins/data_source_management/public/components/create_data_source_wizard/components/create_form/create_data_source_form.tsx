@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   AuthType,
@@ -31,21 +32,6 @@ import {
   isTitleValid,
   performDataSourceFormValidation,
 } from '../../../validation';
-import {
-  ENDPOINT_PLACEHOLDER,
-  DATA_SOURCE_DESCRIPTION_PLACEHOLDER,
-  DATA_SOURCE_PASSWORD_PLACEHOLDER,
-  USERNAME_PLACEHOLDER,
-  DESCRIPTION,
-  PASSWORD,
-  TITLE,
-  USERNAME,
-  ENDPOINT_URL,
-  OPTIONAL,
-  AUTHENTICATION_METHOD_DESCRIPTION,
-  NO_AUTHENTICATION,
-  CREATE_DATA_SOURCE_BUTTON_TEXT,
-} from '../../../text_content';
 import { isValidUrl } from '../../../utils';
 
 export interface CreateDataSourceProps {
@@ -229,10 +215,19 @@ export class CreateDataSourceForm extends React.Component<
     );
   };
   /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (label: string) => {
+  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
     return (
       <>
-        {label} <i style={{ fontWeight: 'normal' }}>- {OPTIONAL}</i>
+        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
+        <i style={{ fontWeight: 'normal' }}>
+          -{' '}
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.createDataSource.optionalText"
+              defaultMessage="optional"
+            />
+          }
+        </i>
       </>
     );
   };
@@ -242,12 +237,19 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <>
         <EuiFormRow
-          label={USERNAME}
+          label={i18n.translate('dataSourcesManagement.createDataSource.username', {
+            defaultMessage: 'Username',
+          })}
           isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
           error={this.state.formErrorsByField.createCredential.username}
         >
           <EuiFieldText
-            placeholder={USERNAME_PLACEHOLDER}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.createDataSource.usernamePlaceholder',
+              {
+                defaultMessage: 'Username to connect to data source',
+              }
+            )}
             isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
             value={this.state.auth.credentials.username || ''}
             onChange={this.onChangeUsername}
@@ -256,13 +258,20 @@ export class CreateDataSourceForm extends React.Component<
           />
         </EuiFormRow>
         <EuiFormRow
-          label={PASSWORD}
+          label={i18n.translate('dataSourcesManagement.createDataSource.password', {
+            defaultMessage: 'Password',
+          })}
           isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
           error={this.state.formErrorsByField.createCredential.password}
         >
           <EuiFieldPassword
             isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
-            placeholder={DATA_SOURCE_PASSWORD_PLACEHOLDER}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.createDataSource.passwordPlaceholder',
+              {
+                defaultMessage: 'Password to connect to data source',
+              }
+            )}
             type={'dual'}
             value={this.state.auth.credentials.password || ''}
             onChange={this.onChangePassword}
@@ -288,14 +297,21 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Title */}
           <EuiFormRow
-            label={TITLE}
+            label={i18n.translate('dataSourcesManagement.createDataSource.title', {
+              defaultMessage: 'Title',
+            })}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
           >
             <EuiFieldText
               name="dataSourceTitle"
               value={this.state.title || ''}
-              placeholder={TITLE}
+              placeholder={i18n.translate(
+                'dataSourcesManagement.createDataSource.titlePlaceHolder',
+                {
+                  defaultMessage: 'Title',
+                }
+              )}
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
               onBlur={this.validateTitle}
@@ -304,11 +320,21 @@ export class CreateDataSourceForm extends React.Component<
           </EuiFormRow>
 
           {/* Description */}
-          <EuiFormRow label={this.renderFieldLabelAsOptional(DESCRIPTION)}>
+          <EuiFormRow
+            label={this.renderFieldLabelAsOptional(
+              'dataSourceManagement.createDataSource.description',
+              'Description'
+            )}
+          >
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
-              placeholder={DATA_SOURCE_DESCRIPTION_PLACEHOLDER}
+              placeholder={i18n.translate(
+                'dataSourcesManagement.createDataSource.descriptionPlaceholder',
+                {
+                  defaultMessage: 'Description of the data source',
+                }
+              )}
               onChange={this.onChangeDescription}
               data-test-subj="createDataSourceFormDescriptionField"
             />
@@ -316,14 +342,21 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Endpoint URL */}
           <EuiFormRow
-            label={ENDPOINT_URL}
+            label={i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
+              defaultMessage: 'Endpoint URL',
+            })}
             isInvalid={!!this.state.formErrorsByField.endpoint.length}
             error={this.state.formErrorsByField.endpoint}
           >
             <EuiFieldText
               name="endpoint"
               value={this.state.endpoint || ''}
-              placeholder={ENDPOINT_PLACEHOLDER}
+              placeholder={i18n.translate(
+                'dataSourcesManagement.createDataSource.endpointPlaceholder',
+                {
+                  defaultMessage: 'Sample URL: https://connectionurl.com',
+                }
+              )}
               isInvalid={!!this.state.formErrorsByField.endpoint.length}
               onChange={this.onChangeEndpoint}
               onBlur={this.validateEndpoint}
@@ -343,8 +376,16 @@ export class CreateDataSourceForm extends React.Component<
 
           <EuiFormRow>
             <EuiText>
-              {AUTHENTICATION_METHOD_DESCRIPTION}
-              <b>{NO_AUTHENTICATION}</b>
+              <FormattedMessage
+                id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+              />
+              <b>
+                <FormattedMessage
+                  id="dataSourcesManagement.createDataSource.noAuthentication"
+                  defaultMessage="No authentication"
+                />
+              </b>
             </EuiText>
           </EuiFormRow>
 
@@ -374,7 +415,10 @@ export class CreateDataSourceForm extends React.Component<
             onClick={this.onClickCreateNewDataSource}
             data-test-subj="createDataSourceButton"
           >
-            {CREATE_DATA_SOURCE_BUTTON_TEXT}
+            <FormattedMessage
+              id="dataSourcesManagement.createDataSource.createButton"
+              defaultMessage="Create data source connection"
+            />
           </EuiButton>
         </EuiForm>
       </EuiPageContent>

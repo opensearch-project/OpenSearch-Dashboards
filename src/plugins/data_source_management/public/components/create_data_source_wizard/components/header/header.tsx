@@ -6,24 +6,34 @@
 import React from 'react';
 
 import { EuiSpacer, EuiTitle, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
-import { CREATE_DATA_SOURCE_HEADER } from '../../../text_content';
 
 export const Header = () => {
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
 
-  changeTitle(CREATE_DATA_SOURCE_HEADER);
+  changeTitle(
+    i18n.translate('dataSourcesManagement.createDataSourceHeader', {
+      defaultMessage: 'Create data source connection',
+    })
+  );
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle>
-            <h1 data-test-subj="createDataSourceHeader">{CREATE_DATA_SOURCE_HEADER}</h1>
+            <h1 data-test-subj="createDataSourceHeader">
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.createDataSourceHeader"
+                  defaultMessage="Create data source connection"
+                />
+              }
+            </h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText>

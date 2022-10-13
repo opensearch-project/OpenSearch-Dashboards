@@ -5,7 +5,11 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -94,7 +98,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                           className="euiTitle euiTitle--medium"
                           data-test-subj="createDataSourceHeader"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSourceHeader"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </h1>
                       </EuiTitle>
                       <EuiSpacer
@@ -252,7 +264,11 @@ exports[`Datasource Management: Create Datasource form should create data source
                 hasEmptyLabelSpace={false}
                 label={
                   <React.Fragment>
-                    Description
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="dataSourceManagement.createDataSource.description"
+                      values={Object {}}
+                    />
                      
                     <i
                       style={
@@ -261,8 +277,13 @@ exports[`Datasource Management: Create Datasource form should create data source
                         }
                       }
                     >
-                      - 
-                      optional
+                      -
+                       
+                      <FormattedMessage
+                        defaultMessage="optional"
+                        id="dataSourcesManagement.createDataSource.optionalText"
+                        values={Object {}}
+                      />
                     </i>
                   </React.Fragment>
                 }
@@ -285,7 +306,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         className="euiFormLabel euiFormRow__label"
                         htmlFor="generated-id"
                       >
-                        Description
+                        <FormattedMessage
+                          defaultMessage="Description"
+                          id="dataSourceManagement.createDataSource.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Description
+                          </span>
+                        </FormattedMessage>
                          
                         <i
                           style={
@@ -294,8 +323,17 @@ exports[`Datasource Management: Create Datasource form should create data source
                             }
                           }
                         >
-                          - 
-                          optional
+                          -
+                           
+                          <FormattedMessage
+                            defaultMessage="optional"
+                            id="dataSourcesManagement.createDataSource.optionalText"
+                            values={Object {}}
+                          >
+                            <span>
+                              optional
+                            </span>
+                          </FormattedMessage>
                         </i>
                       </label>
                     </EuiFormLabel>
@@ -487,9 +525,25 @@ exports[`Datasource Management: Create Datasource form should create data source
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <FormattedMessage
+                          defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+                          id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                          values={Object {}}
+                        >
+                          <span>
+                            Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                          </span>
+                        </FormattedMessage>
                         <b>
-                          No authentication
+                          <FormattedMessage
+                            defaultMessage="No authentication"
+                            id="dataSourcesManagement.createDataSource.noAuthentication"
+                            values={Object {}}
+                          >
+                            <span>
+                              No authentication
+                            </span>
+                          </FormattedMessage>
                         </b>
                       </div>
                     </EuiText>
@@ -663,7 +717,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         <span
                           className="euiButton__text"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSource.createButton"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -684,7 +746,11 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -759,7 +825,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                           className="euiTitle euiTitle--medium"
                           data-test-subj="createDataSourceHeader"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSourceHeader"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </h1>
                       </EuiTitle>
                       <EuiSpacer
@@ -917,7 +991,11 @@ exports[`Datasource Management: Create Datasource form should create data source
                 hasEmptyLabelSpace={false}
                 label={
                   <React.Fragment>
-                    Description
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="dataSourceManagement.createDataSource.description"
+                      values={Object {}}
+                    />
                      
                     <i
                       style={
@@ -926,8 +1004,13 @@ exports[`Datasource Management: Create Datasource form should create data source
                         }
                       }
                     >
-                      - 
-                      optional
+                      -
+                       
+                      <FormattedMessage
+                        defaultMessage="optional"
+                        id="dataSourcesManagement.createDataSource.optionalText"
+                        values={Object {}}
+                      />
                     </i>
                   </React.Fragment>
                 }
@@ -950,7 +1033,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         className="euiFormLabel euiFormRow__label"
                         htmlFor="generated-id"
                       >
-                        Description
+                        <FormattedMessage
+                          defaultMessage="Description"
+                          id="dataSourceManagement.createDataSource.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Description
+                          </span>
+                        </FormattedMessage>
                          
                         <i
                           style={
@@ -959,8 +1050,17 @@ exports[`Datasource Management: Create Datasource form should create data source
                             }
                           }
                         >
-                          - 
-                          optional
+                          -
+                           
+                          <FormattedMessage
+                            defaultMessage="optional"
+                            id="dataSourcesManagement.createDataSource.optionalText"
+                            values={Object {}}
+                          >
+                            <span>
+                              optional
+                            </span>
+                          </FormattedMessage>
                         </i>
                       </label>
                     </EuiFormLabel>
@@ -1152,9 +1252,25 @@ exports[`Datasource Management: Create Datasource form should create data source
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <FormattedMessage
+                          defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+                          id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                          values={Object {}}
+                        >
+                          <span>
+                            Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                          </span>
+                        </FormattedMessage>
                         <b>
-                          No authentication
+                          <FormattedMessage
+                            defaultMessage="No authentication"
+                            id="dataSourcesManagement.createDataSource.noAuthentication"
+                            values={Object {}}
+                          >
+                            <span>
+                              No authentication
+                            </span>
+                          </FormattedMessage>
                         </b>
                       </div>
                     </EuiText>
@@ -1569,7 +1685,15 @@ exports[`Datasource Management: Create Datasource form should create data source
                         <span
                           className="euiButton__text"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSource.createButton"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -1590,7 +1714,11 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
@@ -1622,7 +1750,15 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                           className="euiTitle euiTitle--medium"
                           data-test-subj="createDataSourceHeader"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSourceHeader"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </h1>
                       </EuiTitle>
                       <EuiSpacer
@@ -1780,7 +1916,11 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                 hasEmptyLabelSpace={false}
                 label={
                   <React.Fragment>
-                    Description
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="dataSourceManagement.createDataSource.description"
+                      values={Object {}}
+                    />
                      
                     <i
                       style={
@@ -1789,8 +1929,13 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         }
                       }
                     >
-                      - 
-                      optional
+                      -
+                       
+                      <FormattedMessage
+                        defaultMessage="optional"
+                        id="dataSourcesManagement.createDataSource.optionalText"
+                        values={Object {}}
+                      />
                     </i>
                   </React.Fragment>
                 }
@@ -1813,7 +1958,15 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         className="euiFormLabel euiFormRow__label"
                         htmlFor="generated-id"
                       >
-                        Description
+                        <FormattedMessage
+                          defaultMessage="Description"
+                          id="dataSourceManagement.createDataSource.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Description
+                          </span>
+                        </FormattedMessage>
                          
                         <i
                           style={
@@ -1822,8 +1975,17 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                             }
                           }
                         >
-                          - 
-                          optional
+                          -
+                           
+                          <FormattedMessage
+                            defaultMessage="optional"
+                            id="dataSourcesManagement.createDataSource.optionalText"
+                            values={Object {}}
+                          >
+                            <span>
+                              optional
+                            </span>
+                          </FormattedMessage>
                         </i>
                       </label>
                     </EuiFormLabel>
@@ -2015,9 +2177,25 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <FormattedMessage
+                          defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+                          id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                          values={Object {}}
+                        >
+                          <span>
+                            Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                          </span>
+                        </FormattedMessage>
                         <b>
-                          No authentication
+                          <FormattedMessage
+                            defaultMessage="No authentication"
+                            id="dataSourcesManagement.createDataSource.noAuthentication"
+                            values={Object {}}
+                          >
+                            <span>
+                              No authentication
+                            </span>
+                          </FormattedMessage>
                         </b>
                       </div>
                     </EuiText>
@@ -2432,7 +2610,15 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                         <span
                           className="euiButton__text"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSource.createButton"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </span>
                       </span>
                     </EuiButtonContent>
@@ -2453,7 +2639,11 @@ exports[`Datasource Management: Create Datasource form should throw validation e
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
@@ -2485,7 +2675,15 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                           className="euiTitle euiTitle--medium"
                           data-test-subj="createDataSourceHeader"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSourceHeader"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </h1>
                       </EuiTitle>
                       <EuiSpacer
@@ -2660,7 +2858,11 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                 hasEmptyLabelSpace={false}
                 label={
                   <React.Fragment>
-                    Description
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="dataSourceManagement.createDataSource.description"
+                      values={Object {}}
+                    />
                      
                     <i
                       style={
@@ -2669,8 +2871,13 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         }
                       }
                     >
-                      - 
-                      optional
+                      -
+                       
+                      <FormattedMessage
+                        defaultMessage="optional"
+                        id="dataSourcesManagement.createDataSource.optionalText"
+                        values={Object {}}
+                      />
                     </i>
                   </React.Fragment>
                 }
@@ -2693,7 +2900,15 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         className="euiFormLabel euiFormRow__label"
                         htmlFor="generated-id"
                       >
-                        Description
+                        <FormattedMessage
+                          defaultMessage="Description"
+                          id="dataSourceManagement.createDataSource.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Description
+                          </span>
+                        </FormattedMessage>
                          
                         <i
                           style={
@@ -2702,8 +2917,17 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                             }
                           }
                         >
-                          - 
-                          optional
+                          -
+                           
+                          <FormattedMessage
+                            defaultMessage="optional"
+                            id="dataSourcesManagement.createDataSource.optionalText"
+                            values={Object {}}
+                          >
+                            <span>
+                              optional
+                            </span>
+                          </FormattedMessage>
                         </i>
                       </label>
                     </EuiFormLabel>
@@ -2895,9 +3119,25 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                        <FormattedMessage
+                          defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+                          id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                          values={Object {}}
+                        >
+                          <span>
+                            Provide authentication details require to gain access to the endpoint. If no authentication is required, choose 
+                          </span>
+                        </FormattedMessage>
                         <b>
-                          No authentication
+                          <FormattedMessage
+                            defaultMessage="No authentication"
+                            id="dataSourcesManagement.createDataSource.noAuthentication"
+                            values={Object {}}
+                          >
+                            <span>
+                              No authentication
+                            </span>
+                          </FormattedMessage>
                         </b>
                       </div>
                     </EuiText>
@@ -3312,7 +3552,15 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                         <span
                           className="euiButton__text"
                         >
-                          Create data source connection
+                          <FormattedMessage
+                            defaultMessage="Create data source connection"
+                            id="dataSourcesManagement.createDataSource.createButton"
+                            values={Object {}}
+                          >
+                            <span>
+                              Create data source connection
+                            </span>
+                          </FormattedMessage>
                         </span>
                       </span>
                     </EuiButtonContent>

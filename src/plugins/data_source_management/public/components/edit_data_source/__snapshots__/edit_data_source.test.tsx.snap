@@ -207,9 +207,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                   className="euiText euiText--medium"
                 >
                   <h3>
-                     
-                    Connection Details
-                     
+                    <FormattedMessage
+                      defaultMessage="Connection Details"
+                      id="dataSourcesManagement.editDataSource.connectionDetailsText"
+                      values={Object {}}
+                    >
+                      <span>
+                        Connection Details
+                      </span>
+                    </FormattedMessage>
                   </h3>
                 </div>
               </EuiText>
@@ -223,12 +229,20 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
               <EuiDescribedFormGroup
                 description={
                   <p>
-                    This connection information is used for reference in tables and when adding to a data source connection
+                    <FormattedMessage
+                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                      id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                      values={Object {}}
+                    />
                   </p>
                 }
                 title={
                   <h4>
-                    Object Details
+                    <FormattedMessage
+                      defaultMessage="Object Details"
+                      id="dataSourcesManagement.editDataSource.objectDetailsText"
+                      values={Object {}}
+                    />
                   </h4>
                 }
               >
@@ -253,7 +267,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             <h4
                               className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
                             >
-                              Object Details
+                              <FormattedMessage
+                                defaultMessage="Object Details"
+                                id="dataSourcesManagement.editDataSource.objectDetailsText"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Object Details
+                                </span>
+                              </FormattedMessage>
                             </h4>
                           </EuiTitle>
                           <EuiText
@@ -272,7 +294,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                   className="euiTextColor euiTextColor--subdued"
                                 >
                                   <p>
-                                    This connection information is used for reference in tables and when adding to a data source connection
+                                    <FormattedMessage
+                                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                      id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        This connection information is used for reference in tables and when adding to a data source connection
+                                      </span>
+                                    </FormattedMessage>
                                   </p>
                                 </div>
                               </EuiTextColor>
@@ -378,7 +408,11 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             hasEmptyLabelSpace={false}
                             label={
                               <React.Fragment>
-                                Description
+                                <FormattedMessage
+                                  defaultMessage="Description"
+                                  id="dataSourceManagement.editDataSource.description"
+                                  values={Object {}}
+                                />
                                  
                                 <i
                                   style={
@@ -387,8 +421,13 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                     }
                                   }
                                 >
-                                  - 
-                                  optional
+                                  -
+                                   
+                                  <FormattedMessage
+                                    defaultMessage="optional"
+                                    id="dataSourcesManagement.editDataSource.optionalText"
+                                    values={Object {}}
+                                  />
                                 </i>
                               </React.Fragment>
                             }
@@ -412,7 +451,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                     className="euiFormLabel euiFormRow__label"
                                     htmlFor="generated-id"
                                   >
-                                    Description
+                                    <FormattedMessage
+                                      defaultMessage="Description"
+                                      id="dataSourceManagement.editDataSource.description"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        Description
+                                      </span>
+                                    </FormattedMessage>
                                      
                                     <i
                                       style={
@@ -421,8 +468,17 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                         }
                                       }
                                     >
-                                      - 
-                                      optional
+                                      -
+                                       
+                                      <FormattedMessage
+                                        defaultMessage="optional"
+                                        id="dataSourcesManagement.editDataSource.optionalText"
+                                        values={Object {}}
+                                      >
+                                        <span>
+                                          optional
+                                        </span>
+                                      </FormattedMessage>
                                     </i>
                                   </label>
                                 </EuiFormLabel>
@@ -498,9 +554,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                   className="euiText euiText--medium"
                 >
                   <h3>
-                     
-                    Endpoint
-                     
+                    <FormattedMessage
+                      defaultMessage="Endpoint"
+                      id="dataSourcesManagement.editDataSource.endpointTitle"
+                      values={Object {}}
+                    >
+                      <span>
+                        Endpoint
+                      </span>
+                    </FormattedMessage>
                   </h3>
                 </div>
               </EuiText>
@@ -514,12 +576,20 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
               <EuiDescribedFormGroup
                 description={
                   <p>
-                    This connection information is used for reference in tables and when adding to a data source connection
+                    <FormattedMessage
+                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                      id="dataSourcesManagement.editDataSource.endpointDescription"
+                      values={Object {}}
+                    />
                   </p>
                 }
                 title={
                   <h4>
-                    Endpoint URL
+                    <FormattedMessage
+                      defaultMessage="Endpoint"
+                      id="dataSourcesManagement.editDataSource.endpointTitle"
+                      values={Object {}}
+                    />
                   </h4>
                 }
               >
@@ -544,7 +614,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             <h4
                               className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
                             >
-                              Endpoint URL
+                              <FormattedMessage
+                                defaultMessage="Endpoint"
+                                id="dataSourcesManagement.editDataSource.endpointTitle"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Endpoint
+                                </span>
+                              </FormattedMessage>
                             </h4>
                           </EuiTitle>
                           <EuiText
@@ -563,7 +641,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                   className="euiTextColor euiTextColor--subdued"
                                 >
                                   <p>
-                                    This connection information is used for reference in tables and when adding to a data source connection
+                                    <FormattedMessage
+                                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                      id="dataSourcesManagement.editDataSource.endpointDescription"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        This connection information is used for reference in tables and when adding to a data source connection
+                                      </span>
+                                    </FormattedMessage>
                                   </p>
                                 </div>
                               </EuiTextColor>
@@ -680,9 +766,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                   className="euiText euiText--medium"
                 >
                   <h3>
-                     
-                    Authentication
-                     
+                    <FormattedMessage
+                      defaultMessage="Authentication"
+                      id="dataSourcesManagement.editDataSource.authenticationTitle"
+                      values={Object {}}
+                    >
+                      <span>
+                        Authentication
+                      </span>
+                    </FormattedMessage>
                   </h3>
                 </div>
               </EuiText>
@@ -696,7 +788,11 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
               <EuiDescribedFormGroup
                 title={
                   <h4>
-                    Authentication Method
+                    <FormattedMessage
+                      defaultMessage="Authentication Method"
+                      id="dataSourcesManagement.editDataSource.authenticationMethod"
+                      values={Object {}}
+                    />
                   </h4>
                 }
               >
@@ -721,7 +817,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             <h4
                               className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
                             >
-                              Authentication Method
+                              <FormattedMessage
+                                defaultMessage="Authentication Method"
+                                id="dataSourcesManagement.editDataSource.authenticationMethod"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Authentication Method
+                                </span>
+                              </FormattedMessage>
                             </h4>
                           </EuiTitle>
                         </div>
@@ -1164,7 +1268,15 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                                   <span
                                                     className="euiButton__text"
                                                   >
-                                                    Update stored password
+                                                    <FormattedMessage
+                                                      defaultMessage="Update stored password"
+                                                      id="dataSourcesManagement.editDataSource.updateStoredPassword"
+                                                      values={Object {}}
+                                                    >
+                                                      <span>
+                                                        Update stored password
+                                                      </span>
+                                                    </FormattedMessage>
                                                   </span>
                                                 </span>
                                               </EuiButtonContent>

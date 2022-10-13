@@ -21,6 +21,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { Header } from '../header';
 import {
   AuthType,
   credentialSourceOptions,
@@ -28,7 +31,6 @@ import {
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
 } from '../../../../types';
-import { Header } from '../header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import {
   CreateEditDataSourceValidation,
@@ -37,28 +39,6 @@ import {
   performDataSourceFormValidation,
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
-import {
-  AUTHENTICATION_METHOD,
-  AUTHENTICATION_TITLE,
-  CANCEL_CHANGES,
-  CONNECTION_DETAILS_TITLE,
-  DATA_SOURCE_DESCRIPTION_PLACEHOLDER,
-  DATA_SOURCE_PASSWORD_PLACEHOLDER,
-  USERNAME_PLACEHOLDER,
-  CREDENTIAL,
-  DESCRIPTION,
-  ENDPOINT_DESCRIPTION,
-  ENDPOINT_TITLE,
-  ENDPOINT_URL,
-  OBJECT_DETAILS_DESCRIPTION,
-  OBJECT_DETAILS_TITLE,
-  OPTIONAL,
-  PASSWORD,
-  SAVE_CHANGES,
-  TITLE,
-  UPDATE_STORED_PASSWORD,
-  USERNAME,
-} from '../../../text_content';
 
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
@@ -299,7 +279,12 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           onClick={this.onClickUpdatePassword}
           data-test-subj="editDatasourceUpdatePasswordBtn"
         >
-          {UPDATE_STORED_PASSWORD}
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.editDataSource.updateStoredPassword"
+              defaultMessage="Update stored password"
+            />
+          }
         </EuiButton>
 
         {this.state.showUpdatePasswordModal ? (
@@ -324,10 +309,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (label: string) => {
+  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
     return (
       <>
-        {label} <i style={{ fontWeight: 'normal' }}>- {OPTIONAL}</i>
+        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
+        <i style={{ fontWeight: 'normal' }}>
+          -{' '}
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.editDataSource.optionalText"
+              defaultMessage="optional"
+            />
+          }
+        </i>
       </>
     );
   };
@@ -337,18 +331,45 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="m">
-          <h3> {CONNECTION_DETAILS_TITLE} </h3>
+          <h3>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.connectionDetailsText"
+                defaultMessage="Connection Details"
+              />
+            }
+          </h3>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>{OBJECT_DETAILS_TITLE}</h4>}
-          description={<p>{OBJECT_DETAILS_DESCRIPTION}</p>}
+          title={
+            <h4>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.objectDetailsText"
+                  defaultMessage="Object Details"
+                />
+              }
+            </h4>
+          }
+          description={
+            <p>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                  defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                />
+              }
+            </p>
+          }
         >
           {/* Title */}
           <EuiFormRow
-            label={TITLE}
+            label={i18n.translate('dataSourcesManagement.editDataSource.title', {
+              defaultMessage: 'Title',
+            })}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
             data-test-subj="editDataSourceTitleFormRow"
@@ -356,7 +377,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             <EuiFieldText
               name="dataSourceTitle"
               value={this.state.title || ''}
-              placeholder={TITLE}
+              placeholder={i18n.translate('dataSourcesManagement.editDataSource.titlePlaceHolder', {
+                defaultMessage: 'Title',
+              })}
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
               onBlur={this.validateTitle}
@@ -364,13 +387,21 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           </EuiFormRow>
           {/* Description */}
           <EuiFormRow
-            label={this.renderFieldLabelAsOptional(DESCRIPTION)}
+            label={this.renderFieldLabelAsOptional(
+              'dataSourceManagement.editDataSource.description',
+              'Description'
+            )}
             data-test-subj="editDataSourceDescriptionFormRow"
           >
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
-              placeholder={DATA_SOURCE_DESCRIPTION_PLACEHOLDER}
+              placeholder={i18n.translate(
+                'dataSourcesManagement.editDataSource.descriptionPlaceholder',
+                {
+                  defaultMessage: 'Description of the data source',
+                }
+              )}
               onChange={this.onChangeDescription}
             />
           </EuiFormRow>
@@ -384,17 +415,46 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="m">
-          <h3> {ENDPOINT_TITLE} </h3>
+          <h3>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.endpointTitle"
+                defaultMessage="Endpoint"
+              />
+            }
+          </h3>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
-          title={<h4>{ENDPOINT_URL}</h4>}
-          description={<p>{ENDPOINT_DESCRIPTION}</p>}
+          title={
+            <h4>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.endpointTitle"
+                  defaultMessage="Endpoint"
+                />
+              }
+            </h4>
+          }
+          description={
+            <p>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.endpointDescription"
+                  defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                />
+              }
+            </p>
+          }
         >
           {/* Endpoint */}
-          <EuiFormRow label={ENDPOINT_URL}>
+          <EuiFormRow
+            label={i18n.translate('dataSourcesManagement.editDataSource.endpointURL', {
+              defaultMessage: 'Endpoint URL',
+            })}
+          >
             <EuiFieldText
               name="endpoint"
               value={this.props.existingDataSource.endpoint}
@@ -413,12 +473,30 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="m">
-          <h3> {AUTHENTICATION_TITLE} </h3>
+          <h3>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.authenticationTitle"
+                defaultMessage="Authentication"
+              />
+            }
+          </h3>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
-        <EuiDescribedFormGroup title={<h4>{AUTHENTICATION_METHOD}</h4>}>
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.authenticationMethod"
+                  defaultMessage="Authentication Method"
+                />
+              }
+            </h4>
+          }
+        >
           {this.renderCredentialsSection()}
         </EuiDescribedFormGroup>
       </EuiPanel>
@@ -430,7 +508,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <>
         {/* Auth type select */}
-        <EuiFormRow label={CREDENTIAL}>
+        <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.editDataSource.credential', {
+            defaultMessage: 'Credential',
+          })}
+        >
           <EuiRadioGroup
             options={credentialSourceOptions}
             idSelected={this.state.auth.type}
@@ -452,13 +534,20 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       <>
         {/* Username */}
         <EuiFormRow
-          label={USERNAME}
+          label={i18n.translate('dataSourcesManagement.editDataSource.username', {
+            defaultMessage: 'Username',
+          })}
           isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
           data-test-subj="editDatasourceUsernameFormRow"
         >
           <EuiFieldText
             name="datasourceUsername"
-            placeholder={USERNAME_PLACEHOLDER}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.editDataSource.usernamePlaceholder',
+              {
+                defaultMessage: 'Username to connect to data source',
+              }
+            )}
             value={this.state.auth.credentials.username || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
@@ -468,13 +557,20 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {/* Password */}
         <EuiFormRow
-          label={PASSWORD}
+          label={i18n.translate('dataSourcesManagement.editDataSource.password', {
+            defaultMessage: 'Password',
+          })}
           isInvalid={!!this.state.formErrorsByField.createCredential?.password?.length}
         >
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFieldPassword
-                placeholder={DATA_SOURCE_PASSWORD_PLACEHOLDER}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.editDataSource.passwordPlaceholder',
+                  {
+                    defaultMessage: 'Password to connect to data source',
+                  }
+                )}
                 type={'dual'}
                 value={
                   this.props.existingDataSource.auth.type !== AuthType.NoAuth
@@ -543,7 +639,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               aria-describedby="aria-describedby.countOfUnsavedSettings"
               data-test-subj="datasource-edit-cancelButton"
             >
-              {CANCEL_CHANGES}
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.cancelButtonLabel"
+                defaultMessage="Cancel changes"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -557,7 +656,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               onClick={this.onClickUpdateDataSource}
               data-test-subj="datasource-edit-saveButton"
             >
-              {SAVE_CHANGES}
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.saveButtonLabel"
+                defaultMessage="Save changes"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

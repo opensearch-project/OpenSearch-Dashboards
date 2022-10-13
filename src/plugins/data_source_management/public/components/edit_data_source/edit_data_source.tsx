@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import {
@@ -20,7 +21,6 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
-import { DATA_SOURCE_NOT_FOUND } from '../text_content';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -132,7 +132,16 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   if (!isLoading && !dataSource?.endpoint) {
-    return <h1>{DATA_SOURCE_NOT_FOUND}</h1>;
+    return (
+      <h1>
+        {
+          <FormattedMessage
+            id="dataSourcesManagement.editDataSource.dataSourceNotFound"
+            defaultMessage="Data Source not found!"
+          />
+        }
+      </h1>
+    );
   }
 
   return (
