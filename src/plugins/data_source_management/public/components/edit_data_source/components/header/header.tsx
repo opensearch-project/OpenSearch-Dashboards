@@ -49,6 +49,7 @@ export const Header = ({
         <EuiToolTip content={DELETE_THIS_DATA_SOURCE}>
           <EuiButtonIcon
             color="danger"
+            data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
               setIsDeleteModalVisible(true);
             }}
@@ -72,6 +73,7 @@ export const Header = ({
             cancelButtonText={CANCEL_TEXT}
             confirmButtonText={DELETE_TEXT}
             defaultFocusedButton="confirm"
+            data-test-subj="editDatasourceDeleteConfirmModal"
           >
             <p>{DS_LISTING_DATA_SOURCE_DELETE_IMPACT}</p>
             <p>{DS_LISTING_DATA_SOURCE_DELETE_WARNING}</p>
@@ -85,7 +87,7 @@ export const Header = ({
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <div>
-          <EuiTitle>
+          <EuiTitle data-test-subj="editDataSourceTitle">
             <h1>{dataSourceName}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />

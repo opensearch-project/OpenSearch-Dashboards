@@ -295,7 +295,12 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderUpdatePasswordModal = () => {
     return (
       <>
-        <EuiButton onClick={this.onClickUpdatePassword}>{UPDATE_STORED_PASSWORD}</EuiButton>
+        <EuiButton
+          onClick={this.onClickUpdatePassword}
+          data-test-subj="editDatasourceUpdatePasswordBtn"
+        >
+          {UPDATE_STORED_PASSWORD}
+        </EuiButton>
 
         {this.state.showUpdatePasswordModal ? (
           <UpdatePasswordModal
@@ -346,6 +351,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             label={TITLE}
             isInvalid={!!this.state.formErrorsByField.title.length}
             error={this.state.formErrorsByField.title}
+            data-test-subj="editDataSourceTitleFormRow"
           >
             <EuiFieldText
               name="dataSourceTitle"
@@ -357,7 +363,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             />
           </EuiFormRow>
           {/* Description */}
-          <EuiFormRow label={this.renderFieldLabelAsOptional(DESCRIPTION)}>
+          <EuiFormRow
+            label={this.renderFieldLabelAsOptional(DESCRIPTION)}
+            data-test-subj="editDataSourceDescriptionFormRow"
+          >
             <EuiFieldText
               name="dataSourceDescription"
               value={this.state.description || ''}
@@ -391,6 +400,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               value={this.props.existingDataSource.endpoint}
               disabled={true}
               aria-disabled={true}
+              data-test-subj="editDatasourceEndpointField"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -426,6 +436,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             idSelected={this.state.auth.type}
             onChange={(id) => this.onChangeAuthType(id)}
             name="Credential"
+            data-test-subj="editDataSourceSelectAuthType"
           />
         </EuiFormRow>
 
@@ -443,8 +454,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         <EuiFormRow
           label={USERNAME}
           isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
+          data-test-subj="editDatasourceUsernameFormRow"
         >
           <EuiFieldText
+            name="datasourceUsername"
             placeholder={USERNAME_PLACEHOLDER}
             value={this.state.auth.credentials.username || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
@@ -492,7 +505,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       auth: this.state.auth,
     };
 
-    const { title, description, endpoint, auth } = this.props.existingDataSource;
+    const { title, description, auth } = this.props.existingDataSource;
     const isUsernameChanged: boolean =
       auth.type === formValues.auth.type &&
       auth.type === AuthType.UsernamePasswordType &&
@@ -501,7 +514,6 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (
       formValues.title !== title ||
       formValues.description !== description ||
-      formValues.endpoint !== endpoint ||
       formValues.auth.type !== auth.type ||
       isUsernameChanged
     ) {
@@ -512,50 +524,45 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   renderBottomBar = () => {
-    let bottomBar = null;
-
-    if (this.state.showUpdateOptions) {
-      bottomBar = (
-        <EuiBottomBar data-test-subj="datasource-edit-bottomBar" affordForDisplacement={true}>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            responsive={false}
-            gutterSize="s"
-          >
-            <EuiFlexItem />
-            <EuiFlexItem />
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="ghost"
-                size="s"
-                iconType="cross"
-                onClick={() => this.resetFormValues()}
-                aria-describedby="aria-describedby.countOfUnsavedSettings"
-                data-test-subj="datasource-edit-cancelButton"
-              >
-                {CANCEL_CHANGES}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                className="mgtAdvancedSettingsForm__button"
-                disabled={!this.isFormValid()}
-                color="secondary"
-                fill
-                size="s"
-                iconType="check"
-                onClick={this.onClickUpdateDataSource}
-                data-test-subj="datasource-edit-saveButton"
-              >
-                {SAVE_CHANGES}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
-      );
-    }
-    return bottomBar;
+    return (
+      <EuiBottomBar data-test-subj="datasource-edit-bottomBar" affordForDisplacement={true}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
+          <EuiFlexItem />
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="ghost"
+              size="s"
+              iconType="cross"
+              onClick={() => this.resetFormValues()}
+              aria-describedby="aria-describedby.countOfUnsavedSettings"
+              data-test-subj="datasource-edit-cancelButton"
+            >
+              {CANCEL_CHANGES}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              className="mgtAdvancedSettingsForm__button"
+              disabled={!this.isFormValid()}
+              color="secondary"
+              fill
+              size="s"
+              iconType="check"
+              onClick={this.onClickUpdateDataSource}
+              data-test-subj="datasource-edit-saveButton"
+            >
+              {SAVE_CHANGES}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    );
   };
 
   renderContent = () => {
@@ -574,7 +581,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           {this.renderAuthenticationSection()}
         </EuiForm>
 
-        {this.renderBottomBar()}
+        {this.state.showUpdateOptions ? this.renderBottomBar() : null}
 
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

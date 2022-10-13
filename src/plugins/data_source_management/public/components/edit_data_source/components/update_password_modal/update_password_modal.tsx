@@ -89,12 +89,15 @@ export const UpdatePasswordModal = ({
           <EuiForm data-test-subj="data-source-update-password">
             {/* Username */}
             <EuiFormRow label={USERNAME}>
-              <EuiText size="s">{username}</EuiText>
+              <EuiText size="s" data-test-subj="data-source-update-password-username">
+                {username}
+              </EuiText>
             </EuiFormRow>
             {/* updated Password */}
             <EuiFormRow label={NEW_PASSWORD_TEXT} isInvalid={!isNewPasswordValid}>
               <EuiFieldPassword
                 name="updatedPassword"
+                data-test-subj="updateStoredPasswordUpdatedPasswordField"
                 placeholder={NEW_PASSWORD_TEXT}
                 type={'dual'}
                 value={newPassword}
@@ -111,6 +114,7 @@ export const UpdatePasswordModal = ({
             >
               <EuiFieldPassword
                 name="confirmUpdatedPassword"
+                data-test-subj="updateStoredPasswordConfirmUpdatedPasswordField"
                 placeholder={CONFIRM_NEW_PASSWORD_TEXT}
                 type={'dual'}
                 value={confirmNewPassword}
@@ -123,10 +127,15 @@ export const UpdatePasswordModal = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeUpdatePasswordModal}>{CANCEL_TEXT}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj="updateStoredPasswordCancelBtn"
+            onClick={closeUpdatePasswordModal}
+          >
+            {CANCEL_TEXT}
+          </EuiButtonEmpty>
           <EuiButton
             type="submit"
-            form="modalFormId"
+            data-test-subj="updateStoredPasswordConfirmBtn"
             onClick={onClickUpdatePassword}
             fill={isFormValid()}
             disabled={!isFormValid()}
