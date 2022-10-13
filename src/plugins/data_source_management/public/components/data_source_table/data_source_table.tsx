@@ -317,7 +317,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiPanel hasBorder={false} hasShadow={false} style={{ textAlign: 'center' }}>
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          style={{ textAlign: 'center' }}
+          data-test-subj="datasourceTableEmptyState"
+        >
           <EuiText>
             {
               <FormattedMessage

@@ -44,6 +44,10 @@ describe('Datasource Management: Create Datasource form', () => {
       },
     });
   };
+  const blurOnField = (testSubjId: string) => {
+    component.find(testSubjId).last().simulate('focus');
+    component.find(testSubjId).last().simulate('blur');
+  };
 
   const setAuthTypeValue = (
     comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>,
@@ -61,7 +65,10 @@ describe('Datasource Management: Create Datasource form', () => {
   beforeEach(() => {
     component = mount(
       wrapWithIntl(
-        <CreateDataSourceForm handleSubmit={mockSubmitHandler} existingDatasourceNamesList={[]} />
+        <CreateDataSourceForm
+          handleSubmit={mockSubmitHandler}
+          existingDatasourceNamesList={['dup20']}
+        />
       ),
       {
         wrappingComponent: OpenSearchDashboardsContextProvider,
@@ -153,5 +160,68 @@ describe('Datasource Management: Create Datasource form', () => {
 
     expect(component).toMatchSnapshot();
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
+  });
+
+  /* Validation */
+  test('should validate title as required field & no duplicates allowed', () => {
+    /* Validate duplicate title */
+    changeTextFieldValue(titleIdentifier, 'DuP20');
+    blurOnField(titleIdentifier);
+    // @ts-ignore
+    expect(component.find(titleIdentifier).first().props().isInvalid).toBe(true);
+
+    /* change to original title */
+    changeTextFieldValue(titleIdentifier, 'test_unique_value');
+    blurOnField(titleIdentifier);
+    // @ts-ignore
+    expect(component.find(titleIdentifier).first().props().isInvalid).toBe(false);
+  });
+
+  test('should validate endpoint as required field & valid url', () => {
+    /* Validate empty endpoint */
+    changeTextFieldValue(endpointIdentifier, '');
+    blurOnField(endpointIdentifier);
+    // @ts-ignore
+    expect(component.find(endpointIdentifier).first().props().isInvalid).toBe(true);
+
+    /* Validate invalid URL */
+    changeTextFieldValue(endpointIdentifier, 'invalidURL');
+    blurOnField(endpointIdentifier);
+    // @ts-ignore
+    expect(component.find(endpointIdentifier).first().props().isInvalid).toBe(true);
+
+    /* Validate valid URL */
+    changeTextFieldValue(endpointIdentifier, 'https://connectionurl.com');
+    blurOnField(endpointIdentifier);
+    // @ts-ignore
+    expect(component.find(endpointIdentifier).first().props().isInvalid).toBe(false);
+  });
+
+  test('should validate username as required field', () => {
+    /* Validate empty username */
+    changeTextFieldValue(usernameIdentifier, '');
+    blurOnField(usernameIdentifier);
+    // @ts-ignore
+    expect(component.find(usernameIdentifier).first().props().isInvalid).toBe(true);
+
+    /* Validate valid username */
+    changeTextFieldValue(usernameIdentifier, 'admin');
+    blurOnField(usernameIdentifier);
+    // @ts-ignore
+    expect(component.find(usernameIdentifier).first().props().isInvalid).toBe(false);
+  });
+
+  test('should validate password as required field', () => {
+    /* Validate empty password */
+    changeTextFieldValue(passwordIdentifier, '');
+    blurOnField(passwordIdentifier);
+    // @ts-ignore
+    expect(component.find(passwordIdentifier).first().props().isInvalid).toBe(true);
+
+    /* Validate valid password */
+    changeTextFieldValue(passwordIdentifier, 'admin123');
+    blurOnField(passwordIdentifier);
+    // @ts-ignore
+    expect(component.find(passwordIdentifier).first().props().isInvalid).toBe(false);
   });
 });

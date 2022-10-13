@@ -5,7 +5,11 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -742,7 +746,11 @@ exports[`Datasource Management: Create Datasource form should create data source
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={
       [MockFunction] {
         "calls": Array [
@@ -1706,7 +1714,11 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
@@ -2627,7 +2639,11 @@ exports[`Datasource Management: Create Datasource form should throw validation e
   locale="en"
 >
   <CreateDataSourceForm
-    existingDatasourceNamesList={Array []}
+    existingDatasourceNamesList={
+      Array [
+        "dup20",
+      ]
+    }
     handleSubmit={[MockFunction]}
   >
     <EuiPageContent>
