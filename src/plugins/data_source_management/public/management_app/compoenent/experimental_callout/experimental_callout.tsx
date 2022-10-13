@@ -6,30 +6,47 @@
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { DocLinksStart } from 'opensearch-dashboards/public';
-import {
-  EXPERIMENTAL_FEATURE,
-  EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION,
-  DATA_SOURCE_LEAVE_FEEDBACK_TEXT,
-  DATA_SOURCE_DOCUMENTATION_TEXT,
-  DATA_SOURCE_OPEN_FORUM_TEXT,
-} from '../../../components/text_content';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export const ExperimentalCallout = ({ docLinks }: { docLinks: DocLinksStart }) => {
   return (
     <>
       <EuiCallOut
-        title={EXPERIMENTAL_FEATURE}
+        title={i18n.translate('dataSourcesManagement.experimentalFeatureCallout.title', {
+          defaultMessage: 'Experimental Feature',
+        })}
         iconType="iInCircle"
         data-test-subj="data-source-experimental-call"
       >
         <p>
-          {EXPERIMENTAL_FEATURE_CALL_OUT_DESCRIPTION}
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.experimentalFeatureCallout.description"
+              defaultMessage="The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see "
+            />
+          }
           <EuiLink href={docLinks.links.noDocumentation.indexPatterns.introduction} target="_blank">
-            {DATA_SOURCE_DOCUMENTATION_TEXT}
-          </EuiLink>{' '}
-          {DATA_SOURCE_LEAVE_FEEDBACK_TEXT}
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.experimentalFeatureCallout.documentationText"
+                defaultMessage="Data Source Documentation"
+              />
+            }
+          </EuiLink>
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.experimentalFeatureCallout.feedbackText"
+              defaultMessage="To leave feedback, visit "
+            />
+          }
           <EuiLink href={docLinks.links.noDocumentation.openSearchForum} target="_blank">
-            {DATA_SOURCE_OPEN_FORUM_TEXT}
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.experimentalFeatureCallout.openForumText"
+                defaultMessage="OpenSearch Forum"
+              />
+            }
           </EuiLink>
         </p>
       </EuiCallOut>

@@ -1,5 +1,347 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DataSourceTable should get datasources failed should render empty table 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <DataSourceTable
+    history={
+      Object {
+        "action": "PUSH",
+        "block": [MockFunction],
+        "createHref": [MockFunction],
+        "createSubHistory": [MockFunction],
+        "go": [MockFunction],
+        "goBack": [MockFunction],
+        "goForward": [MockFunction],
+        "length": 1,
+        "listen": [MockFunction],
+        "location": Object {
+          "hash": "",
+          "key": undefined,
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [MockFunction],
+        "replace": [MockFunction],
+      }
+    }
+    location={Object {}}
+    match={Object {}}
+  >
+    <EuiPageContent
+      aria-label="Data Sources"
+      data-test-subj="dataSourceTable"
+      role="region"
+    >
+      <EuiPanel
+        aria-label="Data Sources"
+        className="euiPageContent"
+        data-test-subj="dataSourceTable"
+        paddingSize="l"
+        role="region"
+      >
+        <div
+          aria-label="Data Sources"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+          data-test-subj="dataSourceTable"
+          role="region"
+        >
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiTitle>
+                    <h2
+                      className="euiTitle euiTitle--medium"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Data Sources"
+                        id="dataSourcesManagement.dataSourcesTable.title"
+                        values={Object {}}
+                      >
+                        <span>
+                          Data Sources
+                        </span>
+                      </FormattedMessage>
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="s"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--s"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p>
+                        <FormattedMessage
+                          defaultMessage="Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources."
+                          id="dataSourcesManagement.dataSourcesTable.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources.
+                          </span>
+                        </FormattedMessage>
+                      </p>
+                    </div>
+                  </EuiText>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <CreateButton
+                    history={
+                      Object {
+                        "action": "PUSH",
+                        "block": [MockFunction],
+                        "createHref": [MockFunction],
+                        "createSubHistory": [MockFunction],
+                        "go": [MockFunction],
+                        "goBack": [MockFunction],
+                        "goForward": [MockFunction],
+                        "length": 1,
+                        "listen": [MockFunction],
+                        "location": Object {
+                          "hash": "",
+                          "key": undefined,
+                          "pathname": "/",
+                          "search": "",
+                          "state": undefined,
+                        },
+                        "push": [MockFunction],
+                        "replace": [MockFunction],
+                      }
+                    }
+                  >
+                    <EuiButton
+                      data-test-subj="createDataSourceButton"
+                      fill={true}
+                      onClick={[Function]}
+                    >
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
+                        data-test-subj="createDataSourceButton"
+                        disabled={false}
+                        element="button"
+                        fill={true}
+                        isDisabled={false}
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <button
+                          className="euiButton euiButton--primary euiButton--fill"
+                          data-test-subj="createDataSourceButton"
+                          disabled={false}
+                          onClick={[Function]}
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Create data source connection"
+                                  id="dataSourcesManagement.dataSourceListing.createButton"
+                                  values={Object {}}
+                                >
+                                  <span>
+                                    Create data source connection
+                                  </span>
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
+                  </CreateButton>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+          <EuiSpacer>
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+          </EuiSpacer>
+          <EuiSpacer
+            size="l"
+          >
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+          </EuiSpacer>
+          <EuiPanel
+            data-test-subj="datasourceTableEmptyState"
+            hasBorder={false}
+            hasShadow={false}
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            <div
+              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+              data-test-subj="datasourceTableEmptyState"
+              style={
+                Object {
+                  "textAlign": "center",
+                }
+              }
+            >
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
+                >
+                  <FormattedMessage
+                    defaultMessage="No Data Source Connections have been created yet."
+                    id="dataSourcesManagement.dataSourcesTable.noData"
+                    values={Object {}}
+                  >
+                    <span>
+                      No Data Source Connections have been created yet.
+                    </span>
+                  </FormattedMessage>
+                </div>
+              </EuiText>
+              <EuiSpacer>
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <CreateButton
+                history={
+                  Object {
+                    "action": "PUSH",
+                    "block": [MockFunction],
+                    "createHref": [MockFunction],
+                    "createSubHistory": [MockFunction],
+                    "go": [MockFunction],
+                    "goBack": [MockFunction],
+                    "goForward": [MockFunction],
+                    "length": 1,
+                    "listen": [MockFunction],
+                    "location": Object {
+                      "hash": "",
+                      "key": undefined,
+                      "pathname": "/",
+                      "search": "",
+                      "state": undefined,
+                    },
+                    "push": [MockFunction],
+                    "replace": [MockFunction],
+                  }
+                }
+              >
+                <EuiButton
+                  data-test-subj="createDataSourceButton"
+                  fill={true}
+                  onClick={[Function]}
+                >
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
+                    data-test-subj="createDataSourceButton"
+                    disabled={false}
+                    element="button"
+                    fill={true}
+                    isDisabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <button
+                      className="euiButton euiButton--primary euiButton--fill"
+                      data-test-subj="createDataSourceButton"
+                      disabled={false}
+                      onClick={[Function]}
+                      style={
+                        Object {
+                          "minWidth": undefined,
+                        }
+                      }
+                      type="button"
+                    >
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconSide="left"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
+                      >
+                        <span
+                          className="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            className="euiButton__text"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Create data source connection"
+                              id="dataSourcesManagement.dataSourceListing.createButton"
+                              values={Object {}}
+                            >
+                              <span>
+                                Create data source connection
+                              </span>
+                            </FormattedMessage>
+                          </span>
+                        </span>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </CreateButton>
+            </div>
+          </EuiPanel>
+          <EuiSpacer
+            size="l"
+          >
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+          </EuiSpacer>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </DataSourceTable>
+</IntlProvider>
+`;
+
 exports[`DataSourceTable should get datasources successful should render normally 1`] = `
 <IntlProvider
   locale="en"
@@ -141,7 +483,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                     <h2
                       className="euiTitle euiTitle--medium"
                     >
-                      Data Sources
+                      <FormattedMessage
+                        defaultMessage="Data Sources"
+                        id="dataSourcesManagement.dataSourcesTable.title"
+                        values={Object {}}
+                      >
+                        <span>
+                          Data Sources
+                        </span>
+                      </FormattedMessage>
                     </h2>
                   </EuiTitle>
                   <EuiSpacer
@@ -156,7 +506,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                       className="euiText euiText--medium"
                     >
                       <p>
-                        Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources.
+                        <FormattedMessage
+                          defaultMessage="Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources."
+                          id="dataSourcesManagement.dataSourcesTable.description"
+                          values={Object {}}
+                        >
+                          <span>
+                            Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources.
+                          </span>
+                        </FormattedMessage>
                       </p>
                     </div>
                   </EuiText>
@@ -311,7 +669,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <span
                                 className="euiButton__text"
                               >
-                                Create data source connection
+                                <FormattedMessage
+                                  defaultMessage="Create data source connection"
+                                  id="dataSourcesManagement.dataSourceListing.createButton"
+                                  values={Object {}}
+                                >
+                                  <span>
+                                    Create data source connection
+                                  </span>
+                                </FormattedMessage>
                               </span>
                             </span>
                           </EuiButtonContent>
