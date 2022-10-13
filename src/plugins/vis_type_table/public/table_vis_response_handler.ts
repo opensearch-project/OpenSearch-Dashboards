@@ -49,7 +49,7 @@ export interface TableGroup {
 
 export interface TableContext {
   table?: Table;
-  tableGroups?: TableGroup[];
+  tableGroups: TableGroup[];
   direction?: 'row' | 'column';
 }
 
