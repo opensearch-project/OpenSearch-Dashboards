@@ -287,6 +287,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                           className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
                         >
                           <EuiFormRow
+                            data-test-subj="editDataSourceTitleFormRow"
                             describedByIds={Array []}
                             display="row"
                             error={Array []}
@@ -299,6 +300,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                           >
                             <div
                               className="euiFormRow"
+                              data-test-subj="editDataSourceTitleFormRow"
                               id="generated-id-row"
                             >
                               <div
@@ -368,6 +370,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             </div>
                           </EuiFormRow>
                           <EuiFormRow
+                            data-test-subj="editDataSourceDescriptionFormRow"
                             describedByIds={Array []}
                             display="row"
                             fullWidth={false}
@@ -393,6 +396,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                           >
                             <div
                               className="euiFormRow"
+                              data-test-subj="editDataSourceDescriptionFormRow"
                               id="generated-id-row"
                             >
                               <div
@@ -608,6 +612,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                               >
                                 <EuiFieldText
                                   aria-disabled={true}
+                                  data-test-subj="editDatasourceEndpointField"
                                   disabled={true}
                                   id="generated-id"
                                   name="endpoint"
@@ -629,6 +634,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                           <input
                                             aria-disabled={true}
                                             className="euiFieldText"
+                                            data-test-subj="editDatasourceEndpointField"
                                             disabled={true}
                                             id="generated-id"
                                             name="endpoint"
@@ -760,6 +766,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                 className="euiFormRow__fieldWrapper"
                               >
                                 <EuiRadioGroup
+                                  data-test-subj="editDataSourceSelectAuthType"
                                   id="generated-id"
                                   idSelected="username_password"
                                   name="Credential"
@@ -780,6 +787,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                   }
                                 >
                                   <div
+                                    data-test-subj="editDataSourceSelectAuthType"
                                     id="generated-id"
                                     onBlur={[Function]}
                                     onFocus={[Function]}
@@ -857,6 +865,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                             />
                           </EuiSpacer>
                           <EuiFormRow
+                            data-test-subj="editDatasourceUsernameFormRow"
                             describedByIds={Array []}
                             display="row"
                             fullWidth={false}
@@ -868,6 +877,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                           >
                             <div
                               className="euiFormRow"
+                              data-test-subj="editDatasourceUsernameFormRow"
                               id="generated-id-row"
                             >
                               <div
@@ -896,6 +906,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                 <EuiFieldText
                                   id="generated-id"
                                   isInvalid={false}
+                                  name="datasourceUsername"
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
@@ -918,6 +929,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                           <input
                                             className="euiFieldText"
                                             id="generated-id"
+                                            name="datasourceUsername"
                                             onBlur={[Function]}
                                             onChange={[Function]}
                                             onFocus={[Function]}
@@ -1113,10 +1125,12 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                         className="euiFlexItem"
                                       >
                                         <EuiButton
+                                          data-test-subj="editDatasourceUpdatePasswordBtn"
                                           onClick={[Function]}
                                         >
                                           <EuiButtonDisplay
                                             baseClassName="euiButton"
+                                            data-test-subj="editDatasourceUpdatePasswordBtn"
                                             disabled={false}
                                             element="button"
                                             isDisabled={false}
@@ -1125,6 +1139,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                           >
                                             <button
                                               className="euiButton euiButton--primary"
+                                              data-test-subj="editDatasourceUpdatePasswordBtn"
                                               disabled={false}
                                               onClick={[Function]}
                                               style={
