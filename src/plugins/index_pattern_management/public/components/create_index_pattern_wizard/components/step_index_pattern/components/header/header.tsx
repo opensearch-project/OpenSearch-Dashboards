@@ -103,14 +103,14 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiForm isInvalid={isInputInvalid}>
-            {dataSourceEnabled
+            {dataSourceEnabled && dataSourceRef?.title
               ? renderDataSourceAndIndexPatternInput(
                   isInputInvalid,
                   errors,
                   characterList,
                   query,
                   onQueryChanged,
-                  dataSourceRef!
+                  dataSourceRef.title
                 )
               : renderIndexPatternInput(
                   isInputInvalid,
@@ -216,7 +216,7 @@ const renderDataSourceAndIndexPatternInput = (
   characterList: string,
   query: string,
   onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  dataSourceRef: DataSourceRef
+  dataSourceTitle: string
 ) => {
   return (
     <EuiFlexGroup gutterSize="none">
@@ -239,7 +239,7 @@ const renderDataSourceAndIndexPatternInput = (
                 defaultMessage: 'Data source name',
               }
             )}
-            value={dataSourceRef!.title}
+            value={dataSourceTitle}
             isInvalid={isInputInvalid}
             disabled={true}
             data-test-subj="createIndexPatternDataSourceName"
