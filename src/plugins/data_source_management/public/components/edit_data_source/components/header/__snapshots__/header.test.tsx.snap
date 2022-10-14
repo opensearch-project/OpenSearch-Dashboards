@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Datasource Management: Edit Datasource Header do not show delete icon should render normally 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <Header
+    dataSourceName="testTest20"
+    onClickDeleteIcon={
+      [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    showDeleteIcon={false}
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div>
+              <EuiTitle
+                data-test-subj="editDataSourceTitle"
+              >
+                <h1
+                  className="euiTitle euiTitle--medium"
+                  data-test-subj="editDataSourceTitle"
+                >
+                  testTest20
+                </h1>
+              </EuiTitle>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+            </div>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </Header>
+</IntlProvider>
+`;
+
+exports[`Datasource Management: Edit Datasource Header show delete icon should render normally 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <Header
+    dataSourceName="testTest20"
+    onClickDeleteIcon={[MockFunction]}
+    showDeleteIcon={true}
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div>
+              <EuiTitle
+                data-test-subj="editDataSourceTitle"
+              >
+                <h1
+                  className="euiTitle euiTitle--medium"
+                  data-test-subj="editDataSourceTitle"
+                >
+                  testTest20
+                </h1>
+              </EuiTitle>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+            </div>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <EuiToolTip
+              content="Delete this Data Source"
+              delay="regular"
+              position="top"
+            >
+              <span
+                className="euiToolTipAnchor"
+                onKeyUp={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <EuiButtonIcon
+                  aria-label="Delete this Data Source"
+                  color="danger"
+                  data-test-subj="editDatasourceDeleteIcon"
+                  iconSize="m"
+                  iconType="trash"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  size="m"
+                >
+                  <button
+                    aria-label="Delete this Data Source"
+                    className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--medium"
+                    data-test-subj="editDatasourceDeleteIcon"
+                    disabled={false}
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="trash"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="trash"
+                        size="m"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </span>
+            </EuiToolTip>
+          </div>
+        </EuiFlexItem>
+      </div>
+    </EuiFlexGroup>
+  </Header>
+</IntlProvider>
+`;

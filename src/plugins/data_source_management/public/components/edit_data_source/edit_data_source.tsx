@@ -32,7 +32,7 @@ const defaultDataSource: DataSourceAttributes = {
   },
 };
 
-const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
+export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
   props: RouteComponentProps<{ id: string }>
 ) => {
   /* Initialization */
@@ -65,6 +65,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
           );
         }
       } catch (e) {
+        setDataSource(defaultDataSource);
         handleDisplayToastMessage({
           id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
           defaultMessage: 'Unable to find the Data Source.',
@@ -113,7 +114,7 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   /* Render the edit wizard */
   const renderContent = () => {
     if (!isLoading && (!dataSource || !dataSource.id)) {
-      return <h1>Data Source not found!</h1>;
+      return <h1 data-test-subj="dataSourceNotFound">Data Source not found!</h1>;
     }
     return (
       <>
