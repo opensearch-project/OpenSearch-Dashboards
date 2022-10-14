@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { isEqual, orderBy } from 'lodash';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { orderBy } from 'lodash';
 import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -32,7 +32,7 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
   const currentColState = useRef<{
     columnsWidth: ColumnWidth[];
   }>({
-    columnsWidth: handlers.uiState.get('vis.columnsWidth'),
+    columnsWidth: handlers.uiState.get('vis.columnsWidth') || [],
   });
 
   const sortedRows = useMemo(() => {
@@ -44,9 +44,15 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
 
   const renderCellValue = useMemo(() => {
     return (({ rowIndex, columnId }) => {
-      return sortedRows.hasOwnProperty(rowIndex) ? sortedRows[rowIndex][columnId] || null : null;
+      const rawContent = sortedRows[rowIndex][columnId];
+      const colIndex = columns.findIndex((col) => col.id === columnId);
+      const column = columns[colIndex];
+      // use formatter to format raw content
+      // this can format date and percentage data
+      const formattedContent = column.formatter.convert(rawContent, 'text');
+      return sortedRows.hasOwnProperty(rowIndex) ? formattedContent || null : null;
     }) as EuiDataGridProps['renderCellValue'];
-  }, [sortedRows]);
+  }, [sortedRows, columns]);
 
   const dataGridColumns = getDataGridColumns(
     sortedRows,
@@ -57,7 +63,7 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
   );
 
   const sortedColumns = useMemo(() => {
-    const sort = handlers.uiState.get('vis.sortColumn');
+    const sort: SortColumn = handlers.uiState.get('vis.sortColumn') || {};
     return sort && sort.colIndex !== null && sort.direction
       ? [{ id: dataGridColumns[sort.colIndex]?.id, direction: sort.direction }]
       : [];
@@ -97,19 +103,39 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
     [columns, currentColState, handlers.uiState]
   );
 
+  const footerCellValue = visConfig.showTotal
+    ? // @ts-expect-error
+    ({ columnId }) => {
+      const colIndex = columns.findIndex((col) => col.id === columnId);
+      return columns[colIndex]?.formattedTotal || null;
+    }
+    : undefined;
+
   return (
     <EuiDataGrid
       aria-label="tableVis"
       columns={dataGridColumns}
       columnVisibility={{
         visibleColumns: columns.map(({ id }) => id),
-        setVisibleColumns: () => {},
+        setVisibleColumns: () => { },
       }}
       rowCount={rows.length}
       renderCellValue={renderCellValue}
       sorting={{ columns: sortedColumns, onSort }}
       onColumnResize={onColumnResize}
       pagination={pagination}
+      gridStyle={{
+        border: 'horizontal',
+        header: 'underline',
+      }}
+      minSizeForControls={1}
+      renderFooterCellValue={footerCellValue}
+      toolbarVisibility={{
+        showColumnSelector: false,
+        showSortSelector: false,
+        showFullScreenSelector: false,
+        showStyleSelector: false,
+      }}
     />
   );
 };

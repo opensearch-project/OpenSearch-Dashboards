@@ -80,6 +80,7 @@ export interface FormattedDataProps {
   formattedRows: OpenSearchDashboardsDatatableRow[];
   formattedColumns: FormattedColumn[];
 }
+
 export const convertToFormattedData = (
   table: Table,
   visConfig: TableVisConfig
@@ -95,7 +96,9 @@ export const convertToFormattedData = (
       const dimension =
         isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
 
-      const formatter = dimension ? getFormatService().deserialize(dimension.format) : undefined;
+      if (!dimension) return undefined;
+
+      const formatter = getFormatService().deserialize(dimension.format);
 
       const formattedColumn: FormattedColumn = {
         id: col.id,
@@ -157,7 +160,7 @@ export const convertToFormattedData = (
 
       return formattedColumn;
     })
-    .filter((column) => column);
+    .filter((column): column is FormattedColumn => !!column);
 
   if (visConfig.percentageCol) {
     const insertAtIndex = formattedColumns.findIndex(
@@ -165,7 +168,7 @@ export const convertToFormattedData = (
     );
 
     // column to show percentage for was removed
-    if (insertAtIndex < 0) return;
+    if (insertAtIndex < 0) return { formattedRows, formattedColumns };
 
     const { cols, rows } = addPercentageCol(
       formattedColumns,
