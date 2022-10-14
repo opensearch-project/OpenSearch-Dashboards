@@ -95,11 +95,11 @@ export function SecondaryPanel() {
   );
 
   return (
-    <div className="wizConfig__section wizConfig--secondary">
+    <div className="vbConfig__section vbConfig--secondary">
       <Title title={selectedSchema?.title ?? 'Edit'} isSecondary closeMenu={closeMenu} />
       {showAggParamEditor && (
         <DefaultEditorAggParams
-          className="wizConfig__aggEditor"
+          className="vbConfig__aggEditor"
           agg={aggConfig!}
           indexPattern={indexPattern!}
           setValidity={handleSetValid}

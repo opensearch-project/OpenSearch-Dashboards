@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-.wizConfig {
+.vbConfig {
   @include euiYScrollWithShadows;
 
   background: $euiColorLightestShade;
@@ -42,7 +42,7 @@
     }
   }
 
-  &.showSecondary > .wizConfig__section {
+  &.showSecondary > .vbConfig__section {
     transform: translateX(-100%);
   }
 }
