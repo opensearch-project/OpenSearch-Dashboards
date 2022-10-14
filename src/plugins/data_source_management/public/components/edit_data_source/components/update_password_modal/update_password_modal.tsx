@@ -102,7 +102,9 @@ export const UpdatePasswordModal = ({
                 defaultMessage: 'Username',
               })}
             >
-              <EuiText size="s">{username}</EuiText>
+              <EuiText size="s" data-test-subj="data-source-update-password-username">
+                {username}
+              </EuiText>
             </EuiFormRow>
             {/* updated Password */}
             <EuiFormRow
@@ -113,6 +115,7 @@ export const UpdatePasswordModal = ({
             >
               <EuiFieldPassword
                 name="updatedPassword"
+                data-test-subj="updateStoredPasswordUpdatedPasswordField"
                 placeholder={i18n.translate(
                   'dataSourcesManagement.editDataSource.newPasswordPlaceHolder',
                   {
@@ -136,6 +139,7 @@ export const UpdatePasswordModal = ({
             >
               <EuiFieldPassword
                 name="confirmUpdatedPassword"
+                data-test-subj="updateStoredPasswordConfirmUpdatedPasswordField"
                 placeholder={i18n.translate(
                   'dataSourcesManagement.editDataSource.confirmNewPasswordPlaceHolder',
                   {
@@ -153,7 +157,10 @@ export const UpdatePasswordModal = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeUpdatePasswordModal}>
+          <EuiButtonEmpty
+            data-test-subj="updateStoredPasswordCancelBtn"
+            onClick={closeUpdatePasswordModal}
+          >
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.cancel"
@@ -163,7 +170,7 @@ export const UpdatePasswordModal = ({
           </EuiButtonEmpty>
           <EuiButton
             type="submit"
-            form="modalFormId"
+            data-test-subj="updateStoredPasswordConfirmBtn"
             onClick={onClickUpdatePassword}
             fill={isFormValid()}
             disabled={!isFormValid()}
