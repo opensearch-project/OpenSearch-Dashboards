@@ -59,7 +59,7 @@ export interface TableVisParams {
 export interface FormattedColumn {
   id: string;
   title: string;
-  formatter: IFieldFormat | undefined;
+  formatter: IFieldFormat;
   filterable: boolean;
   formattedTotal?: string | number;
   sumTotal?: number;
