@@ -23,6 +23,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
   const schemas = getVisSchemas(vis, params);
 
   const tableData = {
+    title: vis.title,
     metrics: schemas.metric,
     buckets: schemas.bucket || [],
     splitRow: schemas.split_row,

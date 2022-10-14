@@ -13,14 +13,21 @@ import { TableVisConfig, ColumnWidth, SortColumn } from '../types';
 import { getDataGridColumns } from './table_vis_grid_columns';
 import { usePagination } from '../utils';
 import { convertToFormattedData } from '../utils/convert_to_formatted_data';
+import { TableVisControl } from './table_vis_control';
 
 interface TableVisComponentProps {
+  title?: string;
   table: Table;
   visConfig: TableVisConfig;
   handlers: IInterpreterRenderHandlers;
 }
 
-export const TableVisComponent = ({ table, visConfig, handlers }: TableVisComponentProps) => {
+export const TableVisComponent = ({
+  title,
+  table,
+  visConfig,
+  handlers,
+}: TableVisComponentProps) => {
   const { formattedRows: rows, formattedColumns: columns } = convertToFormattedData(
     table,
     visConfig
@@ -103,6 +110,8 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
     [columns, currentColState, handlers.uiState]
   );
 
+  const ariaLabel = title || visConfig.title || 'tableVis';
+
   const footerCellValue = visConfig.showTotal
     ? // @ts-expect-error
     ({ columnId }) => {
@@ -113,7 +122,7 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
 
   return (
     <EuiDataGrid
-      aria-label="tableVis"
+      aria-label={ariaLabel}
       columns={dataGridColumns}
       columnVisibility={{
         visibleColumns: columns.map(({ id }) => id),
@@ -135,6 +144,9 @@ export const TableVisComponent = ({ table, visConfig, handlers }: TableVisCompon
         showSortSelector: false,
         showFullScreenSelector: false,
         showStyleSelector: false,
+        additionalControls: (
+          <TableVisControl filename={visConfig.title} rows={sortedRows} columns={columns} />
+        ),
       }}
     />
   );
