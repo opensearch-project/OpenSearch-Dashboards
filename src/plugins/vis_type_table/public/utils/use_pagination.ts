@@ -6,10 +6,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TableVisConfig } from '../types';
 
-export const usePagination = (visConfig: TableVisConfig, nrow: number) => {
+export const usePagination = (visConfig: TableVisConfig, nRow: number) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: visConfig.perPage,
+    pageSize: visConfig.perPage || 0,
   });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -20,12 +20,13 @@ export const usePagination = (visConfig: TableVisConfig, nrow: number) => {
   ]);
 
   useEffect(() => {
-    const maxiPageIndex = Math.ceil(nrow / visConfig.perPage) - 1;
+    const perPage = visConfig.perPage || 0;
+    const maxiPageIndex = Math.ceil(nRow / perPage) - 1;
     setPagination((p) => ({
       pageIndex: p.pageIndex > maxiPageIndex ? maxiPageIndex : p.pageIndex,
-      pageSize: visConfig.perPage,
+      pageSize: perPage,
     }));
-  }, [nrow, visConfig.perPage]);
+  }, [nRow, visConfig.perPage]);
 
   return useMemo(
     () => ({

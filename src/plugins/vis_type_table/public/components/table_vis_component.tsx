@@ -35,13 +35,6 @@ export const TableVisComponent = ({
 
   const pagination = usePagination(visConfig, rows.length);
 
-  // store current state
-  const currentColState = useRef<{
-    columnsWidth: ColumnWidth[];
-  }>({
-    columnsWidth: handlers.uiState.get('vis.columnsWidth') || [],
-  });
-
   const sortedRows = useMemo(() => {
     const sort = handlers.uiState.get('vis.sortColumn');
     return sort && sort.colIndex !== null && sort.direction
@@ -66,7 +59,7 @@ export const TableVisComponent = ({
     columns,
     table,
     handlers,
-    currentColState.current.columnsWidth
+    handlers.uiState.get('vis.columnsWidth') || []
   );
 
   const sortedColumns = useMemo(() => {
@@ -77,14 +70,17 @@ export const TableVisComponent = ({
   }, [handlers.uiState, dataGridColumns]);
 
   const onSort = useCallback(
-    (sortingCols: EuiDataGridSorting['columns']) => {
+    (sortingCols: EuiDataGridSorting['columns'] | []) => {
       const nextSortValue = sortingCols[sortingCols.length - 1];
-      const nextSort = {
-        colIndex: dataGridColumns.findIndex((col) => col.id === nextSortValue?.id),
-        direction: nextSortValue.direction,
-      };
+      const nextSort =
+        sortingCols.length > 0
+          ? {
+              colIndex: dataGridColumns.findIndex((col) => col.id === nextSortValue?.id),
+              direction: nextSortValue.direction,
+            }
+          : [];
       handlers.uiState.set('vis.sortColumn', nextSort);
-      handlers.uiState?.emit('reload');
+      handlers.uiState.emit('reload');
       return nextSort;
     },
     [dataGridColumns, handlers.uiState]
@@ -92,22 +88,22 @@ export const TableVisComponent = ({
 
   const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
     ({ columnId, width }) => {
-      const prevState: ColumnWidth[] = currentColState.current.columnsWidth;
+      const curState: ColumnWidth[] = handlers.uiState.get('vis.columnsWidth') || [];
+      const nextState = [...curState];
       const nextColIndex = columns.findIndex((col) => col.id === columnId);
-      const prevColIndex = prevState.findIndex((col) => col.colIndex === nextColIndex);
-      const nextState = [...prevState];
-      const updatedColWidth = { colIndex: nextColIndex, width };
+      const curColIndex = curState.findIndex((col) => col.colIndex === nextColIndex);
+      const nextColWidth = { colIndex: nextColIndex, width };
 
       // if updated column index is not found, then add it to nextState
       // else reset it in nextState
-      if (prevColIndex < 0) nextState.push(updatedColWidth);
-      else nextState[prevColIndex] = updatedColWidth;
+      if (curColIndex < 0) nextState.push(nextColWidth);
+      else nextState[curColIndex] = nextColWidth;
 
       // update uiState
-      currentColState.current.columnsWidth = nextState;
       handlers.uiState.set('vis.columnsWidth', nextState);
+      handlers.uiState.emit('reload');
     },
-    [columns, currentColState, handlers.uiState]
+    [columns, handlers.uiState]
   );
 
   const ariaLabel = title || visConfig.title || 'tableVis';
