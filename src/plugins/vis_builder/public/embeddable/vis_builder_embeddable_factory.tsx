@@ -21,7 +21,7 @@ import {
   WIZARD_SAVED_OBJECT,
 } from '../../common';
 import { DisabledEmbeddable } from './disabled_embeddable';
-import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './wizard_embeddable';
+import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './vis_builder_embeddable';
 import wizardIcon from '../assets/wizard_icon.svg';
 import { getHttp, getSavedWizardLoader, getTimeFilter, getUISettings } from '../plugin_services';
 

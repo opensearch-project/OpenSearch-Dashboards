@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import { Embeddable, EmbeddableOutput } from '../../../embeddable/public';
 
 import { DisabledVisualization } from './disabled_visualization';
-import { WizardInput, WIZARD_EMBEDDABLE } from './wizard_embeddable';
+import { WizardInput, WIZARD_EMBEDDABLE } from './vis_builder_embeddable';
 
 export class DisabledEmbeddable extends Embeddable<WizardInput, EmbeddableOutput> {
   private domNode?: HTMLElement;

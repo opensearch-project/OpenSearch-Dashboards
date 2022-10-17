@@ -4,7 +4,7 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
-import { getStubIndexPattern } from '../../../../plugins/data/public/test_utils';
+import { getStubIndexPattern } from '../../../data/public/test_utils';
 import { IndexPattern } from '../../../data/public';
 import { RootState } from '../application/utils/state_management';
 import { WizardVisSavedObject } from '../types';
