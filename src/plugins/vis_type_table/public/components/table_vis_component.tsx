@@ -5,7 +5,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { orderBy } from 'lodash';
-import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
@@ -114,40 +114,47 @@ export const TableVisComponent = ({
 
   const footerCellValue = visConfig.showTotal
     ? // @ts-expect-error
-    ({ columnId }) => {
-      const colIndex = columns.findIndex((col) => col.id === columnId);
-      return columns[colIndex]?.formattedTotal || null;
-    }
+      ({ columnId }) => {
+        const colIndex = columns.findIndex((col) => col.id === columnId);
+        return columns[colIndex]?.formattedTotal || null;
+      }
     : undefined;
 
   return (
-    <EuiDataGrid
-      aria-label={ariaLabel}
-      columns={dataGridColumns}
-      columnVisibility={{
-        visibleColumns: columns.map(({ id }) => id),
-        setVisibleColumns: () => { },
-      }}
-      rowCount={rows.length}
-      renderCellValue={renderCellValue}
-      sorting={{ columns: sortedColumns, onSort }}
-      onColumnResize={onColumnResize}
-      pagination={pagination}
-      gridStyle={{
-        border: 'horizontal',
-        header: 'underline',
-      }}
-      minSizeForControls={1}
-      renderFooterCellValue={footerCellValue}
-      toolbarVisibility={{
-        showColumnSelector: false,
-        showSortSelector: false,
-        showFullScreenSelector: false,
-        showStyleSelector: false,
-        additionalControls: (
-          <TableVisControl filename={visConfig.title} rows={sortedRows} columns={columns} />
-        ),
-      }}
-    />
+    <>
+      {title && (
+        <EuiTitle size="xs">
+          <h3>{title}</h3>
+        </EuiTitle>
+      )}
+      <EuiDataGrid
+        aria-label={ariaLabel}
+        columns={dataGridColumns}
+        columnVisibility={{
+          visibleColumns: columns.map(({ id }) => id),
+          setVisibleColumns: () => {},
+        }}
+        rowCount={rows.length}
+        renderCellValue={renderCellValue}
+        sorting={{ columns: sortedColumns, onSort }}
+        onColumnResize={onColumnResize}
+        pagination={pagination}
+        gridStyle={{
+          border: 'horizontal',
+          header: 'underline',
+        }}
+        minSizeForControls={1}
+        renderFooterCellValue={footerCellValue}
+        toolbarVisibility={{
+          showColumnSelector: false,
+          showSortSelector: false,
+          showFullScreenSelector: false,
+          showStyleSelector: false,
+          additionalControls: (
+            <TableVisControl filename={visConfig.title} rows={sortedRows} columns={columns} />
+          ),
+        }}
+      />
+    </>
   );
 };
