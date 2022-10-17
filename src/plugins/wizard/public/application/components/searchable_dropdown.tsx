@@ -107,7 +107,7 @@ export const SearchableDropdown = ({
       displayError(error)
     ) : (
       <>
-        <EuiPopoverTitle paddingSize="s" className="wizPopoverTitle">
+        <EuiPopoverTitle paddingSize="s" className="vbPopoverTitle">
           {search}
         </EuiPopoverTitle>
         {list}

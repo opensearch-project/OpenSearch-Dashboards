@@ -10,8 +10,8 @@ import { DataTab } from './data_tab';
 
 export const LeftNav = () => {
   return (
-    <section className="wizSidenav left">
-      <div className="wizDatasourceSelect wizSidenav__header">
+    <section className="vbSidenav left">
+      <div className="vbDatasourceSelect vbSidenav__header">
         <DataSourceSelect />
       </div>
       <DataTab key="containerName" />

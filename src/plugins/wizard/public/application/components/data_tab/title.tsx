@@ -23,7 +23,7 @@ export const Title = ({ title, isSecondary, closeMenu }: TitleProps) => {
   );
   return (
     <>
-      <div className="wizConfig__title">
+      <div className="vbConfig__title">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
           <EuiFlexItem>

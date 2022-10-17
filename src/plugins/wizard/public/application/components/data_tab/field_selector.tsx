@@ -66,13 +66,13 @@ export const FieldSelector = () => {
   );
 
   return (
-    <div className="wizFieldSelector">
+    <div className="vbFieldSelector">
       <div>
         <form>
           <FieldSearch value={fieldSearchValue} />
         </form>
       </div>
-      <div className="wizFieldSelector__fieldGroups">
+      <div className="vbFieldSelector__fieldGroups">
         {/* Count Field */}
         <FieldSelectorField
           field={{
@@ -102,7 +102,7 @@ interface FieldGroupProps {
 const FieldGroup = ({ fields, header, id }: FieldGroupProps) => (
   <EuiAccordion
     id={id}
-    className="wizFieldSelector__fieldGroup"
+    className="vbFieldSelector__fieldGroup"
     buttonContent={
       <EuiTitle size="xxxs">
         <span>{header}</span>
