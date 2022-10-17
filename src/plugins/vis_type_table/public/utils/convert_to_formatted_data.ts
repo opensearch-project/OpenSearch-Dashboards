@@ -85,16 +85,12 @@ export const convertToFormattedData = (
   table: Table,
   visConfig: TableVisConfig
 ): FormattedDataProps => {
-  const { buckets, metrics, splitColumn } = visConfig;
+  const { buckets, metrics } = visConfig;
   let formattedRows: OpenSearchDashboardsDatatableRow[] = table.rows;
   let formattedColumns: FormattedColumn[] = table.columns
     .map(function (col, i) {
       const isBucket = buckets.find((bucket) => bucket.accessor === i);
-      const isSplitColumn = splitColumn
-        ? splitColumn.find((splitCol) => splitCol.accessor === i)
-        : undefined;
-      const dimension =
-        isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
+      const dimension = isBucket || metrics.find((metric) => metric.accessor === i);
 
       if (!dimension) return undefined;
 
