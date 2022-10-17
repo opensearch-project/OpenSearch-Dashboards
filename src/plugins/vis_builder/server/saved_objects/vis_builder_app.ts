@@ -10,7 +10,7 @@ import {
   WizardSavedObjectAttributes,
   WIZARD_SAVED_OBJECT,
 } from '../../common';
-import { wizardSavedObjectTypeMigrations } from './wizard_migration';
+import { wizardSavedObjectTypeMigrations } from './vis_builder_migration';
 
 export const wizardSavedObjectType: SavedObjectsType = {
   name: WIZARD_SAVED_OBJECT,

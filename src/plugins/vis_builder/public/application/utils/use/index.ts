@@ -5,4 +5,4 @@
 
 export { useVisualizationType } from './use_visualization_type';
 export { useIndexPatterns } from './use_index_pattern';
-export { useSavedWizardVis } from './use_saved_wizard_vis';
+export { useSavedWizardVis } from './use_saved_vis_builder_vis';

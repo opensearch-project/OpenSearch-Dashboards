@@ -4,11 +4,11 @@
  */
 
 import { coreMock, savedObjectsServiceMock } from '../../../core/public/mocks';
-import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
-import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
-import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
-import { visualizationsPluginMock } from '../../../plugins/visualizations/public/mocks';
+import { dashboardPluginMock } from '../../dashboard/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { embeddablePluginMock } from '../../embeddable/public/mocks';
+import { navigationPluginMock } from '../../navigation/public/mocks';
+import { visualizationsPluginMock } from '../../visualizations/public/mocks';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { WizardPlugin } from './plugin';
 

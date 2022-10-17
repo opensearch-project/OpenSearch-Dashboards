@@ -15,7 +15,7 @@ import { EDIT_PATH, PLUGIN_ID } from '../../../../common';
 import { WizardServices } from '../../../types';
 import { MetricOptionsDefaults } from '../../../visualizations/metric/metric_viz_type';
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
-import { getSavedWizardVis } from '../get_saved_wizard_vis';
+import { getSavedWizardVis } from '../get_saved_vis_builder_vis';
 import {
   useTypedDispatch,
   setStyleState,
@@ -24,7 +24,7 @@ import {
 } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
-import { validateWizardState } from '../wizard_state_validation';
+import { validateWizardState } from '../vis_builder_state_validation';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
