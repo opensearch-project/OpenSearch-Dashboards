@@ -54,17 +54,24 @@ export async function getIndexPatternObject(req, indexPatternString) {
     )
     .map((indexPattern) => {
       const { title, fields, timeFieldName } = indexPattern.attributes;
+      const dataSourceId =
+        indexPattern.references?.[0]?.type === 'data-source'
+          ? indexPattern.references[0].id
+          : undefined;
+
       return {
         title,
         timeFieldName,
         fields: JSON.parse(fields),
+        dataSourceId,
       };
     });
 
   const indexPatternObject = indexPatterns.length === 1 ? indexPatterns[0] : null;
-
+  const dataSourceId = indexPatternObject?.dataSourceId;
   return {
     indexPatternObject,
     indexPatternString: indexPatternString || get(indexPatternObject, 'title', ''),
+    dataSourceId,
   };
 }

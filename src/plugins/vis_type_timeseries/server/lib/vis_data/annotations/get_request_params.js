@@ -41,7 +41,10 @@ export async function getAnnotationRequestParams(
 ) {
   const opensearchShardTimeout = await getOpenSearchShardTimeout(req);
   const indexPattern = annotation.index_pattern;
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject, indexPatternString, dataSourceId } = await getIndexPatternObject(
+    req,
+    indexPattern
+  );
   const request = buildAnnotationRequest(
     req,
     panel,
@@ -57,5 +60,6 @@ export async function getAnnotationRequestParams(
       ...request,
       timeout: opensearchShardTimeout > 0 ? `${opensearchShardTimeout}ms` : undefined,
     },
+    dataSourceId,
   };
 }

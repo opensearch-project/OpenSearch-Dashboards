@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'opensearch-dashboards/server';
+import {
+  SavedObjectsClientContract,
+  LegacyAPICaller,
+  RequestHandlerContext,
+} from 'opensearch-dashboards/server';
 import { IFieldType, IndexPatternAttributes, SavedObject } from '../../common';
 
 export const getFieldByName = (
@@ -55,4 +59,14 @@ export const findIndexPatternById = async (
   if (savedObjectsResponse.total > 0) {
     return savedObjectsResponse.saved_objects[0];
   }
+};
+
+export const decideLegacyClient = async (
+  context: RequestHandlerContext,
+  request: any
+): Promise<LegacyAPICaller> => {
+  const dataSourceId = request?.query?.data_source;
+  return dataSourceId
+    ? (context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI as LegacyAPICaller)
+    : context.core.opensearch.legacy.client.callAsCurrentUser;
 };

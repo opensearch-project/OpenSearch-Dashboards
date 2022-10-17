@@ -66,7 +66,7 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return response', async () => {
-    const searches = [{ body: 'body', index: 'index' }];
+    const searches = [{ body: 'body', index: 'index', dataSourceId: 'dataSourceId' }];
     const searchFn = jest.fn().mockReturnValue(Promise.resolve({}));
 
     const responses = await abstractSearchStrategy.search(
@@ -101,6 +101,7 @@ describe('AbstractSearchStrategy', () => {
           index: 'index',
         },
         indexType: undefined,
+        dataSourceId: 'dataSourceId',
       },
       {
         strategy: 'opensearch',

@@ -31,7 +31,7 @@
 import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'opensearch-dashboards/server';
-
+import { decideLegacyClient } from '../../../data/server/';
 import { Framework } from '../plugin';
 import {
   indexPatterns,
@@ -39,6 +39,7 @@ import {
   IndexPatternsFetcher,
 } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -56,9 +57,7 @@ export async function getFields(
     framework,
     payload: {},
     pre: {
-      indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.opensearch.legacy.client.callAsCurrentUser
-      ),
+      indexPatternsService: undefined,
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
@@ -71,6 +70,15 @@ export async function getFields(
         .toPromise();
     },
   };
+
+  const { dataSourceId } = await getIndexPatternObject(reqFacade, indexPattern);
+  // pass a fakeRequest with dataSourceId to decideLegacyClient
+  reqFacade.pre.indexPatternsService = new IndexPatternsFetcher(
+    await decideLegacyClient(requestContext, {
+      query: { data_source: dataSourceId },
+    })
+  );
+
   let indexPatternString = indexPattern;
 
   if (!indexPatternString) {

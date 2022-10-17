@@ -69,7 +69,7 @@ export class AbstractSearchStrategy {
   async search(req: ReqFacade, bodies: any[], options = {}) {
     const [, deps] = await req.framework.core.getStartServices();
     const requests: any[] = [];
-    bodies.forEach((body) => {
+    bodies.forEach(({ dataSourceId, ...body }) => {
       requests.push(
         deps.data.search.search(
           req.requestContext,
@@ -79,6 +79,7 @@ export class AbstractSearchStrategy {
               ...this.additionalParams,
             },
             indexType: this.indexType,
+            dataSourceId,
           },
           {
             ...options,

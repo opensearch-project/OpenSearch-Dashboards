@@ -41,7 +41,10 @@ export async function getSeriesRequestParams(
 ) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject, indexPatternString, dataSourceId } = await getIndexPatternObject(
+    req,
+    indexPattern
+  );
   const request = buildRequestBody(
     req,
     panel,
@@ -58,5 +61,6 @@ export async function getSeriesRequestParams(
       ...request,
       timeout: opensearchShardTimeout > 0 ? `${opensearchShardTimeout}ms` : undefined,
     },
+    dataSourceId,
   };
 }

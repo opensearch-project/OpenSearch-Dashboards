@@ -43,7 +43,7 @@ export async function getTableData(req, panel) {
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
   const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
-  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
+  const { indexPatternObject, dataSourceId } = await getIndexPatternObject(req, panelIndexPattern);
 
   const meta = {
     type: panel.type,
@@ -62,6 +62,7 @@ export async function getTableData(req, panel) {
       {
         body,
         index: panelIndexPattern,
+        dataSourceId,
       },
     ]);
 
