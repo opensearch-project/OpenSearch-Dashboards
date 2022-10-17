@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectMigrationFn, SavedObjectMigrationContext } from '../../../../core/server';
-import { wizardSavedObjectTypeMigrations } from './wizard_migration';
+import { wizardSavedObjectTypeMigrations } from './vis_builder_migration';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 

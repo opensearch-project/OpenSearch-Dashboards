@@ -6,7 +6,7 @@
 import React from 'react';
 
 import { SavedObjectEmbeddableInput, withEmbeddableSubscription } from '../../../embeddable/public';
-import { WizardEmbeddable, WizardOutput } from './wizard_embeddable';
+import { WizardEmbeddable, WizardOutput } from './vis_builder_embeddable';
 import { getReactExpressionRenderer } from '../plugin_services';
 
 interface Props {

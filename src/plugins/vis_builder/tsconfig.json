@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src/plugins/wizard",
+    "baseUrl": "./src/plugins/vis_builder",
     "paths": {
       // Allows for importing from `opensearch-dashboards` package for the exported types.
       "opensearch-dashboards": ["./opensearch_dashboards"],
