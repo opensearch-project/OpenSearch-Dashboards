@@ -65,7 +65,7 @@ export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
     <span
       data-test-subj={`field-${field.name}`}
       title={field.name}
-      className="wizFieldSelectorField__name"
+      className="vbFieldSelectorField__name"
     >
       {wrapOnDot(field.displayName)}
     </span>
@@ -73,7 +73,7 @@ export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
 
   return (
     <FieldButton
-      className="wizFieldSelectorField"
+      className="vbFieldSelectorField"
       isActive={infoIsOpen}
       onClick={togglePopover}
       dataTestSubj={`field-${field.name}-showDetails`}
