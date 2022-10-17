@@ -18,14 +18,14 @@ export const WizardApp = () => {
   return (
     <I18nProvider>
       <DragDropProvider>
-        <EuiPage className="wizLayout">
+        <EuiPage className="vbLayout">
           <TopNav />
           <LeftNav />
-          <EuiResizableContainer className="wizLayout__resizeContainer">
+          <EuiResizableContainer className="vbLayout__resizeContainer">
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
-                  className="wizLayout__workspaceResize"
+                  className="vbLayout__workspaceResize"
                   paddingSize="none"
                   initialSize={80}
                   minSize="300px"
@@ -33,9 +33,9 @@ export const WizardApp = () => {
                 >
                   <Workspace />
                 </EuiResizablePanel>
-                <EuiResizableButton className="wizLayout__resizeButton" />
+                <EuiResizableButton className="vbLayout__resizeButton" />
                 <EuiResizablePanel
-                  className="wizLayout__rightNavResize"
+                  className="vbLayout__rightNavResize"
                   paddingSize="none"
                   initialSize={20}
                   minSize="250px"
@@ -45,7 +45,7 @@ export const WizardApp = () => {
                       position: 'top',
                     },
                   ]}
-                  id="wizRightResize"
+                  id="vbRightResize"
                 >
                   <RightNav />
                 </EuiResizablePanel>

@@ -13,7 +13,7 @@ export const DATA_TAB_ID = 'data_tab';
 
 export const DataTab = () => {
   return (
-    <div className="wizDataTab">
+    <div className="vbDataTab">
       <FieldSelector />
       <ConfigPanel />
     </div>

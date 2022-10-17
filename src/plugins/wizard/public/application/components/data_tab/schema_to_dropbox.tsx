@@ -16,7 +16,7 @@ export const mapSchemaToAggPanel = (schemas: Schemas) => {
   return (
     <>
       <Title title="Configuration" />
-      <div className="wizConfig__content">{panelComponents}</div>
+      <div className="vbConfig__content">{panelComponents}</div>
     </>
   );
 };

@@ -72,13 +72,13 @@ export const Workspace: FC = ({ children }) => {
   }, [data.query.state$]);
 
   return (
-    <section className="wizWorkspace">
-      <EuiFlexGroup className="wizCanvasControls">
+    <section className="vbWorkspace">
+      <EuiFlexGroup className="vbCanvasControls">
         <EuiFlexItem>
           <ExperimentalInfo />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiPanel className="wizCanvas" data-test-subj="visualizationLoader">
+      <EuiPanel className="vbCanvas" data-test-subj="visualizationLoader">
         {expression ? (
           <ReactExpressionRenderer
             expression={expression}
@@ -86,16 +86,16 @@ export const Workspace: FC = ({ children }) => {
             uiState={uiState}
           />
         ) : (
-          <EuiFlexItem className="wizWorkspace__empty" data-test-subj="emptyWorkspace">
+          <EuiFlexItem className="vbWorkspace__empty" data-test-subj="emptyWorkspace">
             <EuiEmptyPrompt
               title={<h2>Add a field to start</h2>}
               body={
                 <>
                   <p>Drag a field to the configuration panel to generate a visualization.</p>
-                  <span className="wizWorkspace__container">
-                    <EuiIcon className="wizWorkspace__fieldSvg" type={fields_bg} size="original" />
+                  <span className="vbWorkspace__container">
+                    <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
                     <EuiIcon
-                      className="wizWorkspace__handFieldSvg"
+                      className="vbWorkspace__handFieldSvg"
                       type={hand_field}
                       size="original"
                     />
