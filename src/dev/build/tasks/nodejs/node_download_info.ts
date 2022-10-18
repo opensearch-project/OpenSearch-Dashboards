@@ -37,7 +37,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const arch = platform.getNodeArch();
 
   const downloadName = platform.isWindows()
-    ? 'win-x64/node.exe'
+    ? `node-v${version}-win-x64.zip`
     : `node-v${version}-${arch}.tar.gz`;
 
   const url = `https://nodejs.org/dist/v${version}/${downloadName}`;

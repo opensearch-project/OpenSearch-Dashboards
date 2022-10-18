@@ -153,7 +153,7 @@ export class Config {
   /**
    * Return the list of Platforms we need/have node downloads for. We always
    * include the linux platform even if we aren't targeting linux so we can
-   * reliably get the LICENSE file, which isn't included in the windows version
+   * reliably get the LICENSE file.
    */
   getNodePlatforms() {
     if (this.targetAllPlatforms) {
