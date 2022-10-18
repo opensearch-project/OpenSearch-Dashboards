@@ -30,7 +30,7 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@osd/utils';
+import { REPO_ROOT, standardize } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import pkg from '../../../../package.json';
@@ -89,7 +89,9 @@ describe('#getNodeVersion()', () => {
 describe('#getRepoRelativePath()', () => {
   it('converts an absolute path to relative path, from the root of the repo', async () => {
     const config = await setup();
-    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(`"src/dev/build/lib"`);
+    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(
+      `"${standardize('src/dev/build/lib', false, true)}"`
+    );
   });
 });
 
