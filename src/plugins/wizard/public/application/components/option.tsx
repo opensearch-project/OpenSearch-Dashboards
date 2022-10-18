@@ -18,11 +18,11 @@ export const Option: FC<Props> = ({ title, children, initialIsOpen = false }) =>
       <EuiAccordion
         id={title}
         buttonContent={title}
-        className="wizOption"
+        className="vbOption"
         initialIsOpen={initialIsOpen}
       >
         <EuiSpacer size="s" />
-        <EuiPanel color="subdued" className="wizOption__panel">
+        <EuiPanel color="subdued" className="vbOption__panel">
           {children}
         </EuiPanel>
       </EuiAccordion>

@@ -63,7 +63,7 @@ export const TopNav = () => {
   });
 
   return (
-    <div className="wizTopNav">
+    <div className="vbTopNav">
       <TopNavMenu
         appName={PLUGIN_ID}
         config={config}

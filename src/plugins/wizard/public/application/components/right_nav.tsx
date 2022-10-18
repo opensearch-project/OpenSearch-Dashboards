@@ -36,8 +36,8 @@ export const RightNav = () => {
   }));
 
   return (
-    <section className="wizSidenav right">
-      <div className="wizSidenav__header">
+    <section className="vbSidenav right">
+      <div className="vbSidenav__header">
         <EuiSuperSelect
           options={options}
           valueOfSelected={activeVisName}
@@ -48,7 +48,7 @@ export const RightNav = () => {
           data-test-subj="chartPicker"
         />
       </div>
-      <div className="wizSidenav__style">
+      <div className="vbSidenav__style">
         <StyleSection />
       </div>
       {newVisType && (
@@ -90,7 +90,7 @@ export const RightNav = () => {
 
 const OptionItem = ({ icon, title }: { icon: IconType; title: string }) => (
   <>
-    <EuiIcon type={icon} className="wizTypeSelector__icon" />
+    <EuiIcon type={icon} className="vbTypeSelector__icon" />
     <span>{title}</span>
   </>
 );

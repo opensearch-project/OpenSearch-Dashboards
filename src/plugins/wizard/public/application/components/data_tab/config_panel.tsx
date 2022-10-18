@@ -23,8 +23,8 @@ export function ConfigPanel() {
   const mainPanel = mapSchemaToAggPanel(schemas);
 
   return (
-    <EuiForm className={`wizConfig ${editingState ? 'showSecondary' : ''}`}>
-      <div className="wizConfig__section">{mainPanel}</div>
+    <EuiForm className={`vbConfig ${editingState ? 'showSecondary' : ''}`}>
+      <div className="vbConfig__section">{mainPanel}</div>
       <SecondaryPanel />
     </EuiForm>
   );
