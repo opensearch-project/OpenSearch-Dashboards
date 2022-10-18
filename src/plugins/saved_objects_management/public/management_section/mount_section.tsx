@@ -104,6 +104,7 @@ export const mountManagementSection = async ({
                   serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}
                   columnRegistry={pluginStart.columns}
+                  filterRegistry={pluginStart.filters}
                   allowedTypes={allowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
                 />

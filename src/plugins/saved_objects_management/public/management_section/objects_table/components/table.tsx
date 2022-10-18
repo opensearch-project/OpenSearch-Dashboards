@@ -55,12 +55,14 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementFilterServiceStart,
 } from '../../../services';
 
 export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  filterRegistry: SavedObjectsManagementFilterServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
@@ -174,6 +176,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      filterRegistry,
       dateFormat,
     } = this.props;
 
@@ -194,6 +197,12 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
+      ...filterRegistry.getAll().map((filter) => {
+        return {
+          ...filter,
+          'data-test-subj': `savedObjectsFilter-${filter.id}`,
+        };
+      }),
       // Add this back in once we have tag support
       // {
       //   type: 'field_value_selection',
