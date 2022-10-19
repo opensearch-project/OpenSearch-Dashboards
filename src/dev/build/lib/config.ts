@@ -143,6 +143,7 @@ export class Config {
     const platforms: Platform[] = [];
     if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
     if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
+    if (this.targetPlatforms.windows) platforms.push(this.getPlatform('win32', 'x64'));
     if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));
 
     if (platforms.length > 0) return platforms;
@@ -164,6 +165,7 @@ export class Config {
       return [this.getPlatform('linux', 'x64')];
     }
 
+    // ToDo: All node dists, including Windows, contain a LICENSE file; do we still need to do this?
     return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
   }
 

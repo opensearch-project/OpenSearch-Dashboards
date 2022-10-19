@@ -54,6 +54,7 @@ const setup = async ({
     darwin: false,
     linux: false,
     linuxArm: false,
+    windows: false,
   },
 }: {
   targetAllPlatforms?: boolean;
@@ -61,6 +62,7 @@ const setup = async ({
     darwin: boolean;
     linux: boolean;
     linuxArm: boolean;
+    windows: boolean;
   };
 } = {}) => {
   return await Config.create({
@@ -115,6 +117,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: true,
         linux: false,
         linuxArm: false,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -127,6 +130,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: false,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -139,6 +143,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: false,
         linux: true,
         linuxArm: false,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -205,6 +210,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: true,
         linux: false,
         linuxArm: false,
+        windows: false,
       },
     });
 
@@ -227,6 +233,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: false,
         linux: true,
         linuxArm: false,
+        windows: false,
       },
     });
 
@@ -249,6 +256,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: false,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
 
@@ -271,6 +279,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: true,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
 
