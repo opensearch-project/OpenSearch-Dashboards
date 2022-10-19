@@ -181,8 +181,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { allowedTypes, filterRegistry } = this.props;
     const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
     const { queryText, parsedParams } = parseQuery(this.state.activeQuery, filterFields);
+    const { type: visibleTypes, namespaces } = parsedParams;
 
-    const visibleTypes = parsedParams.type || [];
     const filteredTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
@@ -190,7 +190,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
-      parsedParams,
+      filteredTypes,
+      namespaces,
       queryText
     );
 
@@ -210,8 +211,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const defaultParams = { type: allowedTypes };
-    const savedObjectCounts = await getSavedObjectCounts(this.props.http, defaultParams, queryText);
+    const savedObjectCounts = await getSavedObjectCounts(
+      this.props.http,
+      allowedTypes,
+      [],
+      queryText
+    );
 
     this.setState((state) => ({
       ...state,
@@ -231,8 +236,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(query);
+    const { notifications, http, allowedTypes, filterRegistry } = this.props;
+    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
+    const { queryText, parsedParams } = parseQuery(query, filterFields);
+    const { type: visibleTypes, namespaces } = parsedParams;
+    const filteredTypes = allowedTypes.filter(
+      (type) => !visibleTypes || visibleTypes.includes(type)
+    );
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -240,7 +250,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
+      type: filteredTypes,
+      namespaces,
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -394,8 +405,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
-    const { notifications, http } = this.props;
-    const { queryText } = parseQuery(activeQuery);
+    const { notifications, http, filterRegistry } = this.props;
+
+    const { queryText } = parseQuery(activeQuery, filterFields);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -774,11 +786,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
     };
+    const typeCounts = savedObjectCounts.type || {};
 
     const filterOptions = allowedTypes.map((type) => ({
       value: type,
       name: type,
-      view: `${type} (${savedObjectCounts[type] || 0})`,
+      view: `${type} (${typeCounts[type] || 0})`,
     }));
 
     const filters = [

@@ -38,10 +38,8 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       path: '/api/opensearch-dashboards/management/saved_objects/scroll/counts',
       validate: {
         body: schema.object({
-          params: schema.object({
-            type: schema.maybe(schema.arrayOf(schema.string())),
-            namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          }),
+          typesToInclude: schema.arrayOf(schema.string()),
+          namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
         }),
       },
@@ -51,7 +49,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       const findOptions: SavedObjectsFindOptions = {
         ...req.body.params,
-        type: req.body.params.type || [],
+        type: req.body.typesToInclude,
         perPage: 1000,
       };
 
@@ -62,16 +60,27 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       const objects = await findAll(client, findOptions);
 
-      const counts = objects.reduce((accum, result) => {
-        const type = result.type;
-        accum[type] = accum[type] || 0;
-        accum[type]++;
-        return accum;
-      }, {} as Record<string, number>);
+      const counts = {
+        type: {},
+        namespaces: {},
+      };
 
-      for (const type of findOptions.type) {
-        if (!counts[type]) {
-          counts[type] = 0;
+      objects.forEach((result) => {
+        const type = result.type;
+        if (req.body.namespacesToInclude) {
+          const namespaces = (result.namespaces || []).flat();
+          namespaces.forEach((ns) => {
+            counts.namespaces[ns] = counts.namespaces[ns] || 0;
+            counts.namespaces[ns]++;
+          });
+        }
+        counts.type[type] = counts.type[type] || 0;
+        counts.type[type]++;
+      });
+
+      for (const type of req.body.typesToInclude) {
+        if (!counts.type[type]) {
+          counts.type[type] = 0;
         }
       }
 
