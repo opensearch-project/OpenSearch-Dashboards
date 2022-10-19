@@ -805,6 +805,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         options: filterOptions,
       },
       ...filterRegistry.getAll().map((filter) => {
+        const fieldCounts = savedObjectCounts[filter.field] || {};
+        if (filter.options) {
+          filter.options.map((filterOption) => {
+            filterOption.view = `${filterOption.name} (${fieldCounts[filterOption.value] || 0})`;
+          });
+        }
         return {
           ...filter,
           'data-test-subj': `savedObjectsFilter-${filter.id}`,
