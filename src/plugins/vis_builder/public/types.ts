@@ -45,6 +45,7 @@ export interface WizardServices extends CoreStart {
   history: History;
   embeddable: EmbeddableStart;
   scopedHistory: ScopedHistory;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export interface ISavedVis {

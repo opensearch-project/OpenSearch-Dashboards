@@ -21,6 +21,7 @@ describe('getOnSave', () => {
     newDescription: string;
     returnToOrigin: boolean;
   };
+  let setSaveSuccess: any;
 
   beforeEach(() => {
     savedWizardVis = {
@@ -38,6 +39,7 @@ describe('getOnSave', () => {
     visualizationIdFromUrl = '';
     dispatch = jest.fn();
     mockServices = createWizardServicesMock();
+    setSaveSuccess = jest.fn();
 
     onSaveProps = {
       newTitle: 'new title',
@@ -56,7 +58,8 @@ describe('getOnSave', () => {
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
-      mockServices
+      mockServices,
+      setSaveSuccess
     );
     const onSaveResult = await onSave(onSaveProps);
 
@@ -69,7 +72,8 @@ describe('getOnSave', () => {
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
-      mockServices
+      mockServices,
+      setSaveSuccess
     );
     const onSaveReturn = await onSave(onSaveProps);
     expect(savedWizardVis).toMatchInlineSnapshot(`
@@ -112,7 +116,8 @@ describe('getOnSave', () => {
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
-      mockServices
+      mockServices,
+      setSaveSuccess
     );
     const onSaveResult = await onSave(onSaveProps);
     expect(savedWizardVis.title).toBe('save wizard wiz title');
@@ -130,7 +135,8 @@ describe('getOnSave', () => {
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
-      mockServices
+      mockServices,
+      setSaveSuccess
     );
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('2');
@@ -147,7 +153,8 @@ describe('getOnSave', () => {
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
-      mockServices
+      mockServices,
+      setSaveSuccess
     );
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('1');

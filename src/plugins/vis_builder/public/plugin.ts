@@ -89,6 +89,7 @@ export class WizardPlugin
           savedWizardLoader: selfStart.savedWizardLoader,
           embeddable: pluginsStart.embeddable,
           scopedHistory: params.history,
+          onAppLeave: params.onAppLeave,
         };
 
         // Instantiate the store

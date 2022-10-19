@@ -41,21 +41,30 @@ import { WizardVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
+
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedWizardVis: WizardVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
+  setSaveSuccess: (value: boolean) => void;
 }
 
 export const getTopNavConfig = (
-  { visualizationIdFromUrl, savedWizardVis, saveDisabledReason, dispatch }: TopNavConfigParams,
+  {
+    visualizationIdFromUrl,
+    savedWizardVis,
+    saveDisabledReason,
+    dispatch,
+    setSaveSuccess,
+  }: TopNavConfigParams,
   services: WizardServices
 ) => {
   const {
     i18n: { Context: I18nContext },
     embeddable,
     scopedHistory,
+    application,
   } = services;
 
   const { originatingApp, embeddableId } =
@@ -64,7 +73,36 @@ export const getTopNavConfig = (
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const stateTransfer = embeddable.getStateTransfer();
 
+  const navigateToOriginatingApp = () => {
+    if (originatingApp) {
+      application.navigateToApp(originatingApp);
+    }
+  };
+
   const topNavConfig: TopNavMenuData[] = [
+    ...(originatingApp === 'dashboards'
+      ? [
+          {
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
+            tooltip() {
+              return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                defaultMessage: 'Discard your changes before finishing',
+              });
+            },
+            run: async () => {
+              return navigateToOriginatingApp();
+            },
+          },
+        ]
+      : []),
     {
       id: 'save',
       iconType: savedWizardVis?.id && originatingApp ? undefined : ('save' as const),
@@ -93,7 +131,8 @@ export const getTopNavConfig = (
               originatingApp,
               visualizationIdFromUrl,
               dispatch,
-              services
+              services,
+              setSaveSuccess
             )}
             objectType={'wizard'}
             onClose={() => {}}
@@ -101,7 +140,6 @@ export const getTopNavConfig = (
             getAppNameFromId={stateTransfer.getAppNameFromId}
           />
         );
-
         showSaveModal(saveModal, I18nContext);
       },
     },
@@ -137,7 +175,8 @@ export const getTopNavConfig = (
                 originatingApp,
                 visualizationIdFromUrl,
                 dispatch,
-                services
+                services,
+                setSaveSuccess
               );
 
               return onSave(saveOptions);
@@ -155,7 +194,8 @@ export const getOnSave = (
   originatingApp,
   visualizationIdFromUrl,
   dispatch,
-  services
+  services,
+  setSaveSuccess
 ) => {
   const onSave = async ({
     newTitle,
@@ -192,6 +232,7 @@ export const getOnSave = (
       });
 
       if (id) {
+        setSaveSuccess(true);
         toastNotifications.addSuccess({
           title: i18n.translate('wizard.topNavMenu.saveVisualization.successNotificationText', {
             defaultMessage: `Saved '{visTitle}'`,

@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
+import { i18n } from '@osd/i18n';
 import { PLUGIN_ID } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../utils/get_top_nav_config';
@@ -28,6 +29,7 @@ export const TopNav = () => {
     navigation: {
       ui: { TopNavMenu },
     },
+    onAppLeave,
   } = services;
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
@@ -36,6 +38,21 @@ export const TopNav = () => {
   const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
+  const [originatingAppInTopNav, setOriginatingAppInTopNav] = useState<string>();
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const editorState = useTypedSelector((state) => state.metadata.editor.state);
+
+  /**
+   * Need to set clickSave back to false when user made changes to the editor
+   * to ensure the cancel window show up when user saves the vis builder changes,
+   * remain on the editor by not toggling on 'return to dashboard', made further changes,
+   * and then click cancel
+   */
+  useEffect(() => {
+    if (editorState === 'dirty') {
+      setSaveSuccess(false);
+    }
+  }, [editorState]);
 
   useEffect(() => {
     const getConfig = () => {
@@ -47,6 +64,7 @@ export const TopNav = () => {
           savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
+          setSaveSuccess,
         },
         services
       );
@@ -61,7 +79,42 @@ export const TopNav = () => {
     saveDisabledReason,
     dispatch,
     indexPattern,
+    setSaveSuccess,
   ]);
+
+  useEffect(() => {
+    const { originatingApp } =
+      services.embeddable
+        .getStateTransfer(services.scopedHistory)
+        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+    setOriginatingAppInTopNav(originatingApp);
+  }, [services]);
+
+  useEffect(() => {
+    onAppLeave((actions) => {
+      // Confirm when user coming from the dashboard, and also exit the dashboard
+      // by clicking cancel button, not the save, save as or save and return button
+
+      // TODO: use editorState to differentiate the cancel flow and the save flow
+      // currently it does not work because of the metadata state management flow
+      // the editorState will always reset to default initial state 'loading' inside the onAppLeave function
+      if (
+        originatingAppInTopNav &&
+        originatingAppInTopNav === 'dashboards' &&
+        saveSuccess !== true
+      ) {
+        return actions.confirm(
+          i18n.translate('visualize.confirmModal.confirmTextDescription', {
+            defaultMessage: 'Leave Visualize editor with unsaved changes?',
+          }),
+          i18n.translate('visualize.confirmModal.title', {
+            defaultMessage: 'Unsaved changes',
+          })
+        );
+      }
+      return actions.default();
+    });
+  }, [onAppLeave, originatingAppInTopNav, setSaveSuccess, saveSuccess]);
 
   // reset validity before component destroyed
   useUnmount(() => {
