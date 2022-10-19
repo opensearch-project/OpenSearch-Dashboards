@@ -38,7 +38,10 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       path: '/api/opensearch-dashboards/management/saved_objects/scroll/counts',
       validate: {
         body: schema.object({
-          typesToInclude: schema.arrayOf(schema.string()),
+          params: schema.object({
+            type: schema.maybe(schema.arrayOf(schema.string())),
+            namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          }),
           searchString: schema.maybe(schema.string()),
         }),
       },
@@ -47,9 +50,11 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const { client } = context.core.savedObjects;
 
       const findOptions: SavedObjectsFindOptions = {
-        type: req.body.typesToInclude,
+        ...req.body.params,
+        type: req.body.params.type || [],
         perPage: 1000,
       };
+
       if (req.body.searchString) {
         findOptions.search = `${req.body.searchString}*`;
         findOptions.searchFields = ['title'];
@@ -64,7 +69,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         return accum;
       }, {} as Record<string, number>);
 
-      for (const type of req.body.typesToInclude) {
+      for (const type of findOptions.type) {
         if (!counts[type]) {
           counts[type] = 0;
         }

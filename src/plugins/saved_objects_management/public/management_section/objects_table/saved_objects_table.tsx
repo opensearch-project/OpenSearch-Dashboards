@@ -190,7 +190,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
-      filteredTypes,
+      parsedParams,
       queryText
     );
 
@@ -210,7 +210,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
+    const defaultParams = { type: allowedTypes };
+    const savedObjectCounts = await getSavedObjectCounts(this.props.http, defaultParams, queryText);
 
     this.setState((state) => ({
       ...state,

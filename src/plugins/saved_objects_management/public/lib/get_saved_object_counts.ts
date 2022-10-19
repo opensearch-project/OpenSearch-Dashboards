@@ -32,11 +32,11 @@ import { HttpStart } from 'src/core/public';
 
 export async function getSavedObjectCounts(
   http: HttpStart,
-  typesToInclude: string[],
+  params: any,
   searchString?: string
 ): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/opensearch-dashboards/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, searchString }) }
+    { body: JSON.stringify({ params, searchString }) }
   );
 }
