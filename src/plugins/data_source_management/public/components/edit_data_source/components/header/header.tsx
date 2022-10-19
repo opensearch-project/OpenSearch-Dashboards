@@ -46,6 +46,7 @@ export const Header = ({
         >
           <EuiButtonIcon
             color="danger"
+            data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
               setIsDeleteModalVisible(true);
             }}
@@ -80,6 +81,7 @@ export const Header = ({
               defaultMessage: 'Delete',
             })}
             defaultFocusedButton="confirm"
+            data-test-subj="editDatasourceDeleteConfirmModal"
           >
             <p>
               {
@@ -107,7 +109,7 @@ export const Header = ({
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <div>
-          <EuiTitle>
+          <EuiTitle data-test-subj="editDataSourceTitle">
             <h1>{dataSourceName}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
