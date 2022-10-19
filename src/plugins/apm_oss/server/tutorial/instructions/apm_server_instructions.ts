@@ -35,9 +35,7 @@ export const createEditConfig = () => ({
     defaultMessage: 'Edit the configuration',
   }),
   textPre: i18n.translate('apmOss.tutorial.editConfig.textPre', {
-    defaultMessage:
-      "If you're using an X-Pack secured version of Elastic Stack, you must specify \
-credentials in the `apm-server.yml` config file.",
+    defaultMessage: '',
   }),
   commands: [
     'output.opensearch:',

@@ -80,7 +80,7 @@ if (opts.help) {
 (async function run() {
   const path = resolve(REPO_ROOT, 'NOTICE.txt');
   const newContent = await generateNoticeFromSource({
-    productName: 'OpenSearch Dashboards source code with OpenSearch Dashboards X-Pack source code',
+    productName: 'OpenSearch Dashboards source code',
     directory: REPO_ROOT,
     log,
   });
