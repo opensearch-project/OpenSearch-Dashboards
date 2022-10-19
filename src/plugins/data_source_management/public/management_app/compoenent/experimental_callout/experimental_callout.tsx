@@ -23,7 +23,7 @@ export const ExperimentalCallout = ({ docLinks }: { docLinks: DocLinksStart }) =
           {
             <FormattedMessage
               id="dataSourcesManagement.experimentalFeatureCallout.description"
-              defaultMessage="The feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see "
+              defaultMessage="This feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see "
             />
           }
           <EuiLink href={docLinks.links.noDocumentation.indexPatterns.introduction} target="_blank">
@@ -44,7 +44,7 @@ export const ExperimentalCallout = ({ docLinks }: { docLinks: DocLinksStart }) =
             {
               <FormattedMessage
                 id="dataSourcesManagement.experimentalFeatureCallout.openForumText"
-                defaultMessage="OpenSearch Forum"
+                defaultMessage="forum.opensearch.org"
               />
             }
           </EuiLink>
