@@ -32,12 +32,12 @@ import { Query } from '@elastic/eui';
 
 interface ParsedQuery {
   queryText?: string;
-  visibleTypes?: string[];
+  parsedParams?: any;
 }
 
-export function parseQuery(query: Query): ParsedQuery {
+export function parseQuery(query: Query, filterFields: string[]): ParsedQuery {
   let queryText: string | undefined;
-  let visibleTypes: string[] | undefined;
+  const parsedParams: any = {};
 
   if (query) {
     if (query.ast.getTermClauses().length) {
@@ -46,13 +46,17 @@ export function parseQuery(query: Query): ParsedQuery {
         .map((clause: any) => clause.value)
         .join(' ');
     }
-    if (query.ast.getFieldClauses('type')) {
-      visibleTypes = query.ast.getFieldClauses('type')[0].value as string[];
+    if (!!filterFields) {
+      filterFields.forEach((field) => {
+        if (query.ast.getFieldClauses(field)) {
+          parsedParams[field] = query.ast.getFieldClauses(field)[0].value as string[];
+        }
+      });
     }
   }
 
   return {
     queryText,
-    visibleTypes,
+    parsedParams,
   };
 }

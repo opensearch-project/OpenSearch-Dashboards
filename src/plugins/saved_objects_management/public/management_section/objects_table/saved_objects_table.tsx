@@ -178,9 +178,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
+    const { allowedTypes, filterRegistry } = this.props;
+    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
+    const { queryText, parsedParams } = parseQuery(this.state.activeQuery, filterFields);
 
+    const visibleTypes = parsedParams.type || [];
     const filteredTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
@@ -766,7 +768,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, allowedTypes, applications } = this.props;
+    const { http, allowedTypes, applications, filterRegistry } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -777,6 +779,32 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
+
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.typeFilterName', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: filterOptions,
+      },
+      ...filterRegistry.getAll().map((filter) => {
+        return {
+          ...filter,
+          'data-test-subj': `savedObjectsFilter-${filter.id}`,
+        };
+      }),
+      // Add this back in once we have tag support
+      // {
+      //   type: 'field_value_selection',
+      //   field: 'tag',
+      //   name: 'Tags',
+      //   multiSelect: 'or',
+      //   options: [],
+      // },
+    ];
 
     return (
       <EuiPageContent horizontalPosition="center">
@@ -797,12 +825,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
-            filterRegistry={this.props.filterRegistry}
+            filters={filters}
             selectionConfig={selectionConfig}
             selectedSavedObjects={selectedSavedObjects}
             onQueryChange={this.onQueryChange}
             onTableChange={this.onTableChange}
-            filterOptions={filterOptions}
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
