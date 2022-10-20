@@ -163,10 +163,10 @@ describe('Artifact', () => {
         });
       });
 
-      it('should throw when on a non-Linux platform', async () => {
+      it('should throw when on a non-Linux or non-Windows platform', async () => {
         Object.defineProperties(process, {
           platform: {
-            value: 'win32',
+            value: 'darwin',
           },
           arch: {
             value: ORIGINAL_ARCHITECTURE,
