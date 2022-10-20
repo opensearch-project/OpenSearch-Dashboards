@@ -51,49 +51,48 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   /* Fetch data source by id*/
   useEffectOnce(() => {
     (async function () {
-      setIsLoading(true);
-      try {
-        const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
-        const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
-        if (fetchDataSourceById) {
-          setDataSource(fetchDataSourceById);
-          setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
-        }
-        if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
-          setExistingDatasourceNamesList(
-            listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
-          );
-        }
-      } catch (e) {
-        setDataSource(defaultDataSource);
-        handleDisplayToastMessage({
-          id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
-          defaultMessage: 'Unable to find the Data Source.',
-        });
-        props.history.push('');
-      } finally {
-        setIsLoading(false);
-      }
+      await fetchDataSourceDetailsByID();
     })();
   });
 
-  /* Handle submit - create data source*/
-  const handleSubmit = async (attributes: DataSourceAttributes) => {
+  const fetchDataSourceDetailsByID = async () => {
     setIsLoading(true);
     try {
-      await updateDataSourceById(savedObjects.client, dataSourceID, attributes);
-      props.history.push('');
+      const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
+      const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
+      if (fetchDataSourceById) {
+        setDataSource(fetchDataSourceById);
+        setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
+      }
+      if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
+        setExistingDatasourceNamesList(
+          listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
+        );
+      }
     } catch (e) {
-      setIsLoading(false);
+      setDataSource(defaultDataSource);
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
-        defaultMessage: 'Updating the Data Source failed with some errors. Please try it again.',
+        id: 'dataSourcesManagement.editDataSource.fetchDataSourceFailMsg',
+        defaultMessage: 'Unable to find the Data Source.',
       });
+      props.history.push('');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
-    toasts.addWarning(i18n.translate(id, { defaultMessage }));
+  /* Handle submit - create data source*/
+  const handleSubmit = async (attributes: DataSourceAttributes) => {
+    await updateDataSourceById(savedObjects.client, dataSourceID, attributes);
+    await fetchDataSourceDetailsByID();
+  };
+
+  const handleDisplayToastMessage = ({ id, defaultMessage, success }: ToastMessageItem) => {
+    if (success) {
+      toasts.addSuccess(i18n.translate(id, { defaultMessage }));
+    } else {
+      toasts.addWarning(i18n.translate(id, { defaultMessage }));
+    }
   };
 
   /* Handle delete - data source*/
@@ -124,6 +123,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={handleDelete}
             handleSubmit={handleSubmit}
+            displayToastMessage={handleDisplayToastMessage}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
