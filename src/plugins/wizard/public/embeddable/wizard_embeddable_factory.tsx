@@ -71,11 +71,8 @@ export class WizardEmbeddableFactoryDefinition
   ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
     try {
       const savedWizard = await getSavedWizardLoader().get(savedObjectId);
-
       const editPath = `${EDIT_PATH}/${savedObjectId}`;
-
       const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
-
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
       if (!isLabsEnabled) {
