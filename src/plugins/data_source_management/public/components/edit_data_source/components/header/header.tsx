@@ -14,18 +14,10 @@ import {
   EuiButtonIcon,
   EuiConfirmModal,
 } from '@elastic/eui';
-
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
-import {
-  cancelText,
-  deleteText,
-  deleteThisDataSource,
-  dsListingDeleteDataSourceConfirmation,
-  dsListingDeleteDataSourceDescription,
-  dsListingDeleteDataSourceTitle,
-  dsListingDeleteDataSourceWarning,
-} from '../../../text_content';
 
 export const Header = ({
   showDeleteIcon,
@@ -47,22 +39,34 @@ export const Header = ({
   const renderDeleteButton = () => {
     return (
       <>
-        <EuiToolTip content={deleteThisDataSource}>
+        <EuiToolTip
+          content={i18n.translate('dataSourcesManagement.editDataSource.deleteThisDataSource', {
+            defaultMessage: 'Delete this Data Source',
+          })}
+        >
           <EuiButtonIcon
             color="danger"
+            data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
               setIsDeleteModalVisible(true);
             }}
             iconType="trash"
             iconSize="m"
             size="m"
-            aria-label={deleteThisDataSource}
+            aria-label={i18n.translate(
+              'dataSourcesManagement.editDataSource.deleteThisDataSource',
+              {
+                defaultMessage: 'Delete this Data Source',
+              }
+            )}
           />
         </EuiToolTip>
 
         {isDeleteModalVisible ? (
           <EuiConfirmModal
-            title={dsListingDeleteDataSourceTitle}
+            title={i18n.translate('dataSourcesManagement.editDataSource.deleteTitle', {
+              defaultMessage: 'Delete data source connection',
+            })}
             onCancel={() => {
               setIsDeleteModalVisible(false);
             }}
@@ -70,13 +74,31 @@ export const Header = ({
               setIsDeleteModalVisible(false);
               onClickDeleteIcon();
             }}
-            cancelButtonText={cancelText}
-            confirmButtonText={deleteText}
+            cancelButtonText={i18n.translate('dataSourcesManagement.editDataSource.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={i18n.translate('dataSourcesManagement.editDataSource.delete', {
+              defaultMessage: 'Delete',
+            })}
             defaultFocusedButton="confirm"
+            data-test-subj="editDatasourceDeleteConfirmModal"
           >
-            <p>{dsListingDeleteDataSourceDescription}</p>
-            <p>{dsListingDeleteDataSourceConfirmation}</p>
-            <p>{dsListingDeleteDataSourceWarning}</p>
+            <p>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.deleteConfirmation"
+                  defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+                />
+              }
+            </p>
+            <p>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.deleteWarning"
+                  defaultMessage="This action cannot be undone."
+                />
+              }
+            </p>
           </EuiConfirmModal>
         ) : null}
       </>
@@ -87,7 +109,7 @@ export const Header = ({
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <div>
-          <EuiTitle>
+          <EuiTitle data-test-subj="editDataSourceTitle">
             <h1>{dataSourceName}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />

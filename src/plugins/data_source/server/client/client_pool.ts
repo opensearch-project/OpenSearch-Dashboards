@@ -4,31 +4,32 @@
  */
 
 import { Client } from '@opensearch-project/opensearch';
+import { Client as LegacyClient } from 'elasticsearch';
 import LRUCache from 'lru-cache';
 import { Logger } from 'src/core/server';
 import { DataSourcePluginConfigType } from '../../config';
 
 export interface OpenSearchClientPoolSetup {
-  getClientFromPool: (id: string) => Client | undefined;
-  addClientToPool: (endpoint: string, client: Client) => void;
+  getClientFromPool: (id: string) => Client | LegacyClient | undefined;
+  addClientToPool: (endpoint: string, client: Client | LegacyClient) => void;
 }
 
 /**
- * OpenSearch client pool.
+ * OpenSearch client pool for data source.
  *
  * This client pool uses an LRU cache to manage OpenSearch Js client objects.
  * It reuse TPC connections for each OpenSearch endpoint.
  */
 export class OpenSearchClientPool {
   // LRU cache
-  //   key: data source endpoint url
-  //   value: OpenSearch client object
-  private cache?: LRUCache<string, Client>;
+  //   key: data source endpoint
+  //   value: OpenSearch client object | Legacy client object
+  private cache?: LRUCache<string, Client | LegacyClient>;
   private isClosed = false;
 
   constructor(private logger: Logger) {}
 
-  public async setup(config: DataSourcePluginConfigType) {
+  public async setup(config: DataSourcePluginConfigType): Promise<OpenSearchClientPoolSetup> {
     const logger = this.logger;
     const { size } = config.clientPool;
 
@@ -53,7 +54,7 @@ export class OpenSearchClientPool {
       return this.cache!.get(endpoint);
     };
 
-    const addClientToPool = (endpoint: string, client: Client) => {
+    const addClientToPool = (endpoint: string, client: Client | LegacyClient) => {
       this.cache!.set(endpoint, client);
     };
 

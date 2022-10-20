@@ -33,6 +33,7 @@ describe('Data Source Service', () => {
     test('exposes proper contract', async () => {
       const setup = await service.setup(config);
       expect(setup).toHaveProperty('getDataSourceClient');
+      expect(setup).toHaveProperty('getDataSourceLegacyClient');
     });
   });
 });

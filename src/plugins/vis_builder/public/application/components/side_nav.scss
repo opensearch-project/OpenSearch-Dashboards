@@ -1,0 +1,51 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../util";
+@import "../variables";
+
+.vbSidenav {
+  @include scrollNavParent(auto 1fr);
+
+  &.left {
+    border-right: $euiBorderThin;
+    grid-area: leftNav;
+  }
+
+  &.right {
+    border-left: $euiBorderThin;
+    grid-area: rightNav;
+    height: 100%;
+  }
+
+  &__header {
+    padding: $euiSizeS;
+    border-bottom: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &__style {
+    @include euiYScrollWithShadows;
+  }
+}
+
+.vbTypeSelector__icon {
+  margin-right: $euiSizeS;
+}
+
+.vbSidenavTabs {
+  .euiTab__content {
+    text-transform: capitalize;
+  }
+
+  @include scrollNavParent(min-content 1fr);
+
+  & > [role="tabpanel"] {
+    @include scrollNavParent;
+  }
+}
+
+.vbDatasourceSelect {
+  max-width: calc(#{$vbLeftNavWidth} - 1px);
+}

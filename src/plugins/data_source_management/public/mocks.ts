@@ -96,6 +96,14 @@ export const getDataSourcesResponse = {
   ],
 };
 
+export const existingDatasourceNamesList = [
+  'test123',
+  'testTest20',
+  'TeSt',
+  'duplicateTest',
+  'dup20',
+];
+
 export const getMappedDataSources = [
   {
     id: 'test',
@@ -134,6 +142,17 @@ export const mockDataSourceAttributesWithAuth = {
       username: 'test123',
       password: 'test123',
     },
+  },
+};
+
+export const mockDataSourceAttributesWithNoAuth = {
+  id: 'test123',
+  title: 'create-test-ds123',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: AuthType.NoAuth,
+    credentials: undefined,
   },
 };
 export const getDataSourceByIdWithCredential = {

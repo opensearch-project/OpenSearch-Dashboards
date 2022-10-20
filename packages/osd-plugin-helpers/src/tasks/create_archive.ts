@@ -36,7 +36,7 @@ import del from 'del';
 import vfs from 'vinyl-fs';
 import zip from 'gulp-zip';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const asyncPipeline = promisify(pipeline);
 

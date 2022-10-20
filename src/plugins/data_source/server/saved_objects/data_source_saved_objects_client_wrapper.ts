@@ -10,24 +10,22 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
   SavedObjectsCreateOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'opensearch-dashboards/server';
-
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
-
-import { CryptographyClient } from '../cryptography';
-
+import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import { AuthType } from '../../common/data_sources';
+import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
  * which contains the factory used to create Saved Objects Client Wrapper instances
  */
 export class DataSourceSavedObjectsClientWrapper {
-  constructor(private cryptographyClient: CryptographyClient) {}
+  constructor(private cryptography: CryptographyServiceSetup, private logger: Logger) {}
 
   /**
    * Describes the factory used to create instances of Saved Objects Client Wrappers
@@ -80,7 +78,10 @@ export class DataSourceSavedObjectsClientWrapper {
       }
 
       const encryptedAttributes: Partial<T> = await this.validateAndUpdatePartialAttributes(
-        attributes
+        wrapperOptions,
+        id,
+        attributes,
+        options
       );
 
       return await wrapperOptions.client.update(type, id, encryptedAttributes, options);
@@ -92,14 +93,17 @@ export class DataSourceSavedObjectsClientWrapper {
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
       objects = await Promise.all(
         objects.map(async (object) => {
-          const { type, attributes } = object;
+          const { id, type, attributes } = object;
 
           if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
             return object;
           }
 
           const encryptedAttributes: Partial<T> = await this.validateAndUpdatePartialAttributes(
-            attributes
+            wrapperOptions,
+            id,
+            attributes,
+            options
           );
 
           return {
@@ -141,26 +145,39 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     this.validateAttributes(attributes);
 
-    const { auth } = attributes;
+    const { endpoint, auth } = attributes;
 
     switch (auth.type) {
       case AuthType.NoAuth:
         return {
           ...attributes,
           // Drop the credentials attribute for no_auth
-          credentials: undefined,
+          auth: {
+            type: auth.type,
+            credentials: undefined,
+          },
         };
       case AuthType.UsernamePasswordType:
+        // Signing the data source with endpoint
+        const encryptionContext = {
+          endpoint,
+        };
+
         return {
           ...attributes,
-          auth: await this.encryptCredentials(auth),
+          auth: await this.encryptCredentials(auth, encryptionContext),
         };
       default:
-        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
   }
 
-  private async validateAndUpdatePartialAttributes<T = unknown>(attributes: T) {
+  private async validateAndUpdatePartialAttributes<T = unknown>(
+    wrapperOptions: SavedObjectsClientWrapperOptions,
+    id: string,
+    attributes: Partial<T>,
+    options: SavedObjectsUpdateOptions = {}
+  ) {
     const { auth, endpoint } = attributes;
 
     if (endpoint) {
@@ -169,7 +186,7 @@ export class DataSourceSavedObjectsClientWrapper {
       );
     }
 
-    if (auth === undefined) {
+    if (!auth) {
       return attributes;
     }
 
@@ -180,13 +197,23 @@ export class DataSourceSavedObjectsClientWrapper {
         return {
           ...attributes,
           // Drop the credentials attribute for no_auth
-          credentials: undefined,
+          auth: {
+            type: auth.type,
+            credentials: null,
+          },
         };
       case AuthType.UsernamePasswordType:
         if (credentials?.password) {
+          // Fetch and validate existing signature
+          const encryptionContext = await this.validateEncryptionContext(
+            wrapperOptions,
+            id,
+            options
+          );
+
           return {
             ...attributes,
-            auth: await this.encryptCredentials(auth),
+            auth: await this.encryptCredentials(auth, encryptionContext),
           };
         } else {
           return attributes;
@@ -208,7 +235,7 @@ export class DataSourceSavedObjectsClientWrapper {
       throw SavedObjectsErrorHelpers.createBadRequestError('"endpoint" attribute is not valid');
     }
 
-    if (auth === undefined) {
+    if (!auth) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
@@ -226,7 +253,7 @@ export class DataSourceSavedObjectsClientWrapper {
       case AuthType.NoAuth:
         break;
       case AuthType.UsernamePasswordType:
-        if (credentials === undefined) {
+        if (!credentials) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
             '"auth.credentials" attribute is required'
           );
@@ -252,7 +279,95 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async encryptCredentials<T = unknown>(auth: T) {
+  private async validateEncryptionContext(
+    wrapperOptions: SavedObjectsClientWrapperOptions,
+    id: string,
+    options: SavedObjectsUpdateOptions = {}
+  ) {
+    let attributes;
+
+    try {
+      // Fetch existing data source by id
+      const savedObject = await wrapperOptions.client.get(DATA_SOURCE_SAVED_OBJECT_TYPE, id, {
+        namespace: options.namespace,
+      });
+      attributes = savedObject.attributes;
+    } catch (err: any) {
+      const errMsg = `Failed to fetch existing data source for dataSourceId [${id}]`;
+      this.logger.error(errMsg);
+      this.logger.error(err);
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
+    }
+
+    if (!attributes) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Update failed due to deprecated data source: "attributes" missing. Please delete and create another data source.'
+      );
+    }
+
+    const { endpoint, auth } = attributes;
+
+    if (!endpoint) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Update failed due to deprecated data source: "endpoint" missing. Please delete and create another data source.'
+      );
+    }
+
+    if (!auth) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Update failed due to deprecated data source: "auth" missing. Please delete and create another data source.'
+      );
+    }
+
+    switch (auth.type) {
+      case AuthType.NoAuth:
+        // Signing the data source with exsiting endpoint
+        return {
+          endpoint,
+        };
+      case AuthType.UsernamePasswordType:
+        const { credentials } = auth;
+        if (!credentials) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Update failed due to deprecated data source: "credentials" missing. Please delete and create another data source.'
+          );
+        }
+
+        const { username, password } = credentials;
+
+        if (!username) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Update failed due to deprecated data source: "auth.credentials.username" missing. Please delete and create another data source.'
+          );
+        }
+
+        if (!password) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Update failed due to deprecated data source: "auth.credentials.username" missing. Please delete and create another data source.'
+          );
+        }
+
+        const { encryptionContext } = await this.cryptography
+          .decodeAndDecrypt(password)
+          .catch((err: any) => {
+            const errMsg = `Failed to update existing data source for dataSourceId [${id}]: unable to decrypt "auth.credentials.password"`;
+            this.logger.error(errMsg);
+            this.logger.error(err);
+            throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
+          });
+
+        if (encryptionContext.endpoint !== endpoint) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Update failed due to deprecated data source: "endpoint" contaminated. Please delete and create another data source.'
+          );
+        }
+        return encryptionContext;
+      default:
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
+    }
+  }
+
+  private async encryptCredentials<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
     const {
       credentials: { username, password },
     } = auth;
@@ -261,7 +376,7 @@ export class DataSourceSavedObjectsClientWrapper {
       ...auth,
       credentials: {
         username,
-        password: await this.cryptographyClient.encryptAndEncode(password),
+        password: await this.cryptography.encryptAndEncode(password, encryptionContext),
       },
     };
   }

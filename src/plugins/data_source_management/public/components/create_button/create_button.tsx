@@ -19,10 +19,9 @@ export const CreateButton = ({ history }: Props) => {
       data-test-subj="createDataSourceButton"
       fill={true}
       onClick={() => history.push('/create')}
-      iconType="plusInCircle"
     >
       <FormattedMessage
-        id="dataSourcesManagement.dataSourcesTable.createBtn"
+        id="dataSourcesManagement.dataSourceListing.createButton"
         defaultMessage="Create data source connection"
       />
     </EuiButton>

@@ -44,7 +44,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { useMount } from 'react-use';
+import { useEffectOnce, useMount } from 'react-use';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -58,6 +58,7 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
+import { ExperimentalCallout } from '../experimental_callout';
 
 const pagination = {
   initialPageSize: 10,
@@ -112,6 +113,9 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
+
+  const { columns: columnRegistry } = indexPatternManagementStart;
 
   useMount(() => {
     setBreadcrumbs(getListBreadcrumbs());
@@ -153,6 +157,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   };
 
+  const loadColumnData = async () => {
+    await Promise.all(columnRegistry.getAll().map((column) => column.loadData()));
+    setIsColumnDataLoaded(true);
+  };
+
   useEffect(() => {
     if (!dataSourceEnabled) {
       getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
@@ -164,6 +173,10 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       );
     }
   }, [http, creationOptions, searchClient, dataSourceEnabled]);
+
+  useEffectOnce(() => {
+    loadColumnData();
+  });
 
   chrome.docTitle.change(title);
 
@@ -197,6 +210,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
+    ...columnRegistry.getAll().map((column) => {
+      return {
+        ...column.euiColumn,
+        sortable: false,
+        'data-test-subj': `indexPatternTableColumn-${column.id}`,
+      };
+    }),
   ];
 
   const createButton = canSave ? (
@@ -242,36 +262,39 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   }
 
   return (
-    <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={false}
-        items={indexPatterns}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
-      />
-    </EuiPageContent>
+    <>
+      {dataSourceEnabled ? <ExperimentalCallout /> : null}
+      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>{title}</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
+                  defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={false}
+          items={indexPatterns}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </EuiPageContent>
+    </>
   );
 };
 

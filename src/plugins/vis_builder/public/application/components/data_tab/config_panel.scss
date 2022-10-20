@@ -1,0 +1,48 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.vbConfig {
+  @include euiYScrollWithShadows;
+
+  background: $euiColorLightestShade;
+  border-left: $euiBorderThin;
+  position: relative;
+  overflow-x: hidden;
+
+  &__section {
+    width: 100%;
+    transition: transform $euiAnimSpeedNormal 0s $euiAnimSlightResistance;
+  }
+
+  &__title {
+    padding: $euiSizeS;
+    padding-bottom: 0;
+
+    &.showDivider {
+      border-bottom: 1px solid $euiColorLightShade;
+    }
+  }
+
+  &__content {
+    padding: $euiSizeS;
+  }
+
+  &__aggEditor {
+    padding: 0 $euiSizeM;
+  }
+
+  &--secondary {
+    position: absolute;
+    top: 0;
+    left: 100%;
+
+    .visEditorAggParam--half {
+      margin: $euiSize 0;
+    }
+  }
+
+  &.showSecondary > .vbConfig__section {
+    transform: translateX(-100%);
+  }
+}

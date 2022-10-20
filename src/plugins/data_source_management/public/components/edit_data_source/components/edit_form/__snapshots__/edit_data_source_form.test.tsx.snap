@@ -1,0 +1,2288 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Datasource Management: Edit Datasource Form Case 1: With Username & Password should render normally 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <EditDataSourceForm
+    existingDataSource={
+      Object {
+        "auth": Object {
+          "credentials": Object {
+            "password": "test123",
+            "username": "test123",
+          },
+          "type": "username_password",
+        },
+        "description": "jest testing",
+        "endpoint": "https://test.com",
+        "id": "test",
+        "title": "create-test-ds",
+      }
+    }
+    existingDatasourceNamesList={
+      Array [
+        "test123",
+        "testTest20",
+        "TeSt",
+        "duplicateTest",
+        "dup20",
+      ]
+    }
+    handleSubmit={[MockFunction]}
+    onDeleteDataSource={[MockFunction]}
+  >
+    <Header
+      dataSourceName="create-test-ds"
+      onClickDeleteIcon={[Function]}
+      showDeleteIcon={true}
+    >
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div>
+                <EuiTitle
+                  data-test-subj="editDataSourceTitle"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                    data-test-subj="editDataSourceTitle"
+                  >
+                    create-test-ds
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+              </div>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiToolTip
+                content="Delete this Data Source"
+                delay="regular"
+                position="top"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <EuiButtonIcon
+                    aria-label="Delete this Data Source"
+                    color="danger"
+                    data-test-subj="editDatasourceDeleteIcon"
+                    iconSize="m"
+                    iconType="trash"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    size="m"
+                  >
+                    <button
+                      aria-label="Delete this Data Source"
+                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--medium"
+                      data-test-subj="editDatasourceDeleteIcon"
+                      disabled={false}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="trash"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="trash"
+                          size="m"
+                        />
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </span>
+              </EuiToolTip>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </Header>
+    <EuiForm
+      data-test-subj="data-source-edit"
+      onChange={[Function]}
+    >
+      <div
+        className="euiForm"
+        data-test-subj="data-source-edit"
+        onChange={[Function]}
+      >
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Connection Details"
+                    id="dataSourcesManagement.editDataSource.connectionDetailsText"
+                    values={Object {}}
+                  >
+                    <span>
+                      Connection Details
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              description={
+                <p>
+                  <FormattedMessage
+                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                    id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                    values={Object {}}
+                  />
+                </p>
+              }
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Object Details"
+                    id="dataSourcesManagement.editDataSource.objectDetailsText"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Object Details"
+                              id="dataSourcesManagement.editDataSource.objectDetailsText"
+                              values={Object {}}
+                            >
+                              <span>
+                                Object Details
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                        <EuiText
+                          className="euiDescribedFormGroup__description"
+                          color="subdued"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small euiDescribedFormGroup__description"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                              component="div"
+                            >
+                              <div
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                    id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      This connection information is used for reference in tables and when adding to a data source connection
+                                    </span>
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          data-test-subj="editDataSourceTitleFormRow"
+                          describedByIds={Array []}
+                          display="row"
+                          error={Array []}
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          isInvalid={false}
+                          label="Title"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            data-test-subj="editDataSourceTitleFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                aria-invalid={false}
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                isInvalid={false}
+                                type="label"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Title
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                id="generated-id"
+                                isInvalid={false}
+                                name="dataSourceTitle"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Title"
+                                value="create-test-ds"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl
+                                        isInvalid={false}
+                                      >
+                                        <input
+                                          className="euiFieldText"
+                                          id="generated-id"
+                                          name="dataSourceTitle"
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          placeholder="Title"
+                                          type="text"
+                                          value="create-test-ds"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                        <EuiFormRow
+                          data-test-subj="editDataSourceDescriptionFormRow"
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label={
+                            <React.Fragment>
+                              <FormattedMessage
+                                defaultMessage="Description"
+                                id="dataSourceManagement.editDataSource.description"
+                                values={Object {}}
+                              />
+                               
+                              <i
+                                style={
+                                  Object {
+                                    "fontWeight": "normal",
+                                  }
+                                }
+                              >
+                                -
+                                 
+                                <FormattedMessage
+                                  defaultMessage="optional"
+                                  id="dataSourcesManagement.editDataSource.optionalText"
+                                  values={Object {}}
+                                />
+                              </i>
+                            </React.Fragment>
+                          }
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            data-test-subj="editDataSourceDescriptionFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Description"
+                                    id="dataSourceManagement.editDataSource.description"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      Description
+                                    </span>
+                                  </FormattedMessage>
+                                   
+                                  <i
+                                    style={
+                                      Object {
+                                        "fontWeight": "normal",
+                                      }
+                                    }
+                                  >
+                                    -
+                                     
+                                    <FormattedMessage
+                                      defaultMessage="optional"
+                                      id="dataSourcesManagement.editDataSource.optionalText"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        optional
+                                      </span>
+                                    </FormattedMessage>
+                                  </i>
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                id="generated-id"
+                                name="dataSourceDescription"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Description of the data source"
+                                value="jest testing"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl>
+                                        <input
+                                          className="euiFieldText"
+                                          id="generated-id"
+                                          name="dataSourceDescription"
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          placeholder="Description of the data source"
+                                          type="text"
+                                          value="jest testing"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Endpoint"
+                    id="dataSourcesManagement.editDataSource.endpointTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Endpoint
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              description={
+                <p>
+                  <FormattedMessage
+                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                    id="dataSourcesManagement.editDataSource.endpointDescription"
+                    values={Object {}}
+                  />
+                </p>
+              }
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Endpoint"
+                    id="dataSourcesManagement.editDataSource.endpointTitle"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Endpoint"
+                              id="dataSourcesManagement.editDataSource.endpointTitle"
+                              values={Object {}}
+                            >
+                              <span>
+                                Endpoint
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                        <EuiText
+                          className="euiDescribedFormGroup__description"
+                          color="subdued"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small euiDescribedFormGroup__description"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                              component="div"
+                            >
+                              <div
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                    id="dataSourcesManagement.editDataSource.endpointDescription"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      This connection information is used for reference in tables and when adding to a data source connection
+                                    </span>
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label="Endpoint URL"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Endpoint URL
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                aria-disabled={true}
+                                data-test-subj="editDatasourceEndpointField"
+                                disabled={true}
+                                id="generated-id"
+                                name="endpoint"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                value="https://test.com"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl>
+                                        <input
+                                          aria-disabled={true}
+                                          className="euiFieldText"
+                                          data-test-subj="editDatasourceEndpointField"
+                                          disabled={true}
+                                          id="generated-id"
+                                          name="endpoint"
+                                          onBlur={[Function]}
+                                          onFocus={[Function]}
+                                          type="text"
+                                          value="https://test.com"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Authentication"
+                    id="dataSourcesManagement.editDataSource.authenticationTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Authentication
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Authentication Method"
+                    id="dataSourcesManagement.editDataSource.authenticationMethod"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Authentication Method"
+                              id="dataSourcesManagement.editDataSource.authenticationMethod"
+                              values={Object {}}
+                            >
+                              <span>
+                                Authentication Method
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label="Credential"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Credential
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiRadioGroup
+                                data-test-subj="editDataSourceSelectAuthType"
+                                id="generated-id"
+                                idSelected="username_password"
+                                name="Credential"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                options={
+                                  Array [
+                                    Object {
+                                      "id": "no_auth",
+                                      "label": "No authentication",
+                                    },
+                                    Object {
+                                      "id": "username_password",
+                                      "label": "Username & Password",
+                                    },
+                                  ]
+                                }
+                              >
+                                <div
+                                  data-test-subj="editDataSourceSelectAuthType"
+                                  id="generated-id"
+                                  onBlur={[Function]}
+                                  onFocus={[Function]}
+                                >
+                                  <EuiRadio
+                                    checked={false}
+                                    className="euiRadioGroup__item"
+                                    id="no_auth"
+                                    key="0"
+                                    label="No authentication"
+                                    name="Credential"
+                                    onChange={[Function]}
+                                  >
+                                    <div
+                                      className="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        checked={false}
+                                        className="euiRadio__input"
+                                        id="no_auth"
+                                        name="Credential"
+                                        onChange={[Function]}
+                                        type="radio"
+                                      />
+                                      <div
+                                        className="euiRadio__circle"
+                                      />
+                                      <label
+                                        className="euiRadio__label"
+                                        htmlFor="no_auth"
+                                      >
+                                        No authentication
+                                      </label>
+                                    </div>
+                                  </EuiRadio>
+                                  <EuiRadio
+                                    checked={true}
+                                    className="euiRadioGroup__item"
+                                    id="username_password"
+                                    key="1"
+                                    label="Username & Password"
+                                    name="Credential"
+                                    onChange={[Function]}
+                                  >
+                                    <div
+                                      className="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        checked={true}
+                                        className="euiRadio__input"
+                                        id="username_password"
+                                        name="Credential"
+                                        onChange={[Function]}
+                                        type="radio"
+                                      />
+                                      <div
+                                        className="euiRadio__circle"
+                                      />
+                                      <label
+                                        className="euiRadio__label"
+                                        htmlFor="username_password"
+                                      >
+                                        Username & Password
+                                      </label>
+                                    </div>
+                                  </EuiRadio>
+                                </div>
+                              </EuiRadioGroup>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                        <EuiSpacer>
+                          <div
+                            className="euiSpacer euiSpacer--l"
+                          />
+                        </EuiSpacer>
+                        <EuiFormRow
+                          data-test-subj="editDatasourceUsernameFormRow"
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          isInvalid={false}
+                          label="Username"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            data-test-subj="editDatasourceUsernameFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                aria-invalid={false}
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                isInvalid={false}
+                                type="label"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Username
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                id="generated-id"
+                                isInvalid={false}
+                                name="datasourceUsername"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Username to connect to data source"
+                                value="test123"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl
+                                        isInvalid={false}
+                                      >
+                                        <input
+                                          className="euiFieldText"
+                                          id="generated-id"
+                                          name="datasourceUsername"
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          placeholder="Username to connect to data source"
+                                          type="text"
+                                          value="test123"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                        <EuiFormRow
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          isInvalid={false}
+                          label="Password"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                aria-invalid={false}
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                isInvalid={false}
+                                type="label"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Password
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFlexGroup
+                                id="generated-id"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  id="generated-id"
+                                  onBlur={[Function]}
+                                  onFocus={[Function]}
+                                >
+                                  <EuiFlexItem>
+                                    <div
+                                      className="euiFlexItem"
+                                    >
+                                      <EuiFieldPassword
+                                        compressed={false}
+                                        data-test-subj="updateDataSourceFormPasswordField"
+                                        disabled={true}
+                                        fullWidth={false}
+                                        isInvalid={false}
+                                        isLoading={false}
+                                        onBlur={[Function]}
+                                        onChange={[Function]}
+                                        placeholder="Password to connect to data source"
+                                        type="dual"
+                                        value="********"
+                                      >
+                                        <EuiFormControlLayout
+                                          append={
+                                            Array [
+                                              <EuiButtonIcon
+                                                aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                                disabled={true}
+                                                iconType="eye"
+                                                onClick={[Function]}
+                                                title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                              />,
+                                            ]
+                                          }
+                                          compressed={false}
+                                          fullWidth={false}
+                                          icon="lock"
+                                          isLoading={false}
+                                        >
+                                          <div
+                                            className="euiFormControlLayout euiFormControlLayout--group"
+                                          >
+                                            <div
+                                              className="euiFormControlLayout__childrenWrapper"
+                                            >
+                                              <EuiValidatableControl
+                                                isInvalid={false}
+                                              >
+                                                <input
+                                                  className="euiFieldPassword euiFieldPassword--inGroup euiFieldPassword--withToggle"
+                                                  data-test-subj="updateDataSourceFormPasswordField"
+                                                  disabled={true}
+                                                  onBlur={[Function]}
+                                                  onChange={[Function]}
+                                                  placeholder="Password to connect to data source"
+                                                  type="password"
+                                                  value="********"
+                                                />
+                                              </EuiValidatableControl>
+                                              <EuiFormControlLayoutIcons
+                                                compressed={false}
+                                                icon="lock"
+                                                isLoading={false}
+                                              >
+                                                <div
+                                                  className="euiFormControlLayoutIcons"
+                                                >
+                                                  <EuiFormControlLayoutCustomIcon
+                                                    size="m"
+                                                    type="lock"
+                                                  >
+                                                    <span
+                                                      className="euiFormControlLayoutCustomIcon"
+                                                    >
+                                                      <EuiIcon
+                                                        aria-hidden="true"
+                                                        className="euiFormControlLayoutCustomIcon__icon"
+                                                        size="m"
+                                                        type="lock"
+                                                      >
+                                                        <span
+                                                          aria-hidden="true"
+                                                          className="euiFormControlLayoutCustomIcon__icon"
+                                                          data-euiicon-type="lock"
+                                                          size="m"
+                                                        />
+                                                      </EuiIcon>
+                                                    </span>
+                                                  </EuiFormControlLayoutCustomIcon>
+                                                </div>
+                                              </EuiFormControlLayoutIcons>
+                                            </div>
+                                            <EuiButtonIcon
+                                              aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                              className="euiFormControlLayout__append"
+                                              disabled={true}
+                                              iconType="eye"
+                                              key="0/.0"
+                                              onClick={[Function]}
+                                              title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                            >
+                                              <button
+                                                aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiFormControlLayout__append"
+                                                disabled={true}
+                                                onClick={[Function]}
+                                                title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                                type="button"
+                                              >
+                                                <EuiIcon
+                                                  aria-hidden="true"
+                                                  className="euiButtonIcon__icon"
+                                                  color="inherit"
+                                                  size="m"
+                                                  type="eye"
+                                                >
+                                                  <span
+                                                    aria-hidden="true"
+                                                    className="euiButtonIcon__icon"
+                                                    color="inherit"
+                                                    data-euiicon-type="eye"
+                                                    size="m"
+                                                  />
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiButtonIcon>
+                                          </div>
+                                        </EuiFormControlLayout>
+                                      </EuiFieldPassword>
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem>
+                                    <div
+                                      className="euiFlexItem"
+                                    >
+                                      <EuiButton
+                                        data-test-subj="editDatasourceUpdatePasswordBtn"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiButtonDisplay
+                                          baseClassName="euiButton"
+                                          data-test-subj="editDatasourceUpdatePasswordBtn"
+                                          disabled={false}
+                                          element="button"
+                                          isDisabled={false}
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <button
+                                            className="euiButton euiButton--primary"
+                                            data-test-subj="editDatasourceUpdatePasswordBtn"
+                                            disabled={false}
+                                            onClick={[Function]}
+                                            style={
+                                              Object {
+                                                "minWidth": undefined,
+                                              }
+                                            }
+                                            type="button"
+                                          >
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconSide="left"
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
+                                            >
+                                              <span
+                                                className="euiButtonContent euiButton__content"
+                                              >
+                                                <span
+                                                  className="euiButton__text"
+                                                >
+                                                  <FormattedMessage
+                                                    defaultMessage="Update stored password"
+                                                    id="dataSourcesManagement.editDataSource.updateStoredPassword"
+                                                    values={Object {}}
+                                                  >
+                                                    <span>
+                                                      Update stored password
+                                                    </span>
+                                                  </FormattedMessage>
+                                                </span>
+                                              </span>
+                                            </EuiButtonContent>
+                                          </button>
+                                        </EuiButtonDisplay>
+                                      </EuiButton>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiForm>
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+  </EditDataSourceForm>
+</IntlProvider>
+`;
+
+exports[`Datasource Management: Edit Datasource Form Case 2: With No Authentication should render normally 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <EditDataSourceForm
+    existingDataSource={
+      Object {
+        "auth": Object {
+          "credentials": undefined,
+          "type": "no_auth",
+        },
+        "description": "jest testing",
+        "endpoint": "https://test.com",
+        "id": "test123",
+        "title": "create-test-ds123",
+      }
+    }
+    existingDatasourceNamesList={
+      Array [
+        "test123",
+        "testTest20",
+        "TeSt",
+        "duplicateTest",
+        "dup20",
+      ]
+    }
+    handleSubmit={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "auth": Object {
+                "credentials": Object {
+                  "password": "testPassword",
+                  "username": "test123",
+                },
+                "type": "username_password",
+              },
+              "description": "jest testing",
+              "endpoint": undefined,
+              "title": "create-test-ds",
+            },
+          ],
+          Array [
+            Object {
+              "auth": Object {
+                "credentials": Object {
+                  "username": "test123",
+                },
+                "type": "username_password",
+              },
+              "description": "testDescription",
+              "title": "create-test-ds",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    onDeleteDataSource={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "auth": Object {
+                "credentials": Object {
+                  "password": "testPassword",
+                  "username": "test123",
+                },
+                "type": "username_password",
+              },
+              "description": "jest testing",
+              "endpoint": undefined,
+              "title": "create-test-ds",
+            },
+          ],
+          Array [
+            Object {
+              "auth": Object {
+                "credentials": Object {
+                  "username": "test123",
+                },
+                "type": "username_password",
+              },
+              "description": "testDescription",
+              "title": "create-test-ds",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  >
+    <Header
+      dataSourceName="create-test-ds123"
+      onClickDeleteIcon={[Function]}
+      showDeleteIcon={true}
+    >
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div>
+                <EuiTitle
+                  data-test-subj="editDataSourceTitle"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                    data-test-subj="editDataSourceTitle"
+                  >
+                    create-test-ds123
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+              </div>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiToolTip
+                content="Delete this Data Source"
+                delay="regular"
+                position="top"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  <EuiButtonIcon
+                    aria-label="Delete this Data Source"
+                    color="danger"
+                    data-test-subj="editDatasourceDeleteIcon"
+                    iconSize="m"
+                    iconType="trash"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    size="m"
+                  >
+                    <button
+                      aria-label="Delete this Data Source"
+                      className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--medium"
+                      data-test-subj="editDatasourceDeleteIcon"
+                      disabled={false}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      type="button"
+                    >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        size="m"
+                        type="trash"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="trash"
+                          size="m"
+                        />
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                </span>
+              </EuiToolTip>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </Header>
+    <EuiForm
+      data-test-subj="data-source-edit"
+      onChange={[Function]}
+    >
+      <div
+        className="euiForm"
+        data-test-subj="data-source-edit"
+        onChange={[Function]}
+      >
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Connection Details"
+                    id="dataSourcesManagement.editDataSource.connectionDetailsText"
+                    values={Object {}}
+                  >
+                    <span>
+                      Connection Details
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              description={
+                <p>
+                  <FormattedMessage
+                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                    id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                    values={Object {}}
+                  />
+                </p>
+              }
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Object Details"
+                    id="dataSourcesManagement.editDataSource.objectDetailsText"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Object Details"
+                              id="dataSourcesManagement.editDataSource.objectDetailsText"
+                              values={Object {}}
+                            >
+                              <span>
+                                Object Details
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                        <EuiText
+                          className="euiDescribedFormGroup__description"
+                          color="subdued"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small euiDescribedFormGroup__description"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                              component="div"
+                            >
+                              <div
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                    id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      This connection information is used for reference in tables and when adding to a data source connection
+                                    </span>
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          data-test-subj="editDataSourceTitleFormRow"
+                          describedByIds={Array []}
+                          display="row"
+                          error={Array []}
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          isInvalid={false}
+                          label="Title"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            data-test-subj="editDataSourceTitleFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                aria-invalid={false}
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                isInvalid={false}
+                                type="label"
+                              >
+                                <label
+                                  aria-invalid={false}
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Title
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                id="generated-id"
+                                isInvalid={false}
+                                name="dataSourceTitle"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Title"
+                                value="create-test-ds123"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl
+                                        isInvalid={false}
+                                      >
+                                        <input
+                                          className="euiFieldText"
+                                          id="generated-id"
+                                          name="dataSourceTitle"
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          placeholder="Title"
+                                          type="text"
+                                          value="create-test-ds123"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                        <EuiFormRow
+                          data-test-subj="editDataSourceDescriptionFormRow"
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label={
+                            <React.Fragment>
+                              <FormattedMessage
+                                defaultMessage="Description"
+                                id="dataSourceManagement.editDataSource.description"
+                                values={Object {}}
+                              />
+                               
+                              <i
+                                style={
+                                  Object {
+                                    "fontWeight": "normal",
+                                  }
+                                }
+                              >
+                                -
+                                 
+                                <FormattedMessage
+                                  defaultMessage="optional"
+                                  id="dataSourcesManagement.editDataSource.optionalText"
+                                  values={Object {}}
+                                />
+                              </i>
+                            </React.Fragment>
+                          }
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            data-test-subj="editDataSourceDescriptionFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Description"
+                                    id="dataSourceManagement.editDataSource.description"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      Description
+                                    </span>
+                                  </FormattedMessage>
+                                   
+                                  <i
+                                    style={
+                                      Object {
+                                        "fontWeight": "normal",
+                                      }
+                                    }
+                                  >
+                                    -
+                                     
+                                    <FormattedMessage
+                                      defaultMessage="optional"
+                                      id="dataSourcesManagement.editDataSource.optionalText"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        optional
+                                      </span>
+                                    </FormattedMessage>
+                                  </i>
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                id="generated-id"
+                                name="dataSourceDescription"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                placeholder="Description of the data source"
+                                value="jest testing"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl>
+                                        <input
+                                          className="euiFieldText"
+                                          id="generated-id"
+                                          name="dataSourceDescription"
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onFocus={[Function]}
+                                          placeholder="Description of the data source"
+                                          type="text"
+                                          value="jest testing"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Endpoint"
+                    id="dataSourcesManagement.editDataSource.endpointTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Endpoint
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              description={
+                <p>
+                  <FormattedMessage
+                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                    id="dataSourcesManagement.editDataSource.endpointDescription"
+                    values={Object {}}
+                  />
+                </p>
+              }
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Endpoint"
+                    id="dataSourcesManagement.editDataSource.endpointTitle"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Endpoint"
+                              id="dataSourcesManagement.editDataSource.endpointTitle"
+                              values={Object {}}
+                            >
+                              <span>
+                                Endpoint
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                        <EuiText
+                          className="euiDescribedFormGroup__description"
+                          color="subdued"
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small euiDescribedFormGroup__description"
+                          >
+                            <EuiTextColor
+                              color="subdued"
+                              component="div"
+                            >
+                              <div
+                                className="euiTextColor euiTextColor--subdued"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                                    id="dataSourcesManagement.editDataSource.endpointDescription"
+                                    values={Object {}}
+                                  >
+                                    <span>
+                                      This connection information is used for reference in tables and when adding to a data source connection
+                                    </span>
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiTextColor>
+                          </div>
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label="Endpoint URL"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Endpoint URL
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiFieldText
+                                aria-disabled={true}
+                                data-test-subj="editDatasourceEndpointField"
+                                disabled={true}
+                                id="generated-id"
+                                name="endpoint"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                value="https://test.com"
+                              >
+                                <EuiFormControlLayout
+                                  fullWidth={false}
+                                  inputId="generated-id"
+                                >
+                                  <div
+                                    className="euiFormControlLayout"
+                                  >
+                                    <div
+                                      className="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <EuiValidatableControl>
+                                        <input
+                                          aria-disabled={true}
+                                          className="euiFieldText"
+                                          data-test-subj="editDatasourceEndpointField"
+                                          disabled={true}
+                                          id="generated-id"
+                                          name="endpoint"
+                                          onBlur={[Function]}
+                                          onFocus={[Function]}
+                                          type="text"
+                                          value="https://test.com"
+                                        />
+                                      </EuiValidatableControl>
+                                      <EuiFormControlLayoutIcons />
+                                    </div>
+                                  </div>
+                                </EuiFormControlLayout>
+                              </EuiFieldText>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiPanel
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Authentication"
+                    id="dataSourcesManagement.editDataSource.authenticationTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Authentication
+                    </span>
+                  </FormattedMessage>
+                </h3>
+              </div>
+            </EuiText>
+            <EuiHorizontalRule
+              margin="m"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiDescribedFormGroup
+              title={
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Authentication Method"
+                    id="dataSourcesManagement.editDataSource.authenticationMethod"
+                    values={Object {}}
+                  />
+                </h4>
+              }
+            >
+              <div
+                className="euiDescribedFormGroup"
+                role="group"
+              >
+                <EuiFlexGroup
+                  gutterSize="l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiTitle
+                          className="euiDescribedFormGroup__title"
+                          size="xs"
+                        >
+                          <h4
+                            className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Authentication Method"
+                              id="dataSourcesManagement.editDataSource.authenticationMethod"
+                              values={Object {}}
+                            >
+                              <span>
+                                Authentication Method
+                              </span>
+                            </FormattedMessage>
+                          </h4>
+                        </EuiTitle>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                    >
+                      <div
+                        className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      >
+                        <EuiFormRow
+                          describedByIds={Array []}
+                          display="row"
+                          fullWidth={false}
+                          hasChildLabel={true}
+                          hasEmptyLabelSpace={false}
+                          label="Credential"
+                          labelType="label"
+                        >
+                          <div
+                            className="euiFormRow"
+                            id="generated-id-row"
+                          >
+                            <div
+                              className="euiFormRow__labelWrapper"
+                            >
+                              <EuiFormLabel
+                                className="euiFormRow__label"
+                                htmlFor="generated-id"
+                                isFocused={false}
+                                type="label"
+                              >
+                                <label
+                                  className="euiFormLabel euiFormRow__label"
+                                  htmlFor="generated-id"
+                                >
+                                  Credential
+                                </label>
+                              </EuiFormLabel>
+                            </div>
+                            <div
+                              className="euiFormRow__fieldWrapper"
+                            >
+                              <EuiRadioGroup
+                                data-test-subj="editDataSourceSelectAuthType"
+                                id="generated-id"
+                                idSelected="no_auth"
+                                name="Credential"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onFocus={[Function]}
+                                options={
+                                  Array [
+                                    Object {
+                                      "id": "no_auth",
+                                      "label": "No authentication",
+                                    },
+                                    Object {
+                                      "id": "username_password",
+                                      "label": "Username & Password",
+                                    },
+                                  ]
+                                }
+                              >
+                                <div
+                                  data-test-subj="editDataSourceSelectAuthType"
+                                  id="generated-id"
+                                  onBlur={[Function]}
+                                  onFocus={[Function]}
+                                >
+                                  <EuiRadio
+                                    checked={true}
+                                    className="euiRadioGroup__item"
+                                    id="no_auth"
+                                    key="0"
+                                    label="No authentication"
+                                    name="Credential"
+                                    onChange={[Function]}
+                                  >
+                                    <div
+                                      className="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        checked={true}
+                                        className="euiRadio__input"
+                                        id="no_auth"
+                                        name="Credential"
+                                        onChange={[Function]}
+                                        type="radio"
+                                      />
+                                      <div
+                                        className="euiRadio__circle"
+                                      />
+                                      <label
+                                        className="euiRadio__label"
+                                        htmlFor="no_auth"
+                                      >
+                                        No authentication
+                                      </label>
+                                    </div>
+                                  </EuiRadio>
+                                  <EuiRadio
+                                    checked={false}
+                                    className="euiRadioGroup__item"
+                                    id="username_password"
+                                    key="1"
+                                    label="Username & Password"
+                                    name="Credential"
+                                    onChange={[Function]}
+                                  >
+                                    <div
+                                      className="euiRadio euiRadioGroup__item"
+                                    >
+                                      <input
+                                        checked={false}
+                                        className="euiRadio__input"
+                                        id="username_password"
+                                        name="Credential"
+                                        onChange={[Function]}
+                                        type="radio"
+                                      />
+                                      <div
+                                        className="euiRadio__circle"
+                                      />
+                                      <label
+                                        className="euiRadio__label"
+                                        htmlFor="username_password"
+                                      >
+                                        Username & Password
+                                      </label>
+                                    </div>
+                                  </EuiRadio>
+                                </div>
+                              </EuiRadioGroup>
+                            </div>
+                          </div>
+                        </EuiFormRow>
+                        <EuiSpacer>
+                          <div
+                            className="euiSpacer euiSpacer--l"
+                          />
+                        </EuiSpacer>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </div>
+            </EuiDescribedFormGroup>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiForm>
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+  </EditDataSourceForm>
+</IntlProvider>
+`;
