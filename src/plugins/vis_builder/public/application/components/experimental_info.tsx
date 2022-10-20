@@ -14,13 +14,13 @@ export const InfoComponent = () => {
       className="hide-for-sharing"
       data-test-subj="experimentalVisInfo"
       size="s"
-      title={i18n.translate('wizard.experimentalInfoTitle', {
+      title={i18n.translate('visBuilder.experimentalInfoTitle', {
         defaultMessage: 'This editor is experimental and should not be used in production',
       })}
       iconType="beaker"
     >
       <FormattedMessage
-        id="wizard.experimentalInfoText"
+        id="visBuilder.experimentalInfoText"
         defaultMessage="We want to hear from you about how we can improve your experience. Leave feedback in {githubLink}."
         values={{
           githubLink: (
