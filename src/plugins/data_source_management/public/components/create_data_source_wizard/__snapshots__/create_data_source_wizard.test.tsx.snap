@@ -112,6 +112,13 @@ exports[`Datasource Management: Create Datasource Wizard case1: should load reso
                 </div>
               </EuiFlexGroup>
             </Header>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
             <EuiForm
               data-test-subj="data-source-creation"
             >
@@ -401,7 +408,7 @@ exports[`Datasource Management: Create Datasource Wizard case1: should load reso
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
-                        placeholder="Sample URL: https://connectionurl.com"
+                        placeholder="https://connectionurl.com"
                         value=""
                       >
                         <EuiFormControlLayout
@@ -425,7 +432,7 @@ exports[`Datasource Management: Create Datasource Wizard case1: should load reso
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
-                                  placeholder="Sample URL: https://connectionurl.com"
+                                  placeholder="https://connectionurl.com"
                                   type="text"
                                   value=""
                                 />
@@ -1079,6 +1086,13 @@ exports[`Datasource Management: Create Datasource Wizard case2: should fail to l
                 </div>
               </EuiFlexGroup>
             </Header>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
             <EuiForm
               data-test-subj="data-source-creation"
             >
@@ -1368,7 +1382,7 @@ exports[`Datasource Management: Create Datasource Wizard case2: should fail to l
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
-                        placeholder="Sample URL: https://connectionurl.com"
+                        placeholder="https://connectionurl.com"
                         value=""
                       >
                         <EuiFormControlLayout
@@ -1392,7 +1406,7 @@ exports[`Datasource Management: Create Datasource Wizard case2: should fail to l
                                   onBlur={[Function]}
                                   onChange={[Function]}
                                   onFocus={[Function]}
-                                  placeholder="Sample URL: https://connectionurl.com"
+                                  placeholder="https://connectionurl.com"
                                   type="text"
                                   value=""
                                 />
