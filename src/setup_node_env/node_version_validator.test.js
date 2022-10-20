@@ -64,8 +64,8 @@ describe('NodeVersionValidator', function () {
     );
   });
 
-  it('should run the script WITH error if the minor version is higher', function (done) {
-    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true);
+  it('should run the script WITH warning message if the minor version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), false, true);
   });
 
   it('should run the script WITH error if the minor version is lower', function (done) {
@@ -87,12 +87,13 @@ function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
   return `v${major}.${minor}.${patch}`;
 }
 
-function testValidateNodeVersion(done, versionToTest, expectError = false) {
+function testValidateNodeVersion(done, versionToTest, expectError = false, expectWarning = false) {
   var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
   var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
 
   exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
     expect(stderr).toBeDefined();
+
     if (expectError) {
       expect(error.code).toBe(1);
 
@@ -101,6 +102,13 @@ function testValidateNodeVersion(done, versionToTest, expectError = false) {
         `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
 
       expect(stderr).toStrictEqual(speficicErrorMessage);
+    } else if (expectWarning) {
+      expect(error.code).toBe(0);
+
+      var speficicWarningMessage =
+        `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js` + 
+        `${REQUIRED_NODE_JS_VERSION}. Your current version is ${versionToTest}.\n`;
+      expect(stderr).toStrictEqual(speficicWarningMessage);
     } else {
       expect(error).toBeNull();
       expect(stderr).toHaveLength(0);
