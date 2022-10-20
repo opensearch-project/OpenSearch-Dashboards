@@ -123,7 +123,9 @@ export const VisualizeListing = () => {
         .then(({ total, hits }: { total: number; hits: object[] }) => ({
           total,
           hits: hits.filter(
-            (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
+            (result: any) =>
+              isLabsEnabled ||
+              (result.type?.stage !== 'experimental' && result.stage !== 'experimental')
           ),
         }));
     },
