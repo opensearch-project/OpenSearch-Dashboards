@@ -407,6 +407,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { notifications, http, filterRegistry } = this.props;
 
+    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
     const { queryText } = parseQuery(activeQuery, filterFields);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
