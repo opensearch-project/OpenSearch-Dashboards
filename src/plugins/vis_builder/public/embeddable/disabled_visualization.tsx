@@ -11,7 +11,7 @@ import './disabled_visualization.scss';
 
 export function DisabledVisualization({ title }: { title: string }) {
   return (
-    <div className="vbDisabledVisualization">
+    <div className="vbDisabledVisualization" data-test-subj="disabledVisBuilderVis">
       <EuiIcon type="beaker" size="xl" />
       <div>
         <FormattedMessage

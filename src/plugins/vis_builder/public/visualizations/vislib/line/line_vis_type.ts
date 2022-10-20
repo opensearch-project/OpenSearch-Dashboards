@@ -46,6 +46,28 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
             min: 0,
             max: 1,
             aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!filters'],
+            defaults: { aggTypes: ['date_histogram', 'terms'] },
+          },
+          {
+            group: AggGroupNames.Buckets,
+            name: 'group',
+            title: i18n.translate('visTypeVislib.line.groupTitle', {
+              defaultMessage: 'Split series',
+            }),
+            min: 0,
+            max: 3,
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            defaults: { aggTypes: ['terms'] },
+          },
+          {
+            group: AggGroupNames.Buckets,
+            name: 'split',
+            title: i18n.translate('visTypeVislib.line.splitTitle', {
+              defaultMessage: 'Split chart',
+            }),
+            min: 0,
+            max: 1,
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
             defaults: { aggTypes: ['terms'] },
           },
           {
