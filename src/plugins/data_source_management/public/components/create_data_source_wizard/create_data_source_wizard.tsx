@@ -75,7 +75,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   };
 
   const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
-    toasts.addWarning(i18n.translate(id, { defaultMessage }));
+    toasts.addDanger(i18n.translate(id, { defaultMessage }));
   };
 
   /* Render the creation wizard */

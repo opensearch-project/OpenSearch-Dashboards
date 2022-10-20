@@ -11,13 +11,15 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
   history: History;
+  isEmptyState?: boolean;
+  dataTestSubj: string;
 }
 
-export const CreateButton = ({ history }: Props) => {
+export const CreateButton = ({ history, isEmptyState, dataTestSubj }: Props) => {
   return (
     <EuiButton
-      data-test-subj="createDataSourceButton"
-      fill={true}
+      data-test-subj={dataTestSubj}
+      fill={isEmptyState ? false : true}
       onClick={() => history.push('/create')}
     >
       <FormattedMessage
