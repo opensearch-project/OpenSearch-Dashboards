@@ -108,6 +108,7 @@ exports[`DataSourceTable should get datasources failed should render empty table
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <CreateButton
+                    dataTestSubj="createDataSourceButton"
                     history={
                       Object {
                         "action": "PUSH",
@@ -245,6 +246,7 @@ exports[`DataSourceTable should get datasources failed should render empty table
                 />
               </EuiSpacer>
               <CreateButton
+                dataTestSubj="createDataSourceButtonEmptyState"
                 history={
                   Object {
                     "action": "PUSH",
@@ -267,25 +269,26 @@ exports[`DataSourceTable should get datasources failed should render empty table
                     "replace": [MockFunction],
                   }
                 }
+                isEmptyState={true}
               >
                 <EuiButton
-                  data-test-subj="createDataSourceButton"
-                  fill={true}
+                  data-test-subj="createDataSourceButtonEmptyState"
+                  fill={false}
                   onClick={[Function]}
                 >
                   <EuiButtonDisplay
                     baseClassName="euiButton"
-                    data-test-subj="createDataSourceButton"
+                    data-test-subj="createDataSourceButtonEmptyState"
                     disabled={false}
                     element="button"
-                    fill={true}
+                    fill={false}
                     isDisabled={false}
                     onClick={[Function]}
                     type="button"
                   >
                     <button
-                      className="euiButton euiButton--primary euiButton--fill"
-                      data-test-subj="createDataSourceButton"
+                      className="euiButton euiButton--primary"
+                      data-test-subj="createDataSourceButtonEmptyState"
                       disabled={false}
                       onClick={[Function]}
                       style={
@@ -527,6 +530,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <CreateButton
+                    dataTestSubj="createDataSourceButton"
                     history={
                       Object {
                         "action": "PUSH",
@@ -701,7 +705,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                 Object {
                   "dataType": "string",
                   "field": "title",
-                  "name": "Datasource",
+                  "name": "Title",
                   "render": [Function],
                   "sortable": [Function],
                 },
@@ -1021,7 +1025,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                     Object {
                       "dataType": "string",
                       "field": "title",
-                      "name": "Datasource",
+                      "name": "Title",
                       "render": [Function],
                       "sortable": [Function],
                     },
@@ -1095,7 +1099,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                     "allowNeutralSort": false,
                     "sort": Object {
                       "direction": "asc",
-                      "field": "Datasource",
+                      "field": "Title",
                     },
                   }
                 }
@@ -1176,7 +1180,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                         "isSortAscending": true,
                                         "isSorted": true,
                                         "key": "_data_s_title_0",
-                                        "name": "Datasource",
+                                        "name": "Title",
                                         "onSort": [Function],
                                       },
                                       Object {
@@ -1404,15 +1408,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                             values={
                                               Object {
                                                 "description": undefined,
-                                                "innerText": "Datasource",
+                                                "innerText": "Title",
                                               }
                                             }
                                           >
                                             <span
                                               className="euiTableCellContent__text"
-                                              title="Datasource"
+                                              title="Title"
                                             >
-                                              Datasource
+                                              Title
                                             </span>
                                           </EuiI18n>
                                         </EuiInnerText>
@@ -1562,7 +1566,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   key="_data_column_title_alpha-test_0"
                                   mobileOptions={
                                     Object {
-                                      "header": "Datasource",
+                                      "header": "Title",
                                       "render": undefined,
                                     }
                                   }
@@ -1580,7 +1584,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                     <div
                                       className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                     >
-                                      Datasource
+                                      Title
                                     </div>
                                     <div
                                       className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1715,7 +1719,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   key="_data_column_title_beta-test_0"
                                   mobileOptions={
                                     Object {
-                                      "header": "Datasource",
+                                      "header": "Title",
                                       "render": undefined,
                                     }
                                   }
@@ -1733,7 +1737,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                     <div
                                       className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                     >
-                                      Datasource
+                                      Title
                                     </div>
                                     <div
                                       className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -1868,7 +1872,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   key="_data_column_title_test_0"
                                   mobileOptions={
                                     Object {
-                                      "header": "Datasource",
+                                      "header": "Title",
                                       "render": undefined,
                                     }
                                   }
@@ -1886,7 +1890,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                     <div
                                       className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                     >
-                                      Datasource
+                                      Title
                                     </div>
                                     <div
                                       className="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -2021,7 +2025,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   key="_data_column_title_test2_0"
                                   mobileOptions={
                                     Object {
-                                      "header": "Datasource",
+                                      "header": "Title",
                                       "render": undefined,
                                     }
                                   }
@@ -2039,7 +2043,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                     <div
                                       className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                                     >
-                                      Datasource
+                                      Title
                                     </div>
                                     <div
                                       className="euiTableCellContent euiTableCellContent--overflowingContent"

@@ -140,6 +140,13 @@ exports[`Datasource Management: Create Datasource form should create data source
               </div>
             </EuiFlexGroup>
           </Header>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -429,7 +436,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="Sample URL: https://connectionurl.com"
+                      placeholder="https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -453,7 +460,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="Sample URL: https://connectionurl.com"
+                                placeholder="https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
@@ -867,6 +874,13 @@ exports[`Datasource Management: Create Datasource form should create data source
               </div>
             </EuiFlexGroup>
           </Header>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -1156,7 +1170,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="Sample URL: https://connectionurl.com"
+                      placeholder="https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -1180,7 +1194,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="Sample URL: https://connectionurl.com"
+                                placeholder="https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
@@ -1792,6 +1806,13 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
               </div>
             </EuiFlexGroup>
           </Header>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -2081,7 +2102,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="Sample URL: https://connectionurl.com"
+                      placeholder="https://connectionurl.com"
                       value=""
                     >
                       <EuiFormControlLayout
@@ -2105,7 +2126,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="Sample URL: https://connectionurl.com"
+                                placeholder="https://connectionurl.com"
                                 type="text"
                                 value=""
                               />
@@ -2717,6 +2738,13 @@ exports[`Datasource Management: Create Datasource form should throw validation e
               </div>
             </EuiFlexGroup>
           </Header>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
           <EuiForm
             data-test-subj="data-source-creation"
           >
@@ -3023,7 +3051,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                       onBlur={[Function]}
                       onChange={[Function]}
                       onFocus={[Function]}
-                      placeholder="Sample URL: https://connectionurl.com"
+                      placeholder="https://connectionurl.com"
                       value="https://test.com"
                     >
                       <EuiFormControlLayout
@@ -3047,7 +3075,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                                 onBlur={[Function]}
                                 onChange={[Function]}
                                 onFocus={[Function]}
-                                placeholder="Sample URL: https://connectionurl.com"
+                                placeholder="https://connectionurl.com"
                                 type="text"
                                 value="https://test.com"
                               />
