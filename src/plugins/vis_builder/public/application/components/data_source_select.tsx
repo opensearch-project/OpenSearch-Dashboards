@@ -39,7 +39,7 @@ export const DataSourceSelect = () => {
           dispatch(setIndexPattern(foundOption.id));
         }
       }}
-      prepend={i18n.translate('wizard.nav.dataSource.selector.title', {
+      prepend={i18n.translate('visBuilder.nav.dataSource.selector.title', {
         defaultMessage: 'Data Source',
       })}
       error={error}

@@ -22,7 +22,7 @@ export const useCanSave = () => {
 // TODO: Need to finalize the error messages
 const getErrorMsg = (isEmpty, hasNoChange, hasDraftAgg) => {
   const i18nTranslate = (key: string, defaultMessage: string) =>
-    i18n.translate(`wizard.saveVisualizationTooltip.${key}`, {
+    i18n.translate(`visBuilder.saveVisualizationTooltip.${key}`, {
       defaultMessage,
     });
 

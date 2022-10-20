@@ -110,8 +110,8 @@ export class WizardPlugin
     visualizations.registerAlias({
       name: PLUGIN_ID,
       title: PLUGIN_NAME,
-      description: i18n.translate('wizard.visPicker.description', {
-        defaultMessage: 'Create visualizations using the new Drag & Drop experience',
+      description: i18n.translate('visBuilder.visPicker.description', {
+        defaultMessage: 'Create visualizations using the new Visualization Builder',
       }),
       icon: wizardIconSecondaryFill,
       stage: 'experimental',
