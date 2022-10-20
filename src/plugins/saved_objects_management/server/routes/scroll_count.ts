@@ -46,12 +46,26 @@ export const registerScrollForCountRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
+      const namespaces = [];
+      if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
+        req.body.namespacesToInclude.forEach((ns) => {
+          if (ns === null) {
+            namespaces.push('default');
+          } else {
+            namespaces.push(ns);
+          }
+        });
+      }
 
       const findOptions: SavedObjectsFindOptions = {
         ...req.body.params,
         type: req.body.typesToInclude,
         perPage: 1000,
       };
+
+      if (namespaces.length > 0) {
+        findOptions.namespaces = namespaces;
+      }
 
       if (req.body.searchString) {
         findOptions.search = `${req.body.searchString}*`;
@@ -68,10 +82,10 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       objects.forEach((result) => {
         const type = result.type;
         if (req.body.namespacesToInclude) {
-          const namespaces = (result.namespaces || []).flat();
-          namespaces.forEach((ns) => {
-            if (ns === null || ns === '') {
-              ns = '';
+          const resultNamespaces = (result.namespaces || []).flat();
+          resultNamespaces.forEach((ns) => {
+            if (ns === null) {
+              ns = 'default';
             }
             counts.namespaces[ns] = counts.namespaces[ns] || 0;
             counts.namespaces[ns]++;
