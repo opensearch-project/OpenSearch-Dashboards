@@ -59,6 +59,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
       />
     </EuiSpacer>
     <EditDataSourceForm
+      displayToastMessage={[Function]}
       existingDataSource={
         Object {
           "auth": Object {
@@ -573,177 +574,82 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                   className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                 />
               </EuiHorizontalRule>
-              <EuiDescribedFormGroup
-                description={
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
-                      id="dataSourcesManagement.editDataSource.endpointDescription"
-                      values={Object {}}
-                    />
-                  </p>
-                }
-                title={
-                  <h4>
-                    <FormattedMessage
-                      defaultMessage="Endpoint"
-                      id="dataSourcesManagement.editDataSource.endpointTitle"
-                      values={Object {}}
-                    />
-                  </h4>
-                }
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={true}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                label="Endpoint URL"
+                labelType="label"
               >
                 <div
-                  className="euiDescribedFormGroup"
-                  role="group"
+                  className="euiFormRow euiFormRow--fullWidth"
+                  id="generated-id-row"
                 >
-                  <EuiFlexGroup
-                    gutterSize="l"
+                  <div
+                    className="euiFormRow__labelWrapper"
                   >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    <EuiFormLabel
+                      className="euiFormRow__label"
+                      htmlFor="generated-id"
+                      isFocused={false}
+                      type="label"
                     >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiTitle
-                            className="euiDescribedFormGroup__title"
-                            size="xs"
-                          >
-                            <h4
-                              className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Endpoint"
-                                id="dataSourcesManagement.editDataSource.endpointTitle"
-                                values={Object {}}
-                              >
-                                <span>
-                                  Endpoint
-                                </span>
-                              </FormattedMessage>
-                            </h4>
-                          </EuiTitle>
-                          <EuiText
-                            className="euiDescribedFormGroup__description"
-                            color="subdued"
-                            size="s"
-                          >
-                            <div
-                              className="euiText euiText--small euiDescribedFormGroup__description"
-                            >
-                              <EuiTextColor
-                                color="subdued"
-                                component="div"
-                              >
-                                <div
-                                  className="euiTextColor euiTextColor--subdued"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
-                                      id="dataSourcesManagement.editDataSource.endpointDescription"
-                                      values={Object {}}
-                                    >
-                                      <span>
-                                        This connection information is used for reference in tables and when adding to a data source connection
-                                      </span>
-                                    </FormattedMessage>
-                                  </p>
-                                </div>
-                              </EuiTextColor>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                      <label
+                        className="euiFormLabel euiFormRow__label"
+                        htmlFor="generated-id"
+                      >
+                        Endpoint URL
+                      </label>
+                    </EuiFormLabel>
+                  </div>
+                  <div
+                    className="euiFormRow__fieldWrapper"
+                  >
+                    <EuiFieldText
+                      aria-disabled={true}
+                      data-test-subj="editDatasourceEndpointField"
+                      disabled={true}
+                      fullWidth={true}
+                      id="generated-id"
+                      name="endpoint"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
+                      value="https://test.com"
+                    >
+                      <EuiFormControlLayout
+                        fullWidth={true}
+                        inputId="generated-id"
                       >
                         <div
-                          className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                          className="euiFormControlLayout euiFormControlLayout--fullWidth"
                         >
-                          <EuiFormRow
-                            describedByIds={Array []}
-                            display="row"
-                            fullWidth={false}
-                            hasChildLabel={true}
-                            hasEmptyLabelSpace={false}
-                            label="Endpoint URL"
-                            labelType="label"
+                          <div
+                            className="euiFormControlLayout__childrenWrapper"
                           >
-                            <div
-                              className="euiFormRow"
-                              id="generated-id-row"
-                            >
-                              <div
-                                className="euiFormRow__labelWrapper"
-                              >
-                                <EuiFormLabel
-                                  className="euiFormRow__label"
-                                  htmlFor="generated-id"
-                                  isFocused={false}
-                                  type="label"
-                                >
-                                  <label
-                                    className="euiFormLabel euiFormRow__label"
-                                    htmlFor="generated-id"
-                                  >
-                                    Endpoint URL
-                                  </label>
-                                </EuiFormLabel>
-                              </div>
-                              <div
-                                className="euiFormRow__fieldWrapper"
-                              >
-                                <EuiFieldText
-                                  aria-disabled={true}
-                                  data-test-subj="editDatasourceEndpointField"
-                                  disabled={true}
-                                  id="generated-id"
-                                  name="endpoint"
-                                  onBlur={[Function]}
-                                  onFocus={[Function]}
-                                  value="https://test.com"
-                                >
-                                  <EuiFormControlLayout
-                                    fullWidth={false}
-                                    inputId="generated-id"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout"
-                                    >
-                                      <div
-                                        className="euiFormControlLayout__childrenWrapper"
-                                      >
-                                        <EuiValidatableControl>
-                                          <input
-                                            aria-disabled={true}
-                                            className="euiFieldText"
-                                            data-test-subj="editDatasourceEndpointField"
-                                            disabled={true}
-                                            id="generated-id"
-                                            name="endpoint"
-                                            onBlur={[Function]}
-                                            onFocus={[Function]}
-                                            type="text"
-                                            value="https://test.com"
-                                          />
-                                        </EuiValidatableControl>
-                                        <EuiFormControlLayoutIcons />
-                                      </div>
-                                    </div>
-                                  </EuiFormControlLayout>
-                                </EuiFieldText>
-                              </div>
-                            </div>
-                          </EuiFormRow>
+                            <EuiValidatableControl>
+                              <input
+                                aria-disabled={true}
+                                className="euiFieldText euiFieldText--fullWidth"
+                                data-test-subj="editDatasourceEndpointField"
+                                disabled={true}
+                                id="generated-id"
+                                name="endpoint"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                type="text"
+                                value="https://test.com"
+                              />
+                            </EuiValidatableControl>
+                            <EuiFormControlLayoutIcons />
+                          </div>
                         </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
+                      </EuiFormControlLayout>
+                    </EuiFieldText>
+                  </div>
                 </div>
-              </EuiDescribedFormGroup>
+              </EuiFormRow>
             </div>
           </EuiPanel>
           <EuiSpacer
