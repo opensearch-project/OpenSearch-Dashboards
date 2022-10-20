@@ -36,6 +36,9 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     services: {
       data: {
         search: { aggs: aggService },
+        query: {
+          timefilter: { timefilter },
+        },
       },
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
@@ -49,7 +52,20 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
 
   const aggs = useMemo(() => aggConfigs?.aggs ?? [], [aggConfigs?.aggs]);
 
-  const dropboxAggs = aggs.filter((agg) => agg.schema === schema.name);
+  const dropboxAggs = useMemo(() => aggs.filter((agg) => agg.schema === schema.name), [
+    aggs,
+    schema.name,
+  ]);
+
+  // This useEffect is required to update the timeRange value and initiate rerender to keep labels up to date (Issue #2531).
+  useEffect(() => {
+    const timeRange = timefilter.getTime();
+    dropboxAggs.forEach((agg) => {
+      if (timeRange && agg.type?.name === 'date_histogram') {
+        agg.aggConfigs.setTimeRange(timeRange);
+      }
+    });
+  }, [dropboxAggs, timefilter]);
 
   const displayFields: DropboxDisplay[] = useMemo(
     () =>
