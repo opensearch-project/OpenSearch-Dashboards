@@ -72,7 +72,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     } catch (e) {
       setDataSource(defaultDataSource);
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
+        id: 'dataSourcesManagement.editDataSource.fetchDataSourceFailMsg',
         defaultMessage: 'Unable to find the Data Source.',
       });
       props.history.push('');
