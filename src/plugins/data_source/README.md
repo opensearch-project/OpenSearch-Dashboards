@@ -93,9 +93,9 @@ guide](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CON
 
 ### Design Documents
 
-- [High level design doc](./docs/high_level_design.md)
-- [User stories](./docs/user_stories.md)
-- [client management detail design](./docs/client_management_design.md)
+- [High level design doc](../../../docs/multi-datasource/high_level_design.md)
+- [User stories](../../../docs/multi-datasource/user_stories.md)
+- [Client management detailed design](../../../docs/multi-datasource/client_management_design.md)
 
 ### Integrate with multiple data source feature
 
