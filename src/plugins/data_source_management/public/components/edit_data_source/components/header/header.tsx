@@ -80,6 +80,7 @@ export const Header = ({
             confirmButtonText={i18n.translate('dataSourcesManagement.editDataSource.delete', {
               defaultMessage: 'Delete',
             })}
+            buttonColor="danger"
             defaultFocusedButton="confirm"
             data-test-subj="editDatasourceDeleteConfirmModal"
           >
