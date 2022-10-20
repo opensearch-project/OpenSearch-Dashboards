@@ -50,6 +50,7 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
       state.activeVisualization!.aggConfigParams = [];
+      state.activeVisualization!.draftAgg = undefined;
     },
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
