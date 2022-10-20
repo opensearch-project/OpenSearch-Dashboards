@@ -11,7 +11,7 @@ import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public
 import { Title } from './title';
 import { useIndexPatterns, useVisualizationType } from '../../utils/use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { AggParam, IAggType, IFieldParamType } from '../../../../../data/public';
 import { saveDraftAgg, editDraftAgg } from '../../utils/state_management/visualization_slice';
 import { setValidity } from '../../utils/state_management/metadata_slice';
@@ -33,7 +33,7 @@ export function SecondaryPanel() {
         search: { aggs: aggService },
       },
     },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const schemas = vizType.ui.containerConfig.data.schemas.all;
 
   const aggConfigs = useMemo(() => {

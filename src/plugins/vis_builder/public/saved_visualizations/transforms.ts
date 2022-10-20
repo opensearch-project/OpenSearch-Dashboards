@@ -6,13 +6,13 @@
 import produce from 'immer';
 import { IndexPattern } from '../../../data/public';
 import { RootState, VisualizationState } from '../application/utils/state_management';
-import { WizardVisSavedObject } from '../types';
+import { VisBuilderVisSavedObject } from '../types';
 
 export const saveStateToSavedObject = (
-  obj: WizardVisSavedObject,
+  obj: VisBuilderVisSavedObject,
   state: RootState,
   indexPattern: IndexPattern
-): WizardVisSavedObject => {
+): VisBuilderVisSavedObject => {
   if (state.visualization.indexPattern !== indexPattern.id)
     throw new Error('indexPattern id should match the value in redux state');
 

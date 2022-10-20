@@ -4,10 +4,10 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 
 /*
- * Initial state: default state when opening wizard plugin
+ * Initial state: default state when opening visBuilder plugin
  * Clean state: when viz finished loading and ready to be edited
  * Dirty state: when there are changes applied to the viz after it finished loading
  */
@@ -33,7 +33,7 @@ const initialState: MetadataState = {
 export const getPreloadedState = async ({
   types,
   data,
-}: WizardServices): Promise<MetadataState> => {
+}: VisBuilderServices): Promise<MetadataState> => {
   const preloadedState = { ...initialState };
 
   return preloadedState;

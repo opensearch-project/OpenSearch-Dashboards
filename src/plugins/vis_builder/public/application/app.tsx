@@ -13,7 +13,7 @@ import { Workspace } from './components/workspace';
 import './app.scss';
 import { RightNav } from './components/right_nav';
 
-export const WizardApp = () => {
+export const VisBuilderApp = () => {
   // Render the application DOM.
   return (
     <I18nProvider>

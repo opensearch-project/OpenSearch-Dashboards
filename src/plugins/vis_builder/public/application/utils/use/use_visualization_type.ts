@@ -5,14 +5,14 @@
 
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { VisualizationType } from '../../../services/type_service/visualization_type';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { useTypedSelector } from '../state_management';
 
 export const useVisualizationType = (): VisualizationType => {
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
   const {
     services: { types },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
 
   const visualizationType = types.get(activeVisualization?.name ?? '');
 
