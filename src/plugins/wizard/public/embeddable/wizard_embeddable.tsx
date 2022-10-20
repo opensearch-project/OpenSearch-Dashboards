@@ -29,6 +29,7 @@ import {
 } from '../../../data/public';
 import { validateSchemaState } from '../application/utils/validate_schema_state';
 import { getExpressionLoader, getTypeService } from '../plugin_services';
+import { PersistedState } from '../../../visualizations/public';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const WIZARD_EMBEDDABLE = WIZARD_SAVED_OBJECT;
@@ -65,6 +66,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
   private node?: HTMLElement;
   private savedWizard?: WizardSavedObjectAttributes;
   private serializedState?: { visualization: string; style: string };
+  private uiState?: PersistedState;
 
   constructor(
     timefilter: TimefilterContract,
@@ -90,6 +92,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     );
 
     this.savedWizard = savedWizard;
+    this.uiState = new PersistedState();
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -219,6 +222,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
         query: this.input.query,
         filters: this.input.filters,
       },
+      uiState: this.uiState,
     };
     if (this.abortController) {
       this.abortController.abort();
