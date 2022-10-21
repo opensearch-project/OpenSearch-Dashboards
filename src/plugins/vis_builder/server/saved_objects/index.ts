@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { wizardSavedObjectType } from './vis_builder_app';
+export { visBuilderSavedObjectType } from './vis_builder_app';
