@@ -353,7 +353,9 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const itemsClone = _.cloneDeep(items);
     itemsClone.forEach((item, idx) => {
-      item.id = `${item.id}-${idx}`;
+      if (item.type === 'config') {
+        item.id = `${item.id}-${idx}`;
+      }
     });
 
     return (
