@@ -144,7 +144,7 @@ $osdTypeaheadTypes: (
   flex-grow: 0; /* 2 */
   flex-basis: auto; /* 2 */
   font-family: $euiCodeFontFamily;
-  width: 250px;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: $euiSizeXS $euiSizeS;
