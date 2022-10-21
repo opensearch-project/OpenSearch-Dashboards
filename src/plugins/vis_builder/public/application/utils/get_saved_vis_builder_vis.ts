@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WizardServices } from '../..';
+import { VisBuilderServices } from '../..';
 
-export const getSavedWizardVis = async (services: WizardServices, wizardVisId?: string) => {
-  const { savedWizardLoader } = services;
-  if (!savedWizardLoader) {
+export const getSavedVisBuilderVis = async (
+  services: VisBuilderServices,
+  visBuilderVisId?: string
+) => {
+  const { savedVisBuilderLoader } = services;
+  if (!savedVisBuilderLoader) {
     return {};
   }
-  const savedWizardVis = await savedWizardLoader.get(wizardVisId);
+  const savedVisBuilderVis = await savedVisBuilderLoader.get(visBuilderVisId);
 
-  return savedWizardVis;
+  return savedVisBuilderVis;
 };

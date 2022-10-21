@@ -9,14 +9,14 @@ import { Router, Route, Switch } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Store } from 'redux';
 import { AppMountParameters } from '../../../../core/public';
-import { WizardServices } from '../types';
-import { WizardApp } from './app';
+import { VisBuilderServices } from '../types';
+import { VisBuilderApp } from './app';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { EDIT_PATH } from '../../common';
 
 export const renderApp = (
   { element, history }: AppMountParameters,
-  services: WizardServices,
+  services: VisBuilderServices,
   store: Store
 ) => {
   ReactDOM.render(
@@ -26,7 +26,7 @@ export const renderApp = (
           <services.i18n.Context>
             <Switch>
               <Route path={[`${EDIT_PATH}/:id`, '/']} exact={false}>
-                <WizardApp />
+                <VisBuilderApp />
               </Route>
             </Switch>
           </services.i18n.Context>

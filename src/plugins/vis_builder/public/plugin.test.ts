@@ -10,12 +10,12 @@ import { embeddablePluginMock } from '../../embeddable/public/mocks';
 import { navigationPluginMock } from '../../navigation/public/mocks';
 import { visualizationsPluginMock } from '../../visualizations/public/mocks';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { WizardPlugin } from './plugin';
+import { VisBuilderPlugin } from './plugin';
 
-describe('WizardPlugin', () => {
+describe('VisBuilderPlugin', () => {
   describe('setup', () => {
     it('initializes the plugin correctly and registers it as an alias visualization', () => {
-      const plugin = new WizardPlugin(coreMock.createPluginInitializerContext());
+      const plugin = new VisBuilderPlugin(coreMock.createPluginInitializerContext());
       const pluginStartContract = {
         data: dataPluginMock.createStartContract(),
         savedObject: savedObjectsServiceMock.createStartContract(),
