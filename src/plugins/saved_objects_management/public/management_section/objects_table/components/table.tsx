@@ -31,6 +31,7 @@
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
+import _ from 'lodash';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -350,7 +351,8 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
 
-    items.forEach((item, idx) => {
+    const itemsClone = _.cloneDeep(items);
+    itemsClone.forEach((item, idx) => {
       item.id = `${item.id}-${idx}`;
     });
 
@@ -425,7 +427,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           <EuiBasicTable
             loading={isSearching}
             itemId={itemId}
-            items={items}
+            items={itemsClone}
             columns={columns as any}
             pagination={pagination}
             selection={selection}
