@@ -36,6 +36,7 @@ import { createGunzip } from 'zlib';
 import { inspect, promisify } from 'util';
 
 import archiver from 'archiver';
+import * as StreamZip from 'node-stream-zip';
 import vfs from 'vinyl-fs';
 import File from 'vinyl';
 import del from 'del';
@@ -183,7 +184,7 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = Date.now() } = options;
+  const { select = ['**/*'], dot = false, time = Date.now() / 1000 } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
@@ -266,6 +267,38 @@ export async function gunzip(source: string, destination: string) {
   );
 }
 
+interface UnzipOptions {
+  strip?: boolean | number;
+}
+
+export async function unzip(source: string, destination: string, options: UnzipOptions) {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  await mkdirAsync(destination, { recursive: true });
+
+  const zip = new StreamZip.async({ file: source });
+
+  if (!options.strip || !isFinite(options.strip as number)) {
+    // Extract the entire archive
+    await zip.extract(null, destination);
+  } else {
+    const stripLevels = options.strip === true ? 1 : options.strip;
+
+    // Find the directories that are `stripLevels` deep and extract them only
+    for (const entry of Object.values(await zip.entries())) {
+      if (!entry.isDirectory) continue;
+
+      const pathDepth = entry.name.replace(/\/+$/, '').split('/').length;
+      if (stripLevels === pathDepth) {
+        await zip.extract(entry.name, destination);
+      }
+    }
+  }
+
+  await zip.close();
+}
+
 interface CompressTarOptions {
   createRootDirectory: boolean;
   source: string;
@@ -324,4 +357,8 @@ export async function compressZip({
   await archive.directory(source, name).finalize();
 
   return fileCount;
+}
+
+export function normalizePath(loc: string) {
+  return sep === '\\' ? loc.replace(/\\/g, '/') : loc;
 }

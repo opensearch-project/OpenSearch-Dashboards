@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { join } from 'path';
+import { join, normalize } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@osd/config-schema';
 import { REPO_ROOT } from '../repo_root';
@@ -93,4 +93,28 @@ export const config = {
   schema: schema.object({
     data: schema.string({ defaultValue: () => getDataPath() }),
   }),
+};
+
+/**
+ * Get a standardized reference to a path
+ * @param {string} path - the path to standardize
+ * @param {boolean} [usePosix=true] - produce a posix reference
+ * @param {boolean} [escapedBackslashes=true] - on Windows, double-backslash the reference
+ * @internal
+ */
+export const standardize = (
+  path: string,
+  usePosix: boolean = true,
+  escapedBackslashes: boolean = true
+) => {
+  /* Force os-dependant separators
+   * path.posix.normalize doesn't convert backslashes to slashes on Windows so we manually force it afterwards
+   */
+  const normal = normalize(path);
+
+  // Filter out in-browser executions as well as non-windows ones
+  if (process?.platform !== 'win32') return normal;
+
+  if (usePosix) return normal.replace(/\\/g, '/');
+  return escapedBackslashes ? normal.replace(/\\/g, '\\\\') : normal;
 };

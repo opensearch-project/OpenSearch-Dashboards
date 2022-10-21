@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "scripts": {
-    "osd:bootstrap": "rm -rf target && tsc",
-    "osd:watch": "rm -rf target && tsc --watch"
+    "osd:bootstrap": "node ../../scripts/remove.js target && tsc",
+    "osd:watch": "node ../../scripts/remove.js target && tsc --watch"
   },
   "dependencies": {
     "@osd/dev-utils": "1.0.0",

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { resolve } from 'path';
 import { Bundle, BundleSpec, parseBundles } from './bundle';
 
 jest.mock('fs');
@@ -88,13 +89,16 @@ it('provides the module count from the cache', () => {
 
 it('parses bundles from JSON specs', () => {
   const bundles = parseBundles(JSON.stringify([SPEC]));
+  let expectedCachePath = resolve('/foo/bar/target/.osd-optimizer-cache');
+  // Cannot use `standardize` from `@osd/util` due to mocking of fs
+  if (process?.platform === 'win32') expectedCachePath = expectedCachePath.replace(/\\/g, '\\\\');
 
   expect(bundles).toMatchInlineSnapshot(`
     Array [
       Bundle {
         "banner": undefined,
         "cache": BundleCache {
-          "path": "/foo/bar/target/.osd-optimizer-cache",
+          "path": "${expectedCachePath}",
           "state": undefined,
         },
         "contextDir": "/foo/bar",

@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "osd": "node ../../../../scripts/osd.js",
-    "build": "rm -rf './target' && tsc"
+    "build": "node ../../scripts/remove.js './target' && tsc"
   },
   "devDependencies": {
     "typescript": "4.0.2"
