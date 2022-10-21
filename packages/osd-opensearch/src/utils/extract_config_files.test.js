@@ -38,6 +38,7 @@ jest.mock('fs', () => ({
 
 const { extractConfigFiles } = require('./extract_config_files');
 const fs = require('fs');
+const path = require('path');
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -57,7 +58,7 @@ test('copies file', () => {
   extractConfigFiles(['path=/data/foo.yml'], '/opensearch');
 
   expect(fs.readFileSync.mock.calls[0][0]).toEqual('/data/foo.yml');
-  expect(fs.writeFileSync.mock.calls[0][0]).toEqual('/opensearch/config/foo.yml');
+  expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.resolve('/opensearch/config/foo.yml'));
 });
 
 test('ignores file which does not exist', () => {

@@ -32,7 +32,7 @@
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
-import { resolve, join } from 'path';
+import { resolve, posix } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@osd/config-schema';
 import { createAbsolutePathSerializer, REPO_ROOT } from '@osd/dev-utils';
@@ -50,6 +50,7 @@ import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
 import { DiscoveredPlugin } from './types';
 
+const { join } = posix;
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
 let pluginsService: PluginsService;

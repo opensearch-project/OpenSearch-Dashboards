@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { join } from 'path';
+import { posix } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@osd/dev-utils';
 import { schema } from '@osd/config-schema';
@@ -49,6 +49,7 @@ import {
   InstanceInfo,
 } from './plugin_context';
 
+const { join } = posix;
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();
 jest.doMock(
