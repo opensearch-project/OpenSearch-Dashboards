@@ -106,7 +106,7 @@ function testValidateNodeVersion(done, versionToTest, expectError = false, expec
       expect(error.code).toBe(0);
 
       var speficicWarningMessage =
-        `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js` + 
+        `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js ` +
         `${REQUIRED_NODE_JS_VERSION}. Your current version is ${versionToTest}.\n`;
       expect(stderr).toStrictEqual(speficicWarningMessage);
     } else {
