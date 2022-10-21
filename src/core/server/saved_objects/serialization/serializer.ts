@@ -152,7 +152,7 @@ export class SavedObjectsSerializer {
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
     const prefix = `${namespacePrefix}${type}:`;
 
-    if (!id.startsWith(prefix) || type === 'config') {
+    if (!id.startsWith(prefix)) {
       return id;
     }
 
