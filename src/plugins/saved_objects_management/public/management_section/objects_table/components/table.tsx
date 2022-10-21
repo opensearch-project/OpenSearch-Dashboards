@@ -351,7 +351,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
 
     items.forEach((item, idx) => {
-      item.id = `${item.id}-${idx}`
+      item.id = `${item.id}-${idx}`;
     });
 
     return (
