@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { OpenSearchClientPool } from './client_pool';
-export { configureClient } from './configure_client';
+export { OpenSearchClientPool, OpenSearchClientPoolSetup } from './client_pool';
+export { configureClient, getDataSource, getCredential } from './configure_client';

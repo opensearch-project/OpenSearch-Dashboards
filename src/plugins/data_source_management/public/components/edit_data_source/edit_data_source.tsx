@@ -6,16 +6,21 @@
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useEffectOnce } from 'react-use';
-import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, ToastMessageItem } from '../../types';
-import { deleteDataSourceById, getDataSourceById, updateDataSourceById } from '../utils';
+import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
+import {
+  deleteDataSourceById,
+  getDataSourceById,
+  getDataSources,
+  updateDataSourceById,
+} from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
-import { dataSourceNotFound } from '../text_content';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -27,21 +32,21 @@ const defaultDataSource: DataSourceAttributes = {
   },
 };
 
-const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
+export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }>> = (
   props: RouteComponentProps<{ id: string }>
 ) => {
   /* Initialization */
-  const { savedObjects, setBreadcrumbs } = useOpenSearchDashboards<
-    DataSourceManagementContext
-  >().services;
+  const {
+    savedObjects,
+    setBreadcrumbs,
+    notifications: { toasts },
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id;
 
   /* State Variables */
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
+  const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
-
-  const toastLifeTimeMs: number = 6000;
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -49,18 +54,22 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       setIsLoading(true);
       try {
         const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
+        const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
         if (fetchDataSourceById) {
           setDataSource(fetchDataSourceById);
           setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
         }
+        if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
+          setExistingDatasourceNamesList(
+            listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
+          );
+        }
       } catch (e) {
+        setDataSource(defaultDataSource);
         handleDisplayToastMessage({
           id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
-          defaultMessage: 'Unable to find the Data Source. Please try it again.',
-          color: 'warning',
-          iconType: 'alert',
+          defaultMessage: 'Unable to find the Data Source.',
         });
-
         props.history.push('');
       } finally {
         setIsLoading(false);
@@ -79,25 +88,12 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
         defaultMessage: 'Updating the Data Source failed with some errors. Please try it again.',
-        color: 'warning',
-        iconType: 'alert',
       });
     }
   };
 
-  const handleDisplayToastMessage = ({ id, defaultMessage, color, iconType }: ToastMessageItem) => {
-    if (id && defaultMessage && color && iconType) {
-      const failureMsg = <FormattedMessage id={id} defaultMessage={defaultMessage} />;
-      setToasts([
-        ...toasts,
-        {
-          title: failureMsg,
-          id: failureMsg.props.id,
-          color,
-          iconType,
-        },
-      ]);
-    }
+  const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
+    toasts.addWarning(i18n.translate(id, { defaultMessage }));
   };
 
   /* Handle delete - data source*/
@@ -111,8 +107,6 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',
         defaultMessage: 'Unable to delete the Data Source due to some errors. Please try it again.',
-        color: 'warning',
-        iconType: 'alert',
       });
     }
   };
@@ -120,13 +114,14 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
   /* Render the edit wizard */
   const renderContent = () => {
     if (!isLoading && (!dataSource || !dataSource.id)) {
-      return <h1>Data Source not found!</h1>;
+      return <h1 data-test-subj="dataSourceNotFound">Data Source not found!</h1>;
     }
     return (
       <>
         {dataSource && dataSource.endpoint ? (
           <EditDataSourceForm
             existingDataSource={dataSource}
+            existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={handleDelete}
             handleSubmit={handleSubmit}
           />
@@ -136,25 +131,23 @@ const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: string }
     );
   };
 
-  /* Remove toast on dismiss*/
-  const removeToast = (id: string) => {
-    setToasts(toasts.filter((toast) => toast.id !== id));
-  };
-
   if (!isLoading && !dataSource?.endpoint) {
-    return <h1>{dataSourceNotFound}</h1>;
+    return (
+      <h1>
+        {
+          <FormattedMessage
+            id="dataSourcesManagement.editDataSource.dataSourceNotFound"
+            defaultMessage="Data Source not found!"
+          />
+        }
+      </h1>
+    );
   }
 
   return (
     <>
+      <EuiSpacer size="m" />
       {renderContent()}
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={({ id }) => {
-          removeToast(id);
-        }}
-        toastLifeTimeMs={toastLifeTimeMs}
-      />
     </>
   );
 };

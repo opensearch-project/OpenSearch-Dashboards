@@ -29,7 +29,11 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
+import {
+  HttpServiceSetup,
+  LegacyAPICaller,
+  RequestHandlerContext,
+} from 'opensearch-dashboards/server';
 import { IndexPatternsFetcher } from './fetcher';
 
 export function registerRoutes(http: HttpServiceSetup) {
@@ -151,11 +155,12 @@ export function registerRoutes(http: HttpServiceSetup) {
   );
 }
 
-const decideClient = async (context: RequestHandlerContext, request: any) => {
+const decideClient = async (
+  context: RequestHandlerContext,
+  request: any
+): Promise<LegacyAPICaller> => {
   const dataSourceId = request.query.data_source;
-  if (dataSourceId) {
-    return await context.dataSource.opensearch.getClient(dataSourceId);
-  }
-
-  return context.core.opensearch.legacy.client.callAsCurrentUser;
+  return dataSourceId
+    ? (context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI as LegacyAPICaller)
+    : context.core.opensearch.legacy.client.callAsCurrentUser;
 };

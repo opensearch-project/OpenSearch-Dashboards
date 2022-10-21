@@ -65,6 +65,7 @@ import { DataSourceRef, IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
 import { StepDataSource } from './components/step_data_source';
+import { ExperimentalCallout } from '../experimental_callout';
 
 interface CreateIndexPatternWizardState {
   step: StepType;
@@ -134,6 +135,7 @@ export class CreateIndexPatternWizard extends Component<
             id: errorMsg.props.id,
             color: 'warning',
             iconType: 'alert',
+            text: errors.body.message,
           },
         ]),
       }));
@@ -352,6 +354,7 @@ export class CreateIndexPatternWizard extends Component<
 
     return (
       <>
+        {this.dataSourceEnabled ? <ExperimentalCallout /> : null}
         {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}

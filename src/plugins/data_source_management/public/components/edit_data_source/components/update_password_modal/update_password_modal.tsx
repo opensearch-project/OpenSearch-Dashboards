@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,126 +15,169 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { UpdatePasswordFormType } from '../../../../types';
-import {
-  defaultPasswordValidationByField,
-  UpdatePasswordValidation,
-  validateUpdatePassword,
-} from '../../../validation';
-import { confirmNewPasswordText, newPasswordText, oldPasswordText } from '../../../text_content';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export interface UpdatePasswordModalProps {
-  handleUpdatePassword: (passwords: UpdatePasswordFormType) => void;
+  username: string;
+  handleUpdatePassword: (password: string) => void;
   closeUpdatePasswordModal: () => void;
 }
 
 export const UpdatePasswordModal = ({
+  username,
   handleUpdatePassword,
   closeUpdatePasswordModal,
 }: UpdatePasswordModalProps) => {
   /* State Variables */
-  const [formErrors, setFormErrors] = useState<string[]>([]);
-  const [formErrorsByField, setFormErrorsByField] = useState<UpdatePasswordValidation>(
-    defaultPasswordValidationByField
-  );
-  const [oldPassword, setOldPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmNewPassword, setConfirmNewPassword] = useState<string>('');
-
-  const getFormValues = useCallback(() => {
-    return {
-      oldPassword,
-      newPassword,
-      confirmNewPassword,
-    };
-  }, [oldPassword, newPassword, confirmNewPassword]);
+  const [isNewPasswordValid, setIsNewPasswordValid] = useState<boolean>(true);
+  const [isConfirmNewPasswordValid, setIsConfirmNewPasswordValid] = useState<string[]>([]);
 
   const onClickUpdatePassword = () => {
     if (isFormValid()) {
-      handleUpdatePassword(getFormValues());
+      handleUpdatePassword(newPassword);
     }
   };
 
-  /* Validations */
-  const isFormValid = useCallback(() => {
-    const { formValidationErrors, formValidationErrorsByField } = validateUpdatePassword(
-      getFormValues()
-    );
+  const isFormValid = () => {
+    return !!(newPassword && confirmNewPassword && confirmNewPassword === newPassword);
+  };
 
-    setFormErrors([...formValidationErrors]);
-    setFormErrorsByField({ ...formValidationErrorsByField });
+  const validateNewPassword = () => {
+    setIsNewPasswordValid(!!newPassword);
+  };
 
-    return formValidationErrors.length === 0;
-  }, [getFormValues]);
-
-  useEffect(() => {
-    if (formErrors.length) {
-      isFormValid();
+  const validateConfirmNewPassword = () => {
+    const invalidReason: string[] = [];
+    if (!confirmNewPassword) {
+      invalidReason.push('');
+    } else if (confirmNewPassword !== newPassword) {
+      invalidReason.push(
+        i18n.translate('dataSourcesManagement.editDataSource.passwordNoMatch', {
+          defaultMessage: 'Passwords do not match',
+        })
+      );
     }
-  }, [oldPassword, newPassword, confirmNewPassword, formErrors.length, isFormValid]);
+    setIsConfirmNewPasswordValid(invalidReason);
+  };
 
   const renderUpdatePasswordModal = () => {
     return (
       <EuiModal onClose={closeUpdatePasswordModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>Update password</h1>
+            <h1>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.updateStoredPassword"
+                  defaultMessage="Update stored password"
+                />
+              }
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiForm
-            data-test-subj="data-source-update-password"
-            isInvalid={!!formErrors.length}
-            error={formErrors}
-          >
+          <EuiFormRow>
+            <EuiText size="m" style={{ fontWeight: 300 }}>
+              {
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.updateStoredPasswordDescription"
+                  defaultMessage="Update credential password to reflect accurate password to gain access to the endpoint."
+                />
+              }
+            </EuiText>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+
+          <EuiForm data-test-subj="data-source-update-password">
+            {/* Username */}
             <EuiFormRow
-              label={oldPasswordText}
-              isInvalid={!!formErrorsByField.oldPassword.length}
-              error={formErrorsByField.oldPassword}
+              label={i18n.translate('dataSourcesManagement.editDataSource.username', {
+                defaultMessage: 'Username',
+              })}
             >
-              <EuiFieldPassword
-                placeholder={oldPasswordText}
-                type={'dual'}
-                value={oldPassword}
-                isInvalid={!!formErrorsByField.oldPassword.length}
-                onChange={(e) => setOldPassword(e.target.value)}
-              />
+              <EuiText size="s" data-test-subj="data-source-update-password-username">
+                {username}
+              </EuiText>
             </EuiFormRow>
+            {/* updated Password */}
             <EuiFormRow
-              label={newPasswordText}
-              isInvalid={!!formErrorsByField.newPassword.length}
-              error={formErrorsByField.newPassword}
+              label={i18n.translate('dataSourcesManagement.editDataSource.newPassword', {
+                defaultMessage: 'Updated password',
+              })}
+              isInvalid={!isNewPasswordValid}
             >
               <EuiFieldPassword
-                placeholder={newPasswordText}
+                name="updatedPassword"
+                data-test-subj="updateStoredPasswordUpdatedPasswordField"
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.editDataSource.newPasswordPlaceHolder',
+                  {
+                    defaultMessage: 'Updated password',
+                  }
+                )}
                 type={'dual'}
                 value={newPassword}
-                isInvalid={!!formErrorsByField.newPassword.length}
+                isInvalid={!isNewPasswordValid}
                 onChange={(e) => setNewPassword(e.target.value)}
+                onBlur={validateNewPassword}
               />
             </EuiFormRow>
+            {/* Password */}
             <EuiFormRow
-              label={confirmNewPasswordText}
-              isInvalid={!!formErrorsByField.confirmNewPassword.length}
-              error={formErrorsByField.confirmNewPassword}
+              label={i18n.translate('dataSourcesManagement.editDataSource.confirmNewPassword', {
+                defaultMessage: 'Confirm Updated password',
+              })}
+              isInvalid={!!isConfirmNewPasswordValid.length}
+              error={isConfirmNewPasswordValid}
             >
               <EuiFieldPassword
-                placeholder={confirmNewPasswordText}
+                name="confirmUpdatedPassword"
+                data-test-subj="updateStoredPasswordConfirmUpdatedPasswordField"
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.editDataSource.confirmNewPasswordPlaceHolder',
+                  {
+                    defaultMessage: 'Confirm Updated password',
+                  }
+                )}
                 type={'dual'}
                 value={confirmNewPassword}
-                isInvalid={!!formErrorsByField.confirmNewPassword.length}
+                isInvalid={!!isConfirmNewPasswordValid.length}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
+                onBlur={validateConfirmNewPassword}
               />
             </EuiFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeUpdatePasswordModal}>Cancel</EuiButtonEmpty>
-          <EuiButton type="submit" form="modalFormId" onClick={onClickUpdatePassword} fill>
-            Update
+          <EuiButtonEmpty
+            data-test-subj="updateStoredPasswordCancelBtn"
+            onClick={closeUpdatePasswordModal}
+          >
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.cancel"
+                defaultMessage="Cancel"
+              />
+            }
+          </EuiButtonEmpty>
+          <EuiButton
+            type="submit"
+            data-test-subj="updateStoredPasswordConfirmBtn"
+            onClick={onClickUpdatePassword}
+            fill={isFormValid()}
+            disabled={!isFormValid()}
+          >
+            {i18n.translate('dataSourcesManagement.editDataSource.updateStoredPassword', {
+              defaultMessage: 'Update stored password',
+            })}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

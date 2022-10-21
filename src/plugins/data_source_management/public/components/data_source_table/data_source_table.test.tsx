@@ -16,20 +16,19 @@ import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dash
 import { getMappedDataSources, mockManagementPlugin } from '../../mocks';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
-const toastsIdentifier = 'EuiGlobalToastList';
 const tableIdentifier = 'EuiInMemoryTable';
-const confirmModalIndentifier = 'EuiConfirmModal';
+const confirmModalIdentifier = 'EuiConfirmModal';
 const tableColumnHeaderIdentifier = 'EuiTableHeaderCell';
 const tableColumnHeaderButtonIdentifier = 'EuiTableHeaderCell .euiTableHeaderButton';
+const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 
 describe('DataSourceTable', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
-
   describe('should get datasources failed', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject({}));
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -47,24 +46,11 @@ describe('DataSourceTable', () => {
           }
         );
       });
+      component.update();
     });
-
-    it('should show toast and remove toast normally', () => {
+    test('should render empty table', () => {
       expect(component).toMatchSnapshot();
-      expect(utils.getDataSources).toHaveBeenCalled();
-      component.update();
-      // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(1);
-
-      act(() => {
-        // @ts-ignore
-        component.find(toastsIdentifier).first().prop('dismissToast')({
-          id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-        });
-      });
-      component.update();
-      // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(0); // failure toast
+      expect(component.find(emptyStateIdentifier).exists()).toBe(true);
     });
   });
 
@@ -88,6 +74,7 @@ describe('DataSourceTable', () => {
           }
         );
       });
+      component.update();
     });
 
     it('should render normally', () => {
@@ -116,7 +103,7 @@ describe('DataSourceTable', () => {
       expect(component.find(deleteButtonIdentifier).first().props().disabled).toBe(false);
     });
 
-    it('should detele confirm modal pop up and cancel button work normally', () => {
+    it('should delete confirm modal pop up and cancel button work normally', () => {
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -124,17 +111,17 @@ describe('DataSourceTable', () => {
       component.update();
       component.find(deleteButtonIdentifier).first().simulate('click');
       // test if modal pop up when click the delete button
-      expect(component.find(confirmModalIndentifier).exists()).toBe(true);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
 
       act(() => {
         // @ts-ignore
-        component.find(confirmModalIndentifier).first().props().onCancel();
+        component.find(confirmModalIdentifier).first().props().onCancel();
       });
       component.update();
-      expect(component.find(confirmModalIndentifier).exists()).toBe(false);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
 
-    it('should detele confirm modal confirm button work normally', async () => {
+    it('should delete confirm modal confirm button work normally', async () => {
       spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
 
       act(() => {
@@ -143,17 +130,17 @@ describe('DataSourceTable', () => {
       });
       component.update();
       component.find(deleteButtonIdentifier).first().simulate('click');
-      expect(component.find(confirmModalIndentifier).exists()).toBe(true);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
 
       await act(async () => {
         // @ts-ignore
-        await component.find(confirmModalIndentifier).first().props().onConfirm();
+        await component.find(confirmModalIdentifier).first().props().onConfirm();
       });
       component.update();
-      expect(component.find(confirmModalIndentifier).exists()).toBe(false);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
 
-    it('should show toast when delete datasources failed', async () => {
+    it('should delete datasources & fail', async () => {
       spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
       act(() => {
         // @ts-ignore
@@ -162,17 +149,16 @@ describe('DataSourceTable', () => {
 
       component.update();
       component.find(deleteButtonIdentifier).first().simulate('click');
-      expect(component.find(confirmModalIndentifier).exists()).toBe(true);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
 
       await act(async () => {
         // @ts-ignore
-        await component.find(confirmModalIndentifier).props().onConfirm();
+        await component.find(confirmModalIdentifier).props().onConfirm();
       });
       component.update();
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
       // @ts-ignore
-      expect(component.find(toastsIdentifier).props().toasts.length).toBe(1);
-      expect(component.find(confirmModalIndentifier).exists()).toBe(false);
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
   });
 });

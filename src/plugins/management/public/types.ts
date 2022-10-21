@@ -90,6 +90,7 @@ export interface CreateManagementItemArgs {
   title: string;
   tip?: string;
   order?: number;
+  showExperimentalBadge?: boolean;
   euiIconType?: EuiIconType; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
 }
