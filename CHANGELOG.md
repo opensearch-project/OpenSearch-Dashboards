@@ -66,6 +66,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [CVE-2022-33987] Upgrade geckodriver to 3.0.2 ([#2166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2166))
 * Bumps percy-agent to use non-beta version ([#2415](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2415))
 * Resolve sub-dependent d3-color version and potential security issue ([#2454](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2454))
+* [CVE-2022-3517] Update minimatch from 3.0.4 to 3.0.5 ([#2640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2640))
+* Update unset-value from 1.0.1 to 2.0.1 ([#2640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2640))
 
 ### 📈 Features/Enhancements
 
