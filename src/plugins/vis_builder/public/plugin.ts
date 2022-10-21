@@ -13,43 +13,48 @@ import {
   PluginInitializerContext,
 } from '../../../core/public';
 import {
-  WizardPluginSetupDependencies,
-  WizardPluginStartDependencies,
-  WizardServices,
-  WizardSetup,
-  WizardStart,
+  VisBuilderPluginSetupDependencies,
+  VisBuilderPluginStartDependencies,
+  VisBuilderServices,
+  VisBuilderSetup,
+  VisBuilderStart,
 } from './types';
-import { WizardEmbeddableFactoryDefinition, WIZARD_EMBEDDABLE } from './embeddable';
-import wizardIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
-import wizardIcon from './assets/wizard_icon.svg';
-import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, WIZARD_SAVED_OBJECT } from '../common';
+import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
+import visBuilderIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
+import visBuilderIcon from './assets/wizard_icon.svg';
+import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, VISBUILDER_SAVED_OBJECT } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import {
   setSearchService,
   setIndexPatterns,
   setHttp,
-  setSavedWizardLoader,
+  setSavedVisBuilderLoader,
   setExpressionLoader,
   setTimeFilter,
   setUISettings,
   setTypeService,
   setReactExpressionRenderer,
 } from './plugin_services';
-import { createSavedWizardLoader } from './saved_visualizations';
+import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
 import { ConfigSchema } from '../config';
 
-export class WizardPlugin
+export class VisBuilderPlugin
   implements
-    Plugin<WizardSetup, WizardStart, WizardPluginSetupDependencies, WizardPluginStartDependencies> {
+    Plugin<
+      VisBuilderSetup,
+      VisBuilderStart,
+      VisBuilderPluginSetupDependencies,
+      VisBuilderPluginStartDependencies
+    > {
   private typeService = new TypeService();
 
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    core: CoreSetup<WizardPluginStartDependencies, WizardStart>,
-    { embeddable, visualizations }: WizardPluginSetupDependencies
+    core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
+    { embeddable, visualizations }: VisBuilderPluginSetupDependencies
   ) {
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
@@ -76,7 +81,7 @@ export class WizardPlugin
 
         // Register Default Visualizations
 
-        const services: WizardServices = {
+        const services: VisBuilderServices = {
           ...coreStart,
           toastNotifications: coreStart.notifications.toasts,
           data,
@@ -86,7 +91,7 @@ export class WizardPlugin
           history: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
-          savedWizardLoader: selfStart.savedWizardLoader,
+          savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
           scopedHistory: params.history,
         };
@@ -102,9 +107,9 @@ export class WizardPlugin
     // Register embeddable
     // TODO: investigate simplification via getter a la visualizations:
     // const start = createStartServicesGetter(core.getStartServices));
-    // const embeddableFactory = new WizardEmbeddableFactoryDefinition({ start });
-    const embeddableFactory = new WizardEmbeddableFactoryDefinition();
-    embeddable.registerEmbeddableFactory(WIZARD_EMBEDDABLE, embeddableFactory);
+    // const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition({ start });
+    const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition();
+    embeddable.registerEmbeddableFactory(VISBUILDER_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
     visualizations.registerAlias({
@@ -113,7 +118,7 @@ export class WizardPlugin
       description: i18n.translate('visBuilder.visPicker.description', {
         defaultMessage: 'Create visualizations using the new Visualization Builder',
       }),
-      icon: wizardIconSecondaryFill,
+      icon: visBuilderIconSecondaryFill,
       stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
@@ -124,9 +129,9 @@ export class WizardPlugin
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
-            icon: wizardIcon,
+            icon: visBuilderIcon,
             id,
-            savedObjectType: WIZARD_SAVED_OBJECT,
+            savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
             title: attributes?.title,
             typeTitle: PLUGIN_NAME,
@@ -140,10 +145,13 @@ export class WizardPlugin
     };
   }
 
-  public start(core: CoreStart, { data, expressions }: WizardPluginStartDependencies): WizardStart {
+  public start(
+    core: CoreStart,
+    { data, expressions }: VisBuilderPluginStartDependencies
+  ): VisBuilderStart {
     const typeService = this.typeService.start();
 
-    const savedWizardLoader = createSavedWizardLoader({
+    const savedVisBuilderLoader = createSavedVisBuilderLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
       search: data.search,
@@ -157,14 +165,14 @@ export class WizardPlugin
     setReactExpressionRenderer(expressions.ReactExpressionRenderer);
     setHttp(core.http);
     setIndexPatterns(data.indexPatterns);
-    setSavedWizardLoader(savedWizardLoader);
+    setSavedVisBuilderLoader(savedVisBuilderLoader);
     setTimeFilter(data.query.timefilter.timefilter);
     setTypeService(typeService);
     setUISettings(core.uiSettings);
 
     return {
       ...typeService,
-      savedWizardLoader,
+      savedVisBuilderLoader,
     };
   }
 

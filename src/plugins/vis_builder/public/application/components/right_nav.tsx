@@ -16,14 +16,14 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 import { setActiveVisualization, useTypedDispatch } from '../utils/state_management';
 
 export const RightNav = () => {
   const [newVisType, setNewVisType] = useState<string>();
   const {
     services: { types },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const { ui, name: activeVisName } = useVisualizationType();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;

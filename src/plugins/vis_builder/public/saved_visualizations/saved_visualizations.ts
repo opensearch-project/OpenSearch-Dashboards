@@ -7,12 +7,12 @@ import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
-import { createSavedWizardVisClass } from './_saved_vis';
+import { createSavedVisBuilderVisClass } from './_saved_vis';
 
-export type SavedWizardLoader = ReturnType<typeof createSavedWizardLoader>;
-export function createSavedWizardLoader(services: SavedObjectOpenSearchDashboardsServices) {
+export type SavedVisBuilderLoader = ReturnType<typeof createSavedVisBuilderLoader>;
+export function createSavedVisBuilderLoader(services: SavedObjectOpenSearchDashboardsServices) {
   const { savedObjectsClient } = services;
-  const SavedWizardVisClass = createSavedWizardVisClass(services);
+  const SavedVisBuilderVisClass = createSavedVisBuilderVisClass(services);
 
-  return new SavedObjectLoader(SavedWizardVisClass, savedObjectsClient);
+  return new SavedObjectLoader(SavedVisBuilderVisClass, savedObjectsClient);
 }
