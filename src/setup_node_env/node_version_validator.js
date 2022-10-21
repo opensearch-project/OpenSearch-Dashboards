@@ -61,7 +61,7 @@ if (!isVersionValid) {
 } else if (!isMinorValid) {
   // Validates Minor version of the NodeJS
   var warnMessage =
-    `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js` + 
+    `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js ` +
     `${requiredVersion}. Your current version is ${currentVersion}.`;
   console.warn(warnMessage);
 }
