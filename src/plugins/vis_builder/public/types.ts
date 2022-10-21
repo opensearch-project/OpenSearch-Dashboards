@@ -15,16 +15,16 @@ import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../../../core/public';
 
-export type WizardSetup = TypeServiceSetup;
-export interface WizardStart extends TypeServiceStart {
-  savedWizardLoader: SavedObjectLoader;
+export type VisBuilderSetup = TypeServiceSetup;
+export interface VisBuilderStart extends TypeServiceStart {
+  savedVisBuilderLoader: SavedObjectLoader;
 }
 
-export interface WizardPluginSetupDependencies {
+export interface VisBuilderPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
 }
-export interface WizardPluginStartDependencies {
+export interface VisBuilderPluginStartDependencies {
   embeddable: EmbeddableStart;
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
@@ -33,9 +33,9 @@ export interface WizardPluginStartDependencies {
   expressions: ExpressionsStart;
 }
 
-export interface WizardServices extends CoreStart {
+export interface VisBuilderServices extends CoreStart {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedWizardLoader: WizardStart['savedWizardLoader'];
+  savedVisBuilderLoader: VisBuilderStart['savedVisBuilderLoader'];
   toastNotifications: ToastsStart;
   savedObjectsPublic: SavedObjectsStart;
   navigation: NavigationPublicPluginStart;
@@ -56,4 +56,4 @@ export interface ISavedVis {
   version?: number;
 }
 
-export interface WizardVisSavedObject extends SavedObject, ISavedVis {}
+export interface VisBuilderVisSavedObject extends SavedObject, ISavedVis {}

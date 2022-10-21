@@ -5,7 +5,7 @@
 
 import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
 import { DataPublicPluginStart, TimefilterContract } from '../../data/public';
-import { SavedWizardLoader } from './saved_visualizations';
+import { SavedVisBuilderLoader } from './saved_visualizations';
 import { HttpStart, IUiSettingsClient } from '../../../core/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
@@ -28,9 +28,9 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<
   DataPublicPluginStart['indexPatterns']
 >('data.indexPatterns');
 
-export const [getSavedWizardLoader, setSavedWizardLoader] = createGetterSetter<SavedWizardLoader>(
-  'SavedWizardLoader'
-);
+export const [getSavedVisBuilderLoader, setSavedVisBuilderLoader] = createGetterSetter<
+  SavedVisBuilderLoader
+>('SavedVisBuilderLoader');
 
 export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
 

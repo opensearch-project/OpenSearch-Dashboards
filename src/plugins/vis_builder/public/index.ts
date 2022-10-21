@@ -4,11 +4,11 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { WizardPlugin } from './plugin';
+import { VisBuilderPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new WizardPlugin(initializerContext);
+  return new VisBuilderPlugin(initializerContext);
 }
-export { WizardServices, WizardPluginStartDependencies, WizardStart } from './types';
+export { VisBuilderServices, VisBuilderPluginStartDependencies, VisBuilderStart } from './types';

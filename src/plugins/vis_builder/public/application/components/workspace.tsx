@@ -7,7 +7,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@e
 import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 import { validateSchemaState } from '../utils/validate_schema_state';
 import { useTypedSelector } from '../utils/state_management';
 import { useVisualizationType } from '../utils/use';
@@ -26,7 +26,7 @@ export const Workspace: FC = ({ children }) => {
       notifications: { toasts },
       data,
     },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const { toExpression, ui } = useVisualizationType();
   const [expression, setExpression] = useState<string>();
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({

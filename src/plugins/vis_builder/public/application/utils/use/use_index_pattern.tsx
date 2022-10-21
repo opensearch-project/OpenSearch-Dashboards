@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { IndexPattern } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { useTypedSelector } from '../state_management';
 
 export const useIndexPatterns = () => {
@@ -15,7 +15,7 @@ export const useIndexPatterns = () => {
   const [error, setError] = useState<Error | undefined>(undefined);
   const {
     services: { data },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
 
   let foundSelected: IndexPattern | undefined;
   if (!loading && !error) {

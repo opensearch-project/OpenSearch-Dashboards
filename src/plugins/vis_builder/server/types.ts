@@ -5,6 +5,6 @@
 
 // We need to export plugin server types, even if empty
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WizardPluginSetup {}
+export interface VisBuilderPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WizardPluginStart {}
+export interface VisBuilderPluginStart {}

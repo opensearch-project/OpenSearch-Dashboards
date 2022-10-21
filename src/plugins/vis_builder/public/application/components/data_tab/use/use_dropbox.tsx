@@ -18,7 +18,7 @@ import {
 } from '../../../utils/state_management/visualization_slice';
 import { useIndexPatterns } from '../../../utils/use/use_index_pattern';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../../types';
+import { VisBuilderServices } from '../../../../types';
 
 const filterByName = propFilter('name');
 const filterByType = propFilter('type');
@@ -38,7 +38,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
         search: { aggs: aggService },
       },
     },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const aggConfigParams = useTypedSelector(
     (state) => state.visualization.activeVisualization?.aggConfigParams
   );

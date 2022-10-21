@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 import { getOnSave } from './get_top_nav_config';
-import { createWizardServicesMock } from './mocks';
+import { createVisBuilderServicesMock } from './mocks';
 
 describe('getOnSave', () => {
-  let savedWizardVis: any;
+  let savedVisBuilderVis: any;
   let originatingApp: string | undefined;
   let visualizationIdFromUrl: string;
   let dispatch: any;
-  let mockServices: jest.Mocked<WizardServices>;
+  let mockServices: jest.Mocked<VisBuilderServices>;
   let onSaveProps: {
     newTitle: string;
     newCopyOnSave: boolean;
@@ -23,9 +23,9 @@ describe('getOnSave', () => {
   };
 
   beforeEach(() => {
-    savedWizardVis = {
+    savedVisBuilderVis = {
       id: '1',
-      title: 'save wizard wiz title',
+      title: 'save visBuilder wiz title',
       description: '',
       visualizationState: '',
       styleState: '',
@@ -37,7 +37,7 @@ describe('getOnSave', () => {
     originatingApp = '';
     visualizationIdFromUrl = '';
     dispatch = jest.fn();
-    mockServices = createWizardServicesMock();
+    mockServices = createVisBuilderServicesMock();
 
     onSaveProps = {
       newTitle: 'new title',
@@ -49,10 +49,10 @@ describe('getOnSave', () => {
     };
   });
 
-  test('return undefined when savedWizardVis is null', async () => {
-    savedWizardVis = null;
+  test('return undefined when savedVisBuilderVis is null', async () => {
+    savedVisBuilderVis = null;
     const onSave = getOnSave(
-      savedWizardVis,
+      savedVisBuilderVis,
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
@@ -63,16 +63,16 @@ describe('getOnSave', () => {
     expect(onSaveResult).toBeUndefined();
   });
 
-  test('savedWizardVis get saved correctly', async () => {
+  test('savedVisBuilderVis get saved correctly', async () => {
     const onSave = getOnSave(
-      savedWizardVis,
+      savedVisBuilderVis,
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
       mockServices
     );
     const onSaveReturn = await onSave(onSaveProps);
-    expect(savedWizardVis).toMatchInlineSnapshot(`
+    expect(savedVisBuilderVis).toMatchInlineSnapshot(`
       Object {
         "copyOnSave": false,
         "description": "new description",
@@ -105,28 +105,28 @@ describe('getOnSave', () => {
     expect(onSaveReturn?.id).toBe('1');
   });
 
-  test('savedWizardVis does not change title with a null id', async () => {
-    savedWizardVis.save = jest.fn().mockReturnValue(null);
+  test('savedVisBuilderVis does not change title with a null id', async () => {
+    savedVisBuilderVis.save = jest.fn().mockReturnValue(null);
     const onSave = getOnSave(
-      savedWizardVis,
+      savedVisBuilderVis,
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
       mockServices
     );
     const onSaveResult = await onSave(onSaveProps);
-    expect(savedWizardVis.title).toBe('save wizard wiz title');
+    expect(savedVisBuilderVis.title).toBe('save visBuilder wiz title');
     expect(onSaveResult?.id).toBeNull();
   });
 
-  test('create a new wizard from dashboard', async () => {
-    savedWizardVis.id = undefined;
-    savedWizardVis.save = jest.fn().mockReturnValue('2');
+  test('create a new visBuilder from dashboard', async () => {
+    savedVisBuilderVis.id = undefined;
+    savedVisBuilderVis.save = jest.fn().mockReturnValue('2');
     originatingApp = 'dashboard';
     onSaveProps.returnToOrigin = true;
 
     const onSave = getOnSave(
-      savedWizardVis,
+      savedVisBuilderVis,
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
@@ -137,13 +137,13 @@ describe('getOnSave', () => {
     expect(dispatch).toBeCalledTimes(0);
   });
 
-  test('edit an exising wizard from dashboard', async () => {
-    savedWizardVis.copyOnSave = false;
+  test('edit an exising visBuilder from dashboard', async () => {
+    savedVisBuilderVis.copyOnSave = false;
     onSaveProps.newDescription = 'new description after editing';
     originatingApp = 'dashboard';
     onSaveProps.returnToOrigin = true;
     const onSave = getOnSave(
-      savedWizardVis,
+      savedVisBuilderVis,
       originatingApp,
       visualizationIdFromUrl,
       dispatch,
@@ -152,6 +152,6 @@ describe('getOnSave', () => {
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('1');
     expect(mockServices.application.navigateToApp).toBeCalledTimes(1);
-    expect(savedWizardVis.description).toBe('new description after editing');
+    expect(savedVisBuilderVis.description).toBe('new description after editing');
   });
 });

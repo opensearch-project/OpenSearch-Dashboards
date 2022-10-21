@@ -7,7 +7,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { getStubIndexPattern } from '../../../data/public/test_utils';
 import { IndexPattern } from '../../../data/public';
 import { RootState } from '../application/utils/state_management';
-import { WizardVisSavedObject } from '../types';
+import { VisBuilderVisSavedObject } from '../types';
 import { saveStateToSavedObject } from './transforms';
 
 const getConfig = (cfg: any) => cfg;
@@ -21,7 +21,7 @@ describe('transforms', () => {
 
     beforeEach(() => {
       TEST_INDEX_PATTERN_ID = 'test-pattern';
-      savedObject = {} as WizardVisSavedObject;
+      savedObject = {} as VisBuilderVisSavedObject;
       rootState = {
         metadata: { editor: { state: 'loading', validity: {} } },
         style: '',
