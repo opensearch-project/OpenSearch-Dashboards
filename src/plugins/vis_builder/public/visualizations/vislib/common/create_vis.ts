@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AggConfigs, IndexPattern, search } from '../../../../../data/public';
+import { AggConfigs, IndexPattern } from '../../../../../data/public';
 import { Vis } from '../../../../../visualizations/public';
 import { getSearchService, getTimeFilter } from '../../../plugin_services';
-
-const { isDateHistogramBucketAggConfig } = search.aggs;
 
 export const createVis = async (
   type: string,
@@ -21,12 +19,8 @@ export const createVis = async (
 
   const responseAggs = vis.data.aggs.getResponseAggs().filter((agg) => agg.enabled);
   responseAggs.forEach((agg) => {
-    if (isDateHistogramBucketAggConfig(agg)) {
-      const timeFilter = getTimeFilter();
-
-      agg.params.timeRange = timeFilter.getTime();
-    }
+    const timeFilter = getTimeFilter();
+    agg.params.timeRange = timeFilter.getTime();
   });
-
   return vis;
 };
