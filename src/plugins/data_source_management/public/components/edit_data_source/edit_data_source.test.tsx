@@ -103,7 +103,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       expect(history.push).toBeCalledWith('');
     });
     test('should fail to update datasource', async () => {
-      spyOn(utils, 'updateDataSourceById').and.throwError('error');
+      spyOn(utils, 'updateDataSourceById').and.returnValue(new Error(''));
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('handleSubmit')(
