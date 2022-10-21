@@ -42,6 +42,7 @@ export interface DataSourceTableItem {
 export interface ToastMessageItem {
   id: string;
   defaultMessage: string;
+  success?: boolean;
 }
 
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<

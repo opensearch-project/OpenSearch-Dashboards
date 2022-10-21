@@ -132,7 +132,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const columns = [
     {
       field: 'title',
-      name: 'Datasource',
+      name: 'Title',
       render: (
         name: string,
         index: {
@@ -184,6 +184,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         confirmButtonText={i18n.translate('dataSourcesManagement.dataSourcesTable.delete', {
           defaultMessage: 'Delete',
         })}
+        buttonColor="danger"
         defaultFocusedButton="confirm"
       >
         <p>
@@ -249,7 +250,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Toast Handlers */
 
   const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
-    toasts.addWarning(
+    toasts.addDanger(
       i18n.translate(id, {
         defaultMessage,
       })
@@ -258,7 +259,14 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   /* Render Ui elements*/
   /* Create Data Source button */
-  const createButton = <CreateButton history={history} />;
+  const createButton = <CreateButton history={history} dataTestSubj="createDataSourceButton" />;
+  const createButtonEmptyState = (
+    <CreateButton
+      history={history}
+      isEmptyState={true}
+      dataTestSubj="createDataSourceButtonEmptyState"
+    />
+  );
 
   /* Render header*/
   const renderHeader = () => {
@@ -332,7 +340,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             }
           </EuiText>
           <EuiSpacer />
-          {createButton}
+          {createButtonEmptyState}
         </EuiPanel>
         <EuiSpacer size="l" />
       </>

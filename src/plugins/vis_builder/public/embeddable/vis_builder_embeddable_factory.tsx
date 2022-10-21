@@ -106,7 +106,7 @@ export class WizardEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return i18n.translate('wizard.displayName', {
+    return i18n.translate('visBuilder.displayName', {
       defaultMessage: PLUGIN_ID,
     });
   }

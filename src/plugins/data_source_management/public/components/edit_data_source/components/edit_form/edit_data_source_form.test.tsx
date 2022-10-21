@@ -58,6 +58,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            displayToastMessage={mockFn}
           />
         ),
         {
@@ -229,6 +230,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            displayToastMessage={mockFn}
           />
         ),
         {
