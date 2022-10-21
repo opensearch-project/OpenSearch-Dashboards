@@ -11,6 +11,7 @@ import { AreaVisOptions } from './components/area_vis_options';
 import { VisualizationTypeOptions } from '../../../services/type_service';
 import { toExpression } from './to_expression';
 import { BasicOptionsDefaults } from '../common/types';
+import { VIS_BUILDER_STATE } from '../../../../common';
 
 export interface AreaOptionsDefaults extends BasicOptionsDefaults {
   type: 'area';
@@ -21,6 +22,7 @@ export const createAreaConfig = (): VisualizationTypeOptions<AreaOptionsDefaults
   title: 'Area',
   icon: 'visArea',
   description: 'Display area chart',
+  stage: VIS_BUILDER_STATE,
   toExpression,
   ui: {
     containerConfig: {

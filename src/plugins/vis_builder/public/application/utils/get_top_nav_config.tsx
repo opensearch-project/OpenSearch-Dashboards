@@ -39,7 +39,7 @@ import {
 import { VisBuilderServices } from '../..';
 import { VisBuilderVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
-import { EDIT_PATH } from '../../../common';
+import { EDIT_PATH, VIS_BUILDER_STATE } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
@@ -95,10 +95,11 @@ export const getTopNavConfig = (
               dispatch,
               services
             )}
-            objectType={'wizard'}
+            objectType={'visualization'}
             onClose={() => {}}
             originatingApp={originatingApp}
             getAppNameFromId={stateTransfer.getAppNameFromId}
+            isExperimental={VIS_BUILDER_STATE === 'experimental' ? true : false}
           />
         );
 

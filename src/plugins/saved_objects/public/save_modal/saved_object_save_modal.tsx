@@ -45,6 +45,8 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextArea,
+  EuiBadge,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -70,6 +72,7 @@ interface Props {
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
+  isExperimental?: boolean;
 }
 
 export interface SaveModalState {
@@ -111,6 +114,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               defaultMessage="Save {objectType}"
               values={{ objectType: this.props.objectType }}
             />
+            {this.renderExperimentalBadge()}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -166,6 +170,28 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       </EuiModal>
     );
   }
+
+  private renderExperimentalBadge = () => {
+    if (!this.props.isExperimental) {
+      return;
+    }
+
+    return (
+      <EuiModalHeaderTitle className="osdSavedObjectSaveModalVisBuilder">
+        <FormattedMessage
+          id="savedObjects.saveModal.saveSubTitle"
+          defaultMessage="Visualization Builder"
+        />
+        <EuiBetaBadge
+          label="Lab"
+          iconType="beaker"
+          color="subdued"
+          size="s"
+          className="osdSavedObjectSaveModalBadge"
+        />
+      </EuiModalHeaderTitle>
+    );
+  };
 
   private renderViewDescription = () => {
     if (!this.props.showDescription) {
