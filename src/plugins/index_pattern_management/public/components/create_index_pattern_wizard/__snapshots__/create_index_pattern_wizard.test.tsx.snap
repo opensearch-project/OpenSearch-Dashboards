@@ -39,6 +39,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           },
         ]
       }
+      catchAndWarn={[Function]}
       goToNextStep={[Function]}
       goToPreviousStep={[Function]}
       indexPatternCreationType={
@@ -90,6 +91,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={Array []}
+      catchAndWarn={[Function]}
       goToNextStep={[Function]}
       goToPreviousStep={[Function]}
       indexPatternCreationType={
@@ -191,6 +193,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
     <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={Array []}
+      catchAndWarn={[Function]}
       goToNextStep={[Function]}
       goToPreviousStep={[Function]}
       indexPatternCreationType={
@@ -248,6 +251,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           },
         ]
       }
+      catchAndWarn={[Function]}
       goToNextStep={[Function]}
       goToPreviousStep={[Function]}
       indexPatternCreationType={
