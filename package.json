@@ -79,6 +79,7 @@
     "**/ansi-regex": "^5.0.1",
     "**/axios": "^0.21.4",
     "**/ejs": "^3.1.6",
+    "**/follow-redirects": "^1.15.2",
     "**/front-matter": "^4.0.2",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
