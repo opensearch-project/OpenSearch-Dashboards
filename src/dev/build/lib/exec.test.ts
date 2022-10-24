@@ -39,6 +39,8 @@ import {
 
 import { exec } from './exec';
 
+const escapedPathToNode = Path.sep === '\\' ? '\\\\node.exe' : '/node';
+
 const testWriter = new ToolingLogCollectingWriter();
 const log = new ToolingLog();
 log.setWriters([testWriter]);
@@ -59,7 +61,7 @@ it('executes a command, logs the command, and logs the output', async () => {
   await exec(log, process.execPath, ['-e', 'console.log("hi")']);
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " debg $ <nodedir>/node -e console.log(\\"hi\\")",
+      " debg $ <nodedir>${escapedPathToNode} -e console.log(\\"hi\\")",
       " debg hi",
     ]
   `);
@@ -71,7 +73,7 @@ it('logs using level: option', async () => {
   });
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " info $ <nodedir>/node -e console.log(\\"hi\\")",
+      " info $ <nodedir>${escapedPathToNode} -e console.log(\\"hi\\")",
       " info hi",
     ]
   `);

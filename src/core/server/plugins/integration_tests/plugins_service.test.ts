@@ -32,7 +32,7 @@
 import { REPO_ROOT } from '@osd/dev-utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
-import { join } from 'path';
+import { posix } from 'path';
 
 import { PluginsService } from '../plugins_service';
 import { ConfigPath, ConfigService, Env } from '../../config';
@@ -163,7 +163,7 @@ describe('PluginsService', () => {
       } as Plugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
-      join(pluginPath, 'server'),
+      posix.join(pluginPath, 'server'),
       () => ({
         plugin: pluginInitializer,
       }),

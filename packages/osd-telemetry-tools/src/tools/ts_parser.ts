@@ -31,7 +31,7 @@
 import * as ts from 'typescript';
 import { createFailError } from '@osd/dev-utils';
 import * as path from 'path';
-import { getProperty, getPropertyValue } from './utils';
+import { getProperty, getPropertyValue, normalizePath } from './utils';
 import { getDescriptor, Descriptor } from './serializer';
 
 export function* traverseNodes(maybeNodes: ts.Node | ts.Node[]): Generator<ts.Node> {
@@ -205,7 +205,7 @@ export function* parseUsageCollection(
   sourceFile: ts.SourceFile,
   program: ts.Program
 ): Generator<ParsedUsageCollection> {
-  const relativePath = path.relative(process.cwd(), sourceFile.fileName);
+  const relativePath = normalizePath(path.relative(process.cwd(), sourceFile.fileName), false);
   if (sourceHasUsageCollector(sourceFile)) {
     for (const node of traverseNodes(sourceFile)) {
       if (isMakeUsageCollectorFunction(node, sourceFile)) {

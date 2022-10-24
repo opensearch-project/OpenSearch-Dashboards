@@ -29,6 +29,7 @@ import {
   credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
+  ToastMessageItem,
   UsernamePasswordTypedContent,
 } from '../../../../types';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -45,6 +46,7 @@ export interface EditDataSourceProps {
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
   onDeleteDataSource?: () => void;
+  displayToastMessage: (info: ToastMessageItem) => void;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -57,6 +59,7 @@ export interface EditDataSourceState {
   };
   showUpdatePasswordModal: boolean;
   showUpdateOptions: boolean;
+  isLoading: boolean;
 }
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
@@ -81,6 +84,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       },
       showUpdatePasswordModal: false,
       showUpdateOptions: false,
+      isLoading: false,
     };
   }
 
@@ -208,7 +212,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onClickUpdateDataSource = () => {
+  onClickUpdateDataSource = async () => {
     if (this.isFormValid()) {
       // update data source endpoint is currently not supported/allowed
       const formValues: DataSourceAttributes = {
@@ -225,7 +229,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       }
 
       /* Submit */
-      this.props.handleSubmit(formValues);
+      this.setState({ isLoading: true });
+      try {
+        await this.props.handleSubmit(formValues, false);
+        this.setState({ showUpdateOptions: false });
+        this.setFormValuesForEditMode();
+      } catch (e) {
+        this.props.displayToastMessage({
+          id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
+          defaultMessage: 'Updating the Data Source failed with some errors.',
+        });
+      } finally {
+        this.setState({ isLoading: false });
+      }
     }
   };
 
@@ -247,7 +263,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   /* Update password */
-  updatePassword = (password: string) => {
+  updatePassword = async (password: string) => {
     const { title, description, auth } = this.props.existingDataSource;
     const updateAttributes: DataSourceAttributes = {
       title,
@@ -261,8 +277,21 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         },
       },
     };
-    this.props.handleSubmit(updateAttributes);
     this.closePasswordModal();
+
+    try {
+      await this.props.handleSubmit(updateAttributes, true);
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
+        defaultMessage: 'Password updated successfully.',
+        success: true,
+      });
+    } catch (e) {
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
+        defaultMessage: 'Updating the stored password failed with some errors.',
+      });
+    }
   };
 
   /* Render methods */
@@ -426,44 +455,22 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
-
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.endpointTitle"
-                  defaultMessage="Endpoint"
-                />
-              }
-            </h4>
-          }
-          description={
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.endpointDescription"
-                  defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
-                />
-              }
-            </p>
-          }
+        {/* Endpoint */}
+        <EuiFormRow
+          fullWidth={true}
+          label={i18n.translate('dataSourcesManagement.editDataSource.endpointURL', {
+            defaultMessage: 'Endpoint URL',
+          })}
         >
-          {/* Endpoint */}
-          <EuiFormRow
-            label={i18n.translate('dataSourcesManagement.editDataSource.endpointURL', {
-              defaultMessage: 'Endpoint URL',
-            })}
-          >
-            <EuiFieldText
-              name="endpoint"
-              value={this.props.existingDataSource.endpoint}
-              disabled={true}
-              aria-disabled={true}
-              data-test-subj="editDatasourceEndpointField"
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
+          <EuiFieldText
+            name="endpoint"
+            value={this.props.existingDataSource.endpoint}
+            disabled={true}
+            fullWidth={true}
+            aria-disabled={true}
+            data-test-subj="editDatasourceEndpointField"
+          />
+        </EuiFormRow>
       </EuiPanel>
     );
   };
@@ -653,6 +660,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               fill
               size="s"
               iconType="check"
+              isLoading={this.state.isLoading}
               onClick={this.onClickUpdateDataSource}
               data-test-subj="datasource-edit-saveButton"
             >
