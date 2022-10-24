@@ -34,11 +34,23 @@ describe('getQueryText', () => {
   it('should know how to get the text out of the AST', () => {
     const ast = {
       getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
-      getFieldClauses: () => [{ value: 'lala' }, { value: 'lolo' }],
+      getFieldClauses: (field) => {
+        if (field === 'type') {
+          return [{ value: 'lala' }, { value: 'lolo' }];
+        } else if (field === 'namespaces') {
+          return [{ value: 'default' }];
+        }
+        return [];
+      }
     };
     expect(parseQuery({ ast } as any, ['type'])).toEqual({
       queryText: 'foo bar',
       parsedParams: { type: 'lala' },
+    });
+
+    expect(parseQuery({ ast } as any, ['namespaces'])).toEqual({
+      queryText: 'foo bar',
+      parsedParams: { namespaces: 'default' },
     });
   });
 });
