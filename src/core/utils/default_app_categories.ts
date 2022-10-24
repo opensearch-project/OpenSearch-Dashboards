@@ -55,6 +55,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
       defaultMessage: 'Observability',
     }),
     euiIconType: 'logoObservability',
+    order: 2000,
+  },
+  plugins: {
+    id: 'opensearch',
+    label: i18n.translate('core.ui.observabilityNavList.label', {
+      defaultMessage: 'OpenSearch Plugins',
+    }),
     order: 3000,
   },
   security: {

@@ -143,3 +143,39 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
+
+export interface DashboardListSource {
+  name: string;
+  listProviderFn: () => Observable<DashboardListItem>;
+}
+
+export type DashboardListSources = DashboardListSource[];
+
+export interface DashboardListItem {
+  id: string;
+  title: string;
+  type: string;
+  description: string;
+  url: string;
+  listType: string;
+}
+export type DashboardListItems = DashboardListItem[];
+
+export type DashboardCreators = DashboardCreator[];
+
+export type DashboardCreatorFn = (event: any, history: any) => void;
+export type DashboardItemCreatorClickHandler = (
+  creatorFn: DashboardCreatorFn
+) => (event: any) => void;
+
+export interface DashboardCreator {
+  id: string; // key identifier for creator plugin/module
+  name: string; // display name for create link
+  i18nId?: string; // unique identifier for react-intl FormattedMessage
+  i18nDescription?: string; // helpful description of this i18n context
+  i18nDefaultMessage?: string; // FormattedMessage default message, in tag-replace format
+  i18nDefaultValues?: object; // FormattedMessage default value
+  i18nEntityName?: string; // translation key
+  defaultText: string; // default translation text
+  creatorFn: DashboardCreatorFn; // onClick call this
+}
