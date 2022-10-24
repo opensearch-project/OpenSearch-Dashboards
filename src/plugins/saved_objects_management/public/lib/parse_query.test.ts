@@ -41,7 +41,7 @@ describe('getQueryText', () => {
           return [{ value: 'default' }];
         }
         return [];
-      }
+      },
     };
     expect(parseQuery({ ast } as any, ['type'])).toEqual({
       queryText: 'foo bar',
