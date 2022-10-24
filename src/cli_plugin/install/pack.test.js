@@ -72,10 +72,11 @@ describe('opensearchDashboards cli', function () {
       Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(async () => {
       logger.log.restore();
       logger.error.restore();
-      del.sync(workingPathRoot);
+
+      await del(workingPathRoot);
     });
 
     function copyReplyFile(filename) {

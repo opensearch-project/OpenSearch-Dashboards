@@ -51,8 +51,15 @@ describe('telemetry_usage_collector', () => {
     unreadable: resolve(tempDir, 'tests-telemetry_usage_collector-unreadable.yml'),
     valid: resolve(tempDir, 'telemetry.yml'),
   };
-  const invalidFiles = [tempFiles.too_big, tempFiles.unreadable];
+  const invalidFiles = [tempFiles.too_big];
   const validFiles = [tempFiles.blank, tempFiles.empty, tempFiles.valid];
+  // Windows cannot create the `unreadable` file as unreadable
+  if (process.platform === 'win32') {
+    validFiles.push(tempFiles.unreadable);
+  } else {
+    invalidFiles.push(tempFiles.unreadable);
+  }
+
   const allFiles = Object.values(tempFiles);
   const expectedObject = {
     expected: 'value',
@@ -98,7 +105,7 @@ describe('telemetry_usage_collector', () => {
     });
 
     test('returns `true` file that has valid data', async () => {
-      expect(allFiles.filter(isFileReadable)).toEqual(validFiles);
+      expect(allFiles.filter(isFileReadable).sort()).toEqual(validFiles.sort());
     });
   });
 
