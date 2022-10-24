@@ -29,10 +29,13 @@
  */
 
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@opensearch-project/opensearch';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { isResponseError } from '../../../../../core/server/opensearch/client/errors';
+import { SharedGlobalConfig, Logger, SavedObjectsErrorHelpers } from '../../../../../core/server';
+import { DataSourceConfigError } from '../../../../data_source/server';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
 import {
@@ -86,8 +89,15 @@ export const opensearchSearchStrategyProvider = (
           rawResponse,
           ...getTotalLoaded(rawResponse._shards),
         };
-      } catch (e) {
+      } catch (e: any) {
         if (usage) usage.trackError();
+        if (request.dataSourceId) {
+          const errorMessage = isResponseError(e) ? JSON.stringify(e.meta.body) : undefined;
+          throw new DataSourceConfigError(
+            `Failed to search against data source id [${request.dataSourceId}]: `,
+            SavedObjectsErrorHelpers.decorateBadRequestError(e, errorMessage)
+          );
+        }
         throw e;
       }
     },

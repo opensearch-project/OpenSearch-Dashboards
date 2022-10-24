@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { OsdError } from '../../../../../src/plugins/opensearch_dashboards_utils/common';
+import { OsdError } from '../../../opensearch_dashboards_utils/common';
 
 export class DataSourceConfigError extends OsdError {
   // must have statusCode to avoid route handler in search.ts to return 500

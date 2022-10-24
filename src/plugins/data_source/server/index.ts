@@ -16,3 +16,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+
+export { DataSourceConfigError } from './lib/error';
