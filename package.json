@@ -67,8 +67,7 @@
     "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console",
-    "storybook": "node scripts/storybook"
+    "spec_to_console": "node scripts/spec_to_console"
   },
   "repository": {
     "type": "git",
@@ -76,6 +75,7 @@
   },
   "resolutions": {
     "**/@types/node": ">=10.17.17 <10.20.0",
+    "**/@types/react": "^16.14.23",
     "**/ansi-regex": "^5.0.1",
     "**/axios": "^0.21.4",
     "**/ejs": "^3.1.6",
@@ -316,7 +316,7 @@
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.7.3",
     "@types/reach__router": "^1.2.6",
-    "@types/react": "^16.9.36",
+    "@types/react": "^16.14.23",
     "@types/react-dom": "^16.9.8",
     "@types/react-grid-layout": "^0.16.7",
     "@types/react-redux": "^7.1.9",
