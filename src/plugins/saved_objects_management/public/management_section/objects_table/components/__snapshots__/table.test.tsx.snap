@@ -182,7 +182,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         Array [
           Object {
             "attributes": Object {},
-            "id": "1-0",
+            "id": "1",
             "meta": Object {
               "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
               "icon": "indexPatternApp",
@@ -407,7 +407,7 @@ exports[`Table should render normally 1`] = `
         Array [
           Object {
             "attributes": Object {},
-            "id": "1-0",
+            "id": "1",
             "meta": Object {
               "editUrl": "#/management/opensearch-dashboards/indexPatterns/patterns/1",
               "icon": "indexPatternApp",
