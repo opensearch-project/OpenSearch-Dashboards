@@ -287,6 +287,7 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <EuiPageContent>
         {this.renderHeader()}
+        <EuiSpacer size="m" />
         <EuiForm data-test-subj="data-source-creation">
           {/* Endpoint section */}
           {this.renderSectionHeader(
@@ -354,7 +355,7 @@ export class CreateDataSourceForm extends React.Component<
               placeholder={i18n.translate(
                 'dataSourcesManagement.createDataSource.endpointPlaceholder',
                 {
-                  defaultMessage: 'Sample URL: https://connectionurl.com',
+                  defaultMessage: 'https://connectionurl.com',
                 }
               )}
               isInvalid={!!this.state.formErrorsByField.endpoint.length}

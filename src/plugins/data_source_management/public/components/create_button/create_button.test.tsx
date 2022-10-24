@@ -13,10 +13,11 @@ const createButtonIdentifier = `[data-test-subj="createDataSourceButton"]`;
 
 describe('CreateButton', () => {
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const dataTestSubj = 'createDataSourceButton';
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   beforeEach(() => {
-    component = shallow(<CreateButton history={history} />);
+    component = shallow(<CreateButton history={history} dataTestSubj={dataTestSubj} />);
   });
 
   it('should render normally', () => {
