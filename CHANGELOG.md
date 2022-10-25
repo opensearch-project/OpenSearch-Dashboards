@@ -9,7 +9,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛡 Security
 
 ### 📈 Features/Enhancements
-
+* Ability to start OS Dashboards with a newer and compatible nodejs version ([#2091](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2091))
 * [MD] Support legacy client for data source ([#2204](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2204))
 * [MD] Add data source signing support ([#2510](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2510)) 
 * [Plugin Helpers] Facilitate version changes ([#2398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2398))
