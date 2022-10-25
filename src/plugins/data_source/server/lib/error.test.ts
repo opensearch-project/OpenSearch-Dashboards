@@ -3,8 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApiResponse } from '@opensearch-project/opensearch';
+import {
+  ConnectionError,
+  NoLivingConnectionsError,
+  ResponseError,
+} from '@opensearch-project/opensearch/lib/errors';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { createDataSourceError } from './error';
+import { createDataSourceError, DataSourceError } from './error';
+import { errors as LegacyErrors } from 'elasticsearch';
+
+const createApiResponseError = ({
+  statusCode = 200,
+  headers = {},
+  body = {},
+}: {
+  statusCode?: number;
+  headers?: Record<string, string>;
+  body?: Record<string, any>;
+} = {}): ApiResponse => {
+  return {
+    body,
+    statusCode,
+    headers,
+    warnings: [],
+    meta: {} as any,
+  };
+};
 
 describe('CreateDataSourceError', () => {
   it('create from savedObject bad request error should generate 400 error', () => {
@@ -36,5 +61,60 @@ describe('CreateDataSourceError', () => {
       statusCode: 400,
       message: 'Data Source Error: test reason message',
     });
+  });
+
+  it('create from client response error 401/500 should be casted to a 400 DataSourceError', () => {
+    expect(
+      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 401 })))
+    ).toHaveProperty('statusCode', 400);
+    expect(
+      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 500 })))
+    ).toHaveProperty('statusCode', 400);
+  });
+
+  it('create from non 401 or 500 client response error should respect original statusCode', () => {
+    expect(
+      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 403 })))
+    ).toHaveProperty('statusCode', 403);
+    expect(
+      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 404 })))
+    ).toHaveProperty('statusCode', 404);
+  });
+
+  it('create from non-response client error should be casted to a 400 DataSourceError', () => {
+    expect(
+      createDataSourceError(new ConnectionError('error', createApiResponseError()))
+    ).toHaveProperty('statusCode', 400);
+    expect(
+      createDataSourceError(new NoLivingConnectionsError('error', createApiResponseError()))
+    ).toHaveProperty('statusCode', 400);
+    expect(createDataSourceError(new Error('foo'))).toHaveProperty('statusCode', 400);
+  });
+
+  it('create from legacy client 401/500 error should be casted to a 400 DataSourceError', () => {
+    expect(createDataSourceError(new LegacyErrors.AuthenticationException())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Authentication Exception', 400)
+    );
+    expect(createDataSourceError(new LegacyErrors.InternalServerError())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Internal Server Error', 400)
+    );
+  });
+
+  it('create from legacy client non 401/500 error should respect original statusCode', () => {
+    expect(createDataSourceError(new LegacyErrors.NotFound())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Not Found', 404)
+    );
+    expect(createDataSourceError(new LegacyErrors.TooManyRequests())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Too Many Requests', 429)
+    );
+  });
+
+  it('create from legacy client error should be casted to a 400 DataSourceError', () => {
+    expect(createDataSourceError(new LegacyErrors.NoConnections())).toEqual(
+      new DataSourceError(new Error('dummy'), 'No Living connections', 400)
+    );
+    expect(createDataSourceError(new LegacyErrors.ConnectionFault())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Connection Failure', 400)
+    );
   });
 });
