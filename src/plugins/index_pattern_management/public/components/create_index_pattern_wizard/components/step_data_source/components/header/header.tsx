@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         }
       })
       .catch(() => {
-        toasts.addWarning(
+        toasts.addDanger(
           i18n.translate(
             'indexPatternManagement.createIndexPattern.stepDataSource.fetchDataSourceError',
             {
@@ -145,6 +145,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
             <EuiSelectable
+              data-test-subj="createIndexPatternStepDataSourceSelectDataSource"
               aria-label={i18n.translate(
                 'indexPatternManagement.createIndexPattern.stepDataSource.searchlabel',
                 {
@@ -160,7 +161,6 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                     defaultMessage: 'Search data sources',
                   }
                 ),
-                isInvalid: !!dataSources,
               }}
               singleSelection={'always'}
               options={dataSources}
