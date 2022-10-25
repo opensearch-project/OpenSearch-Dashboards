@@ -30,6 +30,7 @@
 
 import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
+import { Observable } from 'rxjs';
 import { SavedDashboardPanel730ToLatest } from '../common';
 import { ViewMode } from './embeddable_plugin';
 
@@ -140,4 +141,20 @@ export interface StagedFilter {
   value: string;
   operator: string;
   index: string;
+}
+
+export interface DashboardListItem {
+  id: string; // plugin identifier
+  title: string; // item title
+  type: string; // item type display string
+  description: string; // item description
+  url: string; // redirect url to item detail
+  listType: string; // item type key
+}
+
+export type DashboardListItems = DashboardListItem[];
+export type DashboardListProviderFn = () => Observable<DashboardListItems>;
+export interface DashboardDisplay {
+  hits: DashboardListItems;
+  total: number;
 }
