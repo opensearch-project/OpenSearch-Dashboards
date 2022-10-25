@@ -317,6 +317,7 @@ export class CreateIndexPatternWizard extends Component<
             }
             dataSourceRef={dataSourceRef}
             stepInfo={stepInfo}
+            catchAndWarn={this.catchAndWarn}
           />
         </EuiPageContent>
       );
