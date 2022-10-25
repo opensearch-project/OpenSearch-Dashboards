@@ -28,9 +28,7 @@
  * under the License.
  */
 
-import Path from 'path';
-
-import { untar, GlobalTask, copy } from '../../lib';
+import { untar, unzip, GlobalTask } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
 export const ExtractNodeBuilds: GlobalTask = {
@@ -41,10 +39,7 @@ export const ExtractNodeBuilds: GlobalTask = {
       config.getTargetPlatforms().map(async (platform) => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
         if (platform.isWindows()) {
-          // windows executable is not extractable, it's just an .exe file
-          await copy(downloadPath, Path.resolve(extractDir, 'node.exe'), {
-            clone: true,
-          });
+          await unzip(downloadPath, extractDir, { strip: 1 });
         } else {
           await untar(downloadPath, extractDir, { strip: 1 });
         }

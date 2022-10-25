@@ -186,12 +186,14 @@ async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
   // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
   const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
-  if (platform !== 'linux') {
-    throw createCliError(`Snapshots are only available for Linux`);
+  const extension = process.platform === 'win32' ? 'zip' : 'tar.gz';
+
+  if (platform !== 'linux' && platform !== 'windows') {
+    throw createCliError(`Snapshots are only available for Linux and Windows`);
   }
 
   const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-SNAPSHOT`;
-  const latestFile = `opensearch-min-${desiredVersion}-SNAPSHOT-${platform}-${arch}-latest.tar.gz`;
+  const latestFile = `opensearch-min-${desiredVersion}-SNAPSHOT-${platform}-${arch}-latest.${extension}`;
   const completeLatestUrl = `${latestUrl}/${latestFile}`;
 
   let { abc, resp } = await verifySnapshotUrl(completeLatestUrl, log);

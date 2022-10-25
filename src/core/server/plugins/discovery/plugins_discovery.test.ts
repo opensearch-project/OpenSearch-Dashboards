@@ -44,6 +44,7 @@ import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
 
 const OPENSEARCH_DASHBOARDS_ROOT = process.cwd();
+const EXTENDED_PATH_PREFIX = process.platform === 'win32' ? '\\\\?\\' : '';
 
 const Plugins = {
   invalid: () => ({
@@ -243,7 +244,7 @@ describe('plugins discovery system', () => {
     const srcPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
+        `Error: EACCES, permission denied '${EXTENDED_PATH_PREFIX}${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
@@ -278,7 +279,7 @@ describe('plugins discovery system', () => {
     const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${errorPath}' (missing-manifest, ${errorPath})`,
+        `Error: EACCES, permission denied '${EXTENDED_PATH_PREFIX}${errorPath}' (missing-manifest, ${errorPath})`,
       ])
     );
   });
