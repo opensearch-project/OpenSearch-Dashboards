@@ -4,9 +4,10 @@
  */
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { errors } from 'elasticsearch';
+import { errors as LegacyErrors } from 'elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { OsdError } from '../../../opensearch_dashboards_utils/common';
+
 export class DataSourceError extends OsdError {
   // must have statusCode to avoid route handler in search.ts to return 500
   statusCode: number;
@@ -26,10 +27,7 @@ export class DataSourceError extends OsdError {
 export const createDataSourceError = (error: any, message?: string) => {
   // handle saved object client error, while retrieve data source meta info
   if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-    const statusCode = SavedObjectsErrorHelpers.isOpenSearchUnavailableError(error)
-      ? 500
-      : error.output.statusCode;
-    return new DataSourceError(error, error.output.payload.message, statusCode);
+    return new DataSourceError(error, error.output.payload.message, error.output.statusCode);
   }
 
   // cast OpenSearch client 500 response error to 400
@@ -43,8 +41,8 @@ export const createDataSourceError = (error: any, message?: string) => {
 
   // cast legacy client 500, 401 response error to 400
   if (
-    error instanceof errors.AuthenticationException ||
-    error instanceof errors.InternalServerError
+    error instanceof LegacyErrors.AuthenticationException ||
+    error instanceof LegacyErrors.InternalServerError
   ) {
     return new DataSourceError(error, error.message, 400);
   }
