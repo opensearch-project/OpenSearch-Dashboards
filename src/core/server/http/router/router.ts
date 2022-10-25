@@ -301,7 +301,7 @@ export class Router implements IRouter {
         return e;
       }
 
-      if (isDataSourceConfigError(e)) {
+      if (isDataSourceError(e)) {
         return hapiResponseAdapter.handle(
           opensearchDashboardsResponseFactory.badRequest({ body: e.message })
         );
@@ -312,8 +312,8 @@ export class Router implements IRouter {
   }
 }
 
-const isDataSourceConfigError = (error: any) => {
-  return error.constructor.name === 'DataSourceConfigError' && error.statusCode === 400;
+const isDataSourceError = (error: any) => {
+  return error.constructor.name === 'DataSourceError' && error.statusCode === 400;
 };
 
 const convertOpenSearchUnauthorized = (
