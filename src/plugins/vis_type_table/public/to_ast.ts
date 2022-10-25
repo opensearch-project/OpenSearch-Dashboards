@@ -21,10 +21,15 @@ export const toExpressionAst = (vis: Vis, params: any) => {
   );
 
   const schemas = getVisSchemas(vis, params);
+  // manul slice to remove duplicate metrics
+  const metrics =
+    schemas.bucket && vis.params.showPartialRows && !vis.params.showMetricsAtAllLevels
+      ? schemas.metric.slice(-1 * (schemas.metric.length / schemas.bucket.length))
+      : schemas.metric;
 
   const tableData = {
     title: vis.title,
-    metrics: schemas.metric,
+    metrics,
     buckets: schemas.bucket || [],
     splitRow: schemas.split_row,
     splitColumn: schemas.split_column,
