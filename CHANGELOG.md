@@ -10,6 +10,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [CVE-2022-0144] Bump shelljs from 0.8.4 to 0.8.5 ([#2511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2511))
 * [CVE-2022-0155] Bump follow-redirects to 1.15.2 ([#2653](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2653))
 * [CVE-2022-0536] Bump follow-redirects to 1.15.2 ([#2653](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2653))
+* [CVE-2022-23647] Bump prismjs to 1.29.0 ([#2668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2668))
 * [CVE-2021-24033] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
 * [CVE-2021-42740] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
 
