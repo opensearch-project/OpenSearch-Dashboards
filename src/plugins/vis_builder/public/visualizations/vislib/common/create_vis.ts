@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AggConfigs, IndexPattern } from '../../../../../data/public';
+import { AggConfigs, IndexPattern, TimeRange } from '../../../../../data/public';
 import { Vis } from '../../../../../visualizations/public';
-import { getSearchService, getTimeFilter } from '../../../plugin_services';
+import { getSearchService } from '../../../plugin_services';
 
 export const createVis = async (
   type: string,
   aggConfigs: AggConfigs,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  timeRange?: TimeRange
 ) => {
   const vis = new Vis(type);
   vis.data.aggs = aggConfigs;
@@ -19,8 +20,7 @@ export const createVis = async (
 
   const responseAggs = vis.data.aggs.getResponseAggs().filter((agg) => agg.enabled);
   responseAggs.forEach((agg) => {
-    const timeFilter = getTimeFilter();
-    agg.params.timeRange = timeFilter.getTime();
+    agg.params.timeRange = timeRange;
   });
   return vis;
 };

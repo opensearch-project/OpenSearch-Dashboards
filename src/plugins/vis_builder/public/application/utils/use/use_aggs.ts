@@ -6,10 +6,14 @@
 import { cloneDeep } from 'lodash';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { useTypedSelector, useTypedDispatch } from '../state_management';
 import { useIndexPatterns } from './use_index_pattern';
 
+/**
+ * Returns common agg parameters from the store and app context
+ * @returns { indexPattern, aggConfigs, aggs, timeRange }
+ */
 export const useAggs = () => {
   const {
     services: {
@@ -20,7 +24,7 @@ export const useAggs = () => {
         },
       },
     },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const indexPattern = useIndexPatterns().selected;
   const [timeRange, setTimeRange] = useState(timefilter.getTime());
   const aggConfigParams = useTypedSelector(

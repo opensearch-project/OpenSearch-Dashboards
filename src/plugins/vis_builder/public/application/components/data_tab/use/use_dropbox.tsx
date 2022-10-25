@@ -49,6 +49,7 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     () =>
       dropboxAggs?.map(
         (agg): DropboxDisplay => {
+          // For timeseries aggregations that have timeinterval set as auto, the current timerange is required to calculate the label accurately
           agg.aggConfigs.setTimeRange(timeRange);
           return {
             id: agg.id,
