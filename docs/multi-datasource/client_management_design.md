@@ -1,22 +1,22 @@
-# [OpenSearch Dashboards Multi Data Source] Client Management
+# Multi Data Source Client Management
 
 ## 1. Problem Statement
 
-This design is part of the OpenSearch Dashboards multi data source project [[RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1388)], where we need to manage and expose clients. Connections are established through creating OpenSearch clients. Then clients can be used by caller to interact with any data source(OpenSearch is the only data source type in scope at this phase).
+This design is part of the OpenSearch Dashboards multi data source project [[RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1388)], where we need to manage and expose datasource clients. Connections are established by creating clients that can then be used by a caller to interact with any data source (OpenSearch is the only data source type in scope at this phase).
 
 **Overall the critical problems we are solving are:**
 
 1. How to set up connection(clients) for different data sources?
 2. How to expose data source clients to callers through clean interfaces?
 3. How to maintain backwards compatibility if user turn off this feature?
-4. How to manage multiple clients/connection efficiently, and not consume all the memory?(P1)
+4. How to manage multiple clients/connection efficiently, and not consume all the memory?
 
 ## 2. Requirements
 
 1. **Accessibility**:
    1. Clients need to be accessible by other OpenSearch Dashboards plugins or modules through interfaces, in all stages of the plugin lifecycle. E.g “Setup”, and “Start”
    2. Clients should be accessible by plugin through request handler context.
-2. **Client Management**: Clients needs to be reused in a resource-efficient way to not harm the performance (P1)
+2. **Client Management**: Clients needs to be reused in a resource-efficient way to not harm the performance.
 3. **Backwards compatibility**: if user enables this feature and later disabled it. Any related logic should be able to take in this config change, and deal with any user cases.
    1. Either switching to connect to default OpenSearch cluster
    2. Or blocking the connection to data source, and throw error message
@@ -25,7 +25,7 @@ This design is part of the OpenSearch Dashboards multi data source project [[RFC
 ## 3. Architecture/Dataflow
 
 - We are adding a new service in core to manage data source clients, and expose interface for plugins and modules to access data source client.
-- Existing OpenSearch service and saved object services is supposed to be non-affected by this change
+- Existing OpenSearch services and saved object services should not be affected by this change
 
 #### 3.1 Dataflow of plugin(use viz plugin as example) call sequence to retrieve data form any datasource.
 
@@ -43,23 +43,23 @@ This design is part of the OpenSearch Dashboards multi data source project [[RFC
 Similar to how current OpenSearch Dashboards talks to default OS by creating opensearch node.js client using [opensearch-js](https://github.com/opensearch-project/opensearch-js) library, for datasources we also create clients for each. Critical params that differentiate data sources are `url` and `auth`
 
 ```ts
-const { Client } = require(['@opensearch-project/opensearch'](https://github.com/opensearch-project/opensearch-js));
+const { Client } = require('@opensearch-project/opensearch');
 
-const **dataSourceClient** = new Client({
-    node: url,
-    auth: {
-        username,
-        password,
-    },
-    ...OtherClientOptions
+const dataSourceClient = new Client({
+  node: url,
+  auth: {
+    username,
+    password,
+  },
+  ...OtherClientOptions,
 });
 
-dataSourceClient.search()
-dataSourceClient.ping()
+dataSourceClient.search();
+dataSourceClient.ping();
 ```
 
 **2. How to expose datasource clients to callers through clean interfaces?**
-We create an `opensearch_data_service` in core. Similar to existing `openearch_service`, which provides client of default OS cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
+We create an `opensearch_data_service` in core. Similar to existing `opensearch_service`, which provides client of default OS cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
 
 ```
 *// Existing*
@@ -69,15 +69,14 @@ We create an `opensearch_data_service` in core. Similar to existing `openearch_s
 const dataSourceClient: OpenSearchClient = core.openearchData.client
 ```
 
-**3.How to maintain backwards compatibility if user turn off this feature?**
-Context is user can only turn off this feature by updating `opensearch_dashboards.yml` and reboot. Configs are accessible from `ConfigService` in core.
+**3.How to maintain backwards compatibility if user turns off this feature?**
+The context is that user can only turn on/off multiple datasource feature by updating boolean config `data_source.enabled` in `opensearch_dashboards.yml` and reboot.
 
-1. **Browser side**, is datasource feature is turned off, browser should detect the config change and update UI not allowing request to submit to datasource. If the request is not submitted to a datasource, the logic won’t return a datasource client at all.
+1. **Browser side**, if datasource feature is turned off, browser should detect the config change and update UI not allowing request to be submitted to any datasource. Multiple datasource related UI shouldn't render. If the request is not submitted to a datasource, the logic won’t return a datasource client at all.
 2. **Server side**, if user submits the request to datasource manually, on purpose. Or the plugin tries to access datasource client from server side. In the corresponding core service we’ll have a **flag** that maps to the **enable_multi_datasource** boolean config, and throw error if API is called while this feature is turned off.
 
 **4.How to manage multiple clients/connection efficiently, and not consume all the memory?**
 
-- P0, we keep a map of unique clients. No size limit.
 - For datasources with different endpoint, user client Pooling (E.g. LRU cache)
 - For data sources with same endpoint, but different user, use connection pooling strategy (child client) provided by opensearch-js.
 

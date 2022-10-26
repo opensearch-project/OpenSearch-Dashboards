@@ -1,4 +1,4 @@
-# OpenSearch Dashboards Multiple Data Source Support HLD
+# Multiple Data Source Support High Level Design
 
 OpenSearch Dashboards is designed and implemented to only work with one single OpenSearch cluster. This documents discusses the design to enable OpenSearch Dashboards to work with multiple OpenSearch endpoints, which can be a centralized data visualization and analytics application.
 
@@ -8,18 +8,18 @@ For more context, see RFC [Enable OpenSearch Dashboards to support multiple Open
 
 [OpenSearch Dashboards Multiple OpenSearch Data Source Support User Stories](user_stories.md)
 
-From very high level, we propose to introduce `data-source` as a new OpenSearch Dashboards saved object type.
+From a very high level, we introduce `data-source` as a new OpenSearch Dashboards saved object type.
 
 ## Terminologies
 
-- **Dashboards metadata**: refers to data documents saved in the `.opensearch_dashboards` index. Equivalent to Dashboards **saved objects**.
+- **Dashboards metadata**: refers to data documents saved in the `.kibana` index. Equivalent to Dashboards **saved objects**.
 - **User data**: in this document, user data refers to the log, metrics or search catalog data that saved in OpenSearch, users run analysis against these user data with OpenSearch Dashboards.
 - **Data source**: an OpenSearch endpoint, it could be a on-prem cluster, or AWS managed OpenSearch domain or a serverless collection, which stores the user log/metrics data for visualization and analytics purpose.
   - in this document, we may also refer data source as a new type of OpenSearch Dashboards saved objects, which is a data model to describe a data source, including endpoint, auth info, capabilities etc.
 
 ## Scope
 
-We are targeting to release the multiple data source support in OpenSearch 2.x preview as an experimental feature, and make it GA over a few minor version throughout 2.x versions.
+We are targeting to release the multiple data source support in OpenSearch 2.4 preview as an experimental feature, and make it GA over a few minor version throughout 2.x versions.
 
 ### Preview Scope
 
@@ -67,11 +67,11 @@ We are targeting to release the multiple data source support in OpenSearch 2.x p
 Generally, OpenSearch Dashboards works with 2 kinds of data:
 
 1. User data, such as application logs, metrics, and search catalog data in data indices.
-2. OpenSearch Dashboards metadata, which are the saved objects in `.opensearch_dashboards` index
+2. OpenSearch Dashboards metadata, which are the saved objects in `.kibana` index
 
 Currently both OpenSearch Dashboards metadata and user data indices are saved in the same OpenSearch cluster. However in the case to support OpenSearch Dashboards to work with multiple OpenSearch data sources, OpenSearch Dashboards metadata index will be stored in one OpenSearch cluster, and user data indices will be saved in other OpenSearch clusters. Thus we will need to differentiate OpenSearch Dashboards metadata operations and user data access.
 
-OpenSearch Dashboards admin will still define an OpenSearch cluster in the `opensearch.host` config in `opensearch_dashboards.yml` file. It will be used as the OpenSearch Dashboards metadata store, and OpenSearch Dashboards metadata will still be saved in the `.opensearch_dashboards index` in this OpenSearch cluster.
+OpenSearch Dashboards admin will still define an OpenSearch cluster in the `opensearch.host` config in `opensearch_dashboards.yml` file. It will be used as the OpenSearch Dashboards metadata store, and OpenSearch Dashboards metadata will still be saved in the `.kibana` index in this OpenSearch cluster.
 
 Regarding the user data access, we propose to add a new “data-source” saved objects type, which describes a data source connection, such as
 
@@ -79,7 +79,7 @@ Regarding the user data access, we propose to add a new “data-source” saved 
 - auth info, like auth types and credentials to use when accessing the data source
 - data source capabilities, such as if the data source supports AD/ISM etc.
 
-Users can dynamically add data source in OpenSearch Dashboards using UI or API, OpenSearch Dashboards will save the data source saved objects in its metadata index. And then users can do their with with their data sources. For example, when OpenSearch Dashboards needs to access user data on behalf of the customer, customer will need to specify a data source id, then OpenSearch Dashboards can fetch the data source info from its metadata store, then send the request to the corresponding data source endpoint.
+Users can dynamically add data source in OpenSearch Dashboards using UI or API, OpenSearch Dashboards will save the data source saved objects in its metadata index. And then users can do as they want with their data sources. For example, when OpenSearch Dashboards needs to access user data on behalf of the customer, customer will need to specify a data source id, then OpenSearch Dashboards can fetch the data source info from its metadata store, then send the request to the corresponding data source endpoint.
 
 So the Dashboards and OpenSearch setup may look like:![img](./img/hld_setup_diagram.png)
 
@@ -118,7 +118,7 @@ The OpenSearch Dashboards visualization rendering flow will look like following 
 
 ### Backward Compatibility
 
-We plan to release this multi-datasource support as an experimental feature with OpenSearch 3.0. OpenSearch Dashboards admins will be able to enable or disable the multi-datasource feature using configurations in `opensearch_dashboards.yml` .
+We plan to release this multi-datasource support as an experimental feature with OpenSearch 2.4. OpenSearch Dashboards admins will be able to enable or disable the multi-datasource feature using configurations in `opensearch_dashboards.yml` .
 
 If multi-datasource is enabled, OpenSearch Dashboards users will be able to see all data source related feature and APIs, that they can manage their data sources, and build visualization and dashboards with data sources. While if multi-datasource is disabled, users will not see anything related to data sources, and their OpenSearch Dashboards experience will remain the same as single data source.
 
