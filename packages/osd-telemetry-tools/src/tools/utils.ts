@@ -311,6 +311,7 @@ export function difference(actual: any, expected: any) {
   return changes(actual, expected);
 }
 
-export function normalizePath(inputPath: string) {
-  return normalize(path.relative('.', inputPath));
+export function normalizePath(inputPath: string, relativeToRoot: boolean = true) {
+  if (relativeToRoot) return normalize(path.relative('.', inputPath));
+  return normalize(inputPath);
 }

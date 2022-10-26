@@ -143,6 +143,7 @@ export class Config {
     const platforms: Platform[] = [];
     if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
     if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
+    if (this.targetPlatforms.windows) platforms.push(this.getPlatform('win32', 'x64'));
     if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));
 
     if (platforms.length > 0) return platforms;
@@ -153,7 +154,7 @@ export class Config {
   /**
    * Return the list of Platforms we need/have node downloads for. We always
    * include the linux platform even if we aren't targeting linux so we can
-   * reliably get the LICENSE file, which isn't included in the windows version
+   * reliably get the LICENSE file.
    */
   getNodePlatforms() {
     if (this.targetAllPlatforms) {
@@ -164,6 +165,7 @@ export class Config {
       return [this.getPlatform('linux', 'x64')];
     }
 
+    // ToDo: All node dists, including Windows, contain a LICENSE file; do we still need to do this?
     return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
   }
 

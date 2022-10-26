@@ -46,6 +46,6 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 };
 
-export const wizardSavedObjectTypeMigrations = {
+export const visBuilderSavedObjectTypeMigrations = {
   '2.3.0': flow(migrateIndexPattern),
 };

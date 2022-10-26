@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { deleteAll, Task } from '../../lib';
+import { deleteAll, normalizePath, Task } from '../../lib';
 
 export const CleanNodeBuilds: Task = {
   description: 'Cleaning npm from node',
@@ -37,9 +37,11 @@ export const CleanNodeBuilds: Task = {
     for (const platform of config.getTargetPlatforms()) {
       await deleteAll(
         [
-          build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
-          build.resolvePathForPlatform(platform, 'node/bin/npm'),
-          build.resolvePathForPlatform(platform, 'node/bin/npx'),
+          normalizePath(build.resolvePathForPlatform(platform, 'node/**/node_modules')),
+          normalizePath(build.resolvePathForPlatform(platform, 'node/**/npm*')),
+          normalizePath(build.resolvePathForPlatform(platform, 'node/**/npx*')),
+          normalizePath(build.resolvePathForPlatform(platform, 'node/**/corepack*')),
+          normalizePath(build.resolvePathForPlatform(platform, 'node/**/nodevars*')),
         ],
         log
       );

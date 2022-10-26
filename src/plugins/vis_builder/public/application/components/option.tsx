@@ -20,6 +20,7 @@ export const Option: FC<Props> = ({ title, children, initialIsOpen = false }) =>
         buttonContent={title}
         className="vbOption"
         initialIsOpen={initialIsOpen}
+        data-test-subj={`vbOption-${title.replace(/\s+/g, '-')}`}
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued" className="vbOption__panel">

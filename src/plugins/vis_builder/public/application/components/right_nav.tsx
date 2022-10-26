@@ -16,14 +16,14 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 import { setActiveVisualization, useTypedDispatch } from '../utils/state_management';
 
 export const RightNav = () => {
   const [newVisType, setNewVisType] = useState<string>();
   const {
     services: { types },
-  } = useOpenSearchDashboards<WizardServices>();
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const { ui, name: activeVisName } = useVisualizationType();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;
@@ -53,13 +53,13 @@ export const RightNav = () => {
       </div>
       {newVisType && (
         <EuiConfirmModal
-          title={i18n.translate('wizard.rightNav.changeVisType.modalTitle', {
+          title={i18n.translate('visBuilder.rightNav.changeVisType.modalTitle', {
             defaultMessage: 'Change visualization type',
           })}
-          confirmButtonText={i18n.translate('wizard.rightNav.changeVisType.confirmText', {
+          confirmButtonText={i18n.translate('visBuilder.rightNav.changeVisType.confirmText', {
             defaultMessage: 'Change type',
           })}
-          cancelButtonText={i18n.translate('wizard.rightNav.changeVisType.cancelText', {
+          cancelButtonText={i18n.translate('visBuilder.rightNav.changeVisType.cancelText', {
             defaultMessage: 'Cancel',
           })}
           onCancel={() => setNewVisType(undefined)}
@@ -78,7 +78,7 @@ export const RightNav = () => {
         >
           <p>
             <FormattedMessage
-              id="wizard.rightNav.changeVisType.modalDescription"
+              id="visBuilder.rightNav.changeVisType.modalDescription"
               defaultMessage="Changing the visualization type will reset all field selections. Do you want to continue?"
             />
           </p>

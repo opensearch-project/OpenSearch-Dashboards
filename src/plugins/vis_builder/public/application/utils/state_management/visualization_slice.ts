@@ -5,7 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { setActiveVisualization } from './shared_actions';
 
 export interface VisualizationState {
@@ -25,7 +25,7 @@ const initialState: VisualizationState = {
 export const getPreloadedState = async ({
   types,
   data,
-}: WizardServices): Promise<VisualizationState> => {
+}: VisBuilderServices): Promise<VisualizationState> => {
   const preloadedState = { ...initialState };
 
   const defaultVisualization = types.all()[0];
@@ -50,6 +50,7 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
       state.activeVisualization!.aggConfigParams = [];
+      state.activeVisualization!.draftAgg = undefined;
     },
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;

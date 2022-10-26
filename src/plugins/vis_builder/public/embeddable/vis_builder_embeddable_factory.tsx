@@ -17,44 +17,53 @@ import {
   EDIT_PATH,
   PLUGIN_ID,
   PLUGIN_NAME,
-  WizardSavedObjectAttributes,
-  WIZARD_SAVED_OBJECT,
+  VisBuilderSavedObjectAttributes,
+  VISBUILDER_SAVED_OBJECT,
 } from '../../common';
 import { DisabledEmbeddable } from './disabled_embeddable';
-import { WizardEmbeddable, WizardOutput, WIZARD_EMBEDDABLE } from './vis_builder_embeddable';
-import wizardIcon from '../assets/wizard_icon.svg';
-import { getHttp, getSavedWizardLoader, getTimeFilter, getUISettings } from '../plugin_services';
+import {
+  VisBuilderEmbeddable,
+  VisBuilderOutput,
+  VISBUILDER_EMBEDDABLE,
+} from './vis_builder_embeddable';
+import visBuilderIcon from '../assets/wizard_icon.svg';
+import {
+  getHttp,
+  getSavedVisBuilderLoader,
+  getTimeFilter,
+  getUISettings,
+} from '../plugin_services';
 
 // TODO: use or remove?
-export type WizardEmbeddableFactory = EmbeddableFactory<
+export type VisBuilderEmbeddableFactory = EmbeddableFactory<
   SavedObjectEmbeddableInput,
-  WizardOutput | EmbeddableOutput,
-  WizardEmbeddable | DisabledEmbeddable,
-  WizardSavedObjectAttributes
+  VisBuilderOutput | EmbeddableOutput,
+  VisBuilderEmbeddable | DisabledEmbeddable,
+  VisBuilderSavedObjectAttributes
 >;
 
-export class WizardEmbeddableFactoryDefinition
+export class VisBuilderEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<
       SavedObjectEmbeddableInput,
-      WizardOutput | EmbeddableOutput,
-      WizardEmbeddable | DisabledEmbeddable,
-      WizardSavedObjectAttributes
+      VisBuilderOutput | EmbeddableOutput,
+      VisBuilderEmbeddable | DisabledEmbeddable,
+      VisBuilderSavedObjectAttributes
     > {
-  public readonly type = WIZARD_EMBEDDABLE;
+  public readonly type = VISBUILDER_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     // TODO: Update to include most vis functionality
     name: PLUGIN_NAME,
     includeFields: ['visualizationState'],
-    type: WIZARD_SAVED_OBJECT,
-    getIconForSavedObject: () => wizardIcon,
+    type: VISBUILDER_SAVED_OBJECT,
+    getIconForSavedObject: () => visBuilderIcon,
   };
 
   // TODO: Would it be better to explicitly declare start service dependencies?
   constructor() {}
 
   public canCreateNew() {
-    // Because wizard creation starts with the visualization modal, no need to have a separate entry for wizard until it's separate
+    // Because VisBuilder creation starts with the visualization modal, no need to have a separate entry for VisBuilder until it's separate
     return false;
   }
 
@@ -68,9 +77,9 @@ export class WizardEmbeddableFactoryDefinition
     savedObjectId: string,
     input: Partial<SavedObjectEmbeddableInput> & { id: string },
     parent?: IContainer
-  ): Promise<WizardEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
+  ): Promise<VisBuilderEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
     try {
-      const savedWizard = await getSavedWizardLoader().get(savedObjectId);
+      const savedVisBuilder = await getSavedVisBuilderLoader().get(savedObjectId);
       const editPath = `${EDIT_PATH}/${savedObjectId}`;
       const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
@@ -79,10 +88,10 @@ export class WizardEmbeddableFactoryDefinition
         return new DisabledEmbeddable(PLUGIN_NAME, input);
       }
 
-      return new WizardEmbeddable(
+      return new VisBuilderEmbeddable(
         getTimeFilter(),
         {
-          savedWizard,
+          savedVisBuilder,
           editUrl,
           editPath,
           editable: true,
@@ -106,7 +115,7 @@ export class WizardEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return i18n.translate('wizard.displayName', {
+    return i18n.translate('visBuilder.displayName', {
       defaultMessage: PLUGIN_ID,
     });
   }

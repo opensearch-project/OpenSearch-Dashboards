@@ -4,16 +4,16 @@
  */
 
 import Ajv from 'ajv';
-import wizardStateSchema from './schema.json';
+import visBuilderStateSchema from './schema.json';
 
 const ajv = new Ajv();
-const validateState = ajv.compile(wizardStateSchema);
+const validateState = ajv.compile(visBuilderStateSchema);
 
-export const validateWizardState = (wizardState) => {
-  const isWizardStateValid = validateState(wizardState);
+export const validateVisBuilderState = (visBuilderState) => {
+  const isVisBuilderStateValid = validateState(visBuilderState);
 
   return {
-    valid: isWizardStateValid,
+    valid: isVisBuilderStateValid,
     errors: validateState.errors,
   };
 };

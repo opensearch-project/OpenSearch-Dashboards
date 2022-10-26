@@ -69,6 +69,7 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 
@@ -101,15 +102,6 @@ it('runs expected fs operations', async () => {
 
   expect(usedMethods).toMatchInlineSnapshot(`
     Object {
-      "copy": Array [
-        Array [
-          <absolute path>/.node_binaries/<node version>/node.exe,
-          <absolute path>/.node_binaries/<node version>/win32-x64/node.exe,
-          Object {
-            "clone": true,
-          },
-        ],
-      ],
       "untar": Array [
         Array [
           <absolute path>/.node_binaries/<node version>/node-v<node version>-linux-x64.tar.gz,
@@ -128,6 +120,15 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-x64.tar.gz,
           <absolute path>/.node_binaries/<node version>/darwin-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+      ],
+      "unzip": Array [
+        Array [
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-win-x64.zip,
+          <absolute path>/.node_binaries/<node version>/win32-x64,
           Object {
             "strip": 1,
           },

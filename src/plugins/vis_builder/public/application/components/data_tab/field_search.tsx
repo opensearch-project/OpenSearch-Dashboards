@@ -17,11 +17,11 @@ export interface Props {
 }
 
 /**
- * Component is Wizard's side bar to  search of available fields
+ * Component is VisBuilder's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
 export function FieldSearch({ value }: Props) {
-  const searchPlaceholder = i18n.translate('wizard.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('visBuilder.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 

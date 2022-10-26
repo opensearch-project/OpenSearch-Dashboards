@@ -8,13 +8,13 @@ import ReactDOM from 'react-dom';
 import { Embeddable, EmbeddableOutput } from '../../../embeddable/public';
 
 import { DisabledVisualization } from './disabled_visualization';
-import { WizardInput, WIZARD_EMBEDDABLE } from './vis_builder_embeddable';
+import { VisBuilderInput, VISBUILDER_EMBEDDABLE } from './vis_builder_embeddable';
 
-export class DisabledEmbeddable extends Embeddable<WizardInput, EmbeddableOutput> {
+export class DisabledEmbeddable extends Embeddable<VisBuilderInput, EmbeddableOutput> {
   private domNode?: HTMLElement;
-  public readonly type = WIZARD_EMBEDDABLE;
+  public readonly type = VISBUILDER_EMBEDDABLE;
 
-  constructor(private readonly title: string, initialInput: WizardInput) {
+  constructor(private readonly title: string, initialInput: VisBuilderInput) {
     super(initialInput, { title });
   }
 

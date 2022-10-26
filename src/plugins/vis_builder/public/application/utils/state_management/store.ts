@@ -7,7 +7,7 @@ import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolki
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
-import { WizardServices } from '../../..';
+import { VisBuilderServices } from '../../..';
 import { getPreloadedState } from './preload';
 import { setEditorState } from './metadata_slice';
 
@@ -24,7 +24,7 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
   });
 };
 
-export const getPreloadedStore = async (services: WizardServices) => {
+export const getPreloadedStore = async (services: VisBuilderServices) => {
   const preloadedState = await getPreloadedState(services);
   const store = configurePreloadedStore(preloadedState);
 
@@ -72,6 +72,7 @@ export const getPreloadedStore = async (services: WizardServices) => {
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof rootReducer>;
+export type RenderState = Omit<RootState, 'metadata'>; // Remaining state after auxillary states are removed
 type Store = ReturnType<typeof configurePreloadedStore>;
 export type AppDispatch = Store['dispatch'];
 

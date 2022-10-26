@@ -24,7 +24,7 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
   public euiColumn = {
     field: 'referenceId',
     name: i18n.translate('dataSource.management.dataSourceColumn', {
-      defaultMessage: 'Data Source',
+      defaultMessage: 'Data Source Connection',
     }),
     render: (referenceId: string, index: IndexPatternTableRecord) => {
       if (!referenceId) {

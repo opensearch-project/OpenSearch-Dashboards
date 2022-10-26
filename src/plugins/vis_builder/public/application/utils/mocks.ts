@@ -9,9 +9,9 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../expressions/public/mocks';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 
-export const createWizardServicesMock = () => {
+export const createVisBuilderServicesMock = () => {
   const coreStartMock = coreMock.createStart();
   const toastNotifications = coreStartMock.notifications.toasts;
   const applicationMock = coreStartMock.application;
@@ -21,11 +21,11 @@ export const createWizardServicesMock = () => {
   const navigationMock = navigationPluginMock.createStartContract();
   const expressionMock = expressionsPluginMock.createStartContract();
 
-  const wizardServicesMock = {
+  const visBuilderServicesMock = {
     ...coreStartMock,
     navigation: navigationMock,
     expression: expressionMock,
-    savedWizardLoader: {
+    savedVisBuilderLoader: {
       get: jest.fn(),
     } as any,
     setHeaderActionMenu: () => {},
@@ -41,5 +41,5 @@ export const createWizardServicesMock = () => {
     scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
   };
 
-  return (wizardServicesMock as unknown) as jest.Mocked<WizardServices>;
+  return (visBuilderServicesMock as unknown) as jest.Mocked<VisBuilderServices>;
 };
