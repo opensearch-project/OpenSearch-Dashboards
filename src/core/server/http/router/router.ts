@@ -301,20 +301,10 @@ export class Router implements IRouter {
         return e;
       }
 
-      if (isDataSourceError(e)) {
-        return hapiResponseAdapter.handle(
-          opensearchDashboardsResponseFactory.badRequest({ body: e.message })
-        );
-      }
-
       return hapiResponseAdapter.toInternalError();
     }
   }
 }
-
-const isDataSourceError = (error: any) => {
-  return error.constructor.name === 'DataSourceError' && error.statusCode === 400;
-};
 
 const convertOpenSearchUnauthorized = (
   e: OpenSearchNotAuthorizedError
