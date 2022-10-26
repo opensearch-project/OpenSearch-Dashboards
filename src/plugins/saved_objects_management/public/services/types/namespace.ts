@@ -9,17 +9,7 @@
  * GitHub history for details.
  */
 
-interface SavedObjectsManagementFilterOption {
-  value: string;
-  name: string;
-  view: string;
-}
-
-export interface SavedObjectsManagementFilter {
+export interface SavedObjectsManagementNamespace {
   id: string;
-  type: string;
-  field: string;
   name: string;
-  multiSelect: string;
-  options: SavedObjectsManagementFilterOption;
 }
