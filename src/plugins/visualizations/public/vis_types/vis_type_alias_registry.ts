@@ -53,6 +53,7 @@ export interface VisualizationsAppExtension {
     id: string;
     type: string;
     attributes: SavedObjectAttributes;
+    updated_at?: string;
   }) => VisualizationListItem;
 }
 
