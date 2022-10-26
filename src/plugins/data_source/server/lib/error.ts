@@ -24,7 +24,7 @@ export class DataSourceError extends OsdError {
   }
 }
 
-export const createDataSourceError = (error: any, message?: string) => {
+export const createDataSourceError = (error: any, message?: string): DataSourceError => {
   // handle saved object client error, while retrieve data source meta info
   if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
     return new DataSourceError(error, error.output.payload.message, error.output.statusCode);

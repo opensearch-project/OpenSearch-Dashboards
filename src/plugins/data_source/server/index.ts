@@ -16,5 +16,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataSourcePluginSetup, DataSourcePluginStart } from './types';
-
-export { DataSourceError, createDataSourceError } from './lib/error';
