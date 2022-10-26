@@ -11,7 +11,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
-import type { DashboardCreator, DashboardCreatorFn, DashboardCreators } from '../public/types';
+import type { DashboardCreator, DashboardCreatorFn, DashboardCreators } from '../../context/types';
 
 interface CreateButtonProps {
   // createItem: () => {};
@@ -32,7 +32,10 @@ const CreateButton = (props: CreateButtonProps) => {
 
   const getItems = (creators: DashboardCreators) => {
     return creators.map((creator: DashboardCreator) => (
-      <EuiContextMenuItem key={creator.id} onClick={creator.creatorFn}>
+      <EuiContextMenuItem
+        key={creator.id}
+        onClick={props.dashboardItemCreatorClickHandler(creator.creatorFn)}
+      >
         {creator.defaultText}
       </EuiContextMenuItem>
     ));
