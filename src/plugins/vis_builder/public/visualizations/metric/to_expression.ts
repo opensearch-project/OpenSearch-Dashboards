@@ -7,7 +7,7 @@ import { SchemaConfig } from '../../../../visualizations/public';
 import { MetricVisExpressionFunctionDefinition } from '../../../../vis_type_metric/public';
 import { AggConfigs, IAggConfig } from '../../../../data/common';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
-import { RootState } from '../../application/utils/state_management';
+import { RenderState } from '../../application/utils/state_management';
 import { MetricOptionsDefaults } from './metric_viz_type';
 import { getAggExpressionFunctions } from '../common/expression_helpers';
 
@@ -82,7 +82,7 @@ const getVisSchemas = (aggConfigs: AggConfigs): any => {
   return schemas;
 };
 
-export interface MetricRootState extends RootState {
+export interface MetricRootState extends RenderState {
   style: MetricOptionsDefaults;
 }
 

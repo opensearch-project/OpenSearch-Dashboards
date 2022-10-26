@@ -4,8 +4,9 @@
  */
 import { ReactElement } from 'react';
 import { IconType } from '@elastic/eui';
-import { RootState } from '../../application/utils/state_management';
+import { RenderState } from '../../application/utils/state_management';
 import { Schemas } from '../../../../vis_default_editor/public';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 
 export interface DataTabConfig {
   schemas: Schemas;
@@ -28,5 +29,8 @@ export interface VisualizationTypeOptions<T = any> {
       style: StyleTabConfig<T>;
     };
   };
-  readonly toExpression: (state: RootState) => Promise<string | undefined>;
+  readonly toExpression: (
+    state: RenderState,
+    searchContext: IExpressionLoaderParams['searchContext']
+  ) => Promise<string | undefined>;
 }

@@ -63,8 +63,7 @@ export class SimpleSavedObject<T = unknown> {
       error,
       references,
       migrationVersion,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      updated_at,
+      updated_at: updateAt,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -73,7 +72,7 @@ export class SimpleSavedObject<T = unknown> {
     this.references = references || [];
     this._version = version;
     this.migrationVersion = migrationVersion;
-    this.updated_at = updated_at;
+    this.updated_at = updateAt;
     if (error) {
       this.error = error;
     }
