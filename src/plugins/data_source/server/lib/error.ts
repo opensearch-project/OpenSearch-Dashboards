@@ -30,24 +30,17 @@ export const createDataSourceError = (error: any, message?: string): DataSourceE
     return new DataSourceError(error, error.output.payload.message, error.output.statusCode);
   }
 
-  // cast OpenSearch client 500 response error to 400
   // cast OpenSearch client 401 response error to 400, due to https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2591
-  if (
-    (isResponseError(error) && error.statusCode === 500) ||
-    (isResponseError(error) && error.statusCode === 401)
-  ) {
+  if (isResponseError(error) && error.statusCode === 401) {
     return new DataSourceError(error, JSON.stringify(error.meta.body), 400);
   }
 
-  // cast legacy client 500, 401 response error to 400
-  if (
-    error instanceof LegacyErrors.AuthenticationException ||
-    error instanceof LegacyErrors.InternalServerError
-  ) {
+  // cast legacy client 401 response error to 400
+  if (error instanceof LegacyErrors.AuthenticationException) {
     return new DataSourceError(error, error.message, 400);
   }
 
-  // all other error that may or may not comes with statuscode
+  // handle all other error that may or may not comes with statuscode
   return new DataSourceError(error, message);
 };
 

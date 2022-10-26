@@ -63,22 +63,22 @@ describe('CreateDataSourceError', () => {
     });
   });
 
-  it('create from client response error 401/500 should be casted to a 400 DataSourceError', () => {
+  it('create from client response error 401 should be casted to a 400 DataSourceError', () => {
     expect(
       createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 401 })))
     ).toHaveProperty('statusCode', 400);
-    expect(
-      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 500 })))
-    ).toHaveProperty('statusCode', 400);
   });
 
-  it('create from non 401 or 500 client response error should respect original statusCode', () => {
+  it('create from non 401 client response error should respect original statusCode', () => {
     expect(
       createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 403 })))
     ).toHaveProperty('statusCode', 403);
     expect(
       createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 404 })))
     ).toHaveProperty('statusCode', 404);
+    expect(
+      createDataSourceError(new ResponseError(createApiResponseError({ statusCode: 500 })))
+    ).toHaveProperty('statusCode', 500);
   });
 
   it('create from non-response client error should be casted to a 400 DataSourceError', () => {
@@ -91,21 +91,21 @@ describe('CreateDataSourceError', () => {
     expect(createDataSourceError(new Error('foo'))).toHaveProperty('statusCode', 400);
   });
 
-  it('create from legacy client 401/500 error should be casted to a 400 DataSourceError', () => {
+  it('create from legacy client 401 error should be casted to a 400 DataSourceError', () => {
     expect(createDataSourceError(new LegacyErrors.AuthenticationException())).toEqual(
       new DataSourceError(new Error('dummy'), 'Authentication Exception', 400)
     );
-    expect(createDataSourceError(new LegacyErrors.InternalServerError())).toEqual(
-      new DataSourceError(new Error('dummy'), 'Internal Server Error', 400)
-    );
   });
 
-  it('create from legacy client non 401/500 error should respect original statusCode', () => {
+  it('create from legacy client non 401 error should respect original statusCode', () => {
     expect(createDataSourceError(new LegacyErrors.NotFound())).toEqual(
       new DataSourceError(new Error('dummy'), 'Not Found', 404)
     );
     expect(createDataSourceError(new LegacyErrors.TooManyRequests())).toEqual(
       new DataSourceError(new Error('dummy'), 'Too Many Requests', 429)
+    );
+    expect(createDataSourceError(new LegacyErrors.InternalServerError())).toEqual(
+      new DataSourceError(new Error('dummy'), 'Internal Server Error', 400)
     );
   });
 
