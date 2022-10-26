@@ -59,7 +59,7 @@ dataSourceClient.ping();
 ```
 
 **2. How to expose datasource clients to callers through clean interfaces?**
-We create an `opensearch_data_service` in core. Similar to existing `opensearch_service`, which provides client of default OS cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
+We create a `data source service`. Similar to existing `opensearch service` in core, which provides client of default OS cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
 
 ```
 *// Existing*
@@ -80,159 +80,96 @@ The context is that user can only turn on/off multiple datasource feature by upd
 - For datasources with different endpoint, user client Pooling (E.g. LRU cache)
 - For data sources with same endpoint, but different user, use connection pooling strategy (child client) provided by opensearch-js.
 
-### 4.1 Create `core → opensearch_data_service.ts -> class: OpenSearchDataService`
+**5.Where should we implement the core logic?**
+Current `opensearch service` exists in core. The module we'll implement has similarity function wise, but we choose to implement `data source service` in plugin along with `crypto` service for the following reasons.
 
-- Extend from [OpenSearchService](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/3d6dd638d021f383a4c6ab750c83a1d30d3787b3/src/core/server/opensearch/opensearch_service.ts#L60) to reuse utility functions
-- Instance variables
-  - SavedObjectClient
-  - DataSourceClusterClient
-- Add `savedObject` as dependency, E.g
-  - interface StartDeps {
-    savedObjects: InternalSavedObjectsServiceStart;
-    }
-- **setup()**:
-  - Override setup() to not to initialize anything non-related to datasource, such as scoped client， internal client and legacy-related
-  - Initialize `DataSourceClient` object
-  - **return:** nothing
-- **start():**
-  - **input**: `{ savedObjects, auditTrail }: StartDeps`
-  - Initialize saved object client.
-  - **return:** createOrFindClient(<datasourceId>)
-- **stop():** close all datasource clients and child clients
-- Other
-  - Register this service to related interfaces such as `CoreStart/CoreSetup`
-  - Create corresponding service interfaces such as `InternalOpenSearchDataServiceStart`
+1. Data source is a feature that can be turned on or off. Plugin is born for such plugable use case.
+2. We don't mess up with OpenSearch Dashboards core, since this is an experimental feature, the potential risk of breaking existing behavior will be lower if we use plugin. Worst case, user could just uninstall the plugin.
+3. Complexity wise, it's about the same amount of work.
 
-### 4.2 Refactor `core → opensearch -> client` module
+### 4.1 Data Source Plugin
 
-Currently [`core-opensearch`](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/d7004dc5b0392477fdd54ac66b29d231975a173b/src/core/server/opensearch)module contains 2 major parts.
+Create a data source plugin that only has server side code, to hold most core logic of data source feature. Including data service, crypto service, and client management. A plugin will have all setup, start and stop as lifecycle.
 
-- **opensearch_service**: hold a `ClusterClient` instance
-- **[client module](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/d7004dc5b0392477fdd54ac66b29d231975a173b/src/core/server/opensearch/client)**: the utilities and interfaces for creating `ClusterClient`
-  - internalClient: read only. (create as OpenSearch Dashboards internal user, system user)
-  - ScopedClient: read only. (as current user)
-  - asScoped(): function that create child clients of the read only ScopeClient for current user
+**Functionality**
 
-We’ll only make changes in the client module
+- Setup plugin configuration such as `data_source.enabled`
+- Define and register datasource as a new saved object type
+- Initiate data source service and crypto service
+- Register API to get datasource client to core route handler context
+- Setup logging and auditing
+- Stop all running services in plugin `stop()` phase
 
-**4.2.1 Create `IDataSourceClient` Interface**
+### 4.1 Data Source Service
 
-Similar to Existing `IClusterClient`
+We need to create a data source service in the data source plugin, to provide the main functionality and APIs for callers to `getDataSourceClient()`. A service in a plugin will have all setup, start and stop as lifecycle.
+
+**Functionality**
+
+- Initialize client pool as empty data structure but with size mapped to user config value. (`data_source.clientPool.size`)
+- Configuring a data source client and expose as `getDataSourceClient()` from service level.
+
+### 4.2. Data source client
+
+We need to configure the data source client by either creating a new one, or looking up the client pool.
+
+**Functionality**
+
+- Get data source meta info: Use saved object client to retrieve data source info from OpenSearch Dashboards system index by id, and parse results to `DataSource` object.
+
+  ```ts
+  {
+    title: ds-sample;
+    description?: data source;
+    endpoint: http://opensearch.com;
+    auth: {
+      type: "Basic Auth"
+      username: "user name"
+      password: "encrypted content"
+    };
+  }
+  ```
+
+- Get root client: Look up client Pool by **endpoint**, return client if existed. If misses, we create new client instance and load into pool. At this step, the client won't have any auth info.
+
+- Get credentials: Call crypto service utilities to **decrypt** user credentials from `DataSource` Object.
+- Assemble the actual query client: With auth info and root client, we’ll leverage the openearch-js connection pooling strategy to create the actual query client from root client by `client.child()`.
+
+#### 4.2.1 Legacy Client
+
+OpenSearch Dashboards is forked from Kibana 7.10. At the time of the fork happened, there are 2 types of client used in the codebase. One is the new client, which later was migrated as `opensearhc-js`, the other one is the legacy client which is `elasticsearc-js`. Legacy clients are still used many critical features, such as visualization, index pattern management, along with new client.
 
 ```ts
-export interface IClusterClient {
-  readonly asInternalUser: OpenSearchClient;
-  asScoped: (request: ScopeableRequest) => IScopedClusterClient;
-}
+// legacy client
+context.core.opensearch.legacy.client.callAsCurrentUser;
+// new client
+context.core.opensearch.client.asCurrentUser;
 ```
 
-`IDataSourceClient` represents an OpenSearch data source API client created by the platform. It allows to call API on behalf of the user defined in the datasource saved
+Since deprecating legacy client could be a bigger scope of project, multiple data source feature still need to implement a substitute for it as for now. Implementation should be done in a way that's decoupled with data source client as much as possible, for easier deprecation. Similar to [opensearch legacy service](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/src/core/server/opensearch/legacy) in core.
 
 ```ts
-export interface IDataSourceClient {
-  asDataSource: (dataSourceId: String) => Promise<OpenSearchClient>;
-  close: () => Promise<void>;
-}
+context.dataSource.opensearch.legacy.getClient(dataSourceId);
 ```
-
-**4.2.2 Create `DataSourceClient` Class**
-
-- extends `IDataSourceClient`
-- Add local variable **isDataSourceEnabled**
-  - The value of flag is mapped to the boolean configuration “enable_multi_datasource” in `opensearch_dashboards.yml`. Flag to determine if feature is enabled. If turned off, any access to dataSourceClient will be rejected and throw error
-- Add local variable **rootDataSourceClientCollection**
-  - Map<datasource id, Client> (initialize as empty or take user config to add Clients)
-- Implement the new function `asDataSource` as shown in above `IDataSourceClient` interface. Params and return type is clear
-
-  - **Functionality**
-    - Throw error if **isDataSourceEnabled == false**
-    - Look up Client Pool by datasource id, return client if existed
-    - Use `Saved_Object` Client to retrieve datas source info from OpenSearch Dashboards system index and parse to `DataSource` object
-    - Call credential manager utilities to **decrypt** user credentials from `DataSource` Object
-    - Create Client using dataSource metadata, and decrypted user credential
-      - Optimization: If same endpoint but different user credential, we’ll leverage the openearch-js connection pooling strategy to create client by `.child()`
 
 ### 4.3 Register datasource client to core context
 
 This is for plugin to access data source client via request handler. For example, by `core.client.search(params)`. It’s a very common use case for plugin to access cluster while handling request. In fact data plugin uses it in its search module to get client, and I’ll talk about it in details in next section.
 
-**4.3.1 Update `RequestHandlerContext` interface**
-
 - **param**
-  - **dataSourceId**: need it to retrieve **datasource info** for either creating new client, or loop up the client pool
+  - **dataSourceId**: need it to retrieve **datasource info** for either creating new client, or look up the client pool
 - **return type:** OpenSearchClient
   ```ts
-  export interface RequestHandlerContext {
-    core: {
-      savedObjects: {
-        client: SavedObjectsClientContract;
-        typeRegistry: ISavedObjectTypeRegistry;
-      };
-      opensearch: {
-        client: IScopedClusterClient;
-        legacy: {
-          client: ILegacyScopedClusterClient;
-        };
-      };
-      opensearchData: {
-        getClient(dataSourceId: String): Promise<OpenSearchClient>; // method
-      };
-      ...
-    };
-  }
-  ```
-
-**4.3.2 Update** **`CoreOpenSearchRouteHandlerContext`** **class**
-
-- Create class `CoreOpenSearchDataRouteHandlerContext`
-
-  ```ts
-  class CoreOpenSearchDataRouteHandlerContext {
-            constructor(
-              private readonly opensearchDataStart: InternalOpenSearchDataServiceStart
-            ) {}
-
-            public getClient(dataSourceId: string) {
-                return async () => {
-                  try {
-                    await this.opensearchDataStart.client.asDataSource(dataSourceId)
-                  }
-              }
-            }
-  ```
-
-- Register to `CoreRouteHandlerContext`
-
-  ```ts
-   export class CoreRouteHandlerContext {
-        #auditor?: Auditor;
-
-        readonly opensearch: CoreOpenSearchRouteHandlerContext;
-        readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
-        readonly uiSettings: CoreUiSettingsRouteHandlerContext;
-        **readonly dataSource CoreOpenSearchDataRouteHandlerContext**
-
-        constructor(
-          private readonly coreStart: InternalCoreStart,
-          private readonly request: OpenSearchDashboardsRequest
-        ) {
-          this.savedObjects = new CoreSavedObjectsRouteHandlerContext(
-            this.coreStart.savedObjects,
-            this.request
-          );
-          this.opensearch = new CoreOpenSearchRouteHandlerContext(
-            this.coreStart.opensearch,
-            this.request,
-          );
-          this.uiSettings = new CoreUiSettingsRouteHandlerContext(
-            this.coreStart.uiSettings,
-            this.savedObjects
-          );
-          this.dataSource = new CoreOpenSearchDataRouteHandlerContext(
-            this.coreStart.opensearchData
-          )
+  core.http.registerRouteHandlerContext(
+      'dataSource',
+      {
+        opensearch: {
+          getClient: (dataSourceId: string) = {
+            ...
+            return dataSourceService.getDataSourceClient()
+          }
         }
-
+      }
   ```
 
 ### 4.4 Refactor data plugin search module to call core API to get datasource client
@@ -267,19 +204,14 @@ client.search(params)
 
 When loading a dashboard with visualizations, each visualization sends at least 1 request to server side to retrieve data. With multiple data source feature enabled, multiple requests are being sent to multiple datasources, that requires multiple clients. If we return a new client **per request**, it will soon fill up the memory and sockets with idle clients hanging there. Of course we can close a client anytime. But the connection is supposed to be kept alive for easy reload and periodic pulling data. Therefore, we should come up with better solution to manage clients efficiently.
 
-#### P0: **const dataSourceClientPool = Map<dataSourceId, client>()**
+#### Client pooling by LRU cache
 
-- Keep all datasource clients in a Map
-- Map enables easy look up. The input for getting a data source client is `dataSourceId`. If a client was created with same datasource, we can easily find it and return to caller. Otherwise we create a new client to return to caller, and add to the Map.
-- While stopping the service, we can close all the connections by looping the Map and calling `client.close()` for each.
+- Key: data source endpoint
+- Value: OpenSearch client object
+- Configurable pool size: `data_source.clientPool.size`, default to 5
+- Use existing js `lru-cache` lib in OpenSearch Dashboards, that enables easy initialization, look up, and dumping outdated client.
+- While stopping the service, we can close all the connections by looping the LRU cache and calling `client.close()` for each.
 - For data sources with same endpoint, but different user, use connection pooling strategy (child client) provided by opensearch-js.
-
-#### P1: Client pooling by LRU cache
-
-- key: data source endpoint
-- value: OpenSearch client object
-- configurable pool size
-- use existing js lru-cache lib
 
 ```ts
 import LRUCache from 'lru-cache';

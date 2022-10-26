@@ -15,11 +15,13 @@ participant "SearchSource\n(High Level API)" as s
 participant "Search Strategy\n(Low Level API)" as ss
 end box
 
+box "OSD Server-Data Source Plugin" #LightBlue
+participant "OpenSearch Data Service" as ods #LightGreen
+end box
+
 box "OSD Server-Core" #LightBlue
 participant "OpenSearch Service" as os 
-participant "OpenSearch Data Service" as ods #LightGreen
 participant "Saved Object Service" as sos
-
 end box
 
 box "OpenSearch"

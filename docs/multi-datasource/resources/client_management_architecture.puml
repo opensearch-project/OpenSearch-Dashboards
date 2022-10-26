@@ -52,7 +52,7 @@ rectangle "Legend" {
       
     }
   }
-  rectangle "Data Plugin" <<Existing>> {
+  rectangle "Data Plugin" <<Existing>> as dp {
     rectangle "Search Module" as sm <<existing>> {
       rectangle "Search Source" <<modify>> as source {
 
@@ -65,13 +65,15 @@ rectangle "Legend" {
     interface "DataPluginStart" as dps
   }
 
-  rectangle "Core" <<existing>> as core {
-       rectangle "OpenSearch Data Service" as ods <<new>> {
-        component "DataSource Client" as dc <<new>>
-        interface "ServiceStart" as odsss
+  rectangle "OpenSearch Data Source Plugin" as ods <<new>> {
+        component "DataSource Service" as ds
+        interface "PluginSetUp" as dsps
+        component "Crypto Service" as cs
       }
-      rectangle "opensearch service" as os_service <<modify>> {
 
+  rectangle "Core" <<existing>> as core {
+       
+      rectangle "opensearch service" as os_service <<modify>> {
         component "internal/scoped client" as ic <<existing>>
         interface "ServiceStart" as osss
 
@@ -86,34 +88,23 @@ rectangle "Legend" {
 
   }
 
-  rectangle "Credential Manager" <<new>> as cm {
-
-  }
-
-  ods --> cm: decrypt user credential
-  dc --> es: query
-  ' os_service -[hidden]- cc
+  ds --> es: query
   source -> strategy: call
   strategy --> cc: get datasource client 
   viz --> dps: speical viz types
   viz --> source
   dps --> sm
   sos --> os: get saved objects
-  ' d --> sos: get datasource
   core_start --> cc
   core_start <.. a: get client
   a ..> dps
   a ...> cc: get client
   core_start <-- osss: register
   osss <-- soss: depends
-  soss <--- odsss: depends
-  ' soss <--> core_start
-  ' d ---> es: query
   ic --> os: query
-  odsss --> core_start: register
- 
-
-
+  ds -> cs: decrypt credential
+  dsps ---> cc: register
+  dp --[hidden]-- ods
 
   rectangle "Default OpenSearch" <<existing>> as os {
   }
