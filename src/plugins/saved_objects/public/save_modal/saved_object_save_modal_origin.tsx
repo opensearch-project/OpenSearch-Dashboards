@@ -50,7 +50,6 @@ interface OriginSaveModalProps {
   objectType: string;
   onClose: () => void;
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
-  isExperimental?: boolean;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -126,7 +125,6 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       options={getReturnToOriginSwitch}
       description={documentInfo.description}
       showDescription={true}
-      isExperimental={props.isExperimental}
     />
   );
 }

@@ -27,7 +27,7 @@ import {
   PLUGIN_ID,
   PLUGIN_NAME,
   VISBUILDER_SAVED_OBJECT,
-  VIS_BUILDER_TYPE_SHORTHAND,
+  VIS_BUILDER_CHART_TYPE,
 } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
@@ -140,7 +140,7 @@ export class VisBuilderPlugin
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
             title: attributes?.title,
-            typeTitle: VIS_BUILDER_TYPE_SHORTHAND,
+            typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,
           }),
         },

@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Timeline',
         'Vega',
         'Vertical Bar',
-        'Visualization Builder',
+        'Wizard', // TODO: Update to final name when ready
       ];
       if (!isOss) {
         expectedChartTypes.push('Maps', 'Lens');
