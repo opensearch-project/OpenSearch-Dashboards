@@ -4,13 +4,17 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import {
   AppMountParameters,
   AppNavLinkStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from '../../../core/public';
 import {
   VisBuilderPluginSetupDependencies,
@@ -41,10 +45,17 @@ import {
   setUISettings,
   setTypeService,
   setReactExpressionRenderer,
+  setQueryService,
 } from './plugin_services';
 import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
 import { ConfigSchema } from '../config';
+import {
+  createOsdUrlStateStorage,
+  createOsdUrlTracker,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
+import { opensearchFilters } from '../../data/public';
 
 export class VisBuilderPlugin
   implements
@@ -55,13 +66,50 @@ export class VisBuilderPlugin
       VisBuilderPluginStartDependencies
     > {
   private typeService = new TypeService();
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stopUrlTracking: (() => void) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
 
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations, data: dataSetup }: VisBuilderPluginSetupDependencies
   ) {
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl,
+      restorePreviousUrl,
+    } = createOsdUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/vis-builder'),
+      defaultSubUrl: '#/',
+      storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          osdUrlKey: '_g',
+          stateUpdate$: dataSetup.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
+            }))
+          ),
+        },
+      ],
+      getHistory: () => {
+        return this.currentHistory!;
+      },
+    });
+    this.stopUrlTracking = () => {
+      stopUrlTracker();
+    };
+
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
 
@@ -70,13 +118,15 @@ export class VisBuilderPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
+      defaultPath: '#/',
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
 
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
         const { data, savedObjects, navigation, expressions } = pluginsStart;
+        this.currentHistory = params.history;
 
         // make sure the index pattern list is up to date
         data.indexPatterns.clearCache();
@@ -85,28 +135,48 @@ export class VisBuilderPlugin
         // TODO: Add the redirect
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
-        // Register Default Visualizations
+        appMounted();
 
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        // Register Default Visualizations
         const services: VisBuilderServices = {
           ...coreStart,
+          scopedHistory: this.currentHistory,
+          history: params.history,
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history: params.history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           toastNotifications: coreStart.notifications.toasts,
           data,
           savedObjectsPublic: savedObjects,
           navigation,
           expressions,
-          history: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
           savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
-          scopedHistory: params.history,
+          setActiveUrl,
+          restorePreviousUrl,
+          dashboard: pluginsStart.dashboard,
         };
 
         // Instantiate the store
         const store = await getPreloadedStore(services);
 
+        const unmount = renderApp(params, services, store);
         // Render the application
-        return renderApp(params, services, store);
+        return () => {
+          unlistenParentHistory();
+          unmount();
+          appUnMounted();
+        };
       },
     });
 
@@ -176,6 +246,7 @@ export class VisBuilderPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setTypeService(typeService);
     setUISettings(core.uiSettings);
+    setQueryService(data.query);
 
     return {
       ...typeService,
@@ -183,5 +254,9 @@ export class VisBuilderPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
+  }
 }

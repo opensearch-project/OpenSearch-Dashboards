@@ -6,7 +6,7 @@
 import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolkit';
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
-import { reducer as metadataReducer } from './metadata_slice';
+import { reducer as metadataReducer, setOriginatingApp } from './metadata_slice';
 import { VisBuilderServices } from '../../..';
 import { getPreloadedState } from './preload';
 import { setEditorState } from './metadata_slice';
@@ -25,6 +25,10 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
 };
 
 export const getPreloadedStore = async (services: VisBuilderServices) => {
+  const { originatingApp } =
+    services.embeddable
+      .getStateTransfer(services.scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const preloadedState = await getPreloadedState(services);
   const store = configurePreloadedStore(preloadedState);
 
@@ -34,6 +38,7 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
     style: styleState,
   };
   let previousMetadata = metadataState;
+  store.dispatch(setOriginatingApp({ state: originatingApp }));
 
   // Listen to changes
   const handleChange = () => {
