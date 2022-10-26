@@ -39,5 +39,5 @@ export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilde
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }
