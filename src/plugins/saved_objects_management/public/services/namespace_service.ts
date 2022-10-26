@@ -16,6 +16,7 @@ export interface SavedObjectsManagementNamespaceServiceSetup {
    * register given namespace in the registry.
    */
   register: (namespace: SavedObjectsManagementNamespace<unknown>) => void;
+  registerAlias: (alias: string) => void;
 }
 
 export interface SavedObjectsManagementNamespaceServiceStart {
@@ -23,10 +24,12 @@ export interface SavedObjectsManagementNamespaceServiceStart {
    * return all {@link SavedObjectsManagementNamespace | namespaces} currently registered.
    */
   getAll: () => Array<SavedObjectsManagementNamespace<unknown>>;
+  getAlias: () => string;
 }
 
 export class SavedObjectsManagementNamespaceService {
   private readonly namespaces = new Map<string, SavedObjectsManagementNamespace<unknown>>();
+  private readonly alias;
 
   setup(): SavedObjectsManagementNamespaceServiceSetup {
     return {
@@ -36,12 +39,16 @@ export class SavedObjectsManagementNamespaceService {
         }
         this.namespaces.set(ns.id, ns);
       },
+      registerAlias: (alias) => {
+        this.alias = alias;
+      },
     };
   }
 
   start(): SavedObjectsManagementNamespaceServiceStart {
     return {
       getAll: () => [...this.namespaces.values()],
+      getAlias: () => this.alias,
     };
   }
 }

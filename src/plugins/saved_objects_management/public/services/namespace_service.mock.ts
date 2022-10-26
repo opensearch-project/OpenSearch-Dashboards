@@ -26,10 +26,12 @@ const createStartMock = (): jest.Mocked<SavedObjectsManagementNamespaceServiceSt
   const mock = {
     has: jest.fn(),
     getAll: jest.fn(),
+    getAlias: jest.fn(),
   };
 
   mock.has.mockReturnValue(true);
   mock.getAll.mockReturnValue([]);
+  mock.getAlias.mockReturnValue('Namespace');
 
   return mock;
 };
