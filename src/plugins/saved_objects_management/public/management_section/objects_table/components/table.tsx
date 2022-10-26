@@ -55,18 +55,18 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementFilterServiceStart,
 } from '../../../services';
 
 export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  filters: SavedObjectsManagementFilter[];
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
+  filters: any[];
   canDelete: boolean;
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
@@ -164,6 +164,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
+      filters,
       selectionConfig: selection,
       onDelete,
       onActionRefresh,
@@ -174,7 +175,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
-      filters,
+      namespaceRegistry,
       dateFormat,
     } = this.props;
 

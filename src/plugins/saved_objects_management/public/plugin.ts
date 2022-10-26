@@ -45,9 +45,9 @@ import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementFilterService,
-  SavedObjectsManagementFilterServiceSetup,
-  SavedObjectsManagementFilterServiceStart,
+  SavedObjectsManagementNamespaceService,
+  SavedObjectsManagementNamespaceServiceSetup,
+  SavedObjectsManagementNamespaceServiceStart,
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
@@ -56,14 +56,14 @@ import { registerServices } from './register_services';
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
-  filters: SavedObjectsManagementFilterServiceSetup;
+  namespaces: SavedObjectsManagementNamespaceServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
   columns: SavedObjectsManagementColumnServiceStart;
-  filters: SavedObjectsManagementFilterServiceStart;
+  namespaces: SavedObjectsManagementNamespaceServiceStart;
 }
 
 export interface SetupDependencies {
@@ -89,7 +89,7 @@ export class SavedObjectsManagementPlugin
     > {
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
-  private filterService = new SavedObjectsManagementFilterService();
+  private namespaceService = new SavedObjectsManagementNamespaceService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
@@ -98,7 +98,7 @@ export class SavedObjectsManagementPlugin
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
-    const filterSetup = this.filterService.setup();
+    const namespaceSetup = this.namespaceService.setup();
 
     if (home) {
       home.featureCatalogue.register({
@@ -140,7 +140,7 @@ export class SavedObjectsManagementPlugin
     return {
       actions: actionSetup,
       columns: columnSetup,
-      filters: filterSetup,
+      namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
     };
   }
@@ -148,12 +148,12 @@ export class SavedObjectsManagementPlugin
   public start(core: CoreStart, { data }: StartDependencies) {
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
-    const filterStart = this.filterService.start();
+    const namespaceStart = this.namespaceService.start();
 
     return {
       actions: actionStart,
       columns: columnStart,
-      filters: filterStart,
+      namespaces: namespaceStart,
     };
   }
 }

@@ -10,19 +10,19 @@
  */
 
 import {
-  SavedObjectsManagementFilterService,
-  SavedObjectsManagementFilterServiceSetup,
-  SavedObjectsManagementFilterServiceStart,
-} from './filter_service';
+  SavedObjectsManagementNamespaceService,
+  SavedObjectsManagementNamespaceServiceSetup,
+  SavedObjectsManagementNamespaceServiceStart,
+} from './namespace_service';
 
-const createSetupMock = (): jest.Mocked<SavedObjectsManagementFilterServiceSetup> => {
+const createSetupMock = (): jest.Mocked<SavedObjectsManagementNamespaceServiceSetup> => {
   const mock = {
     register: jest.fn(),
   };
   return mock;
 };
 
-const createStartMock = (): jest.Mocked<SavedObjectsManagementFilterServiceStart> => {
+const createStartMock = (): jest.Mocked<SavedObjectsManagementNamespaceServiceStart> => {
   const mock = {
     has: jest.fn(),
     getAll: jest.fn(),
@@ -34,7 +34,9 @@ const createStartMock = (): jest.Mocked<SavedObjectsManagementFilterServiceStart
   return mock;
 };
 
-const createServiceMock = (): jest.Mocked<PublicMethodsOf<SavedObjectsManagementFilterService>> => {
+const createServiceMock = (): jest.Mocked<
+  PublicMethodsOf<SavedObjectsManagementNamespaceService>
+> => {
   const mock = {
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
@@ -42,7 +44,7 @@ const createServiceMock = (): jest.Mocked<PublicMethodsOf<SavedObjectsManagement
   return mock;
 };
 
-export const filterServiceMock = {
+export const namespaceServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
   createStart: createStartMock,

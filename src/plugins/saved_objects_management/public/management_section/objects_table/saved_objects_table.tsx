@@ -85,7 +85,7 @@ import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementFilterServiceStart,
+  SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
@@ -100,7 +100,7 @@ export interface SavedObjectsTableProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  filterRegistry: SavedObjectsManagementFilterServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
@@ -178,8 +178,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes, filterRegistry } = this.props;
-    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
+    const { allowedTypes } = this.props;
+    const filterFields = ['type', 'namespaces'];
     const { queryText, parsedParams } = parseQuery(this.state.activeQuery, filterFields);
     const { type: visibleTypes, namespaces } = parsedParams;
 
@@ -236,8 +236,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes, filterRegistry } = this.props;
-    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
+    const { notifications, http, allowedTypes } = this.props;
+    const filterFields = ['type', 'namespaces'];
     const { queryText, parsedParams } = parseQuery(query, filterFields);
     const { type: visibleTypes, namespaces } = parsedParams;
     const filteredTypes = allowedTypes.filter(
@@ -405,9 +405,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
-    const { notifications, http, filterRegistry } = this.props;
+    const { notifications, http } = this.props;
 
-    const filterFields = ['type', ...filterRegistry.getAll().map((f) => f.field)];
+    const filterFields = ['type', 'namespaces'];
     const { queryText } = parseQuery(activeQuery, filterFields);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
@@ -782,7 +782,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, allowedTypes, applications, filterRegistry } = this.props;
+    const { http, allowedTypes, applications, namespaceRegistry } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -805,18 +805,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         multiSelect: 'or',
         options: filterOptions,
       },
-      ...filterRegistry.getAll().map((filter) => {
-        const fieldCounts = savedObjectCounts[filter.field] || {};
-        if (filter.options) {
-          filter.options.map((filterOption) => {
-            filterOption.view = `${filterOption.name} (${fieldCounts[filterOption.value] || 0})`;
-          });
-        }
-        return {
-          ...filter,
-          'data-test-subj': `savedObjectsFilter-${filter.id}`,
-        };
-      }),
       // Add this back in once we have tag support
       // {
       //   type: 'field_value_selection',
@@ -826,6 +814,28 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       //   options: [],
       // },
     ];
+
+    const availableNamespaces = namespaceRegistry.getAll() || [];
+    if (availableNamespaces && availableNamespaces.length > 0) {
+      const nsCounts = savedObjectCounts.namespaces || {};
+      const nsFilterOptions = availableNamespaces.map((ns) => {
+        return {
+          name: ns.name,
+          value: ns.id,
+          view: `${ns.name} (${nsCounts[ns.id] || 0})`,
+        };
+      });
+
+      filters.push({
+        type: 'field_value_selection',
+        field: 'namespaces',
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.namespaceFilterName', {
+          defaultMessage: 'Namespaces',
+        }),
+        multiSelect: 'or',
+        options: nsFilterOptions,
+      });
+    }
 
     return (
       <EuiPageContent horizontalPosition="center">
@@ -846,11 +856,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
-            filters={filters}
             selectionConfig={selectionConfig}
             selectedSavedObjects={selectedSavedObjects}
             onQueryChange={this.onQueryChange}
             onTableChange={this.onTableChange}
+            filters={filters}
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}

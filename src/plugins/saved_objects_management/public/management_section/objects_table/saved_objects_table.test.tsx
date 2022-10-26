@@ -53,7 +53,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
-import { filterServiceMock } from '../../services/filter_service.mock';
+import { namespaceServiceMock } from '../../services/namespace_service.mock';
 import {
   SavedObjectsTable,
   SavedObjectsTableProps,
@@ -148,7 +148,7 @@ describe('SavedObjectsTable', () => {
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
-      filterRegistry: filterServiceMock.createStart(),
+      namespaceRegistry: namespaceServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
