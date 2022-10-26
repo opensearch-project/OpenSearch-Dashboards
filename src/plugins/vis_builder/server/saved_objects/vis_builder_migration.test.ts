@@ -17,19 +17,19 @@ describe('2.3.0', () => {
 
   it('should return original doc if visualizationState is not found', () => {
     const migratedDoc = migrate({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {},
     });
 
     expect(migratedDoc).toEqual({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {},
     });
   });
 
   it('should return original doc if indexPattern is not found within visualizationState', () => {
     const migratedDoc = migrate({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: {
           searchSource: '',
@@ -39,7 +39,7 @@ describe('2.3.0', () => {
     });
 
     expect(migratedDoc).toEqual({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: {
           searchSource: '',
@@ -51,7 +51,7 @@ describe('2.3.0', () => {
 
   it('should return original doc if references is not an array', () => {
     const migratedDoc = migrate({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: {},
       },
@@ -59,7 +59,7 @@ describe('2.3.0', () => {
     });
 
     expect(migratedDoc).toEqual({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: {},
       },
@@ -69,7 +69,7 @@ describe('2.3.0', () => {
 
   it('should migrate the old version visBuilder saved object to new version VisBuilder saved object', () => {
     const migratedDoc = migrate({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: JSON.stringify({
           searchFields: {},
@@ -82,7 +82,7 @@ describe('2.3.0', () => {
     });
 
     expect(migratedDoc).toEqual({
-      type: 'wizard',
+      type: 'visBuilder',
       attributes: {
         visualizationState: JSON.stringify({
           searchFields: {},

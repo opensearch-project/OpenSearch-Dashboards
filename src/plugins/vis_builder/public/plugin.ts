@@ -20,15 +20,9 @@ import {
   VisBuilderStart,
 } from './types';
 import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
-import visBuilderIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
-import visBuilderIcon from './assets/wizard_icon.svg';
-import {
-  EDIT_PATH,
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  VISBUILDER_SAVED_OBJECT,
-  VIS_BUILDER_CHART_TYPE,
-} from '../common';
+import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
+import visBuilderIcon from './assets/vis_builder_icon.svg';
+import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, VISBUILDER_SAVED_OBJECT, VIS_BUILDER_CHART_TYPE } from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import {

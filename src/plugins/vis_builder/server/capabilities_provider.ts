@@ -4,7 +4,7 @@
  */
 
 export const capabilitiesProvider = () => ({
-  wizard: {
+  visBuilder: {
     // TODO: investigate which capabilities we need to provide
     // createNew: true,
     // createShortUrl: true,

@@ -1,5 +1,6 @@
 {
-  "id": "wizard",
+  "id": "visBuilder",
+  "configPath": "visBuilder",
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,

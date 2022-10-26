@@ -46,6 +46,8 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 };
 
+// TODO: add migration to change the saved object type from wizard to visBuilder
+
 export const visBuilderSavedObjectTypeMigrations = {
   '2.3.0': flow(migrateIndexPattern),
 };

@@ -23,7 +23,7 @@ export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilde
   }
 
   public setup({ capabilities, http, savedObjects }: CoreSetup) {
-    this.logger.debug('wizard: Setup');
+    this.logger.debug('visBuilder: Setup');
 
     // Register saved object types
     savedObjects.registerType(visBuilderSavedObjectType);
@@ -35,9 +35,9 @@ export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilde
   }
 
   public start(_core: CoreStart) {
-    this.logger.debug('wizard: Started');
+    this.logger.debug('visBuilder: Started');
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
