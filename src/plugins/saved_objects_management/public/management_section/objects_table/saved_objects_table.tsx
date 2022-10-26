@@ -179,9 +179,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchCounts = async () => {
     const { allowedTypes } = this.props;
-    const filterFields = ['type', 'namespaces'];
-    const { queryText, parsedParams } = parseQuery(this.state.activeQuery, filterFields);
-    const { type: visibleTypes, namespaces } = parsedParams;
+    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
 
     const filteredTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
@@ -191,7 +189,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
       filteredTypes,
-      namespaces,
+      visibleNamespaces,
       queryText
     );
 
@@ -237,9 +235,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes } = this.props;
-    const filterFields = ['type', 'namespaces'];
-    const { queryText, parsedParams } = parseQuery(query, filterFields);
-    const { type: visibleTypes, namespaces } = parsedParams;
+    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
     const filteredTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
@@ -251,7 +247,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-      namespaces,
+      namespaces: visibleNamespaces,
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -407,8 +403,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { notifications, http } = this.props;
 
-    const filterFields = ['type', 'namespaces'];
-    const { queryText } = parseQuery(activeQuery, filterFields);
+    const { queryText } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);

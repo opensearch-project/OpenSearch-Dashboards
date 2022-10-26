@@ -45,12 +45,8 @@ describe('getQueryText', () => {
     };
     expect(parseQuery({ ast } as any, ['type'])).toEqual({
       queryText: 'foo bar',
-      parsedParams: { type: 'lala' },
-    });
-
-    expect(parseQuery({ ast } as any, ['namespaces'])).toEqual({
-      queryText: 'foo bar',
-      parsedParams: { namespaces: 'default' },
+      visibleTypes: 'lala',
+      visibleNamespaces: 'default',
     });
   });
 });
