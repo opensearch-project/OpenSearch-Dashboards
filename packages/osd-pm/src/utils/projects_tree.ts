@@ -31,7 +31,7 @@
 import chalk from 'chalk';
 import path from 'path';
 
-import { standardize } from '@osd/utils';
+import { standardize } from '@osd/cross-platform';
 import { Project } from './project';
 
 const projectKey = Symbol('__project');
