@@ -800,14 +800,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         multiSelect: 'or',
         options: filterOptions,
       },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
     ];
 
     const availableNamespaces = namespaceRegistry.getAll() || [];
