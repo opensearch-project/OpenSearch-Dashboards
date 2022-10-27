@@ -7,6 +7,7 @@ export const PLUGIN_ID = 'wizard';
 export const PLUGIN_NAME = 'Wizard';
 export const VISUALIZE_ID = 'visualize';
 export const EDIT_PATH = '/edit';
+export const VIS_BUILDER_CHART_TYPE = 'VisBuilder';
 
 export {
   VisBuilderSavedObjectAttributes,
