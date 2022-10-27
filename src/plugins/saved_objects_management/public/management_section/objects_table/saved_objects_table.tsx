@@ -813,13 +813,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         };
       });
 
-      const filterText = namespaceRegistry.getAlias() || 'Namespaces';
       filters.push({
         type: 'field_value_selection',
         field: 'namespaces',
-        name: i18n.translate('savedObjectsManagement.objectsTable.table.namespaceFilterName', {
-          defaultMessage: filterText,
-        }),
+        name:
+          namespaceRegistry.getAlias() ||
+          i18n.translate('savedObjectsManagement.objectsTable.table.namespaceFilterName', {
+            defaultMessage: 'Namespaces',
+          }),
         multiSelect: 'or',
         options: nsFilterOptions,
       });
