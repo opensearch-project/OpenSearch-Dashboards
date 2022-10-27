@@ -260,7 +260,7 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
-      const { useExpandedHeader = true } = injectedMetadata.getBranding() ?? {};
+      const { useExpandedHeader = false } = injectedMetadata.getBranding() ?? {};
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';

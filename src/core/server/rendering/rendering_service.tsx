@@ -270,7 +270,7 @@ export class RenderingService {
       : DEFAULT_TITLE;
 
     // use expanded menu by default unless explicitly set to false
-    const { useExpandedHeader = true } = branding;
+    const { useExpandedHeader = false } = branding;
 
     const brandingAssignment: BrandingAssignment = {
       logoDefault,

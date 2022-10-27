@@ -82,7 +82,7 @@ export const config = {
         defaultValue: '',
       }),
       useExpandedHeader: schema.boolean({
-        defaultValue: true,
+        defaultValue: false,
       }),
     }),
   }),
