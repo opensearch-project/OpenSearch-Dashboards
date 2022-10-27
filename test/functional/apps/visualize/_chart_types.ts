@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Timeline',
         'Vega',
         'Vertical Bar',
-        'Visualization Builder',
+        'VisBuilder',
       ];
       if (!isOss) {
         expectedChartTypes.push('Maps', 'Lens');

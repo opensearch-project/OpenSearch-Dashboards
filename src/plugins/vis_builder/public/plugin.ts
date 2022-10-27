@@ -122,7 +122,7 @@ export class VisBuilderPlugin
       name: PLUGIN_ID,
       title: PLUGIN_NAME,
       description: i18n.translate('visBuilder.visPicker.description', {
-        defaultMessage: 'Create visualizations using the new Visualization Builder',
+        defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
       icon: visBuilderIconSecondaryFill,
       stage: 'experimental',

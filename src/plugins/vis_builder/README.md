@@ -6,7 +6,7 @@ An OpenSearch Dashboards plugin for a visualization experience that makes explor
 
 To use this plugin, navigate to:
 
-Visualize -> Create Visualization -> Visualization Builder
+Visualize -> Create Visualization -> VisBuilder
 
 ## Add a visualization
 
