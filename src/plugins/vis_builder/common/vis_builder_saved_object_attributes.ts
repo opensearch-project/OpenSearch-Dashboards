@@ -5,7 +5,7 @@
 
 import { SavedObjectAttributes } from '../../../core/types';
 
-export const VISBUILDER_SAVED_OBJECT = 'visBuilder';
+export const VISBUILDER_SAVED_OBJECT = 'visualization-visbuilder';
 
 export interface VisBuilderSavedObjectAttributes extends SavedObjectAttributes {
   title: string;

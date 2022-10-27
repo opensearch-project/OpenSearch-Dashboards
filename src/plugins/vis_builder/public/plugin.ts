@@ -130,7 +130,7 @@ export class VisBuilderPlugin
       aliasPath: '#/',
       appExtensions: {
         visualizations: {
-          docTypes: [PLUGIN_ID],
+          docTypes: [VISBUILDER_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: PLUGIN_ID,

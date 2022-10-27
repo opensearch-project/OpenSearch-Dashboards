@@ -26,7 +26,7 @@ export const visBuilderSavedObjectType: SavedObjectsType = {
     getInAppUrl({ id }: SavedObject) {
       return {
         path: `/app/${PLUGIN_ID}${EDIT_PATH}/${encodeURIComponent(id)}`,
-        uiCapabilitiesPath: 'visBuilder.show',
+        uiCapabilitiesPath: 'visualization-visbuilder.show',
       };
     },
   },

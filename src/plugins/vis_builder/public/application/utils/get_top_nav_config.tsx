@@ -39,7 +39,7 @@ import {
 import { VisBuilderServices } from '../..';
 import { VisBuilderVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
-import { EDIT_PATH } from '../../../common';
+import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
@@ -207,7 +207,7 @@ export const getOnSave = (
           if (newlyCreated && stateTransfer) {
             // create new embeddable to transfer to originatingApp
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-              state: { type: 'visBuilder', input: { savedObjectId: id } },
+              state: { type: VISBUILDER_SAVED_OBJECT, input: { savedObjectId: id } },
             });
             return { id };
           } else {
