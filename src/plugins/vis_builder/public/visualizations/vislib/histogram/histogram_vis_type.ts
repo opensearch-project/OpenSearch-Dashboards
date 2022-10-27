@@ -11,7 +11,6 @@ import { BasicOptionsDefaults } from '../common/types';
 import { HistogramVisOptions } from './components/histogram_vis_options';
 import { VisualizationTypeOptions } from '../../../services/type_service';
 import { toExpression } from './to_expression';
-import { VIS_BUILDER_STATE } from '../../../../common';
 
 export interface HistogramOptionsDefaults extends BasicOptionsDefaults {
   type: 'histogram';
@@ -22,7 +21,6 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
   title: 'Bar',
   icon: 'visBarVertical',
   description: 'Display histogram visualizations',
-  stage: VIS_BUILDER_STATE,
   toExpression,
   ui: {
     containerConfig: {

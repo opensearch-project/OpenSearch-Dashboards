@@ -10,7 +10,6 @@ import { ColorModes, ColorSchemas } from '../../../../charts/public';
 import { MetricVizOptions } from './components/metric_viz_options';
 import { VisualizationTypeOptions } from '../../services/type_service';
 import { toExpression } from './to_expression';
-import { VIS_BUILDER_STATE } from '../../../common';
 
 export interface MetricOptionsDefaults {
   addTooltip: boolean;
@@ -41,7 +40,6 @@ export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefa
   title: 'Metric',
   icon: 'visMetric',
   description: 'Display metric visualizations',
-  stage: VIS_BUILDER_STATE,
   toExpression,
   ui: {
     containerConfig: {

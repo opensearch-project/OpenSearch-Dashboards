@@ -11,7 +11,6 @@ import { LineVisOptions } from './components/line_vis_options';
 import { VisualizationTypeOptions } from '../../../services/type_service';
 import { toExpression } from './to_expression';
 import { BasicOptionsDefaults } from '../common/types';
-import { VIS_BUILDER_STATE } from '../../../../common';
 
 export interface LineOptionsDefaults extends BasicOptionsDefaults {
   type: 'line';
@@ -22,7 +21,6 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
   title: 'Line',
   icon: 'visLine',
   description: 'Display line chart',
-  stage: VIS_BUILDER_STATE,
   toExpression,
   ui: {
     containerConfig: {
