@@ -3,21 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
-import { FieldSearch } from './field_search';
 
 import {
+  FilterManager,
+  IndexPattern,
   IndexPatternField,
   OPENSEARCH_FIELD_TYPES,
   OSD_FIELD_TYPES,
+  SortDirection,
 } from '../../../../../data/public';
-import { FieldSelectorField } from './field_selector_field';
+import { IExpressionLoaderParams } from '../../../../../expressions/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
-import './field_selector.scss';
+import { VisBuilderServices } from '../../../types';
+import { COUNT_FIELD } from '../../utils/drag_drop';
 import { useTypedSelector } from '../../utils/state_management';
 import { useIndexPatterns } from '../../utils/use';
-import { getAvailableFields } from './utils';
+import { FieldSearch } from './field_search';
+import { FieldSelectorField, SelectorFieldButton } from './field_selector_field';
+import { FieldDetails } from './types';
+import { getAvailableFields, getDetails } from './utils';
+import './field_selector.scss';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -33,14 +41,34 @@ const META_FIELDS: string[] = [
 ];
 
 export const FieldSelector = () => {
+  const {
+    services: {
+      data: {
+        query: {
+          filterManager,
+          queryString,
+          state$,
+          timefilter: { timefilter },
+        },
+        search: { searchSource },
+      },
+      uiSettings: config,
+    },
+  } = useOpenSearchDashboards<VisBuilderServices>();
   const indexPattern = useIndexPatterns().selected;
   const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
+  const [hits, setHits] = useState<Array<Record<string, any>>>([]);
+  const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
+    query: queryString.getQuery(),
+    filters: filterManager.getFilters(),
+  });
 
   useEffect(() => {
-    const indexFields = indexPattern?.fields ?? [];
+    const indexFields = indexPattern?.fields.getAll() ?? [];
     const filteredSubset = getAvailableFields(indexFields).filter((field) =>
-      field.displayName.includes(fieldSearchValue)
+      // case-insensitive field search
+      field.displayName.toLowerCase().includes(fieldSearchValue.toLowerCase())
     );
 
     setFilteredFields(filteredSubset);
@@ -65,6 +93,63 @@ export const FieldSelector = () => {
     [filteredFields]
   );
 
+  useEffect(() => {
+    async function getData() {
+      if (indexPattern && searchContext) {
+        const newSearchSource = await searchSource.create();
+        const timeRangeFilter = timefilter.createFilter(indexPattern);
+
+        newSearchSource
+          .setField('index', indexPattern)
+          .setField('size', config.get('discover:sampleSize') ?? 500)
+          .setField('sort', [{ [indexPattern.timeFieldName || '_score']: 'desc' as SortDirection }])
+          .setField('filter', [
+            ...(searchContext.filters ?? []),
+            ...(timeRangeFilter ? [timeRangeFilter] : []),
+          ]);
+
+        if (searchContext.query) {
+          const contextQuery =
+            searchContext.query instanceof Array ? searchContext.query[0] : searchContext.query;
+
+          newSearchSource.setField('query', contextQuery);
+        }
+
+        const searchResponse = await newSearchSource.fetch();
+
+        setHits(searchResponse.hits.hits);
+      }
+    }
+
+    getData();
+  }, [config, searchContext, searchSource, indexPattern, timefilter]);
+
+  useLayoutEffect(() => {
+    const subscription = state$.subscribe(({ state }) => {
+      setSearchContext({
+        query: state.query,
+        filters: state.filters,
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [state$]);
+
+  const getDetailsByField = useCallback(
+    (ipField: IndexPatternField) => {
+      return getDetails(ipField, hits, indexPattern);
+    },
+    [hits, indexPattern]
+  );
+
+  const commonFieldGroupProps = {
+    filterManager,
+    indexPattern,
+    getDetails: getDetailsByField,
+  };
+
   return (
     <div className="vbFieldSelector">
       <div>
@@ -74,20 +159,28 @@ export const FieldSelector = () => {
       </div>
       <div className="vbFieldSelector__fieldGroups">
         {/* Count Field */}
-        <FieldSelectorField
-          field={{
-            displayName: 'Count',
-            scripted: false,
-            type: 'number',
-          }}
+        <SelectorFieldButton
+          field={{ name: 'count', displayName: 'Count', type: 'number' }}
+          dragValue={COUNT_FIELD}
         />
         <FieldGroup
           id="categoricalFields"
           header="Categorical Fields"
           fields={fields?.categorical}
+          {...commonFieldGroupProps}
         />
-        <FieldGroup id="numericalFields" header="Numerical Fields" fields={fields?.numerical} />
-        <FieldGroup id="metaFields" header="Meta Fields" fields={fields?.meta} />
+        <FieldGroup
+          id="numericalFields"
+          header="Numerical Fields"
+          fields={fields?.numerical}
+          {...commonFieldGroupProps}
+        />
+        <FieldGroup
+          id="metaFields"
+          header="Meta Fields"
+          fields={fields?.meta}
+          {...commonFieldGroupProps}
+        />
       </div>
     </div>
   );
@@ -95,37 +188,42 @@ export const FieldSelector = () => {
 
 interface FieldGroupProps {
   fields?: IndexPatternField[];
+  filterManager: FilterManager;
+  getDetails: (ipField: IndexPatternField) => FieldDetails;
   header: string;
   id: string;
+  indexPattern?: IndexPattern;
 }
 
-const FieldGroup = ({ fields, header, id }: FieldGroupProps) => (
-  <EuiAccordion
-    id={id}
-    className="vbFieldSelector__fieldGroup"
-    buttonContent={
-      <EuiTitle size="xxxs">
-        <span>{header}</span>
-      </EuiTitle>
-    }
-    extraAction={
-      <EuiNotificationBadge color="subdued" size="m">
-        {fields?.length || 0}
-      </EuiNotificationBadge>
-    }
-    initialIsOpen
-  >
-    {fields?.map((field, i) => (
-      <EuiFlexItem key={i}>
-        <FieldSelectorField field={field} />
-      </EuiFlexItem>
-    ))}
-  </EuiAccordion>
-);
+const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => {
+  return (
+    <EuiAccordion
+      id={id}
+      className="vbFieldSelector__fieldGroup"
+      buttonContent={
+        <EuiTitle size="xxxs">
+          <span>{header}</span>
+        </EuiTitle>
+      }
+      extraAction={
+        <EuiNotificationBadge color="subdued" size="m">
+          {fields?.length || 0}
+        </EuiNotificationBadge>
+      }
+      initialIsOpen
+    >
+      {fields?.map((field, i) => (
+        <EuiFlexItem key={i}>
+          <FieldSelectorField field={field} {...rest} />
+        </EuiFlexItem>
+      ))}
+    </EuiAccordion>
+  );
+};
 
-function getFieldCategory(field: IndexPatternField): keyof IFieldCategories {
-  if (META_FIELDS.includes(field.name)) return 'meta';
-  if (field.type === OSD_FIELD_TYPES.NUMBER) return 'numerical';
+function getFieldCategory({ name, type }: IndexPatternField): keyof IFieldCategories {
+  if (META_FIELDS.includes(name)) return 'meta';
+  if (type === OSD_FIELD_TYPES.NUMBER) return 'numerical';
 
   return 'categorical';
 }

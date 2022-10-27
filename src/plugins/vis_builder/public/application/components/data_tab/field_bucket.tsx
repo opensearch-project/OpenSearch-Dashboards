@@ -1,0 +1,114 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import {
+  EuiText,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiProgress,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+import { IndexPatternField } from '../../../../../data/public';
+
+import { Bucket } from './types';
+import './field_bucket.scss';
+
+interface Props {
+  bucket: Bucket;
+  field: IndexPatternField;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+}
+
+export function VisBuilderFieldBucket({ bucket, field, onAddFilter }: Props) {
+  const { count, display, percent, value } = bucket;
+  const { filterable: isFilterableField, name: fieldName } = field;
+
+  const emptyTxt = i18n.translate('visBuilder.fieldChooser.detailViews.emptyStringText', {
+    // We need this to communicate to users when a top value is actually an empty string
+    defaultMessage: 'Empty string',
+  });
+  const addLabel = i18n.translate(
+    'visBuilder.fieldChooser.detailViews.filterValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter for {fieldName}: "{value}"',
+      values: { fieldName, value },
+    }
+  );
+  const removeLabel = i18n.translate(
+    'visBuilder.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    {
+      defaultMessage: 'Filter out {fieldName}: "{value}"',
+      values: { fieldName, value },
+    }
+  );
+
+  const displayValue = display || emptyTxt;
+
+  return (
+    <>
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="s">
+        <EuiFlexItem className="vbFieldDetails__barContainer" grow={1}>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={1} className="eui-textTruncate">
+              <EuiText
+                title={`${displayValue}: ${count} (${percent.toFixed(1)}%)`}
+                size="xs"
+                className="eui-textTruncate"
+              >
+                {displayValue}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
+              <EuiText color="secondary" size="xs" className="eui-textTruncate">
+                {percent.toFixed(1)}%
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <StringFieldProgressBar value={value} percent={percent} count={count} />
+        </EuiFlexItem>
+        {/* TODO: Should we have any explanation for non-filterable fields? */}
+        {isFilterableField && (
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiButtonIcon
+                className="vbFieldDetails__filterButton"
+                iconSize="s"
+                iconType="plusInCircle"
+                onClick={() => onAddFilter(field, value, '+')}
+                aria-label={addLabel}
+                data-test-subj={`plus-${fieldName}-${value}`}
+              />
+              <EuiButtonIcon
+                className="vbFieldDetails__filterButton"
+                iconSize="s"
+                iconType="minusInCircle"
+                onClick={() => onAddFilter(field, value, '-')}
+                aria-label={removeLabel}
+                data-test-subj={`minus-${fieldName}-${value}`}
+              />
+            </div>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+}
+
+export function StringFieldProgressBar({
+  value,
+  percent,
+  count,
+}: Pick<Bucket, 'count' | 'percent' | 'value'>) {
+  const ariaLabel = `${value}: ${count} (${percent}%)`;
+
+  return (
+    <EuiProgress value={percent} max={100} color="secondary" aria-label={ariaLabel} size="s" />
+  );
+}

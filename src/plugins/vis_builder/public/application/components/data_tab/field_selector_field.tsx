@@ -28,31 +28,96 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import { IndexPatternField } from '../../../../../data/public';
-import { FieldButton, FieldIcon } from '../../../../../opensearch_dashboards_react/public';
-import { useDrag } from '../../utils/drag_drop/drag_drop_context';
-import { COUNT_FIELD } from '../../utils/drag_drop/types';
+import React, { useCallback, useState } from 'react';
+import { EuiPopover } from '@elastic/eui';
 
+import {
+  FilterManager,
+  IndexPattern,
+  IndexPatternField,
+  opensearchFilters,
+} from '../../../../../data/public';
+import {
+  FieldButton,
+  FieldButtonProps,
+  FieldIcon,
+} from '../../../../../opensearch_dashboards_react/public';
+
+import { COUNT_FIELD, useDrag } from '../../utils/drag_drop';
+import { VisBuilderFieldDetails } from './field_details';
+import { FieldDetails } from './types';
 import './field_selector_field.scss';
 
 export interface FieldSelectorFieldProps {
-  field: Partial<IndexPatternField> & Pick<IndexPatternField, 'displayName' | 'type' | 'scripted'>;
+  field: IndexPatternField;
+  filterManager: FilterManager;
+  indexPattern?: IndexPattern;
+  getDetails: (field) => FieldDetails;
 }
 
-// TODO:
-// 1. Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
-// 2. Add popover for fields stats from discover as well
-export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
+// TODO: Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
+export const FieldSelectorField = ({
+  field,
+  filterManager,
+  indexPattern,
+  getDetails,
+}: FieldSelectorFieldProps) => {
+  const { id: indexPatternId = '', metaFields = [] } = indexPattern ?? {};
+  const isMetaField = metaFields.includes(field.name);
   const [infoIsOpen, setOpen] = useState(false);
-  const [dragProps] = useDrag({
-    namespace: 'field-data',
-    value: field.name || COUNT_FIELD,
-  });
+
+  const onAddFilter = useCallback(
+    (fieldToFilter, value, operation) => {
+      const newFilters = opensearchFilters.generateFilters(
+        filterManager,
+        fieldToFilter,
+        value,
+        operation,
+        indexPatternId
+      );
+      return filterManager.addFilters(newFilters);
+    },
+    [filterManager, indexPatternId]
+  );
 
   function togglePopover() {
     setOpen(!infoIsOpen);
   }
+
+  return (
+    <EuiPopover
+      ownFocus
+      display="block"
+      button={<SelectorFieldButton isActive={infoIsOpen} onClick={togglePopover} field={field} />}
+      isOpen={infoIsOpen}
+      closePopover={() => setOpen(false)}
+      anchorPosition="rightUp"
+      panelClassName="vbItem__fieldPopoverPanel"
+      repositionOnScroll
+    >
+      {infoIsOpen && (
+        <VisBuilderFieldDetails
+          field={field}
+          isMetaField={isMetaField}
+          details={getDetails(field)}
+          onAddFilter={onAddFilter}
+        />
+      )}
+    </EuiPopover>
+  );
+};
+
+export interface SelectorFieldButtonProps extends Partial<FieldButtonProps> {
+  dragValue?: IndexPatternField['name'] | null | typeof COUNT_FIELD;
+  field: Partial<IndexPatternField> & Pick<IndexPatternField, 'displayName' | 'name' | 'type'>;
+}
+
+export const SelectorFieldButton = ({ dragValue, field, ...rest }: SelectorFieldButtonProps) => {
+  const { name, displayName, type, scripted = false } = field ?? {};
+  const [dragProps] = useDrag({
+    namespace: 'field-data',
+    value: dragValue ?? name,
+  });
 
   function wrapOnDot(str?: string) {
     // u200B is a non-width white-space character, which allows
@@ -61,26 +126,21 @@ export const FieldSelectorField = ({ field }: FieldSelectorFieldProps) => {
     return str ? str.replace(/\./g, '.\u200B') : '';
   }
 
-  const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="vbFieldSelectorField__name"
-    >
-      {wrapOnDot(field.displayName)}
+  const defaultIcon = <FieldIcon type={type} scripted={scripted} size="l" />;
+
+  const defaultFieldName = (
+    <span data-test-subj={`field-${name}`} title={name} className="vbFieldSelectorField__name">
+      {wrapOnDot(displayName)}
     </span>
   );
 
-  return (
-    <FieldButton
-      className="vbFieldSelectorField"
-      isActive={infoIsOpen}
-      onClick={togglePopover}
-      dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={<FieldIcon type={field.type} scripted={field.scripted} size="l" />}
-      // fieldAction={actionButton}
-      fieldName={fieldName}
-      {...dragProps}
-    />
-  );
+  const defaultProps = {
+    className: 'vbFieldSelectorField',
+    dataTestSubj: `field-${name}-showDetails`,
+    fieldIcon: defaultIcon,
+    fieldName: defaultFieldName,
+    onClick: () => {},
+  };
+
+  return <FieldButton {...defaultProps} {...rest} {...dragProps} />;
 };
