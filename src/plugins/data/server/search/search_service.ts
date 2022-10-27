@@ -42,6 +42,7 @@ import {
   StartServicesAccessor,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
@@ -78,6 +79,7 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 export interface SearchServiceSetupDependencies {
   registerFunction: AggsSetupDependencies['registerFunction'];
   usageCollection?: UsageCollectionSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 /** @internal */
@@ -105,7 +107,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { registerFunction, usageCollection }: SearchServiceSetupDependencies
+    { registerFunction, usageCollection, dataSource }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core, this.initializerContext) : undefined;
 
@@ -122,7 +124,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       opensearchSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
-        usage
+        usage,
+        dataSource
       )
     );
 
