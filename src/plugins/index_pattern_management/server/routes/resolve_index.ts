@@ -63,13 +63,25 @@ export function registerResolveIndexRoute(router: IRouter): void {
         ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
         : context.core.opensearch.legacy.client.callAsCurrentUser;
 
-      const result = await caller('transport.request', {
-        method: 'GET',
-        path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
-          queryString ? '?' + new URLSearchParams(queryString).toString() : ''
-        }`,
-      });
-      return res.ok({ body: result });
+      try {
+        const result = await caller('transport.request', {
+          method: 'GET',
+          path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
+            queryString ? '?' + new URLSearchParams(queryString).toString() : ''
+          }`,
+        });
+        return res.ok({ body: result });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
     }
   );
 }

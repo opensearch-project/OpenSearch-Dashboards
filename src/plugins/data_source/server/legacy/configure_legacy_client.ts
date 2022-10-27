@@ -23,7 +23,7 @@ import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup, getCredential, getDataSource } from '../client';
 import { parseClientOptions } from './client_config';
-import { DataSourceConfigError } from '../lib/error';
+import { createDataSourceError, DataSourceError } from '../lib/error';
 
 export const configureLegacyClient = async (
   { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
@@ -40,8 +40,8 @@ export const configureLegacyClient = async (
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
-    // Re-throw as DataSourceConfigError
-    throw new DataSourceConfigError('Failed to get data source client: ', error);
+    // Re-throw as DataSourceError
+    throw createDataSourceError(error);
   }
 };
 
@@ -140,7 +140,6 @@ const callAPI = async (
     if (!options.wrap401Errors || err.statusCode !== 401) {
       throw err;
     }
-
     throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 };

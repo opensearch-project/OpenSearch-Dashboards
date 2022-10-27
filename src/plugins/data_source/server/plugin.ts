@@ -28,6 +28,7 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
+import { createDataSourceError } from './lib/error';
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
   private readonly cryptographyService: CryptographyService;
@@ -102,7 +103,9 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       )
     );
 
-    return {};
+    return {
+      createDataSourceError: (e: any) => createDataSourceError(e),
+    };
   }
 
   public start(core: CoreStart) {
