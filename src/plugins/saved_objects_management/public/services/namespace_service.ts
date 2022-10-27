@@ -40,6 +40,11 @@ export class SavedObjectsManagementNamespaceService {
         this.namespaces.set(ns.id, ns);
       },
       registerAlias: (alias) => {
+        if (!!this.alias) {
+          throw new Error(
+            `An alias has already been registered. Cannot register more than one alias.`
+          );
+        }
         this.alias = alias;
       },
     };

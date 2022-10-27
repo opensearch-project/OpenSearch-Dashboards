@@ -18,18 +18,17 @@ import {
 const createSetupMock = (): jest.Mocked<SavedObjectsManagementNamespaceServiceSetup> => {
   const mock = {
     register: jest.fn(),
+    registerAlias: jest.fn(),
   };
   return mock;
 };
 
 const createStartMock = (): jest.Mocked<SavedObjectsManagementNamespaceServiceStart> => {
   const mock = {
-    has: jest.fn(),
     getAll: jest.fn(),
     getAlias: jest.fn(),
   };
 
-  mock.has.mockReturnValue(true);
   mock.getAll.mockReturnValue([]);
   mock.getAlias.mockReturnValue('Namespace');
 

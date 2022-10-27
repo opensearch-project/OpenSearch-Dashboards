@@ -58,7 +58,6 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       }
 
       const findOptions: SavedObjectsFindOptions = {
-        ...req.body.params,
         type: req.body.typesToInclude,
         perPage: 1000,
       };
@@ -98,6 +97,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       for (const type of req.body.typesToInclude) {
         if (!counts.type[type]) {
           counts.type[type] = 0;
+        }
+      }
+
+      const namespacesToInclude = req.body.namespacesToInclude || [];
+      for (const ns of namespacesToInclude) {
+        if (!counts.namespaces[ns]) {
+          counts.namespaces[ns] = 0;
         }
       }
 
