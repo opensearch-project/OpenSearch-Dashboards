@@ -95,7 +95,7 @@ export const getTopNavConfig = (
               dispatch,
               services
             )}
-            objectType={'wizard'}
+            objectType={'visualization'}
             onClose={() => {}}
             originatingApp={originatingApp}
             getAppNameFromId={stateTransfer.getAppNameFromId}
