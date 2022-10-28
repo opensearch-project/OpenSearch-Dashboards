@@ -19,11 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.waitForVisualizationSelectPage();
 
       // Try to find the visBuilder Vis type.
-      const wizardVisTypeExists = await PageObjects.visualize.hasVisType('visBuilder');
-      expect(wizardVisTypeExists).to.be(true);
+      const visBuilderVisTypeExists = await PageObjects.visualize.hasVisType('vis-builder');
+      expect(visBuilderVisTypeExists).to.be(true);
 
       // Create a new visualization
-      await PageObjects.visualize.clickVisType('visBuilder');
+      await PageObjects.visualize.clickVisType('vis-builder');
 
       // Check that the experimental banner is there and state that this is experimental
       const info = await PageObjects.visBuilder.getExperimentalInfo();
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.waitForVisualizationSelectPage();
 
       // Try to find the visBuilder Vis type.
-      const visBuilderVisTypeExists = await PageObjects.visualize.hasVisType('visBuilder');
+      const visBuilderVisTypeExists = await PageObjects.visualize.hasVisType('vis-builder');
       expect(visBuilderVisTypeExists).to.be(false);
     });
 

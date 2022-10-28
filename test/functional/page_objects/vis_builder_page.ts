@@ -23,7 +23,7 @@ export function VisBuilderPageProvider({ getService, getPageObjects }: FtrProvid
     };
 
     public async navigateToCreateVisBuilder() {
-      await common.navigateToApp('visBuilder');
+      await common.navigateToApp('vis-builder');
       await header.waitUntilLoadingHasFinished();
     }
 
