@@ -61,11 +61,12 @@ export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
-  filterOptions: any[];
+  filters: any[];
   canDelete: boolean;
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
@@ -76,7 +77,7 @@ export interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any) => void;
+  onQueryChange: (query: any, filterFields: string[]) => void;
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
@@ -163,7 +164,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
-      filterOptions,
+      filters,
       selectionConfig: selection,
       onDelete,
       onActionRefresh,
@@ -174,6 +175,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      namespaceRegistry,
       dateFormat,
     } = this.props;
 
@@ -183,26 +185,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       totalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
-
-    const filters = [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: i18n.translate('savedObjectsManagement.objectsTable.table.typeFilterName', {
-          defaultMessage: 'Type',
-        }),
-        multiSelect: 'or',
-        options: filterOptions,
-      },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
-    ];
 
     const columns = [
       {
