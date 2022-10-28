@@ -78,7 +78,7 @@ export default function () {
         `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
         `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg`,
         `--opensearchDashboards.branding.applicationTitle=OpenSearch`,
-        `--wizard.enabled=true`,
+        `--vis_builder.enabled=true`,
       ],
     },
     services,

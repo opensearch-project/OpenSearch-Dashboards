@@ -1,6 +1,6 @@
 # Saved object
 
-The saved object plugin provides all the core services and functionalities of saved objects. It is utilized by many core plugins such as [`visualization`](../visualizations/), [`dashboard`](../dashboard/) and [`wizard`](../wizard/), as well as external plugins. Saved object is the primary way to store app and plugin data in a standardized form in OpenSearch Dashboards. They allow plugin developers to manage creating, saving, editing and retrieving data for the application. They can also make reference to other saved objects and have useful features out of the box, such as migrations and strict typings. The saved objects can be managed by the Saved Object Management UI.
+The saved object plugin provides all the core services and functionalities of saved objects. It is utilized by many core plugins such as [`visualization`](../visualizations/), [`dashboard`](../dashboard/) and [`visBuilder`](../vis_builder/), as well as external plugins. Saved object is the primary way to store app and plugin data in a standardized form in OpenSearch Dashboards. They allow plugin developers to manage creating, saving, editing and retrieving data for the application. They can also make reference to other saved objects and have useful features out of the box, such as migrations and strict typings. The saved objects can be managed by the Saved Object Management UI.
 
 ## Save relationships to index pattern
 
