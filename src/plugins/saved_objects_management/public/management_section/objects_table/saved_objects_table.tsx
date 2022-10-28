@@ -178,7 +178,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes } = this.props;
+    const { allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
 
     const filteredTypes = allowedTypes.filter(
@@ -196,7 +196,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach((id) => {
+    const filteredTypeCounts = filteredSavedObjectCounts.type || {};
+
+    Object.keys(filteredTypeCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
@@ -207,12 +209,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
+    let availableNamespaces = namespaceRegistry.getAll() || [];
+    availableNamespaces = availableNamespaces.map((ns) => ns.id);
+
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.http,
       allowedTypes,
-      [],
+      availableNamespaces,
       queryText
     );
 

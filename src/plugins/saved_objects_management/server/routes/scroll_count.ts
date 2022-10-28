@@ -47,14 +47,11 @@ export const registerScrollForCountRoute = (router: IRouter) => {
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
       const namespaces = [];
+      const counts = {
+        type: {},
+      };
       if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
-        req.body.namespacesToInclude.forEach((ns) => {
-          if (ns === null) {
-            namespaces.push('default');
-          } else {
-            namespaces.push(ns);
-          }
-        });
+        counts.namespaces = {};
       }
 
       const findOptions: SavedObjectsFindOptions = {
@@ -73,14 +70,9 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       const objects = await findAll(client, findOptions);
 
-      const counts = {
-        type: {},
-        namespaces: {},
-      };
-
       objects.forEach((result) => {
         const type = result.type;
-        if (req.body.namespacesToInclude) {
+        if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
           const resultNamespaces = (result.namespaces || []).flat();
           resultNamespaces.forEach((ns) => {
             if (ns === null) {
