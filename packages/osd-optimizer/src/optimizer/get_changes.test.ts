@@ -33,7 +33,7 @@ import path from 'path';
 jest.mock('execa');
 
 import { getChanges } from './get_changes';
-import { standardize } from '@osd/cross-platform';
+import { standardize } from '@osd/dev-utils';
 
 const execa: jest.Mock = jest.requireMock('execa');
 
