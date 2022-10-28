@@ -1,0 +1,15 @@
+{
+  "name": "@osd/cross-platform",
+  "main": "./target/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "osd:bootstrap": "yarn build"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2",
+    "tsd": "^0.21.0"
+  }
+}
