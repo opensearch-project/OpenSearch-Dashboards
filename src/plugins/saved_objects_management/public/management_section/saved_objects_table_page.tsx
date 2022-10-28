@@ -47,6 +47,7 @@ const SavedObjectsTablePage = ({
   serviceRegistry,
   actionRegistry,
   columnRegistry,
+  namespaceRegistry,
   setBreadcrumbs,
 }: {
   coreStart: CoreStart;
@@ -55,6 +56,7 @@ const SavedObjectsTablePage = ({
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
@@ -78,6 +80,7 @@ const SavedObjectsTablePage = ({
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
       columnRegistry={columnRegistry}
+      namespaceRegistry={namespaceRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       search={dataStart.search}
