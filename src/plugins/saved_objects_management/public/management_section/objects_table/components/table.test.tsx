@@ -62,7 +62,19 @@ const defaultProps: TableProps = {
   selectionConfig: {
     onSelectionChange: () => {},
   },
-  filterOptions: [{ value: 2 }],
+  filters: [
+    {
+      type: 'field_value_selection',
+      field: 'type',
+      name: 'Type',
+      multiSelect: 'or',
+      options: [
+        {
+          value: 2,
+        },
+      ],
+    },
+  ],
   onDelete: () => {},
   onActionRefresh: () => {},
   onExport: () => {},
