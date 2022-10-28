@@ -99,22 +99,21 @@ core.opensearch.withDataSource(<data_source_id>).callAsCurrentUser(searchParams)
 
 OpenSearch Dashboards plugins like data plugin, alerting plugin will need to introduce the data source concept into their use case, letting users to specify a data source when using their functions, and then switch to this new opensearch interface when calling OpenSearch APIs or executing queries.
 
-### Multi-datasource support in visualizations
+### Visualization solution with support of multiple datasource
 
-Current OpenSearch Dashboards have 3 major saved object types, index pattern, visualization and Dashboards
+Current OpenSearch Dashboards visualization solution replies on 3 major saved object types: index-pattern, visualization and dashboard.
 
-- Visualization works starts with index pattern. An index pattern is a level of data abstraction. Index pattern describes a set of data indices, and their data schema.
-- OpenSearch Dashboards users can create data visualizations against an index pattern. A visualization includes the OpenSearch SDL query, aggregation and a reference to an index pattern, as well as graph metadata such as legend and labels. When rendering a visualization graph, the visualization executes the query& aggregation against that specific index pattern, and draw the graph according to graph settings.
-- Then OpenSearch Dashboards users can place a set of visualizations into a dashboard. A OpenSearch Dashboards dashboards describes the layout and control (time picker, field filters) of all visualizations on the dashboard.
+- Index pattern is a level of data abstraction. Index pattern describes a set of data indices, and their data schema.
+- Visualization works starts with index pattern. OpenSearch Dashboards users can create data visualizations against an index pattern. A visualization includes the OpenSearch DSL query, aggregation and a reference to an index pattern, as well as graph metadata such as legend and labels. When rendering a visualization graph, the visualization executes the query & aggregation against that specific index pattern, and draw the graph according to graph settings.
+- Dashboard references visualizations. OpenSearch Dashboards users can place a set of visualizations into a dashboard. A OpenSearch Dashboards dashboards describes the layout and control (time picker, field filters) of all visualizations on the dashboard.
 
-To support multiple data source in OpenSearch Dashboards, we will add “data source” to index pattern model. One index pattern will have a `dataSourceId` field, so that it refers to a data source.
+To support multiple data source in OpenSearch Dashboards, we will add “data source” saved object as a reference to the index pattern model. One index pattern will have one data source reference. An index pattern can only refer to one data source, one data source can be used by multiple index patterns.
 
-An index pattern can only refer to one data source, one data source can be used by multiple index patterns.
-With this new “data source” reference in index pattern, OpenSearch Dashboards users will need to create data sources in OpenSearch Dashboards, then select a data source when creating index patterns. Then the visualization and dashboard creation experience will remain the same.
+With this new “data source” reference in index pattern, OpenSearch Dashboards users will need to first create data sources in OpenSearch Dashboards, then select a data source when creating index patterns. Then the visualization and dashboard creation experience will remain the same. Also for any other save object types, if they reference index-pattern, or reference any save object that references index-pattern. Retrieving data from data source will be supported out of the box.
 
-For OpenSearch Dashboards multiple data source user experience, refer to [OpenSearch Dashboards Multiple OpenSearch Data Source Support User Stories](https://quip-amazon.com/VXQ0AhpPs3gU)
+- For OpenSearch Dashboards multiple data source user experience, refer to [OpenSearch Dashboards Multiple OpenSearch Data Source Support User Stories](https://quip-amazon.com/VXQ0AhpPs3gU)
 
-The OpenSearch Dashboards visualization rendering flow will look like following with multi-datasource support: ![image](./img/hld_vis_flow.png)
+- The OpenSearch Dashboards visualization rendering flow will look like following with multi-datasource support: ![image](./img/hld_vis_flow.png)
 
 ### Backward Compatibility
 

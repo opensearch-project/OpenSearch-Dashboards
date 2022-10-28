@@ -25,7 +25,7 @@ This document discusses the user experience of the OpenSearch Dashboards multipl
 We are planning to introduce a new `data-source` model, to describe an OpenSearch data source, and letting index pattern to refer to a `data-source`.
 
 - OpenSearch Dashboards admin setup the OpenSearch Dashboards service and configure the OpenSearch **metadata store endpoint** in `opensearch_dashboards.yml`
-  - the metadata store OpenSearch cluster only saves the `opensearch_dashboards` index, data indices can be saved in other OpenSearch stores
+  - the metadata store OpenSearch cluster only saves the `.kibana` index, data indices can be saved in other OpenSearch stores
 - Users will need to have a data-source before they can do any visualization or analytics work with OpenSearch Dashboards
   - Users can create/update/view data sources
   - Users need to specify a data source when creating new index patterns, data source is not mutable after index pattern is created
