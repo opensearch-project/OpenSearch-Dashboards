@@ -10,7 +10,6 @@ import {
   VisBuilderSavedObjectAttributes,
   VISBUILDER_SAVED_OBJECT,
 } from '../../common';
-import { visBuilderSavedObjectTypeMigrations } from './vis_builder_migration';
 
 export const visBuilderSavedObjectType: SavedObjectsType = {
   name: VISBUILDER_SAVED_OBJECT,
@@ -30,7 +29,7 @@ export const visBuilderSavedObjectType: SavedObjectsType = {
       };
     },
   },
-  migrations: visBuilderSavedObjectTypeMigrations,
+  migrations: {},
   mappings: {
     properties: {
       title: {
