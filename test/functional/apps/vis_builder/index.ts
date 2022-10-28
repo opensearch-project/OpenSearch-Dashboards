@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context.d';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
@@ -12,11 +12,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
-  describe('wizard app', function () {
+  describe('visBuilder app', function () {
     this.tags('ciGroup13');
 
     before(async function () {
-      log.debug('Starting wizard before method');
+      log.debug('Starting visBuilder before method');
       await browser.setWindowSize(1280, 800);
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchArchiver.loadIfNeeded('long_window_logstash');

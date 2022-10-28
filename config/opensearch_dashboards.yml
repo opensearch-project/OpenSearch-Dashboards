@@ -222,7 +222,7 @@
 
 # Set the value of this setting to true to start exploring wizard
 # functionality in Visualization.
-# wizard.enabled: false
+# vis_builder.enabled: false
 
 # Set the value of this setting to true to enable the experimental multiple data source
 # support feature. Use with caution.

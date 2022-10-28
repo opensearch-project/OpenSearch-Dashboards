@@ -91,7 +91,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
         const managementRedirectTarget = {
           [PLUGIN_ID]: {
             app: 'management',
-            path: `opensearch-dashboards/objects/savedWizard/${visualizationIdFromUrl}`,
+            path: `opensearch-dashboards/objects/savedVisBuilder/${visualizationIdFromUrl}`,
           },
         };
 
