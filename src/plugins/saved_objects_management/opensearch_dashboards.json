@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "wizard"],
+  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "visBuilder"],
   "extraPublicDirs": ["public/lib"],
   "requiredBundles": ["opensearchDashboardsReact", "home"]
 }

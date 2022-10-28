@@ -183,7 +183,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     this.timeRange = cloneDeep(this.input.timeRange);
 
     const div = document.createElement('div');
-    div.className = `wizard visualize panel-content panel-content--fullWidth`;
+    div.className = `visBuilder visualize panel-content panel-content--fullWidth`;
     node.appendChild(div);
 
     this.node = div;
@@ -201,7 +201,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
       div.setAttribute('data-description', this.savedVisBuilder.description);
     }
 
-    div.setAttribute('data-test-subj', 'wizardLoader');
+    div.setAttribute('data-test-subj', 'visBuilderLoader');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
