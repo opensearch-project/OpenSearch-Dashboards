@@ -22,7 +22,13 @@ import {
 import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
 import visBuilderIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
 import visBuilderIcon from './assets/wizard_icon.svg';
-import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, VISBUILDER_SAVED_OBJECT } from '../common';
+import {
+  EDIT_PATH,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  VISBUILDER_SAVED_OBJECT,
+  VIS_BUILDER_CHART_TYPE,
+} from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import {
@@ -125,7 +131,7 @@ export class VisBuilderPlugin
       appExtensions: {
         visualizations: {
           docTypes: [PLUGIN_ID],
-          toListItem: ({ id, attributes }) => ({
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
@@ -134,7 +140,8 @@ export class VisBuilderPlugin
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
             title: attributes?.title,
-            typeTitle: PLUGIN_NAME,
+            typeTitle: VIS_BUILDER_CHART_TYPE,
+            updated_at: updatedAt,
           }),
         },
       },
