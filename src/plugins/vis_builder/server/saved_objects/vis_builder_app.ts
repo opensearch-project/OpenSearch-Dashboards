@@ -10,7 +10,6 @@ import {
   VisBuilderSavedObjectAttributes,
   VISBUILDER_SAVED_OBJECT,
 } from '../../common';
-import { visBuilderSavedObjectTypeMigrations } from './vis_builder_migration';
 
 export const visBuilderSavedObjectType: SavedObjectsType = {
   name: VISBUILDER_SAVED_OBJECT,
@@ -22,15 +21,15 @@ export const visBuilderSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
     getTitle: ({ attributes: { title } }: SavedObject<VisBuilderSavedObjectAttributes>) => title,
     getEditUrl: ({ id }: SavedObject) =>
-      `/management/opensearch-dashboards/objects/savedWizard/${encodeURIComponent(id)}`,
+      `/management/opensearch-dashboards/objects/savedVisBuilder/${encodeURIComponent(id)}`,
     getInAppUrl({ id }: SavedObject) {
       return {
         path: `/app/${PLUGIN_ID}${EDIT_PATH}/${encodeURIComponent(id)}`,
-        uiCapabilitiesPath: 'wizard.show',
+        uiCapabilitiesPath: 'visualization-visbuilder.show',
       };
     },
   },
-  migrations: visBuilderSavedObjectTypeMigrations,
+  migrations: {},
   mappings: {
     properties: {
       title: {
