@@ -1,4 +1,4 @@
-# Wizard
+# VisBuilder
 
 An OpenSearch Dashboards plugin for a visualization experience that makes exploring data and creating visualizations much easier. It will act as an additional way to create visualizations alongside the exiting tools within the current visualizations plugin. The tool will be incremental to the visualization tools available to users in OpenSearch Dashboards today.
 
@@ -6,7 +6,7 @@ An OpenSearch Dashboards plugin for a visualization experience that makes explor
 
 To use this plugin, navigate to:
 
-Visualize -> Create Visualization -> Wizard
+Visualize -> Create Visualization -> VisBuilder
 
 ## Add a visualization
 

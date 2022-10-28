@@ -26,7 +26,7 @@ import {
   VisBuilderOutput,
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
-import visBuilderIcon from '../assets/wizard_icon.svg';
+import visBuilderIcon from '../assets/vis_builder_icon.svg';
 import {
   getHttp,
   getSavedVisBuilderLoader,
