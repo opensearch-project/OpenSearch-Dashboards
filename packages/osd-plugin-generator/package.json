@@ -9,6 +9,7 @@
     "osd:watch": "node scripts/build --watch"
   },
   "dependencies": {
+    "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "ejs": "^3.1.7",
     "execa": "^4.0.2",

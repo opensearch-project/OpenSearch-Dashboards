@@ -5,7 +5,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function WizardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function VisBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
@@ -16,14 +16,14 @@ export function WizardPageProvider({ getService, getPageObjects }: FtrProviderCo
    * This page object contains the visualization type selection, the landing page,
    * and the open/save dialog functions
    */
-  class WizardPage {
+  class VisBuilderPage {
     index = {
       LOGSTASH_TIME_BASED: 'logstash-*',
       LOGSTASH_NON_TIME_BASED: 'logstash*',
     };
 
-    public async navigateToCreateWizard() {
-      await common.navigateToApp('wizard');
+    public async navigateToCreateVisBuilder() {
+      await common.navigateToApp('vis-builder');
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -124,5 +124,5 @@ export function WizardPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
   }
 
-  return new WizardPage();
+  return new VisBuilderPage();
 }

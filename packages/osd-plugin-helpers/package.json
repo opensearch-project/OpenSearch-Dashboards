@@ -16,6 +16,7 @@
     "osd:watch": "tsc --watch"
   },
   "dependencies": {
+    "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "del": "^5.1.0",
