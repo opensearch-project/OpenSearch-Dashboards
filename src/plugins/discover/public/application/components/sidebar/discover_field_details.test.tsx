@@ -59,8 +59,9 @@ const indexPattern = getStubIndexPattern(
 
 describe('discover sidebar field details', function () {
   const defaultProps = {
+    columns: [],
+    details: { buckets: [], error: '', exists: 1, total: 1 },
     indexPattern,
-    details: { buckets: [], error: '', exists: 1, total: 1, columns: [] },
     onAddFilter: jest.fn(),
   };
 
@@ -176,7 +177,7 @@ describe('discover sidebar field details', function () {
       details: { ...defaultProps.details, error: errText },
     });
     expect(findTestSubject(comp, 'fieldVisualizeContainer').length).toBe(1);
-    expect(findTestSubject(comp, 'fieldVisualizeBucket').length).toBe(0);
+    expect(findTestSubject(comp, 'fieldVisualizeBucketContainer').length).toBe(0);
     expect(findTestSubject(comp, 'fieldVisualizeError').length).toBe(1);
     expect(findTestSubject(comp, 'fieldVisualizeError').text()).toBe(errText);
 

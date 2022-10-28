@@ -36,7 +36,6 @@ import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 export function getDetails(
   field: IndexPatternField,
   hits: Array<Record<string, unknown>>,
-  columns: string[],
   indexPattern?: IndexPattern
 ) {
   const defaultDetails = {
@@ -44,7 +43,6 @@ export function getDetails(
     exists: 0,
     total: 0,
     buckets: [],
-    columns,
   };
   if (!indexPattern) {
     return {

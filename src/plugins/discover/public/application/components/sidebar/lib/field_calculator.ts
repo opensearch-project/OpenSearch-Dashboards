@@ -28,7 +28,6 @@
  * under the License.
  */
 
-// import _ from 'lodash';
 import { i18n } from '@osd/i18n';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { FieldValueCounts } from '../types';

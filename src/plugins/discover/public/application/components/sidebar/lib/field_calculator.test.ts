@@ -105,7 +105,7 @@ describe('field_calculator', function () {
     });
 
     it('should count array terms independently', function () {
-      expect(groups['foo,bar']).toBe(undefined);
+      expect(groups['foo,bar']).toBeUndefined();
       expect(groups.foo.count).toBe(5);
       expect(groups.bar.count).toBe(3);
       expect(groups.baz.count).toBe(1);
@@ -196,7 +196,7 @@ describe('field_calculator', function () {
       expect(extensions.buckets).toBeInstanceOf(Array);
       const buckets = extensions.buckets as Bucket[];
       expect(buckets.length).toBe(5);
-      expect(extensions.error).toBe(undefined);
+      expect(extensions.error).toBeUndefined();
     });
 
     it('counts only distinct values if less than default', function () {
@@ -206,7 +206,7 @@ describe('field_calculator', function () {
       expect(extensions.buckets).toBeInstanceOf(Array);
       const buckets = extensions.buckets as Bucket[];
       expect(buckets.length).toBe(4);
-      expect(extensions.error).toBe(undefined);
+      expect(extensions.error).toBeUndefined();
     });
 
     it('counts only distinct values if less than specified count', function () {
@@ -216,7 +216,7 @@ describe('field_calculator', function () {
       expect(extensions.buckets).toBeInstanceOf(Array);
       const buckets = extensions.buckets as Bucket[];
       expect(buckets.length).toBe(4);
-      expect(extensions.error).toBe(undefined);
+      expect(extensions.error).toBeUndefined();
     });
 
     it('counts the top 3 values', function () {
@@ -226,23 +226,23 @@ describe('field_calculator', function () {
       const buckets = extensions.buckets as Bucket[];
       expect(buckets.length).toBe(3);
       expect(_.map(buckets, 'value')).toEqual(['html', 'gif', 'php']);
-      expect(extensions.error).toBe(undefined);
+      expect(extensions.error).toBeUndefined();
     });
 
     it('fails to analyze geo and attachment types', function () {
       params.field = indexPattern.fields.getByName('point') as IndexPatternField;
-      expect(getFieldValueCounts(params).error).not.toBe(undefined);
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
       params.field = indexPattern.fields.getByName('area') as IndexPatternField;
-      expect(getFieldValueCounts(params).error).not.toBe(undefined);
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
       params.field = indexPattern.fields.getByName('request_body') as IndexPatternField;
-      expect(getFieldValueCounts(params).error).not.toBe(undefined);
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
       params.field = indexPattern.fields.getByName('ip') as IndexPatternField;
-      expect(getFieldValueCounts(params).error).not.toBe(undefined);
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
 
     it('counts the total hits', function () {

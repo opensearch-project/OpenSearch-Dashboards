@@ -43,16 +43,18 @@ import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import './discover_field_details.scss';
 
 interface DiscoverFieldDetailsProps {
+  columns: string[];
+  details: FieldDetails;
   field: IndexPatternField;
   indexPattern: IndexPattern;
-  details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({
+  columns,
+  details,
   field,
   indexPattern,
-  details,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
@@ -61,25 +63,23 @@ export function DiscoverFieldDetails({
 
   useEffect(() => {
     const checkIfVisualizable = async () => {
-      const visualizable = await isFieldVisualizable(field, indexPattern.id, details.columns).catch(
+      const visualizable = await isFieldVisualizable(field, indexPattern.id, columns).catch(
         () => false
       );
 
       setShowVisualizeLink(visualizable);
       if (visualizable) {
-        const href = await getVisualizeHref(field, indexPattern.id, details.columns).catch(
-          () => ''
-        );
+        const href = await getVisualizeHref(field, indexPattern.id, columns).catch(() => '');
         setVisualizeLink(href || '');
       }
     };
     checkIfVisualizable();
-  }, [field, indexPattern.id, details.columns]);
+  }, [field, indexPattern.id, columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // regular link click. let the uiActions code handle the navigation and show popup if needed
     event.preventDefault();
-    triggerVisualizeActions(field, indexPattern.id, details.columns);
+    triggerVisualizeActions(field, indexPattern.id, columns);
   };
 
   return (
