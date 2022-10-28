@@ -32,6 +32,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import loadJsonFile from 'load-json-file';
+import { fullpath } from '@osd/cross-platform';
 
 const readOpenSearchDashboardsPkgJson = (dir: string) => {
   try {
@@ -58,7 +59,7 @@ const findOpenSearchDashboardsPackageJson = () => {
   // search for the opensearch-dashboards directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
-  const startDir = Fs.realpathSync(__dirname);
+  const startDir = fullpath(Fs.realpathSync(__dirname));
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {

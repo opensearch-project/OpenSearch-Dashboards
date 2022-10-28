@@ -4,6 +4,7 @@
  */
 
 import { normalize } from 'path';
+import { execSync } from 'child_process';
 
 /**
  * Get a standardized reference to a path
@@ -27,4 +28,27 @@ export const standardize = (
 
   if (usePosix) return normal.replace(/\\/g, '/');
   return escapedBackslashes ? normal.replace(/\\/g, '\\\\') : normal;
+};
+
+/**
+ * Get the fullpath of a directory on non-POSIX system
+ * @param {string} path - the path to standardize
+ * @internal
+ */
+
+export const fullpath = (
+  path: string = process.cwd()
+) => {
+  if (process.platform === 'win32') {
+    try {
+      const pathFullName = execSync('powershell "(Get-Item -LiteralPath $pwd).FullName"', {
+        cwd: path,
+        encoding: 'utf8',
+      })?.trim?.();
+      if (pathFullName?.length > 2) path = pathFullName;
+    } catch (ex) {
+      // Do nothing
+    }
+  }
+  return path;
 };
