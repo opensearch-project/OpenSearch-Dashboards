@@ -38,6 +38,7 @@ interface ParsedQuery {
 export function parseQuery(query: Query): ParsedQuery {
   let queryText: string | undefined;
   let visibleTypes: string[] | undefined;
+  let visibleNamespaces: string[] | undefined;
 
   if (query) {
     if (query.ast.getTermClauses().length) {
@@ -49,10 +50,14 @@ export function parseQuery(query: Query): ParsedQuery {
     if (query.ast.getFieldClauses('type')) {
       visibleTypes = query.ast.getFieldClauses('type')[0].value as string[];
     }
+    if (query.ast.getFieldClauses('namespaces')) {
+      visibleNamespaces = query.ast.getFieldClauses('namespaces')[0].value as string[];
+    }
   }
 
   return {
     queryText,
     visibleTypes,
+    visibleNamespaces,
   };
 }

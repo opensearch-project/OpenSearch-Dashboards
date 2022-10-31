@@ -39,6 +39,11 @@ export {
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
 export {
+  SavedObjectsManagementNamespaceService,
+  SavedObjectsManagementNamespaceServiceStart,
+  SavedObjectsManagementNamespaceServiceSetup,
+} from './namespace_service';
+export {
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
@@ -46,5 +51,6 @@ export {
 export {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumn,
+  SavedObjectsManagementNamespace,
   SavedObjectsManagementRecord,
 } from './types';
