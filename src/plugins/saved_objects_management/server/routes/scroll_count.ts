@@ -50,17 +50,15 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const counts = {
         type: {},
       };
-      if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
-        counts.namespaces = {};
-      }
 
       const findOptions: SavedObjectsFindOptions = {
         type: req.body.typesToInclude,
         perPage: 1000,
       };
 
-      if (namespaces.length > 0) {
-        findOptions.namespaces = namespaces;
+      if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
+        counts.namespaces = {};
+        findOptions.namespaces = req.body.namespacesToInclude;
       }
 
       if (req.body.searchString) {
