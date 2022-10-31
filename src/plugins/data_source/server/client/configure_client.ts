@@ -13,7 +13,7 @@ import {
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceConfigError } from '../lib/error';
+import { createDataSourceError, DataSourceError } from '../lib/error';
 import { DataSourceClientParams } from '../types';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
@@ -32,8 +32,8 @@ export const configureClient = async (
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
-    // Re-throw as DataSourceConfigError
-    throw new DataSourceConfigError('Failed to get data source client: ', error);
+    // Re-throw as DataSourceError
+    throw createDataSourceError(error);
   }
 };
 
@@ -59,8 +59,8 @@ export const getCredential = async (
   const { decryptedText, encryptionContext } = await cryptography
     .decodeAndDecrypt(password)
     .catch((err: any) => {
-      // Re-throw as DataSourceConfigError
-      throw new DataSourceConfigError('Unable to decrypt "auth.credentials.password".', err);
+      // Re-throw as DataSourceError
+      throw createDataSourceError(err);
     });
 
   if (encryptionContext!.endpoint !== endpoint) {

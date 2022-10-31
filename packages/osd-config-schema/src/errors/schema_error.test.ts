@@ -28,8 +28,10 @@
  * under the License.
  */
 
-import { relative } from 'path';
+import { relative, sep } from 'path';
 import { SchemaError } from '.';
+
+import { standardize, PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 /**
  * Make all paths in stacktrace relative.
@@ -37,7 +39,7 @@ import { SchemaError } from '.';
 export const cleanStack = (stack: string) =>
   stack
     .split('\n')
-    .filter((line) => !line.includes('node_modules/') && !line.includes('internal/'))
+    .filter((line) => !line.includes('node_modules' + sep) && !line.includes('internal/'))
     .map((line) => {
       const parts = /.*\((.*)\).?/.exec(line) || [];
 
@@ -46,7 +48,9 @@ export const cleanStack = (stack: string) =>
       }
 
       const path = parts[1];
-      return line.replace(path, relative(process.cwd(), path));
+      const relativePath = standardize(relative(PROCESS_WORKING_DIR, path));
+
+      return line.replace(path, relativePath);
     })
     .join('\n');
 

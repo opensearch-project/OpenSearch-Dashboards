@@ -62,6 +62,7 @@ const allIndices = [
 ];
 
 const goToNextStep = () => {};
+const catchAndWarn = jest.fn(async (asyncFn) => await asyncFn);
 
 const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
@@ -94,6 +95,7 @@ describe('StepIndexPattern', () => {
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
         initialQuery: 'opensearch-dashboards',
+        catchAndWarn,
       },
       mockContext
     );
@@ -116,6 +118,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
+        catchAndWarn,
       },
       mockContext
     );
@@ -139,6 +142,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
+        catchAndWarn,
       },
       mockContext
     );
@@ -163,6 +167,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
+        catchAndWarn,
       },
       mockContext
     );
@@ -179,6 +184,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
+        catchAndWarn,
       },
       mockContext
     );
@@ -194,6 +200,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
+        catchAndWarn,
       },
       mockContext
     );

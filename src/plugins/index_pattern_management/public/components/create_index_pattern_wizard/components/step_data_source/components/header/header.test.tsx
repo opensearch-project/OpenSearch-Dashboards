@@ -18,20 +18,6 @@ jest.mock('../../../../../../../../../plugins/opensearch_dashboards_react/public
 afterAll(() => jest.clearAllMocks());
 
 describe('Header', () => {
-  it('should render normally', () => {
-    const component = shallowWithIntl(
-      <Header
-        onDataSourceSelected={() => {}}
-        dataSourceRef={{ type: 'type', id: 'id', title: 'title' }!}
-        goToNextStep={() => {}}
-        isNextStepDisabled={true}
-        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
   it('should render existing data sources list when choose to use data source', () => {
     const component = shallowWithIntl(
       <Header
@@ -51,7 +37,12 @@ describe('Header', () => {
         },
       });
 
-    expect(component).toMatchSnapshot();
+    expect(
+      component
+        .find('[data-test-subj="createIndexPatternStepDataSourceSelectDataSource"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
   });
 
   it('should disable next step before select data source', () => {

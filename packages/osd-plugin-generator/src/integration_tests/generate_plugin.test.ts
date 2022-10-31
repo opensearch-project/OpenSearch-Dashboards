@@ -32,13 +32,18 @@ import Path from 'path';
 
 import del from 'del';
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/utils';
-import { createAbsolutePathSerializer } from '@osd/dev-utils';
+import { standardize } from '@osd/cross-platform';
+import { REPO_ROOT, createAbsolutePathSerializer } from '@osd/dev-utils';
 import globby from 'globby';
 
-const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);
+// Has to be a posix reference because it is used to generate glob patterns
+const GENERATED_DIR = standardize(Path.resolve(REPO_ROOT, `plugins`), true);
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer());
+expect.addSnapshotSerializer(
+  createAbsolutePathSerializer(
+    process?.platform === 'win32' ? standardize(REPO_ROOT, true) : REPO_ROOT
+  )
+);
 
 beforeEach(async () => {
   await del([`${GENERATED_DIR}/**`, `!${GENERATED_DIR}`, `!${GENERATED_DIR}/.gitignore`], {

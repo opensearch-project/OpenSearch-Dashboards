@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 import {
   EuiSpacer,
   EuiCallOut,
@@ -65,6 +65,11 @@ interface StepIndexPatternProps {
   showSystemIndices: boolean;
   dataSourceRef?: DataSourceRef;
   stepInfo: StepInfo;
+  catchAndWarn: (
+    asyncFn: Promise<MatchedItem[]>,
+    errorValue: [] | string[],
+    errorMsg: ReactElement
+  ) => Promise<unknown>;
 }
 
 interface StepIndexPatternState {
@@ -165,7 +170,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   };
 
   fetchIndices = async (query: string) => {
-    const { indexPatternCreationType, dataSourceRef } = this.props;
+    const { indexPatternCreationType, dataSourceRef, catchAndWarn } = this.props;
     const dataSourceId = dataSourceRef?.id;
     const { existingIndexPatterns } = this.state;
     const { http } = this.context.services;
@@ -180,16 +185,27 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
 
+    const indicesFailMsg = (
+      <FormattedMessage
+        id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
+        defaultMessage="Failed to load indices"
+      />
+    );
+
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices({
-          http,
-          getIndexTags,
-          pattern: query,
-          showAllIndices,
-          searchClient,
-          dataSourceId,
-        })
+        catchAndWarn(
+          getIndices({
+            http,
+            getIndexTags,
+            pattern: query,
+            showAllIndices,
+            searchClient,
+            dataSourceId,
+          }),
+          [],
+          indicesFailMsg
+        )
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -200,22 +216,30 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices({
-        http,
-        getIndexTags,
-        pattern: `${query}*`,
-        showAllIndices,
-        searchClient,
-        dataSourceId,
-      }),
-      getIndices({
-        http,
-        getIndexTags,
-        pattern: query,
-        showAllIndices,
-        searchClient,
-        dataSourceId,
-      }),
+      catchAndWarn(
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: `${query}*`,
+          showAllIndices,
+          searchClient,
+          dataSourceId,
+        }),
+        [],
+        indicesFailMsg
+      ),
+      catchAndWarn(
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: query,
+          showAllIndices,
+          searchClient,
+          dataSourceId,
+        }),
+        [],
+        indicesFailMsg
+      ),
     ]);
 
     // If the search changed, discard this state

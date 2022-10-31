@@ -137,7 +137,7 @@ describe('parse function', function () {
     `);
   });
 
-  it('should throw when on a non-Linux platform', function () {
+  it('produces expected results on Windows', function () {
     Object.defineProperties(process, {
       platform: {
         value: 'win32',
@@ -146,9 +146,23 @@ describe('parse function', function () {
         value: 'x64',
       },
     });
-    expect(() => parse(command, { ...defaultOptions }, osdPackage)).toThrow(
-      'Plugins are only available for Linux'
-    );
+    expect(parse(command, { ...defaultOptions }, osdPackage)).toMatchInlineSnapshot(`
+      Object {
+        "config": "",
+        "plugin": "plugin name",
+        "pluginDir": <absolute path>/plugins,
+        "quiet": false,
+        "silent": false,
+        "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
+        "timeout": 0,
+        "urls": Array [
+          "plugin name",
+          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/windows/x64/tar/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
+        ],
+        "version": 1234,
+        "workingPath": <absolute path>/plugins/.plugin.installing,
+      }
+    `);
   });
 
   it('should not throw when on a non-x64 arch', function () {

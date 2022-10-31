@@ -53,7 +53,8 @@ describe('#getProjects', () => {
 
     await promisify(symlink)(
       join(__dirname, '__fixtures__/symlinked-plugins/corge'),
-      join(rootPlugins, 'corge')
+      join(rootPlugins, 'corge'),
+      'junction' // This parameter would only be used on Windows
     );
   });
 
