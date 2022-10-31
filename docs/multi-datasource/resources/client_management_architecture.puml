@@ -1,0 +1,117 @@
+@startuml
+hide stereotype
+skinparam nodesep 6
+skinparam ranksep 10
+
+skinparam component {
+backgroundColor<<new>> Green
+backgroundColor<<modify>> Orange
+backgroundColor<<existing>> LightYellow
+backgroundColor<<external>> LightGrey
+backgroundColor<<AOS>> Khaki
+backgroundColor<<Data>> Grey
+backgroundColor<<CS>> LightGrey
+}
+skinparam rectangle {
+backgroundColor<<new>> Green
+backgroundColor<<modify>> Orange
+backgroundColor<<existing>> LightYellow
+backgroundColor<<external>> LightGrey
+backgroundColor<<AOS>> Khaki
+backgroundColor<<Data>> Grey
+backgroundColor<<CS>> LightGrey
+}
+skinparam node {
+backgroundColor<<new>> Green
+backgroundColor<<modify>> Orange
+backgroundColor<<existing>> LightYellow
+backgroundColor<<external>> LightGrey
+backgroundColor<<AOS>> Khaki
+backgroundColor<<Data>> Grey
+backgroundColor<<CS>> LightGrey
+}
+
+title ** OSD Multi Data Source Client Management Architecture **
+
+node "Dashboards" as cluster {
+rectangle "Legend" {
+    rectangle "New" as new <<new>>
+    rectangle "Modified" as modify <<modify>>
+    rectangle "Existing" as existing <<existing>>
+    rectangle "External" as external <<external>>
+    new -[hidden]right- modify
+    modify -[hidden]right- existing
+    existing -[hidden]right- external    
+}
+
+  rectangle "Other Plugins" <<existing>> {
+    rectangle "visualization" as viz <<existing>> {
+      
+    }
+    rectangle "Alerting or other" as a <<modify>> {
+      
+    }
+  }
+  rectangle "Data Plugin" <<Existing>> as dp {
+    rectangle "Search Module" as sm <<existing>> {
+      rectangle "Search Source" <<modify>> as source {
+
+      }
+      rectangle "Search Strategy" as strategy <<modify>> {
+
+      }
+      
+    }
+    interface "DataPluginStart" as dps
+  }
+
+  rectangle "OpenSearch Data Source Plugin" as ods <<new>> {
+        component "DataSource Service" as ds
+        interface "PluginSetUp" as dsps
+        component "Crypto Service" as cs
+      }
+
+  rectangle "Core" <<existing>> as core {
+       
+      rectangle "opensearch service" as os_service <<modify>> {
+        component "internal/scoped client" as ic <<existing>>
+        interface "ServiceStart" as osss
+
+      }
+      interface "CoreStart" as core_start
+      rectangle "saved object service" as sos <<existing>> {
+        interface "ServiceStart" as soss
+      }
+     
+      interface "CoreRouteHandlerContext" as cc <<modify>>
+      
+
+  }
+
+  ds --> es: query
+  source -> strategy: call
+  strategy --> cc: get datasource client 
+  viz --> dps: speical viz types
+  viz --> source
+  dps --> sm
+  sos --> os: get saved objects
+  core_start --> cc
+  core_start <.. a: get client
+  a ..> dps
+  a ...> cc: get client
+  core_start <-- osss: register
+  osss <-- soss: depends
+  ic --> os: query
+  ds -> cs: decrypt credential
+  dsps ---> cc: register
+  dp --[hidden]-- ods
+
+  rectangle "Default OpenSearch" <<existing>> as os {
+  }
+  rectangle "Datasource(OpenSearch)" <<external>> as es {
+
+  }
+}
+
+
+@enduml
