@@ -141,9 +141,7 @@ describe('IndexMigrator', () => {
       },
     });
 
-    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow(
-      /use the X-Pack upgrade assistant/
-    );
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow();
   });
 
   test('fails if root doc type is not "doc"', async () => {
@@ -164,9 +162,7 @@ describe('IndexMigrator', () => {
       },
     });
 
-    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow(
-      /use the X-Pack upgrade assistant/
-    );
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow();
   });
 
   test('retains unknown core field mappings from the previous index', async () => {
