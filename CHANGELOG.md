@@ -12,6 +12,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 📈 Features/Enhancements
 
 ### 🐛 Bug Fixes
+* [BUG] Fix suggestion list cutoff issue ([#2607](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2607))
 
 ### 🚞 Infrastructure
 
@@ -46,7 +47,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛠 Maintenance
 
-* [Version] Increment to 1.4 ([#1341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1341)) 
+* [Version] Increment to 1.4 ([#1341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1341))
 
 ### 🪛 Refactoring
 
