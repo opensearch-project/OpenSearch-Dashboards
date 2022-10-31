@@ -1,0 +1,75 @@
+@startuml
+autoactivate on
+
+title ** Multiple Datasource Visualization call sequence **
+
+box "OSD Browser"
+participant "visualization" as viz
+' participant "Timeline/Vega/TSVB" as viz_s
+participant "expression" as e
+end box
+
+
+box "OSD Server-Data Plugin" #LightBlue
+participant "SearchSource\n(High Level API)" as s
+participant "Search Strategy\n(Low Level API)" as ss
+end box
+
+box "OSD Server-Data Source Plugin" #LightBlue
+participant "OpenSearch Data Service" as ods #LightGreen
+end box
+
+box "OSD Server-Core" #LightBlue
+participant "OpenSearch Service" as os 
+participant "Saved Object Service" as sos
+end box
+
+box "OpenSearch"
+database "OSD metadata" as oi
+database "data index" as default_di
+end box
+
+box "DataSource[OS]"
+database "data index" as datasource_di
+end box
+
+sos --> os: depends on
+ods --> sos: depends on
+
+viz -> e: execute expression pipeline
+e -> s: create SearchSource 
+s -> ss: call .search()
+alt viz_type = Timelion/TSVB/Vega
+viz -> ss: call .search()
+end
+
+ss -> os: get client
+alt if (datasource == true)
+ss -> ods: get datasource client
+alt if exists in datasource client pool
+ods -> ods: find client
+end
+
+ods -> sos: call saved_obj_client
+sos -> oi: get datasource metadata
+oi --> sos:
+sos --> ods: datasource metadata
+ods --> ods: create datasource client \n and add to pool
+ods --> ss: return client
+
+end
+os --> ss: return client
+alt if (client is datasource Client)
+ss -> datasource_di: query
+datasource_di --> ss: data 
+end
+
+ss -> default_di: query
+default_di --> ss: data 
+
+ss --> s: data
+s --> e: data
+e --> viz: render data
+
+skinparam BoxPadding 15
+@enduml
