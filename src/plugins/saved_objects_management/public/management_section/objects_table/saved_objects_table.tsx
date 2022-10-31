@@ -202,7 +202,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
-        label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
+        label: `${id} (${filteredTypeCounts[id] || 0})`,
       });
 
       // Select it by default.
