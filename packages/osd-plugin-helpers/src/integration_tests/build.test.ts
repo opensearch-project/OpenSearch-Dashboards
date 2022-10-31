@@ -32,8 +32,12 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { standardize } from '@osd/cross-platform';
-import { REPO_ROOT, createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
+import {
+  REPO_ROOT,
+  standardize,
+  createStripAnsiSerializer,
+  createReplaceSerializer,
+} from '@osd/dev-utils';
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
