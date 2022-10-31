@@ -73,15 +73,7 @@ export const registerFindRoute = (
         const namespacesToInclude = Array.isArray(req.query.namespaces)
           ? req.query.namespaces
           : [req.query.namespaces];
-        const searchNamespaces = [];
-        namespacesToInclude.forEach((ns) => {
-          if (ns == null) {
-            searchNamespaces.push('default');
-          } else {
-            searchNamespaces.push(ns);
-          }
-        });
-        req.query.namespaces = searchNamespaces;
+        req.query.namespaces = namespacesToInclude;
       }
       const includedFields = Array.isArray(req.query.fields)
         ? req.query.fields

@@ -209,8 +209,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    let availableNamespaces = namespaceRegistry.getAll() || [];
-    availableNamespaces = availableNamespaces.map((ns) => ns.id);
+    let availableNamespaces = namespaceRegistry.getAll();
+    if (availableNamespaces && availableNamespaces.length > 0) {
+      availableNamespaces = availableNamespaces.map((ns) => ns.id);
+    }
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
@@ -239,11 +241,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes } = this.props;
+    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
     const filteredTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
+
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -252,8 +255,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-      namespaces: visibleNamespaces,
     };
+
+    let availableNamespaces = namespaceRegistry.getAll();
+    if (availableNamespaces && availableNamespaces.length > 0) {
+      availableNamespaces = availableNamespaces.map((ns) => ns.id);
+      const filteredNamespaces = availableNamespaces.filter(
+        (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
+      );
+      findOptions.namespaces = filteredNamespaces;
+    }
+
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
     }
