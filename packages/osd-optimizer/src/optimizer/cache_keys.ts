@@ -28,13 +28,12 @@
  * under the License.
  */
 
-import Path from 'path';
-import Fs from 'fs';
-import { promisify } from 'util';
+import { dirname, resolve } from 'path';
+import { readFile } from 'fs/promises';
 
 import Chalk from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/utils';
+import { relativeToRepoRoot, REPO_ROOT } from '@osd/cross-platform';
 import stripAnsi from 'strip-ansi';
 
 import { diff } from 'jest-diff';
@@ -45,8 +44,8 @@ import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
 import { OptimizerConfig } from './optimizer_config';
 
-const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
-const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
+const OPTIMIZER_DIR = dirname(require.resolve('../../package.json'));
+const RELATIVE_DIR = relativeToRepoRoot(OPTIMIZER_DIR)!;
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
   const expectedJson = jsonStable(expected, {
@@ -156,10 +155,7 @@ async function getLastCommit() {
 
 async function getBootstrapCacheKey() {
   try {
-    return await promisify(Fs.readFile)(
-      Path.resolve(OPTIMIZER_DIR, 'target/.bootstrap-cache'),
-      'utf8'
-    );
+    return await readFile(resolve(OPTIMIZER_DIR, 'target/.bootstrap-cache'), { encoding: 'utf8' });
   } catch (error) {
     if (error?.code !== 'ENOENT') {
       throw error;

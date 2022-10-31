@@ -30,7 +30,7 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT, standardize } from '@osd/utils';
+import { standardize, REPO_ROOT } from '@osd/cross-platform';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import pkg from '../../../../package.json';

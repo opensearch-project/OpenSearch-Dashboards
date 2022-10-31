@@ -62,6 +62,7 @@ export async function createArchive({ opensearchDashboardsVersion, plugin, log }
     vfs.dest(buildDir)
   );
 
+  log.info(`cleaning up compression temporary artifacts`);
   // delete the files that were zipped
-  await del(Path.resolve(buildDir, 'opensearch-dashboards'));
+  await del(Path.resolve(buildDir, 'opensearch-dashboards'), { cwd: buildDir });
 }
