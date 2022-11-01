@@ -31,6 +31,8 @@
 import { relative, sep } from 'path';
 import { SchemaError } from '.';
 
+import { standardize, getRepoRoot } from '@osd/cross-platform';
+
 /**
  * Make all paths in stacktrace relative.
  */
@@ -46,9 +48,7 @@ export const cleanStack = (stack: string) =>
       }
 
       const path = parts[1];
-      // Cannot use `standardize` from `@osd/utils
-      let relativePath = relative(process.cwd(), path);
-      if (process.platform === 'win32') relativePath = relativePath.replace(/\\/g, '/');
+      const relativePath = standardize(relative(getRepoRoot(path) || '.', path));
 
       return line.replace(path, relativePath);
     })

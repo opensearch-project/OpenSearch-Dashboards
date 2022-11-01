@@ -29,6 +29,7 @@
  */
 
 import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 export class File {
   private path: string;
@@ -37,7 +38,7 @@ export class File {
 
   constructor(path: string) {
     this.path = resolve(path);
-    this.relativePath = relative(process.cwd(), this.path);
+    this.relativePath = relative(PROCESS_WORKING_DIR, this.path);
     this.ext = extname(this.path);
   }
 
