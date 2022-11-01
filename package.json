@@ -87,6 +87,7 @@
     "**/istanbul-instrumenter-loader/schema-utils": "^1.0.0",
     "**/json-schema": "^0.4.0",
     "**/kind-of": ">=6.0.3",
+    "**/loader-utils": "^2.0.3",
     "**/lodash": "^4.17.21",
     "**/merge": "^2.1.1",
     "**/minimist": "^1.2.5",
