@@ -38,10 +38,10 @@ interface SavedObjectCountOptions {
 
 export async function getSavedObjectCounts(
   http: HttpStart,
-  countOptions: SavedObjectCountOptions
+  options: SavedObjectCountOptions
 ): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/opensearch-dashboards/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify(countOptions) }
+    { body: JSON.stringify(options) }
   );
 }
