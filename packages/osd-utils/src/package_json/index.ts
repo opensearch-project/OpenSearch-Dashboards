@@ -29,7 +29,7 @@
  */
 
 import { dirname, resolve } from 'path';
-import { REPO_ROOT } from '../repo_root';
+import { REPO_ROOT } from '@osd/cross-platform';
 
 export const opensearchDashboardsPackageJSON = {
   __filename: resolve(REPO_ROOT, 'package.json'),
