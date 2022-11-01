@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import Fs from 'fs';
+import { mkdir } from 'fs/promises';
 import { join } from 'path';
 import http from 'http';
 
@@ -40,6 +40,7 @@ import del from 'del';
 import { Logger } from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 describe('opensearchDashboards cli', function () {
   describe('plugin downloader', function () {
@@ -70,17 +71,17 @@ describe('opensearchDashboards cli', function () {
       throw new Error('expected the promise to reject');
     }
 
-    beforeEach(function () {
+    beforeEach(async () => {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del.sync(testWorkingPath);
-      Fs.mkdirSync(testWorkingPath, { recursive: true });
+      await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
+      await mkdir(testWorkingPath, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(async () => {
       logger.log.restore();
       logger.error.restore();
-      del.sync(testWorkingPath);
+      del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
     });
 
     describe('_downloadSingle', function () {

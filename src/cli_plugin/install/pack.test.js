@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import Fs from 'fs';
 import { join } from 'path';
+import { mkdir } from 'fs/promises';
 
 import sinon from 'sinon';
 import glob from 'glob-all';
@@ -38,6 +38,7 @@ import del from 'del';
 import { Logger } from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 describe('opensearchDashboards cli', function () {
   describe('pack', function () {
@@ -49,7 +50,7 @@ describe('opensearchDashboards cli', function () {
     let logger;
     let settings;
 
-    beforeEach(function () {
+    beforeEach(async () => {
       //These tests are dependent on the file system, and I had some inconsistent
       //behavior with del.sync show up. Until these tests are re-written to not
       //depend on the file system, I make sure that each test uses a different
@@ -69,14 +70,14 @@ describe('opensearchDashboards cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      Fs.mkdirSync(testWorkingPath, { recursive: true });
+      await mkdir(testWorkingPath, { recursive: true });
     });
 
     afterEach(async () => {
       logger.log.restore();
       logger.error.restore();
 
-      await del(workingPathRoot);
+      await del(workingPathRoot, { cwd: PROCESS_WORKING_DIR });
     });
 
     function copyReplyFile(filename) {
