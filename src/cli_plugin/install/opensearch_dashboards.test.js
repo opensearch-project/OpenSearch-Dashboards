@@ -30,12 +30,14 @@
 
 import { join } from 'path';
 import fs from 'fs';
+import { mkdir } from 'fs/promises';
 
 import sinon from 'sinon';
 import del from 'del';
 
 import { existingInstall, assertVersion } from './opensearch_dashboards';
 import { Logger } from '../lib/logger';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 jest.spyOn(fs, 'statSync');
 
@@ -62,17 +64,17 @@ describe('opensearchDashboards cli', function () {
       const logger = new Logger(settings);
 
       describe('assertVersion', function () {
-        beforeEach(function () {
-          del.sync(testWorkingPath);
-          fs.mkdirSync(testWorkingPath, { recursive: true });
+        beforeEach(async () => {
+          await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
+          await mkdir(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
         });
 
-        afterEach(function () {
+        afterEach(async () => {
           logger.log.restore();
           logger.error.restore();
-          del.sync(testWorkingPath);
+          await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
         });
 
         it('should succeed with exact match', function () {

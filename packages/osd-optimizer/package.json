@@ -13,6 +13,7 @@
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.5",
     "@osd/babel-preset": "1.0.0",
+    "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "@osd/std": "1.0.0",
     "@osd/ui-shared-deps": "1.0.0",

@@ -30,11 +30,12 @@
 
 import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
 
-import path from 'path';
+import { resolve } from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
-import { normalizePath } from './utils';
+import { relativeToRepoRoot, standardize } from '@osd/cross-platform';
 
-const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');
+const currentDir = relativeToRepoRoot(__dirname);
+const localePath = resolve(currentDir, '__fixtures__', 'integrate_locale_files', 'fr.json');
 
 const mockDefaultMessagesMap = new Map([
   ['plugin-1.message-id-1', { message: 'Message text 1' }],
@@ -180,9 +181,12 @@ Map {
       const [[path1, json1], [path2, json2]] = mockWriteFileAsync.mock.calls;
       const [[dirPath1], [dirPath2]] = mockMakeDirAsync.mock.calls;
 
-      expect([normalizePath(path1), json1]).toMatchSnapshot();
-      expect([normalizePath(path2), json2]).toMatchSnapshot();
-      expect([normalizePath(dirPath1), normalizePath(dirPath2)]).toMatchSnapshot();
+      expect([standardize(relativeToRepoRoot(path1)), json1]).toMatchSnapshot();
+      expect([standardize(relativeToRepoRoot(path2)), json2]).toMatchSnapshot();
+      expect([
+        standardize(relativeToRepoRoot(dirPath1)),
+        standardize(relativeToRepoRoot(dirPath2)),
+      ]).toMatchSnapshot();
     });
   });
 });

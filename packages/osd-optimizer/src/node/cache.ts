@@ -33,6 +33,7 @@ import { Writable } from 'stream';
 
 import chalk from 'chalk';
 import * as LmdbStore from 'lmdb-store';
+import { getMatchingRoot } from '@osd/cross-platform';
 
 const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
@@ -48,17 +49,24 @@ export class Cache {
   private readonly atimes: LmdbStore.Database<string, string>;
   private readonly mtimes: LmdbStore.Database<string, string>;
   private readonly sourceMaps: LmdbStore.Database<string, string>;
-  private readonly pathRoot: string;
+  private readonly pathRoots: string[];
   private readonly prefix: string;
   private readonly log?: Writable;
   private readonly timer: NodeJS.Timer;
 
-  constructor(config: { pathRoot: string; dir: string; prefix: string; log?: Writable }) {
-    if (!Path.isAbsolute(config.pathRoot)) {
+  constructor(config: {
+    pathRoot: string | string[];
+    dir: string;
+    prefix: string;
+    log?: Writable;
+  }) {
+    const pathRoots = Array.isArray(config.pathRoot) ? config.pathRoot : [config.pathRoot];
+
+    if (!pathRoots.every((pathRoot) => Path.isAbsolute(pathRoot))) {
       throw new Error('cache requires an absolute path to resolve paths relative to');
     }
 
-    this.pathRoot = config.pathRoot;
+    this.pathRoots = pathRoots;
     this.prefix = config.prefix;
     this.log = config.log;
 
@@ -139,10 +147,17 @@ export class Cache {
   }
 
   private getKey(path: string) {
+    const resolvedPath = Path.resolve(path);
+    /* Try to find the root that is the parent to `path` so we can make a nimble
+     * and unique key based on the relative path. If A root was not found, just
+     * use any of the roots; the key would just be long.
+     */
+    const pathRoot = getMatchingRoot(resolvedPath, this.pathRoots) || this.pathRoots[0];
+
     const normalizedPath =
       Path.sep !== '/'
-        ? Path.relative(this.pathRoot, path).split(Path.sep).join('/')
-        : Path.relative(this.pathRoot, path);
+        ? Path.relative(pathRoot, resolvedPath).split(Path.sep).join('/')
+        : Path.relative(pathRoot, resolvedPath);
 
     return `${this.prefix}${normalizedPath}`;
   }
