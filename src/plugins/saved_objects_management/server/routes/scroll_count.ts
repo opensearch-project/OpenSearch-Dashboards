@@ -55,7 +55,10 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         perPage: 1000,
       };
 
-      if (!!req.body.namespacesToInclude) {
+      const requestHasNamespaces =
+        Array.isArray(req.body.namespacesToInclude) && req.body.namespacesToInclude.length;
+
+      if (requestHasNamespaces) {
         counts.namespaces = {};
         findOptions.namespaces = req.body.namespacesToInclude;
       }
@@ -69,7 +72,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       objects.forEach((result) => {
         const type = result.type;
-        if (!!req.body.namespacesToInclude) {
+        if (requestHasNamespaces) {
           const resultNamespaces = (result.namespaces || []).flat();
           resultNamespaces.forEach((ns) => {
             if (ns === null) {
