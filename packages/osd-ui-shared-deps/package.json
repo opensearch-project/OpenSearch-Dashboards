@@ -44,7 +44,7 @@
     "css-loader": "^5.2.7",
     "del": "^5.1.0",
     "loader-utils": "^1.2.3",
-    "val-loader": "^1.1.1",
+    "val-loader": "^2.1.2",
     "webpack": "^4.41.5"
   }
 }
