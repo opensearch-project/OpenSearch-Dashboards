@@ -32,7 +32,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/cross-platform';
+import { REPO_ROOT, standardize } from '@osd/cross-platform';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
 import extract from 'extract-zip';
 import del from 'del';
@@ -78,7 +78,9 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(generateProc.all).toMatchInlineSnapshot(`
     " succ 🎉
 
-          Your plugin has been created in `);
+          Your plugin has been created in ${standardize('plugins/foo_test_plugin', false, true)}
+    "
+  `);
 
   const buildProc = await execa(
     process.execPath,
@@ -164,7 +166,9 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
   expect(generateProc.all).toMatchInlineSnapshot(`
     " succ 🎉
 
-          Your plugin has been created in `);
+          Your plugin has been created in ${standardize('plugins/foo_test_plugin', false, true)}
+    "
+  `);
 
   const buildProc = await execa(
     process.execPath,
