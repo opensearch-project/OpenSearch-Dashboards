@@ -43,12 +43,16 @@ import {
   ProjectMap,
   topologicallyBatchProjects,
 } from './projects';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const rootPath = resolve(__dirname, '__fixtures__/opensearch-dashboards');
 const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
   beforeAll(async () => {
+    // Make sure we start clean
+    await del(rootPlugins, { cwd: PROCESS_WORKING_DIR });
+
     await promisify(mkdir)(rootPlugins);
 
     await promisify(symlink)(
@@ -58,7 +62,7 @@ describe('#getProjects', () => {
     );
   });
 
-  afterAll(async () => await del(rootPlugins));
+  afterAll(async () => await del(rootPlugins, { cwd: PROCESS_WORKING_DIR }));
 
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);
