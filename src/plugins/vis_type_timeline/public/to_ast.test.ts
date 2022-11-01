@@ -38,7 +38,7 @@ describe('timeline vis toExpressionAst function', () => {
   beforeEach(() => {
     vis = {
       params: {
-        expression: '.es(*)',
+        expression: '.opensearch(*)',
         interval: 'auto',
       },
     } as any;

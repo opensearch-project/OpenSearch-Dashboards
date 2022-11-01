@@ -6,7 +6,7 @@ Object {
     Object {
       "arguments": Object {
         "expression": Array [
-          ".es(*)",
+          ".opensearch(*)",
         ],
         "interval": Array [
           "auto",
