@@ -185,7 +185,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
-    const availableNamespaces = namespaceRegistry.getAll();
+    let availableNamespaces = namespaceRegistry.getAll() || [];
+    availableNamespaces = availableNamespaces.map((ns) => ns.id);
 
     const filteredCountOptions = {
       typesToInclude: filteredTypes,
@@ -193,7 +194,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     if (availableNamespaces?.length) {
-      filteredCountOptions.namespacesToInclude = visibleNamespaces;
+      if (visibleNamespaces?.length) {
+        filteredCountOptions.namespacesToInclude = visibleNamespaces;
+      } else {
+        filteredCountOptions.namespacesToInclude = availableNamespaces;
+      }
     }
 
     // These are the saved objects visible in the table.
@@ -224,7 +229,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     if (availableNamespaces?.length) {
-      countOptions.namespacesToInclude = '_all';
+      countOptions.namespacesToInclude = availableNamespaces;
     }
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
@@ -266,15 +271,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     let availableNamespaces = namespaceRegistry.getAll();
+    availableNamespaces = availableNamespaces.map((ns) => ns.id);
     if (availableNamespaces?.length) {
       if (visibleNamespaces?.length) {
-        availableNamespaces = availableNamespaces.map((ns) => ns.id);
-        const filteredNamespaces = availableNamespaces.filter(
-          (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
-        );
-        findOptions.namespaces = filteredNamespaces;
+        findOptions.namespaces = visibleNamespaces;
       } else {
-        findOptions.namespaces = '_all';
+        findOptions.namespaces = availableNamespaces;
       }
     }
 
@@ -832,7 +834,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     ];
 
     const availableNamespaces = namespaceRegistry.getAll() || [];
-    if (availableNamespaces && availableNamespaces.length > 0) {
+    if (availableNamespaces?.length) {
       const nsCounts = savedObjectCounts.namespaces || {};
       const nsFilterOptions = availableNamespaces.map((ns) => {
         return {

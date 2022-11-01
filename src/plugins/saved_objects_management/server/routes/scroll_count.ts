@@ -91,6 +91,13 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         }
       }
 
+      const namespacesToInclude = req.body.namespacesToInclude || [];
+      for (const ns of namespacesToInclude) {
+        if (!counts.namespaces[ns]) {
+          counts.namespaces[ns] = 0;
+        }
+      }
+
       return res.ok({
         body: counts,
       });
