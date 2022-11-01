@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cross Platform path standardize on POSIX-compatible platforms ignores additional parameters 1`] = `"/a/b/c"`;
+
+exports[`Cross Platform path standardize on POSIX-compatible platforms produces a path in POSIX format 1`] = `"/a/b/c"`;
+
+exports[`Cross Platform path standardize on Windows produces a path in POSIX format 1`] = `"C:/a/b/c"`;
+
+exports[`Cross Platform path standardize on Windows produces a path in native format 1`] = `"C:\\\\a\\\\b\\\\c"`;
+
+exports[`Cross Platform path standardize on Windows produces a path in native format even for POSIX input 1`] = `"C:\\\\a\\\\b\\\\c"`;
+
+exports[`Cross Platform path standardize on Windows produces a path in native format with escaped backslashes 1`] = `"C:\\\\\\\\a\\\\\\\\b\\\\\\\\c"`;

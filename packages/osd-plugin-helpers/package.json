@@ -12,7 +12,7 @@
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "scripts": {
-    "osd:bootstrap": "node ../../scripts/remove.js && tsc",
+    "osd:bootstrap": "node ../../scripts/remove.js target && tsc",
     "osd:watch": "tsc --watch"
   },
   "dependencies": {

@@ -36,7 +36,7 @@ import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/utils';
+import { relativeToRepoRoot, REPO_ROOT } from '@osd/cross-platform';
 import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';
@@ -48,7 +48,7 @@ import { getChanges } from './get_changes';
 import { OptimizerConfig } from './optimizer_config';
 
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
-const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
+const RELATIVE_DIR = relativeToRepoRoot(OPTIMIZER_DIR)!;
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
   const expectedJson = jsonStable(expected, {

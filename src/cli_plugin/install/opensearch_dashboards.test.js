@@ -38,6 +38,7 @@ import del from 'del';
 
 import { existingInstall, assertVersion } from './opensearch_dashboards';
 import { Logger } from '../lib/logger';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 jest.spyOn(fs, 'statSync');
 
@@ -64,17 +65,17 @@ describe('opensearchDashboards cli', function () {
       const logger = new Logger(settings);
 
       describe('assertVersion', function () {
-        beforeEach(function () {
-          del.sync(testWorkingPath);
+        beforeEach(async () => {
+          await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
           fs.mkdirSync(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
         });
 
-        afterEach(function () {
+        afterEach(async () => {
           logger.log.restore();
           logger.error.restore();
-          del.sync(testWorkingPath);
+          await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
         });
 
         it('should succeed with exact match', function () {

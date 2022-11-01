@@ -3,20 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { execSync } from 'child_process';
+import { resolveToFullPathSync, standardize } from './path';
 
-let workingDir = process.cwd();
+/**
+ * The full pathname of the working directory of the process
+ * @constant
+ * @type {string}
+ */
+export const PROCESS_WORKING_DIR: string = resolveToFullPathSync(process.cwd());
 
-if (process.platform === 'win32') {
-  try {
-    const pathFullName = execSync('powershell "(Get-Item -LiteralPath $pwd).FullName"', {
-      cwd: workingDir,
-      encoding: 'utf8',
-    })?.trim?.();
-    if (pathFullName?.length > 2) workingDir = pathFullName;
-  } catch (ex) {
-    // Do nothing
-  }
-}
-
-export const PROCESS_WORKING_DIR = workingDir;
+/**
+ * The full pathname of the working directory of the process, in POSIX format
+ * @constant
+ * @type {string}
+ */
+export const PROCESS_POSIX_WORKING_DIR: string = standardize(PROCESS_WORKING_DIR);

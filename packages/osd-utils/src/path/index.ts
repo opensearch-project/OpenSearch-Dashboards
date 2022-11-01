@@ -33,7 +33,7 @@
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@osd/config-schema';
-import { REPO_ROOT } from '../repo_root';
+import { REPO_ROOT } from '@osd/cross-platform';
 
 const isString = (v: any): v is string => typeof v === 'string';
 

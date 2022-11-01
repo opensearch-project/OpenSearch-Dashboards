@@ -34,8 +34,8 @@ import Path from 'path';
 
 import del from 'del';
 import execa from 'execa';
-import { standardize } from '@osd/cross-platform';
-import { REPO_ROOT, createAbsolutePathSerializer } from '@osd/dev-utils';
+import { standardize, REPO_ROOT } from '@osd/cross-platform';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 import globby from 'globby';
 
 // Has to be a posix reference because it is used to generate glob patterns
