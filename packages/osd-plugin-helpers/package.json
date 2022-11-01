@@ -12,10 +12,11 @@
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "scripts": {
-    "osd:bootstrap": "node ../../scripts/remove.js && tsc",
+    "osd:bootstrap": "node ../../scripts/remove.js target && tsc",
     "osd:watch": "tsc --watch"
   },
   "dependencies": {
+    "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "del": "^5.1.0",

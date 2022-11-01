@@ -33,7 +33,8 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, posix } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@osd/config-schema';
-import { createAbsolutePathSerializer, REPO_ROOT } from '@osd/dev-utils';
+import { getRepoRoot } from '@osd/cross-platform';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
@@ -127,7 +128,10 @@ describe('PluginsService', () => {
     };
 
     coreId = Symbol('core');
-    env = Env.createDefault(REPO_ROOT, getEnvOptions());
+    /* Using getRepoRoot to get the appropriate one between REPO_ROOT and REPO_ROOT_8_3; this
+     * is only a problem on Windows.
+     */
+    env = Env.createDefault(getRepoRoot(resolve('.'))!, getEnvOptions());
 
     config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
     const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
