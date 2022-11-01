@@ -185,12 +185,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
+    const availableNamespaces = namespaceRegistry.getAll();
+
+    const filteredCountOptions = {
+      typesToInclude: filteredTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces?.length) {
+      filteredCountOptions.namespacesToInclude = visibleNamespaces;
+    }
+
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
-      filteredTypes,
-      visibleNamespaces,
-      queryText
+      filteredCountOptions
     );
 
     const exportAllOptions: ExportAllOption[] = [];
@@ -209,19 +218,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    let availableNamespaces = namespaceRegistry.getAll();
-    if (availableNamespaces && availableNamespaces.length > 0) {
-      availableNamespaces = availableNamespaces.map((ns) => ns.id);
+    const countOptions = {
+      typesToInclude: allowedTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces?.length) {
+      countOptions.namespacesToInclude = '_all';
     }
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(
-      this.props.http,
-      allowedTypes,
-      availableNamespaces,
-      queryText
-    );
+    const savedObjectCounts = await getSavedObjectCounts(this.props.http, countOptions);
 
     this.setState((state) => ({
       ...state,
@@ -258,12 +266,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     let availableNamespaces = namespaceRegistry.getAll();
-    if (availableNamespaces && availableNamespaces.length > 0) {
-      availableNamespaces = availableNamespaces.map((ns) => ns.id);
-      const filteredNamespaces = availableNamespaces.filter(
-        (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
-      );
-      findOptions.namespaces = filteredNamespaces;
+    if (availableNamespaces?.length) {
+      if (visibleNamespaces?.length) {
+        availableNamespaces = availableNamespaces.map((ns) => ns.id);
+        const filteredNamespaces = availableNamespaces.filter(
+          (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
+        );
+        findOptions.namespaces = filteredNamespaces;
+      } else {
+        findOptions.namespaces = '_all';
+      }
     }
 
     if (findOptions.type.length > 1) {

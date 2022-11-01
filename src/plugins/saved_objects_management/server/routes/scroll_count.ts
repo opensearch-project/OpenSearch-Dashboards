@@ -39,14 +39,15 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),
-          namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
+          namespacesToInclude: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
           searchString: schema.maybe(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
-      const namespaces = [];
       const counts = {
         type: {},
       };
@@ -56,7 +57,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         perPage: 1000,
       };
 
-      if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
+      if ('namespacesToInclude' in req.body) {
         counts.namespaces = {};
         findOptions.namespaces = req.body.namespacesToInclude;
       }
@@ -70,7 +71,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       objects.forEach((result) => {
         const type = result.type;
-        if (req.body.namespacesToInclude && req.body.namespacesToInclude.length > 0) {
+        if ('namespacesToInclude' in req.body) {
           const resultNamespaces = (result.namespaces || []).flat();
           resultNamespaces.forEach((ns) => {
             if (ns === null) {
@@ -87,13 +88,6 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       for (const type of req.body.typesToInclude) {
         if (!counts.type[type]) {
           counts.type[type] = 0;
-        }
-      }
-
-      const namespacesToInclude = req.body.namespacesToInclude || [];
-      for (const ns of namespacesToInclude) {
-        if (!counts.namespaces[ns]) {
-          counts.namespaces[ns] = 0;
         }
       }
 
