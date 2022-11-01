@@ -16,7 +16,7 @@ Update the following configuration in the `opensearch_dashboards.yml` file to ap
 
 - Current auditor configuration:
 
-```
+```yml
 data_source.audit.appender.kind: 'file'
 data_source.audit.appender.layout.kind: 'pattern'
 data_source.audit.appender.path: '/tmp/opensearch-dashboards-data-source-audit.log'
@@ -24,10 +24,11 @@ data_source.audit.appender.path: '/tmp/opensearch-dashboards-data-source-audit.l
 
 3. The default encryption-related configuration parameters are:
 
-```
+```yml
 data_source.encryption.wrappingKeyName: 'changeme'
 data_source.encryption.wrappingKeyNamespace: 'changeme'
-data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+data_source.encryption.wrappingKey:
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ```
 
 Note that if any of the encryption keyring configuration values change (wrappingKeyName/wrappingKeyNamespace/wrappingKey), none of the previously-encrypted credentials can be decrypted; therefore, credentials of previously created data sources must be updated to continue use.
@@ -79,7 +80,7 @@ a. Envelope encryption - provides strong protection on data keys. Read more deta
 
 b. Key derivation with HMAC - KDF with SHA-384 protects against accidental reuse of a data encryption keys and reduces the risk of overusing data keys.
 
-c. Signature algorithm - ECDSA with P-384 and SHA-384. Under multiple data source case, data source documents stored on OpenSearch can be modified / replaced by attacker. With ECDSA signature, ciphertext decryption will fail if it’s getting pullted. No one will be able to create another signature that verifies with the public key because the private key has been dropped.
+c. Signature algorithm - ECDSA with P-384 and SHA-384. Under multiple data source case, data source documents stored on OpenSearch can be modified / replaced by attacker. With ECDSA signature, ciphertext decryption will fail if it’s getting polluted. No one will be able to create another signature that verifies with the public key because the private key has been dropped.
 
 Please check https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1756 for more details.
 
@@ -88,5 +89,14 @@ Please check https://github.com/opensearch-project/OpenSearch-Dashboards/issues/
 ## Development
 
 See the [OpenSearch Dashboards contributing
-guide](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md) for instructions
-setting up your development environment.
+guide](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
+
+### Design Documents
+
+- [High level design doc](../../../docs/multi-datasource/high_level_design.md)
+- [User stories](../../../docs/multi-datasource/user_stories.md)
+- [Client management detailed design](../../../docs/multi-datasource/client_management_design.md)
+
+### Integrate with multiple data source feature
+
+TODO: [#2455](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2455)
