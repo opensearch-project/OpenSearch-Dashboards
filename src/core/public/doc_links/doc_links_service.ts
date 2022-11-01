@@ -403,6 +403,9 @@ export class DocLinksService {
             loadingData: `${OPENSEARCH_WEBSITE_DOCS}`,
             introduction: `${OPENSEARCH_WEBSITE_DOCS}`,
           },
+          dataSource: {
+            guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}discover/multi-data-sources/`,
+          },
           management: {
             opensearchDashboardsGeneralSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
             opensearchDashboardsSearchSettings: `${OPENSEARCH_WEBSITE_DOCS}`,
@@ -758,6 +761,9 @@ export interface DocLinksStart {
       readonly indexPatterns: {
         readonly loadingData: string;
         readonly introduction: string;
+      };
+      readonly dataSource: {
+        readonly guide: string;
       };
       readonly scriptedFields: {
         readonly scriptFields: string;
