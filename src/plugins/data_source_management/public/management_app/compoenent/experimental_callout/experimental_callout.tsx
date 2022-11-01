@@ -26,7 +26,7 @@ export const ExperimentalCallout = ({ docLinks }: { docLinks: DocLinksStart }) =
               defaultMessage="This feature is experimental and should not be used in a production environment. Any index patterns, visualization, and observability panels will be impacted if the feature is deactivated. For more information see "
             />
           }
-          <EuiLink href={docLinks.links.noDocumentation.indexPatterns.introduction} target="_blank">
+          <EuiLink href={docLinks.links.noDocumentation.dataSource.guide} target="_blank">
             {
               <FormattedMessage
                 id="dataSourcesManagement.experimentalFeatureCallout.documentationText"
