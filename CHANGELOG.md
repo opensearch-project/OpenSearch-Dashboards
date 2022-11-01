@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [CVE-2022-23647] Bump prismjs to 1.29.0 ([#2668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2668))
 * [CVE-2021-24033] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
 * [CVE-2021-42740] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
+* [CVE-2022-37601] Bump loader-utils to 2.0.3 ([#2707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2707))
 
 ### 📈 Features/Enhancements
 
