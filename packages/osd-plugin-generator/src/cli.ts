@@ -32,7 +32,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/utils';
+import { PROCESS_WORKING_DIR, REPO_ROOT } from '@osd/cross-platform';
 import { run, createFailError, createFlagError } from '@osd/dev-utils';
 
 import { snakeCase } from './casing';
@@ -78,7 +78,7 @@ export function runCli() {
       }
 
       log.success(
-        `🎉\n\nYour plugin has been created in ${Path.relative(process.cwd(), outputDir)}\n`
+        `🎉\n\nYour plugin has been created in ${Path.relative(PROCESS_WORKING_DIR, outputDir)}\n`
       );
     },
     {
