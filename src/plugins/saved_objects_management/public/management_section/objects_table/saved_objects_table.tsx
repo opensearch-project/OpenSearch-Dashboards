@@ -71,10 +71,12 @@ import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
   getSavedObjectCounts,
+  SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
+  filterQuery,
   findObjects,
   findObject,
   extractExportDetails,
@@ -178,43 +180,57 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes } = this.props;
+    const { allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+
+    const filteredCountOptions: SavedObjectCountOptions = {
+      typesToInclude: filteredTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      filteredCountOptions.namespacesToInclude = filteredNamespaces;
+    }
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
-      filteredTypes,
-      visibleNamespaces,
-      queryText
+      filteredCountOptions
     );
 
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach((id) => {
+    const filteredTypeCounts = filteredSavedObjectCounts.type || {};
+
+    Object.keys(filteredTypeCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
-        label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
+        label: `${id} (${filteredTypeCounts[id] || 0})`,
       });
 
       // Select it by default.
       exportAllSelectedOptions[id] = true;
     });
 
+    const countOptions: SavedObjectCountOptions = {
+      typesToInclude: allowedTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces.length) {
+      countOptions.namespacesToInclude = availableNamespaces;
+    }
+
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(
-      this.props.http,
-      allowedTypes,
-      [],
-      queryText
-    );
+    const savedObjectCounts = await getSavedObjectCounts(this.props.http, countOptions);
 
     this.setState((state) => ({
       ...state,
@@ -234,11 +250,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes } = this.props;
+    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
-    const filteredTypes = allowedTypes.filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -247,8 +261,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-      namespaces: visibleNamespaces,
     };
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      findOptions.namespaces = filteredNamespaces;
+    }
+
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
     }
@@ -803,7 +823,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     ];
 
     const availableNamespaces = namespaceRegistry.getAll() || [];
-    if (availableNamespaces && availableNamespaces.length > 0) {
+    if (availableNamespaces.length) {
       const nsCounts = savedObjectCounts.namespaces || {};
       const nsFilterOptions = availableNamespaces.map((ns) => {
         return {
