@@ -15,14 +15,14 @@ export function DisabledVisualization({ title }: { title: string }) {
       <EuiIcon type="beaker" size="xl" />
       <div>
         <FormattedMessage
-          id="wizard.disabledVisualizationTitle"
+          id="visBuilder.disabledVisualizationTitle"
           defaultMessage="{title} is an experimental visualization."
           values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
         />
       </div>
       <div>
         <FormattedMessage
-          id="wizard.disabledVisualizationMessage"
+          id="visBuilder.disabledVisualizationMessage"
           defaultMessage="Please turn on lab-mode in the advanced settings to see these visualizations."
         />
       </div>
