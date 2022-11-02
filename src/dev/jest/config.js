@@ -75,7 +75,12 @@ export default {
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
   coverageReporters: ['lcov', 'text-summary'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
-  modulePathIgnorePatterns: ['__fixtures__/', 'target/', '<rootDir>/src/plugins/maps_legacy'],
+  modulePathIgnorePatterns: [
+    '__fixtures__/',
+    'target/',
+    '<rootDir>/src/plugins/maps_legacy',
+    '<rootDir>/src/cli_plugin/list/.test.data.list',
+  ],
   testEnvironment: 'jest-environment-jsdom',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [

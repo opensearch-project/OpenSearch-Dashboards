@@ -93,7 +93,7 @@ export default async function ({ readConfigFile }) {
         hash: '/',
       },
       visBuilder: {
-        pathname: '/app/visBuilder',
+        pathname: '/app/vis-builder',
         hash: '/',
       },
       dashboard: {

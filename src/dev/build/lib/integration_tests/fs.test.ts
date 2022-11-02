@@ -34,6 +34,7 @@ import { chmodSync, statSync } from 'fs';
 import del from 'del';
 
 import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const TMP = resolve(__dirname, '../__tmp__');
 const FIXTURES = resolve(__dirname, '../__fixtures__');
@@ -61,13 +62,13 @@ beforeAll(async () => {
 
 // clean and recreate TMP directory
 beforeEach(async () => {
-  await del(TMP);
+  await del(TMP, { cwd: PROCESS_WORKING_DIR });
   await mkdirp(TMP);
 });
 
 // cleanup TMP directory
 afterAll(async () => {
-  await del(TMP);
+  await del(TMP, { cwd: PROCESS_WORKING_DIR });
 });
 
 describe('mkdirp()', () => {

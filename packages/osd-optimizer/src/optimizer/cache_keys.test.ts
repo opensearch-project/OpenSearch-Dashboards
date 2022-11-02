@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import Path from 'path';
-
+import fs from 'fs/promises';
 import { diff } from 'jest-diff';
 import { REPO_ROOT } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
@@ -51,14 +50,6 @@ jest.mock('./get_mtimes.ts', () => ({
 }));
 
 jest.mock('execa');
-
-jest.mock('fs', () => {
-  const realFs = jest.requireActual('fs');
-  return {
-    ...realFs,
-    readFile: jest.fn(realFs.readFile),
-  };
-});
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -83,17 +74,9 @@ jest.requireMock('execa').mockImplementation(async (cmd: string, args: string[],
 
 describe('getOptimizerCacheKey()', () => {
   it('uses latest commit, bootstrap cache, and changed files to create unique value', async () => {
-    jest
-      .requireMock('fs')
-      .readFile.mockImplementation(
-        (path: string, enc: string, cb: (err: null, file: string) => void) => {
-          expect(path).toBe(
-            Path.resolve(REPO_ROOT, 'packages/osd-optimizer/target/.bootstrap-cache')
-          );
-          expect(enc).toBe('utf8');
-          cb(null, '<bootstrap cache>');
-        }
-      );
+    const mockFSReadFileAsync = jest
+      .spyOn(fs, 'readFile')
+      .mockReturnValue(Promise.resolve('<bootstrap cache>'));
 
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
@@ -122,6 +105,8 @@ describe('getOptimizerCacheKey()', () => {
               },
             }
           `);
+
+    mockFSReadFileAsync.mockRestore();
   });
 });
 
