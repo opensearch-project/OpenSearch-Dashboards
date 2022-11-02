@@ -28,21 +28,16 @@
  * under the License.
  */
 
-import Path from 'path';
-import Fs from 'fs';
+import { resolve, parse, dirname, isAbsolute, relative } from 'path';
 
 import loadJsonFile from 'load-json-file';
+import { resolveToFullPathSync, resolveToShortPathSync, realPathSync } from './path';
 
 const readOpenSearchDashboardsPkgJson = (dir: string) => {
   try {
-    const path = Path.resolve(dir, 'package.json');
-    const json = loadJsonFile.sync(path);
-    if (
-      json &&
-      typeof json === 'object' &&
-      'name' in json &&
-      json.name === 'opensearch-dashboards'
-    ) {
+    const path = resolve(dir, 'package.json');
+    const json = loadJsonFile.sync(path) as { [key: string]: any };
+    if (json?.name === 'opensearch-dashboards') {
       return json;
     }
   } catch (error) {
@@ -58,8 +53,8 @@ const findOpenSearchDashboardsPackageJson = () => {
   // search for the opensearch-dashboards directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
-  const startDir = Fs.realpathSync(__dirname);
-  const { root: rootDir } = Path.parse(startDir);
+  const startDir = realPathSync(__dirname);
+  const { root: rootDir } = parse(startDir);
   let cursor = startDir;
   while (true) {
     const opensearchDashboardsPkgJson = readOpenSearchDashboardsPkgJson(cursor);
@@ -73,7 +68,7 @@ const findOpenSearchDashboardsPackageJson = () => {
       };
     }
 
-    const parent = Path.dirname(cursor);
+    const parent = dirname(cursor);
     if (parent === rootDir) {
       throw new Error(`unable to find opensearch-dashboards directory from ${startDir}`);
     }
@@ -86,5 +81,25 @@ const {
   opensearchDashboardsPkgJson,
 } = findOpenSearchDashboardsPackageJson();
 
-export const REPO_ROOT = opensearchDashboardsDir;
+export const REPO_ROOT = resolveToFullPathSync(opensearchDashboardsDir);
+export const REPO_ROOT_8_3 = resolveToShortPathSync(opensearchDashboardsDir);
 export const UPSTREAM_BRANCH = opensearchDashboardsPkgJson.branch;
+
+export const getMatchingRoot = (path: string, rootPaths: string | string[]) => {
+  const rootPathsArray = Array.isArray(rootPaths) ? rootPaths : [rootPaths];
+
+  // We can only find the appropriate root if an absolute path was given
+  if (path && isAbsolute(path)) {
+    // Return the matching root if one is found or return `undefined`
+    return rootPathsArray.find((root) => path.startsWith(root));
+  }
+
+  return undefined;
+};
+
+export const getRepoRoot = (path: string) => getMatchingRoot(path, [REPO_ROOT, REPO_ROOT_8_3]);
+
+export const relativeToRepoRoot = (path: string) => {
+  const repoRoot = getRepoRoot(path);
+  return repoRoot ? relative(repoRoot, path) : null;
+};
