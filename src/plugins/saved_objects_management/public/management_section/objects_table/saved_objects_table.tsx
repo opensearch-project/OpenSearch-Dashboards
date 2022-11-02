@@ -75,6 +75,7 @@ import {
   getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
+  filterQuery,
   findObjects,
   findObject,
   extractExportDetails,
@@ -181,12 +182,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
 
-    let availableNamespaces = namespaceRegistry.getAll() || [];
-    availableNamespaces = availableNamespaces.map((ns) => ns.id);
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
     const filteredCountOptions = {
       typesToInclude: filteredTypes,
@@ -194,9 +192,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     if (availableNamespaces?.length) {
-      const filteredNamespaces = availableNamespaces.filter(
-        (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
-      );
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       filteredCountOptions.namespacesToInclude = filteredNamespaces;
     }
 
@@ -255,9 +251,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
     const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
-    const filteredTypes = allowedTypes.filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -268,12 +262,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       type: filteredTypes,
     };
 
-    let availableNamespaces = namespaceRegistry.getAll();
-    availableNamespaces = availableNamespaces.map((ns) => ns.id);
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
     if (availableNamespaces?.length) {
-      const filteredNamespaces = availableNamespaces.filter(
-        (ns) => !visibleNamespaces || visibleNamespaces.includes(ns)
-      );
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       findOptions.namespaces = filteredNamespaces;
     }
 
