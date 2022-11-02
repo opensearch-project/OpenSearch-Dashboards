@@ -30,14 +30,18 @@
 
 import { HttpStart } from 'src/core/public';
 
+export interface SavedObjectCountOptions {
+  typesToInclude: string[];
+  namespacesToInclude?: string[];
+  searchString?: string;
+}
+
 export async function getSavedObjectCounts(
   http: HttpStart,
-  typesToInclude: string[],
-  namespacesToInclude: string[],
-  searchString?: string
+  options: SavedObjectCountOptions
 ): Promise<Record<string, number>> {
   return await http.post<Record<string, number>>(
     `/api/opensearch-dashboards/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, namespacesToInclude, searchString }) }
+    { body: JSON.stringify(options) }
   );
 }

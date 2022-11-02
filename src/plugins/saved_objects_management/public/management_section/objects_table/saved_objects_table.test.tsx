@@ -137,10 +137,12 @@ describe('SavedObjectsTable', () => {
     http.post.mockResolvedValue([]);
 
     getSavedObjectCountsMock.mockReturnValue({
-      'index-pattern': 0,
-      visualization: 0,
-      dashboard: 0,
-      search: 0,
+      type: {
+        'index-pattern': 0,
+        visualization: 0,
+        dashboard: 0,
+        search: 0,
+      },
     });
 
     defaultProps = {
