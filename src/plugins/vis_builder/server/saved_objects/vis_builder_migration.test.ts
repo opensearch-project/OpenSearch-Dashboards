@@ -4,13 +4,13 @@
  */
 
 import { SavedObjectMigrationFn, SavedObjectMigrationContext } from '../../../../core/server';
-import { wizardSavedObjectTypeMigrations } from './vis_builder_migration';
+import { visBuilderSavedObjectTypeMigrations } from './vis_builder_migration';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('2.3.0', () => {
   const migrate = (doc: any) =>
-    wizardSavedObjectTypeMigrations['2.3.0'](
+    visBuilderSavedObjectTypeMigrations['2.3.0'](
       doc as Parameters<SavedObjectMigrationFn>[0],
       savedObjectMigrationContext
     );
@@ -67,7 +67,7 @@ describe('2.3.0', () => {
     });
   });
 
-  it('should migrate the old version wizard saved object to new version wizard saved object', () => {
+  it('should migrate the old version visBuilder saved object to new version VisBuilder saved object', () => {
     const migratedDoc = migrate({
       type: 'wizard',
       attributes: {
