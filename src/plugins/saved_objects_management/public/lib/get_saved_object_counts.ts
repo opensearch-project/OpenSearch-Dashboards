@@ -30,7 +30,7 @@
 
 import { HttpStart } from 'src/core/public';
 
-interface SavedObjectCountOptions {
+export interface SavedObjectCountOptions {
   typesToInclude: string[];
   namespacesToInclude?: string[];
   searchString?: string;

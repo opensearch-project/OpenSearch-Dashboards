@@ -71,6 +71,7 @@ import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
   getSavedObjectCounts,
+  SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
@@ -186,12 +187,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions = {
+    const filteredCountOptions: SavedObjectCountOptions = {
       typesToInclude: filteredTypes,
       searchString: queryText,
     };
 
-    if (availableNamespaces?.length) {
+    if (availableNamespaces.length) {
       const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       filteredCountOptions.namespacesToInclude = filteredNamespaces;
     }
@@ -218,12 +219,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions = {
+    const countOptions: SavedObjectCountOptions = {
       typesToInclude: allowedTypes,
       searchString: queryText,
     };
 
-    if (availableNamespaces?.length) {
+    if (availableNamespaces.length) {
       countOptions.namespacesToInclude = availableNamespaces;
     }
 
@@ -263,7 +264,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
-    if (availableNamespaces?.length) {
+    if (availableNamespaces.length) {
       const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       findOptions.namespaces = filteredNamespaces;
     }
@@ -822,7 +823,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     ];
 
     const availableNamespaces = namespaceRegistry.getAll() || [];
-    if (availableNamespaces?.length) {
+    if (availableNamespaces.length) {
       const nsCounts = savedObjectCounts.namespaces || {};
       const nsFilterOptions = availableNamespaces.map((ns) => {
         return {
