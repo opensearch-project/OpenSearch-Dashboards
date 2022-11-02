@@ -1,0 +1,37 @@
+# .github/release.yml
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - amazon-auto
+  categories:
+    - title: 💥 Breaking Changes
+      labels:
+        - breaking
+    - title: 📈 Features/Enhancements
+      labels:
+        - enhancement
+    - title: 🐛 Bug Fixes
+      labels:
+        - bug
+    - title: 🛡 Security
+      labels:
+        - cve
+        - security vulnerability
+    - title: 🚞 Infrastructure
+      labels:
+        - infra
+    - title: 📝 Documentation
+      labels:
+        - docs
+    - title: 🛠 Maintenance
+      labels:
+        - maintenance
+    - title: 🪛 Refactoring
+      labels:
+        - refactor
+    - title: 🔩 Tests
+      labels:
+        - test
