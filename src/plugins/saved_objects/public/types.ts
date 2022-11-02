@@ -110,6 +110,7 @@ export interface SavedObjectConfig {
   path?: string;
   searchSource?: ISearchSource | boolean;
   type?: string;
+  updated_at?: string;
 }
 
 export type OpenSearchResponse = Record<string, any>;
