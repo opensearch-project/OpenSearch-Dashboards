@@ -69,20 +69,6 @@ export const registerFindRoute = (
       const managementService = await managementServicePromise;
       const { client } = context.core.savedObjects;
       const searchTypes = Array.isArray(req.query.type) ? req.query.type : [req.query.type];
-      if ('namespaces' in req.query) {
-        const namespacesToInclude = Array.isArray(req.query.namespaces)
-          ? req.query.namespaces
-          : [req.query.namespaces];
-        const searchNamespaces = [];
-        namespacesToInclude.forEach((ns) => {
-          if (ns == null) {
-            searchNamespaces.push('default');
-          } else {
-            searchNamespaces.push(ns);
-          }
-        });
-        req.query.namespaces = searchNamespaces;
-      }
       const includedFields = Array.isArray(req.query.fields)
         ? req.query.fields
         : [req.query.fields];
