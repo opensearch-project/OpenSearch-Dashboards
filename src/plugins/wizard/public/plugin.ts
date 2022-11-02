@@ -120,7 +120,7 @@ export class WizardPlugin
       appExtensions: {
         visualizations: {
           docTypes: [PLUGIN_ID],
-          toListItem: ({ id, attributes }) => ({
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
@@ -130,6 +130,7 @@ export class WizardPlugin
             stage: 'experimental',
             title: attributes?.title,
             typeTitle: PLUGIN_NAME,
+            updated_at: updatedAt,
           }),
         },
       },
