@@ -17,8 +17,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { WizardPluginSetup, WizardPluginStart } from './types';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    enabled: true,
-  },
   schema: configSchema,
 };
