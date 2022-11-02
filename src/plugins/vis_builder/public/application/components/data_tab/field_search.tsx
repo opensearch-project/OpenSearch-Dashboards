@@ -21,7 +21,7 @@ export interface Props {
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
 export function FieldSearch({ value }: Props) {
-  const searchPlaceholder = i18n.translate('wizard.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('visBuilder.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 

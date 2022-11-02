@@ -69,16 +69,16 @@ export const getTopNavConfig = (
       id: 'save',
       iconType: savedWizardVis?.id && originatingApp ? undefined : ('save' as const),
       emphasize: savedWizardVis && !savedWizardVis.id,
-      description: i18n.translate('wizard.topNavMenu.saveVisualizationButtonAriaLabel', {
+      description: i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonAriaLabel', {
         defaultMessage: 'Save Visualization',
       }),
       className: savedWizardVis?.id && originatingApp ? 'saveAsButton' : '',
       label:
         savedWizardVis?.id && originatingApp
-          ? i18n.translate('wizard.topNavMenu.saveVisualizationAsButtonLabel', {
+          ? i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
               defaultMessage: 'save as',
             })
-          : i18n.translate('wizard.topNavMenu.saveVisualizationButtonLabel', {
+          : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
               defaultMessage: 'save',
             }),
       testId: 'wizardSaveButton',
@@ -115,7 +115,7 @@ export const getTopNavConfig = (
             emphasize: true,
             iconType: 'checkInCircleFilled' as const,
             description: i18n.translate(
-              'wizard.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              'visBuilder.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
                 defaultMessage: 'Finish editing wizard and return to the last app',
               }
@@ -193,7 +193,7 @@ export const getOnSave = (
 
       if (id) {
         toastNotifications.addSuccess({
-          title: i18n.translate('wizard.topNavMenu.saveVisualization.successNotificationText', {
+          title: i18n.translate('visBuilder.topNavMenu.saveVisualization.successNotificationText', {
             defaultMessage: `Saved '{visTitle}'`,
             values: {
               visTitle: savedWizardVis.title,
@@ -236,7 +236,7 @@ export const getOnSave = (
       console.error(error);
 
       toastNotifications.addDanger({
-        title: i18n.translate('wizard.topNavMenu.saveVisualization.failureNotificationText', {
+        title: i18n.translate('visBuilder.topNavMenu.saveVisualization.failureNotificationText', {
           defaultMessage: `Error on saving '{visTitle}'`,
           values: {
             visTitle: newTitle,
