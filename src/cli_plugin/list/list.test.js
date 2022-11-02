@@ -30,10 +30,12 @@
 
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
+import { mkdir } from 'fs/promises';
 
 import del from 'del';
 
 import { list } from './list';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 function createPlugin(name, version, pluginBaseDir) {
   const pluginDir = join(pluginBaseDir, name);
@@ -61,14 +63,14 @@ describe('opensearchDashboards cli', function () {
   describe('plugin lister', function () {
     const pluginDir = join(__dirname, '.test.data.list');
 
-    beforeEach(function () {
+    beforeEach(async () => {
       logger.messages.length = 0;
-      del.sync(pluginDir);
-      mkdirSync(pluginDir, { recursive: true });
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
+      await mkdir(pluginDir, { recursive: true });
     });
 
-    afterEach(function () {
-      del.sync(pluginDir);
+    afterEach(async () => {
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
     });
 
     it('list all of the folders in the plugin folder, ignoring dot prefixed plugins and regular files', function () {

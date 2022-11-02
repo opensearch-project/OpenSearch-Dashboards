@@ -30,6 +30,7 @@
 
 import Path from 'path';
 
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 import { RunWithCommands, createFlagError, createFailError } from '@osd/dev-utils';
 
 import { findOpenSearchDashboardsJson } from './find_opensearch_dashboards_json';
@@ -79,10 +80,10 @@ export function runCli() {
           throw createFlagError('expected a single --skip-archive flag');
         }
 
-        const pluginDir = await findOpenSearchDashboardsJson(process.cwd());
+        const pluginDir = await findOpenSearchDashboardsJson(PROCESS_WORKING_DIR);
         if (!pluginDir) {
           throw createFailError(
-            `Unable to find OpenSearch Dashboards Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a opensearch_dashboards.json file?`
+            `Unable to find OpenSearch Dashboards Platform plugin in [${PROCESS_WORKING_DIR}] or any of its parent directories. Has it been migrated properly? Does it have a opensearch_dashboards.json file?`
           );
         }
 
@@ -148,30 +149,30 @@ export function runCli() {
         allowUnexpected: true,
       },
       async run({ log, flags }) {
-        const pluginDir = await findOpenSearchDashboardsJson(process.cwd());
+        const pluginDir = await findOpenSearchDashboardsJson(PROCESS_WORKING_DIR);
         if (!pluginDir) {
           throw createFailError(
-            `Unable to find OpenSearch Dashboards Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a opensearch_dashboards.json file?`
+            `Unable to find OpenSearch Dashboards Platform plugin in [${PROCESS_WORKING_DIR}] or any of its parent directories. Has it been migrated properly? Does it have a opensearch_dashboards.json file?`
           );
         }
 
         let dashboardsPackage;
         try {
-          dashboardsPackage = await import(Path.join(process.cwd(), '../../package.json'));
+          dashboardsPackage = await import(Path.join(PROCESS_WORKING_DIR, '../../package.json'));
         } catch (ex) {
           throw createFailError(`Unable to parse the OpenSearch Dashboards' package.json file`);
         }
 
         let pluginPackage;
         try {
-          pluginPackage = await import(Path.join(process.cwd(), 'package.json'));
+          pluginPackage = await import(Path.join(PROCESS_WORKING_DIR, 'package.json'));
         } catch (ex) {
           throw createFailError(`Unable to parse the plugin's package.json file`);
         }
 
         let manifestFile;
         try {
-          manifestFile = await import(Path.join(process.cwd(), 'opensearch_dashboards.json'));
+          manifestFile = await import(Path.join(PROCESS_WORKING_DIR, 'opensearch_dashboards.json'));
         } catch (ex) {
           throw createFailError(`Unable to parse the plugin's opensearch_dashboards.json file`);
         }
@@ -240,7 +241,7 @@ export function runCli() {
 
         const context: VersionContext = {
           log,
-          sourceDir: process.cwd(),
+          sourceDir: PROCESS_WORKING_DIR,
           pluginVersion: updatedPluginVersion,
           compatibilityVersion: updatedCompatibilityVersion,
         };

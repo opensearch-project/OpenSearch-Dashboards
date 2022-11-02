@@ -35,6 +35,7 @@ import del from 'del';
 
 import { getChildPaths } from '../fs';
 import { scanCopy } from '../scan_copy';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const IS_WINDOWS = process.platform === 'win32';
 const FIXTURES = resolve(__dirname, '../__fixtures__');
@@ -50,7 +51,7 @@ beforeAll(async () => {
 
 // cleanup TMP directory
 afterEach(async () => {
-  await del(TMP);
+  await del(TMP, { cwd: PROCESS_WORKING_DIR });
 });
 
 it('rejects if source path is not absolute', async () => {
