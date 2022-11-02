@@ -34,7 +34,7 @@ const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { OPENSEARCH_BIN } = require('./paths');
+const { OPENSEARCH_BIN, OPENSEARCH_PLUGIN } = require('./paths');
 const { log: defaultLog, parseOpenSearchLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -167,6 +167,32 @@ exports.Cluster = class Cluster {
 
     await decompress(archivePath, extractPath);
 
+    this._log.indent(-4);
+  }
+
+  /**
+   * Unpacks a tar or zip file containing the opensearch plugin directory for an
+   * OpenSearch cluster.
+   *
+   * @param {string} installPath
+   * @param {Array|string} opensearchPlugins Array or string of opensearch plugin(s) artifact url
+   */
+  async installOpensearchPlugin(installPath, opensearchPluginsPath) {
+    this._log.info(chalk.bold(`Downloading Opensearch plugin on the cluster snapshot`));
+    this._log.indent(4);
+    // Run opensearch-plugin tool script to download openSearch plugin artifacts
+    if (Array.isArray(opensearchPluginsPath)) {
+      for (const pluginPath of opensearchPluginsPath) {
+        this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
+        await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
+      }
+    } else if (typeof opensearchPluginsPath === 'string') {
+      this._log.info(`Installing OpenSearch Plugin from the path: ${opensearchPluginsPath}`);
+      await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, opensearchPluginsPath], {
+        cwd: installPath,
+      });
+    }
+    this._log.info(`Plugin download complete`);
     this._log.indent(-4);
   }
 

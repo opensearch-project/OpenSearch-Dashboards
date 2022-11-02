@@ -49,6 +49,7 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --P               OpenSearch plugin artifact URL to install it on the cluster.
 
     Example:
 
@@ -64,6 +65,7 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       opensearchArgs: 'E',
+      opensearchPlugins: 'P',
     },
 
     string: ['version'],
@@ -81,6 +83,10 @@ exports.run = async (defaults = {}) => {
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
+    }
+
+    if (options.opensearchPlugins) {
+      await cluster.installOpensearchPlugin(installPath, options.opensearchPlugins);
     }
 
     options.bundledJDK = true;
