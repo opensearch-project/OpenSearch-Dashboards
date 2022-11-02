@@ -45,7 +45,7 @@ const mockOnAddFilter = jest.fn();
 describe('visBuilder sidebar field details', function () {
   const defaultProps = {
     isMetaField: false,
-    details: { buckets: [], error: '', exists: 1, total: 1, columns: [] },
+    details: { buckets: [], error: '', exists: 1, total: 1 },
     onAddFilter: mockOnAddFilter,
   };
 

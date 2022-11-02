@@ -94,6 +94,7 @@ export const FieldSelectorField = ({
       anchorPosition="rightUp"
       panelClassName="vbItem__fieldPopoverPanel"
       repositionOnScroll
+      data-test-subj="field-selector-field"
     >
       {infoIsOpen && (
         <VisBuilderFieldDetails
@@ -113,17 +114,17 @@ export interface SelectorFieldButtonProps extends Partial<FieldButtonProps> {
 }
 
 export const SelectorFieldButton = ({ dragValue, field, ...rest }: SelectorFieldButtonProps) => {
-  const { name, displayName, type, scripted = false } = field ?? {};
+  const { name, displayName, type, scripted = false } = field;
   const [dragProps] = useDrag({
     namespace: 'field-data',
     value: dragValue ?? name,
   });
 
-  function wrapOnDot(str?: string) {
+  function wrapOnDot(str: string) {
     // u200B is a non-width white-space character, which allows
     // the browser to efficiently word-wrap right after the dot
     // without us having to draw a lot of extra DOM elements, etc
-    return str ? str.replace(/\./g, '.\u200B') : '';
+    return str.replace(/\./g, '.\u200B');
   }
 
   const defaultIcon = <FieldIcon type={type} scripted={scripted} size="l" />;

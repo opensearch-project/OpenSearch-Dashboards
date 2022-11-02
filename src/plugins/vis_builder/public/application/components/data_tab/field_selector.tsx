@@ -195,7 +195,7 @@ interface FieldGroupProps {
   indexPattern?: IndexPattern;
 }
 
-const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => {
+export const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => {
   return (
     <EuiAccordion
       id={id}
@@ -221,9 +221,9 @@ const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => {
   );
 };
 
-function getFieldCategory({ name, type }: IndexPatternField): keyof IFieldCategories {
+export const getFieldCategory = ({ name, type }: IndexPatternField): keyof IFieldCategories => {
   if (META_FIELDS.includes(name)) return 'meta';
   if (type === OSD_FIELD_TYPES.NUMBER) return 'numerical';
 
   return 'categorical';
-}
+};
