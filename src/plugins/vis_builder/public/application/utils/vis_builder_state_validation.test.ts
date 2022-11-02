@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { validateWizardState } from './wizard_state_validation';
+import { validateWizardState } from './vis_builder_state_validation';
 
 describe('wizard state validation', () => {
   const validStyleState = {
