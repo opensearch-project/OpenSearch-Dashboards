@@ -48,6 +48,7 @@ import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
 import { createFailError } from '@osd/dev-utils';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
@@ -62,7 +63,7 @@ export const accessAsync = promisify(fs.access);
 export const globAsync = promisify(glob);
 
 export function normalizePath(inputPath) {
-  return normalize(path.relative('.', inputPath));
+  return normalize(path.relative(PROCESS_WORKING_DIR, inputPath));
 }
 
 export function difference(left = [], right = []) {
