@@ -28,54 +28,11 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
-import { chain } from 'lodash';
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
-import { AggTypes, TableVisConfig } from '../types';
+import { TableVisConfig } from '../types';
 import { getFormatService } from '../services';
 import { FormattedColumn } from '../types';
-
-function insert(arr: FormattedColumn[], index: number, col: FormattedColumn) {
-  const newArray = [...arr];
-  newArray.splice(index + 1, 0, col);
-  return newArray;
-}
-
-/**
- * @param columns - the formatted columns that will be displayed
- * @param title - the title of the column to add to
- * @param rows - the row data for the columns
- * @param insertAtIndex - the index to insert the percentage column at
- * @returns cols and rows for the table to render now included percentage column(s)
- */
-function addPercentageCol(
-  columns: FormattedColumn[],
-  title: string,
-  rows: Table['rows'],
-  insertAtIndex: number
-) {
-  const { id, sumTotal } = columns[insertAtIndex];
-  const newId = `${id}-percents`;
-  const formatter = getFormatService().deserialize({ id: 'percent' });
-  const i18nTitle = i18n.translate('visTypeTableNew.params.percentageTableColumnName', {
-    defaultMessage: '{title} percentages',
-    values: { title },
-  });
-  const newCols = insert(columns, insertAtIndex, {
-    title: i18nTitle,
-    id: newId,
-    formatter,
-    filterable: false,
-  });
-  const newRows = rows.map((row) => ({
-    [newId]: (row[id] as number) / (sumTotal as number),
-    ...row,
-  }));
-
-  return { cols: newCols, rows: newRows };
-}
-
 export interface FormattedDataProps {
   formattedRows: OpenSearchDashboardsDatatableRow[];
   formattedColumns: FormattedColumn[];
@@ -86,8 +43,8 @@ export const convertToFormattedData = (
   visConfig: TableVisConfig
 ): FormattedDataProps => {
   const { buckets, metrics } = visConfig;
-  let formattedRows: OpenSearchDashboardsDatatableRow[] = table.rows;
-  let formattedColumns: FormattedColumn[] = table.columns
+  const formattedRows: OpenSearchDashboardsDatatableRow[] = table.rows;
+  const formattedColumns: FormattedColumn[] = table.columns
     .map(function (col, i) {
       const isBucket = buckets.find((bucket) => bucket.accessor === i);
       const dimension = isBucket || metrics.find((metric) => metric.accessor === i);
@@ -103,77 +60,9 @@ export const convertToFormattedData = (
         filterable: !!isBucket,
       };
 
-      const isDate = dimension?.format?.id === 'date' || dimension?.format?.params?.id === 'date';
-      const allowsNumericalAggregations = formatter?.allowsNumericalAggregations;
-
-      if (allowsNumericalAggregations || isDate || visConfig.totalFunc === AggTypes.COUNT) {
-        const sum = table.rows.reduce((prev, curr) => {
-          // some metrics return undefined for some of the values
-          // derivative is an example of this as it returns undefined in the first row
-          if (curr[col.id] === undefined) return prev;
-          return prev + (curr[col.id] as number);
-        }, 0);
-
-        formattedColumn.sumTotal = sum;
-        switch (visConfig.totalFunc) {
-          case AggTypes.SUM: {
-            if (!isDate) {
-              formattedColumn.formattedTotal = formatter?.convert(sum);
-              formattedColumn.total = formattedColumn.sumTotal;
-            }
-            break;
-          }
-          case AggTypes.AVG: {
-            if (!isDate) {
-              const total = sum / table.rows.length;
-              formattedColumn.formattedTotal = formatter?.convert(total);
-              formattedColumn.total = total;
-            }
-            break;
-          }
-          case AggTypes.MIN: {
-            const total = chain(table.rows).map(col.id).min().value() as number;
-            formattedColumn.formattedTotal = formatter?.convert(total);
-            formattedColumn.total = total;
-            break;
-          }
-          case AggTypes.MAX: {
-            const total = chain(table.rows).map(col.id).max().value() as number;
-            formattedColumn.formattedTotal = formatter?.convert(total);
-            formattedColumn.total = total;
-            break;
-          }
-          case 'count': {
-            const total = table.rows.length;
-            formattedColumn.formattedTotal = total;
-            formattedColumn.total = total;
-            break;
-          }
-          default:
-            break;
-        }
-      }
-
       return formattedColumn;
     })
     .filter((column): column is FormattedColumn => !!column);
 
-  if (visConfig.percentageCol) {
-    const insertAtIndex = formattedColumns.findIndex(
-      (col) => col.title === visConfig.percentageCol
-    );
-
-    // column to show percentage for was removed
-    if (insertAtIndex < 0) return { formattedRows, formattedColumns };
-
-    const { cols, rows } = addPercentageCol(
-      formattedColumns,
-      visConfig.percentageCol,
-      table.rows,
-      insertAtIndex
-    );
-    formattedRows = rows;
-    formattedColumns = cols;
-  }
   return { formattedRows, formattedColumns };
 };

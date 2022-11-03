@@ -9,15 +9,11 @@ import { AggGroupNames } from '../../../../data/public';
 import { TableVizOptions } from './components/table_viz_options';
 import { VisualizationTypeOptions } from '../../services/type_service';
 import { toExpression } from './to_expression';
-import { AggTypes } from './types';
 
 export interface TableOptionsDefaults {
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
 }
 
 export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaults> => ({
@@ -91,9 +87,6 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
           perPage: 10,
           showPartialRows: false,
           showMetricsAtAllLevels: false,
-          showTotal: false,
-          totalFunc: AggTypes.SUM,
-          percentageCol: '',
         },
         render: TableVizOptions,
       },

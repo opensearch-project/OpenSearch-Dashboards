@@ -40,82 +40,82 @@ export const getDataGridColumns = (
   };
 
   return cols.map((col, colIndex) => {
-    const cellActions = col.filterable
-      ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = rows[rowIndex][columnId];
-            const filterContent = col.formatter?.convert(filterValue);
+    //const cellActions = col.filterable
+    //  ? [
+    //      ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+    //        const filterValue = rows[rowIndex][columnId];
+    //        const filterContent = col.formatter?.convert(filterValue);
 
-            const filterForValueText = i18n.translate(
-              'visTypeTableNew.tableVisFilter.filterForValue',
-              {
-                defaultMessage: 'Filter for value',
-              }
-            );
-            const filterForValueLabel = i18n.translate(
-              'visTypeTableNew.tableVisFilter.filterForValueLabel',
-              {
-                defaultMessage: 'Filter for value: {filterContent}',
-                values: {
-                  filterContent,
-                },
-              }
-            );
+    //        const filterForValueText = i18n.translate(
+    //          'visTypeTableNew.tableVisFilter.filterForValue',
+    //          {
+    //            defaultMessage: 'Filter for value',
+    //          }
+    //        );
+    //        const filterForValueLabel = i18n.translate(
+    //          'visTypeTableNew.tableVisFilter.filterForValueLabel',
+    //          {
+    //            defaultMessage: 'Filter for value: {filterContent}',
+    //            values: {
+    //              filterContent,
+    //            },
+    //          }
+    //        );
 
-            return (
-              filterValue != null && (
-                <Component
-                  onClick={() => {
-                    filterBucket(rowIndex, colIndex, false);
-                    closePopover();
-                  }}
-                  iconType="plusInCircle"
-                  aria-label={filterForValueLabel}
-                  data-test-subj="filterForValue"
-                >
-                  {filterForValueText}
-                </Component>
-              )
-            );
-          },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = rows[rowIndex][columnId];
-            const filterContent = col.formatter?.convert(filterValue);
+    //        return (
+    //          filterValue != null && (
+    //            <Component
+    //              onClick={() => {
+    //                filterBucket(rowIndex, colIndex, false);
+    //                closePopover();
+    //              }}
+    //              iconType="plusInCircle"
+    //              aria-label={filterForValueLabel}
+    //              data-test-subj="filterForValue"
+    //            >
+    //              {filterForValueText}
+    //            </Component>
+    //          )
+    //        );
+    //      },
+    //      ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+    //        const filterValue = rows[rowIndex][columnId];
+    //        const filterContent = col.formatter?.convert(filterValue);
 
-            const filterOutValueText = i18n.translate(
-              'visTypeTableNew.tableVisFilter.filterOutValue',
-              {
-                defaultMessage: 'Filter out value',
-              }
-            );
-            const filterOutValueLabel = i18n.translate(
-              'visTypeTableNew.tableVisFilter.filterOutValueLabel',
-              {
-                defaultMessage: 'Filter out value: {filterContent}',
-                values: {
-                  filterContent,
-                },
-              }
-            );
+    //        const filterOutValueText = i18n.translate(
+    //          'visTypeTableNew.tableVisFilter.filterOutValue',
+    //          {
+    //            defaultMessage: 'Filter out value',
+    //          }
+    //        );
+    //        const filterOutValueLabel = i18n.translate(
+    //          'visTypeTableNew.tableVisFilter.filterOutValueLabel',
+    //          {
+    //            defaultMessage: 'Filter out value: {filterContent}',
+    //            values: {
+    //              filterContent,
+    //            },
+    //          }
+    //        );
 
-            return (
-              filterValue != null && (
-                <Component
-                  onClick={() => {
-                    filterBucket(rowIndex, colIndex, true);
-                    closePopover();
-                  }}
-                  iconType="minusInCircle"
-                  aria-label={filterOutValueLabel}
-                  data-test-subj="filterOutValue"
-                >
-                  {filterOutValueText}
-                </Component>
-              )
-            );
-          },
-        ]
-      : undefined;
+    //        return (
+    //          filterValue != null && (
+    //            <Component
+    //              onClick={() => {
+    //                filterBucket(rowIndex, colIndex, true);
+    //                closePopover();
+    //              }}
+    //              iconType="minusInCircle"
+    //              aria-label={filterOutValueLabel}
+    //              data-test-subj="filterOutValue"
+    //            >
+    //              {filterOutValueText}
+    //            </Component>
+    //          )
+    //        );
+    //      },
+    //    ]
+    //  : undefined;
 
     const initialWidth = columnsWidth.find((c) => c.colIndex === colIndex);
 
@@ -138,7 +138,7 @@ export const getDataGridColumns = (
           }),
         },
       },
-      cellActions,
+      //cellActions,
     };
     if (initialWidth) {
       dataGridColumn.initialWidth = initialWidth.width;

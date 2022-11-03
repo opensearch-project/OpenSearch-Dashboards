@@ -31,14 +31,6 @@
 import { SchemaConfig } from 'src/plugins/visualizations/public';
 import { IFieldFormat } from 'src/plugins/data/public';
 
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
-
 export interface TableVisConfig extends TableVisParams {
   title: string;
   metrics: SchemaConfig[];
@@ -51,9 +43,6 @@ export interface TableVisParams {
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
 }
 
 export interface FormattedColumn {
@@ -61,9 +50,6 @@ export interface FormattedColumn {
   title: string;
   formatter: IFieldFormat;
   filterable: boolean;
-  formattedTotal?: string | number;
-  sumTotal?: number;
-  total?: number;
 }
 
 export interface ColumnWidth {
