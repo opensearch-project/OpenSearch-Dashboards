@@ -7,7 +7,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import ReactDOM from 'react-dom';
 import { merge, Subscription } from 'rxjs';
 
-import { PLUGIN_ID, WizardSavedObjectAttributes, WIZARD_SAVED_OBJECT } from '../../common';
+import { PLUGIN_ID, VisBuilderSavedObjectAttributes, VISBUILDER_SAVED_OBJECT } from '../../common';
 import {
   Embeddable,
   EmbeddableOutput,
@@ -30,12 +30,13 @@ import {
 import { validateSchemaState } from '../application/utils/validate_schema_state';
 import { getExpressionLoader, getTypeService } from '../plugin_services';
 import { PersistedState } from '../../../visualizations/public';
+import { RenderState, VisualizationState } from '../application/utils/state_management';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
-export const WIZARD_EMBEDDABLE = WIZARD_SAVED_OBJECT;
+export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
 
-export interface WizardEmbeddableConfiguration {
-  savedWizard: WizardSavedObjectAttributes;
+export interface VisBuilderEmbeddableConfiguration {
+  savedVisBuilder: VisBuilderSavedObjectAttributes;
   // TODO: add indexPatterns as part of configuration
   // indexPatterns?: IIndexPattern[];
   editPath: string;
@@ -43,18 +44,18 @@ export interface WizardEmbeddableConfiguration {
   editable: boolean;
 }
 
-export interface WizardOutput extends EmbeddableOutput {
+export interface VisBuilderOutput extends EmbeddableOutput {
   /**
-   * Will contain the saved object attributes of the Wizard Saved Object that matches
+   * Will contain the saved object attributes of the VisBuilder Saved Object that matches
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
    */
-  savedWizard?: WizardSavedObjectAttributes;
+  savedVisBuilder?: VisBuilderSavedObjectAttributes;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, WizardOutput> {
-  public readonly type = WIZARD_EMBEDDABLE;
+export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput, VisBuilderOutput> {
+  public readonly type = VISBUILDER_EMBEDDABLE;
   private handler?: ExpressionLoader;
   private timeRange?: TimeRange;
   private query?: Query;
@@ -64,13 +65,13 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
   private autoRefreshFetchSubscription: Subscription;
   private subscriptions: Subscription[] = [];
   private node?: HTMLElement;
-  private savedWizard?: WizardSavedObjectAttributes;
+  private savedVisBuilder?: VisBuilderSavedObjectAttributes;
   private serializedState?: { visualization: string; style: string };
   private uiState?: PersistedState;
 
   constructor(
     timefilter: TimefilterContract,
-    { savedWizard, editPath, editUrl, editable }: WizardEmbeddableConfiguration,
+    { savedVisBuilder, editPath, editUrl, editable }: VisBuilderEmbeddableConfiguration,
     initialInput: SavedObjectEmbeddableInput,
     {
       parent,
@@ -81,17 +82,17 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     super(
       initialInput,
       {
-        defaultTitle: savedWizard.title,
+        defaultTitle: savedVisBuilder.title,
         editPath,
         editApp: PLUGIN_ID,
         editUrl,
         editable,
-        savedWizard,
+        savedVisBuilder,
       },
       parent
     );
 
-    this.savedWizard = savedWizard;
+    this.savedVisBuilder = savedVisBuilder;
     this.uiState = new PersistedState();
 
     this.autoRefreshFetchSubscription = timefilter
@@ -107,7 +108,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
 
   private getSerializedState = () => {
     const { visualizationState: visualization = '{}', styleState: style = '{}' } =
-      this.savedWizard || {};
+      this.savedVisBuilder || {};
     return {
       visualization,
       style,
@@ -121,16 +122,16 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     const { visualization, style } = this.serializedState;
 
     const vizStateWithoutIndex = JSON.parse(visualization);
-    const visualizationState = {
+    const visualizationState: VisualizationState = {
       searchField: vizStateWithoutIndex.searchField,
       activeVisualization: vizStateWithoutIndex.activeVisualization,
-      indexPattern: this.savedWizard?.searchSourceFields?.index,
+      indexPattern: this.savedVisBuilder?.searchSourceFields?.index,
     };
-    const rootState = {
+    const renderState: RenderState = {
       visualization: visualizationState,
       style: JSON.parse(style),
     };
-    const visualizationName = rootState.visualization?.activeVisualization?.name ?? '';
+    const visualizationName = renderState.visualization?.activeVisualization?.name ?? '';
     const visualizationType = getTypeService().get(visualizationName);
     if (!visualizationType) {
       this.onContainerError(new Error(`Invalid visualization type ${visualizationName}`));
@@ -138,7 +139,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     }
     const { toExpression, ui } = visualizationType;
     const schemas = ui.containerConfig.data.schemas;
-    const [valid, errorMsg] = validateSchemaState(schemas, rootState);
+    const [valid, errorMsg] = validateSchemaState(schemas, visualizationState);
 
     if (!valid) {
       if (errorMsg) {
@@ -147,7 +148,11 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
       }
     } else {
       // TODO: handle error in Expression creation
-      const exp = await toExpression(rootState);
+      const exp = await toExpression(renderState, {
+        filters: this.filters,
+        query: this.query,
+        timeRange: this.timeRange,
+      });
       return exp;
     }
   };
@@ -162,7 +167,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
 
   // Needed to add informational tooltip
   public getDescription() {
-    return this.savedWizard?.description;
+    return this.savedVisBuilder?.description;
   }
 
   public render(node: HTMLElement) {
@@ -178,7 +183,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     this.timeRange = cloneDeep(this.input.timeRange);
 
     const div = document.createElement('div');
-    div.className = `wizard visualize panel-content panel-content--fullWidth`;
+    div.className = `visBuilder visualize panel-content panel-content--fullWidth`;
     node.appendChild(div);
 
     this.node = div;
@@ -192,11 +197,11 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
       },
     });
 
-    if (this.savedWizard?.description) {
-      div.setAttribute('data-description', this.savedWizard.description);
+    if (this.savedVisBuilder?.description) {
+      div.setAttribute('data-description', this.savedVisBuilder.description);
     }
 
-    div.setAttribute('data-test-subj', 'wizardLoader');
+    div.setAttribute('data-test-subj', 'visBuilderLoader');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
@@ -268,12 +273,15 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     // Check if rootState has changed
     if (!isEqual(this.getSerializedState(), this.serializedState)) {
       this.serializedState = this.getSerializedState();
-      this.expression = (await this.getExpression()) ?? '';
       dirty = true;
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
+    if (dirty) {
+      this.expression = (await this.getExpression()) ?? '';
+
+      if (this.handler) {
+        this.updateHandler();
+      }
     }
   }
 
@@ -295,7 +303,7 @@ export class WizardEmbeddable extends Embeddable<SavedObjectEmbeddableInput, Wiz
     this.updateOutput({ loading: false, error });
   };
 
-  // TODO: we may eventually need to add support for visualizations that use triggers like filter or brush, but current wizard vis types don't support triggers
+  // TODO: we may eventually need to add support for visualizations that use triggers like filter or brush, but current VisBuilder vis types don't support triggers
   // public supportedTriggers(): TriggerId[] {
   //   return this.visType.getSupportedTriggers?.() ?? [];
   // }

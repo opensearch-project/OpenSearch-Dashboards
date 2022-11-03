@@ -30,7 +30,7 @@
 
 import minimatch from 'minimatch';
 
-import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
+import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask, normalizePath } from '../lib';
 
 export const Clean: GlobalTask = {
   global: true,
@@ -190,8 +190,8 @@ export const CleanExtraBinScripts: Task = {
       if (platform.isWindows()) {
         await deleteAll(
           [
-            build.resolvePathForPlatform(platform, 'bin', '*'),
-            `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
+            normalizePath(build.resolvePathForPlatform(platform, 'bin', '*')),
+            `!${normalizePath(build.resolvePathForPlatform(platform, 'bin', '*.bat'))}`,
           ],
           log
         );

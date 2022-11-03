@@ -220,9 +220,9 @@
 # for reducing the load of OpenSearch cluster.
 # data.search.usageTelemetry.enabled: false
 
-# Set the value of this setting to true to start exploring wizard
+# Set the value of this setting to false to disable VisBuilder
 # functionality in Visualization.
-# wizard.enabled: false
+# vis_builder.enabled: false
 
 # Set the value of this setting to true to enable the experimental multiple data source
 # support feature. Use with caution.

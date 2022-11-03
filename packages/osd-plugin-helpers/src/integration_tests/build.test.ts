@@ -32,7 +32,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@osd/utils';
+import { REPO_ROOT, standardize } from '@osd/cross-platform';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
 import extract from 'extract-zip';
 import del from 'del';
@@ -78,7 +78,7 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(generateProc.all).toMatchInlineSnapshot(`
     " succ 🎉
 
-          Your plugin has been created in plugins/foo_test_plugin
+          Your plugin has been created in ${standardize('plugins/foo_test_plugin', false, true)}
     "
   `);
 
@@ -105,7 +105,8 @@ it('builds a generated plugin into a viable archive', async () => {
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-1.0.0.zip]"
+     info compressing plugin into [fooTestPlugin-1.0.0.zip]
+     info cleaning up compression temporary artifacts"
   `);
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
@@ -165,7 +166,7 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
   expect(generateProc.all).toMatchInlineSnapshot(`
     " succ 🎉
 
-          Your plugin has been created in plugins/foo_test_plugin
+          Your plugin has been created in ${standardize('plugins/foo_test_plugin', false, true)}
     "
   `);
 
@@ -192,7 +193,8 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-1.0.0.x.zip]"
+     info compressing plugin into [fooTestPlugin-1.0.0.x.zip]
+     info cleaning up compression temporary artifacts"
   `);
 
   await extract(PLUGIN_ARCHIVE_X, { dir: TMP_DIR }, () => {});

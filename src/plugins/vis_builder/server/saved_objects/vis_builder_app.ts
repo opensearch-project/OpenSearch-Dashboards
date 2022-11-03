@@ -7,30 +7,29 @@ import { SavedObject, SavedObjectsType } from '../../../../core/server';
 import {
   EDIT_PATH,
   PLUGIN_ID,
-  WizardSavedObjectAttributes,
-  WIZARD_SAVED_OBJECT,
+  VisBuilderSavedObjectAttributes,
+  VISBUILDER_SAVED_OBJECT,
 } from '../../common';
-import { wizardSavedObjectTypeMigrations } from './vis_builder_migration';
 
-export const wizardSavedObjectType: SavedObjectsType = {
-  name: WIZARD_SAVED_OBJECT,
+export const visBuilderSavedObjectType: SavedObjectsType = {
+  name: VISBUILDER_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
   management: {
     // icon: '', // TODO: Need a custom icon here - unfortunately a custom SVG won't work without changes to the SavedObjectsManagement plugin
     defaultSearchField: 'title',
     importableAndExportable: true,
-    getTitle: ({ attributes: { title } }: SavedObject<WizardSavedObjectAttributes>) => title,
+    getTitle: ({ attributes: { title } }: SavedObject<VisBuilderSavedObjectAttributes>) => title,
     getEditUrl: ({ id }: SavedObject) =>
-      `/management/opensearch-dashboards/objects/savedWizard/${encodeURIComponent(id)}`,
+      `/management/opensearch-dashboards/objects/savedVisBuilder/${encodeURIComponent(id)}`,
     getInAppUrl({ id }: SavedObject) {
       return {
         path: `/app/${PLUGIN_ID}${EDIT_PATH}/${encodeURIComponent(id)}`,
-        uiCapabilitiesPath: 'wizard.show',
+        uiCapabilitiesPath: 'visualization-visbuilder.show',
       };
     },
   },
-  migrations: wizardSavedObjectTypeMigrations,
+  migrations: {},
   mappings: {
     properties: {
       title: {

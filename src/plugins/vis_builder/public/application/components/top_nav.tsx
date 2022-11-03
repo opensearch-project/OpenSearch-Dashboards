@@ -9,10 +9,10 @@ import { useUnmount } from 'react-use';
 import { PLUGIN_ID } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../utils/get_top_nav_config';
-import { WizardServices } from '../../types';
+import { VisBuilderServices } from '../../types';
 
 import './top_nav.scss';
-import { useIndexPatterns, useSavedWizardVis } from '../utils/use';
+import { useIndexPatterns, useSavedVisBuilderVis } from '../utils/use';
 import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
 import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
@@ -22,7 +22,7 @@ import { TopNavMenuData } from '../../../../navigation/public';
 export const TopNav = () => {
   // id will only be set for the edit route
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
-  const { services } = useOpenSearchDashboards<WizardServices>();
+  const { services } = useOpenSearchDashboards<VisBuilderServices>();
   const {
     setHeaderActionMenu,
     navigation: {
@@ -33,18 +33,18 @@ export const TopNav = () => {
   const dispatch = useTypedDispatch();
 
   const saveDisabledReason = useCanSave();
-  const savedWizardVis = useSavedWizardVis(visualizationIdFromUrl);
+  const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
 
   useEffect(() => {
     const getConfig = () => {
-      if (!savedWizardVis || !indexPattern) return;
+      if (!savedVisBuilderVis || !indexPattern) return;
 
       return getTopNavConfig(
         {
           visualizationIdFromUrl,
-          savedWizardVis: saveStateToSavedObject(savedWizardVis, rootState, indexPattern),
+          savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
         },
@@ -55,7 +55,7 @@ export const TopNav = () => {
     setConfig(getConfig());
   }, [
     rootState,
-    savedWizardVis,
+    savedVisBuilderVis,
     services,
     visualizationIdFromUrl,
     saveDisabledReason,

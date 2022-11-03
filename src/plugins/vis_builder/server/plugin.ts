@@ -11,11 +11,11 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { WizardPluginSetup, WizardPluginStart } from './types';
+import { VisBuilderPluginSetup, VisBuilderPluginStart } from './types';
 import { capabilitiesProvider } from './capabilities_provider';
-import { wizardSavedObjectType } from './saved_objects';
+import { visBuilderSavedObjectType } from './saved_objects';
 
-export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart> {
+export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilderPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -23,10 +23,10 @@ export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart
   }
 
   public setup({ capabilities, http, savedObjects }: CoreSetup) {
-    this.logger.debug('wizard: Setup');
+    this.logger.debug('vis-builder: Setup');
 
     // Register saved object types
-    savedObjects.registerType(wizardSavedObjectType);
+    savedObjects.registerType(visBuilderSavedObjectType);
 
     // Register capabilities
     capabilities.registerProvider(capabilitiesProvider);
@@ -35,7 +35,7 @@ export class WizardPlugin implements Plugin<WizardPluginSetup, WizardPluginStart
   }
 
   public start(_core: CoreStart) {
-    this.logger.debug('wizard: Started');
+    this.logger.debug('vis-builder: Started');
     return {};
   }
 

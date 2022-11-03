@@ -12,10 +12,10 @@ import {
   SavedObjectNotFound,
 } from '../../../../../opensearch_dashboards_utils/public';
 import { EDIT_PATH, PLUGIN_ID } from '../../../../common';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { MetricOptionsDefaults } from '../../../visualizations/metric/metric_viz_type';
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
-import { getSavedWizardVis } from '../get_saved_vis_builder_vis';
+import { getSavedVisBuilderVis } from '../get_saved_vis_builder_vis';
 import {
   useTypedDispatch,
   setStyleState,
@@ -24,12 +24,12 @@ import {
 } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
-import { validateWizardState } from '../vis_builder_state_validation';
+import { validateVisBuilderState } from '../vis_builder_state_validation';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
-export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) => {
-  const { services } = useOpenSearchDashboards<WizardServices>();
+export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined) => {
+  const { services } = useOpenSearchDashboards<VisBuilderServices>();
   const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);
   const dispatch = useTypedDispatch();
 
@@ -49,27 +49,30 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
         text: message,
       });
     };
-    const loadSavedWizardVis = async () => {
+    const loadSavedVisBuilderVis = async () => {
       try {
-        const savedWizardVis = await getSavedWizardVis(services, visualizationIdFromUrl);
+        const savedVisBuilderVis = await getSavedVisBuilderVis(services, visualizationIdFromUrl);
 
-        if (savedWizardVis.id) {
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedWizardVis.title, navigateToApp));
-          chrome.docTitle.change(savedWizardVis.title);
+        if (savedVisBuilderVis.id) {
+          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVisBuilderVis.title, navigateToApp));
+          chrome.docTitle.change(savedVisBuilderVis.title);
         } else {
           chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
         }
 
-        if (savedWizardVis.styleState !== '{}' && savedWizardVis.visualizationState !== '{}') {
-          const styleState = JSON.parse(savedWizardVis.styleState);
-          const vizStateWithoutIndex = JSON.parse(savedWizardVis.visualizationState);
+        if (
+          savedVisBuilderVis.styleState !== '{}' &&
+          savedVisBuilderVis.visualizationState !== '{}'
+        ) {
+          const styleState = JSON.parse(savedVisBuilderVis.styleState);
+          const vizStateWithoutIndex = JSON.parse(savedVisBuilderVis.visualizationState);
           const visualizationState: VisualizationState = {
             searchField: vizStateWithoutIndex.searchField,
             activeVisualization: vizStateWithoutIndex.activeVisualization,
-            indexPattern: savedWizardVis.searchSourceFields.index,
+            indexPattern: savedVisBuilderVis.searchSourceFields.index,
           };
 
-          const validateResult = validateWizardState({ styleState, visualizationState });
+          const validateResult = validateVisBuilderState({ styleState, visualizationState });
           if (!validateResult.valid) {
             const err = validateResult.errors;
             if (err) {
@@ -82,13 +85,13 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
           dispatch(setVisualizationState(visualizationState));
         }
 
-        setSavedVisState(savedWizardVis);
+        setSavedVisState(savedVisBuilderVis);
         dispatch(setEditorState({ state: 'clean' }));
       } catch (error) {
         const managementRedirectTarget = {
           [PLUGIN_ID]: {
             app: 'management',
-            path: `opensearch-dashboards/objects/savedWizard/${visualizationIdFromUrl}`,
+            path: `opensearch-dashboards/objects/savedVisBuilder/${visualizationIdFromUrl}`,
           },
         };
 
@@ -113,7 +116,7 @@ export const useSavedWizardVis = (visualizationIdFromUrl: string | undefined) =>
       }
     };
 
-    loadSavedWizardVis();
+    loadSavedVisBuilderVis();
   }, [dispatch, services, visualizationIdFromUrl]);
 
   return savedVisState;

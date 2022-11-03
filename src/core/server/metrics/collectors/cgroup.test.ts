@@ -31,6 +31,7 @@
 import mockFs from 'mock-fs';
 import { loggerMock } from '@osd/logging/target/mocks';
 import { OsCgroupMetricsCollector } from './cgroup';
+import path from 'path';
 
 describe('OsCgroupMetricsCollector', () => {
   afterEach(() => mockFs.restore());
@@ -140,10 +141,14 @@ throttled_time 666
 
     const logger = loggerMock.create();
 
+    const usagePath =
+      (process.platform === 'win32' ? '\\\\?\\' : '') +
+      path.resolve('/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage');
+
     const collector = new OsCgroupMetricsCollector({ logger });
     expect(await collector.collect()).toEqual({});
     expect(logger.error).toHaveBeenCalledWith(
-      "cgroup metrics could not be read due to error: [Error: EACCES, permission denied '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
+      `cgroup metrics could not be read due to error: [Error: EACCES, permission denied '${usagePath}']`
     );
   });
 });

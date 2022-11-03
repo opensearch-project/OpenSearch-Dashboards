@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { validateWizardState } from './vis_builder_state_validation';
+import { validateVisBuilderState } from './vis_builder_state_validation';
 
-describe('wizard state validation', () => {
+describe('visBuilder state validation', () => {
   const validStyleState = {
     addLegend: true,
     addTooltip: true,
@@ -21,8 +21,8 @@ describe('wizard state validation', () => {
     searchField: '',
   };
   describe('correct return when validation suceeds', () => {
-    test('with correct wizard state', () => {
-      const validationResult = validateWizardState({
+    test('with correct visBuilder state', () => {
+      const validationResult = validateVisBuilderState({
         styleState: validStyleState,
         visualizationState: validVisualizationState,
       });
@@ -32,7 +32,7 @@ describe('wizard state validation', () => {
   });
   describe('correct return with errors when validation fails', () => {
     test('with non object type styleStyle', () => {
-      const validationResult = validateWizardState({
+      const validationResult = validateVisBuilderState({
         styleState: [],
         visualizationState: validVisualizationState,
       });

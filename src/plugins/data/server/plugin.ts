@@ -30,6 +30,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { ConfigSchema } from '../config';
 import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
@@ -64,6 +65,7 @@ export interface DataPluginStart {
 export interface DataPluginSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -96,7 +98,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection }: DataPluginSetupDependencies
+    { expressions, usageCollection, dataSource }: DataPluginSetupDependencies
   ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
@@ -109,6 +111,7 @@ export class DataServerPlugin
     const searchSetup = this.searchService.setup(core, {
       registerFunction: expressions.registerFunction,
       usageCollection,
+      dataSource,
     });
 
     return {

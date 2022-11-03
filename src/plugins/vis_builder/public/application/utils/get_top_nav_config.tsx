@@ -36,21 +36,21 @@ import {
   SavedObjectSaveOpts,
   showSaveModal,
 } from '../../../../saved_objects/public';
-import { WizardServices } from '../..';
-import { WizardVisSavedObject } from '../../types';
+import { VisBuilderServices } from '../..';
+import { VisBuilderVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
-import { EDIT_PATH } from '../../../common';
+import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
-  savedWizardVis: WizardVisSavedObject;
+  savedVisBuilderVis: VisBuilderVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
 }
 
 export const getTopNavConfig = (
-  { visualizationIdFromUrl, savedWizardVis, saveDisabledReason, dispatch }: TopNavConfigParams,
-  services: WizardServices
+  { visualizationIdFromUrl, savedVisBuilderVis, saveDisabledReason, dispatch }: TopNavConfigParams,
+  services: VisBuilderServices
 ) => {
   const {
     i18n: { Context: I18nContext },
@@ -67,35 +67,35 @@ export const getTopNavConfig = (
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
-      iconType: savedWizardVis?.id && originatingApp ? undefined : ('save' as const),
-      emphasize: savedWizardVis && !savedWizardVis.id,
+      iconType: savedVisBuilderVis?.id && originatingApp ? undefined : ('save' as const),
+      emphasize: savedVisBuilderVis && !savedVisBuilderVis.id,
       description: i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonAriaLabel', {
         defaultMessage: 'Save Visualization',
       }),
-      className: savedWizardVis?.id && originatingApp ? 'saveAsButton' : '',
+      className: savedVisBuilderVis?.id && originatingApp ? 'saveAsButton' : '',
       label:
-        savedWizardVis?.id && originatingApp
+        savedVisBuilderVis?.id && originatingApp
           ? i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
               defaultMessage: 'save as',
             })
           : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
               defaultMessage: 'save',
             }),
-      testId: 'wizardSaveButton',
+      testId: 'visBuilderSaveButton',
       disableButton: !!saveDisabledReason,
       tooltip: saveDisabledReason,
       run: (_anchorElement) => {
         const saveModal = (
           <SavedObjectSaveModalOrigin
-            documentInfo={savedWizardVis}
+            documentInfo={savedVisBuilderVis}
             onSave={getOnSave(
-              savedWizardVis,
+              savedVisBuilderVis,
               originatingApp,
               visualizationIdFromUrl,
               dispatch,
               services
             )}
-            objectType={'wizard'}
+            objectType={'visualization'}
             onClose={() => {}}
             originatingApp={originatingApp}
             getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -105,7 +105,7 @@ export const getTopNavConfig = (
         showSaveModal(saveModal, I18nContext);
       },
     },
-    ...(originatingApp && ((savedWizardVis && savedWizardVis.id) || embeddableId)
+    ...(originatingApp && ((savedVisBuilderVis && savedVisBuilderVis.id) || embeddableId)
       ? [
           {
             id: 'saveAndReturn',
@@ -117,23 +117,23 @@ export const getTopNavConfig = (
             description: i18n.translate(
               'visBuilder.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
-                defaultMessage: 'Finish editing wizard and return to the last app',
+                defaultMessage: 'Finish editing visBuilder and return to the last app',
               }
             ),
-            testId: 'wizardsaveAndReturnButton',
+            testId: 'visBuilderSaveAndReturnButton',
             disableButton: !!saveDisabledReason,
             tooltip: saveDisabledReason,
             run: async () => {
               const saveOptions = {
-                newTitle: savedWizardVis.title,
+                newTitle: savedVisBuilderVis.title,
                 newCopyOnSave: false,
                 isTitleDuplicateConfirmed: false,
-                newDescription: savedWizardVis.description,
+                newDescription: savedVisBuilderVis.description,
                 returnToOrigin: true,
               };
 
               const onSave = getOnSave(
-                savedWizardVis,
+                savedVisBuilderVis,
                 originatingApp,
                 visualizationIdFromUrl,
                 dispatch,
@@ -151,7 +151,7 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
-  savedWizardVis,
+  savedVisBuilderVis,
   originatingApp,
   visualizationIdFromUrl,
   dispatch,
@@ -173,18 +173,18 @@ export const getOnSave = (
     const { embeddable, toastNotifications, application, history } = services;
     const stateTransfer = embeddable.getStateTransfer();
 
-    if (!savedWizardVis) {
+    if (!savedVisBuilderVis) {
       return;
     }
 
-    const currentTitle = savedWizardVis.title;
-    savedWizardVis.title = newTitle;
-    savedWizardVis.description = newDescription;
-    savedWizardVis.copyOnSave = newCopyOnSave;
-    const newlyCreated = !savedWizardVis.id || savedWizardVis.copyOnSave;
+    const currentTitle = savedVisBuilderVis.title;
+    savedVisBuilderVis.title = newTitle;
+    savedVisBuilderVis.description = newDescription;
+    savedVisBuilderVis.copyOnSave = newCopyOnSave;
+    const newlyCreated = !savedVisBuilderVis.id || savedVisBuilderVis.copyOnSave;
 
     try {
-      const id = await savedWizardVis.save({
+      const id = await savedVisBuilderVis.save({
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
@@ -196,22 +196,22 @@ export const getOnSave = (
           title: i18n.translate('visBuilder.topNavMenu.saveVisualization.successNotificationText', {
             defaultMessage: `Saved '{visTitle}'`,
             values: {
-              visTitle: savedWizardVis.title,
+              visTitle: savedVisBuilderVis.title,
             },
           }),
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
         if (originatingApp && returnToOrigin) {
-          // create or edit wizard directly from another app, such as `dashboard`
+          // create or edit visBuilder directly from another app, such as `dashboard`
           if (newlyCreated && stateTransfer) {
             // create new embeddable to transfer to originatingApp
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-              state: { type: 'wizard', input: { savedObjectId: id } },
+              state: { type: VISBUILDER_SAVED_OBJECT, input: { savedObjectId: id } },
             });
             return { id };
           } else {
-            // update an existing wizard from another app
+            // update an existing visBuilder from another app
             application.navigateToApp(originatingApp);
           }
         }
@@ -226,7 +226,7 @@ export const getOnSave = (
         dispatch(setEditorState({ state: 'clean' }));
       } else {
         // reset title if save not successful
-        savedWizardVis.title = currentTitle;
+        savedVisBuilderVis.title = currentTitle;
       }
 
       // Even if id='', which it will be for a duplicate title warning, we still want to return it, to avoid closing the modal
@@ -247,7 +247,7 @@ export const getOnSave = (
       });
 
       // reset title if save not successful
-      savedWizardVis.title = currentTitle;
+      savedVisBuilderVis.title = currentTitle;
       return { error };
     }
   };

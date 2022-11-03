@@ -6,16 +6,16 @@
 import React from 'react';
 
 import { SavedObjectEmbeddableInput, withEmbeddableSubscription } from '../../../embeddable/public';
-import { WizardEmbeddable, WizardOutput } from './vis_builder_embeddable';
+import { VisBuilderEmbeddable, VisBuilderOutput } from './vis_builder_embeddable';
 import { getReactExpressionRenderer } from '../plugin_services';
 
 interface Props {
-  embeddable: WizardEmbeddable;
+  embeddable: VisBuilderEmbeddable;
   input: SavedObjectEmbeddableInput;
-  output: WizardOutput;
+  output: VisBuilderOutput;
 }
 
-function WizardEmbeddableComponentInner({ embeddable, input: {}, output: { error } }: Props) {
+function VisBuilderEmbeddableComponentInner({ embeddable, input: {}, output: { error } }: Props) {
   const { expression } = embeddable;
   const ReactExpressionRenderer = getReactExpressionRenderer();
 
@@ -31,8 +31,8 @@ function WizardEmbeddableComponentInner({ embeddable, input: {}, output: { error
   );
 }
 
-export const WizardEmbeddableComponent = withEmbeddableSubscription<
+export const VisBuilderEmbeddableComponent = withEmbeddableSubscription<
   SavedObjectEmbeddableInput,
-  WizardOutput,
-  WizardEmbeddable
->(WizardEmbeddableComponentInner);
+  VisBuilderOutput,
+  VisBuilderEmbeddable
+>(VisBuilderEmbeddableComponentInner);

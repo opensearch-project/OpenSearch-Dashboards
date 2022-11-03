@@ -42,8 +42,7 @@ import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
-
-const OPENSEARCH_DASHBOARDS_ROOT = process.cwd();
+import { PROCESS_WORKING_DIR, standardize } from '@osd/cross-platform';
 
 const Plugins = {
   invalid: () => ({
@@ -86,13 +85,7 @@ const packageMock = {
 };
 
 const manifestPath = (...pluginPath: string[]) =>
-  resolve(
-    OPENSEARCH_DASHBOARDS_ROOT,
-    'src',
-    'plugins',
-    ...pluginPath,
-    'opensearch_dashboards.json'
-  );
+  resolve(PROCESS_WORKING_DIR, 'src', 'plugins', ...pluginPath, 'opensearch_dashboards.json');
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -156,8 +149,8 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${PROCESS_WORKING_DIR}/plugins/plugin_b`]: Plugins.valid('pluginB'),
       },
       { createCwd: false }
     );
@@ -178,10 +171,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.invalid(),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_b`]: Plugins.incomplete(),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_c`]: Plugins.incompatible(),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
       },
       { createCwd: false }
     );
@@ -220,7 +213,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins`]: mockFs.directory({
+        [`${PROCESS_WORKING_DIR}/src/plugins`]: mockFs.directory({
           mode: 0, // 0000
           items: {
             plugin_a: Plugins.valid('pluginA'),
@@ -240,10 +233,15 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const srcPluginsPath = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'src', 'plugins');
+    const srcPluginsPath = resolve(PROCESS_WORKING_DIR, 'src', 'plugins');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
+        `Error: EACCES, permission denied '${standardize(
+          srcPluginsPath,
+          false,
+          false,
+          true
+        )}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
@@ -257,7 +255,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: {
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: {
           ...Plugins.inaccessibleManifest(),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -278,7 +276,12 @@ describe('plugins discovery system', () => {
     const errorPath = manifestPath('plugin_a');
     expect(errors).toEqual(
       expect.arrayContaining([
-        `Error: EACCES, permission denied '${errorPath}' (missing-manifest, ${errorPath})`,
+        `Error: EACCES, permission denied '${standardize(
+          errorPath,
+          false,
+          false,
+          true
+        )}' (missing-manifest, ${errorPath})`,
       ])
     );
   });
@@ -292,10 +295,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
       },
       { createCwd: false }
     );
@@ -329,7 +332,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/plugin_a`]: {
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: {
           ...Plugins.valid('pluginA'),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -348,18 +351,14 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid(
-          'plugin3'
-        ),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid(
-          'plugin4'
-        ),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid(
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid(
           'plugin5'
         ),
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
+        [`${PROCESS_WORKING_DIR}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
           'plugin6'
         ),
       },
@@ -378,11 +377,11 @@ describe('plugins discovery system', () => {
   it('works with symlinks', async () => {
     const { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
-    const pluginFolder = resolve(OPENSEARCH_DASHBOARDS_ROOT, '..', 'ext-plugins');
+    const pluginFolder = resolve(PROCESS_WORKING_DIR, '..', 'ext-plugins');
 
     mockFs(
       {
-        [`${OPENSEARCH_DASHBOARDS_ROOT}/plugins`]: mockFs.symlink({
+        [`${PROCESS_WORKING_DIR}/plugins`]: mockFs.symlink({
           path: '../ext-plugins',
         }),
         [pluginFolder]: {

@@ -67,7 +67,7 @@
     "makelogs": "node scripts/makelogs",
     "uiFramework:compileCss": "cd packages/osd-ui-framework && yarn compileCss",
     "osd:watch": "node scripts/opensearch_dashboards --dev --logging.json=false",
-    "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
+    "build:types": "node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
@@ -87,11 +87,14 @@
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
     "**/kind-of": ">=6.0.3",
+    "**/loader-utils": "^2.0.3",
     "**/node-jose": "^2.1.0",
     "**/nth-check": "^2.0.1",
     "**/qs": "^6.10.3",
     "**/trim": "^0.0.3",
-    "**/typescript": "4.0.2"
+    "**/typescript": "4.0.2",
+    "**/unset-value": "^2.0.1",
+    "**/minimatch": "^3.0.5"
   },
   "workspaces": {
     "packages": [
@@ -135,6 +138,7 @@
     "@osd/apm-config-loader": "1.0.0",
     "@osd/config": "1.0.0",
     "@osd/config-schema": "1.0.0",
+    "@osd/cross-platform": "1.0.0",
     "@osd/i18n": "1.0.0",
     "@osd/interpreter": "1.0.0",
     "@osd/logging": "1.0.0",
@@ -412,6 +416,7 @@
     "mutation-observer": "^1.0.3",
     "ngreact": "^0.5.1",
     "nock": "12.0.3",
+    "node-stream-zip": "^1.15.0",
     "normalize-path": "^3.0.0",
     "nyc": "^15.1.0",
     "pixelmatch": "^5.1.0",

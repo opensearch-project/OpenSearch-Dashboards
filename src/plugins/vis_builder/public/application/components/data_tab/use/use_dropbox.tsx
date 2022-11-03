@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { BucketAggType, IndexPatternField, propFilter } from '../../../../../../data/common';
 import { Schema } from '../../../../../../vis_default_editor/public';
 import { COUNT_FIELD, FieldDragDataType } from '../../../utils/drag_drop/types';
-import { useTypedDispatch, useTypedSelector } from '../../../utils/state_management';
+import { useTypedDispatch } from '../../../utils/state_management';
 import { DropboxDisplay, DropboxProps } from '../dropbox';
 import { useDrop } from '../../../utils/drag_drop';
 import {
@@ -16,9 +16,9 @@ import {
   reorderAgg,
   updateAggConfigParams,
 } from '../../../utils/state_management/visualization_slice';
-import { useIndexPatterns } from '../../../utils/use/use_index_pattern';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { WizardServices } from '../../../../types';
+import { VisBuilderServices } from '../../../../types';
+import { useAggs } from '../../../utils/use';
 
 const filterByName = propFilter('name');
 const filterByType = propFilter('type');
@@ -30,36 +30,34 @@ export interface UseDropboxProps extends Pick<DropboxProps, 'id' | 'label'> {
 export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const { id: dropboxId, label, schema } = props;
   const [validAggTypes, setValidAggTypes] = useState<string[]>([]);
+  const { aggConfigs, indexPattern, aggs, timeRange } = useAggs();
   const dispatch = useTypedDispatch();
-  const indexPattern = useIndexPatterns().selected;
   const {
     services: {
       data: {
         search: { aggs: aggService },
       },
     },
-  } = useOpenSearchDashboards<WizardServices>();
-  const aggConfigParams = useTypedSelector(
-    (state) => state.visualization.activeVisualization?.aggConfigParams
-  );
+  } = useOpenSearchDashboards<VisBuilderServices>();
 
-  const aggConfigs = useMemo(() => {
-    return indexPattern && aggService.createAggConfigs(indexPattern, cloneDeep(aggConfigParams));
-  }, [aggConfigParams, aggService, indexPattern]);
-
-  const aggs = useMemo(() => aggConfigs?.aggs ?? [], [aggConfigs?.aggs]);
-
-  const dropboxAggs = aggs.filter((agg) => agg.schema === schema.name);
+  const dropboxAggs = useMemo(() => aggs.filter((agg) => agg.schema === schema.name), [
+    aggs,
+    schema.name,
+  ]);
 
   const displayFields: DropboxDisplay[] = useMemo(
     () =>
       dropboxAggs?.map(
-        (agg): DropboxDisplay => ({
-          id: agg.id,
-          label: agg.makeLabel(),
-        })
-      ) || [],
-    [dropboxAggs]
+        (agg): DropboxDisplay => {
+          // For timeseries aggregations that have timeinterval set as auto, the current timerange is required to calculate the label accurately
+          agg.aggConfigs.setTimeRange(timeRange);
+          return {
+            id: agg.id,
+            label: agg.makeLabel(),
+          };
+        }
+      ) ?? [],
+    [dropboxAggs, timeRange]
   );
 
   // Event handlers for each dropbox action type

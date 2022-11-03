@@ -40,7 +40,7 @@ describe('getConfigurationFilePaths', () => {
 
     expect(getConfigurationFilePaths(argv)).toEqual([
       resolve(cwd, join('.', 'relative-path')),
-      '/absolute-path',
+      resolve('/absolute-path'),
     ]);
   });
 

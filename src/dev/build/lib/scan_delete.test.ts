@@ -36,12 +36,16 @@ import del from 'del';
 // @ts-ignore
 import { mkdirp, write } from './fs';
 import { scanDelete } from './scan_delete';
+import { PROCESS_WORKING_DIR, getRepoRoot } from '@osd/cross-platform';
 
-const TMP = resolve(__dirname, '__tests__/__tmp__');
+const rootPath = getRepoRoot(__dirname);
+const currentDir = rootPath ? resolve('.', relative(rootPath, __dirname)) : __dirname;
+
+const TMP = resolve(currentDir, '__tests__/__tmp__');
 
 // clean and recreate TMP directory
 beforeEach(async () => {
-  await del(TMP);
+  await del(TMP, { cwd: currentDir });
   await mkdirp(resolve(TMP, 'foo/bar/baz'));
   await mkdirp(resolve(TMP, 'foo/bar/box'));
   await mkdirp(resolve(TMP, 'a/b/c/d/e'));
@@ -50,13 +54,13 @@ beforeEach(async () => {
 
 // cleanup TMP directory
 afterAll(async () => {
-  await del(TMP);
+  await del(TMP, { cwd: currentDir });
 });
 
 it('requires absolute paths', async () => {
   await expect(
     scanDelete({
-      directory: relative(process.cwd(), TMP),
+      directory: relative(PROCESS_WORKING_DIR, TMP),
       regularExpressions: [],
     })
   ).rejects.toMatchInlineSnapshot(

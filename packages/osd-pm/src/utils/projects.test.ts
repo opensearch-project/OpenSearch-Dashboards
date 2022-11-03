@@ -43,21 +43,26 @@ import {
   ProjectMap,
   topologicallyBatchProjects,
 } from './projects';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const rootPath = resolve(__dirname, '__fixtures__/opensearch-dashboards');
 const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
   beforeAll(async () => {
+    // Make sure we start clean
+    await del(rootPlugins, { cwd: PROCESS_WORKING_DIR });
+
     await promisify(mkdir)(rootPlugins);
 
     await promisify(symlink)(
       join(__dirname, '__fixtures__/symlinked-plugins/corge'),
-      join(rootPlugins, 'corge')
+      join(rootPlugins, 'corge'),
+      'junction' // This parameter would only be used on Windows
     );
   });
 
-  afterAll(async () => await del(rootPlugins));
+  afterAll(async () => await del(rootPlugins, { cwd: PROCESS_WORKING_DIR }));
 
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);
