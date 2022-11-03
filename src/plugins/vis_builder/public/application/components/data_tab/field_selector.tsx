@@ -22,7 +22,7 @@ import { COUNT_FIELD } from '../../utils/drag_drop';
 import { useTypedSelector } from '../../utils/state_management';
 import { useIndexPatterns } from '../../utils/use';
 import { FieldSearch } from './field_search';
-import { FieldSelectorField, SelectorFieldButton } from './field_selector_field';
+import { Field, DraggableFieldButton } from './field';
 import { FieldDetails } from './types';
 import { getAvailableFields, getDetails } from './utils';
 import './field_selector.scss';
@@ -159,7 +159,7 @@ export const FieldSelector = () => {
       </div>
       <div className="vbFieldSelector__fieldGroups">
         {/* Count Field */}
-        <SelectorFieldButton
+        <DraggableFieldButton
           field={{ name: 'count', displayName: 'Count', type: 'number' }}
           dragValue={COUNT_FIELD}
         />
@@ -214,7 +214,7 @@ export const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => 
     >
       {fields?.map((field, i) => (
         <EuiFlexItem key={i}>
-          <FieldSelectorField field={field} {...rest} />
+          <Field field={field} {...rest} />
         </EuiFlexItem>
       ))}
     </EuiAccordion>

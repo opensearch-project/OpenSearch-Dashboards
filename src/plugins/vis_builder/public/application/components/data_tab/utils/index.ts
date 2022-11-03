@@ -4,4 +4,4 @@
  */
 
 export { getAvailableFields } from './get_available_fields';
-export { getDetails } from './get_details';
+export { getFieldDetails as getDetails } from './get_field_details';

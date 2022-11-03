@@ -10,7 +10,7 @@ import { FieldDetails } from '../types';
 
 import { getFieldValueCounts } from './field_calculator';
 
-export function getDetails(
+export function getFieldDetails(
   field: IndexPatternField,
   hits: Array<Record<string, unknown>>,
   indexPattern?: IndexPattern
@@ -24,7 +24,7 @@ export function getDetails(
   if (!indexPattern) {
     return {
       ...defaultDetails,
-      error: i18n.translate('visBuilder.fieldChooser.noIndexPatternSelectedErrorMessage', {
+      error: i18n.translate('visBuilder.fieldSelector.noIndexPatternSelectedErrorMessage', {
         defaultMessage: 'Index pattern not specified.',
       }),
     };
@@ -32,7 +32,7 @@ export function getDetails(
   if (!hits.length) {
     return {
       ...defaultDetails,
-      error: i18n.translate('visBuilder.fieldChooser.noHits', {
+      error: i18n.translate('visBuilder.fieldSelector.noHits', {
         defaultMessage:
           'No documents match the selected query and filters. Try increasing time range or removing filters.',
       }),

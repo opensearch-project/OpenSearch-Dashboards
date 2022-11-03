@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 
 import { IndexPatternField } from '../../../../../data/public';
 
-import { VisBuilderFieldBucket } from './field_bucket';
+import { FieldBucket } from './field_bucket';
 import { Bucket, FieldDetails } from './types';
 
 interface FieldDetailsProps {
@@ -19,31 +19,26 @@ interface FieldDetailsProps {
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function VisBuilderFieldDetails({
-  field,
-  isMetaField,
-  details,
-  onAddFilter,
-}: FieldDetailsProps) {
+export function FieldDetailsView({ field, isMetaField, details, onAddFilter }: FieldDetailsProps) {
   const { buckets, error, exists, total } = details;
 
   const bucketsTitle =
     buckets.length > 1
-      ? i18n.translate('visBuilder.fieldChooser.detailViews.fieldTopValuesLabel', {
+      ? i18n.translate('visBuilder.fieldSelector.detailsView.fieldTopValuesLabel', {
           defaultMessage: 'Top {n} values',
           values: { n: buckets.length },
         })
-      : i18n.translate('visBuilder.fieldChooser.detailViews.fieldTopValueLabel', {
+      : i18n.translate('visBuilder.fieldSelector.detailsView.fieldTopValueLabel', {
           defaultMessage: 'Top value',
         });
-  const errorTitle = i18n.translate('visBuilder.fieldChooser.detailViews.fieldNoValuesLabel', {
+  const errorTitle = i18n.translate('visBuilder.fieldSelector.detailsView.fieldNoValuesLabel', {
     defaultMessage: 'No values found',
   });
-  const existsIn = i18n.translate('visBuilder.fieldChooser.detailViews.fieldExistsIn', {
+  const existsIn = i18n.translate('visBuilder.fieldSelector.detailsView.fieldExistsIn', {
     defaultMessage: 'Exists in {exists}',
     values: { exists },
   });
-  const totalRecords = i18n.translate('visBuilder.fieldChooser.detailViews.fieldTotalRecords', {
+  const totalRecords = i18n.translate('visBuilder.fieldSelector.detailsView.fieldTotalRecords', {
     defaultMessage: '/ {total} records',
     values: { total },
   });
@@ -66,7 +61,7 @@ export function VisBuilderFieldDetails({
             data-test-subj="fieldDetailsBucketsContainer"
           >
             {buckets.map((bucket: Bucket, idx: number) => (
-              <VisBuilderFieldBucket
+              <FieldBucket
                 key={`bucket${idx}`}
                 bucket={bucket}
                 field={field}

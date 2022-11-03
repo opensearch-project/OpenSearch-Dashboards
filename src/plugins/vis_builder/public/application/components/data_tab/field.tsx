@@ -44,11 +44,11 @@ import {
 } from '../../../../../opensearch_dashboards_react/public';
 
 import { COUNT_FIELD, useDrag } from '../../utils/drag_drop';
-import { VisBuilderFieldDetails } from './field_details';
+import { FieldDetailsView } from './field_details';
 import { FieldDetails } from './types';
-import './field_selector_field.scss';
+import './field.scss';
 
-export interface FieldSelectorFieldProps {
+export interface FieldProps {
   field: IndexPatternField;
   filterManager: FilterManager;
   indexPattern?: IndexPattern;
@@ -56,12 +56,7 @@ export interface FieldSelectorFieldProps {
 }
 
 // TODO: Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
-export const FieldSelectorField = ({
-  field,
-  filterManager,
-  indexPattern,
-  getDetails,
-}: FieldSelectorFieldProps) => {
+export const Field = ({ field, filterManager, indexPattern, getDetails }: FieldProps) => {
   const { id: indexPatternId = '', metaFields = [] } = indexPattern ?? {};
   const isMetaField = metaFields.includes(field.name);
   const [infoIsOpen, setOpen] = useState(false);
@@ -88,16 +83,16 @@ export const FieldSelectorField = ({
     <EuiPopover
       ownFocus
       display="block"
-      button={<SelectorFieldButton isActive={infoIsOpen} onClick={togglePopover} field={field} />}
+      button={<DraggableFieldButton isActive={infoIsOpen} onClick={togglePopover} field={field} />}
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
       panelClassName="vbItem__fieldPopoverPanel"
       repositionOnScroll
-      data-test-subj="field-selector-field"
+      data-test-subj="field-popover"
     >
       {infoIsOpen && (
-        <VisBuilderFieldDetails
+        <FieldDetailsView
           field={field}
           isMetaField={isMetaField}
           details={getDetails(field)}
@@ -108,12 +103,12 @@ export const FieldSelectorField = ({
   );
 };
 
-export interface SelectorFieldButtonProps extends Partial<FieldButtonProps> {
+export interface DraggableFieldButtonProps extends Partial<FieldButtonProps> {
   dragValue?: IndexPatternField['name'] | null | typeof COUNT_FIELD;
   field: Partial<IndexPatternField> & Pick<IndexPatternField, 'displayName' | 'name' | 'type'>;
 }
 
-export const SelectorFieldButton = ({ dragValue, field, ...rest }: SelectorFieldButtonProps) => {
+export const DraggableFieldButton = ({ dragValue, field, ...rest }: DraggableFieldButtonProps) => {
   const { name, displayName, type, scripted = false } = field;
   const [dragProps] = useDrag({
     namespace: 'field-data',
@@ -130,13 +125,13 @@ export const SelectorFieldButton = ({ dragValue, field, ...rest }: SelectorField
   const defaultIcon = <FieldIcon type={type} scripted={scripted} size="l" />;
 
   const defaultFieldName = (
-    <span data-test-subj={`field-${name}`} title={name} className="vbFieldSelectorField__name">
+    <span data-test-subj={`field-${name}`} title={name} className="vbFieldButton__name">
       {wrapOnDot(displayName)}
     </span>
   );
 
   const defaultProps = {
-    className: 'vbFieldSelectorField',
+    className: 'vbFieldButton',
     dataTestSubj: `field-${name}-showDetails`,
     fieldIcon: defaultIcon,
     fieldName: defaultFieldName,

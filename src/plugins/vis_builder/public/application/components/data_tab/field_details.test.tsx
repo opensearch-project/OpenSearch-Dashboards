@@ -38,11 +38,11 @@ import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 
 import { IndexPatternField } from '../../../../../data/public';
 
-import { VisBuilderFieldDetails } from './field_details';
+import { FieldDetailsView } from './field_details';
 
 const mockOnAddFilter = jest.fn();
 
-describe('visBuilder sidebar field details', function () {
+describe('visBuilder field details', function () {
   const defaultProps = {
     isMetaField: false,
     details: { buckets: [], error: '', exists: 1, total: 1 },
@@ -51,7 +51,7 @@ describe('visBuilder sidebar field details', function () {
 
   function mountComponent(field: IndexPatternField, props?: Record<string, any>) {
     const compProps = { ...defaultProps, ...props, field };
-    return mountWithIntl(<VisBuilderFieldDetails {...compProps} />);
+    return mountWithIntl(<FieldDetailsView {...compProps} />);
   }
 
   it('should render buckets if they exist', async function () {

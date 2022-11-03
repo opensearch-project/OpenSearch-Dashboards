@@ -49,14 +49,14 @@ describe('visBuilder sidebar field selector', function () {
 
       expect(container).toHaveTextContent(defaultProps.header);
       expect(container).toHaveTextContent('0');
-      expect(screen.queryAllByTestId('field-selector-field').length).toBeFalsy();
+      expect(screen.queryAllByTestId('field-popover').length).toBeFalsy();
 
       await fireEvent.click(screen.getByText(defaultProps.header));
 
       expect(mockGetDetails).not.toHaveBeenCalled();
     });
 
-    it('renders an accordion with FieldSelectorFields if fields provided', async () => {
+    it('renders an accordion with Fields if fields provided', async () => {
       const props = {
         ...defaultProps,
         fields: ['bytes', 'machine.ram', 'memory', 'phpmemory'].map(getFields),
@@ -65,7 +65,7 @@ describe('visBuilder sidebar field selector', function () {
 
       expect(container).toHaveTextContent(props.header);
       expect(container).toHaveTextContent(props.fields.length.toString());
-      expect(screen.queryAllByTestId('field-selector-field').length).toBe(props.fields.length);
+      expect(screen.queryAllByTestId('field-popover').length).toBe(props.fields.length);
 
       await fireEvent.click(screen.getByText('memory'));
 

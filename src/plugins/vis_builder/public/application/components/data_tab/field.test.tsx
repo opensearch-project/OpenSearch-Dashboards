@@ -8,10 +8,10 @@ import { render, screen } from '@testing-library/react';
 
 import { IndexPatternField } from '../../../../../data/public';
 
-import { SelectorFieldButton } from './field_selector_field';
+import { DraggableFieldButton } from './field';
 
-describe('visBuilder sidebar field selector field', function () {
-  describe('SelectorFieldButton', () => {
+describe('visBuilder field', function () {
+  describe('DraggableFieldButton', () => {
     it('should render normal fields without a dragValue specified', async () => {
       const props = {
         field: new IndexPatternField(
@@ -28,19 +28,19 @@ describe('visBuilder sidebar field selector field', function () {
           'bytes'
         ),
       };
-      render(<SelectorFieldButton {...props} />);
+      render(<DraggableFieldButton {...props} />);
 
-      expect(screen.getByTestId('field-bytes-showDetails')).toBeDefined();
+      const button = screen.getByTestId('field-bytes-showDetails');
+
+      expect(button).toBeDefined();
     });
 
-    // it('should allow specified dragValue to override the field name');
+    // TODO: it('should allow specified dragValue to override the field name');
 
-    // it('should make dots wrappable');
+    // TODO: it('should make dots wrappable');
 
-    // it('should use a non-scripted FieldIcon by default');
+    // TODO: it('should use a non-scripted FieldIcon by default');
   });
 
-  // describe('FieldSelectorField', function () {
-
-  // });
+  // TODO: describe('Field', function () { });
 });

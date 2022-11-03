@@ -19,36 +19,36 @@ import { IndexPatternField } from '../../../../../data/public';
 import { Bucket } from './types';
 import './field_bucket.scss';
 
-interface Props {
+interface FieldBucketProps {
   bucket: Bucket;
   field: IndexPatternField;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function VisBuilderFieldBucket({ bucket, field, onAddFilter }: Props) {
+export function FieldBucket({ bucket, field, onAddFilter }: FieldBucketProps) {
   const { count, display, percent, value } = bucket;
   const { filterable: isFilterableField, name: fieldName } = field;
 
-  const emptyTxt = i18n.translate('visBuilder.fieldChooser.detailViews.emptyStringText', {
+  const emptyText = i18n.translate('visBuilder.fieldSelector.detailsView.emptyStringText', {
     // We need this to communicate to users when a top value is actually an empty string
     defaultMessage: 'Empty string',
   });
   const addLabel = i18n.translate(
-    'visBuilder.fieldChooser.detailViews.filterValueButtonAriaLabel',
+    'visBuilder.fieldSelector.detailsView.filterValueButtonAriaLabel',
     {
       defaultMessage: 'Filter for {fieldName}: "{value}"',
       values: { fieldName, value },
     }
   );
   const removeLabel = i18n.translate(
-    'visBuilder.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    'visBuilder.fieldSelector.detailsView.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {fieldName}: "{value}"',
       values: { fieldName, value },
     }
   );
 
-  const displayValue = display || emptyTxt;
+  const displayValue = display || emptyText;
 
   return (
     <>
@@ -70,7 +70,13 @@ export function VisBuilderFieldBucket({ bucket, field, onAddFilter }: Props) {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <StringFieldProgressBar value={value} percent={percent} count={count} />
+          <EuiProgress
+            value={percent}
+            max={100}
+            color="secondary"
+            aria-label={`${value}: ${count} (${percent}%)`}
+            size="s"
+          />
         </EuiFlexItem>
         {/* TODO: Should we have any explanation for non-filterable fields? */}
         {isFilterableField && (
@@ -98,17 +104,5 @@ export function VisBuilderFieldBucket({ bucket, field, onAddFilter }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
-  );
-}
-
-export function StringFieldProgressBar({
-  value,
-  percent,
-  count,
-}: Pick<Bucket, 'count' | 'percent' | 'value'>) {
-  const ariaLabel = `${value}: ${count} (${percent}%)`;
-
-  return (
-    <EuiProgress value={percent} max={100} color="secondary" aria-label={ariaLabel} size="s" />
   );
 }
