@@ -10,6 +10,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+* [Legacy Maps Plugin] Prevent reverse-tabnabbing ([#2540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2540))
+
 ### 📈 Features/Enhancements
 * Ability to start OS Dashboards with a newer and compatible nodejs version ([#2091](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2091))
 - [MD] Support legacy client for data source ([#2204](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2204))
