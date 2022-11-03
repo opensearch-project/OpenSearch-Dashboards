@@ -39,8 +39,8 @@ This design is part of the OpenSearch Dashboards multi data source project [[RFC
 
 ### 4.0 Answer some critical design questions
 
-**1.** **How to set up connection(clients) for different datasources?**
-Similar to how current OpenSearch Dashboards talks to default OS by creating opensearch node.js client using [opensearch-js](https://github.com/opensearch-project/opensearch-js) library, for datasources we also create clients for each. Critical params that differentiate data sources are `url` and `auth`
+**1.** **How to set up connection(clients) for different data sources?**
+Similar to how current OpenSearch Dashboards talks to default OpenSearch by creating a client using [opensearch-js](https://github.com/opensearch-project/opensearch-js) library, for data sources we also create clients for each connection. Critical params that differentiate data sources are `url` and `auth`
 
 ```ts
 const { Client } = require('@opensearch-project/opensearch');
@@ -59,7 +59,7 @@ dataSourceClient.ping();
 ```
 
 **2. How to expose datasource clients to callers through clean interfaces?**
-We create a `data source service`. Similar to existing `opensearch service` in core, which provides client of default OS cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
+We create a `data source service`. Similar to existing `opensearch service` in core, which provides client of default OpenSearch cluster. This new service will be dedicated to provide clients for data sources. Following the same paradigm we can register this new service to `CoreStart`, `CoreRouteHandlerContext` , in order to expose data source client to plugins and modules. The interface is exposed from new service, and thus it doesn’t mess up with any existing services, and keeps the interface clean.
 
 ```
 *// Existing*
@@ -77,14 +77,14 @@ The context is that user can only turn on/off multiple datasource feature by upd
 
 **4.How to manage multiple clients/connection efficiently, and not consume all the memory?**
 
-- For datasources with different endpoint, user client Pooling (E.g. LRU cache)
+- For data sources with different endpoint, user client Pooling (E.g. LRU cache)
 - For data sources with same endpoint, but different user, use connection pooling strategy (child client) provided by opensearch-js.
 
 **5.Where should we implement the core logic?**
 Current `opensearch service` exists in core. The module we'll implement has similarity function wise, but we choose to implement `data source service` in plugin along with `crypto` service for the following reasons.
 
-1. Data source is a feature that can be turned on or off. Plugin is born for such plugable use case.
-2. We don't mess up with OpenSearch Dashboards core, since this is an experimental feature, the potential risk of breaking existing behavior will be lower if we use plugin. Worst case, user could just uninstall the plugin.
+1. Data source is a feature that can be turned on or off. Plugin is born for such pluggable use case.
+2. We don't mess up with OpenSearch Dashboards core, since this is an experimental feature, the potential risk of breaking existing behavior will be lowered if we use plugin. Worst case, user could just uninstall the plugin.
 3. Complexity wise, it's about the same amount of work.
 
 ### 4.1 Data Source Plugin
@@ -130,14 +130,14 @@ We need to configure the data source client by either creating a new one, or loo
   }
   ```
 
-- Get root client: Look up client Pool by **endpoint**, return client if existed. If misses, we create new client instance and load into pool. At this step, the client won't have any auth info.
+- Get root client: Look up the client pool by **endpoint** and return the client if it exists. If a client was not found, a new client instance is created and loaded into pool. At this step, the client won't have any auth info.
 
 - Get credentials: Call crypto service utilities to **decrypt** user credentials from `DataSource` Object.
-- Assemble the actual query client: With auth info and root client, we’ll leverage the openearch-js connection pooling strategy to create the actual query client from root client by `client.child()`.
+- Assemble the actual query client: With auth info and root client, we’ll leverage the `opensearch-js` connection pooling strategy to create the actual query client from root client by `client.child()`.
 
 #### 4.2.1 Legacy Client
 
-OpenSearch Dashboards is forked from Kibana 7.10. At the time of the fork happened, there are 2 types of client used in the codebase. One is the new client, which later was migrated as `opensearhc-js`, the other one is the legacy client which is `elasticsearc-js`. Legacy clients are still used many critical features, such as visualization, index pattern management, along with new client.
+OpenSearch Dashboards had two types of clients available for use when created. One was the "new client" which has since been separated into `opensearch-js`, and the other was the legacy client named `elasticsearch-js`. Legacy clients are still used by some core features like visualization and index pattern management.
 
 ```ts
 // legacy client
@@ -174,7 +174,7 @@ This is for plugin to access data source client via request handler. For example
 
 ### 4.4 Refactor data plugin search module to call core API to get datasource client
 
-`Search strategy` is the low level API of data plugin search module. It retrieve clients and query OpenSearch. It needs to be refactored to switch between default client and datasource client, depending on whether a request is send to datasource or not.
+`Search strategy` is the low level API of data plugin search module. It retrieves clients and queries OpenSearch. It needs to be refactored to switch between the default client and the datasource client, depending on whether or not a request is sent to the datasource.
 
 Currently default client is retrieved by search module of data plugin to interact with OpenSearch by this API call. Ref: [opensearch-search-strategy.ts](https://github.com/opensearch-project/opensearch-dashboards/blob/e3b34df1dea59a253884f6da4e49c3e717d362c9/src/plugins/data/server/search/opensearch_search/opensearch_search_strategy.ts#L75)
 
@@ -184,7 +184,7 @@ const client: OpenSearchClient = core.opensearch.client.asCurrentUser;
 client.search(params);
 ```
 
-Similarly we’ll have the following for datasource use case. `AsCurrentUser` is something doesn’t make sense for datasource, because it’s always the “current” user credential defined in the “datasource”, that we are using to create the client, or look up the client pool.
+Similarly we’ll have the following for datasource use case. `AsCurrentUser` doesn't really apply to a datasource because it’s always the “current” user's credentials, defined in the “datasource”, that gets used to initialize the client or lookup the client pool.
 
 ```ts
 if (request.dataSource) {

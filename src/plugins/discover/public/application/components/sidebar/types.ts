@@ -36,9 +36,12 @@ export interface IndexPatternRef {
 export interface FieldDetails {
   error: string;
   exists: number;
-  total: boolean;
+  total: number;
   buckets: Bucket[];
-  columns: string[];
+}
+
+export interface FieldValueCounts extends Partial<FieldDetails> {
+  missing?: number;
 }
 
 export interface Bucket {

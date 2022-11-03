@@ -11,7 +11,8 @@ env:
   FTR_PATH: 'ftr'
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
-  SPEC: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/*.js,'
+  SPEC: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
+  CYPRESS_ENV: 'env CYPRESS_VISBUILDER_ENABLED=true '
 
 jobs:
   cypress-tests:
@@ -75,7 +76,7 @@ jobs:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser chromium --spec ${{ env.SPEC }}
+          command: ${{ env.CYPRESS_ENV }} yarn cypress:run-without-security --browser chromium --spec ${{ env.SPEC }}
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - uses: actions/upload-artifact@v3
