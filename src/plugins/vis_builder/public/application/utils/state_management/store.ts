@@ -72,6 +72,7 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof rootReducer>;
+export type RenderState = Omit<RootState, 'metadata'>; // Remaining state after auxillary states are removed
 type Store = ReturnType<typeof configurePreloadedStore>;
 export type AppDispatch = Store['dispatch'];
 

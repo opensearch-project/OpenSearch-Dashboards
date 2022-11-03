@@ -4,22 +4,26 @@
  */
 
 import { buildVislibDimensions } from '../../../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../../../expressions/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  IExpressionLoaderParams,
+} from '../../../../../expressions/public';
 import { AreaOptionsDefaults } from './area_vis_type';
 import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState, getValueAxes, getPipelineParams } from '../common';
 import { createVis } from '../common/create_vis';
 
-export const toExpression = async ({
-  style: styleState,
-  visualization,
-}: VislibRootState<AreaOptionsDefaults>) => {
+export const toExpression = async (
+  { style: styleState, visualization }: VislibRootState<AreaOptionsDefaults>,
+  searchContext: IExpressionLoaderParams['searchContext']
+) => {
   const { aggConfigs, expressionFns, indexPattern } = await getAggExpressionFunctions(
     visualization
   );
   const { addLegend, addTooltip, legendPosition, type } = styleState;
 
-  const vis = await createVis(type, aggConfigs, indexPattern);
+  const vis = await createVis(type, aggConfigs, indexPattern, searchContext?.timeRange);
 
   const params = getPipelineParams();
   const dimensions = await buildVislibDimensions(vis, params);

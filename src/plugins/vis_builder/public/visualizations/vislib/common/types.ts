@@ -4,7 +4,7 @@
  */
 
 import { Positions } from '../../../../../vis_type_vislib/public';
-import { RootState } from '../../../application/utils/state_management';
+import { RenderState } from '../../../application/utils/state_management';
 
 export interface BasicOptionsDefaults {
   addTooltip: boolean;
@@ -13,6 +13,6 @@ export interface BasicOptionsDefaults {
   type: string;
 }
 
-export interface VislibRootState<T extends BasicOptionsDefaults> extends RootState {
+export interface VislibRootState<T extends BasicOptionsDefaults> extends RenderState {
   style: T;
 }

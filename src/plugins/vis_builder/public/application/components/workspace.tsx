@@ -41,7 +41,7 @@ export const Workspace: FC = ({ children }) => {
   useEffect(() => {
     async function loadExpression() {
       const schemas = ui.containerConfig.data.schemas;
-      const [valid, errorMsg] = validateSchemaState(schemas, rootState);
+      const [valid, errorMsg] = validateSchemaState(schemas, rootState.visualization);
 
       if (!valid) {
         if (errorMsg) {
@@ -50,12 +50,13 @@ export const Workspace: FC = ({ children }) => {
         setExpression(undefined);
         return;
       }
-      const exp = await toExpression(rootState);
+
+      const exp = await toExpression(rootState, searchContext);
       setExpression(exp);
     }
 
     loadExpression();
-  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas]);
+  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas, searchContext]);
 
   useLayoutEffect(() => {
     const subscription = data.query.state$.subscribe(({ state }) => {
