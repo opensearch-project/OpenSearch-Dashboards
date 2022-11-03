@@ -117,8 +117,8 @@ export function DiscoverSidebar({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) => getDetails(ipField, hits, columns, selectedIndexPattern),
-    [hits, columns, selectedIndexPattern]
+    (ipField: IndexPatternField) => getDetails(ipField, hits, selectedIndexPattern),
+    [hits, selectedIndexPattern]
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
@@ -199,6 +199,7 @@ export function DiscoverSidebar({
                       className="dscSidebar__item"
                     >
                       <DiscoverField
+                        columns={columns}
                         field={field}
                         indexPattern={selectedIndexPattern}
                         onAddField={onAddField}
@@ -274,6 +275,7 @@ export function DiscoverSidebar({
                       className="dscSidebar__item"
                     >
                       <DiscoverField
+                        columns={columns}
                         field={field}
                         indexPattern={selectedIndexPattern}
                         onAddField={onAddField}
@@ -304,6 +306,7 @@ export function DiscoverSidebar({
                   className="dscSidebar__item"
                 >
                   <DiscoverField
+                    columns={columns}
                     field={field}
                     indexPattern={selectedIndexPattern}
                     onAddField={onAddField}
