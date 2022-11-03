@@ -40,7 +40,7 @@ export const getDataGridColumns = (
   };
 
   return cols.map((col, colIndex) => {
-    //const cellActions = col.filterable
+    // const cellActions = col.filterable
     //  ? [
     //      ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
     //        const filterValue = rows[rowIndex][columnId];
@@ -138,7 +138,7 @@ export const getDataGridColumns = (
           }),
         },
       },
-      //cellActions,
+      // cellActions,
     };
     if (initialWidth) {
       dataGridColumn.initialWidth = initialWidth.width;
