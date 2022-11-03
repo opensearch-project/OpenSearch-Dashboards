@@ -28,15 +28,10 @@
  * under the License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 
-import {
-  FilterManager,
-  IndexPattern,
-  IndexPatternField,
-  opensearchFilters,
-} from '../../../../../data/public';
+import { IndexPatternField } from '../../../../../data/public';
 import {
   FieldButton,
   FieldButtonProps,
@@ -50,30 +45,12 @@ import './field.scss';
 
 export interface FieldProps {
   field: IndexPatternField;
-  filterManager: FilterManager;
-  indexPattern?: IndexPattern;
   getDetails: (field) => FieldDetails;
 }
 
 // TODO: Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)
-export const Field = ({ field, filterManager, indexPattern, getDetails }: FieldProps) => {
-  const { id: indexPatternId = '', metaFields = [] } = indexPattern ?? {};
-  const isMetaField = metaFields.includes(field.name);
+export const Field = ({ field, getDetails }: FieldProps) => {
   const [infoIsOpen, setOpen] = useState(false);
-
-  const onAddFilter = useCallback(
-    (fieldToFilter, value, operation) => {
-      const newFilters = opensearchFilters.generateFilters(
-        filterManager,
-        fieldToFilter,
-        value,
-        operation,
-        indexPatternId
-      );
-      return filterManager.addFilters(newFilters);
-    },
-    [filterManager, indexPatternId]
-  );
 
   function togglePopover() {
     setOpen(!infoIsOpen);
@@ -91,14 +68,7 @@ export const Field = ({ field, filterManager, indexPattern, getDetails }: FieldP
       repositionOnScroll
       data-test-subj="field-popover"
     >
-      {infoIsOpen && (
-        <FieldDetailsView
-          field={field}
-          isMetaField={isMetaField}
-          details={getDetails(field)}
-          onAddFilter={onAddFilter}
-        />
-      )}
+      {infoIsOpen && <FieldDetailsView field={field} details={getDetails(field)} />}
     </EuiPopover>
   );
 };

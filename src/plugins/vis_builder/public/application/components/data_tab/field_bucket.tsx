@@ -18,16 +18,18 @@ import { IndexPatternField } from '../../../../../data/public';
 
 import { Bucket } from './types';
 import './field_bucket.scss';
+import { useOnAddFilter } from '../../utils/use';
 
 interface FieldBucketProps {
   bucket: Bucket;
   field: IndexPatternField;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function FieldBucket({ bucket, field, onAddFilter }: FieldBucketProps) {
+export function FieldBucket({ bucket, field }: FieldBucketProps) {
   const { count, display, percent, value } = bucket;
   const { filterable: isFilterableField, name: fieldName } = field;
+
+  const onAddFilter = useOnAddFilter();
 
   const emptyText = i18n.translate('visBuilder.fieldSelector.detailsView.emptyStringText', {
     // We need this to communicate to users when a top value is actually an empty string

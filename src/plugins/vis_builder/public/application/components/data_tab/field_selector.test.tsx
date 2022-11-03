@@ -8,7 +8,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { FilterManager, IndexPatternField } from '../../../../../data/public';
 import { FieldGroup } from './field_selector';
 
-const mockGetDetails = jest.fn(() => ({
+const mockUseIndexPatterns = jest.fn(() => ({ selected: 'mockIndexPattern' }));
+const mockUseOnAddFilter = jest.fn();
+jest.mock('../../utils/use', () => ({
+  useIndexPatterns: jest.fn(() => mockUseIndexPatterns),
+  useOnAddFilter: jest.fn(() => mockUseOnAddFilter),
+}));
+
+const mockGetDetailsByField = jest.fn(() => ({
   buckets: [1, 2, 3].map((n) => ({
     display: `display-${n}`,
     value: `value-${n}`,
@@ -39,7 +46,7 @@ const getFields = (name) => {
 describe('visBuilder sidebar field selector', function () {
   const defaultProps = {
     filterManager: {} as FilterManager,
-    getDetails: mockGetDetails,
+    getDetailsByField: mockGetDetailsByField,
     header: 'mockHeader',
     id: 'mockID',
   };
@@ -53,7 +60,7 @@ describe('visBuilder sidebar field selector', function () {
 
       await fireEvent.click(screen.getByText(defaultProps.header));
 
-      expect(mockGetDetails).not.toHaveBeenCalled();
+      expect(mockGetDetailsByField).not.toHaveBeenCalled();
     });
 
     it('renders an accordion with Fields if fields provided', async () => {
@@ -69,7 +76,7 @@ describe('visBuilder sidebar field selector', function () {
 
       await fireEvent.click(screen.getByText('memory'));
 
-      expect(mockGetDetails).toHaveBeenCalledTimes(1);
+      expect(mockGetDetailsByField).toHaveBeenCalledTimes(1);
     });
   });
 });

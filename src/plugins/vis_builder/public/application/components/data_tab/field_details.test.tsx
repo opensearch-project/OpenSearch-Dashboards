@@ -40,17 +40,17 @@ import { IndexPatternField } from '../../../../../data/public';
 
 import { FieldDetailsView } from './field_details';
 
-const mockOnAddFilter = jest.fn();
+const mockUseIndexPatterns = jest.fn(() => ({ selected: 'mockIndexPattern' }));
+const mockUseOnAddFilter = jest.fn();
+jest.mock('../../utils/use', () => ({
+  useIndexPatterns: jest.fn(() => mockUseIndexPatterns),
+  useOnAddFilter: jest.fn(() => mockUseOnAddFilter),
+}));
 
 describe('visBuilder field details', function () {
-  const defaultProps = {
-    isMetaField: false,
-    details: { buckets: [], error: '', exists: 1, total: 1 },
-    onAddFilter: mockOnAddFilter,
-  };
-
+  const defaultDetails = { buckets: [], error: '', exists: 1, total: 1 };
   function mountComponent(field: IndexPatternField, props?: Record<string, any>) {
-    const compProps = { ...defaultProps, ...props, field };
+    const compProps = { details: defaultDetails, ...props, field };
     return mountWithIntl(<FieldDetailsView {...compProps} />);
   }
 
@@ -75,7 +75,7 @@ describe('visBuilder field details', function () {
       count: 100,
     }));
     const comp = mountComponent(field, {
-      details: { ...defaultProps.details, buckets },
+      details: { ...defaultDetails, buckets },
     });
     expect(findTestSubject(comp, 'fieldDetailsContainer').length).toBe(1);
     expect(findTestSubject(comp, 'fieldDetailsError').length).toBe(0);
@@ -124,7 +124,7 @@ describe('visBuilder field details', function () {
     );
     const errText = 'Some error';
     const comp = mountComponent(field, {
-      details: { ...defaultProps.details, error: errText },
+      details: { ...defaultDetails, error: errText },
     });
     expect(findTestSubject(comp, 'fieldDetailsContainer').length).toBe(1);
     expect(findTestSubject(comp, 'fieldDetailsBucketsContainer').children().length).toBe(0);
@@ -148,29 +148,6 @@ describe('visBuilder field details', function () {
       'bytes'
     );
     const comp = mountComponent(field);
-    expect(findTestSubject(comp, 'fieldDetailsContainer').length).toBe(1);
-    expect(findTestSubject(comp, 'fieldDetailsError').length).toBe(0);
-    expect(findTestSubject(comp, 'fieldDetailsExistsLink').length).toBe(0);
-  });
-
-  it('should not render an exists filter link for meta fields', async function () {
-    const field = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: true,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
-    const comp = mountComponent(field, {
-      ...defaultProps,
-      isMetaField: true,
-    });
     expect(findTestSubject(comp, 'fieldDetailsContainer').length).toBe(1);
     expect(findTestSubject(comp, 'fieldDetailsError').length).toBe(0);
     expect(findTestSubject(comp, 'fieldDetailsExistsLink').length).toBe(0);

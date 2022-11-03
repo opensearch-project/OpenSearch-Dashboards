@@ -9,18 +9,24 @@ import { i18n } from '@osd/i18n';
 
 import { IndexPatternField } from '../../../../../data/public';
 
+import { useIndexPatterns, useOnAddFilter } from '../../utils/use';
 import { FieldBucket } from './field_bucket';
 import { Bucket, FieldDetails } from './types';
 
 interface FieldDetailsProps {
   field: IndexPatternField;
-  isMetaField: boolean;
   details: FieldDetails;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function FieldDetailsView({ field, isMetaField, details, onAddFilter }: FieldDetailsProps) {
+export function FieldDetailsView({ field, details }: FieldDetailsProps) {
   const { buckets, error, exists, total } = details;
+
+  const onAddFilter = useOnAddFilter();
+  const indexPattern = useIndexPatterns().selected;
+
+  const { metaFields = [] } = indexPattern ?? {};
+  const isMetaField = metaFields.includes(field.name);
+  const shouldAllowExistsFilter = !isMetaField && !field.scripted;
 
   const bucketsTitle =
     buckets.length > 1
@@ -45,8 +51,6 @@ export function FieldDetailsView({ field, isMetaField, details, onAddFilter }: F
 
   const title = buckets.length ? bucketsTitle : errorTitle;
 
-  const shouldAllowExistsFilter = !isMetaField && !field.scripted;
-
   return (
     <>
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
@@ -61,12 +65,7 @@ export function FieldDetailsView({ field, isMetaField, details, onAddFilter }: F
             data-test-subj="fieldDetailsBucketsContainer"
           >
             {buckets.map((bucket: Bucket, idx: number) => (
-              <FieldBucket
-                key={`bucket${idx}`}
-                bucket={bucket}
-                field={field}
-                onAddFilter={onAddFilter}
-              />
+              <FieldBucket key={`bucket${idx}`} bucket={bucket} field={field} />
             ))}
           </div>
         )}

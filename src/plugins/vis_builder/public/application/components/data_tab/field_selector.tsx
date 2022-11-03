@@ -3,24 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiAccordion, EuiNotificationBadge, EuiTitle } from '@elastic/eui';
 
-import {
-  FilterManager,
-  IndexPattern,
-  IndexPatternField,
-  OPENSEARCH_FIELD_TYPES,
-  OSD_FIELD_TYPES,
-  SortDirection,
-} from '../../../../../data/public';
-import { IExpressionLoaderParams } from '../../../../../expressions/public';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { IndexPattern, IndexPatternField, OSD_FIELD_TYPES } from '../../../../../data/public';
 
-import { VisBuilderServices } from '../../../types';
 import { COUNT_FIELD } from '../../utils/drag_drop';
 import { useTypedSelector } from '../../utils/state_management';
-import { useIndexPatterns } from '../../utils/use';
+import { useIndexPatterns, useSampleHits } from '../../utils/use';
 import { FieldSearch } from './field_search';
 import { Field, DraggableFieldButton } from './field';
 import { FieldDetails } from './types';
@@ -33,36 +23,11 @@ interface IFieldCategories {
   meta: IndexPatternField[];
 }
 
-const META_FIELDS: string[] = [
-  OPENSEARCH_FIELD_TYPES._ID,
-  OPENSEARCH_FIELD_TYPES._INDEX,
-  OPENSEARCH_FIELD_TYPES._SOURCE,
-  OPENSEARCH_FIELD_TYPES._TYPE,
-];
-
 export const FieldSelector = () => {
-  const {
-    services: {
-      data: {
-        query: {
-          filterManager,
-          queryString,
-          state$,
-          timefilter: { timefilter },
-        },
-        search: { searchSource },
-      },
-      uiSettings: config,
-    },
-  } = useOpenSearchDashboards<VisBuilderServices>();
   const indexPattern = useIndexPatterns().selected;
   const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
+  const hits = useSampleHits();
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
-  const [hits, setHits] = useState<Array<Record<string, any>>>([]);
-  const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
-    query: queryString.getQuery(),
-    filters: filterManager.getFilters(),
-  });
 
   useEffect(() => {
     const indexFields = indexPattern?.fields.getAll() ?? [];
@@ -79,7 +44,7 @@ export const FieldSelector = () => {
     () =>
       filteredFields?.reduce<IFieldCategories>(
         (fieldGroups, currentField) => {
-          const category = getFieldCategory(currentField);
+          const category = getFieldCategory(currentField, indexPattern);
           fieldGroups[category].push(currentField);
 
           return fieldGroups;
@@ -90,52 +55,8 @@ export const FieldSelector = () => {
           meta: [],
         }
       ),
-    [filteredFields]
+    [filteredFields, indexPattern]
   );
-
-  useEffect(() => {
-    async function getData() {
-      if (indexPattern && searchContext) {
-        const newSearchSource = await searchSource.create();
-        const timeRangeFilter = timefilter.createFilter(indexPattern);
-
-        newSearchSource
-          .setField('index', indexPattern)
-          .setField('size', config.get('discover:sampleSize') ?? 500)
-          .setField('sort', [{ [indexPattern.timeFieldName || '_score']: 'desc' as SortDirection }])
-          .setField('filter', [
-            ...(searchContext.filters ?? []),
-            ...(timeRangeFilter ? [timeRangeFilter] : []),
-          ]);
-
-        if (searchContext.query) {
-          const contextQuery =
-            searchContext.query instanceof Array ? searchContext.query[0] : searchContext.query;
-
-          newSearchSource.setField('query', contextQuery);
-        }
-
-        const searchResponse = await newSearchSource.fetch();
-
-        setHits(searchResponse.hits.hits);
-      }
-    }
-
-    getData();
-  }, [config, searchContext, searchSource, indexPattern, timefilter]);
-
-  useLayoutEffect(() => {
-    const subscription = state$.subscribe(({ state }) => {
-      setSearchContext({
-        query: state.query,
-        filters: state.filters,
-      });
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [state$]);
 
   const getDetailsByField = useCallback(
     (ipField: IndexPatternField) => {
@@ -143,12 +64,6 @@ export const FieldSelector = () => {
     },
     [hits, indexPattern]
   );
-
-  const commonFieldGroupProps = {
-    filterManager,
-    indexPattern,
-    getDetails: getDetailsByField,
-  };
 
   return (
     <div className="vbFieldSelector">
@@ -167,19 +82,19 @@ export const FieldSelector = () => {
           id="categoricalFields"
           header="Categorical Fields"
           fields={fields?.categorical}
-          {...commonFieldGroupProps}
+          getDetailsByField={getDetailsByField}
         />
         <FieldGroup
           id="numericalFields"
           header="Numerical Fields"
           fields={fields?.numerical}
-          {...commonFieldGroupProps}
+          getDetailsByField={getDetailsByField}
         />
         <FieldGroup
           id="metaFields"
           header="Meta Fields"
           fields={fields?.meta}
-          {...commonFieldGroupProps}
+          getDetailsByField={getDetailsByField}
         />
       </div>
     </div>
@@ -188,14 +103,12 @@ export const FieldSelector = () => {
 
 interface FieldGroupProps {
   fields?: IndexPatternField[];
-  filterManager: FilterManager;
-  getDetails: (ipField: IndexPatternField) => FieldDetails;
+  getDetailsByField: (ipField: IndexPatternField) => FieldDetails;
   header: string;
   id: string;
-  indexPattern?: IndexPattern;
 }
 
-export const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => {
+export const FieldGroup = ({ fields, header, id, getDetailsByField }: FieldGroupProps) => {
   return (
     <EuiAccordion
       id={id}
@@ -214,15 +127,19 @@ export const FieldGroup = ({ fields, header, id, ...rest }: FieldGroupProps) => 
     >
       {fields?.map((field, i) => (
         <EuiFlexItem key={i}>
-          <Field field={field} {...rest} />
+          <Field field={field} getDetails={getDetailsByField} />
         </EuiFlexItem>
       ))}
     </EuiAccordion>
   );
 };
 
-export const getFieldCategory = ({ name, type }: IndexPatternField): keyof IFieldCategories => {
-  if (META_FIELDS.includes(name)) return 'meta';
+export const getFieldCategory = (
+  { name, type }: IndexPatternField,
+  indexPattern: IndexPattern | undefined
+): keyof IFieldCategories => {
+  const { metaFields = [] } = indexPattern ?? {};
+  if (metaFields.includes(name)) return 'meta';
   if (type === OSD_FIELD_TYPES.NUMBER) return 'numerical';
 
   return 'categorical';
