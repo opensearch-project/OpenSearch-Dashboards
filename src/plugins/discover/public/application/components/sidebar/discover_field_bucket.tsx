@@ -68,7 +68,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 title={
                   bucket.display === ''
                     ? emptyTxt
-                    : `${bucket.display}: ${bucket.count} (${bucket.percent}%)`
+                    : `${bucket.display}: ${bucket.count} (${bucket.percent.toFixed(1)}%)`
                 }
                 size="xs"
                 className="eui-textTruncate"
@@ -78,7 +78,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiText color="secondary" size="xs" className="eui-textTruncate">
-                {bucket.percent}%
+                {bucket.percent.toFixed(1)}%
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
