@@ -95,12 +95,6 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  /**
-   * @property {boolean} - allow numeric aggregation
-   * @private
-   */
-  allowsNumericalAggregations?: boolean;
-
   protected readonly _params: any;
   protected getConfig: FieldFormatsGetConfigFn | undefined;
 

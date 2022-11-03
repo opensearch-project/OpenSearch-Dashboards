@@ -11,55 +11,17 @@ import produce from 'immer';
 import { Draft } from 'immer';
 import { EuiIconTip } from '@elastic/eui';
 import { search } from '../../../../../data/public';
-import { NumberInputOption, SwitchOption, SelectOption } from '../../../../../charts/public';
+import { NumberInputOption, SwitchOption } from '../../../../../charts/public';
 import {
   useTypedDispatch,
   useTypedSelector,
   setStyleState,
 } from '../../../application/utils/state_management';
-import { useAggs } from '../../../../public/application/utils/use';
 import { TableOptionsDefaults } from '../table_viz_type';
 import { Option } from '../../../application/app';
-import { AggTypes } from '../types';
-
-const { tabifyGetColumns } = search;
-
-const totalAggregations = [
-  {
-    value: AggTypes.SUM,
-    text: i18n.translate('visTypeTableNew.totalAggregations.sumText', {
-      defaultMessage: 'Sum',
-    }),
-  },
-  {
-    value: AggTypes.AVG,
-    text: i18n.translate('visTypeTableNew.totalAggregations.averageText', {
-      defaultMessage: 'Average',
-    }),
-  },
-  {
-    value: AggTypes.MIN,
-    text: i18n.translate('visTypeTableNewNew.totalAggregations.minText', {
-      defaultMessage: 'Min',
-    }),
-  },
-  {
-    value: AggTypes.MAX,
-    text: i18n.translate('visTypeTableNewNew.totalAggregations.maxText', {
-      defaultMessage: 'Max',
-    }),
-  },
-  {
-    value: AggTypes.COUNT,
-    text: i18n.translate('visTypeTableNewNew.totalAggregations.countText', {
-      defaultMessage: 'Count',
-    }),
-  },
-];
 
 function TableVizOptions() {
   const styleState = useTypedSelector((state) => state.style) as TableOptionsDefaults;
-  const { aggConfigs } = useAggs();
   const dispatch = useTypedDispatch();
 
   const setOption = useCallback(
@@ -69,35 +31,6 @@ function TableVizOptions() {
     },
     [dispatch, styleState]
   );
-
-  const percentageColumns = useMemo(() => {
-    const defaultPercentageColText = {
-      value: '',
-      text: i18n.translate('visTypeTableNew.params.defaultPercentageCol', {
-        defaultMessage: 'Don’t show',
-      }),
-    };
-    return aggConfigs
-      ? [
-          defaultPercentageColText,
-          ...tabifyGetColumns(aggConfigs.getResponseAggs(), true)
-            .filter((col) => get(col.aggConfig.toSerializedFieldFormat(), 'id') === 'number')
-            .map(({ name }) => ({ value: name, text: name })),
-        ]
-      : [defaultPercentageColText];
-  }, [aggConfigs]);
-
-  useEffect(() => {
-    if (
-      !percentageColumns.find(({ value }) => value === styleState.percentageCol) &&
-      percentageColumns[0] &&
-      percentageColumns[0].value !== styleState.percentageCol
-    ) {
-      setOption((draft) => {
-        draft.percentageCol = percentageColumns[0].value;
-      });
-    }
-  }, [percentageColumns, styleState.percentageCol, setOption]);
 
   const isPerPageValid = styleState.perPage === '' || styleState.perPage > 0;
 
@@ -167,49 +100,6 @@ function TableVizOptions() {
             })
           }
           data-test-subj="showPartialRows"
-        />
-
-        <SwitchOption
-          label={i18n.translate('visTypeTableNewNew.params.showTotalLabel', {
-            defaultMessage: 'Show total',
-          })}
-          paramName="showTotal"
-          value={styleState.showTotal}
-          setValue={(_, value) =>
-            setOption((draft) => {
-              draft.showTotal = value;
-            })
-          }
-        />
-
-        <SelectOption
-          label={i18n.translate('visTypeTableNewNew.params.totalFunctionLabel', {
-            defaultMessage: 'Total function',
-          })}
-          disabled={!styleState.showTotal}
-          options={totalAggregations}
-          paramName="totalFunc"
-          value={styleState.totalFunc}
-          setValue={(_, value) =>
-            setOption((draft) => {
-              draft.totalFunc = value;
-            })
-          }
-        />
-
-        <SelectOption
-          label={i18n.translate('visTypeTableNewNew.params.PercentageColLabel', {
-            defaultMessage: 'Percentage column',
-          })}
-          options={percentageColumns}
-          paramName="percentageCol"
-          value={styleState.percentageCol}
-          setValue={(_, value) =>
-            setOption((draft) => {
-              draft.percentageCol = value;
-            })
-          }
-          id="datatableVisualizationPercentageCol"
         />
       </Option>
     </>
