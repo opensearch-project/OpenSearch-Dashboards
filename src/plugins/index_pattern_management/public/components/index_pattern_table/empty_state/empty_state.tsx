@@ -151,6 +151,7 @@ export const EmptyState = ({
         <EuiSpacer size="m" />
         <EuiPageContentBody>
           <EuiFlexGrid className="inpEmptyState__cardGrid" columns={3} responsive={true}>
+            {/* TODO: [UNCOMMENTME] Once we have long-term fix for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2684
             <EuiFlexItem>
               <EuiCard
                 className="inpEmptyState__card"
@@ -169,7 +170,7 @@ export const EmptyState = ({
                   />
                 }
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             {getMlCardState() !== MlCardState.HIDDEN ? mlCard : <></>}
             <EuiFlexItem>
               <EuiCard
