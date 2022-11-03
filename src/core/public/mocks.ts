@@ -83,6 +83,7 @@ function createCoreSetupMock({
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
+      getBranding: injectedMetadataServiceMock.createSetupContract().getBranding,
     },
   };
 
