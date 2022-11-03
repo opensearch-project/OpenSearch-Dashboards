@@ -32,7 +32,7 @@
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export const createRegionDeniedWarning = (function () {
@@ -112,9 +112,12 @@ export const createZoomWarningMsg = (function () {
               Please go to { wms } for more information."
               values={{
                 wms: (
-                  <a target="_blank" href="https://opensearch.org/docs/latest/dashboards/maptiles/">
+                  <EuiLink
+                    target="_blank"
+                    href="https://opensearch.org/docs/latest/dashboards/maptiles/"
+                  >
                     {`Custom WMS Configuration`}
-                  </a>
+                  </EuiLink>
                 ),
               }}
             />
