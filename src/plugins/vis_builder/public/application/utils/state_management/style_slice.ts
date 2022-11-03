@@ -4,14 +4,17 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { WizardServices } from '../../../types';
+import { VisBuilderServices } from '../../../types';
 import { setActiveVisualization } from './shared_actions';
 
 export type StyleState<T = any> = T;
 
 const initialState = {} as StyleState;
 
-export const getPreloadedState = async ({ types, data }: WizardServices): Promise<StyleState> => {
+export const getPreloadedState = async ({
+  types,
+  data,
+}: VisBuilderServices): Promise<StyleState> => {
   let preloadedState = initialState;
 
   const defaultVisualization = types.all()[0];

@@ -9,6 +9,6 @@ export const VISUALIZE_ID = 'visualize';
 export const EDIT_PATH = '/edit';
 
 export {
-  WizardSavedObjectAttributes,
-  WIZARD_SAVED_OBJECT,
+  VisBuilderSavedObjectAttributes,
+  VISBUILDER_SAVED_OBJECT,
 } from './vis_builder_saved_object_attributes';

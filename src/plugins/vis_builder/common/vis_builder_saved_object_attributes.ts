@@ -5,9 +5,9 @@
 
 import { SavedObjectAttributes } from '../../../core/types';
 
-export const WIZARD_SAVED_OBJECT = 'wizard';
+export const VISBUILDER_SAVED_OBJECT = 'wizard';
 
-export interface WizardSavedObjectAttributes extends SavedObjectAttributes {
+export interface VisBuilderSavedObjectAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   visualizationState?: string;

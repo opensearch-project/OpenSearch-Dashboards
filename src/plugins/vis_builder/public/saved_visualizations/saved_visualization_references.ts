@@ -4,11 +4,11 @@
  */
 
 import { SavedObjectReference } from '../../../../core/public';
-import { WizardVisSavedObject } from '../types';
+import { VisBuilderVisSavedObject } from '../types';
 import { injectSearchSourceReferences } from '../../../data/public';
 
 export function injectReferences(
-  savedObject: WizardVisSavedObject,
+  savedObject: VisBuilderVisSavedObject,
   references: SavedObjectReference[]
 ) {
   if (savedObject.searchSourceFields) {
