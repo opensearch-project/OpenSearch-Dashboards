@@ -20,9 +20,15 @@ import {
   VisBuilderStart,
 } from './types';
 import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
-import visBuilderIconSecondaryFill from './assets/wizard_icon_secondary_fill.svg';
-import visBuilderIcon from './assets/wizard_icon.svg';
-import { EDIT_PATH, PLUGIN_ID, PLUGIN_NAME, VISBUILDER_SAVED_OBJECT } from '../common';
+import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
+import visBuilderIcon from './assets/vis_builder_icon.svg';
+import {
+  EDIT_PATH,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  VISBUILDER_SAVED_OBJECT,
+  VIS_BUILDER_CHART_TYPE,
+} from '../common';
 import { TypeService } from './services/type_service';
 import { getPreloadedStore } from './application/utils/state_management';
 import {
@@ -116,7 +122,7 @@ export class VisBuilderPlugin
       name: PLUGIN_ID,
       title: PLUGIN_NAME,
       description: i18n.translate('visBuilder.visPicker.description', {
-        defaultMessage: 'Create visualizations using the new Visualization Builder',
+        defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
       icon: visBuilderIconSecondaryFill,
       stage: 'experimental',
@@ -124,7 +130,7 @@ export class VisBuilderPlugin
       aliasPath: '#/',
       appExtensions: {
         visualizations: {
-          docTypes: [PLUGIN_ID],
+          docTypes: [VISBUILDER_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
             description: attributes?.description,
             editApp: PLUGIN_ID,
@@ -134,7 +140,7 @@ export class VisBuilderPlugin
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
             title: attributes?.title,
-            typeTitle: PLUGIN_NAME,
+            typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,
           }),
         },

@@ -60,7 +60,10 @@ const getBadge = (item: VisualizationListItem) => {
     return (
       <EuiBetaBadge
         className="visListingTable__experimentalIcon"
-        label="E"
+        label="Lab"
+        size="s"
+        color="subdued"
+        iconType={'beaker'}
         title={i18n.translate('visualize.listing.experimentalTitle', {
           defaultMessage: 'Experimental',
         })}

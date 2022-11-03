@@ -44,7 +44,7 @@ import { TimePickerProvider } from './time_picker';
 import { TimelinePageProvider } from './timeline_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
 import { VisualizePageProvider } from './visualize_page';
-import { WizardPageProvider } from './wizard_page';
+import { VisBuilderPageProvider } from './vis_builder_page';
 import { VisualizeEditorPageProvider } from './visualize_editor_page';
 import { VisualizeChartPageProvider } from './visualize_chart_page';
 import { TileMapPageProvider } from './tile_map_page';
@@ -69,7 +69,7 @@ export const pageObjects = {
   timePicker: TimePickerProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
-  wizard: WizardPageProvider,
+  visBuilder: VisBuilderPageProvider,
   visEditor: VisualizeEditorPageProvider,
   visChart: VisualizeChartPageProvider,
   tileMap: TileMapPageProvider,

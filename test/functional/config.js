@@ -48,7 +48,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timeline'),
       require.resolve('./apps/visualize'),
-      require.resolve('./apps/wizard'),
+      require.resolve('./apps/vis_builder'),
     ],
     pageObjects,
     services,
@@ -92,8 +92,8 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/visualize',
         hash: '/',
       },
-      wizard: {
-        pathname: '/app/wizard',
+      visBuilder: {
+        pathname: '/app/visBuilder',
         hash: '/',
       },
       dashboard: {

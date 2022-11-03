@@ -39,7 +39,7 @@ import {
 import { VisBuilderServices } from '../..';
 import { VisBuilderVisSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
-import { EDIT_PATH } from '../../../common';
+import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
@@ -81,7 +81,7 @@ export const getTopNavConfig = (
           : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
               defaultMessage: 'save',
             }),
-      testId: 'wizardSaveButton',
+      testId: 'visBuilderSaveButton',
       disableButton: !!saveDisabledReason,
       tooltip: saveDisabledReason,
       run: (_anchorElement) => {
@@ -95,7 +95,7 @@ export const getTopNavConfig = (
               dispatch,
               services
             )}
-            objectType={'wizard'}
+            objectType={'visualization'}
             onClose={() => {}}
             originatingApp={originatingApp}
             getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -120,7 +120,7 @@ export const getTopNavConfig = (
                 defaultMessage: 'Finish editing visBuilder and return to the last app',
               }
             ),
-            testId: 'wizardsaveAndReturnButton',
+            testId: 'visBuilderSaveAndReturnButton',
             disableButton: !!saveDisabledReason,
             tooltip: saveDisabledReason,
             run: async () => {
@@ -207,7 +207,7 @@ export const getOnSave = (
           if (newlyCreated && stateTransfer) {
             // create new embeddable to transfer to originatingApp
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-              state: { type: 'wizard', input: { savedObjectId: id } },
+              state: { type: VISBUILDER_SAVED_OBJECT, input: { savedObjectId: id } },
             });
             return { id };
           } else {
