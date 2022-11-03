@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { IconType } from '@elastic/eui';
-import { RootState } from '../../application/utils/state_management';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
+import { RenderState } from '../../application/utils/state_management';
 import { VisualizationTypeOptions } from './types';
 
 type IVisualizationType = VisualizationTypeOptions;
@@ -15,7 +16,10 @@ export class VisualizationType implements IVisualizationType {
   public readonly icon: IconType;
   public readonly stage: 'experimental' | 'production';
   public readonly ui: IVisualizationType['ui'];
-  public readonly toExpression: (state: RootState) => Promise<string | undefined>;
+  public readonly toExpression: (
+    state: RenderState,
+    searchContext: IExpressionLoaderParams['searchContext']
+  ) => Promise<string | undefined>;
 
   constructor(options: VisualizationTypeOptions) {
     this.name = options.name;

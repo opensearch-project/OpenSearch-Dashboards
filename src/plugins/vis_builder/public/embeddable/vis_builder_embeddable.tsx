@@ -30,6 +30,7 @@ import {
 import { validateSchemaState } from '../application/utils/validate_schema_state';
 import { getExpressionLoader, getTypeService } from '../plugin_services';
 import { PersistedState } from '../../../visualizations/public';
+import { RenderState, VisualizationState } from '../application/utils/state_management';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
@@ -121,16 +122,16 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     const { visualization, style } = this.serializedState;
 
     const vizStateWithoutIndex = JSON.parse(visualization);
-    const visualizationState = {
+    const visualizationState: VisualizationState = {
       searchField: vizStateWithoutIndex.searchField,
       activeVisualization: vizStateWithoutIndex.activeVisualization,
       indexPattern: this.savedVisBuilder?.searchSourceFields?.index,
     };
-    const rootState = {
+    const renderState: RenderState = {
       visualization: visualizationState,
       style: JSON.parse(style),
     };
-    const visualizationName = rootState.visualization?.activeVisualization?.name ?? '';
+    const visualizationName = renderState.visualization?.activeVisualization?.name ?? '';
     const visualizationType = getTypeService().get(visualizationName);
     if (!visualizationType) {
       this.onContainerError(new Error(`Invalid visualization type ${visualizationName}`));
@@ -138,7 +139,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     }
     const { toExpression, ui } = visualizationType;
     const schemas = ui.containerConfig.data.schemas;
-    const [valid, errorMsg] = validateSchemaState(schemas, rootState);
+    const [valid, errorMsg] = validateSchemaState(schemas, visualizationState);
 
     if (!valid) {
       if (errorMsg) {
@@ -147,7 +148,11 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
       }
     } else {
       // TODO: handle error in Expression creation
-      const exp = await toExpression(rootState);
+      const exp = await toExpression(renderState, {
+        filters: this.filters,
+        query: this.query,
+        timeRange: this.timeRange,
+      });
       return exp;
     }
   };
@@ -268,12 +273,15 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     // Check if rootState has changed
     if (!isEqual(this.getSerializedState(), this.serializedState)) {
       this.serializedState = this.getSerializedState();
-      this.expression = (await this.getExpression()) ?? '';
       dirty = true;
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
+    if (dirty) {
+      this.expression = (await this.getExpression()) ?? '';
+
+      if (this.handler) {
+        this.updateHandler();
+      }
     }
   }
 

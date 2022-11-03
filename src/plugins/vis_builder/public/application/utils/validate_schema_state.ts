@@ -5,10 +5,19 @@
 
 import { countBy } from 'lodash';
 import { Schemas } from '../../../../vis_default_editor/public';
-import { RootState } from './state_management';
+import { VisualizationState } from './state_management';
 
-export const validateSchemaState = (schemas: Schemas, state: RootState): [boolean, string?] => {
-  const activeViz = state.visualization.activeVisualization;
+/**
+ * Validate if the visualization state fits the  vis type schema criteria
+ * @param schemas Visualization type config Schema objects
+ * @param state visualization state
+ * @returns [Validity, 'Message']
+ */
+export const validateSchemaState = (
+  schemas: Schemas,
+  state: VisualizationState
+): [boolean, string?] => {
+  const activeViz = state.activeVisualization;
   const vizName = activeViz?.name;
   const aggs = activeViz?.aggConfigParams;
 
