@@ -26,6 +26,7 @@ interface IFieldCategories {
 export const FieldSelector = () => {
   const indexPattern = useIndexPatterns().selected;
   const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
+  // TODO: instead of a single fetch of sampled hits for all fields, we should just use the agg service to get top hits or terms per field: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2780
   const hits = useSampleHits();
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
 
@@ -77,6 +78,8 @@ export const FieldSelector = () => {
         <DraggableFieldButton
           field={{ name: 'count', displayName: 'Count', type: 'number' }}
           dragValue={COUNT_FIELD}
+          // TODO: improve the test ID for the Count field (or use a non-conflicting `name` value) and update functional test accordingly: https://github.com/opensearch-project/opensearch-dashboards-functional-test/blob/6f4125c9823f8e54e138076737ca16f011cbd7e7/cypress/integration/core-opensearch-dashboards/opensearch-dashboards/apps/vis_builder/vis_types/metric.spec.js#L36
+          dataTestSubj="field-undefined-showDetails"
         />
         <FieldGroup
           id="categoricalFields"

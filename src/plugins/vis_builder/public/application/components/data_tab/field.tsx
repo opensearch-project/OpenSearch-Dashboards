@@ -65,6 +65,7 @@ export const Field = ({ field, getDetails }: FieldProps) => {
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
       panelClassName="vbItem__fieldPopoverPanel"
+      // TODO: make reposition on scroll actually work: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2782
       repositionOnScroll
       data-test-subj="field-popover"
     >
