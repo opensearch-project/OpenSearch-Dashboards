@@ -29,6 +29,7 @@
  */
 
 import React from 'react';
+// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
@@ -99,8 +100,9 @@ function getComponent({
 
   const props = {
     indexPattern,
+    columns: [],
     field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 1 })),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
