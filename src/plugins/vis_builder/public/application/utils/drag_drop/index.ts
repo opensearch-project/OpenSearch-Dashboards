@@ -4,3 +4,4 @@
  */
 
 export * from './drag_drop_context';
+export * from './types';
