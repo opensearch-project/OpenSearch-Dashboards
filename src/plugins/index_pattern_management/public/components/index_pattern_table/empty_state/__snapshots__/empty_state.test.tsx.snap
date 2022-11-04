@@ -35,33 +35,6 @@ exports[`EmptyState should render normally 1`] = `
             className="inpEmptyState__card"
             description={
               <FormattedMessage
-                defaultMessage="Add data from a variety of sources."
-                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="database"
-              />
-            }
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Add integration"
-                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
                 defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
                 id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
                 values={Object {}}

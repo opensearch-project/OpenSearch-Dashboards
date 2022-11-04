@@ -11,15 +11,15 @@ Update the following configuration in the `opensearch_dashboards.yml` file to ap
 1. The dataSource plugin is disabled by default; to enable it:
    `data_source.enabled: true`
 
-2. The audit trail is enabled by default for logging the access to data source; to disable it:
-   `data_source.audit.enabled: false`
+2. The audit trail is disabled by default for logging the access to data source; to disable it:
+   `data_source.audit.enabled: true`
 
-- Current auditor configuration:
+- Default auditor configuration:
 
 ```yml
 data_source.audit.appender.kind: 'file'
 data_source.audit.appender.layout.kind: 'pattern'
-data_source.audit.appender.path: '/tmp/opensearch-dashboards-data-source-audit.log'
+data_source.audit.appender.path: '<Operating System's Temp Folder>/opensearch-dashboards-data-source-audit.log'
 ```
 
 3. The default encryption-related configuration parameters are:

@@ -1,0 +1,23 @@
+{
+  "id": "visBuilder",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "dashboard",
+    "data",
+    "embeddable",
+    "expressions",
+    "navigation",
+    "savedObjects",
+    "visualizations"
+  ],
+  "requiredBundles": [
+    "charts",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
+    "visDefaultEditor",
+    "visTypeVislib"
+  ]
+}
