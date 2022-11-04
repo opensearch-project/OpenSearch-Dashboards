@@ -5,6 +5,7 @@
 
 import type { TypeServiceSetup } from '../services/type_service';
 import { createMetricConfig } from './metric';
+import { createTableConfig } from './table';
 import { createHistogramConfig, createLineConfig, createAreaConfig } from './vislib';
 
 export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup) {
@@ -13,6 +14,7 @@ export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup) {
     createLineConfig,
     createAreaConfig,
     createMetricConfig,
+    createTableConfig,
   ];
 
   visualizationTypes.forEach((createTypeConfig) => {
