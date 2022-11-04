@@ -34,7 +34,7 @@ export const configSchema = schema.object({
     size: schema.number({ defaultValue: 5 }),
   }),
   audit: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     appender: fileAppenderSchema,
   }),
 });
