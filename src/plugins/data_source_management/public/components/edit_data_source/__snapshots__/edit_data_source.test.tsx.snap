@@ -1018,6 +1018,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                           onBlur={[Function]}
                                           onChange={[Function]}
                                           placeholder="Password to connect to data source"
+                                          spellCheck={false}
                                           type="dual"
                                           value="********"
                                         >
@@ -1054,6 +1055,7 @@ exports[`Datasource Management: Edit Datasource Wizard should load resources suc
                                                     onBlur={[Function]}
                                                     onChange={[Function]}
                                                     placeholder="Password to connect to data source"
+                                                    spellCheck={false}
                                                     type="password"
                                                     value="********"
                                                   />
