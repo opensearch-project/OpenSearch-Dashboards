@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import Url from 'url';
+import { format as formatUrl } from 'url';
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, OSD_CERT_PATH, OSD_KEY_PATH } from '@osd/dev-utils';
 
@@ -46,7 +46,7 @@ export default async function ({ readConfigFile }) {
       ...httpConfig.get('services'),
       supertest: createOpenSearchDashboardsSupertestProvider({
         certificateAuthorities,
-        opensearchDashboardsUrl: Url.format({
+        opensearchDashboardsUrl: formatUrl({
           ...httpConfig.get('servers.opensearchDashboards'),
           port: redirectPort,
           // test with non ssl protocol
