@@ -1,3 +1,8 @@
+opensearch.hosts: ["https://localhost:9200"]
+opensearch.username: "admin" # Default username on the docker image
+opensearch.password: "admin" # Default password on the docker image
+opensearch.ssl.verificationMode: none
+
 # OpenSearch Dashboards is served by a back end server. This setting specifies the port to use.
 #server.port: 5601
 

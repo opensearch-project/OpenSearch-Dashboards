@@ -28,8 +28,10 @@
  * under the License.
  */
 
+import { ReactElement } from 'react';
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
@@ -64,6 +66,12 @@ export type ActionExecutionContext<Context extends BaseContext = BaseContext> = 
 export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | Context
   | ActionExecutionContext<Context>;
+
+export interface ActionContextMenuData {
+  items?: ReactElement[];
+  panels?: EuiContextMenuPanelDescriptor[];
+  order?: number;
+}
 
 export interface Action<Context extends BaseContext = {}, T = ActionType>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -124,6 +132,8 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * false by default.
    */
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
+
+  contextMenuData?: ActionContextMenuData;
 }
 
 /**

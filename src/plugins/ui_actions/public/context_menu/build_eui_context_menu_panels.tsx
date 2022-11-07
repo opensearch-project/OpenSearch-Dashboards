@@ -152,11 +152,21 @@ export async function buildContextMenuForActions({
       items: [],
     },
   };
+  const additionalContextMenuGroups = [];
   const promises = actions.map(async (item) => {
     const { action } = item;
+    const contextMenuData = action.contextMenuData || action.definition?.contextMenuData;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
+
     if (!isCompatible) return;
+
+    // Exit early if contextMenuData provided, which will handle all menu data
+    if (contextMenuData) {
+      additionalContextMenuGroups.push(contextMenuData);
+      return;
+    }
+
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping) {
@@ -227,5 +237,39 @@ export async function buildContextMenuForActions({
   }
 
   const panelList = Object.values(panels);
-  return removePanelMetaFields(panelList);
+
+  if (!additionalContextMenuGroups.length) {
+    return panelList;
+  }
+
+  // Add group for existing panel of items
+  additionalContextMenuGroups.push({ items: panelList[0].items, order: 0 });
+
+  // Sort groups based on order...higher order goes first
+  additionalContextMenuGroups.sort((a, b) => (b.order || 0) - (a.order || 0));
+
+  // For each grooup...add panels and add items and insert separators as needed
+  panelList[0].items = additionalContextMenuGroups.reduce((newItems, data, index) => {
+    const { items = [], panels: additionalPanels = [], order = 0 } = data;
+
+    // Add panels
+    panelList.push(...additionalPanels);
+
+    // If order is below 0, add separator before items
+    if (order < 0) {
+      newItems.push({ isSeparator: true, key: `sep-before-${index}` });
+    }
+
+    // Add items
+    newItems.push(...items);
+
+    // If order is above 0, add separator after
+    if (order > 0) {
+      newItems.push({ isSeparator: true, key: `sep-after-${index}` });
+    }
+
+    return newItems;
+  }, []);
+
+  return panelList;
 }
