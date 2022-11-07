@@ -125,6 +125,7 @@ export const UpdatePasswordModal = ({
                 type={'dual'}
                 value={newPassword}
                 isInvalid={!isNewPasswordValid}
+                spellCheck={false}
                 onChange={(e) => setNewPassword(e.target.value)}
                 onBlur={validateNewPassword}
               />
@@ -149,6 +150,7 @@ export const UpdatePasswordModal = ({
                 type={'dual'}
                 value={confirmNewPassword}
                 isInvalid={!!isConfirmNewPasswordValid.length}
+                spellCheck={false}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 onBlur={validateConfirmNewPassword}
               />
