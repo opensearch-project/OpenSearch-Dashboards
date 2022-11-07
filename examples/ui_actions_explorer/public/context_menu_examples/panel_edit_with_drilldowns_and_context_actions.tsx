@@ -55,23 +55,15 @@ export const PanelEditWithDrilldownsAndContextActions: React.FC = () => {
       order: 20,
     },
   ];
-  const secondaryActionGrouping: Action['grouping'] = [
-    {
-      id: 'secondary',
-      getDisplayName: () => 'Secondary',
-      getIconType: () => 'cloudStormy',
-      order: 20,
-    },
-  ];
   const actions = [
     sampleAction('test-1', 100, 'Edit visualization', 'pencil'),
     sampleAction('test-2', 99, 'Clone panel', 'partial'),
     sampleAction('test-3', 98, 'Edit panel title', 'pencil'),
     sampleAction('test-4', 97, 'Customize time range', 'calendar'),
-    sampleAction('test-5', 96, 'Inspect', 'inspect', secondaryActionGrouping),
-    sampleAction('test-6', 95, 'Full screen', 'fullScreen', secondaryActionGrouping),
-    sampleAction('test-7', 94, 'Replace panel', 'submodule', secondaryActionGrouping),
-    sampleAction('test-8', 193, 'Delete from dashboard', 'trash', secondaryActionGrouping),
+    sampleAction('test-5', 96, 'Inspect', 'inspect'),
+    sampleAction('test-6', 95, 'Full screen', 'fullScreen'),
+    sampleAction('test-7', 94, 'Replace panel', 'submodule'),
+    sampleAction('test-8', 93, 'Delete from dashboard', 'trash'),
 
     sampleAction('test-9', 10, 'Create drilldown', 'plusInCircle', drilldownGrouping),
     sampleAction('test-10', 9, 'Manage drilldowns', 'list', drilldownGrouping),

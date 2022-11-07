@@ -271,5 +271,5 @@ export async function buildContextMenuForActions({
     return newItems;
   }, []);
 
-  return panelList;
+  return removePanelMetaFields(panelList);
 }
