@@ -585,6 +585,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                     : this.state.auth.credentials.password
                 }
                 isInvalid={!!this.state.formErrorsByField.createCredential?.password?.length}
+                spellCheck={false}
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
                 disabled={this.props.existingDataSource.auth.type !== AuthType.NoAuth}
