@@ -29,7 +29,7 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import * as url from 'url';
+import { URL } from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
@@ -52,7 +52,7 @@ import { RouteDependencies } from '../../../';
 import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
-  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
+  const urlResult = new URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have OpenSearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
