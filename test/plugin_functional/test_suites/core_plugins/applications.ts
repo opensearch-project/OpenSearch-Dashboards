@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import url from 'url';
+import { URL } from 'url';
 import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
@@ -50,14 +50,18 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return (await wrapper.getSize()).height;
   };
 
-  const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) =>
-    url.format({
-      protocol: 'http:',
-      hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost',
-      port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620',
-      pathname,
-      search,
-    });
+  const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) => {
+    const url = new URL(
+      pathname ?? '',
+      `http://${process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost'}:${
+        process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620'
+      }`
+    );
+    if (search) {
+      url.search = search;
+    }
+    return url.toString();
+  };
 
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
