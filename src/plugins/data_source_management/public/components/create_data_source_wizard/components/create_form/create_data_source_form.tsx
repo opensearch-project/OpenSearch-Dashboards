@@ -276,6 +276,7 @@ export class CreateDataSourceForm extends React.Component<
             value={this.state.auth.credentials.password || ''}
             onChange={this.onChangePassword}
             onBlur={this.validatePassword}
+            spellCheck={false}
             data-test-subj="createDataSourceFormPasswordField"
           />
         </EuiFormRow>
