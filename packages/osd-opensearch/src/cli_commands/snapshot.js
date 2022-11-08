@@ -49,11 +49,12 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
-      --P               OpenSearch plugin artifact URL to install it on the cluster.
+      --P               OpenSearch plugin artifact URL to install it on the cluster. We should use the flag multiple times
+                        to install multiple plugins on the cluster snapshot.
 
     Example:
 
-      opensearch snapshot --version 5.6.8 -E cluster.name=test -E path.data=/tmp/opensearch-data
+      opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:alerting:2.2.0.0
   `;
 };
 

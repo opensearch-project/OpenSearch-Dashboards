@@ -178,19 +178,14 @@ exports.Cluster = class Cluster {
    * @param {Array|string} opensearchPlugins Array or string of opensearch plugin(s) artifact url
    */
   async installOpensearchPlugin(installPath, opensearchPluginsPath) {
-    this._log.info(chalk.bold(`Downloading Opensearch plugin on the cluster snapshot`));
+    this._log.info(chalk.bold(`Downloading Opensearch plugin(s) on the cluster snapshot`));
     this._log.indent(4);
+    opensearchPluginsPath =
+      typeof opensearchPluginsPath === 'string' ? [opensearchPluginsPath] : opensearchPluginsPath;
     // Run opensearch-plugin tool script to download openSearch plugin artifacts
-    if (Array.isArray(opensearchPluginsPath)) {
-      for (const pluginPath of opensearchPluginsPath) {
-        this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
-        await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
-      }
-    } else if (typeof opensearchPluginsPath === 'string') {
-      this._log.info(`Installing OpenSearch Plugin from the path: ${opensearchPluginsPath}`);
-      await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, opensearchPluginsPath], {
-        cwd: installPath,
-      });
+    for (const pluginPath of opensearchPluginsPath) {
+      this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
+      await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
     }
     this._log.info(`Plugin download complete`);
     this._log.indent(-4);
