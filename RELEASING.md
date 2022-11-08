@@ -28,25 +28,25 @@ The RM should review the [public roadmap](https://github.com/orgs/opensearch-pro
 
 #### Prepare BWC data and update BWC versions
 
-Backwards Compatibility Tests (BWC) are cypress tests that identify any obvious compatibility bugs with previous versions. RM should generate test data and test locally following instructions [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md#backwards-compatibility-tests) and cut PR to include both generated data and version upgrade for automated build. (See example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2393/files))
+Backward Compatibility Tests (BWC) are cypress tests that identify any obvious compatibility bugs with previous versions. The RM should generate test data and test locally following instructions [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md#backwards-compatibility-tests) and cut PR to include both generated data and version upgrade for automated build. (See example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2393/files))
 
 #### Cut release branch for major / minor release
 
-For major / minor release, RM should cut the release branch from the parent branch, [following OpenSearch project branching](https://github.com/opensearch-project/.github/blob/main/RELEASING.md#opensearch-branching)
+For major / minor release, the RM should cut the release branch from the parent branch, [following OpenSearch project branching](https://github.com/opensearch-project/.github/blob/main/RELEASING.md#opensearch-branching)
 
 ### Release Phase 2 - Pre-Release
 
-The release process for OpenSearch is centralized. Jenkins workflows are in place to regularly find differences in the OpenSearch and OpenSearch Dashboards components and create new snapshots for those that have been updated. RM should update the release branch version in the distribution manifest (see example [PR](https://github.com/opensearch-project/opensearch-build/pull/2586/files)) and increment the parent branch version (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2295/files)).
+The release process for OpenSearch is centralized. Jenkins workflows are in place to regularly find differences in the OpenSearch and OpenSearch Dashboards components and create new snapshots for those that have been updated. The RM should update the release branch version in the distribution manifest (see example [PR](https://github.com/opensearch-project/opensearch-build/pull/2586/files)) and increment the parent branch version (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2295/files)).
 
 #### Write release notes
 
-OpenSearch Dashboards maintains a [CHANGELOG.md](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CHANGELOG.md) and verifies it as part of the PR checklist step. For the time being, RM should create release notes PR with the label `doc`, referring to the `CHANGELOG.md` (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2318))
+OpenSearch Dashboards maintains a [CHANGELOG.md](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CHANGELOG.md) and verifies it as part of the PR checklist step. For the time being, the RM should create release notes PR with the label `doc`, referring to the `CHANGELOG.md` (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2318))
 
 ### Release Phase 3 - Release testing
 
 #### Verify integration and BWC test results
 
-The automated integration test and BWC test are executed concurrently with the release artifacts build. RM should examine the test results and assist in triaging the broken test case.
+The automated integration test and BWC test are executed concurrently with the release artifacts build. The RM should examine the test results and assist in triaging the broken test case.
 
 Example build:
 
@@ -57,11 +57,11 @@ arm64: https://build.ci.opensearch.org/job/integ-test-opensearch-dashboards/996/
 Example test results:
 https://opensearch-project.github.io/opensearch-dashboards-functional-test/site/?version=2.3.0&build_number=4104&test_number=996
 
-Note: change `arch` to correspond to the build's processor (CPU) architecture
+Note: change `arch` to match the operating system CPU architecture for which the build is being produced.
 
 #### Sanity test with tarball and docker image
 
-Once the release candidate artifacts are built, RM should configure the OpenSearch cluster with OpenSearch Dashboards according to the [instructions in the OpenSearch build repo](https://github.com/opensearch-project/opensearch-build/issues/2447#issuecomment-1241406594) and produce sanity tests to identify broken functionalities caused by new features / code changes. If you find any, please file bug reports and assist in triaging the bugfix.
+Once the release candidate artifacts are built, the RM should configure the OpenSearch cluster with OpenSearch Dashboards according to the [instructions in the OpenSearch build repo](https://github.com/opensearch-project/opensearch-build/issues/2447#issuecomment-1241406594) and produce sanity tests to identify broken functionalities caused by new features / code changes. If you find any, please file bug reports and assist in triaging the bugfix.
 
 ### Release Phase 4 - Release Announcement
 
@@ -69,6 +69,8 @@ Release artifacts and announcements will be available on https://opensearch.org/
 
 ### Release Phase 5 - Post-Release
 
-After release announced, OpenSearch build repository maintainer will trigger a job that creates a tag in each repository based on the commit hash and branch that was included in the release (which could take a couple hours for it to be available).
+After a release is announced, OpenSearch build repository maintainers will trigger a job that creates a tag in each repository based on the commit hash and branch that was included in the release; the release tag could take a few hours to show up on GitHub.
 
-RM should update the [release page](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/) with the latest download URL and release notes after the release tag created. RM is also advised to conduct a retrospective and publish the findings.
+The RM should update the [release page](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/) with the latest download URL and release notes after the release tag is created.
+
+If needed, the RM could conduct a retrospective review of the release, and publish their findings regarding any missed steps and process improvements.
