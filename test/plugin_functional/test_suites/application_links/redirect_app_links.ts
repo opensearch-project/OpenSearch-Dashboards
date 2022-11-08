@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import url from 'url';
+import { URL } from 'url';
 import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
@@ -40,8 +40,8 @@ declare global {
 }
 
 const getPathWithHash = (absoluteUrl: string) => {
-  const parsed = url.parse(absoluteUrl);
-  return `${parsed.path}${parsed.hash ?? ''}`;
+  const parsed = new URL(absoluteUrl);
+  return parsed.toString().substring(parsed.origin.length);
 };
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
