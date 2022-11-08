@@ -6,7 +6,7 @@ This project follows [OpenSearch project branching, labelling, and releasing](ht
 
 ### Overview
 
-The OpenSearch project releases versioned distributions of OpenSearch, OpenSearch Dashboards, and the OpenSearch plugins. This runbook describes in detail how to perform an end-to-end major/minor/patch version release for the OpenSearch Dashboards project as the release manager (RM) of this release version. RM is responsible for updating the release status broadly on the release tracking issue ([example](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2230)) on GitHub.
+The OpenSearch project releases versioned distributions of OpenSearch, OpenSearch Dashboards, and the OpenSearch plugins. This runbook details the steps involved in performing major, minor, and patch version releases for the OpenSearch Dashboards project; these steps need to be completed by the release managers (RM) assigned to each release. The RM is also responsible for updating the release status on the release tracking issues maintained on GitHub ([example](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2230)).
 
 \*Important Dates: https://opensearch.org/releases.html
 
@@ -14,9 +14,9 @@ The OpenSearch project releases versioned distributions of OpenSearch, OpenSearc
 
 For major and minor releases, the OpenSearch build repository [maintainers](https://github.com/opensearch-project/opensearch-build/blob/main/MAINTAINERS.md) will create a release issue in the OpenSearch Dashboards repository ([example](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2230)) which links to the overall issue in the OpenSearch build repository ([example](https://github.com/opensearch-project/opensearch-build/issues/2447)). For patch releases, they will only create the overall issue in the OpenSearch build repository ([example](https://github.com/opensearch-project/opensearch-build/issues/2650)).
 
-The release manager (RM) will be assigned to the OpenSearch Dashboards release issue and will be responsible for reviewing all tasks in this issue for preparation. It's also a good idea to compare the current release issue to the issue of previous release version at this point to ensure that all new processes have been captured.
+The OpenSearch Dashboards release issue will be assigned to the RM who should prepare for the release by reviewing all listed tasks. They should also compare the current release issue to the issue of the previous release version to ensure that all new processes have been captured.
 
-RM will review the [public roadmap](https://github.com/orgs/opensearch-project/projects/1) and confirm the release scope with other OpenSearch Dashboards [maintainers](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/MAINTAINERS.md) as well as feature owners. Since release labels are intended to clearly communicate which features and fixes are targeted for the upcoming release, RM will audit that all issues and pull requests are labelled properly. For example, if current release version is v2.3.0, all features not ready will be labeled as v2.4.0 (or even later by discussing with the feature owner). After then, RM will need to check all PRs for the current release version are merged into main branch and backported PRs are merged with all CI passed.
+The RM should review the [public roadmap](https://github.com/orgs/opensearch-project/projects/1) and confirm the release scope with other OpenSearch Dashboards [maintainers](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/MAINTAINERS.md) as well as the feature owners. Since release labels are intended to highlight the features and fixes meant for the upcoming release, the RM should verify that all issues and pull requests are labelled accordingly. For example, if current release version was v2.3.0, all features not ready for the release should be labeled as v2.4.0 or later by discussing with the feature owners. The RM should also check all PRs for the current release version to confirm that they are merged into the `main` branch and their backported PRs are merged with all CI passing.
 
 #### How to validate that merged commits have been properly backported?
 
@@ -28,19 +28,19 @@ RM will review the [public roadmap](https://github.com/orgs/opensearch-project/p
 
 #### Prepare BWC data and update BWC versions
 
-Backwards Compatibility Tests (BWC) are cypress tests that identify any obvious compatibility bugs with previous versions. RM will generate test data and test locally following instructions [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md#backwards-compatibility-tests) and cut PR to include both generated data and version upgrade for automated build. (See example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2393/files))
+Backwards Compatibility Tests (BWC) are cypress tests that identify any obvious compatibility bugs with previous versions. RM should generate test data and test locally following instructions [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md#backwards-compatibility-tests) and cut PR to include both generated data and version upgrade for automated build. (See example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2393/files))
 
 #### Cut release branch for major / minor release
 
-For major / minor release, RM will need to cut the release branch from the parent branch, [following OpenSearch project branching](https://github.com/opensearch-project/.github/blob/main/RELEASING.md#opensearch-branching)
+For major / minor release, RM should cut the release branch from the parent branch, [following OpenSearch project branching](https://github.com/opensearch-project/.github/blob/main/RELEASING.md#opensearch-branching)
 
 ### Release Phase 2 - Pre-Release
 
-The release process for OpenSearch is centralized. Jenkins workflows are in place to regularly find differences in the OpenSearch and OpenSearch Dashboards components and create new snapshots for those that have been updated. RM will update the release branch version in the distribution manifest (see example [PR](https://github.com/opensearch-project/opensearch-build/pull/2586/files)) and increment the parent branch version (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2295/files)).
+The release process for OpenSearch is centralized. Jenkins workflows are in place to regularly find differences in the OpenSearch and OpenSearch Dashboards components and create new snapshots for those that have been updated. RM should update the release branch version in the distribution manifest (see example [PR](https://github.com/opensearch-project/opensearch-build/pull/2586/files)) and increment the parent branch version (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2295/files)).
 
 #### Write release notes
 
-OpenSearch Dashboards maintains a [CHANGELOG.md](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CHANGELOG.md) and verifies it as part of the PR checklist step. For the time being, RM will create release notes PR with the label `doc`, referring to the `CHANGELOG.md` (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2318))
+OpenSearch Dashboards maintains a [CHANGELOG.md](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CHANGELOG.md) and verifies it as part of the PR checklist step. For the time being, RM should create release notes PR with the label `doc`, referring to the `CHANGELOG.md` (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2318))
 
 ### Release Phase 3 - Release testing
 
@@ -61,7 +61,7 @@ Note: change `arch` to correspond to the build's processor (CPU) architecture
 
 #### Sanity test with tarball and docker image
 
-Once the release candidate artifacts are built, RM will configure the OpenSearch cluster with OpenSearch Dashboards according to the [instructions in the OpenSearch build repo](https://github.com/opensearch-project/opensearch-build/issues/2447#issuecomment-1241406594) and produce sanity tests to identify broken functionalities caused by new features / code changes. If you find any, please file bug reports and assist in triaging the bugfix.
+Once the release candidate artifacts are built, RM should configure the OpenSearch cluster with OpenSearch Dashboards according to the [instructions in the OpenSearch build repo](https://github.com/opensearch-project/opensearch-build/issues/2447#issuecomment-1241406594) and produce sanity tests to identify broken functionalities caused by new features / code changes. If you find any, please file bug reports and assist in triaging the bugfix.
 
 ### Release Phase 4 - Release Announcement
 
@@ -71,4 +71,4 @@ Release artifacts and announcements will be available on https://opensearch.org/
 
 After release announced, OpenSearch build repository maintainer will trigger a job that creates a tag in each repository based on the commit hash and branch that was included in the release (which could take a couple hours for it to be available).
 
-RM will update the [release page](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/) with the latest download URL and release notes after the release tag created. RM is also advised to conduct a retrospective and publish the findings.
+RM should update the [release page](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/) with the latest download URL and release notes after the release tag created. RM is also advised to conduct a retrospective and publish the findings.
