@@ -30,6 +30,7 @@
 
 import { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
+import { URL } from 'url';
 
 import { schema } from './schema';
 
@@ -126,6 +127,9 @@ export class Config {
       if (typeof v === 'function') {
         return v;
       }
+      if (v instanceof URL) {
+        return new URL(v.toString());
+      }
     });
   }
 
@@ -133,6 +137,9 @@ export class Config {
     return cloneDeepWith(this[$values], (v) => {
       if (typeof v === 'function') {
         return v;
+      }
+      if (v instanceof URL) {
+        return new URL(v.toString());
       }
     });
   }

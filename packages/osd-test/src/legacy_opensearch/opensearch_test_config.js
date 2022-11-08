@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import url, { format as formatUrl } from 'url';
+import { URL } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../osd';
 
@@ -42,7 +42,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getUrl() {
-    return formatUrl(this.getUrlParts());
+    return this.getUrlParts().toString();
   }
 
   getBuildFrom() {
@@ -56,30 +56,16 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   getUrlParts() {
     // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
-      const testOpenSearchUrl = url.parse(process.env.TEST_OPENSEARCH_URL);
-      return {
-        // have to remove the ":" off protocol
-        protocol: testOpenSearchUrl.protocol.slice(0, -1),
-        hostname: testOpenSearchUrl.hostname,
-        port: parseInt(testOpenSearchUrl.port, 10),
-        username: testOpenSearchUrl.auth.split(':')[0],
-        password: testOpenSearchUrl.auth.split(':')[1],
-        auth: testOpenSearchUrl.auth,
-      };
+      return new URL(process.env.TEST_OPENSEARCH_URL);
     }
-
     const username = process.env.TEST_OPENSEARCH_USERNAME || adminTestUser.username;
     const password = process.env.TEST_OPENSEARCH_PASSWORD || adminTestUser.password;
-
-    return {
-      // Allow setting any individual component(s) of the URL,
-      // or use default values (username and password from ../osd/users.js)
-      protocol: process.env.TEST_OPENSEARCH_PROTOCOL || 'http',
-      hostname: process.env.TEST_OPENSEARCH_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_OPENSEARCH_PORT, 10) || 9220,
-      auth: `${username}:${password}`,
-      username: username,
-      password: password,
-    };
+    const protocol = process.env.TEST_OPENSEARCH_PROTOCOL || 'http';
+    const hostname = process.env.TEST_OPENSEARCH_HOSTNAME || 'localhost';
+    const port = parseInt(process.env.TEST_OPENSEARCH_PORT, 10) || 9220;
+    const url = new URL(`${protocol}://${hostname}:${port}`);
+    url.username = username;
+    url.password = password;
+    return url;
   }
 })();
