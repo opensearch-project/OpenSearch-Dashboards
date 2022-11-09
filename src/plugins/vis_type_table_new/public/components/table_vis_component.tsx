@@ -38,8 +38,10 @@ export const TableVisComponent = ({
   const pagination = usePagination(visConfig, rows.length);
 
   const sortedRows = useMemo(() => {
-    return uiState.sort?.colIndex && uiState.sort.direction
-      ? orderBy(rows, columns[uiState.sort.colIndex]?.id, uiState.sort.direction)
+    return uiState.sort.colIndex !== null &&
+      columns[uiState.sort.colIndex].id &&
+      uiState.sort.direction
+      ? orderBy(rows, columns[uiState.sort.colIndex].id, uiState.sort.direction)
       : rows;
   }, [columns, rows, uiState]);
 
@@ -58,8 +60,10 @@ export const TableVisComponent = ({
   const dataGridColumns = getDataGridColumns(sortedRows, columns, table, event, uiState.width);
 
   const sortedColumns = useMemo(() => {
-    return uiState.sort?.colIndex && uiState.sort.direction
-      ? [{ id: dataGridColumns[uiState.sort.colIndex]?.id, direction: uiState.sort.direction }]
+    return uiState.sort.colIndex !== null &&
+      dataGridColumns[uiState.sort.colIndex].id &&
+      uiState.sort.direction
+      ? [{ id: dataGridColumns[uiState.sort.colIndex].id, direction: uiState.sort.direction }]
       : [];
   }, [dataGridColumns, uiState]);
 
