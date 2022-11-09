@@ -229,7 +229,22 @@ exports.Cluster = class Cluster {
       throw new Error('OpenSearch has not been started');
     }
 
-    await treeKillAsync(this._process.pid);
+    /* Temporary fix for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2811
+     *
+     * `tree-kill` behaves differently on Windows, where it throws if `pid` is already dead, when
+     * compared to other operating systems, where it silently returns.
+     */
+    try {
+      await treeKillAsync(this._process.pid);
+    } catch (ex) {
+      console.log('ex.message', ex.message);
+      if (
+        process.platform === 'win32' &&
+        !ex.message?.includes(`The process "${this._process.pid}" not found`)
+      ) {
+        throw ex;
+      }
+    }
 
     await this._outcome;
   }
