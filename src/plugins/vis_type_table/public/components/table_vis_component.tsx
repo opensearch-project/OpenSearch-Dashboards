@@ -117,6 +117,13 @@ export const TableVisComponent = ({
 
   const ariaLabel = title || visConfig.title || 'tableVis';
 
+  const footerCellValue = visConfig.showTotal
+    ? ({ columnId }: { columnId: any }) => {
+        const colIndex = columns.findIndex((col) => col.id === columnId);
+        return columns[colIndex]?.formattedTotal || null;
+      }
+    : undefined;
+
   return (
     <>
       {title && (
@@ -141,6 +148,7 @@ export const TableVisComponent = ({
           header: 'underline',
         }}
         minSizeForControls={1}
+        renderFooterCellValue={footerCellValue}
         toolbarVisibility={{
           showColumnSelector: false,
           showSortSelector: false,
