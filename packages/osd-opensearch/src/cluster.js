@@ -171,24 +171,26 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpacks a tar or zip file containing the opensearch plugin directory for an
+   * Unpacks a tar or zip file containing the OpenSearch plugin directory for an
    * OpenSearch cluster.
    *
    * @param {string} installPath
-   * @param {Array|string} opensearchPlugins Array or string of opensearch plugin(s) artifact url
+   * @param {Array|string} opensearchPlugins Array or string of OpenSearch plugin(s) artifact url
    */
-  async installOpensearchPlugin(installPath, opensearchPluginsPath) {
-    this._log.info(chalk.bold(`Downloading Opensearch plugin(s) on the cluster snapshot`));
-    this._log.indent(4);
-    opensearchPluginsPath =
-      typeof opensearchPluginsPath === 'string' ? [opensearchPluginsPath] : opensearchPluginsPath;
-    // Run opensearch-plugin tool script to download openSearch plugin artifacts
-    for (const pluginPath of opensearchPluginsPath) {
-      this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
-      await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
+  async installOpenSearchPlugins(installPath, opensearchPluginsPath) {
+    if (opensearchPluginsPath) {
+      this._log.info(chalk.bold(`Downloading OpenSearch plugin(s) on the cluster snapshot`));
+      this._log.indent(4);
+      opensearchPluginsPath =
+        typeof opensearchPluginsPath === 'string' ? [opensearchPluginsPath] : opensearchPluginsPath;
+      // Run opensearch-plugin tool script to download OpenSearch plugin artifacts
+      for (const pluginPath of opensearchPluginsPath) {
+        this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
+        await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
+      }
+      this._log.info(`Plugin installation complete`);
+      this._log.indent(-4);
     }
-    this._log.info(`Plugin download complete`);
-    this._log.indent(-4);
   }
 
   /**
