@@ -93,14 +93,14 @@ export const Workspace: FC = ({ children }) => {
               body={
                 <>
                   <p>Drag a field to the configuration panel to generate a visualization.</p>
-                  <span className="vbWorkspace__container">
+                  <div className="vbWorkspace__container">
                     <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
                     <EuiIcon
                       className="vbWorkspace__handFieldSvg"
                       type={hand_field}
                       size="original"
                     />
-                  </span>
+                  </div>
                 </>
               }
             />
