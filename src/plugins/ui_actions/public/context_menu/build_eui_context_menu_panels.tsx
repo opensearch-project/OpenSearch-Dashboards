@@ -236,7 +236,7 @@ export async function buildContextMenuForActions({
     }
   }
 
-  const panelList = Object.values(panels);
+  const panelList = removePanelMetaFields(Object.values(panels));
 
   if (!additionalContextMenuGroups.length) {
     return panelList;
@@ -271,5 +271,5 @@ export async function buildContextMenuForActions({
     return newItems;
   }, []);
 
-  return removePanelMetaFields(panelList);
+  return panelList;
 }
