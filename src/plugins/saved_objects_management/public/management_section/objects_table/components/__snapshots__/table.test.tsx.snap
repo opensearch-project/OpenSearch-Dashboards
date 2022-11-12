@@ -144,6 +144,15 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "sortable": false,
           },
           Object {
+            "data-test-subj": "updated-at",
+            "dataType": "date",
+            "description": "Last update of the saved object",
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
             "actions": Array [
               Object {
                 "available": [Function],
@@ -358,6 +367,15 @@ exports[`Table should render normally 1`] = `
             "name": "Title",
             "render": [Function],
             "sortable": false,
+          },
+          Object {
+            "data-test-subj": "updated-at",
+            "dataType": "date",
+            "description": "Last update of the saved object",
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
           },
           Object {
             "actions": Array [

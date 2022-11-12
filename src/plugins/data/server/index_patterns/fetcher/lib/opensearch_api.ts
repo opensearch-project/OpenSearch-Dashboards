@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { convertOpenSearchError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 

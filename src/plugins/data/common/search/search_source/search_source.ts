@@ -282,6 +282,9 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
+      const indexPattern = this.getField('index');
+      searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
+
       response = await this.fetchSearch(searchRequest, options);
     }
 
@@ -335,9 +338,10 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
-      onResponse(searchRequest, rawResponse)
-    );
+    return search(
+      { params, indexType: searchRequest.indexType, dataSourceId: searchRequest.dataSourceId },
+      options
+    ).then(({ rawResponse }) => onResponse(searchRequest, rawResponse));
   }
 
   /**
@@ -466,7 +470,7 @@ export class SearchSource {
     }
   }
 
-  private flatten() {
+  flatten() {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};

@@ -39,17 +39,30 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),
+          namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
+      const counts = {
+        type: {},
+      };
 
       const findOptions: SavedObjectsFindOptions = {
         type: req.body.typesToInclude,
         perPage: 1000,
       };
+
+      const requestHasNamespaces =
+        Array.isArray(req.body.namespacesToInclude) && req.body.namespacesToInclude.length;
+
+      if (requestHasNamespaces) {
+        counts.namespaces = {};
+        findOptions.namespaces = req.body.namespacesToInclude;
+      }
+
       if (req.body.searchString) {
         findOptions.search = `${req.body.searchString}*`;
         findOptions.searchFields = ['title'];
@@ -57,16 +70,32 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       const objects = await findAll(client, findOptions);
 
-      const counts = objects.reduce((accum, result) => {
+      objects.forEach((result) => {
         const type = result.type;
-        accum[type] = accum[type] || 0;
-        accum[type]++;
-        return accum;
-      }, {} as Record<string, number>);
+        if (requestHasNamespaces) {
+          const resultNamespaces = (result.namespaces || []).flat();
+          resultNamespaces.forEach((ns) => {
+            if (ns === null) {
+              ns = 'default';
+            }
+            counts.namespaces[ns] = counts.namespaces[ns] || 0;
+            counts.namespaces[ns]++;
+          });
+        }
+        counts.type[type] = counts.type[type] || 0;
+        counts.type[type]++;
+      });
 
       for (const type of req.body.typesToInclude) {
-        if (!counts[type]) {
-          counts[type] = 0;
+        if (!counts.type[type]) {
+          counts.type[type] = 0;
+        }
+      }
+
+      const namespacesToInclude = req.body.namespacesToInclude || [];
+      for (const ns of namespacesToInclude) {
+        if (!counts.namespaces[ns]) {
+          counts.namespaces[ns] = 0;
         }
       }
 

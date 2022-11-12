@@ -37,8 +37,10 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  SavedObjectReference,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
@@ -56,6 +58,7 @@ export interface IndexPatternManagmentContext {
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
+  dataSourceEnabled: boolean;
 }
 
 export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<
@@ -66,4 +69,19 @@ export enum MlCardState {
   HIDDEN,
   DISABLED,
   ENABLED,
+}
+
+export type DataSourceRef = { title: string } & Pick<SavedObjectReference, 'type' | 'id'>;
+
+export interface IndexPatternTableRecord {
+  type: string;
+  id: string;
+  referenceId?: string;
+}
+
+export interface IndexPatternTableColumn<T> {
+  id: string;
+  euiColumn: Omit<EuiTableFieldDataColumnType<IndexPatternTableRecord>, 'sortable'>;
+  data?: T;
+  loadData: () => Promise<T>;
 }

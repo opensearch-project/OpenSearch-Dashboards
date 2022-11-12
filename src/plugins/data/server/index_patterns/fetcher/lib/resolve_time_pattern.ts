@@ -31,7 +31,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { LegacyAPICaller } from 'opensearch-dashboards/server';
+import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi, IndicesAliasResponse } from './opensearch_api';

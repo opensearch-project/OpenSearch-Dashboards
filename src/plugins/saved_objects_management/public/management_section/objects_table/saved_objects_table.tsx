@@ -71,10 +71,12 @@ import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
   getSavedObjectCounts,
+  SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
+  filterQuery,
   findObjects,
   findObject,
   extractExportDetails,
@@ -85,6 +87,7 @@ import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
@@ -99,6 +102,7 @@ export interface SavedObjectsTableProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
@@ -109,6 +113,7 @@ export interface SavedObjectsTableProps {
   perPageConfig: number;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  dateFormat: string;
 }
 
 export interface SavedObjectsTableState {
@@ -175,37 +180,57 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   fetchCounts = async () => {
-    const { allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
+    const { allowedTypes, namespaceRegistry } = this.props;
+    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = allowedTypes.filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+
+    const filteredCountOptions: SavedObjectCountOptions = {
+      typesToInclude: filteredTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      filteredCountOptions.namespacesToInclude = filteredNamespaces;
+    }
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
       this.props.http,
-      filteredTypes,
-      queryText
+      filteredCountOptions
     );
 
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    Object.keys(filteredSavedObjectCounts).forEach((id) => {
+    const filteredTypeCounts = filteredSavedObjectCounts.type || {};
+
+    Object.keys(filteredTypeCounts).forEach((id) => {
       // Add this type as a bulk-export option.
       exportAllOptions.push({
         id,
-        label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
+        label: `${id} (${filteredTypeCounts[id] || 0})`,
       });
 
       // Select it by default.
       exportAllSelectedOptions[id] = true;
     });
 
+    const countOptions: SavedObjectCountOptions = {
+      typesToInclude: allowedTypes,
+      searchString: queryText,
+    };
+
+    if (availableNamespaces.length) {
+      countOptions.namespacesToInclude = availableNamespaces;
+    }
+
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
+    const savedObjectCounts = await getSavedObjectCounts(this.props.http, countOptions);
 
     this.setState((state) => ({
       ...state,
@@ -225,8 +250,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes } = this.props;
-    const { queryText, visibleTypes } = parseQuery(query);
+    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
+    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -234,8 +260,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
+      type: filteredTypes,
     };
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      findOptions.namespaces = filteredNamespaces;
+    }
+
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
     }
@@ -389,6 +422,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { notifications, http } = this.props;
+
     const { queryText } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
@@ -763,17 +797,54 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, allowedTypes, applications } = this.props;
+    const { http, allowedTypes, applications, namespaceRegistry } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
     };
+    const typeCounts = savedObjectCounts.type || {};
 
     const filterOptions = allowedTypes.map((type) => ({
       value: type,
       name: type,
-      view: `${type} (${savedObjectCounts[type] || 0})`,
+      view: `${type} (${typeCounts[type] || 0})`,
     }));
+
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.typeFilterName', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: filterOptions,
+      },
+    ];
+
+    const availableNamespaces = namespaceRegistry.getAll() || [];
+    if (availableNamespaces.length) {
+      const nsCounts = savedObjectCounts.namespaces || {};
+      const nsFilterOptions = availableNamespaces.map((ns) => {
+        return {
+          name: ns.name,
+          value: ns.id,
+          view: `${ns.name} (${nsCounts[ns.id] || 0})`,
+        };
+      });
+
+      filters.push({
+        type: 'field_value_selection',
+        field: 'namespaces',
+        name:
+          namespaceRegistry.getAlias() ||
+          i18n.translate('savedObjectsManagement.objectsTable.table.namespaceFilterName', {
+            defaultMessage: 'Namespaces',
+          }),
+        multiSelect: 'or',
+        options: nsFilterOptions,
+      });
+    }
 
     return (
       <EuiPageContent horizontalPosition="center">
@@ -798,7 +869,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             selectedSavedObjects={selectedSavedObjects}
             onQueryChange={this.onQueryChange}
             onTableChange={this.onTableChange}
-            filterOptions={filterOptions}
+            filters={filters}
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
@@ -811,6 +882,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
+            dateFormat={this.props.dateFormat}
           />
         </RedirectAppLinks>
       </EuiPageContent>

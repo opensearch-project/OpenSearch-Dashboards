@@ -30,6 +30,7 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { IndexPatternManagementStart } from '../plugin';
 
 export async function getIndexPatterns(
@@ -49,18 +50,22 @@ export async function getIndexPatterns(
           .map((pattern) => {
             const id = pattern.id;
             const title = pattern.get('title');
+            const references = pattern.references;
             const isDefault = defaultIndex === id;
 
             const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
               pattern,
               isDefault
             );
+            const reference = Array.isArray(references) ? references[0] : undefined;
+            const referenceId = reference?.id;
 
             return {
               id,
               title,
               default: isDefault,
               tags,
+              referenceId,
               // the prepending of 0 at the default pattern takes care of prioritization
               // so the sorting will but the default index on top
               // or on bottom of a the table
@@ -76,6 +81,34 @@ export async function getIndexPatterns(
               return 0;
             }
           })
+      ) || []
+  );
+}
+
+export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
+  return (
+    savedObjectsClient
+      .find<DataSourceAttributes>({
+        type: 'data-source',
+        fields: ['title', 'type'],
+        perPage: 10000,
+      })
+      .then((response) =>
+        response.savedObjects
+          .map((dataSource) => {
+            const id = dataSource.id;
+            const type = dataSource.type;
+            const title = dataSource.get('title');
+
+            return {
+              id,
+              title,
+              type,
+              label: title,
+              sort: `${title}`,
+            };
+          })
+          .sort((a, b) => a.sort.localeCompare(b.sort))
       ) || []
   );
 }

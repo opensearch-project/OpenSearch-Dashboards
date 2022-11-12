@@ -74,11 +74,32 @@ const searchClient = () =>
     observer.next(successfulSearchResponse);
     observer.complete();
   }) as any;
+const dataSourceId = 'dataSourceId';
 
 const http = httpServiceMock.createStartContract();
 http.get.mockResolvedValue(successfulResolveResponse);
 
 describe('getIndices', () => {
+  it('should work in a basic case with data source', async () => {
+    const uncalledSearchClient = jest.fn();
+    const result = await getIndices({
+      http,
+      getIndexTags,
+      pattern: 'opensearch-dashboards',
+      searchClient: uncalledSearchClient,
+      dataSourceId,
+    });
+    expect(http.get).toHaveBeenCalled();
+    expect(http.get).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ query: { data_source: dataSourceId } })
+    );
+    expect(uncalledSearchClient).not.toHaveBeenCalled();
+    expect(result.length).toBe(3);
+    expect(result[0].name).toBe('f-alias');
+    expect(result[1].name).toBe('foo');
+  });
+
   it('should work in a basic case', async () => {
     const uncalledSearchClient = jest.fn();
     const result = await getIndices({
@@ -88,19 +109,24 @@ describe('getIndices', () => {
       searchClient: uncalledSearchClient,
     });
     expect(http.get).toHaveBeenCalled();
+    expect(http.get).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.not.objectContaining({ query: { data_source: dataSourceId } })
+    );
     expect(uncalledSearchClient).not.toHaveBeenCalled();
     expect(result.length).toBe(3);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
   });
 
-  it('should make two calls in cross cluser case', async () => {
+  it('should make two calls in cross cluster case', async () => {
     http.get.mockResolvedValue(successfulResolveResponse);
     const result = await getIndices({
       http,
       getIndexTags,
       pattern: '*:opensearch-dashboards',
       searchClient,
+      dataSourceId,
     });
 
     expect(http.get).toHaveBeenCalled();
@@ -112,14 +138,21 @@ describe('getIndices', () => {
   });
 
   it('should ignore ccs query-all', async () => {
-    expect((await getIndices({ http, getIndexTags, pattern: '*:', searchClient })).length).toBe(0);
+    expect(
+      (await getIndices({ http, getIndexTags, pattern: '*:', searchClient, dataSourceId })).length
+    ).toBe(0);
   });
 
   it('should ignore a single comma', async () => {
-    expect((await getIndices({ http, getIndexTags, pattern: ',', searchClient })).length).toBe(0);
-    expect((await getIndices({ http, getIndexTags, pattern: ',*', searchClient })).length).toBe(0);
     expect(
-      (await getIndices({ http, getIndexTags, pattern: ',foobar', searchClient })).length
+      (await getIndices({ http, getIndexTags, pattern: ',', searchClient, dataSourceId })).length
+    ).toBe(0);
+    expect(
+      (await getIndices({ http, getIndexTags, pattern: ',*', searchClient, dataSourceId })).length
+    ).toBe(0);
+    expect(
+      (await getIndices({ http, getIndexTags, pattern: ',foobar', searchClient, dataSourceId }))
+        .length
     ).toBe(0);
   });
 
@@ -170,6 +203,21 @@ describe('getIndices', () => {
         searchClient,
       });
       expect(result.length).toBe(0);
+    });
+
+    it('should throw error with data source use case', async () => {
+      http.get.mockImplementationOnce(() => {
+        throw new Error('Test error');
+      });
+      expect(
+        getIndices({
+          http,
+          getIndexTags,
+          pattern: 'opensearch-dashboards',
+          searchClient,
+          dataSourceId,
+        })
+      ).rejects.toThrowError();
     });
   });
 });

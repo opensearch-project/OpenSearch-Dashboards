@@ -223,4 +223,30 @@ describe('IndexPatterns', () => {
 
     expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
+
+  test('savedObjectToSpecWithDataSource', () => {
+    const savedObject = {
+      id: 'id',
+      version: 'version',
+      attributes: {
+        title: 'opensearch-dashboards-*',
+        timeFieldName: '@timestamp',
+        fields: '[]',
+        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+        fieldFormatMap: '{"field":{}}',
+        typeMeta: '{}',
+        type: '',
+      },
+      type: 'index-pattern',
+      references: [
+        {
+          id: 'id',
+          type: 'data-source',
+          name: 'dataSource',
+        },
+      ],
+    };
+
+    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  });
 });

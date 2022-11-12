@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { join } from 'path';
+import { posix } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -44,6 +44,8 @@ import {
   PluginConfigDescriptor,
 } from './types';
 import { CoreSetup, CoreStart } from '..';
+
+const { join } = posix;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating

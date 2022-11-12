@@ -40,7 +40,7 @@ import { REPO_ROOT } from '@osd/dev-utils';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 
-const DEFAULT_TEST_METADATA_PATH = join(REPO_ROOT, 'target', 'test_metadata.json');
+const DEFAULT_TEST_METADATA_PATH = resolve(REPO_ROOT, 'target', 'test_metadata.json');
 const MOCK_CONFIG_PATH = join('test', 'config.js');
 const MOCK_TEST_PATH = join('test', 'apps', 'test.js');
 const ENVS_TO_RESET = ['TEST_METADATA_PATH'];

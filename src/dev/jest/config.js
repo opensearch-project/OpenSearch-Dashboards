@@ -49,16 +49,6 @@ export default {
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
   ],
-  collectCoverageFrom: [
-    'src/plugins/**/*.{ts,tsx}',
-    '!src/plugins/**/*.d.ts',
-    'packages/osd-ui-framework/src/components/**/*.js',
-    '!packages/osd-ui-framework/src/components/index.js',
-    '!packages/osd-ui-framework/src/components/**/*/index.js',
-    'packages/osd-ui-framework/src/services/**/*.js',
-    '!packages/osd-ui-framework/src/services/index.js',
-    '!packages/osd-ui-framework/src/services/**/*/index.js',
-  ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
@@ -82,9 +72,15 @@ export default {
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
-  coverageReporters: ['html', 'text', 'text-summary'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coverageReporters: ['lcov', 'text-summary'],
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
-  modulePathIgnorePatterns: ['__fixtures__/', 'target/', '<rootDir>/src/plugins/maps_legacy'],
+  modulePathIgnorePatterns: [
+    '__fixtures__/',
+    'target/',
+    '<rootDir>/src/plugins/maps_legacy',
+    '<rootDir>/src/cli_plugin/list/.test.data.list',
+  ],
   testEnvironment: 'jest-environment-jsdom',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
@@ -100,9 +96,9 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary|d3-color))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
@@ -110,4 +106,7 @@ export default {
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
+  globals: {
+    Uint8Array: Uint8Array,
+  },
 };

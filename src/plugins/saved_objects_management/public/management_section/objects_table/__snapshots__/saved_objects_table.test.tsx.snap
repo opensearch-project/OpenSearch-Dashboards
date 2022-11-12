@@ -274,27 +274,35 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
-      filterOptions={
+      filters={
         Array [
           Object {
-            "name": "index-pattern",
-            "value": "index-pattern",
-            "view": "index-pattern (0)",
-          },
-          Object {
-            "name": "visualization",
-            "value": "visualization",
-            "view": "visualization (0)",
-          },
-          Object {
-            "name": "dashboard",
-            "value": "dashboard",
-            "view": "dashboard (0)",
-          },
-          Object {
-            "name": "search",
-            "value": "search",
-            "view": "search (0)",
+            "field": "type",
+            "multiSelect": "or",
+            "name": "Type",
+            "options": Array [
+              Object {
+                "name": "index-pattern",
+                "value": "index-pattern",
+                "view": "index-pattern (0)",
+              },
+              Object {
+                "name": "visualization",
+                "value": "visualization",
+                "view": "visualization (0)",
+              },
+              Object {
+                "name": "dashboard",
+                "value": "dashboard",
+                "view": "dashboard (0)",
+              },
+              Object {
+                "name": "search",
+                "value": "search",
+                "view": "search (0)",
+              },
+            ],
+            "type": "field_value_selection",
           },
         ]
       }

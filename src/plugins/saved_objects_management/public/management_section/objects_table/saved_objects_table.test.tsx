@@ -53,6 +53,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
+import { namespaceServiceMock } from '../../services/namespace_service.mock';
 import {
   SavedObjectsTable,
   SavedObjectsTableProps,
@@ -136,10 +137,12 @@ describe('SavedObjectsTable', () => {
     http.post.mockResolvedValue([]);
 
     getSavedObjectCountsMock.mockReturnValue({
-      'index-pattern': 0,
-      visualization: 0,
-      dashboard: 0,
-      search: 0,
+      type: {
+        'index-pattern': 0,
+        visualization: 0,
+        dashboard: 0,
+        search: 0,
+      },
     });
 
     defaultProps = {
@@ -147,6 +150,7 @@ describe('SavedObjectsTable', () => {
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
+      namespaceRegistry: namespaceServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,

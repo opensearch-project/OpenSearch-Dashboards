@@ -1,0 +1,27 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "variables";
+
+.vbLayout {
+  padding: 0;
+  display: grid;
+  grid-template:
+    "topNav topNav" min-content
+    "leftNav workspaceNav" 1fr / #{$vbLeftNavWidth} 1fr;
+  height: calc(100vh - #{$osdHeaderOffset});
+
+  &__resizeContainer {
+    min-height: 0;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &__resizeButton {
+    transform: translateX(-$euiSizeM / 2);
+  }
+}
+
+.headerIsExpanded .vbLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+}

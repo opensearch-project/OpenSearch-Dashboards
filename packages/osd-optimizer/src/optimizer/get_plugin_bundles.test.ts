@@ -31,10 +31,15 @@
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import { getPluginBundles } from './get_plugin_bundles';
+import path from 'path';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo', '<repoRoot>'));
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/output', '<outputRoot>'));
+expect.addSnapshotSerializer(createAbsolutePathSerializer(path.resolve('/output'), '<outputRoot>'));
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/outside/of/repo', '<outsideOfRepo>'));
+expect.addSnapshotSerializer(
+  createAbsolutePathSerializer(path.resolve('/outside/of/repo'), '<outsideOfRepo>')
+);
 
 it('returns a bundle for core and each plugin', () => {
   expect(

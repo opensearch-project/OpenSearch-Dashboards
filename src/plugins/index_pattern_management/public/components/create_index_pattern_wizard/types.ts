@@ -79,3 +79,17 @@ export interface Tag {
   key: string;
   color: string;
 }
+
+export interface StepInfo {
+  totalStepNumber: number;
+  currentStepNumber: number;
+}
+
+export interface DataSourceTableItem {
+  id: string;
+  type: string;
+  title: string;
+  sort: string;
+  checked?: 'on' | 'off';
+  label: string;
+}

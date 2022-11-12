@@ -1,0 +1,13 @@
+.expressions-demo {
+  .explorer_list .euiDescriptionList__title {
+    max-width: 400px;
+  }
+
+  .explorer_section_type > code {
+    margin-left: $euiSizeXS;
+  }
+
+  .playgroundRenderer {
+    height: 500px; // Visualizations require the container to have a valid width and height to render
+  }
+}

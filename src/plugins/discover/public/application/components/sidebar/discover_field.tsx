@@ -41,6 +41,10 @@ import './discover_field.scss';
 
 export interface DiscoverFieldProps {
   /**
+   * the selected columns displayed in the doc table in discover
+   */
+  columns: string[];
+  /**
    * The displayed field
    */
   field: IndexPatternField;
@@ -76,6 +80,7 @@ export interface DiscoverFieldProps {
 }
 
 export function DiscoverField({
+  columns,
   field,
   indexPattern,
   onAddField,
@@ -228,9 +233,10 @@ export function DiscoverField({
       </EuiPopoverTitle>
       {infoIsOpen && (
         <DiscoverFieldDetails
-          indexPattern={indexPattern}
-          field={field}
+          columns={columns}
           details={getDetails(field)}
+          field={field}
+          indexPattern={indexPattern}
           onAddFilter={onAddFilter}
         />
       )}

@@ -1,0 +1,45 @@
+@startuml 
+title DataSource Management in Stack Management
+
+
+:DataSource Owner: as DSO
+:DataSource User: as DSU
+
+(Stack Management Page) as (Page-Stack)
+(DataSource Management Page) as (Page-DM)
+(Add new DataSource Page) as (Page-AND)
+(DataSource Grid View) as (Component-DSG)
+(DataSource Edit Page) as (Page-DSEP)
+(Delete DataSource Button) as (Component-DelDS)
+(Export DataSource Button) as (Component-ExDS)
+(Import DataSource Button) as (Component-ImDS)
+
+
+(DataSource Name) as (Component-DSName)
+(DataSource Type) as (Component-DSType)
+(DataSource Endpoint) as (Component-DSEndpoint)
+(DataSource Credential) as (Component-DSCredential)
+
+DSO -> (Page-Stack)
+(Page-Stack) -> (Page-DM)
+(Page-DM) -> (Page-AND) : Add
+(Page-AND) -> (Page-DM) : Save
+(Page-DM) ...> (Component-DSG): View
+(Page-DM) <..> (Component-DelDS) : Delete
+(Page-DM) <..> (Component-ExDS) : Export
+(Page-DM) <..> (Component-ImDS) : Import
+
+(Component-DSG) -> (Page-DSEP): Edit
+
+(Page-DSEP) .....> (Component-DSName) : Edit
+(Page-DSEP) .....> (Component-DSType): Edit
+(Page-DSEP) .....> (Component-DSEndpoint): Edit
+(Page-DSEP) .....> (Component-DSCredential): Select
+
+note top of DSO
+  DataSource Owner who has access to manage 
+   all DataSources.
+  When security enabled, user could only see
+   DataSources added by them
+end note
+@enduml

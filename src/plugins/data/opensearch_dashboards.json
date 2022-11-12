@@ -3,11 +3,8 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "expressions",
-    "uiActions"
-  ],
-  "optionalPlugins": ["usageCollection"],
+  "requiredPlugins": ["expressions", "uiActions"],
+  "optionalPlugins": ["usageCollection", "dataSource"],
   "extraPublicDirs": ["common", "common/utils/abort_utils"],
   "requiredBundles": [
     "usageCollection",

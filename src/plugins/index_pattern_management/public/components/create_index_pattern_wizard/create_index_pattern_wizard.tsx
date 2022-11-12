@@ -47,14 +47,28 @@ import { LoadingState } from './components/loading_state';
 
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { ensureMinimumTime, getIndices } from './lib';
+import {
+  DATA_SOURCE_STEP,
+  ensureMinimumTime,
+  getCurrentStepNumber,
+  getIndices,
+  getInitialStepName,
+  getNextStep,
+  getPrevStep,
+  getTotalStepNumber,
+  INDEX_PATTERN_STEP,
+  StepType,
+  TIME_FIELD_STEP,
+} from './lib';
 import { IndexPatternCreationConfig } from '../..';
-import { IndexPatternManagmentContextValue } from '../../types';
+import { DataSourceRef, IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
+import { StepDataSource } from './components/step_data_source';
+import { ExperimentalCallout } from '../experimental_callout';
 
 interface CreateIndexPatternWizardState {
-  step: number;
+  step: StepType;
   indexPattern: string;
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
@@ -63,6 +77,7 @@ interface CreateIndexPatternWizardState {
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
   docLinks: DocLinksStart;
+  dataSourceRef?: DataSourceRef;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -73,6 +88,9 @@ export class CreateIndexPatternWizard extends Component<
 
   public readonly context!: IndexPatternManagmentContextValue;
 
+  dataSourceEnabled: boolean;
+  totalSteps: number;
+
   constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -80,12 +98,16 @@ export class CreateIndexPatternWizard extends Component<
 
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
 
+    this.dataSourceEnabled = context.services.dataSourceEnabled;
+    this.totalSteps = getTotalStepNumber(this.dataSourceEnabled);
+    const isInitiallyLoadingIndices = !this.dataSourceEnabled;
+
     this.state = {
-      step: 1,
+      step: getInitialStepName(this.dataSourceEnabled),
       indexPattern: '',
       allIndices: [],
       remoteClustersExist: false,
-      isInitiallyLoadingIndices: true,
+      isInitiallyLoadingIndices,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -93,7 +115,9 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   async UNSAFE_componentWillMount() {
-    this.fetchData();
+    if (!this.dataSourceEnabled) {
+      this.fetchData();
+    }
   }
 
   catchAndWarn = async (
@@ -111,6 +135,7 @@ export class CreateIndexPatternWizard extends Component<
             id: errorMsg.props.id,
             color: 'warning',
             iconType: 'alert',
+            text: errors.body.message,
           },
         ]),
       }));
@@ -120,6 +145,8 @@ export class CreateIndexPatternWizard extends Component<
 
   fetchData = async () => {
     const { http } = this.context.services;
+    const { dataSourceRef } = this.state;
+    const dataSourceId = dataSourceRef?.id;
     const getIndexTags = (indexName: string) =>
       this.state.indexPatternCreationType.getIndexTags(indexName);
     const searchClient = this.context.services.data.search.search;
@@ -141,7 +168,7 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices({ http, getIndexTags, pattern: '*', searchClient }),
+        getIndices({ http, getIndexTags, pattern: '*', searchClient, dataSourceId }),
 
         [],
         indicesFailMsg
@@ -153,7 +180,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices({ http, getIndexTags, pattern: '*:*', searchClient }),
+      getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId }),
 
       ['a'],
       clustersFailMsg
@@ -165,13 +192,14 @@ export class CreateIndexPatternWizard extends Component<
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     let emptyPattern: IndexPattern;
     const { history } = this.props;
-    const { indexPattern } = this.state;
+    const { indexPattern, dataSourceRef } = this.state;
 
     try {
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
         timeFieldName,
+        dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });
     } catch (err) {
@@ -209,12 +237,28 @@ export class CreateIndexPatternWizard extends Component<
     history.push(`/patterns/${emptyPattern.id}`);
   };
 
-  goToTimeFieldStep = (indexPattern: string, selectedTimeField?: string) => {
-    this.setState({ step: 2, indexPattern, selectedTimeField });
+  goToNextFromIndexPattern = (indexPattern: string, selectedTimeField?: string) => {
+    this.setState({ indexPattern, selectedTimeField });
+    this.goToNextStep();
   };
 
-  goToIndexPatternStep = () => {
-    this.setState({ step: 1 });
+  goToNextFromDataSource = (dataSourceRef: DataSourceRef) => {
+    this.setState({ isInitiallyLoadingIndices: true, dataSourceRef }, async () => {
+      this.fetchData();
+      this.goToNextStep();
+    });
+  };
+
+  goToNextStep = () => {
+    this.setState((prevState) => ({
+      step: getNextStep(prevState.step, this.dataSourceEnabled)!,
+    }));
+  };
+
+  goToPreviousStep = () => {
+    this.setState((prevState) => ({
+      step: getPrevStep(prevState.step, this.dataSourceEnabled)!,
+    }));
   };
 
   renderHeader() {
@@ -230,7 +274,12 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   renderContent() {
-    const { allIndices, isInitiallyLoadingIndices, step, indexPattern } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef } = this.state;
+
+    const stepInfo = {
+      totalStepNumber: this.totalSteps,
+      currentStepNumber: getCurrentStepNumber(step, this.dataSourceEnabled),
+    };
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
@@ -238,7 +287,17 @@ export class CreateIndexPatternWizard extends Component<
 
     const header = this.renderHeader();
 
-    if (step === 1) {
+    if (step === DATA_SOURCE_STEP) {
+      return (
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepDataSource goToNextStep={this.goToNextFromDataSource} stepInfo={stepInfo} />
+        </EuiPageContent>
+      );
+    }
+
+    if (step === INDEX_PATTERN_STEP) {
       const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
@@ -250,26 +309,33 @@ export class CreateIndexPatternWizard extends Component<
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
             indexPatternCreationType={this.state.indexPatternCreationType}
-            goToNextStep={this.goToTimeFieldStep}
+            goToPreviousStep={this.goToPreviousStep}
+            goToNextStep={this.goToNextFromIndexPattern}
             showSystemIndices={
-              this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
+              this.state.indexPatternCreationType.getShowSystemIndices() &&
+              this.state.step === INDEX_PATTERN_STEP
             }
+            dataSourceRef={dataSourceRef}
+            stepInfo={stepInfo}
+            catchAndWarn={this.catchAndWarn}
           />
         </EuiPageContent>
       );
     }
 
-    if (step === 2) {
+    if (step === TIME_FIELD_STEP) {
       return (
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
           <StepTimeField
             indexPattern={indexPattern}
-            goToPreviousStep={this.goToIndexPatternStep}
+            goToPreviousStep={this.goToPreviousStep}
             createIndexPattern={this.createIndexPattern}
             indexPatternCreationType={this.state.indexPatternCreationType}
             selectedTimeField={this.state.selectedTimeField}
+            dataSourceRef={dataSourceRef}
+            stepInfo={stepInfo}
           />
         </EuiPageContent>
       );
@@ -289,6 +355,7 @@ export class CreateIndexPatternWizard extends Component<
 
     return (
       <>
+        {this.dataSourceEnabled ? <ExperimentalCallout /> : null}
         {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}

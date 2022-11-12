@@ -1,0 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.vbDisabledVisualization {
+  width: 100%;
+  display: grid;
+  grid-gap: $euiSize;
+  place-content: center;
+  place-items: center;
+  text-align: center;
+}

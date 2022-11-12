@@ -300,6 +300,7 @@ export class Router implements IRouter {
       if (LegacyOpenSearchErrorHelpers.isNotAuthorizedError(e)) {
         return e;
       }
+
       return hapiResponseAdapter.toInternalError();
     }
   }

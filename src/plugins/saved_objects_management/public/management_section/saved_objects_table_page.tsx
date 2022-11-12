@@ -47,6 +47,7 @@ const SavedObjectsTablePage = ({
   serviceRegistry,
   actionRegistry,
   columnRegistry,
+  namespaceRegistry,
   setBreadcrumbs,
 }: {
   coreStart: CoreStart;
@@ -55,10 +56,12 @@ const SavedObjectsTablePage = ({
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+  const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
 
   useEffect(() => {
     setBreadcrumbs([
@@ -77,6 +80,7 @@ const SavedObjectsTablePage = ({
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
       columnRegistry={columnRegistry}
+      namespaceRegistry={namespaceRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       search={dataStart.search}
@@ -93,6 +97,7 @@ const SavedObjectsTablePage = ({
           );
         }
       }}
+      dateFormat={dateFormat}
       canGoInApp={(savedObject) => {
         const { inAppUrl } = savedObject.meta;
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;

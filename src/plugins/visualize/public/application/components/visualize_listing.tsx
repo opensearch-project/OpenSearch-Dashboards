@@ -109,7 +109,11 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history), [application, history]);
+  const tableColumns = useMemo(() => getTableColumns(application, history, uiSettings), [
+    application,
+    history,
+    uiSettings,
+  ]);
 
   const fetchItems = useCallback(
     (filter) => {
@@ -119,7 +123,9 @@ export const VisualizeListing = () => {
         .then(({ total, hits }: { total: number; hits: object[] }) => ({
           total,
           hits: hits.filter(
-            (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
+            (result: any) =>
+              isLabsEnabled ||
+              (result.type?.stage !== 'experimental' && result.stage !== 'experimental')
           ),
         }));
     },

@@ -33,7 +33,7 @@ import { promisify } from 'util';
 
 import del from 'del';
 
-import { BuildContext } from '../build_context';
+import { BuildContext } from '../contexts';
 
 const asyncMkdir = promisify(Fs.mkdir);
 

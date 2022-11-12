@@ -33,6 +33,7 @@ import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@opensearch-project/opensearch';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
 import {
@@ -42,11 +43,13 @@ import {
   getShardTimeout,
   shimAbortSignal,
 } from '..';
+import { decideClient } from './decide_client';
 
 export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  dataSource?: DataSourcePluginSetup
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
@@ -70,10 +73,9 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const promise = shimAbortSignal(
-          context.core.opensearch.client.asCurrentUser.search(params),
-          options?.abortSignal
-        );
+        const client = await decideClient(context, request);
+        const promise = shimAbortSignal(client.search(params), options?.abortSignal);
+
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
         if (usage) usage.trackSuccess(rawResponse.took);
@@ -88,6 +90,10 @@ export const opensearchSearchStrategyProvider = (
         };
       } catch (e) {
         if (usage) usage.trackError();
+
+        if (dataSource && request.dataSourceId) {
+          throw dataSource.createDataSourceError(e);
+        }
         throw e;
       }
     },

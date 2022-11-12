@@ -29,7 +29,11 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
+import {
+  HttpServiceSetup,
+  LegacyAPICaller,
+  RequestHandlerContext,
+} from 'opensearch-dashboards/server';
 import { IndexPatternsFetcher } from './fetcher';
 
 export function registerRoutes(http: HttpServiceSetup) {
@@ -53,11 +57,12 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.opensearch.legacy.client;
+      const callAsCurrentUser = await decideClient(context, request);
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
@@ -112,11 +117,13 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const { callAsCurrentUser } = context.core.opensearch.legacy.client;
+      const callAsCurrentUser = await decideClient(context, request);
+
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
@@ -147,3 +154,13 @@ export function registerRoutes(http: HttpServiceSetup) {
     }
   );
 }
+
+const decideClient = async (
+  context: RequestHandlerContext,
+  request: any
+): Promise<LegacyAPICaller> => {
+  const dataSourceId = request.query.data_source;
+  return dataSourceId
+    ? (context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI as LegacyAPICaller)
+    : context.core.opensearch.legacy.client.callAsCurrentUser;
+};

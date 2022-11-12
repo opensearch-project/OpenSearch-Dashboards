@@ -90,6 +90,24 @@ function create(id: string) {
   });
 }
 
+function createWithDataSource(id: string) {
+  const {
+    type,
+    version,
+    attributes: { timeFieldName, fields, title },
+    reference,
+  } = stubbedSavedObjectIndexPattern(id, true);
+
+  const dataSourceRef = { id: reference[0].id, type: reference[0].type };
+  return new IndexPattern({
+    spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
+    savedObjectsClient: {} as any,
+    fieldFormats: fieldFormatsMock,
+    shortDotsEnable: false,
+    metaFields: [],
+  });
+}
+
 describe('IndexPattern', () => {
   let indexPattern: IndexPattern;
 
@@ -249,6 +267,56 @@ describe('IndexPattern', () => {
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
       expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
+    });
+  });
+});
+
+describe('IndexPatternWithDataSource', () => {
+  let indexPattern: IndexPattern;
+
+  // create an indexPattern instance for each test
+  beforeEach(() => {
+    indexPattern = createWithDataSource('test-pattern');
+  });
+
+  describe('toSpec', () => {
+    test('should match snapshot', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can restore from spec', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      const spec = indexPattern.toSpec();
+      const restoredPattern = new IndexPattern({
+        spec,
+        savedObjectsClient: {} as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+      expect(restoredPattern.id).toEqual(indexPattern.id);
+      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
+      expect(restoredPattern.dataSourceRef).toEqual(indexPattern.dataSourceRef);
+    });
+  });
+
+  describe('getSaveObjectReference', () => {
+    test('should get index pattern saved object reference', function () {
+      expect(indexPattern.getSaveObjectReference()[0]?.id).toEqual(indexPattern.dataSourceRef?.id);
+      expect(indexPattern.getSaveObjectReference()[0]?.type).toEqual(
+        indexPattern.dataSourceRef?.type
+      );
+      expect(indexPattern.getSaveObjectReference()[0]?.name).toEqual('dataSource');
     });
   });
 });

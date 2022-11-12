@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
-import { WizardStart } from '../../wizard/public';
+import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
@@ -45,6 +45,9 @@ import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementNamespaceService,
+  SavedObjectsManagementNamespaceServiceSetup,
+  SavedObjectsManagementNamespaceServiceStart,
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
@@ -53,12 +56,14 @@ import { registerServices } from './register_services';
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
+  namespaces: SavedObjectsManagementNamespaceServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
   columns: SavedObjectsManagementColumnServiceStart;
+  namespaces: SavedObjectsManagementNamespaceServiceStart;
 }
 
 export interface SetupDependencies {
@@ -71,7 +76,7 @@ export interface StartDependencies {
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
   discover?: DiscoverStart;
-  wizard?: WizardStart;
+  visBuilder?: VisBuilderStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -84,6 +89,7 @@ export class SavedObjectsManagementPlugin
     > {
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
+  private namespaceService = new SavedObjectsManagementNamespaceService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
@@ -92,6 +98,7 @@ export class SavedObjectsManagementPlugin
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
+    const namespaceSetup = this.namespaceService.setup();
 
     if (home) {
       home.featureCatalogue.register({
@@ -133,6 +140,7 @@ export class SavedObjectsManagementPlugin
     return {
       actions: actionSetup,
       columns: columnSetup,
+      namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
     };
   }
@@ -140,10 +148,12 @@ export class SavedObjectsManagementPlugin
   public start(core: CoreStart, { data }: StartDependencies) {
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
+    const namespaceStart = this.namespaceService.start();
 
     return {
       actions: actionStart,
       columns: columnStart,
+      namespaces: namespaceStart,
     };
   }
 }

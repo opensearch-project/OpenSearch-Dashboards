@@ -36,6 +36,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
+import moment from 'moment';
+import { IUiSettingsClient } from 'src/core/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -58,7 +60,10 @@ const getBadge = (item: VisualizationListItem) => {
     return (
       <EuiBetaBadge
         className="visListingTable__experimentalIcon"
-        label="E"
+        label="Lab"
+        size="s"
+        color="subdued"
+        iconType={'beaker'}
         title={i18n.translate('visualize.listing.experimentalTitle', {
           defaultMessage: 'Experimental',
         })}
@@ -91,7 +96,11 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
   return icon;
 };
 
-export const getTableColumns = (application: ApplicationStart, history: History) => [
+export const getTableColumns = (
+  application: ApplicationStart,
+  history: History,
+  uiSettings: IUiSettingsClient
+) => [
   {
     field: 'title',
     name: i18n.translate('visualize.listing.table.titleColumnName', {
@@ -102,13 +111,7 @@ export const getTableColumns = (application: ApplicationStart, history: History)
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
         <EuiLink
-          onClick={() => {
-            if (editApp) {
-              application.navigateToApp(editApp, { path: editUrl });
-            } else if (editUrl) {
-              history.push(editUrl);
-            }
-          }}
+          href={editApp ? application.getUrlForApp(editApp, { path: editUrl }) : `#${editUrl}`}
           data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
         >
           {field}
@@ -143,6 +146,20 @@ export const getTableColumns = (application: ApplicationStart, history: History)
     }),
     sortable: true,
     render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
+  },
+  {
+    field: `updated_at`,
+    name: i18n.translate('visualize.listing.table.columnUpdatedAtName', {
+      defaultMessage: 'Last updated',
+    }),
+    dataType: 'date',
+    sortable: true,
+    description: i18n.translate('visualize.listing.table.columnUpdatedAtDescription', {
+      defaultMessage: 'Last update of the saved object',
+    }),
+    ['data-test-subj']: 'updated-at',
+    render: (updatedAt: string) =>
+      updatedAt && moment(updatedAt).format(uiSettings.get('dateFormat')),
   },
 ];
 

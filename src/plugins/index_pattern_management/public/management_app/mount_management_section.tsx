@@ -36,7 +36,6 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
@@ -65,10 +64,11 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, dataSource },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const dataSourceEnabled = !!dataSource;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -87,6 +87,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    dataSourceEnabled,
   };
 
   ReactDOM.render(

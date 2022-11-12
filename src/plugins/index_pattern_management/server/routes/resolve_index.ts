@@ -29,7 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter, LegacyAPICaller } from 'src/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
@@ -49,6 +49,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
               schema.literal('none'),
             ])
           ),
+          data_source: schema.maybe(schema.string()),
         }),
       },
     },
@@ -56,16 +57,31 @@ export function registerResolveIndexRoute(router: IRouter): void {
       const queryString = req.query.expand_wildcards
         ? { expand_wildcards: req.query.expand_wildcards }
         : null;
-      const result = await context.core.opensearch.legacy.client.callAsCurrentUser(
-        'transport.request',
-        {
+
+      const dataSourceId = req.query.data_source;
+      const caller = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+      try {
+        const result = await caller('transport.request', {
           method: 'GET',
           path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
             queryString ? '?' + new URLSearchParams(queryString).toString() : ''
           }`,
-        }
-      );
-      return res.ok({ body: result });
+        });
+        return res.ok({ body: result });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
     }
   );
 }

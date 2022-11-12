@@ -29,7 +29,7 @@
  */
 
 import { join } from 'path';
-import { writeFileSync, mkdirSync } from 'fs';
+import { mkdir, writeFile } from 'fs/promises';
 
 import sinon from 'sinon';
 import glob from 'glob-all';
@@ -37,6 +37,7 @@ import del from 'del';
 
 import { Logger } from '../lib/logger';
 import { remove } from './remove';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 describe('opensearchDashboards cli', function () {
   describe('plugin remover', function () {
@@ -46,20 +47,20 @@ describe('opensearchDashboards cli', function () {
 
     const settings = { pluginDir };
 
-    beforeEach(function () {
+    beforeEach(async () => {
       processExitStub = sinon.stub(process, 'exit');
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del.sync(pluginDir);
-      mkdirSync(pluginDir, { recursive: true });
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
+      await mkdir(pluginDir, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(async () => {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      del.sync(pluginDir);
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
     });
 
     it('throw an error if the plugin is not installed.', function () {
@@ -71,18 +72,18 @@ describe('opensearchDashboards cli', function () {
       expect(process.exit.called).toBe(true);
     });
 
-    it('throw an error if the specified plugin is not a folder.', function () {
-      writeFileSync(join(pluginDir, 'foo'), 'This is a file, and not a folder.');
+    it('throw an error if the specified plugin is not a folder.', async () => {
+      await writeFile(join(pluginDir, 'foo'), 'This is a file, and not a folder.');
 
       remove(settings, logger);
       expect(logger.error.firstCall.args[0]).toMatch(/not a plugin/);
       expect(process.exit.called).toBe(true);
     });
 
-    it('delete the specified folder.', function () {
+    it('delete the specified folder.', async () => {
       settings.pluginPath = join(pluginDir, 'foo');
-      mkdirSync(join(pluginDir, 'foo'), { recursive: true });
-      mkdirSync(join(pluginDir, 'bar'), { recursive: true });
+      await mkdir(join(pluginDir, 'foo'), { recursive: true });
+      await mkdir(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
 

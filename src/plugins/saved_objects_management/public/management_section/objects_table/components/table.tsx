@@ -30,6 +30,7 @@
 
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
+import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -60,11 +61,12 @@ export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
-  filterOptions: any[];
+  filters: any[];
   canDelete: boolean;
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
@@ -75,11 +77,12 @@ export interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any) => void;
+  onQueryChange: (query: any, filterFields: string[]) => void;
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  dateFormat: string;
 }
 
 interface TableState {
@@ -161,7 +164,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
-      filterOptions,
+      filters,
       selectionConfig: selection,
       onDelete,
       onActionRefresh,
@@ -172,6 +175,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      namespaceRegistry,
+      dateFormat,
     } = this.props;
 
     const pagination = {
@@ -180,26 +185,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       totalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
-
-    const filters = [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: i18n.translate('savedObjectsManagement.objectsTable.table.typeFilterName', {
-          defaultMessage: 'Type',
-        }),
-        multiSelect: 'or',
-        options: filterOptions,
-      },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
-    ];
 
     const columns = [
       {
@@ -250,6 +235,20 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      {
+        field: `updated_at`,
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnUpdatedAtName', {
+          defaultMessage: 'Last updated',
+        }),
+        dataType: 'date',
+        sortable: true,
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.table.columnUpdatedAtDescription',
+          { defaultMessage: 'Last update of the saved object' }
+        ),
+        'data-test-subj': 'updated-at',
+        render: (updatedAt: string) => updatedAt && moment(updatedAt).format(dateFormat),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...columnRegistry.getAll().map((column) => {
         return {
