@@ -33,7 +33,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
 import { uiToReactComponent } from '../../../opensearch_dashboards_react/public';
-import { Action, ActionExecutionContext } from '../actions';
+import { Action, ActionExecutionContext, ActionContextMenuData } from '../actions';
 import { Trigger } from '../triggers';
 import { BaseContext } from '../types';
 
@@ -152,18 +152,20 @@ export async function buildContextMenuForActions({
       items: [],
     },
   };
-  const additionalContextMenuGroups = [];
+  const additionalContextMenuDataGroups: ActionContextMenuData[] = [];
   const promises = actions.map(async (item) => {
     const { action } = item;
-    const contextMenuData = action.contextMenuData || action.definition?.contextMenuData;
+    // For some actions, the data is contained within action.definition
+    const contextMenuData: ActionContextMenuData =
+      action.contextMenuData || action.definition?.contextMenuData;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
 
     if (!isCompatible) return;
 
-    // Exit early if contextMenuData provided, which will handle all menu data
+    // Exit early if contextMenuData provided, which will handle all menu data for this action
     if (contextMenuData) {
-      additionalContextMenuGroups.push(contextMenuData);
+      additionalContextMenuDataGroups.push(contextMenuData);
       return;
     }
 
@@ -236,40 +238,53 @@ export async function buildContextMenuForActions({
     }
   }
 
+  // This holds all panels for the final context menu
   const panelList = removePanelMetaFields(Object.values(panels));
 
-  if (!additionalContextMenuGroups.length) {
+  if (!additionalContextMenuDataGroups.length) {
     return panelList;
   }
 
   // Add group for existing panel of items
-  additionalContextMenuGroups.push({ items: panelList[0].items, order: 0 });
+  additionalContextMenuDataGroups.push({
+    additionalFirstPanelItems: panelList[0].items,
+    additionalFirstPanelItemsOrder: 0,
+  });
 
   // Sort groups based on order...higher order goes first
-  additionalContextMenuGroups.sort((a, b) => (b.order || 0) - (a.order || 0));
+  additionalContextMenuDataGroups.sort(
+    (a, b) => (b.additionalFirstPanelItemsOrder || 0) - (a.additionalFirstPanelItemsOrder || 0)
+  );
 
   // For each grooup...add panels and add items and insert separators as needed
-  panelList[0].items = additionalContextMenuGroups.reduce((newItems, data, index) => {
-    const { items = [], panels: additionalPanels = [], order = 0 } = data;
+  panelList[0].items = additionalContextMenuDataGroups.reduce(
+    (newItems: any[], data: ActionContextMenuData, index) => {
+      const {
+        additionalFirstPanelItems = [],
+        additionalPanels = [],
+        additionalFirstPanelItemsOrder = 0,
+      } = data;
 
-    // Add panels
-    panelList.push(...additionalPanels);
+      // Add panels
+      panelList.push(...additionalPanels);
 
-    // If order is below 0, add separator before items
-    if (order < 0) {
-      newItems.push({ isSeparator: true, key: `sep-before-${index}` });
-    }
+      // If order is below 0, add separator before items
+      if (additionalFirstPanelItemsOrder < 0) {
+        newItems.push({ isSeparator: true, key: `sep-before-${index}` });
+      }
 
-    // Add items
-    newItems.push(...items);
+      // Add items
+      newItems.push(...additionalFirstPanelItems);
 
-    // If order is above 0, add separator after
-    if (order > 0) {
-      newItems.push({ isSeparator: true, key: `sep-after-${index}` });
-    }
+      // If order is above 0, add separator after
+      if (additionalFirstPanelItemsOrder > 0) {
+        newItems.push({ isSeparator: true, key: `sep-after-${index}` });
+      }
 
-    return newItems;
-  }, []);
+      return newItems;
+    },
+    []
+  );
 
   return panelList;
 }

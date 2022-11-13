@@ -44,7 +44,7 @@ export const PanelWithContextMenuData: React.FC = () => {
   const panel2Id = uuid();
   const panel3Id = uuid();
   const contextMenuData: Action['contextMenuData'] = {
-    panels: [
+    additionalPanels: [
       {
         id: panel1Id,
         title: 'New panel 1',
@@ -78,14 +78,14 @@ export const PanelWithContextMenuData: React.FC = () => {
         ],
       },
     ],
-    items: [
+    additionalFirstPanelItems: [
       {
         name: 'Nested panels',
         icon: 'bell',
         panel: panel1Id,
       },
     ],
-    order: 100,
+    additionalFirstPanelItemsOrder: 100,
   };
   const actions = [
     sampleAction('test-1', 100, 'Edit visualization', 'pencil', undefined, contextMenuData),
@@ -93,7 +93,7 @@ export const PanelWithContextMenuData: React.FC = () => {
 
   const panels = useAsync(() =>
     buildContextMenuForActions({
-      actions: actions.map((action) => ({ action, context, trigger })),
+      actions: actions.map((action: Action) => ({ action, context, trigger })),
     })
   );
 

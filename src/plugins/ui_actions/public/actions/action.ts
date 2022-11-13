@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { ReactElement } from 'react';
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -68,9 +67,10 @@ export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | ActionExecutionContext<Context>;
 
 export interface ActionContextMenuData {
-  items?: ReactElement[];
-  panels?: EuiContextMenuPanelDescriptor[];
-  order?: number;
+  // Items can be React elements or objects
+  additionalFirstPanelItems?: any[];
+  additionalFirstPanelItemsOrder?: number;
+  additionalPanels?: EuiContextMenuPanelDescriptor[];
 }
 
 export interface Action<Context extends BaseContext = {}, T = ActionType>

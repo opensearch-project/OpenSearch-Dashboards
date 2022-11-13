@@ -46,7 +46,6 @@ export const ContextMenuExamples: React.FC = () => {
         Below examples show how context menu panels look with varying number of actions and how the
         actions can be grouped into different panels using <EuiCode>grouping</EuiCode> field.
       </p>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelView />
@@ -58,7 +57,6 @@ export const ContextMenuExamples: React.FC = () => {
           <PanelViewWithSharingLong />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelEdit />
