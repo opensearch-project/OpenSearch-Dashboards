@@ -348,6 +348,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         trigger: contextMenuTrigger,
       })),
       closeMenu: this.closeMyContextMenuPanel,
+      overlays: this.props.overlays,
     });
   };
 }

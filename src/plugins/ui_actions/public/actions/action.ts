@@ -30,9 +30,11 @@
 
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
+import { CoreStart } from '../../../../core/public';
 
 export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
 export type ActionDefinitionByType<T extends ActionType> = ActionDefinition<
@@ -64,6 +66,23 @@ export type ActionExecutionContext<Context extends BaseContext = BaseContext> = 
 export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | Context
   | ActionExecutionContext<Context>;
+
+export interface ActionContextMenuData {
+  // Items can be React elements or objects
+  additionalFirstPanelItems?: any[];
+  additionalFirstPanelItemsOrder?: number;
+  additionalPanels?: EuiContextMenuPanelDescriptor[];
+}
+
+export interface GetActionContextMenuDataArgs {
+  context: ActionExecutionContext;
+  overlays?: CoreStart['overlays'];
+  closeMenu?: () => void;
+}
+
+export type GetContextMenuDataType = (
+  options: GetActionContextMenuDataArgs
+) => ActionContextMenuData;
 
 export interface Action<Context extends BaseContext = {}, T = ActionType>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -124,6 +143,13 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * false by default.
    */
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
+
+  /**
+   * This data will provide an order, items and panels for the dashboard context
+   * menu. If provided, the context menu will not add the display name and
+   * execution to the context menu.
+   */
+  getContextMenuData?: GetContextMenuDataType;
 }
 
 /**

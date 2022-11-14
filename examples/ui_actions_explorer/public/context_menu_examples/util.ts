@@ -36,7 +36,8 @@ export const sampleAction = (
   order: number,
   name: string,
   icon: EuiIconType,
-  grouping?: Action['grouping']
+  grouping?: Action['grouping'],
+  getContextMenuData?: Action['getContextMenuData']
 ): Action => {
   return {
     id,
@@ -47,5 +48,6 @@ export const sampleAction = (
     isCompatible: async () => true,
     execute: async () => {},
     grouping,
+    getContextMenuData,
   };
 };

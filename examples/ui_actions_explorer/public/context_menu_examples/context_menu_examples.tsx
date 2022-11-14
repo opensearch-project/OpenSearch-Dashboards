@@ -29,13 +29,14 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { PanelView } from './panel_view';
 import { PanelViewWithSharing } from './panel_view_with_sharing';
 import { PanelViewWithSharingLong } from './panel_view_with_sharing_long';
 import { PanelEdit } from './panel_edit';
 import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
 import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
+import { PanelWithContextMenuData } from './panel_with_context_menu_data';
 
 export const ContextMenuExamples: React.FC = () => {
   return (
@@ -45,7 +46,6 @@ export const ContextMenuExamples: React.FC = () => {
         Below examples show how context menu panels look with varying number of actions and how the
         actions can be grouped into different panels using <EuiCode>grouping</EuiCode> field.
       </p>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelView />
@@ -57,7 +57,6 @@ export const ContextMenuExamples: React.FC = () => {
           <PanelViewWithSharingLong />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelEdit />
@@ -67,6 +66,21 @@ export const ContextMenuExamples: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <PanelEditWithDrilldownsAndContextActions />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <p>
+        A context menu consists of an initial panel (with items), and other panels that are linked
+        to. The following example shows a way of adding panels as well as adding items to the first
+        panel. The following example shows deeply nested items and panels by directly adding panels
+        and items to the context menu using the contextMenuData property on an action. In addition
+        to panels and items properties, an order property is also available, which will allow the
+        items on the initial panel to be grouped and automatically separated by a divider. Note: If
+        contextMenuData is provided, the regular action item is ignored.
+      </p>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PanelWithContextMenuData />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>

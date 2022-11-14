@@ -32,8 +32,14 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
+import { CoreStart } from '../../../../core/public';
 import { uiToReactComponent } from '../../../opensearch_dashboards_react/public';
-import { Action, ActionExecutionContext } from '../actions';
+import {
+  Action,
+  ActionExecutionContext,
+  ActionContextMenuData,
+  GetContextMenuDataType,
+} from '../actions';
 import { Trigger } from '../triggers';
 import { BaseContext } from '../types';
 
@@ -135,6 +141,7 @@ export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
   closeMenu?: () => void;
+  overlays?: CoreStart['overlays'];
 }
 
 /**
@@ -144,6 +151,7 @@ export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
   closeMenu = () => {},
+  overlays,
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
@@ -152,11 +160,23 @@ export async function buildContextMenuForActions({
       items: [],
     },
   };
+  const additionalContextMenuDataGroups: ActionContextMenuData[] = [];
   const promises = actions.map(async (item) => {
     const { action } = item;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
+    // For some actions, the data is contained within action.definition
+    const getContextMenuData: GetContextMenuDataType =
+      action.getContextMenuData || action.definition?.getContextMenuData;
+
     if (!isCompatible) return;
+
+    // Exit early if contextMenuData provided, which will handle all menu data for this action
+    if (getContextMenuData) {
+      additionalContextMenuDataGroups.push(getContextMenuData({ context, overlays, closeMenu }));
+      return;
+    }
+
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping) {
@@ -226,6 +246,53 @@ export async function buildContextMenuForActions({
     }
   }
 
-  const panelList = Object.values(panels);
-  return removePanelMetaFields(panelList);
+  // This holds all panels for the final context menu
+  const panelList = removePanelMetaFields(Object.values(panels));
+
+  if (!additionalContextMenuDataGroups.length) {
+    return panelList;
+  }
+
+  // Add group for existing panel of items
+  additionalContextMenuDataGroups.push({
+    additionalFirstPanelItems: panelList[0].items,
+    additionalFirstPanelItemsOrder: 0,
+  });
+
+  // Sort groups based on order...higher order goes first
+  additionalContextMenuDataGroups.sort(
+    (a, b) => (b.additionalFirstPanelItemsOrder || 0) - (a.additionalFirstPanelItemsOrder || 0)
+  );
+
+  // For each grooup...add panels and add items and insert separators as needed
+  panelList[0].items = additionalContextMenuDataGroups.reduce(
+    (newItems: any[], data: ActionContextMenuData, index) => {
+      const {
+        additionalFirstPanelItems = [],
+        additionalPanels = [],
+        additionalFirstPanelItemsOrder = 0,
+      } = data;
+
+      // Add panels
+      panelList.push(...additionalPanels);
+
+      // If order is below 0, add separator before items
+      if (additionalFirstPanelItemsOrder < 0) {
+        newItems.push({ isSeparator: true, key: `sep-before-${index}` });
+      }
+
+      // Add items
+      newItems.push(...additionalFirstPanelItems);
+
+      // If order is above 0, add separator after
+      if (additionalFirstPanelItemsOrder > 0) {
+        newItems.push({ isSeparator: true, key: `sep-after-${index}` });
+      }
+
+      return newItems;
+    },
+    []
+  );
+
+  return panelList;
 }
