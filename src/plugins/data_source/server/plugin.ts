@@ -91,7 +91,10 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     core.auditTrail.register(auditorFactory);
     const auditTrailPromise = core.getStartServices().then(([coreStart]) => coreStart.auditTrail);
 
-    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
+    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(
+      config,
+      core
+    );
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',

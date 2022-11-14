@@ -38,3 +38,4 @@ export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
 export { getLocalLicense } from './get_local_license';
 export { getClusterUuids } from './get_cluster_stats';
 export { registerCollection } from './register_collection';
+export { getClusterInfo } from './get_cluster_info';
