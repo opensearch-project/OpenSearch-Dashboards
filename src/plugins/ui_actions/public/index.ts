@@ -77,4 +77,7 @@ export {
   ActionDefinitionByType,
   ActionExecutionContext,
   ActionExecutionMeta,
+  ActionContextMenuData,
+  GetActionContextMenuDataArgs,
+  GetContextMenuDataType,
 } from './actions';
