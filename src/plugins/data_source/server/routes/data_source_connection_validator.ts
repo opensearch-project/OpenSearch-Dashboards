@@ -12,7 +12,8 @@ export class DataSourceConnectionValidator {
 
   async validate() {
     try {
-      return await getClusterInfo(this.callDataCluster);
+      const req = await getClusterInfo(this.callDataCluster);
+      return req;
     } catch (e) {
       throw createDataSourceError(e);
     }
