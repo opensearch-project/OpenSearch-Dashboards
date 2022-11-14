@@ -5,6 +5,7 @@
 
 import {
   Auditor,
+  CoreSetup,
   LegacyCallAPIOptions,
   Logger,
   OpenSearchClient,
@@ -13,6 +14,7 @@ import { DataSourcePluginConfigType } from '../config';
 import { configureClient, OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
 import { DataSourceClientParams } from './types';
+import { registerTestConnection } from './routes/test_connection';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
@@ -37,7 +39,10 @@ export class DataSourceService {
     this.legacyClientPool = new OpenSearchClientPool(this.legacyLogger);
   }
 
-  async setup(config: DataSourcePluginConfigType): Promise<DataSourceServiceSetup> {
+  async setup(
+    config: DataSourcePluginConfigType,
+    core: CoreSetup
+  ): Promise<DataSourceServiceSetup> {
     const opensearchClientPoolSetup = await this.openSearchClientPool.setup(config);
     const legacyClientPoolSetup = await this.legacyClientPool.setup(config);
 
@@ -63,6 +68,10 @@ export class DataSourceService {
           ),
       };
     };
+
+    /* Register the internal endpoint used for Endpoint validation - Test Connection */
+    const router = core.http.createRouter();
+    registerTestConnection(router, config, opensearchClientPoolSetup);
 
     return { getDataSourceClient, getDataSourceLegacyClient };
   }

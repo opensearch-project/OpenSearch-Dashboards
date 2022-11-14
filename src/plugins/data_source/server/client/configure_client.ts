@@ -106,6 +106,31 @@ const getQueryClient = async (
 };
 
 /**
+ * Create a child client object with given auth info.
+ *
+ * @param rootClient root client for the connection with given data source endpoint.
+ * @param dataSource data source saved object
+ * @returns child client.
+ */
+export const getValidationClient = async (
+  rootClient: Client,
+  dataSource: DataSourceAttributes
+): Promise<Client> => {
+  const { type, credentials } = dataSource.auth;
+
+  switch (type) {
+    case AuthType.NoAuth:
+      return rootClient.child();
+
+    case AuthType.UsernamePasswordType:
+      return getBasicAuthClient(rootClient, credentials as UsernamePasswordTypedContent);
+
+    default:
+      throw Error(`${type} is not a supported auth type for data source`);
+  }
+};
+
+/**
  * Gets a root client object of the OpenSearch endpoint.
  * Will attempt to get from cache, if cache miss, create a new one and load into cache.
  *
@@ -113,7 +138,7 @@ const getQueryClient = async (
  * @param config data source config
  * @returns OpenSearch client for the given data source endpoint.
  */
-const getRootClient = (
+export const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
   config: DataSourcePluginConfigType,
   { getClientFromPool, addClientToPool }: OpenSearchClientPoolSetup
