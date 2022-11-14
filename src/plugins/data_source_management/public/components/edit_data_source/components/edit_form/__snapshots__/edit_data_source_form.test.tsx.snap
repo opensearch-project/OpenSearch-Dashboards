@@ -965,6 +965,7 @@ exports[`Datasource Management: Edit Datasource Form Case 1: With Username & Pas
                                         onBlur={[Function]}
                                         onChange={[Function]}
                                         placeholder="Password to connect to data source"
+                                        spellCheck={false}
                                         type="dual"
                                         value="********"
                                       >
@@ -1001,6 +1002,7 @@ exports[`Datasource Management: Edit Datasource Form Case 1: With Username & Pas
                                                   onBlur={[Function]}
                                                   onChange={[Function]}
                                                   placeholder="Password to connect to data source"
+                                                  spellCheck={false}
                                                   type="password"
                                                   value="********"
                                                 />

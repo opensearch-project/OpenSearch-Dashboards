@@ -9,8 +9,12 @@ import { ExpressionFunctionOpenSearchDashboards } from '../../../../expressions'
 import { buildExpressionFunction } from '../../../../expressions/public';
 import { VisualizationState } from '../../application/utils/state_management';
 import { getSearchService, getIndexPatterns } from '../../plugin_services';
+import { StyleState } from '../../application/utils/state_management';
 
-export const getAggExpressionFunctions = async (visualization: VisualizationState) => {
+export const getAggExpressionFunctions = async (
+  visualization: VisualizationState,
+  style?: StyleState
+) => {
   const { activeVisualization, indexPattern: indexId = '' } = visualization;
   const { aggConfigParams } = activeVisualization || {};
 
@@ -32,8 +36,8 @@ export const getAggExpressionFunctions = async (visualization: VisualizationStat
     'opensearchaggs',
     {
       index: indexId,
-      metricsAtAllLevels: false,
-      partialRows: false,
+      metricsAtAllLevels: style?.showMetricsAtAllLevels || false,
+      partialRows: style?.showPartialRows || false,
       aggConfigs: JSON.stringify(aggConfigs.aggs),
       includeFormatHints: false,
     }
