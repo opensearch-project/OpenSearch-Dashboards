@@ -161,7 +161,7 @@
     "commander": "^3.0.2",
     "core-js": "^3.6.5",
     "deep-freeze-strict": "^1.1.1",
-    "del": "^5.1.0",
+    "del": "^6.1.1",
     "dns-sync": "^0.2.1",
     "elastic-apm-node": "^3.7.0",
     "elasticsearch": "^16.7.0",
