@@ -19,7 +19,7 @@ exports[`EmptyState should render normally 1`] = `
           <h1>
             <FormattedMessage
               defaultMessage="Point in Time"
-              id="pointInTimeManagement.pointInTime.header.pointInTimeTitle"
+              id="pointInTimeManagement.header.pointInTimeTitle"
               values={Object {}}
             />
           </h1>
@@ -29,7 +29,11 @@ exports[`EmptyState should render normally 1`] = `
         fill={true}
         iconType="plusInCircle"
       >
-        Create point in time
+        <FormattedMessage
+          defaultMessage="Create point in time"
+          id="pointInTimeManagement.header.createPointInTimeButton"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiPageContentHeader>
     <EuiText
@@ -38,7 +42,7 @@ exports[`EmptyState should render normally 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Create and manage point in time objects to help you retrieve data from OpenSearch."
-          id="pointInTimeManagement.pointInTime.pointInTimeDescription"
+          id="pointInTimeManagement.pointInTimeDescription"
           values={Object {}}
         />
       </p>
@@ -64,7 +68,11 @@ exports[`EmptyState should render normally 1`] = `
         </EuiFlexItem>
         <EuiSpacer />
         <EuiButton>
-          Create point in time
+          <FormattedMessage
+            defaultMessage="Create point in time"
+            id="pointInTimeManagement.createPointInTimeButton"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexGroup>
     </EuiPageContentBody>
