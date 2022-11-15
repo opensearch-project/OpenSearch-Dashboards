@@ -57,7 +57,6 @@ export {
   getClusterUuids,
   getLocalLicense,
   getLocalStats,
-  getClusterInfo,
   TelemetryLocalStats,
   DATA_TELEMETRY_ID,
   DataTelemetryIndex,
