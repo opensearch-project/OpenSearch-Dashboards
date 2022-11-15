@@ -34,6 +34,7 @@ Color mappings in `value`/`text` form
 #### `getHeatmapColors`
 
 Function to retrieve heatmap related colors based on `value` and `colorSchemaName`
+
 #### `truncatedColorMaps`
 
 Color mappings subset of `vislibColorMaps`
@@ -48,11 +49,11 @@ Color mappings related to vislib visualizations
 
 ### Components
 
+Standardized React input UI components which can be used by visualization editors to specify various visualization options.
+
 #### `BasicOptions`
 
 Components for specifying legend and tooltip
-
-#### `ColorModes`
 
 #### `ColorRanges`
 
@@ -61,6 +62,10 @@ Component for specifying color range thresholds
 #### `ColorSchemaOptions`
 
 Component for specifying color schemas (palettes)
+
+#### `NumberInputOption`
+
+Deprecated in favor of `RequiredNumberInputOption`
 
 #### `RangeOption`
 
