@@ -38,9 +38,14 @@ export const registerTestConnection = (
     },
     async (context, request, response) => {
       const dataSource: DataSourceAttributes = request.body as DataSourceAttributes;
-
-      if (dataSource.auth.type === AuthType.UsernamePasswordType) {
-        dataSource.endpoint += '/_plugins/_security/api/account';
+      const {
+        endpoint,
+        auth: { type },
+      } = dataSource;
+      if (type === AuthType.UsernamePasswordType) {
+        dataSource.endpoint += `${
+          endpoint.slice(-1) === '/' ? '' : '/'
+        }_plugins/_security/api/account`;
       }
 
       // Reuse the client cache in configure_client.ts, but require some refactor

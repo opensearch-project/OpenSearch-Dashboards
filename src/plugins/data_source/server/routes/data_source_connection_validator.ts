@@ -4,7 +4,6 @@
  */
 
 import { OpenSearchClient } from 'opensearch-dashboards/server';
-import { getClusterInfo } from '../../../telemetry/server';
 import { createDataSourceError } from '../lib/error';
 
 export class DataSourceConnectionValidator {
@@ -12,7 +11,7 @@ export class DataSourceConnectionValidator {
 
   async validate() {
     try {
-      const req = await getClusterInfo(this.callDataCluster);
+      const req = await this.callDataCluster.info<OpenSearchClient>();
       return req;
     } catch (e) {
       throw createDataSourceError(e);
