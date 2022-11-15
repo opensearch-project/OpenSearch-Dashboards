@@ -33,20 +33,23 @@ export const EmptyState = () => {
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="pointInTimeManagement.pointInTime.header.pointInTimeTitle"
+                  id="pointInTimeManagement.header.pointInTimeTitle"
                   defaultMessage="Point in Time"
                 />
               </h1>
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiButton fill={true} iconType="plusInCircle">
-            Create point in time
+            <FormattedMessage
+              id="pointInTimeManagement.header.createPointInTimeButton"
+              defaultMessage="Create point in time"
+            />
           </EuiButton>
         </EuiPageContentHeader>
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="pointInTimeManagement.pointInTime.pointInTimeDescription"
+              id="pointInTimeManagement.pointInTimeDescription"
               defaultMessage="Create and manage point in time objects to help you retrieve data from OpenSearch."
             />
           </p>
@@ -61,7 +64,12 @@ export const EmptyState = () => {
           >
             <EuiFlexItem grow={false}>No point in time objects have been created yet.</EuiFlexItem>
             <EuiSpacer />
-            <EuiButton>Create point in time</EuiButton>
+            <EuiButton>
+              <FormattedMessage
+                id="pointInTimeManagement.createPointInTimeButton"
+                defaultMessage="Create point in time"
+              />
+            </EuiButton>
           </EuiFlexGroup>
         </EuiPageContentBody>
       </EuiPageContent>
