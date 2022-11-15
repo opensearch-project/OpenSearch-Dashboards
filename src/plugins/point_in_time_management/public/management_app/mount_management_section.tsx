@@ -11,7 +11,7 @@ import { PointInTimeManagementStartDependencies } from '../plugin';
 import { StartServicesAccessor } from '../../../../core/public';
 import { PointInTimeManagementContext } from '../types';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
-import { EmptyState } from '../components/empty_state';
+import { EmptyState } from '../components';
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<PointInTimeManagementStartDependencies>,
