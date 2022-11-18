@@ -75,7 +75,7 @@ export function createSavedSheetClass(
           title: 'New Timeline Sheet',
           hits: 0,
           description: '',
-          timelion_sheet: ['.es(*)'],
+          timelion_sheet: ['.opensearch(*)'],
           timelion_interval: 'auto',
           timelion_chart_height: 275,
           timelion_columns: config.get('timeline:default_columns') || 2,
