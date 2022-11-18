@@ -62,6 +62,8 @@ describe('Generating BWC test data without security', () => {
       .find('[data-test-subj="newItemButton"]')
       .click();
     cy.get('[data-test-subj="visType-timelion"]').click();
+    // update default expression to use `.es(*)` instead of `.opensearch(*)` for bwc
+    cy.get('[class="view-line"]').type('{selectAll}{backspace}.es(*)');
     cy.get('[data-test-subj="visualizeSaveButton"]').click();
     cy.get('[data-test-subj="savedObjectTitle"]').type('test-timeline');
     cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click();
