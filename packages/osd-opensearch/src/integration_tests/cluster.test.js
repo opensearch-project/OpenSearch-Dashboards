@@ -292,6 +292,33 @@ describe('#start(installPath)', () => {
   });
 });
 
+describe('#installOpenSearchPlugins()', () => {
+  it('install array of plugins on cluster snapshot', async () => {
+    const cluster = new Cluster({ log });
+    await cluster.installOpenSearchPlugins('foo', ['foo1', 'foo2']);
+    expect(execa).toHaveBeenCalledTimes(2);
+    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo1'], {
+      cwd: 'foo',
+    });
+    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo2'], {
+      cwd: 'foo',
+    });
+  });
+  it('installs single plugin on cluster snapshot', async () => {
+    const cluster = new Cluster({ log });
+    await cluster.installOpenSearchPlugins('foo', 'foo1');
+    expect(execa).toHaveBeenCalledTimes(1);
+    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo1'], {
+      cwd: 'foo',
+    });
+  });
+  it('do not execute plugin installation script when no plugins in the param list', async () => {
+    const cluster = new Cluster({ log });
+    await cluster.installOpenSearchPlugins('foo');
+    expect(execa).toHaveBeenCalledTimes(0);
+  });
+});
+
 describe('#run()', () => {
   it('resolves when bin/opensearch exists with 0', async () => {
     mockOpenSearchBin({ exitCode: 0 });
