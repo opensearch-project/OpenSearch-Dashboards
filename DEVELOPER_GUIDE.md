@@ -59,6 +59,30 @@ Dashboards. In a separate terminal you can run the latest snapshot built using:
 $ yarn opensearch snapshot 
 ```
 
+If you would like to download a specific OpenSearch plugin on the cluster snapshot, pass the `--P` flag after `yarn opensearch snapshot`. We can use the flag multiple times to install multiple plugins on the cluster snapshot. The argument value can be URL to the plugin's zip file, maven coordinates of the plugin or for local zip files, use `file:` followed by the absolute or relative path to the plugin zip file. Below is the example help command:
+
+```
+$ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plugin/opensearch-test-plugin/2.4.0.0/opensearch-test-plugin-2.4.0.0.zip
+```
+
+Following are the list of options that can be passed after `yarn opensearch snapshot` to configure the cluster snapshot.
+Options:
+
+      --license         Run with a 'oss', 'basic', or 'trial' license [default: oss]
+      --version         Version of OpenSearch to download [default: 3.0.0}]
+      --base-path       Path containing cache/installations [default: /home/ubuntu/OpenSearch-Dashboards/.opensearch]
+      --install-path    Installation path, defaults to 'source' within base-path
+      --data-archive    Path to zip or tarball containing an OpenSearch data directory to seed the cluster with.
+      --password        Sets password for opensearch user [default: changeme]
+      -E                Additional key=value settings to pass to OpenSearch
+      --download-only   Download the snapshot but don't actually start it
+      --ssl             Sets up SSL on OpenSearch
+      --P               OpenSearch plugin artifact URL to install it on the cluster. 
+
+```
+$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
+```
+
 **Warning:** Starting the Dashboards instance before or during the initialization of the OpenSearch Server can cause Dashboards to sometimes misbehave. Ensure that the OpenSearch server instance is up and running first before starting up the Dashboards dev server from the next step.
 
 ### Run OpenSearch Dashboards
