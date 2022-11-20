@@ -71,12 +71,21 @@ export const ContextMenuExamples: React.FC = () => {
       <EuiSpacer />
       <p>
         A context menu consists of an initial panel (with items), and other panels that are linked
-        to. The following example shows a way of adding panels as well as adding items to the first
-        panel. The following example shows deeply nested items and panels by directly adding panels
-        and items to the context menu using the contextMenuData property on an action. In addition
-        to panels and items properties, an order property is also available, which will allow the
-        items on the initial panel to be grouped and automatically separated by a divider. Note: If
-        contextMenuData is provided, the regular action item is ignored.
+        from the items. The following example shows a different way of adding items to the first
+        panel, as well as adding additonal panels...different than the <EuiCode>grouping</EuiCode>{' '}
+        field used above. The following example also shows deeply nested items and panels by
+        directly adding panels and items to the context menu using the
+        <EuiCode>getContextMenuData</EuiCode> function of an action. The{' '}
+        <EuiCode>getContextMenuData</EuiCode>
+        function returns <EuiCode>additionalPanels</EuiCode> which is any amount of panels that are
+        added after the initial panel. The <EuiCode>getContextMenuData</EuiCode> function also
+        returns
+        <EuiCode>additionalFirstPanelGroups</EuiCode>, which is used to group panels (even if the
+        items come from different actions) into sections on the initial panel. Each group can have
+        an order and even a title for the group. Each group is divided by a separator. There is also
+        a <EuiCode>default</EuiCode>
+        group which has all miscellenous items. Note: If <EuiCode>getContextMenuData</EuiCode> is
+        provided, the regular action item is ignored.
       </p>
       <EuiFlexGroup>
         <EuiFlexItem>

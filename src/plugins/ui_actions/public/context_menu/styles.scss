@@ -1,0 +1,19 @@
+@import "@elastic/eui/src/global_styling/variables/index";
+
+.build_eui_context_menu_panels {
+  &__title-text {
+    h5 {
+      color: inherit;
+    }
+  }
+}
+
+button.build_eui_context_menu_panels__no-action {
+  cursor: default;
+
+  &:hover,
+  &:active {
+    text-decoration: none;
+    background-color: inherit;
+  }
+}

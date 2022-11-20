@@ -78,6 +78,7 @@ export {
   ActionExecutionContext,
   ActionExecutionMeta,
   ActionContextMenuData,
+  ActionContextMenuDataFirstPanelGroup,
   GetActionContextMenuDataArgs,
   GetContextMenuDataType,
 } from './actions';

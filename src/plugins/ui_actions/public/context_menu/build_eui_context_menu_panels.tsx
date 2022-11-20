@@ -29,7 +29,11 @@
  */
 
 import * as React from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiText,
+} from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from '../../../../core/public';
@@ -38,10 +42,12 @@ import {
   Action,
   ActionExecutionContext,
   ActionContextMenuData,
+  ActionContextMenuDataFirstPanelGroup,
   GetContextMenuDataType,
 } from '../actions';
 import { Trigger } from '../triggers';
 import { BaseContext } from '../types';
+import './styles.scss';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -160,7 +166,7 @@ export async function buildContextMenuForActions({
       items: [],
     },
   };
-  const additionalContextMenuDataGroups: ActionContextMenuData[] = [];
+  const additionalContextMenuDatas: ActionContextMenuData[] = [];
   const promises = actions.map(async (item) => {
     const { action } = item;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
@@ -173,7 +179,7 @@ export async function buildContextMenuForActions({
 
     // Exit early if contextMenuData provided, which will handle all menu data for this action
     if (getContextMenuData) {
-      additionalContextMenuDataGroups.push(getContextMenuData({ context, overlays, closeMenu }));
+      additionalContextMenuDatas.push(getContextMenuData({ context, overlays, closeMenu }));
       return;
     }
 
@@ -249,50 +255,89 @@ export async function buildContextMenuForActions({
   // This holds all panels for the final context menu
   const panelList = removePanelMetaFields(Object.values(panels));
 
-  if (!additionalContextMenuDataGroups.length) {
+  if (!additionalContextMenuDatas.length) {
     return panelList;
   }
 
-  // Add group for existing panel of items
-  additionalContextMenuDataGroups.push({
-    additionalFirstPanelItems: panelList[0].items,
-    additionalFirstPanelItemsOrder: 0,
+  // Add additional panels
+  additionalContextMenuDatas.forEach((additionalContextMenuData: ActionContextMenuData) => {
+    panelList.push(...(additionalContextMenuData.additionalPanels || []));
   });
 
-  // Sort groups based on order...higher order goes first
-  additionalContextMenuDataGroups.sort(
-    (a, b) => (b.additionalFirstPanelItemsOrder || 0) - (a.additionalFirstPanelItemsOrder || 0)
+  // Create array of groups
+  let firstPanelItemsGroups: ActionContextMenuDataFirstPanelGroup[] = [];
+
+  // Add group for existing panel of items
+  firstPanelItemsGroups.push({
+    name: 'default',
+    order: 0,
+    items: panelList[0].items || [],
+  });
+
+  // Add groups from additionalContextMenuDatas
+  additionalContextMenuDatas.forEach((additionalContextMenuData: ActionContextMenuData) => {
+    firstPanelItemsGroups.push(...(additionalContextMenuData.additionalFirstPanelGroups || []));
+  });
+
+  // For each group...if duplicate group ID exists, combine group
+  firstPanelItemsGroups = firstPanelItemsGroups.reduce(
+    (
+      newGroups: ActionContextMenuDataFirstPanelGroup[],
+      currentGroup: ActionContextMenuDataFirstPanelGroup
+    ) => {
+      const { name = 'default', items = [] } = currentGroup;
+
+      const indexOfAlreadyAddedMatch = newGroups.findIndex(
+        (matchingGroup: ActionContextMenuDataFirstPanelGroup) => matchingGroup.name === name
+      );
+
+      if (indexOfAlreadyAddedMatch === -1) {
+        // If no match, add to itemsGroups
+        newGroups.push(currentGroup);
+      } else {
+        // Group exists already, so add items to matching group
+        newGroups[indexOfAlreadyAddedMatch].items.push(...items);
+      }
+
+      return newGroups;
+    },
+    []
   );
 
-  // For each grooup...add panels and add items and insert separators as needed
-  panelList[0].items = additionalContextMenuDataGroups.reduce(
-    (newItems: any[], data: ActionContextMenuData, index) => {
-      const {
-        additionalFirstPanelItems = [],
-        additionalPanels = [],
-        additionalFirstPanelItemsOrder = 0,
-      } = data;
+  // Sort groups based on order...higher order goes first
+  firstPanelItemsGroups.sort((a, b) => (b.order || 0) - (a.order || 0));
 
-      // Add panels
-      panelList.push(...additionalPanels);
+  // For each group...add separators, title, and items
+  const firstPanelItems: any[] = firstPanelItemsGroups.reduce(
+    (newItems: any[], currentGroup: ActionContextMenuDataFirstPanelGroup, index) => {
+      const { name = 'default', items = [], isTitleVisible } = currentGroup;
 
-      // If order is below 0, add separator before items
-      if (additionalFirstPanelItemsOrder < 0) {
+      // If after first group, add separator before
+      if (index > 0 && items.length > 0) {
         newItems.push({ isSeparator: true, key: `sep-before-${index}` });
       }
 
-      // Add items
-      newItems.push(...additionalFirstPanelItems);
-
-      // If order is above 0, add separator after
-      if (additionalFirstPanelItemsOrder > 0) {
-        newItems.push({ isSeparator: true, key: `sep-after-${index}` });
+      // Add title if needed
+      if (isTitleVisible) {
+        newItems.push({
+          name: (
+            <EuiText color="success" className="build_eui_context_menu_panels__title-text">
+              <h5>{name}</h5>
+            </EuiText>
+          ),
+          className: 'build_eui_context_menu_panels__no-action',
+        });
       }
+
+      // Add items
+      newItems.push(...items);
 
       return newItems;
     },
     []
   );
+
+  panelList[0].items = firstPanelItems;
 
   return panelList;
 }

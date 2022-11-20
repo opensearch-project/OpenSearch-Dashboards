@@ -78,17 +78,70 @@ export const PanelWithContextMenuData: React.FC = () => {
         ],
       },
     ],
-    additionalFirstPanelItems: [
+    additionalFirstPanelGroups: [
       {
-        name: 'Nested panels',
-        icon: 'bell',
-        panel: panel1Id,
+        items: [
+          {
+            name: 'This is the default group',
+            icon: 'bell',
+          },
+        ],
+      },
+      {
+        name: 'Initial group',
+        order: 99,
+        items: [
+          {
+            name: 'Nested panels',
+            icon: 'bell',
+            panel: panel1Id,
+          },
+        ],
+      },
+      {
+        name: 'View events',
+        isTitleVisible: true,
+        order: 9,
+        items: [
+          {
+            name: 'Nested panels in view',
+            icon: 'bell',
+            panel: panel1Id,
+          },
+        ],
       },
     ],
-    additionalFirstPanelItemsOrder: 100,
+  });
+  const getContextMenuData2: Action['getContextMenuData'] = () => ({
+    additionalFirstPanelGroups: [
+      {
+        name: 'Initial group',
+        order: 99,
+        items: [
+          {
+            name: 'From other action 1',
+            icon: 'bell',
+            panel: panel1Id,
+          },
+        ],
+      },
+      {
+        name: 'View events',
+        isTitleVisible: true,
+        order: 9,
+        items: [
+          {
+            name: 'From other action 2',
+            icon: 'bell',
+            panel: panel1Id,
+          },
+        ],
+      },
+    ],
   });
   const actions = [
     sampleAction('test-1', 100, 'Edit visualization', 'pencil', undefined, getContextMenuData),
+    sampleAction('test-2', 100, 'Edit visualization', 'pencil', undefined, getContextMenuData2),
   ];
 
   const panels = useAsync(() =>
@@ -100,7 +153,7 @@ export const PanelWithContextMenuData: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton onClick={() => setOpen((x) => !x)}>Panel with context menu data</EuiButton>
+        <EuiButton onClick={() => setOpen((x) => !x)}>Panel with getContextMenuData</EuiButton>
       }
       isOpen={open}
       panelPaddingSize="none"
