@@ -58,7 +58,7 @@ if (!isVersionValid) {
   // Actions to apply when validation fails: error report + exit.
   console.error(errorMessage);
   process.exit(1);
-} else if (!isMinorValid) {
+} else if (isMinorValid) {
   // Validates Minor version of the NodeJS
   var warnMessage =
     `You're using an untested version of Node.js. OpenSearch Dashboards has been tested to work with Node.js ` +
