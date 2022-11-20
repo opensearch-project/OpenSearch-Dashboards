@@ -70,11 +70,11 @@ export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
 export interface ActionContextMenuDataFirstPanelGroup {
   name?: string;
   order?: number;
+  // Items can be React elements or objects
   items: any[];
   isTitleVisible?: boolean;
 }
 export interface ActionContextMenuData {
-  // Items can be React elements or objects
   additionalFirstPanelGroups?: ActionContextMenuDataFirstPanelGroup[];
   additionalPanels?: EuiContextMenuPanelDescriptor[];
 }

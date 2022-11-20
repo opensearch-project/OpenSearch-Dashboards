@@ -177,7 +177,7 @@ export async function buildContextMenuForActions({
 
     if (!isCompatible) return;
 
-    // Exit early if contextMenuData provided, which will handle all menu data for this action
+    // Exit early if getContextMenuData provided, which will handle all menu data for this action
     if (getContextMenuData) {
       additionalContextMenuDatas.push(getContextMenuData({ context, overlays, closeMenu }));
       return;
@@ -264,10 +264,11 @@ export async function buildContextMenuForActions({
     panelList.push(...(additionalContextMenuData.additionalPanels || []));
   });
 
-  // Create array of groups
+  // Start to build the items for the intial panel...
+  // First, create an array to store all groups
   let firstPanelItemsGroups: ActionContextMenuDataFirstPanelGroup[] = [];
 
-  // Add group for existing panel of items
+  // Add group for existing panel of items. This is the default group.
   firstPanelItemsGroups.push({
     name: 'default',
     order: 0,
@@ -279,7 +280,9 @@ export async function buildContextMenuForActions({
     firstPanelItemsGroups.push(...(additionalContextMenuData.additionalFirstPanelGroups || []));
   });
 
-  // For each group...if duplicate group ID exists, combine group
+  // For each group...combine groups that have the same name.
+  // Note: the `order` and `isTitleVisible` properties are not taken into
+  // account to determine if a group is the same.
   firstPanelItemsGroups = firstPanelItemsGroups.reduce(
     (
       newGroups: ActionContextMenuDataFirstPanelGroup[],
@@ -292,7 +295,7 @@ export async function buildContextMenuForActions({
       );
 
       if (indexOfAlreadyAddedMatch === -1) {
-        // If no match, add to itemsGroups
+        // If no match, add to newGroups
         newGroups.push(currentGroup);
       } else {
         // Group exists already, so add items to matching group
@@ -312,7 +315,7 @@ export async function buildContextMenuForActions({
     (newItems: any[], currentGroup: ActionContextMenuDataFirstPanelGroup, index) => {
       const { name = 'default', items = [], isTitleVisible } = currentGroup;
 
-      // If after first group, add separator before
+      // If after first group, add separator before this group's items
       if (index > 0 && items.length > 0) {
         newItems.push({ isSeparator: true, key: `sep-before-${index}` });
       }
