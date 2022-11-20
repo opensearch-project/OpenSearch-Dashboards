@@ -288,7 +288,7 @@ export async function buildContextMenuForActions({
       newGroups: ActionContextMenuDataFirstPanelGroup[],
       currentGroup: ActionContextMenuDataFirstPanelGroup
     ) => {
-      const { name = 'default', items = [] } = currentGroup;
+      const { name = 'default', items = [], order = 0, isTitleVisible } = currentGroup;
 
       const indexOfAlreadyAddedMatch = newGroups.findIndex(
         (matchingGroup: ActionContextMenuDataFirstPanelGroup) => matchingGroup.name === name
@@ -300,6 +300,15 @@ export async function buildContextMenuForActions({
       } else {
         // Group exists already, so add items to matching group
         newGroups[indexOfAlreadyAddedMatch].items.push(...items);
+
+        // Use highest order
+        if (order > (newGroups[indexOfAlreadyAddedMatch].order || 0)) {
+          newGroups[indexOfAlreadyAddedMatch].order = order;
+        }
+
+        // Show title if either group has option set to true
+        newGroups[indexOfAlreadyAddedMatch].isTitleVisible =
+          newGroups[indexOfAlreadyAddedMatch].isTitleVisible || isTitleVisible;
       }
 
       return newGroups;
