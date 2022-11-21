@@ -408,7 +408,7 @@
     "load-grunt-config": "^4.0.1",
     "load-json-file": "^6.2.0",
     "markdown-it": "^12.3.2",
-    "mocha": "^7.2.0",
+    "mocha": "10.1.0",
     "mock-fs": "^4.12.0",
     "monaco-editor": "~0.17.0",
     "ms-chromium-edge-driver": "^0.4.3",
