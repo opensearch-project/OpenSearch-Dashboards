@@ -3,7 +3,7 @@ name: Run cypress tests
 # trigger on every PR for all branches except feature branches
 on:
   pull_request:
-    branches: [ '**', '!feature/**' ]
+    branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
 
