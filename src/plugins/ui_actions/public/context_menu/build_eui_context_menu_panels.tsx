@@ -172,7 +172,7 @@ export async function buildContextMenuForActions({
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
     // For some actions, the data is contained within action.definition
-    const getContextMenuData: GetContextMenuDataType =
+    const getContextMenuData: GetContextMenuDataType | undefined =
       action.getContextMenuData || action.definition?.getContextMenuData;
 
     if (!isCompatible) return;

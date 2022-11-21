@@ -155,6 +155,11 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * execution to the context menu.
    */
   getContextMenuData?: GetContextMenuDataType;
+
+  /**
+   * When an action is created with ActionDefinition, this object is present.
+   */
+  definition?: ActionDefinition;
 }
 
 /**
@@ -196,6 +201,13 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * right-clicks and selects "Open in new tab".
    */
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
+
+  /**
+   * This data will provide an order, items and panels for the dashboard context
+   * menu. If provided, the context menu will not add the display name and
+   * execution to the context menu.
+   */
+  getContextMenuData?: GetContextMenuDataType;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;
