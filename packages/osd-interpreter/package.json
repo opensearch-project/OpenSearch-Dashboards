@@ -24,7 +24,7 @@
     "babel-loader": "^8.2.3",
     "copy-webpack-plugin": "^6.0.2",
     "css-loader": "^5.2.7",
-    "del": "^5.1.0",
+    "del": "^6.1.1",
     "getopts": "^2.2.5",
     "pegjs": "0.10.0",
     "sass-loader": "^10.2.0",
