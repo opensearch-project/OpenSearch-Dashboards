@@ -1,6 +1,6 @@
 name: Run cypress tests
 
-# trigger on every PR for all branches except feature branches
+# trigger on every PR for all branches
 on:
   pull_request:
     branches: [ '**' ]
