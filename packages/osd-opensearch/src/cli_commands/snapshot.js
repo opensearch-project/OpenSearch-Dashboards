@@ -49,10 +49,13 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --P               OpenSearch plugin artifact URL to install it on the cluster. We can use the flag multiple times
+                        to install multiple plugins on the cluster snapshot. The argument value can be url to zip file, maven coordinates of the plugin 
+                        or for local zip files, use file:<followed by the absolute or relative path to the plugin zip file>.
 
     Example:
 
-      opensearch snapshot --version 5.6.8 -E cluster.name=test -E path.data=/tmp/opensearch-data
+      opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
   `;
 };
 
@@ -64,6 +67,7 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       opensearchArgs: 'E',
+      opensearchPlugins: 'P',
     },
 
     string: ['version'],
@@ -81,6 +85,10 @@ exports.run = async (defaults = {}) => {
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
+    }
+
+    if (options.opensearchPlugins) {
+      await cluster.installOpenSearchPlugins(installPath, options.opensearchPlugins);
     }
 
     options.bundledJDK = true;
