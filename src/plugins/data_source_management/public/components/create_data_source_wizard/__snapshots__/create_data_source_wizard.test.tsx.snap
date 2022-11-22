@@ -775,6 +775,7 @@ exports[`Datasource Management: Create Datasource Wizard case1: should load reso
                         onChange={[Function]}
                         onFocus={[Function]}
                         placeholder="Password to connect to data source"
+                        spellCheck={false}
                         type="dual"
                         value=""
                       >
@@ -811,6 +812,7 @@ exports[`Datasource Management: Create Datasource Wizard case1: should load reso
                                   onChange={[Function]}
                                   onFocus={[Function]}
                                   placeholder="Password to connect to data source"
+                                  spellCheck={false}
                                   type="password"
                                   value=""
                                 />
@@ -1749,6 +1751,7 @@ exports[`Datasource Management: Create Datasource Wizard case2: should fail to l
                         onChange={[Function]}
                         onFocus={[Function]}
                         placeholder="Password to connect to data source"
+                        spellCheck={false}
                         type="dual"
                         value=""
                       >
@@ -1785,6 +1788,7 @@ exports[`Datasource Management: Create Datasource Wizard case2: should fail to l
                                   onChange={[Function]}
                                   onFocus={[Function]}
                                   placeholder="Password to connect to data source"
+                                  spellCheck={false}
                                   type="password"
                                   value=""
                                 />

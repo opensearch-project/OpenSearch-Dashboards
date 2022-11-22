@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
 import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -89,18 +90,29 @@ export const Workspace: FC = ({ children }) => {
         ) : (
           <EuiFlexItem className="vbWorkspace__empty" data-test-subj="emptyWorkspace">
             <EuiEmptyPrompt
-              title={<h2>Add a field to start</h2>}
+              title={
+                <h2>
+                  {i18n.translate('visBuilder.workSpace.empty.title', {
+                    defaultMessage: 'Add a field to start',
+                  })}
+                </h2>
+              }
               body={
                 <>
-                  <p>Drag a field to the configuration panel to generate a visualization.</p>
-                  <span className="vbWorkspace__container">
+                  <p>
+                    {i18n.translate('visBuilder.workSpace.empty.description', {
+                      defaultMessage:
+                        'Drag a field to the configuration panel to generate a visualization.',
+                    })}
+                  </p>
+                  <div className="vbWorkspace__container">
                     <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
                     <EuiIcon
                       className="vbWorkspace__handFieldSvg"
                       type={hand_field}
                       size="original"
                     />
-                  </span>
+                  </div>
                 </>
               }
             />
