@@ -14,7 +14,7 @@ import React, {
 } from 'react';
 import { DragDataType } from './types';
 
-// TODO: Replace any with corret type
+// TODO: Replace any with correct type
 // TODO: Split into separate files
 interface IDragDropContext {
   data: DragDataType;

@@ -1537,6 +1537,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="Password to connect to data source"
+                      spellCheck={false}
                       type="dual"
                       value="test123"
                     >
@@ -1573,6 +1574,7 @@ exports[`Datasource Management: Create Datasource form should create data source
                                 onChange={[Function]}
                                 onFocus={[Function]}
                                 placeholder="Password to connect to data source"
+                                spellCheck={false}
                                 type="password"
                                 value="test123"
                               />
@@ -2469,6 +2471,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="Password to connect to data source"
+                      spellCheck={false}
                       type="dual"
                       value=""
                     >
@@ -2505,6 +2508,7 @@ exports[`Datasource Management: Create Datasource form should render normally 1`
                                 onChange={[Function]}
                                 onFocus={[Function]}
                                 placeholder="Password to connect to data source"
+                                spellCheck={false}
                                 type="password"
                                 value=""
                               />
@@ -3418,6 +3422,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                       onChange={[Function]}
                       onFocus={[Function]}
                       placeholder="Password to connect to data source"
+                      spellCheck={false}
                       type="dual"
                       value="test123"
                     >
@@ -3454,6 +3459,7 @@ exports[`Datasource Management: Create Datasource form should throw validation e
                                 onChange={[Function]}
                                 onFocus={[Function]}
                                 placeholder="Password to connect to data source"
+                                spellCheck={false}
                                 type="password"
                                 value="test123"
                               />
