@@ -19,7 +19,7 @@
     "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "@osd/optimizer": "1.0.0",
-    "del": "^5.1.0",
+    "del": "^6.1.1",
     "execa": "^4.0.2",
     "gulp-zip": "^5.0.2",
     "inquirer": "^7.3.3",
