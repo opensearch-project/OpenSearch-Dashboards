@@ -47,6 +47,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
+import { ExtensionOpaqueId } from '../extensions';
 
 /**
  * Accessibility status of an application.
@@ -654,25 +655,25 @@ export interface ApplicationSetup {
 export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'registerAppUpdater'> {
   /**
    * Register an mountable application to the system.
-   * @param plugin - opaque ID of the plugin that registers this application
+   * @param opaqueId - opaque ID of the plugin that registers this application
    * @param app
    */
   register<HistoryLocationState = unknown>(
-    plugin: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     app: App<HistoryLocationState>
   ): void;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
+   * opaqueId that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
    * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
+   * @param opaqueId - The opaque ID of the plugin or extension that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
   registerMountContext<T extends keyof AppMountContext>(
-    pluginOpaqueId: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
@@ -796,15 +797,15 @@ export interface ApplicationStart {
 export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
+   * plugin or extension that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
    * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
+   * @param opaqueId - The opaque ID of the plugin or extension that is registering the context.
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
   registerMountContext<T extends keyof AppMountContext>(
-    pluginOpaqueId: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;

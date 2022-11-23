@@ -30,7 +30,7 @@
 
 import { get } from 'lodash';
 import { deepFreeze } from '@osd/std';
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { DiscoveredExtension, ExtensionName, DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
   PackageInfo,
@@ -38,6 +38,14 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { AppCategory, Branding } from '../';
+
+export interface InjectedExtensionMetadata {
+  extensionId: ExtensionName;
+  extension: DiscoveredExtension;
+  config?: {
+    [key: string]: unknown;
+  };
+}
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -66,6 +74,7 @@ export interface InjectedMetadataParams {
       mode: Readonly<EnvironmentMode>;
       packageInfo: Readonly<PackageInfo>;
     };
+    uiExtensions: InjectedExtensionMetadata[];
     uiPlugins: InjectedPluginMetadata[];
     anonymousStatusPage: boolean;
     legacyMetadata: {
@@ -119,6 +128,10 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
+      getExtensions: () => {
+        return this.state.uiExtensions;
+      },
+
       getPlugins: () => {
         return this.state.uiPlugins;
       },
@@ -168,6 +181,10 @@ export interface InjectedMetadataSetup {
    * An array of frontend plugins in topological order.
    */
   getPlugins: () => InjectedPluginMetadata[];
+  /**
+   * An array of frontend exensions in topological order.
+   */
+  getExtensions: () => InjectedExtensionMetadata[];
   getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
     uiSettings: {

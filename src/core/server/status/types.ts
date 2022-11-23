@@ -31,6 +31,7 @@
 import { Observable } from 'rxjs';
 import { deepFreeze } from '@osd/std';
 import { PluginName } from '../plugins';
+import { ExtensionName } from '../extensions';
 
 /**
  * The current status of a service at a point in time.
@@ -256,5 +257,10 @@ export interface InternalStatusServiceSetup
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;
     getDependenciesStatus$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
     getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus>;
+  };
+  extensions: {
+    set(extension: ExtensionName, status$: Observable<ServiceStatus>): void;
+    getDependenciesStatus$(extension: ExtensionName): Observable<Record<string, ServiceStatus>>;
+    getDerivedStatus$(extension: ExtensionName): Observable<ServiceStatus>;
   };
 }

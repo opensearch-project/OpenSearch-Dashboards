@@ -55,3 +55,5 @@ export * from './simple_opensearch_dashboards_platform_plugin_discovery';
 export * from './streams';
 export * from './babel';
 export * from './parse_opensearch_dashboards_platform_plugin';
+export * from './simple_opensearch_dashboards_platform_extension_discovery';
+export * from './parse_opensearch_dashboards_platform_extension';

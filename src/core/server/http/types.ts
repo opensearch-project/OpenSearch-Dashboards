@@ -42,7 +42,7 @@ import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
-import { PluginOpaqueId, RequestHandlerContext } from '..';
+import { ExtensionOpaqueId, PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
@@ -292,11 +292,11 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  createRouter: (path: string, id?: PluginOpaqueId | ExtensionOpaqueId) => IRouter;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    pluginOpaqueId: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;

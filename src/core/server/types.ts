@@ -29,6 +29,7 @@
  */
 
 /** This module is intended for consumption by public to avoid import issues with server-side code */
+export { ExtensionOpaqueId } from './extensions/types';
 export { PluginOpaqueId } from './plugins/types';
 export * from './saved_objects/types';
 export * from './ui_settings/types';

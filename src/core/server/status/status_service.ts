@@ -47,11 +47,14 @@ import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
+import { ExtensionsStatusService } from './extensions_status';
+import { ExtensionName } from '../extensions';
 
 interface SetupDeps {
   opensearch: Pick<InternalOpenSearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
+  extensionDependencies: ReadonlyMap<ExtensionName, ExtensionName[]>;
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
@@ -62,6 +65,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly config$: Observable<StatusConfigType>;
 
   private pluginsStatus?: PluginsStatusService;
+  private extensionsStatus?: ExtensionsStatusService;
   private overallSubscription?: Subscription;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -72,6 +76,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   public async setup({
     opensearch,
     pluginDependencies,
+    extensionDependencies,
     http,
     metrics,
     savedObjects,
@@ -80,17 +85,20 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ opensearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
+    this.extensionsStatus = new ExtensionsStatusService({ core$, extensionDependencies });
 
     const overall$: Observable<ServiceStatus> = combineLatest([
       core$,
       this.pluginsStatus.getAll$(),
+      this.extensionsStatus.getAll$(),
     ]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
-      map(([coreStatus, pluginsStatus]) => {
+      map(([coreStatus, pluginsStatus, extensionsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
           ...Object.entries(pluginsStatus),
+          ...Object.entries(extensionsStatus),
         ]);
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
@@ -115,6 +123,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       status: {
         overall$,
         plugins$: this.pluginsStatus.getAll$(),
+        extensions$: this.extensionsStatus.getAll$(),
         core$,
       },
     });
@@ -126,6 +135,13 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
         getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
         getDerivedStatus$: this.pluginsStatus.getDerivedStatus$.bind(this.pluginsStatus),
+      },
+      extensions: {
+        set: this.extensionsStatus.set.bind(this.extensionsStatus),
+        getDependenciesStatus$: this.extensionsStatus.getDependenciesStatus$.bind(
+          this.extensionsStatus
+        ),
+        getDerivedStatus$: this.extensionsStatus.getDerivedStatus$.bind(this.extensionsStatus),
       },
       isStatusPageAnonymous: () => statusConfig.allowAnonymous,
     };

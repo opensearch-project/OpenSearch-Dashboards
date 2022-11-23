@@ -28,22 +28,23 @@
  * under the License.
  */
 
-import { PluginOpaqueId } from '../../server';
+import { PluginOpaqueId, ExtensionOpaqueId } from '../../server';
 import { IContextContainer, ContextContainer, HandlerFunction } from '../../utils/context';
 import { CoreContext } from '../core_system';
 
 interface StartDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+  extensionDependencies: ReadonlyMap<ExtensionOpaqueId, ExtensionOpaqueId[]>;
 }
 
 /** @internal */
 export class ContextService {
   constructor(private readonly core: CoreContext) {}
 
-  public setup({ pluginDependencies }: StartDeps): ContextSetup {
+  public setup({ pluginDependencies, extensionDependencies }: StartDeps): ContextSetup {
     return {
       createContextContainer: <THandler extends HandlerFunction<any>>() =>
-        new ContextContainer<THandler>(pluginDependencies, this.core.coreId),
+        new ContextContainer<THandler>(this.core.coreId, pluginDependencies, extensionDependencies),
     };
   }
 }

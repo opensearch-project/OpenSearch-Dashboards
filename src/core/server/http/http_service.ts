@@ -39,6 +39,7 @@ import { ContextSetup } from '../context';
 import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
+import { ExtensionOpaqueId } from '../extensions';
 import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';
@@ -114,18 +115,21 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
-        const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
+      createRouter: (
+        path: string,
+        id: PluginOpaqueId | ExtensionOpaqueId = this.coreContext.coreId
+      ) => {
+        const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, id);
         const router = new Router(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
 
       registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-        pluginOpaqueId: PluginOpaqueId,
+        opaqueId: PluginOpaqueId | ExtensionOpaqueId,
         contextName: T,
         provider: RequestHandlerContextProvider<T>
-      ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+      ) => this.requestHandlerContext!.registerContext(opaqueId, contextName, provider),
     };
 
     return this.internalSetup;

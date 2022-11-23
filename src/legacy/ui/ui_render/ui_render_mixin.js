@@ -144,6 +144,28 @@ export function uiRenderMixin(osdServer, server, config) {
         }
       })(kpUiPlugins.public.keys());
 
+      const kpUiExtensions = osdServer.newPlatform.__internals.uiExtensions;
+      const kpExtensionPublicPaths = new Map();
+      const kpExtensionBundlePaths = new Set();
+
+      // recursively iterate over the kpUiExtension ids and their required bundles
+      // to populate kpExtensionPublicPaths and kpExtensionBundlePaths
+      (function readKpExtensions(extensionIds) {
+        for (const extensionId of extensionIds) {
+          if (kpExtensionPublicPaths.has(extensionId)) {
+            continue;
+          }
+
+          kpExtensionPublicPaths.set(extensionId, `${regularBundlePath}/extension/${extensionId}/`);
+          kpExtensionBundlePaths.add(
+            `${regularBundlePath}/extension/${extensionId}/${extensionId}.extension.js`
+          );
+          readKpExtensions(kpUiExtensions.internal.get(extensionId).requiredBundles);
+        }
+      })(kpUiExtensions.public.keys());
+
+      // TODO: dependency tree here
+
       const jsDependencyPaths = [
         ...UiSharedDeps.jsDepFilenames.map(
           (filename) => `${regularBundlePath}/osd-ui-shared-deps/${filename}`
@@ -152,6 +174,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
         `${regularBundlePath}/core/core.entry.js`,
         ...kpPluginBundlePaths,
+        ...kpExtensionBundlePaths,
       ];
 
       // These paths should align with the bundle routes configured in
@@ -160,6 +183,7 @@ export function uiRenderMixin(osdServer, server, config) {
         core: `${regularBundlePath}/core/`,
         'osd-ui-shared-deps': `${regularBundlePath}/osd-ui-shared-deps/`,
         ...Object.fromEntries(kpPluginPublicPaths),
+        ...Object.fromEntries(kpExtensionPublicPaths),
       });
 
       const bootstrap = new AppBootstrap({

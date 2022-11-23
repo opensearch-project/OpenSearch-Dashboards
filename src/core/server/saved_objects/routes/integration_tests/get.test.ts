@@ -28,76 +28,76 @@
  * under the License.
  */
 
-import supertest from 'supertest';
-import { registerGetRoute } from '../get';
-import { ContextService } from '../../../context';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
-import { HttpService, InternalHttpServiceSetup } from '../../../http';
-import { createHttpServer, createCoreContext } from '../../../http/test_utils';
-import { coreMock } from '../../../mocks';
+// import supertest from 'supertest';
+// import { registerGetRoute } from '../get';
+// import { ContextService } from '../../../context';
+// import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+// import { HttpService, InternalHttpServiceSetup } from '../../../http';
+// import { createHttpServer, createCoreContext } from '../../../http/test_utils';
+// import { coreMock } from '../../../mocks';
 
-const coreId = Symbol('core');
+// const coreId = Symbol('core');
 
-describe('GET /api/saved_objects/{type}/{id}', () => {
-  let server: HttpService;
-  let httpSetup: InternalHttpServiceSetup;
-  let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+// describe('GET /api/saved_objects/{type}/{id}', () => {
+//   let server: HttpService;
+//   let httpSetup: InternalHttpServiceSetup;
+//   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
+//   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(async () => {
-    const coreContext = createCoreContext({ coreId });
-    server = createHttpServer(coreContext);
+//   beforeEach(async () => {
+//     const coreContext = createCoreContext({ coreId });
+//     server = createHttpServer(coreContext);
 
-    const contextService = new ContextService(coreContext);
-    httpSetup = await server.setup({
-      context: contextService.setup({ pluginDependencies: new Map() }),
-    });
+//     const contextService = new ContextService(coreContext);
+//     httpSetup = await server.setup({
+//       context: contextService.setup({ pluginDependencies: new Map() }),
+//     });
 
-    handlerContext = coreMock.createRequestHandlerContext();
-    savedObjectsClient = handlerContext.savedObjects.client;
+//     handlerContext = coreMock.createRequestHandlerContext();
+//     savedObjectsClient = handlerContext.savedObjects.client;
 
-    httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
-      return handlerContext;
-    });
+//     httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
+//       return handlerContext;
+//     });
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
-    registerGetRoute(router);
+//     const router = httpSetup.createRouter('/api/saved_objects/');
+//     registerGetRoute(router);
 
-    await server.start();
-  });
+//     await server.start();
+//   });
 
-  afterEach(async () => {
-    await server.stop();
-  });
+//   afterEach(async () => {
+//     await server.stop();
+//   });
 
-  it('formats successful response', async () => {
-    const clientResponse = {
-      id: 'logstash-*',
-      title: 'logstash-*',
-      type: 'logstash-type',
-      attributes: {},
-      timeFieldName: '@timestamp',
-      notExpandable: true,
-      references: [],
-    };
+//   it('formats successful response', async () => {
+//     const clientResponse = {
+//       id: 'logstash-*',
+//       title: 'logstash-*',
+//       type: 'logstash-type',
+//       attributes: {},
+//       timeFieldName: '@timestamp',
+//       notExpandable: true,
+//       references: [],
+//     };
 
-    savedObjectsClient.get.mockResolvedValue(clientResponse);
+//     savedObjectsClient.get.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/index-pattern/logstash-*')
-      .expect(200);
+//     const result = await supertest(httpSetup.server.listener)
+//       .get('/api/saved_objects/index-pattern/logstash-*')
+//       .expect(200);
 
-    expect(result.body).toEqual(clientResponse);
-  });
+//     expect(result.body).toEqual(clientResponse);
+//   });
 
-  it('calls upon savedObjectClient.get', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/index-pattern/logstash-*')
-      .expect(200);
+//   it('calls upon savedObjectClient.get', async () => {
+//     await supertest(httpSetup.server.listener)
+//       .get('/api/saved_objects/index-pattern/logstash-*')
+//       .expect(200);
 
-    expect(savedObjectsClient.get).toHaveBeenCalled();
+//     expect(savedObjectsClient.get).toHaveBeenCalled();
 
-    const args = savedObjectsClient.get.mock.calls[0];
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
-  });
-});
+//     const args = savedObjectsClient.get.mock.calls[0];
+//     expect(args).toEqual(['index-pattern', 'logstash-*']);
+//   });
+// });

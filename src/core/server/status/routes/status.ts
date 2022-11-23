@@ -38,6 +38,7 @@ import { ServiceStatus, CoreStatus } from '../types';
 import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { PackageInfo } from '../../config';
+import { ExtensionName } from '../../extensions';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -54,6 +55,7 @@ interface Deps {
     overall$: Observable<ServiceStatus>;
     core$: Observable<CoreStatus>;
     plugins$: Observable<Record<PluginName, ServiceStatus>>;
+    extensions$: Observable<Record<ExtensionName, ServiceStatus>>;
   };
 }
 
@@ -61,6 +63,7 @@ interface StatusInfo {
   overall: ServiceStatus;
   core: CoreStatus;
   plugins: Record<string, ServiceStatus>;
+  extensions: Record<string, ServiceStatus>;
 }
 
 interface StatusHttpBody {
@@ -118,9 +121,16 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
   // the plugins status when OpenSearch Dashboards starts up so this endpoint responds quickly on first boot.
   const combinedStatus$ = new ReplaySubject<
-    [ServiceStatus<unknown>, CoreStatus, Record<string, ServiceStatus<unknown>>]
+    [
+      ServiceStatus<unknown>,
+      CoreStatus,
+      Record<string, ServiceStatus<unknown>>,
+      Record<string, ServiceStatus<unknown>>
+    ]
   >(1);
-  combineLatest([status.overall$, status.core$, status.plugins$]).subscribe(combinedStatus$);
+  combineLatest([status.overall$, status.core$, status.plugins$, status.extensions$]).subscribe(
+    combinedStatus$
+  );
 
   router.get(
     {
@@ -138,7 +148,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
     async (context, req, res) => {
       const { version, buildSha, buildNum } = config.packageInfo;
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
-      const [overall, core, plugins] = await combinedStatus$.pipe(first()).toPromise();
+      const [overall, core, plugins, extensions] = await combinedStatus$.pipe(first()).toPromise();
 
       let statusInfo: StatusInfo | LegacyStatusInfo;
       if (req.query?.v8format) {
@@ -146,12 +156,14 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
           overall,
           core,
           plugins,
+          extensions,
         };
       } else {
         statusInfo = calculateLegacyStatus({
           overall,
           core,
           plugins,
+          extensions,
           versionWithoutSnapshot,
         });
       }

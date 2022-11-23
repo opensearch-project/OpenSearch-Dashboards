@@ -30,4 +30,5 @@
 
 module.exports = {
   plugins: [require('autoprefixer')()],
+  extensions: [require('autoprefixer')()],
 };

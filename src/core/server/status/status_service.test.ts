@@ -68,6 +68,7 @@ describe('StatusService', () => {
         status$: of(available),
       },
       pluginDependencies: new Map(),
+      extensionDependencies: new Map(),
       environment: environmentServiceMock.createSetupContract(),
       http: httpServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),

@@ -35,7 +35,7 @@ import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
-const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
+const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const, 'extension' as const];
 
 const DEFAULT_IMPLICIT_BUNDLE_DEPS = ['core'];
 
@@ -151,7 +151,11 @@ export class Bundle {
       json = '{}';
     }
 
-    let parsedManifest: { requiredPlugins?: string[]; requiredBundles?: string[] };
+    let parsedManifest: {
+      requiredPlugins?: string[];
+      requiredBundles?: string[];
+      requiredExtensions?: string[];
+    };
     try {
       parsedManifest = JSON.parse(json);
     } catch (error) {
@@ -162,7 +166,11 @@ export class Bundle {
 
     if (typeof parsedManifest === 'object' && parsedManifest) {
       const explicit = parsedManifest.requiredBundles || [];
-      const implicit = [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(parsedManifest.requiredPlugins || [])];
+      const implicit = [
+        ...DEFAULT_IMPLICIT_BUNDLE_DEPS,
+        ...(parsedManifest.requiredPlugins || []),
+        ...(parsedManifest.requiredExtensions || []),
+      ];
 
       if (isStringArray(explicit) && isStringArray(implicit)) {
         return {

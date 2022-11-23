@@ -88,6 +88,8 @@ export class Env {
   public readonly logDir: string;
   /** @internal */
   public readonly pluginSearchPaths: readonly string[];
+  /** @internal */
+  public readonly extensionSearchPaths: readonly string[];
 
   /**
    * Information about OpenSearch Dashboards package (version, build number etc.).
@@ -134,6 +136,13 @@ export class Env {
       resolve(this.homeDir, 'src', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
+      resolve(this.homeDir, '..', 'opensearch-dashboards-extra'),
+    ];
+
+    this.extensionSearchPaths = [
+      resolve(this.homeDir, 'src', 'extensions'),
+      resolve(this.homeDir, 'extensions'),
+      ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'extensions')] : []),
       resolve(this.homeDir, '..', 'opensearch-dashboards-extra'),
     ];
 

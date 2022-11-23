@@ -45,6 +45,7 @@ function mockProps() {
       csp: injectedMetadata.getCspConfig(),
       vars: injectedMetadata.getInjectedVars(),
       uiPlugins: injectedMetadata.getPlugins(),
+      uiExtensions: injectedMetadata.getExtensions(),
       legacyMetadata: {
         uiSettings: {
           defaults: { legacyInjectedUiSettingDefaults: true },

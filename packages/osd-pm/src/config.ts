@@ -33,13 +33,19 @@ import { resolve } from 'path';
 interface Options {
   rootPath: string;
   skipOpenSearchDashboardsPlugins?: boolean;
+  skipOpenSearchDashboardsExtensions?: boolean;
   ossOnly?: boolean;
 }
 
 /**
- * Returns all the paths where plugins are located
+ * Returns all the paths where plugins and extensions are located
  */
-export function getProjectPaths({ rootPath, ossOnly, skipOpenSearchDashboardsPlugins }: Options) {
+export function getProjectPaths({
+  rootPath,
+  ossOnly,
+  skipOpenSearchDashboardsPlugins,
+  skipOpenSearchDashboardsExtensions,
+}: Options) {
   const projectPaths = [rootPath, resolve(rootPath, 'packages/*')];
 
   // This is needed in order to install the dependencies for the declared
@@ -55,13 +61,23 @@ export function getProjectPaths({ rootPath, ossOnly, skipOpenSearchDashboardsPlu
   projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'examples/*'));
 
-  if (!skipOpenSearchDashboardsPlugins) {
+  if (!skipOpenSearchDashboardsPlugins || !skipOpenSearchDashboardsExtensions) {
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*'));
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*/packages/*'));
+  }
+
+  if (!skipOpenSearchDashboardsPlugins) {
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*/plugins/*'));
     projectPaths.push(resolve(rootPath, 'plugins/*'));
     projectPaths.push(resolve(rootPath, 'plugins/*/packages/*'));
     projectPaths.push(resolve(rootPath, 'plugins/*/plugins/*'));
+  }
+
+  if (!skipOpenSearchDashboardsExtensions) {
+    projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*/extensions/*'));
+    projectPaths.push(resolve(rootPath, 'extensions/*'));
+    projectPaths.push(resolve(rootPath, 'extensions/*/packages/*'));
+    projectPaths.push(resolve(rootPath, 'extensions/*/extensions/*'));
   }
 
   return projectPaths;

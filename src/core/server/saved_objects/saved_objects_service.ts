@@ -276,6 +276,7 @@ interface WrappedClientFactoryWrapper {
 export interface SavedObjectsStartDeps {
   opensearch: InternalOpenSearchServiceStart;
   pluginsInitialized?: boolean;
+  extensionsInitialized?: boolean;
 }
 
 export class SavedObjectsService
@@ -352,7 +353,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    { opensearch, pluginsInitialized = true }: SavedObjectsStartDeps,
+    { opensearch, pluginsInitialized = true, extensionsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -389,7 +390,8 @@ export class SavedObjectsService
      * We also cannot safely run migrations if plugins are not initialized since
      * not plugin migrations won't be registered.
      */
-    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
+    const skipMigrations =
+      this.config.migration.skip || !pluginsInitialized || !extensionsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(

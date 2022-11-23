@@ -51,6 +51,7 @@ describe('calculateLegacyStatus', () => {
       overall: available,
       core: {} as any,
       plugins: {},
+      extensions: {},
       versionWithoutSnapshot: '1.1.1',
     });
 
@@ -72,6 +73,11 @@ describe('calculateLegacyStatus', () => {
         savedObjects: critical,
       },
       plugins: {
+        a: available,
+        b: unavailable,
+        c: degraded,
+      },
+      extensions: {
         a: available,
         b: unavailable,
         c: degraded,

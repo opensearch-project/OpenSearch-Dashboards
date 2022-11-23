@@ -31,7 +31,7 @@
 import { flatten } from 'lodash';
 import { ShallowPromise } from '@osd/utility-types';
 import { pick } from '@osd/std';
-import type { CoreId, PluginOpaqueId } from '../server';
+import { CoreId, PluginOpaqueId, ExtensionOpaqueId } from '../server';
 
 /**
  * Make all properties in T optional, except for the properties whose keys are in the union K
@@ -55,7 +55,7 @@ export type IContextProvider<
   THandler extends HandlerFunction<any>,
   TContextName extends keyof HandlerContextType<THandler>
 > = (
-  // context.core will always be available, but plugin contexts are typed as optional
+  // context.core will always be available, but plugin or extension contexts are typed as optional
   context: PartialExceptFor<HandlerContextType<THandler>, 'core'>,
   ...rest: HandlerParameters<THandler>
 ) =>
@@ -174,13 +174,13 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
    *
    * Throws an exception if more than one provider is registered for the same `contextName`.
    *
-   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this context.
+   * @param opaqueId - The opaque ID for the plugin or extension that registers this context.
    * @param contextName - The key of the `TContext` object this provider supplies the value for.
    * @param provider - A {@link IContextProvider} to be called each time a new context is created.
    * @returns The {@link IContextContainer} for method chaining.
    */
   registerContext<TContextName extends keyof HandlerContextType<THandler>>(
-    pluginOpaqueId: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     contextName: TContextName,
     provider: IContextProvider<THandler, TContextName>
   ): this;
@@ -188,13 +188,13 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
   /**
    * Create a new handler function pre-wired to context for the plugin.
    *
-   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this handler.
+   * @param opaqueId - The opaque ID for the plugin or extension that registers this handler.
    * @param handler - Handler function to pass context object to.
    * @returns A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of
    * the `handler` return value.
    */
   createHandler(
-    pluginOpaqueId: PluginOpaqueId,
+    opaqueId: PluginOpaqueId | ExtensionOpaqueId,
     handler: THandler
   ): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
 }
@@ -218,10 +218,12 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
 
   /**
    * @param pluginDependencies - A map of plugins to an array of their dependencies.
+   * @param extensionDependencies - A map of extensions to an array of their dependencies.
    */
   constructor(
-    private readonly pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
-    private readonly coreId: CoreId
+    private readonly coreId: CoreId,
+    private readonly pluginDependencies?: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>,
+    private readonly extensionDependencies?: ReadonlyMap<ExtensionOpaqueId, ExtensionOpaqueId[]>
   ) {
     this.contextNamesBySource = new Map<symbol, Array<keyof HandlerContextType<THandler>>>([
       [coreId, []],
@@ -236,8 +238,14 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }
-    if (source !== this.coreId && !this.pluginDependencies.has(source)) {
-      throw new Error(`Cannot register context for unknown plugin: ${source.toString()}`);
+    if (
+      source !== this.coreId &&
+      !this.pluginDependencies!.has(source) &&
+      !this.extensionDependencies!.has(source)
+    ) {
+      throw new Error(
+        `Cannot create handler for unknown plugin or extension: ${source.toString()}`
+      );
     }
 
     this.contextProviders.set(contextName, { provider, source });
@@ -250,8 +258,14 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
   };
 
   public createHandler = (source: symbol, handler: THandler) => {
-    if (source !== this.coreId && !this.pluginDependencies.has(source)) {
-      throw new Error(`Cannot create handler for unknown plugin: ${source.toString()}`);
+    if (
+      source !== this.coreId &&
+      !this.pluginDependencies!.has(source) &&
+      !this.extensionDependencies!.has(source)
+    ) {
+      throw new Error(
+        `Cannot create handler for unknown plugin or extension: ${source.toString()}`
+      );
     }
 
     return (async (...args: HandlerParameters<THandler>) => {
@@ -301,12 +315,36 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     return new Set(this.contextNamesBySource.get(this.coreId)!);
   }
 
+  private getContextNamesForExtensionId(extensionId: symbol) {
+    // If the source is a extension...
+    const extensionDeps = this.extensionDependencies!.get(extensionId);
+    if (!extensionDeps) {
+      // This case should never be hit, but let's be safe.
+      throw new Error(`Cannot create context for unknown extension: ${extensionId.toString()}`);
+    }
+
+    return new Set([
+      // Core contexts
+      ...this.contextNamesBySource.get(this.coreId)!,
+      // Contexts source created
+      ...(this.contextNamesBySource.get(extensionId) || []),
+      // Contexts sources's dependencies created
+      ...flatten(extensionDeps.map((e) => this.contextNamesBySource.get(e) || [])),
+    ]);
+  }
+
   private getContextNamesForPluginId(pluginId: symbol) {
     // If the source is a plugin...
-    const pluginDeps = this.pluginDependencies.get(pluginId);
+    const pluginDeps = this.pluginDependencies!.get(pluginId);
     if (!pluginDeps) {
       // This case should never be hit, but let's be safe.
-      throw new Error(`Cannot create context for unknown plugin: ${pluginId.toString()}`);
+      const extensionDeps = this.extensionDependencies!.get(pluginId);
+      if (!extensionDeps) {
+        throw new Error(
+          `Cannot create context for unknown plugin or extension: ${pluginId.toString()}`
+        );
+      }
+      return this.getContextNamesForExtensionId(pluginId);
     }
 
     return new Set([

@@ -37,12 +37,17 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
 import { assertIsNpUiPluginPublicDirs, NpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 import { fromRoot } from '../../core/server/utils';
+import {
+  assertIsNpUiExtensionPublicDirs,
+  NpUiExtensionPublicDirs,
+} from '../np_ui_extension_public_dirs';
 
 /**
  *  Creates the routes that serves files from `bundlesPath`.
  *
  *  @param {Object} options
  *  @property {Array<{id,path}>} options.npUiPluginPublicDirs array of ids and paths that should be served for new platform plugins
+ *  @property {Array<{id,path}>} options.npUiExtensionPublicDirs array of ids and paths that should be served for new platform extensions
  *  @property {string} options.regularBundlesPath
  *  @property {string} options.basePublicPath
  *
@@ -51,11 +56,13 @@ import { fromRoot } from '../../core/server/utils';
 export function createBundlesRoute({
   basePublicPath,
   npUiPluginPublicDirs = [],
+  npUiExtensionPublicDirs = [],
   buildHash,
   isDist = false,
 }: {
   basePublicPath: string;
   npUiPluginPublicDirs?: NpUiPluginPublicDirs;
+  npUiExtensionPublicDirs?: NpUiExtensionPublicDirs;
   buildHash: string;
   isDist?: boolean;
 }) {
@@ -64,6 +71,7 @@ export function createBundlesRoute({
   // will store the 100 most recently used hashes.
   const fileHashCache = new FileHashCache();
   assertIsNpUiPluginPublicDirs(npUiPluginPublicDirs);
+  assertIsNpUiExtensionPublicDirs(npUiExtensionPublicDirs);
 
   if (typeof basePublicPath !== 'string') {
     throw new TypeError('basePublicPath must be a string');
@@ -85,6 +93,15 @@ export function createBundlesRoute({
       buildRouteForBundles({
         publicPath: `${basePublicPath}/${buildHash}/bundles/plugin/${id}/`,
         routePath: `/${buildHash}/bundles/plugin/${id}/`,
+        bundlesPath: path,
+        fileHashCache,
+        isDist,
+      })
+    ),
+    ...npUiExtensionPublicDirs.map(({ extensionId, path }) =>
+      buildRouteForBundles({
+        publicPath: `${basePublicPath}/${buildHash}/bundles/extension/${extensionId}/`,
+        routePath: `/${buildHash}/bundles/extension/${extensionId}/`,
         bundlesPath: path,
         fileHashCache,
         isDist,

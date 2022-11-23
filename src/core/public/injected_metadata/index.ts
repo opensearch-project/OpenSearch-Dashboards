@@ -33,5 +33,6 @@ export {
   InjectedMetadataParams,
   InjectedMetadataSetup,
   InjectedMetadataStart,
+  InjectedExtensionMetadata,
   InjectedPluginMetadata,
 } from './injected_metadata_service';

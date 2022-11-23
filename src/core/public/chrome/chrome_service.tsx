@@ -76,7 +76,7 @@ export type ChromeBranding = Branding;
 /** @public */
 export interface ChromeHelpExtension {
   /**
-   * Provide your plugin's name to create a header for separation
+   * Provide your plugin or extension's name to create a header for separation
    */
   appName: string;
   /**

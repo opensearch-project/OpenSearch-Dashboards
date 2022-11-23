@@ -41,6 +41,11 @@ import {
 } from '../common';
 
 import {
+  findOpenSearchDashboardsPlatformExtensions,
+  OpenSearchDashboardsPlatformExtension,
+} from './opensearch_dashboards_platform_extensions';
+import { getExtensionBundles } from './get_extension_bundles';
+import {
   findOpenSearchDashboardsPlatformPlugins,
   OpenSearchDashboardsPlatformPlugin,
 } from './opensearch_dashboards_platform_plugins';
@@ -98,6 +103,12 @@ interface Options {
 
   /** include examples in default scan dirs */
   examples?: boolean;
+  /** absolute paths to specific extension that should be built */
+  extensionPaths?: string[];
+  /** absolute paths to directories that should be built, overrides the default scan dirs */
+  extensionScanDirs?: string[];
+  /** absolute paths that should be added to the default scan dirs */
+  extraExtensionScanDirs?: string[];
   /** absolute paths to specific plugins that should be built */
   pluginPaths?: string[];
   /** absolute paths to directories that should be built, overrides the default scan dirs */
@@ -141,6 +152,8 @@ export interface ParsedOptions {
   profileWebpack: boolean;
   cache: boolean;
   dist: boolean;
+  extensionPaths: string[];
+  extensionScanDirs: string[];
   pluginPaths: string[];
   pluginScanDirs: string[];
   filters: string[];
@@ -198,6 +211,33 @@ export class OptimizerConfig {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
+    /**
+     * BEWARE: this needs to stay roughly synchronized with
+     * `src/core/server/config/env.ts` which determines which paths
+     * should be searched for extensions to load
+     */
+    const extensionScanDirs = options.extensionScanDirs || [
+      Path.resolve(repoRoot, 'extensions'),
+      ...(examples ? [Path.resolve('examples')] : []),
+      Path.resolve(repoRoot, 'opensearch-dashboards-extra'),
+    ];
+
+    if (!extensionScanDirs.every((p) => Path.isAbsolute(p))) {
+      throw new TypeError('extensionScanDirs must all be absolute paths');
+    }
+
+    for (const extraExtensionScanDir of options.extraExtensionScanDirs || []) {
+      if (!Path.isAbsolute(extraExtensionScanDir)) {
+        throw new TypeError('extraExtensionScanDirs must all be absolute paths');
+      }
+      extensionScanDirs.push(extraExtensionScanDir);
+    }
+
+    const extensionPaths = options.extensionPaths || [];
+    if (!extensionPaths.every((s) => Path.isAbsolute(s))) {
+      throw new TypeError('extensionPaths must all be absolute paths');
+    }
+
     const maxWorkerCount = process.env.OSD_OPTIMIZER_MAX_WORKERS
       ? parseInt(process.env.OSD_OPTIMIZER_MAX_WORKERS, 10)
       : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
@@ -219,6 +259,8 @@ export class OptimizerConfig {
       cache,
       pluginScanDirs,
       pluginPaths,
+      extensionScanDirs,
+      extensionPaths,
       filters,
       inspectWorkers,
       includeCoreBundle,
@@ -228,6 +270,10 @@ export class OptimizerConfig {
 
   static create(inputOptions: Options) {
     const options = OptimizerConfig.parseOptions(inputOptions);
+    const extensions = findOpenSearchDashboardsPlatformExtensions(
+      options.extensionScanDirs,
+      options.extensionPaths
+    );
     const plugins = findOpenSearchDashboardsPlatformPlugins(
       options.pluginScanDirs,
       options.pluginPaths
@@ -245,6 +291,7 @@ export class OptimizerConfig {
             }),
           ]
         : []),
+      ...getExtensionBundles(extensions, options.repoRoot, options.outputRoot),
       ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
 
@@ -253,6 +300,7 @@ export class OptimizerConfig {
       options.cache,
       options.watch,
       options.inspectWorkers,
+      extensions,
       plugins,
       options.repoRoot,
       options.maxWorkerCount,
@@ -268,6 +316,7 @@ export class OptimizerConfig {
     public readonly cache: boolean,
     public readonly watch: boolean,
     public readonly inspectWorkers: boolean,
+    public readonly extensions: OpenSearchDashboardsPlatformExtension[],
     public readonly plugins: OpenSearchDashboardsPlatformPlugin[],
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,

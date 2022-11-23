@@ -42,6 +42,7 @@ import * as UiSharedDeps from '@osd/ui-shared-deps';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { BundleRefsExtension } from './bundle_refs_extension';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
@@ -80,6 +81,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      new BundleRefsExtension(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 

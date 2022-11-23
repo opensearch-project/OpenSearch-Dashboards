@@ -44,6 +44,7 @@ import {
 } from './injected_metadata';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
+import { ExtensionsService } from './extensions';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
@@ -101,6 +102,7 @@ export class CoreSystem {
   private readonly i18n: I18nService;
   private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
+  private readonly extensions: ExtensionsService;
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
@@ -143,6 +145,7 @@ export class CoreSystem {
 
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    this.extensions = new ExtensionsService(this.coreContext, injectedMetadata.uiExtensions);
     this.coreApp = new CoreApp(this.coreContext);
   }
 
@@ -162,8 +165,10 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
+      const extensionDependencies = this.extensions.getOpaqueIds();
       const context = this.context.setup({
         pluginDependencies: new Map([...pluginDependencies]),
+        extensionDependencies: new Map([...extensionDependencies]),
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -180,6 +185,7 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
+      await this.extensions.setup(core);
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -259,6 +265,7 @@ export class CoreSystem {
       };
 
       await this.plugins.start(core);
+      await this.extensions.start(core);
 
       const { useExpandedHeader = true } = injectedMetadata.getBranding() ?? {};
 
@@ -295,6 +302,7 @@ export class CoreSystem {
 
   public stop() {
     this.plugins.stop();
+    this.extensions.stop();
     this.coreApp.stop();
     this.notifications.stop();
     this.http.stop();

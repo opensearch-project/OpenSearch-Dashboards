@@ -40,6 +40,7 @@ const createSetupContractMock = () => {
     getCspConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
+    getExtensions: jest.fn(),
     getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),

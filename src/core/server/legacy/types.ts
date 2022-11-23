@@ -29,6 +29,7 @@
  */
 
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
+import { ExtensionsServiceSetup, ExtensionsServiceStart, UiExtensions } from '../extensions';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
 import { InternalRenderingServiceSetup } from '../rendering';
 
@@ -40,9 +41,12 @@ export type LegacyVars = Record<string, any>;
 
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
+  extensions: ExtensionsServiceSetup;
   rendering: InternalRenderingServiceSetup;
 };
-type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
+type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart } & {
+  extensions: ExtensionsServiceStart;
+};
 
 /**
  * New platform representation of the legacy configuration (OpenSearchDashboardsConfig)
@@ -65,6 +69,8 @@ export interface LegacyServiceSetupDeps {
   core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
   uiPlugins: UiPlugins;
+  extensions: Record<string, unknown>;
+  uiExtensions: UiExtensions;
 }
 
 /**
@@ -74,6 +80,7 @@ export interface LegacyServiceSetupDeps {
 export interface LegacyServiceStartDeps {
   core: LegacyCoreStart;
   plugins: Record<string, unknown>;
+  extensions: Record<string, unknown>;
 }
 
 /**

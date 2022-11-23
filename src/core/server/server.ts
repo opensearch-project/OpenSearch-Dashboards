@@ -41,6 +41,7 @@ import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
+import { ExtensionsService, config as extensionsConfig } from './extensions';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
@@ -76,6 +77,7 @@ export class Server {
   private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
+  private readonly extensions: ExtensionsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
@@ -88,6 +90,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
 
   #pluginsInitialized?: boolean;
+  #extensionsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
   private readonly logger: LoggerFactory;
 
@@ -105,6 +108,7 @@ export class Server {
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
+    this.extensions = new ExtensionsService(core);
     this.legacy = new LegacyService(core);
     this.opensearch = new OpenSearchService(core);
     this.savedObjects = new SavedObjectsService(core);
@@ -130,6 +134,10 @@ export class Server {
     const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
+    // Discover any extensions before continuing. This allows other systems to utilize the extension dependency graph.
+    const { extensionTree, uiExtensions } = await this.extensions.discover({
+      environment: environmentSetup,
+    });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
@@ -145,6 +153,10 @@ export class Server {
       pluginDependencies: new Map([
         ...pluginTree.asOpaqueIds,
         [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
+      ]),
+      extensionDependencies: new Map([
+        ...extensionTree.asOpaqueIds,
+        [this.legacy.legacyId, [...extensionTree.asOpaqueIds.keys()]],
       ]),
     });
 
@@ -175,6 +187,7 @@ export class Server {
     const statusSetup = await this.status.setup({
       opensearch: opensearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
+      extensionDependencies: extensionTree.asNames,
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
       http: httpSetup,
@@ -185,6 +198,7 @@ export class Server {
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      uiExtensions,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -217,10 +231,20 @@ export class Server {
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
+    const extensionsSetup = await this.extensions.setup(coreSetup);
+    this.#extensionsInitialized = extensionsSetup.initialized;
+
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
+      core: {
+        ...coreSetup,
+        plugins: pluginsSetup,
+        extensions: extensionsSetup,
+        rendering: renderingSetup,
+      },
       plugins: mapToObject(pluginsSetup.contracts),
       uiPlugins,
+      extensions: mapToObject(extensionsSetup.contracts),
+      uiExtensions,
     });
 
     this.registerCoreContext(coreSetup);
@@ -243,6 +267,7 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({
       opensearch: opensearchStart,
       pluginsInitialized: this.#pluginsInitialized,
+      extensionsInitialized: this.#extensionsInitialized,
     });
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
@@ -266,13 +291,16 @@ export class Server {
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
+    const extensionsStart = await this.extensions.start(this.coreStart);
 
     await this.legacy.start({
       core: {
         ...this.coreStart,
         plugins: pluginsStart,
+        extensions: extensionsStart,
       },
       plugins: mapToObject(pluginsStart.contracts),
+      extensions: mapToObject(extensionsStart.contracts),
     });
 
     await this.http.start();
@@ -286,6 +314,7 @@ export class Server {
 
     await this.legacy.stop();
     await this.plugins.stop();
+    await this.extensions.stop();
     await this.savedObjects.stop();
     await this.opensearch.stop();
     await this.http.stop();
@@ -315,6 +344,7 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
+      extensionsConfig,
       devConfig,
       opensearchDashboardsConfig,
       savedObjectsConfig,

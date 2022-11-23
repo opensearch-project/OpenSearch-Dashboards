@@ -28,19 +28,20 @@
  * under the License.
  */
 
-import { PluginOpaqueId } from '../../server';
+import { PluginOpaqueId, ExtensionOpaqueId } from '../../server';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
 import { CoreContext } from '../core_context';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
+const extensionDependencies = new Map<ExtensionOpaqueId, ExtensionOpaqueId[]>();
 
 describe('ContextService', () => {
   describe('#setup()', () => {
-    test('createContextContainer returns a new container configured with pluginDependencies', () => {
+    test('createContextContainer returns a new container configured with pluginDependencies and extensionDependencies', () => {
       const coreId = Symbol();
       const service = new ContextService({ coreId } as CoreContext);
-      const setup = service.setup({ pluginDependencies });
+      const setup = service.setup({ pluginDependencies, extensionDependencies });
       expect(setup.createContextContainer()).toBeDefined();
       expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
     });

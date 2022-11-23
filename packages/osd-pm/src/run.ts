@@ -44,6 +44,9 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       skipOpenSearchDashboardsPlugins: Boolean(
         config.options['skip-opensearch-dashboards-plugins']
       ),
+      skipOpenSearchDashboardsExtensions: Boolean(
+        config.options['skip-opensearch-dashboards-extensions']
+      ),
       ossOnly: Boolean(config.options.oss),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include),

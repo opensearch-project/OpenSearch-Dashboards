@@ -38,6 +38,7 @@ import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
 import { PluginOpaqueId } from '../plugins';
+import { ExtensionOpaqueId } from '../extensions';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -154,10 +155,10 @@ export class ApplicationService {
       this.subscriptions.push(subscription);
     };
 
-    const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
+    const wrapMount = (opaqueId: PluginOpaqueId | ExtensionOpaqueId, app: App<any>): AppMount => {
       let handler: AppMount;
       if (isAppMountDeprecated(app.mount)) {
-        handler = this.mountContext!.createHandler(plugin, app.mount);
+        handler = this.mountContext!.createHandler(opaqueId, app.mount);
         if (process.env.NODE_ENV === 'development') {
           // eslint-disable-next-line no-console
           console.warn(
@@ -175,7 +176,7 @@ export class ApplicationService {
 
     return {
       registerMountContext: this.mountContext!.registerContext,
-      register: (plugin, app: App<any>) => {
+      register: (opaqueId, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
         if (this.registrationClosed) {
@@ -203,7 +204,7 @@ export class ApplicationService {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
           exactRoute: app.exactRoute ?? false,
-          mount: wrapMount(plugin, app),
+          mount: wrapMount(opaqueId, app),
           unmountBeforeMounting: false,
         });
       },

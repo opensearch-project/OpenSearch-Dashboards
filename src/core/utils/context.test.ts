@@ -55,7 +55,7 @@ const coreId = Symbol();
 
 describe('ContextContainer', () => {
   it('does not allow the same context to be registered twice', () => {
-    const contextContainer = new ContextContainer<(context: MyContext) => string>(plugins, coreId);
+    const contextContainer = new ContextContainer<(context: MyContext) => string>(coreId, plugins);
     contextContainer.registerContext(coreId, 'ctxFromA', () => 'aString');
 
     expect(() =>
@@ -68,8 +68,8 @@ describe('ContextContainer', () => {
   describe('registerContext', () => {
     it('throws error if called with an unknown symbol', async () => {
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
       await expect(() =>
         contextContainer.registerContext(Symbol('unknown'), 'ctxFromA', jest.fn())
@@ -82,8 +82,8 @@ describe('ContextContainer', () => {
   describe('context building', () => {
     it('resolves dependencies', async () => {
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
       expect.assertions(8);
       contextContainer.registerContext(coreId, 'core1', (context) => {
@@ -136,8 +136,8 @@ describe('ContextContainer', () => {
       expect.assertions(4);
 
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
       contextContainer
         .registerContext(pluginA, 'ctxFromA', (context) => {
@@ -167,8 +167,8 @@ describe('ContextContainer', () => {
     it('exposes all core context to core providers', async () => {
       expect.assertions(4);
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
 
       contextContainer
@@ -195,8 +195,8 @@ describe('ContextContainer', () => {
 
     it('does not expose plugin contexts to core handler', async () => {
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
 
       contextContainer
@@ -217,7 +217,7 @@ describe('ContextContainer', () => {
       expect.assertions(6);
       const contextContainer = new ContextContainer<
         (context: MyContext, arg1: string, arg2: number) => string
-      >(plugins, coreId);
+      >(coreId, plugins);
 
       contextContainer.registerContext(coreId, 'core1', (context, str, num) => {
         expect(str).toEqual('passed string');
@@ -254,8 +254,8 @@ describe('ContextContainer', () => {
   describe('createHandler', () => {
     it('throws error if called with an unknown symbol', async () => {
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
       await expect(() =>
         contextContainer.createHandler(Symbol('unknown'), jest.fn())
@@ -266,8 +266,8 @@ describe('ContextContainer', () => {
 
     it('returns value from original handler', async () => {
       const contextContainer = new ContextContainer<(context: MyContext) => string>(
-        plugins,
-        coreId
+        coreId,
+        plugins
       );
       const rawHandler1 = jest.fn(() => 'handler1');
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
@@ -278,7 +278,7 @@ describe('ContextContainer', () => {
     it('passes additional arguments to handlers', async () => {
       const contextContainer = new ContextContainer<
         (context: MyContext, arg1: string, arg2: number) => string
-      >(plugins, coreId);
+      >(coreId, plugins);
 
       const rawHandler1 = jest.fn<string, [MyContext, string, number]>(() => 'handler1');
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);

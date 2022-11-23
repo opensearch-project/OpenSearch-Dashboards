@@ -34,6 +34,7 @@ interface Status {
   state: 'green' | 'red' | 'yellow';
   title?: string;
   id?: string;
+  extensionId?: string;
   icon: string;
   message: string;
   uiColor: string;

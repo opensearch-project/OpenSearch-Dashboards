@@ -31,6 +31,7 @@
 import { ToolingLog } from '../tooling_log';
 import { OsdClientRequester, ReqOptions } from './osd_client_requester';
 import { OsdClientStatus } from './osd_client_status';
+import { OsdClientExtensions } from './osd_client_extensions';
 import { OsdClientPlugins } from './osd_client_plugins';
 import { OsdClientVersion } from './osd_client_version';
 import { OsdClientSavedObjects } from './osd_client_saved_objects';
@@ -45,6 +46,7 @@ export interface OsdClientOptions {
 
 export class OsdClient {
   readonly status: OsdClientStatus;
+  readonly extensions: OsdClientExtensions;
   readonly plugins: OsdClientPlugins;
   readonly version: OsdClientVersion;
   readonly savedObjects: OsdClientSavedObjects;
@@ -74,6 +76,7 @@ export class OsdClient {
       certificateAuthorities: options.certificateAuthorities,
     });
     this.status = new OsdClientStatus(this.requester);
+    this.extensions = new OsdClientExtensions(this.status);
     this.plugins = new OsdClientPlugins(this.status);
     this.version = new OsdClientVersion(this.status);
     this.savedObjects = new OsdClientSavedObjects(this.log, this.requester);

@@ -41,7 +41,10 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
 
   const server = createHttpServer(coreContext);
   const httpSetup = await server.setup({
-    context: contextService.setup({ pluginDependencies: new Map() }),
+    context: contextService.setup({
+      pluginDependencies: new Map(),
+      extensionDependencies: new Map(),
+    }),
   });
   const handlerContext = coreMock.createRequestHandlerContext();
 

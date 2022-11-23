@@ -58,6 +58,7 @@ import { statusServiceMock } from '../status/status_service.mock';
 import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { DiscoveredExtension } from '../extensions';
 
 const MockOsdServer: jest.Mock<OsdServer> = OsdServer as any;
 
@@ -100,6 +101,10 @@ beforeEach(() => {
         initialized: true,
         contracts: new Map([['plugin-id', 'plugin-value']]),
       },
+      extensions: {
+        initialized: true,
+        contracts: new Map([['extension-id', 'extension-value']]),
+      },
       rendering: renderingServiceMock,
       environment: environmentSetup,
       status: statusServiceMock.createInternalSetupContract(),
@@ -122,14 +127,31 @@ beforeEach(() => {
       ]),
       browserConfigs: new Map(),
     },
+    extensions: { 'extension-id': 'extension-value' },
+    uiExtensions: {
+      public: new Map([['extension-id', {} as DiscoveredExtension]]),
+      internal: new Map([
+        [
+          'extension-id',
+          {
+            requiredBundles: [],
+            publicTargetDir: 'path/to/target/public',
+            publicAssetsDir: '/extensions/name/assets/',
+          },
+        ],
+      ]),
+      browserConfigs: new Map(),
+    },
   };
 
   startDeps = {
     core: {
       ...coreMock.createInternalStart(),
       plugins: { contracts: new Map() },
+      extensions: { contracts: new Map() },
     },
     plugins: {},
+    extensions: {},
   };
 
   config$ = new BehaviorSubject<Config>(

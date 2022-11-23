@@ -78,6 +78,7 @@ export async function loadAction({
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const opensearchDashboardsPluginIds = await osdClient.plugins.getEnabledIds();
+  const opensearchDashboardsExtensionIds = await osdClient.extensions.getEnabledIds();
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -121,7 +122,10 @@ export async function loadAction({
   if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
     await migrateOpenSearchDashboardsIndex({ client, osdClient });
 
-    if (opensearchDashboardsPluginIds.includes('spaces')) {
+    if (
+      opensearchDashboardsPluginIds.includes('spaces') ||
+      opensearchDashboardsExtensionIds.includes('spaces')
+    ) {
       await createDefaultSpace({ client, index: '.kibana' });
     }
   }

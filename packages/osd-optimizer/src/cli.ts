@@ -84,6 +84,13 @@ run(
       throw createFlagError('expected --workers to be a number greater than 0');
     }
 
+    const extraExtensionScanDirs = ([] as string[])
+      .concat((flags['scan-dir'] as string | string[]) || [])
+      .map((p) => Path.resolve(p));
+    if (!extraExtensionScanDirs.every((s) => typeof s === 'string')) {
+      throw createFlagError('expected --scan-dir to be a string');
+    }
+
     const extraPluginScanDirs = ([] as string[])
       .concat((flags['scan-dir'] as string | string[]) || [])
       .map((p) => Path.resolve(p));
@@ -119,6 +126,7 @@ run(
       cache,
       examples: examples && !(validateLimits || updateLimits),
       profileWebpack,
+      extraExtensionScanDirs,
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,

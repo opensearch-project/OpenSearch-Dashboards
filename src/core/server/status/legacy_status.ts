@@ -34,11 +34,13 @@ import { deepFreeze } from '@osd/std';
 
 import { ServiceStatusLevels, ServiceStatus, CoreStatus } from './types';
 import { PluginName } from '../plugins';
+import { ExtensionName } from '../extensions';
 
 interface Deps {
   overall: ServiceStatus;
   core: CoreStatus;
   plugins: Record<PluginName, ServiceStatus>;
+  extensions: Record<ExtensionName, ServiceStatus>;
   versionWithoutSnapshot: string;
 }
 
@@ -74,6 +76,7 @@ export const calculateLegacyStatus = ({
   core,
   overall,
   plugins,
+  extensions,
   versionWithoutSnapshot,
 }: Deps): LegacyStatusInfo => {
   const since = new Date().toISOString();
@@ -94,7 +97,15 @@ export const calculateLegacyStatus = ({
     serviceStatusToHttpComponent(`plugin:${pluginName}@${versionWithoutSnapshot}`, s, since)
   );
 
-  const componentStatuses: StatusComponentHttp[] = [...coreStatuses, ...pluginStatuses];
+  const extensionStatuses = Object.entries(extensions).map(([extensionName, s]) =>
+    serviceStatusToHttpComponent(`extension:${extensionName}@${versionWithoutSnapshot}`, s, since)
+  );
+
+  const componentStatuses: StatusComponentHttp[] = [
+    ...coreStatuses,
+    ...pluginStatuses,
+    ...extensionStatuses,
+  ];
 
   return {
     overall: overallLegacy,

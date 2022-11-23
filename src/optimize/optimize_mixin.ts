@@ -33,6 +33,7 @@ import Hapi from '@hapi/hapi';
 import { createBundlesRoute } from './bundles_route';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
 import OsdServer, { OpenSearchDashboardsConfig } from '../legacy/server/osd_server';
+import { getNpUiExtensionPublicDirs } from './np_ui_extension_public_dirs';
 
 export const optimizeMixin = async (
   osdServer: OsdServer,
@@ -43,6 +44,7 @@ export const optimizeMixin = async (
     createBundlesRoute({
       basePublicPath: config.get('server.basePath'),
       npUiPluginPublicDirs: getNpUiPluginPublicDirs(osdServer),
+      npUiExtensionPublicDirs: getNpUiExtensionPublicDirs(osdServer),
       buildHash: osdServer.newPlatform.env.packageInfo.buildNum.toString(),
       isDist: osdServer.newPlatform.env.packageInfo.dist,
     })

@@ -37,6 +37,7 @@ import { InternalHttpServiceSetup, OpenSearchDashboardsRequest, LegacyRequest } 
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
+import { DiscoveredExtension, UiExtensions } from '../extensions';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -67,6 +68,11 @@ export interface RenderingMetadata {
       plugin: DiscoveredPlugin;
       config?: Record<string, unknown>;
     }>;
+    uiExtensions: Array<{
+      extensionId: string;
+      extension: DiscoveredExtension;
+      config?: Record<string, unknown>;
+    }>;
     legacyMetadata: {
       uiSettings: {
         defaults: Record<string, any>;
@@ -82,6 +88,7 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+  uiExtensions: UiExtensions;
 }
 
 /** @public */

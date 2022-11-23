@@ -297,6 +297,7 @@ export class LegacyService implements CoreService {
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
+      getStartServicesForExtensions: () => Promise.resolve([coreStart, startDeps.extensions, {}]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -309,14 +310,17 @@ export class LegacyService implements CoreService {
       setupDeps: {
         core: coreSetup,
         plugins: setupDeps.plugins,
+        extensions: setupDeps.extensions,
       },
       startDeps: {
         core: coreStart,
         plugins: startDeps.plugins,
+        extensions: startDeps.extensions,
       },
       __internals: {
         hapiServer: setupDeps.core.http.server,
         uiPlugins: setupDeps.uiPlugins,
+        uiExtensions: setupDeps.uiExtensions,
         rendering: setupDeps.core.rendering,
       },
       logger: this.coreContext.logger,

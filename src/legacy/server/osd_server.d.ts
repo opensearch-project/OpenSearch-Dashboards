@@ -43,6 +43,8 @@ import {
 import { LegacyConfig } from '../../core/server/legacy';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { UiExtensions } from '../../core/server/extensions';
 
 // lot of legacy code was assuming this type only had these two methods
 export type OpenSearchDashboardsConfig = Pick<LegacyConfig, 'get' | 'has'>;
@@ -50,6 +52,10 @@ export type OpenSearchDashboardsConfig = Pick<LegacyConfig, 'get' | 'has'>;
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
   interface PluginProperties {
+    spaces: any;
+  }
+
+  interface ExtensionProperties {
     spaces: any;
   }
 
@@ -66,11 +72,16 @@ export interface PluginsSetup {
   [key: string]: object;
 }
 
+export interface ExtensionsSetup {
+  [key: string]: object;
+}
+
 export interface OpenSearchDashboardsCore {
   __internals: {
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
+    uiExtensions: UiExtensions;
   };
   env: {
     mode: Readonly<EnvironmentMode>;
@@ -79,10 +90,12 @@ export interface OpenSearchDashboardsCore {
   setupDeps: {
     core: CoreSetup;
     plugins: PluginsSetup;
+    extensions: ExtensionsSetup;
   };
   startDeps: {
     core: CoreStart;
     plugins: Record<string, object>;
+    extensions: Record<string, object>;
   };
   logger: LoggerFactory;
 }

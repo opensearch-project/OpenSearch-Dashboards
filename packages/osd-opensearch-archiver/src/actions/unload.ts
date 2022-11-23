@@ -61,6 +61,7 @@ export async function unloadAction({
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const opensearchDashboardsPluginIds = await osdClient.plugins.getEnabledIds();
+  const opensearchDashboardsExtensionIds = await osdClient.extensions.getEnabledIds();
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
@@ -70,6 +71,7 @@ export async function unloadAction({
       createReadStream(resolve(inputDir, filename)) as Readable,
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
+      createDeleteIndexStream(client, stats, log, opensearchDashboardsExtensionIds),
       createDeleteIndexStream(client, stats, log, opensearchDashboardsPluginIds),
     ] as [Readable, ...Writable[]]);
   }

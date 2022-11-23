@@ -52,6 +52,7 @@ import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config'
 import { HttpConfigType } from '../http/http_config';
 import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
+import { UiExtensions } from '../extensions';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
@@ -67,6 +68,7 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    uiExtensions,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     const [opensearchDashboardsConfig, serverConfig] = await Promise.all([
       this.coreContext.configService
@@ -129,6 +131,13 @@ export class RenderingService {
                 id,
                 plugin,
                 config: await this.getUiConfig(uiPlugins, id),
+              }))
+            ),
+            uiExtensions: await Promise.all(
+              [...uiExtensions.public].map(async ([extensionId, extension]) => ({
+                extensionId,
+                extension,
+                config: await this.getUiConfigForExtensions(uiExtensions, extensionId),
               }))
             ),
             legacyMetadata: {
@@ -342,6 +351,12 @@ export class RenderingService {
 
   private async getUiConfig(uiPlugins: UiPlugins, pluginId: string) {
     const browserConfig = uiPlugins.browserConfigs.get(pluginId);
+
+    return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  }
+
+  private async getUiConfigForExtensions(uiExtensions: UiExtensions, extensionId: string) {
+    const browserConfig = uiExtensions.browserConfigs.get(extensionId);
 
     return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
   }

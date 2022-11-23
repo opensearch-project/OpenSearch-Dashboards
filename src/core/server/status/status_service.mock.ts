@@ -71,6 +71,11 @@ const createInternalSetupContractMock = () => {
       getDependenciesStatus$: jest.fn(),
       getDerivedStatus$: jest.fn(),
     },
+    extensions: {
+      set: jest.fn(),
+      getDependenciesStatus$: jest.fn(),
+      getDerivedStatus$: jest.fn(),
+    },
   };
 
   return setupContract;

@@ -109,6 +109,7 @@ export class OpenSearchDashboards {
   /** filter the projects to just those matching certain paths/include/exclude tags */
   getFilteredProjects(options: {
     skipOpenSearchDashboardsPlugins: boolean;
+    skipOpenSearchDashboardsExtensions: boolean;
     ossOnly: boolean;
     exclude: string[];
     include: string[];
