@@ -3,14 +3,14 @@
 
 name: Build and test
 
-# trigger on every commit push and PR for all branches except feature branches and pushes for backport branches
+# trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: [ '**', '!feature/**', '!backport/**' ]
+    branches: [ '**', '!backport/**' ]
     paths-ignore:
       - '**/*.md'
   pull_request:
-    branches: [ '**', '!feature/**' ]
+    branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
 
