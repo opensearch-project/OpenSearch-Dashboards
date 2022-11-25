@@ -66,7 +66,7 @@ export function runCli() {
         },
         help: `
           --skip-archive                       Don't create the zip file, just create the build/opensearch-dashboards directory
-          --opensearch-dashboards-version, -v  OpenSearch version that the
+          --opensearch-dashboards-version, -k  OpenSearch Dashboards version that the built plugin will target
         `,
       },
       async run({ log, flags }) {

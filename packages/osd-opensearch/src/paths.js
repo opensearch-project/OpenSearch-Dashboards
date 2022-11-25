@@ -44,3 +44,4 @@ exports.OPENSEARCH_BIN = maybeUseBat('bin/opensearch');
 exports.OPENSEARCH_CONFIG = 'config/opensearch.yml';
 
 exports.OPENSEARCH_KEYSTORE_BIN = maybeUseBat('./bin/opensearch-keystore');
+exports.OPENSEARCH_PLUGIN = maybeUseBat('./bin/opensearch-plugin');

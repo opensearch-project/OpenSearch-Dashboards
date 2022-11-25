@@ -34,7 +34,7 @@ const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { OPENSEARCH_BIN } = require('./paths');
+const { OPENSEARCH_BIN, OPENSEARCH_PLUGIN } = require('./paths');
 const { log: defaultLog, parseOpenSearchLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -171,6 +171,29 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Unpacks a tar or zip file containing the OpenSearch plugin directory for an
+   * OpenSearch cluster.
+   *
+   * @param {string} installPath
+   * @param {Array|string} opensearchPlugins Array or string of OpenSearch plugin(s) artifact url
+   */
+  async installOpenSearchPlugins(installPath, opensearchPluginsPath) {
+    if (opensearchPluginsPath) {
+      this._log.info(chalk.bold(`Downloading OpenSearch plugin(s) on the cluster snapshot`));
+      this._log.indent(4);
+      opensearchPluginsPath =
+        typeof opensearchPluginsPath === 'string' ? [opensearchPluginsPath] : opensearchPluginsPath;
+      // Run opensearch-plugin tool script to download OpenSearch plugin artifacts
+      for (const pluginPath of opensearchPluginsPath) {
+        this._log.info(`Installing OpenSearch Plugin from the path: ${pluginPath}`);
+        await execa(OPENSEARCH_PLUGIN, [`install`, `--batch`, pluginPath], { cwd: installPath });
+      }
+      this._log.info(`Plugin installation complete`);
+      this._log.indent(-4);
+    }
+  }
+
+  /**
    * Starts OpenSearch and returns resolved promise once started
    *
    * @param {String} installPath
@@ -229,7 +252,22 @@ exports.Cluster = class Cluster {
       throw new Error('OpenSearch has not been started');
     }
 
-    await treeKillAsync(this._process.pid);
+    /* Temporary fix for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2811
+     *
+     * `tree-kill` behaves differently on Windows, where it throws if `pid` is already dead, when
+     * compared to other operating systems, where it silently returns.
+     */
+    try {
+      await treeKillAsync(this._process.pid);
+    } catch (ex) {
+      console.log('ex.message', ex.message);
+      if (
+        process.platform === 'win32' &&
+        !ex.message?.includes(`The process "${this._process.pid}" not found`)
+      ) {
+        throw ex;
+      }
+    }
 
     await this._outcome;
   }

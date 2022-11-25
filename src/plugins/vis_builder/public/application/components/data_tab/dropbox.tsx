@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -127,7 +128,11 @@ const DropboxComponent = ({
               } ${canDrop ? 'canDrop' : ''}`}
               {...(isValidDropTarget && dropProps)}
             >
-              <EuiText size="s">Click or drop to add</EuiText>
+              <EuiText size="s">
+                {i18n.translate('visBuilder.dropbox.addField.title', {
+                  defaultMessage: 'Click or drop to add',
+                })}
+              </EuiText>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 aria-label="clear-field"

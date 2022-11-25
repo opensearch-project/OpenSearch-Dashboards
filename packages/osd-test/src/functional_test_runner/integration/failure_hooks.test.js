@@ -55,6 +55,7 @@ describe('failure hooks', function () {
       {
         flag: '$FAILING_TEST$',
         assert(lines) {
+          expect(lines.shift()).to.match(/\$FAILING_TEST\$/);
           expect(lines.shift()).to.match(/global before each/);
           expect(lines.shift()).to.match(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
           expect(lines.shift()).to.match(/info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$/);

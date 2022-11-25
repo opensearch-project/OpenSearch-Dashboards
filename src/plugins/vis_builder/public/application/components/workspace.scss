@@ -30,6 +30,7 @@ $keyframe-multiplier: 1 / $animation-multiplier;
     animation: vbDragAnimation #{$total-duartion}s ease-in-out infinite forwards;
     position: absolute;
     top: 34.5%;
+    width: 50% !important;
   }
 }
 
