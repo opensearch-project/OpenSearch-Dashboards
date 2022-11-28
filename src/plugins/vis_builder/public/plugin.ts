@@ -74,42 +74,9 @@ export class VisBuilderPlugin
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations, data: dataSetup }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations }: VisBuilderPluginSetupDependencies
   ) {
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      setActiveUrl,
-      restorePreviousUrl,
-    } = createOsdUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/vis-builder'),
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: dataSetup.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
-          ),
-        },
-      ],
-      getHistory: () => {
-        return this.currentHistory!;
-      },
-    });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
+    // Register Default Visualizations
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
 
@@ -127,6 +94,35 @@ export class VisBuilderPlugin
         const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
         const { data, savedObjects, navigation, expressions } = pluginsStart;
         this.currentHistory = params.history;
+
+        const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+          baseUrl: core.http.basePath.prepend('/app/vis-builder'),
+          defaultSubUrl: '#/',
+          storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
+          navLinkUpdater$: this.appStateUpdater,
+          toastNotifications: core.notifications.toasts,
+          stateParams: [
+            {
+              osdUrlKey: '_g',
+              stateUpdate$: data.query.state$.pipe(
+                filter(
+                  ({ changes }) =>
+                    !!(changes.globalFilters || changes.time || changes.refreshInterval)
+                ),
+                map(({ state }) => ({
+                  ...state,
+                  filters: state.filters?.filter(opensearchFilters.isFilterPinned),
+                }))
+              ),
+            },
+          ],
+          getHistory: () => {
+            return this.currentHistory!;
+          },
+        });
+        this.stopUrlTracking = () => {
+          stopUrlTracker();
+        };
 
         // make sure the index pattern list is up to date
         data.indexPatterns.clearCache();

@@ -21,7 +21,7 @@ export interface MetadataState {
     };
     state: EditorState;
   };
-  originatingApp: string | undefined;
+  originatingApp?: string;
 }
 
 const initialState: MetadataState = {
@@ -52,7 +52,7 @@ export const slice = createSlice({
     setEditorState: (state, action: PayloadAction<{ state: EditorState }>) => {
       state.editor.state = action.payload.state;
     },
-    setOriginatingApp: (state, action: PayloadAction<{ state: string | undefined }>) => {
+    setOriginatingApp: (state, action: PayloadAction<{ state?: string }>) => {
       state.originatingApp = action.payload.state;
     },
     setState: (_state, action: PayloadAction<MetadataState>) => {
