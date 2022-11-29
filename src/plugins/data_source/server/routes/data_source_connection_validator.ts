@@ -11,10 +11,13 @@ export class DataSourceConnectionValidator {
 
   async validate() {
     try {
-      const req = await this.callDataCluster.info<OpenSearchClient>();
-      return req;
+      return await this.callDataCluster.info<OpenSearchClient>();
     } catch (e) {
-      throw createDataSourceError(e);
+      if (e.statusCode === 403) {
+        return true;
+      } else {
+        throw createDataSourceError(e);
+      }
     }
   }
 }

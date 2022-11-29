@@ -5,15 +5,13 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
-import { DataSourcePluginConfigType } from '../../config';
-import { getRootClient, getValidationClient, OpenSearchClientPoolSetup } from '../client';
-import { AuthType, DataSourceAttributes } from '../../common/data_sources';
+import { DataSourceAttributes } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
+import { DataSourceServiceSetup } from '../data_source_service';
 
-export const registerTestConnection = (
+export const registerTestConnectionRoute = (
   router: IRouter,
-  config: DataSourcePluginConfigType,
-  { getClientFromPool, addClientToPool }: OpenSearchClientPoolSetup
+  dataSourceServiceSetup: DataSourceServiceSetup
 ) => {
   router.post(
     {
@@ -38,19 +36,10 @@ export const registerTestConnection = (
     },
     async (context, request, response) => {
       const dataSource: DataSourceAttributes = request.body as DataSourceAttributes;
-      const {
-        endpoint,
-        auth: { type },
-      } = dataSource;
-      if (type === AuthType.UsernamePasswordType) {
-        dataSource.endpoint += `${
-          endpoint.slice(-1) === '/' ? '' : '/'
-        }_plugins/_security/api/account`;
-      }
 
-      // Reuse the client cache in configure_client.ts, but require some refactor
-      const rootClient = getRootClient(dataSource, config, { getClientFromPool, addClientToPool });
-      const dataSourceClient: OpenSearchClient = await getValidationClient(rootClient, dataSource);
+      const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
+        dataSource
+      );
 
       try {
         const dsValidator = new DataSourceConnectionValidator(dataSourceClient);
