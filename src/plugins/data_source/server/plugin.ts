@@ -29,6 +29,8 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
+import { registerTestConnectionRoute } from './routes/test_connection';
+
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
   private readonly cryptographyService: CryptographyService;
@@ -91,10 +93,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     core.auditTrail.register(auditorFactory);
     const auditTrailPromise = core.getStartServices().then(([coreStart]) => coreStart.auditTrail);
 
-    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(
-      config,
-      core
-    );
+    const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',
@@ -105,6 +104,9 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
         auditTrailPromise
       )
     );
+
+    const router = core.http.createRouter();
+    registerTestConnectionRoute(router, dataSourceService);
 
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),

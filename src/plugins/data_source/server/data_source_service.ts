@@ -3,18 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Auditor,
-  CoreSetup,
-  LegacyCallAPIOptions,
-  Logger,
-  OpenSearchClient,
-} from '../../../../src/core/server';
+import { LegacyCallAPIOptions, Logger, OpenSearchClient } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
 import { configureClient, OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
 import { DataSourceClientParams } from './types';
-import { registerTestConnection } from './routes/test_connection';
+import { DataSourceAttributes } from '../common/data_sources';
+import { configureTestClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
@@ -27,6 +22,8 @@ export interface DataSourceServiceSetup {
       options?: LegacyCallAPIOptions
     ) => Promise<unknown>;
   };
+
+  getTestingClient: (dataSource: DataSourceAttributes) => Promise<OpenSearchClient>;
 }
 export class DataSourceService {
   private readonly openSearchClientPool: OpenSearchClientPool;
@@ -39,10 +36,7 @@ export class DataSourceService {
     this.legacyClientPool = new OpenSearchClientPool(this.legacyLogger);
   }
 
-  async setup(
-    config: DataSourcePluginConfigType,
-    core: CoreSetup
-  ): Promise<DataSourceServiceSetup> {
+  async setup(config: DataSourcePluginConfigType): Promise<DataSourceServiceSetup> {
     const opensearchClientPoolSetup = await this.openSearchClientPool.setup(config);
     const legacyClientPoolSetup = await this.legacyClientPool.setup(config);
 
@@ -50,6 +44,10 @@ export class DataSourceService {
       params: DataSourceClientParams
     ): Promise<OpenSearchClient> => {
       return configureClient(params, opensearchClientPoolSetup, config, this.logger);
+    };
+
+    const getTestingClient = (dataSource: DataSourceAttributes): Promise<OpenSearchClient> => {
+      return configureTestClient(dataSource, opensearchClientPoolSetup, config, this.logger);
     };
 
     const getDataSourceLegacyClient = (params: DataSourceClientParams) => {
@@ -69,11 +67,7 @@ export class DataSourceService {
       };
     };
 
-    /* Register the internal endpoint used for Endpoint validation - Test Connection */
-    const router = core.http.createRouter();
-    registerTestConnection(router, config, opensearchClientPoolSetup);
-
-    return { getDataSourceClient, getDataSourceLegacyClient };
+    return { getDataSourceClient, getDataSourceLegacyClient, getTestingClient };
   }
 
   start() {}
