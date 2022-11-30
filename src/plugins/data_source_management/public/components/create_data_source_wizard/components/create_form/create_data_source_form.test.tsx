@@ -20,11 +20,13 @@ const authTypeIdentifier = '[data-test-subj="createDataSourceFormAuthTypeSelect"
 const usernameIdentifier = '[data-test-subj="createDataSourceFormUsernameField"]';
 const passwordIdentifier = '[data-test-subj="createDataSourceFormPasswordField"]';
 const createButtonIdentifier = '[data-test-subj="createDataSourceButton"]';
+const testConnectionButtonIdentifier = '[data-test-subj="createDataSourceTestConnectionButton"]';
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockSubmitHandler = jest.fn();
+  const mockTestConnectionHandler = jest.fn();
 
   const getFields = (comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>) => {
     return {
@@ -66,6 +68,7 @@ describe('Datasource Management: Create Datasource form', () => {
     component = mount(
       wrapWithIntl(
         <CreateDataSourceForm
+          handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}
           existingDatasourceNamesList={['dup20']}
         />
@@ -81,7 +84,8 @@ describe('Datasource Management: Create Datasource form', () => {
 
   /* Scenario 1: Should render the page normally*/
   test('should render normally', () => {
-    expect(component).toMatchSnapshot();
+    const testConnBtn = component.find(testConnectionButtonIdentifier).last();
+    expect(testConnBtn.prop('disabled')).toBe(true);
   });
 
   /* Scenario 2: submit without any input from user - should display validation error messages*/
@@ -117,7 +121,6 @@ describe('Datasource Management: Create Datasource form', () => {
 
     const { title, description, endpoint, username, password } = getFields(component);
 
-    expect(component).toMatchSnapshot();
     expect(title.prop('isInvalid')).toBe(true);
     expect(description.prop('isInvalid')).toBe(undefined);
     expect(endpoint.prop('isInvalid')).toBe(false);
@@ -142,9 +145,10 @@ describe('Datasource Management: Create Datasource form', () => {
     changeTextFieldValue(usernameIdentifier, 'test123');
     changeTextFieldValue(passwordIdentifier, 'test123');
 
-    findTestSubject(component, 'createDataSourceButton').simulate('click');
+    findTestSubject(component, 'createDataSourceTestConnectionButton').simulate('click');
 
-    expect(component).toMatchSnapshot();
+    findTestSubject(component, 'createDataSourceButton').simulate('click');
+    expect(mockTestConnectionHandler).toHaveBeenCalled();
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
   });
 
@@ -158,7 +162,6 @@ describe('Datasource Management: Create Datasource form', () => {
 
     findTestSubject(component, 'createDataSourceButton').simulate('click');
 
-    expect(component).toMatchSnapshot();
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
   });
 

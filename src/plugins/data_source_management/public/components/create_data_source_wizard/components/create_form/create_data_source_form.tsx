@@ -432,7 +432,7 @@ export class CreateDataSourceForm extends React.Component<
                   fill={false}
                   disabled={!this.isFormValid()}
                   onClick={this.onClickTestConnection}
-                  data-test-subj="createDataSourceButton"
+                  data-test-subj="createDataSourceTestConnectionButton"
                 >
                   <FormattedMessage
                     id="dataSourcesManagement.createDataSource.testConnectionButton"

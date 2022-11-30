@@ -37,14 +37,24 @@ export const configureClient = async (
   }
 };
 
-export const configureTestClient = (
+export const configureTestClient = async (
+  { savedObjects, cryptography }: DataSourceClientParams,
   dataSource: DataSourceAttributes,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
 ): Promise<Client> => {
   try {
+    const {
+      id,
+      auth: { type, credentials },
+    } = dataSource;
     const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
+
+    if (type === AuthType.UsernamePasswordType && !credentials?.password && id) {
+      dataSource = await getPasswordFromDataSourceId(dataSource, savedObjects, cryptography);
+    }
+
     return getQueryClient(rootClient, dataSource, undefined, false);
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSource: ${dataSource}`);
@@ -52,6 +62,35 @@ export const configureTestClient = (
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
   }
+};
+
+const getPasswordFromDataSourceId = async (
+  dataSource: DataSourceAttributes,
+  savedObjects: SavedObjectsClientContract,
+  cryptography: CryptographyServiceSetup
+): Promise<DataSourceAttributes> => {
+  const {
+    id,
+    auth: { type, credentials },
+  } = dataSource;
+
+  const { attributes: fetchedDataSource } = await getDataSource(id || '', savedObjects);
+  const password =
+    (fetchedDataSource &&
+      fetchedDataSource.auth &&
+      fetchedDataSource.auth.credentials &&
+      fetchedDataSource.auth.credentials.password) ||
+    '';
+
+  if (password && credentials) {
+    dataSource.auth = { type, credentials: { ...credentials, password } };
+    const fetchedCredential = await getCredential(dataSource, cryptography);
+    dataSource.auth = {
+      type,
+      credentials: { ...credentials, password: fetchedCredential.password },
+    };
+  }
+  return dataSource;
 };
 
 export const getDataSource = async (

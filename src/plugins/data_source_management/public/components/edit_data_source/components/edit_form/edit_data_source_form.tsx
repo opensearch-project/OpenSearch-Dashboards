@@ -45,6 +45,7 @@ export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
+  handleTestConnection: (formValues: DataSourceAttributes) => void;
   onDeleteDataSource?: () => void;
   displayToastMessage: (info: ToastMessageItem) => void;
 }
@@ -231,7 +232,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       /* Submit */
       this.setState({ isLoading: true });
       try {
-        await this.props.handleSubmit(formValues, false);
+        await this.props.handleSubmit(formValues);
         this.setState({ showUpdateOptions: false });
         this.setFormValuesForEditMode();
       } catch (e) {
@@ -248,6 +249,36 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   onClickDeleteDataSource = () => {
     if (this.props.onDeleteDataSource) {
       this.props.onDeleteDataSource();
+    }
+  };
+
+  onClickTestConnection = async () => {
+    this.setState({ isLoading: true });
+
+    try {
+      const formValues: DataSourceAttributes = {
+        title: this.state.title,
+        description: this.state.description,
+        endpoint: this.props.existingDataSource.endpoint,
+        auth: { ...this.state.auth, credentials: { ...this.state.auth.credentials, password: '' } },
+      };
+
+      await this.props.handleTestConnection(formValues);
+
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.testConnectionSuccessMsg',
+        defaultMessage:
+          'Connecting to the endpoint using the provided authentication method was successful.',
+        success: true,
+      });
+    } catch (e) {
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.testConnectionFailMsg',
+        defaultMessage:
+          'Failed Connecting to the endpoint using the provided authentication method.',
+      });
+    } finally {
+      this.setState({ isLoading: false });
     }
   };
 
@@ -280,7 +311,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.closePasswordModal();
 
     try {
-      await this.props.handleSubmit(updateAttributes, true);
+      await this.props.handleSubmit(updateAttributes);
       this.props.displayToastMessage({
         id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
         defaultMessage: 'Password updated successfully.',
@@ -331,8 +362,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <Header
         showDeleteIcon={true}
+        isFormValid={!!this.state.auth?.credentials?.username}
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
+        onClickTestConnection={this.onClickTestConnection}
       />
     );
   };

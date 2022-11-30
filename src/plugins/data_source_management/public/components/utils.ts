@@ -81,9 +81,11 @@ export async function deleteMultipleDataSources(
 
 export async function testConnection(
   http: HttpStart,
-  { endpoint, auth: { type, credentials } }: DataSourceAttributes
+  { endpoint, auth: { type, credentials } }: DataSourceAttributes,
+  dataSourceID?: string
 ) {
   const query: any = {
+    id: dataSourceID || '',
     endpoint,
     auth: {
       type,
