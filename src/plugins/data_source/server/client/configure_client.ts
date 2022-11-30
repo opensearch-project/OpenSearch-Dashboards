@@ -49,48 +49,29 @@ export const configureTestClient = async (
       id,
       auth: { type, credentials },
     } = dataSource;
+    let requireDecryption = false;
+
     const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
 
     if (type === AuthType.UsernamePasswordType && !credentials?.password && id) {
-      dataSource = await getPasswordFromDataSourceId(dataSource, savedObjects, cryptography);
+      const { attributes: fetchedDataSource } = await getDataSource(id || '', savedObjects);
+      dataSource.auth = {
+        type,
+        credentials: {
+          username: credentials?.username || '',
+          password: fetchedDataSource.auth.credentials?.password || '',
+        },
+      };
+      requireDecryption = true;
     }
 
-    return getQueryClient(rootClient, dataSource, undefined, false);
+    return getQueryClient(rootClient, dataSource, cryptography, requireDecryption);
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSource: ${dataSource}`);
     logger.error(error);
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
   }
-};
-
-const getPasswordFromDataSourceId = async (
-  dataSource: DataSourceAttributes,
-  savedObjects: SavedObjectsClientContract,
-  cryptography: CryptographyServiceSetup
-): Promise<DataSourceAttributes> => {
-  const {
-    id,
-    auth: { type, credentials },
-  } = dataSource;
-
-  const { attributes: fetchedDataSource } = await getDataSource(id || '', savedObjects);
-  const password =
-    (fetchedDataSource &&
-      fetchedDataSource.auth &&
-      fetchedDataSource.auth.credentials &&
-      fetchedDataSource.auth.credentials.password) ||
-    '';
-
-  if (password && credentials) {
-    dataSource.auth = { type, credentials: { ...credentials, password } };
-    const fetchedCredential = await getCredential(dataSource, cryptography);
-    dataSource.auth = {
-      type,
-      credentials: { ...credentials, password: fetchedCredential.password },
-    };
-  }
-  return dataSource;
 };
 
 export const getDataSource = async (

@@ -254,13 +254,23 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });
+    const existingAuthType = this.props.existingDataSource.auth.type;
 
     try {
+      const isNewCredential = !!(
+        existingAuthType === AuthType.NoAuth && this.state.auth.type !== existingAuthType
+      );
       const formValues: DataSourceAttributes = {
         title: this.state.title,
         description: this.state.description,
         endpoint: this.props.existingDataSource.endpoint,
-        auth: { ...this.state.auth, credentials: { ...this.state.auth.credentials, password: '' } },
+        auth: {
+          ...this.state.auth,
+          credentials: {
+            ...this.state.auth.credentials,
+            password: isNewCredential ? this.state.auth.credentials.password : '',
+          },
+        },
       };
 
       await this.props.handleTestConnection(formValues);
@@ -362,7 +372,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <Header
         showDeleteIcon={true}
-        isFormValid={!!this.state.auth?.credentials?.username}
+        isFormValid={
+          !!this.state.auth?.credentials?.username || this.state.auth.type === AuthType.NoAuth
+        }
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
