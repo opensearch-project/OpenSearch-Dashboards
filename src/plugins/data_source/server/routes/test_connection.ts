@@ -8,16 +8,19 @@ import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
 import { DataSourceAttributes } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
+import { CryptographyServiceSetup } from '../cryptography_service';
 
 export const registerTestConnectionRoute = (
   router: IRouter,
-  dataSourceServiceSetup: DataSourceServiceSetup
+  dataSourceServiceSetup: DataSourceServiceSetup,
+  cryptography: CryptographyServiceSetup
 ) => {
   router.post(
     {
       path: '/internal/data-source-management/validate',
       validate: {
         body: schema.object({
+          id: schema.string(),
           endpoint: schema.string(),
           auth: schema.maybe(
             schema.object({
@@ -38,6 +41,11 @@ export const registerTestConnectionRoute = (
       const dataSource: DataSourceAttributes = request.body as DataSourceAttributes;
 
       const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
+        {
+          dataSourceId: dataSource.id || '',
+          savedObjects: context.core.savedObjects.client,
+          cryptography,
+        },
         dataSource
       );
 

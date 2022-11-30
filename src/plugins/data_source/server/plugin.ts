@@ -106,7 +106,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     );
 
     const router = core.http.createRouter();
-    registerTestConnectionRoute(router, dataSourceService);
+    registerTestConnectionRoute(router, dataSourceService, cryptographyServiceSetup);
 
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),

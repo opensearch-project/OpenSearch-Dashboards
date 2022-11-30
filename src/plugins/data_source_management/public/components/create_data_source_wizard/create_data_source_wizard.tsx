@@ -92,7 +92,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       });
     } catch (e) {
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.createDataSource.createDataSourceFailMsg',
+        id: 'dataSourcesManagement.createDataSource.testConnectionFailMsg',
         defaultMessage:
           'Failed Connecting to the endpoint using the provided authentication method.',
       });
