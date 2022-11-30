@@ -54,6 +54,8 @@ Add the release runbook to RELEASING.md ([#2533](https://github.com/opensearch-p
 
 ### 🚞 Infrastructure
 
+* Update backport custom branch name to utilize head template ([#2766](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2766))
+
 ### 📝 Documentation
 
 ### 🛠 Maintenance
