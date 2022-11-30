@@ -50,8 +50,6 @@ export interface VisBuilderServices extends CoreStart {
   embeddable: EmbeddableStart;
   scopedHistory: ScopedHistory;
   osdUrlStateStorage: IOsdUrlStateStorage;
-  setActiveUrl: (newUrl: string) => void;
-  restorePreviousUrl: () => void;
   dashboard: DashboardStart;
 }
 

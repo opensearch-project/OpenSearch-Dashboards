@@ -74,8 +74,36 @@ export class VisBuilderPlugin
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations, data }: VisBuilderPluginSetupDependencies
   ) {
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/vis-builder'),
+      defaultSubUrl: '#/',
+      storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          osdUrlKey: '_g',
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
+            }))
+          ),
+        },
+      ],
+      getHistory: () => {
+        return this.currentHistory!;
+      },
+    });
+    this.stopUrlTracking = () => {
+      stopUrlTracker();
+    };
+
     // Register Default Visualizations
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
@@ -92,40 +120,11 @@ export class VisBuilderPlugin
 
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
-        const { data, savedObjects, navigation, expressions } = pluginsStart;
+        const { savedObjects, navigation, expressions } = pluginsStart;
         this.currentHistory = params.history;
 
-        const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-          baseUrl: core.http.basePath.prepend('/app/vis-builder'),
-          defaultSubUrl: '#/',
-          storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
-          navLinkUpdater$: this.appStateUpdater,
-          toastNotifications: core.notifications.toasts,
-          stateParams: [
-            {
-              osdUrlKey: '_g',
-              stateUpdate$: data.query.state$.pipe(
-                filter(
-                  ({ changes }) =>
-                    !!(changes.globalFilters || changes.time || changes.refreshInterval)
-                ),
-                map(({ state }) => ({
-                  ...state,
-                  filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-                }))
-              ),
-            },
-          ],
-          getHistory: () => {
-            return this.currentHistory!;
-          },
-        });
-        this.stopUrlTracking = () => {
-          stopUrlTracker();
-        };
-
         // make sure the index pattern list is up to date
-        data.indexPatterns.clearCache();
+        pluginsStart.data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
         // TODO: Add the redirect
@@ -150,7 +149,7 @@ export class VisBuilderPlugin
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
           toastNotifications: coreStart.notifications.toasts,
-          data,
+          data: pluginsStart.data,
           savedObjectsPublic: savedObjects,
           navigation,
           expressions,
@@ -158,8 +157,6 @@ export class VisBuilderPlugin
           types: typeService.start(),
           savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
-          setActiveUrl,
-          restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
         };
 
@@ -220,7 +217,7 @@ export class VisBuilderPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions }: VisBuilderPluginStartDependencies
+    { expressions, data }: VisBuilderPluginStartDependencies
   ): VisBuilderStart {
     const typeService = this.typeService.start();
 
