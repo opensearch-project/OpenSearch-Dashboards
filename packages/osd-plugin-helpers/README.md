@@ -49,7 +49,7 @@ $ plugin-helpers help
 
       Options:
         --skip-archive                       Don't create the zip file, just create the build/opensearch-dashboards directory
-        --opensearch-dashboards-version, -v  OpenSearch Dashboards version that the built plugin will target
+        --opensearch-dashboards-version, -k  OpenSearch Dashboards version that the built plugin will target
     
      
     version
