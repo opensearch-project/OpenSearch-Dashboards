@@ -12,6 +12,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [Legacy Maps Plugin] Prevent reverse-tabnabbing ([#2540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2540))
 * [CVE-2022-0155] Bump follow-redirects to 1.15.2 [#2653](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2653))
 * [CVE-2022-0536] Bump follow-redirects to 1.15.2 [#2653](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2653))
+* [CVE-2021-24033] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
+* [CVE-2021-42740] Remove storybook package to fix CVE-2021-42740 and CVE-2021-24033 ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
 
 ### 📈 Features/Enhancements
 
@@ -29,6 +31,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 Add the release runbook to RELEASING.md ([#2533](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2533))
 
 ### 🛠 Maintenance
+* Remove storybook package and related code ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
 
 ### 🪛 Refactoring
 
