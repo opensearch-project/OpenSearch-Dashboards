@@ -66,7 +66,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Refactor and improve Discover field summaries ([#2391](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2391))
 
 ### 🔩 Tests
-* [Multi DataSource] Add unit test coverage for Update Data source management stack  ([#2567](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2567))
+
+- [Multi DataSource] Add unit test coverage for Update Data source management stack ([#2567](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2567))
+- [BWC Tests] Add BWC tests for 2.5.0 ([#2890](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2890))
 
 ## [2.x]
 ### 💥 Breaking Changes
