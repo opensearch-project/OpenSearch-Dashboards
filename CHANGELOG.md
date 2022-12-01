@@ -60,6 +60,7 @@ Add the release runbook to RELEASING.md ([#2533](https://github.com/opensearch-p
 
 ### 📝 Documentation
 
+* Corrected README and help command of osd-plugin-helpers ([#2810](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2810))
 ### 🛠 Maintenance
 
 * [Version] Increment to 1.4 ([#1341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1341))
