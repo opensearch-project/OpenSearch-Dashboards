@@ -24,6 +24,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const path = require('path');
 
 /*
  * Modifications Copyright OpenSearch Contributors. See
@@ -59,7 +60,7 @@ const { findMostRecentlyChanged } = require('./find_most_recently_changed');
 
 test('returns newest file', () => {
   const file = findMostRecentlyChanged('/data/*.yml');
-  expect(file).toEqual('/data/newest.yml');
+  expect(file).toEqual(path.resolve('/data/newest.yml'));
 });
 
 afterAll(() => {

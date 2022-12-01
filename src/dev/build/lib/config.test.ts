@@ -27,7 +27,7 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@osd/utils';
+import { REPO_ROOT, standardize } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import pkg from '../../../../package.json';
@@ -51,6 +51,7 @@ const setup = async ({
     darwin: false,
     linux: false,
     linuxArm: false,
+    windows: false,
   },
 }: {
   targetAllPlatforms?: boolean;
@@ -58,6 +59,7 @@ const setup = async ({
     darwin: boolean;
     linux: boolean;
     linuxArm: boolean;
+    windows: boolean;
   };
 } = {}) => {
   return await Config.create({
@@ -84,7 +86,9 @@ describe('#getNodeVersion()', () => {
 describe('#getRepoRelativePath()', () => {
   it('converts an absolute path to relative path, from the root of the repo', async () => {
     const config = await setup();
-    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(`"src/dev/build/lib"`);
+    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(
+      `"${standardize('src/dev/build/lib', false, true)}"`
+    );
   });
 });
 
@@ -112,6 +116,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: true,
         linux: false,
         linuxArm: false,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -124,6 +129,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: false,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -136,6 +142,7 @@ describe('#hasSpecifiedPlatform', () => {
         darwin: false,
         linux: true,
         linuxArm: false,
+        windows: false,
       },
     });
     expect(config.hasSpecifiedPlatform() === true);
@@ -202,6 +209,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: true,
         linux: false,
         linuxArm: false,
+        windows: false,
       },
     });
 
@@ -224,6 +232,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: false,
         linux: true,
         linuxArm: false,
+        windows: false,
       },
     });
 
@@ -246,6 +255,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: false,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
 
@@ -268,6 +278,7 @@ describe('#getTargetPlatforms()', () => {
         darwin: true,
         linux: false,
         linuxArm: true,
+        windows: false,
       },
     });
 

@@ -64,7 +64,7 @@
     "uiFramework:createComponent": "cd packages/osd-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/osd-ui-framework && yarn documentComponent",
     "osd:watch": "node scripts/opensearch_dashboards --dev --logging.json=false",
-    "build:types": "rm -rf ./target/types && tsc --p tsconfig.types.json",
+    "build:types": "node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console"
@@ -435,6 +435,7 @@
     "mutation-observer": "^1.0.3",
     "ngreact": "^0.5.1",
     "nock": "12.0.3",
+    "node-stream-zip": "^1.15.0",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",
