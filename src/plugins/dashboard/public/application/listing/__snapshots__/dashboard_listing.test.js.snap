@@ -4,6 +4,7 @@ exports[`after fetch hideWriteControls 1`] = `
 <I18nProvider>
   <TableListView
     createItem={null}
+    dashboardItemCreators={Array []}
     deleteItems={null}
     editItem={null}
     editItemAvailable={null}
@@ -613,7 +614,6 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={10}
     listingLimit={1000}
     noItemsFragment={
       <div>
