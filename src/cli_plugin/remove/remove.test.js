@@ -39,6 +39,7 @@ import del from 'del';
 
 import { Logger } from '../lib/logger';
 import { remove } from './remove';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 describe('opensearchDashboards cli', function () {
   describe('plugin remover', function () {
@@ -48,20 +49,20 @@ describe('opensearchDashboards cli', function () {
 
     const settings = { pluginDir };
 
-    beforeEach(function () {
+    beforeEach(async () => {
       processExitStub = sinon.stub(process, 'exit');
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del.sync(pluginDir);
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
       mkdirSync(pluginDir, { recursive: true });
     });
 
-    afterEach(function () {
+    afterEach(async () => {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      del.sync(pluginDir);
+      await del(pluginDir, { cwd: PROCESS_WORKING_DIR });
     });
 
     it('throw an error if the plugin is not installed.', function () {

@@ -69,6 +69,7 @@
     "write-pkg": "^4.0.0"
   },
   "dependencies": {
+    "@osd/cross-platform": "1.0.0",
     "@osd/utils": "1.0.0",
     "tslib": "^2.0.0"
   }
