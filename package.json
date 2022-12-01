@@ -71,7 +71,7 @@
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "node scripts/build_ts_refs && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
-    "pkg-version": "./dev-tools/get-version.sh"
+    "pkg-version": "node -e \"console.log(require('./package.json').version)\""
   },
   "repository": {
     "type": "git",
