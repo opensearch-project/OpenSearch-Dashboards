@@ -293,14 +293,17 @@ describe('#start(installPath)', () => {
 });
 
 describe('#installOpenSearchPlugins()', () => {
+  const pluginHelperCLI =
+    process.platform === 'win32' ? './bin/opensearch-plugin.bat' : './bin/opensearch-plugin';
+
   it('install array of plugins on cluster snapshot', async () => {
     const cluster = new Cluster({ log });
     await cluster.installOpenSearchPlugins('foo', ['foo1', 'foo2']);
     expect(execa).toHaveBeenCalledTimes(2);
-    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo1'], {
+    expect(execa).toHaveBeenCalledWith(pluginHelperCLI, ['install', '--batch', 'foo1'], {
       cwd: 'foo',
     });
-    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo2'], {
+    expect(execa).toHaveBeenCalledWith(pluginHelperCLI, ['install', '--batch', 'foo2'], {
       cwd: 'foo',
     });
   });
@@ -308,7 +311,7 @@ describe('#installOpenSearchPlugins()', () => {
     const cluster = new Cluster({ log });
     await cluster.installOpenSearchPlugins('foo', 'foo1');
     expect(execa).toHaveBeenCalledTimes(1);
-    expect(execa).toHaveBeenCalledWith('./bin/opensearch-plugin', ['install', '--batch', 'foo1'], {
+    expect(execa).toHaveBeenCalledWith(pluginHelperCLI, ['install', '--batch', 'foo1'], {
       cwd: 'foo',
     });
   });
