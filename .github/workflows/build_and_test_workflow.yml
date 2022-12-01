@@ -25,18 +25,18 @@ env:
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
 
 jobs:
-  build-lint-test:
+  build-lint-test-linux:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
-    name: Build and Verify
+    name: Build and Verify on Linux
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -66,17 +66,72 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           directory: ./target/opensearch-dashboards-coverage
+          flags: Linux
 
       - name: Run integration tests
         id: integration-tests
         run: yarn test:jest_integration:ci
 
-  functional-tests:
+  build-lint-test-windows:
+    runs-on: windows-latest
+    name: Build and Verify on Windows
+    steps:
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Run linter
+        id: linter
+        run: yarn lint
+
+      - name: Run unit tests with coverage
+        id: unit-tests
+        run: yarn test:jest:ci:coverage
+
+      - name: Run mocha tests with coverage
+        id: mocha-tests
+        run: yarn test:mocha:coverage
+
+      - name: Upload Code Coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/opensearch-dashboards-coverage
+          flags: Windows
+
+      - name: Run integration tests
+        id: integration-tests
+        run: yarn test:jest_integration:ci
+
+  functional-tests-linux:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
-    name: Run functional tests
+    name: Run functional tests on Linux
     strategy:
       matrix:
         group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ]
@@ -84,10 +139,10 @@ jobs:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -116,12 +171,64 @@ jobs:
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
 
-  build-min-artifact-tests:
+  functional-tests-windows:
+    runs-on: windows-latest
+    name: Run functional tests on Windows
+    strategy:
+      matrix:
+        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ]
+    steps:
+      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      # image has the latest chrome v99
+      - name: Setup chromedriver
+        run: yarn add --dev chromedriver@106.0.1
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Run CI test group ${{ matrix.group }}
+        id: ftr-tests
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
+          JOB: ci${{ matrix.group }}
+          CACHE_DIR: ciGroup${{ matrix.group }}
+
+  build-min-artifact-tests-linux:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
-    name: Build min release artifacts
+    name: Build min release artifacts on Linux
     defaults:
       run:
         working-directory: ./artifacts
@@ -138,12 +245,12 @@ jobs:
             script: build-platform --linux-arm --skip-os-packages
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -174,8 +281,64 @@ jobs:
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
           retention-days: 1
 
+  build-min-artifact-tests-windows:
+    runs-on: windows-latest
+    name: Build min release artifacts on Windows
+    defaults:
+      run:
+        working-directory: artifacts
+    strategy:
+      matrix:
+        include:
+          - name: Windows x64
+            ext: zip
+            suffix: windows-x64
+            script: build-platform --windows --skip-os-packages
+    steps:
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+        working-directory: .
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: artifacts
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'artifacts/.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $env:GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build `${{ matrix.name }}`
+        run: yarn ${{ matrix.script }} --release
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.suffix }}-${{ env.VERSION }}
+          path: artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 1
+
   bwc-tests:
-    needs: [build-min-artifact-tests]
+    needs: [build-min-artifact-tests-linux]
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
@@ -189,7 +352,7 @@ jobs:
         version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0 ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
@@ -197,7 +360,7 @@ jobs:
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
