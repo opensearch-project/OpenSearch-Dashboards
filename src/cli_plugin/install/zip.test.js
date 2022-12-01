@@ -50,8 +50,8 @@ describe('opensearchDashboards cli', function () {
       tempPath = path.resolve(os.tmpdir(), randomDir);
     });
 
-    afterEach(() => {
-      del.sync(tempPath, { force: true });
+    afterEach(async () => {
+      await del(tempPath, { force: true });
     });
 
     describe('analyzeArchive', function () {

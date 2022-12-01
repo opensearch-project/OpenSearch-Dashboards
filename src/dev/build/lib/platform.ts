@@ -32,6 +32,7 @@ export interface TargetPlatforms {
   darwin: boolean;
   linuxArm: boolean;
   linux: boolean;
+  windows: boolean;
 }
 
 export class Platform {

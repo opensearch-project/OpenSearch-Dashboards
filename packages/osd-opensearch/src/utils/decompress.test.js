@@ -54,8 +54,8 @@ beforeEach(() => {
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
 });
 
-afterEach(() => {
-  del.sync(tmpFolder, { force: true });
+afterEach(async () => {
+  await del(tmpFolder, { force: true });
 });
 
 test('zip strips root directory', async () => {

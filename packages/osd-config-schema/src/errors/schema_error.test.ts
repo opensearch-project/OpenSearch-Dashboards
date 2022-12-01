@@ -30,7 +30,7 @@
  * GitHub history for details.
  */
 
-import { relative } from 'path';
+import { relative, sep } from 'path';
 import { SchemaError } from '.';
 
 /**
@@ -39,7 +39,7 @@ import { SchemaError } from '.';
 export const cleanStack = (stack: string) =>
   stack
     .split('\n')
-    .filter((line) => !line.includes('node_modules/') && !line.includes('internal/'))
+    .filter((line) => !line.includes('node_modules' + sep) && !line.includes('internal/'))
     .map((line) => {
       const parts = /.*\((.*)\).?/.exec(line) || [];
 
@@ -48,7 +48,11 @@ export const cleanStack = (stack: string) =>
       }
 
       const path = parts[1];
-      return line.replace(path, relative(process.cwd(), path));
+      // Cannot use `standardize` from `@osd/utils
+      let relativePath = relative(process.cwd(), path);
+      if (process.platform === 'win32') relativePath = relativePath.replace(/\\/g, '/');
+
+      return line.replace(path, relativePath);
     })
     .join('\n');
 

@@ -33,6 +33,7 @@
 import chalk from 'chalk';
 import path from 'path';
 
+import { standardize } from '@osd/utils';
 import { Project } from './project';
 
 const projectKey = Symbol('__project');
@@ -119,7 +120,7 @@ function createTreeStructure(tree: IProjectsTree): ITree {
     // `foo/bar/baz` instead.
     if (subtree.children && subtree.children.length === 1) {
       const child = subtree.children[0];
-      const newName = chalk.dim(path.join(dir.toString(), child.name!));
+      const newName = chalk.dim(standardize(path.join(dir.toString(), child.name!), true));
 
       children.push({
         children: child.children,
