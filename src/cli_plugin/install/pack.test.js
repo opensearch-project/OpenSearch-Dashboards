@@ -40,6 +40,7 @@ import del from 'del';
 import { Logger } from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 describe('opensearchDashboards cli', function () {
   describe('pack', function () {
@@ -78,7 +79,7 @@ describe('opensearchDashboards cli', function () {
       logger.log.restore();
       logger.error.restore();
 
-      await del(workingPathRoot);
+      await del(workingPathRoot, { cwd: PROCESS_WORKING_DIR });
     });
 
     function copyReplyFile(filename) {
