@@ -91,6 +91,7 @@ export default {
     'target/',
     '<rootDir>/src/plugins/maps_legacy',
     '<rootDir>/src/plugins/region_map',
+    '<rootDir>/src/cli_plugin/list/.test.data.list',
   ],
   testEnvironment: 'jest-environment-jsdom-thirteen',
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],

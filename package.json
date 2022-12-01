@@ -138,6 +138,7 @@
     "@osd/apm-config-loader": "1.0.0",
     "@osd/config": "1.0.0",
     "@osd/config-schema": "1.0.0",
+    "@osd/cross-platform": "1.0.0",
     "@osd/i18n": "1.0.0",
     "@osd/interpreter": "1.0.0",
     "@osd/logging": "1.0.0",
