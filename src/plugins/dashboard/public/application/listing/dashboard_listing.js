@@ -56,9 +56,14 @@ export class DashboardListing extends React.Component {
         <TableListView
           headingId="dashboardListingHeading"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
+          dashboardItemCreators={
+            this.props.hideWriteControls ? [] : this.props.dashboardItemCreators
+          }
+          dashboardItemCreatorClickHandler={this.props.dashboardItemCreatorClickHandler}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
           editItem={this.props.hideWriteControls ? null : this.props.editItem}
+          editItemAvailable={this.props.hideWriteControls ? null : this.props.editItemAvailable}
           tableColumns={this.getTableColumns()}
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
@@ -163,7 +168,7 @@ export class DashboardListing extends React.Component {
 
   getTableColumns() {
     const dateFormat = this.props.core.uiSettings.get('dateFormat');
-    const tableColumns = [
+    return [
       {
         field: 'title',
         name: i18n.translate('dashboard.listing.table.titleColumnName', {
@@ -178,6 +183,14 @@ export class DashboardListing extends React.Component {
             {field}
           </EuiLink>
         ),
+      },
+      {
+        field: 'type',
+        name: i18n.translate('dashboard.listing.table.typeColumnName', {
+          defaultMessage: 'Type',
+        }),
+        dataType: 'string',
+        sortable: true,
       },
       {
         field: 'description',
@@ -201,15 +214,17 @@ export class DashboardListing extends React.Component {
         render: (updatedAt) => updatedAt && moment(updatedAt).format(dateFormat),
       },
     ];
-    return tableColumns;
   }
 }
 
 DashboardListing.propTypes = {
   createItem: PropTypes.func.isRequired,
+  dashboardItemCreators: PropTypes.func.isRequired,
+  dashboardItemCreatorClickHandler: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  editItemAvailable: PropTypes.func,
   getViewUrl: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,

@@ -29,7 +29,7 @@
  */
 
 import * as React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 
@@ -45,6 +45,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { DashboardListProviderFn } from 'src/plugins/dashboard/public/application/legacy_app';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -119,6 +120,12 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
+import {
+  DashboardListSources,
+  DashboardCreators,
+  DashboardCreator,
+  DashboardListItems,
+} from './types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -156,8 +163,20 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type DashboardSetup = void;
+export type RegisterDashboardListSourceFn = (
+  pluginName: string,
+  listProviderFn: DashboardListProviderFn
+) => void;
 
+export interface RegisterOtherItemCreatorFn {
+  pluginName: string;
+  itemCreator: () => {};
+}
+
+export interface DashboardSetup {
+  registerDashboardListSource: RegisterDashboardListSourceFn;
+  registerDashboardItemCreator: RegisterOtherItemCreatorFn;
+}
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
   addEmbeddableToDashboard: (options: {
@@ -200,6 +219,8 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
+  private dashboardListSources: DashboardListSources = [];
+  private dashboardItemCreators: DashboardCreators = [];
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
   public setup(
@@ -308,6 +329,27 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const registerDashboardListSource = (
+      pluginName: string,
+      listProviderFn: () => Observable<DashboardListItems>
+    ) => {
+      this.dashboardListSources.push({ name: pluginName, listProviderFn });
+    };
+
+    const registerDashboardItemCreator = (creator: DashboardCreator) => {
+      this.dashboardItemCreators.push(creator);
+    };
+
+    const dashboardCreate = (history) => history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+
+    // Register default DashboardCreator for Dashboards itself
+    registerDashboardItemCreator({
+      id: 'dashboard',
+      name: DashboardConstants.DASHBOARDS_ID,
+      defaultText: 'Dashboard',
+      creatorFn: dashboardCreate,
+    });
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -341,6 +383,8 @@ export class DashboardPlugin
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
           savedDashboards: dashboardStart.getSavedDashboardLoader(),
+          dashboardListSources: this.dashboardListSources,
+          dashboardItemCreators: this.dashboardItemCreators,
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -420,6 +464,11 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    return {
+      registerDashboardListSource,
+      registerDashboardItemCreator,
+    };
   }
 
   private addEmbeddableToDashboard(

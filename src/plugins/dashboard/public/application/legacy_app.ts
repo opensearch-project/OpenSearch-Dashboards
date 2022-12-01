@@ -30,10 +30,13 @@
 
 import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
+import { createHashHistory } from 'history';
+import { from, Observable, concat } from 'rxjs';
+import { filter, map, mergeMap, reduce } from 'rxjs/operators';
 
+import { DashboardCreatorFn } from 'src/plugins/dashboard/public/types';
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
-import { createHashHistory } from 'history';
 
 import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -47,6 +50,22 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
 
+export interface DashboardListItem {
+  id: string; // plugin identifier
+  title: string; // item title
+  type: string; // item type display string
+  description: string; // item description
+  url: string; // redirect url to item detail
+  listType: string; // item type key
+}
+
+export type DashboardListItems = DashboardListItem[];
+export type DashboardListProviderFn = () => Observable<DashboardListItems>;
+export interface DashboardDisplay {
+  hits: DashboardListItems;
+  total: number;
+}
+
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
@@ -54,8 +73,11 @@ export function initDashboardApp(app, deps) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
+      ['dashboardItemCreators', { watchDepth: 'reference' }],
+      ['dashboardItemCreatorClickHandler', { watchDepth: 'reference' }],
       ['getViewUrl', { watchDepth: 'reference' }],
       ['editItem', { watchDepth: 'reference' }],
+      ['editItemAvailable', { watchDepth: 'reference' }],
       ['findItems', { watchDepth: 'reference' }],
       ['deleteItems', { watchDepth: 'reference' }],
       ['listingLimit', { watchDepth: 'reference' }],
@@ -102,6 +124,7 @@ export function initDashboardApp(app, deps) {
       },
     };
 
+    /* eslint-disable object-shorthand */
     $routeProvider
       .when('/', {
         redirectTo: DashboardConstants.LANDING_PAGE_PATH,
@@ -127,14 +150,66 @@ export function initDashboardApp(app, deps) {
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
+          $scope.dashboardItemCreators = () => {
+            return deps.dashboardItemCreators.map((creator) => ({
+              ...creator,
+              creatorFn: (event) => creator.creatorFn(event, history),
+            }));
+          };
+          $scope.dashboardItemCreatorClickHandler = (
+            creatorFn: DashboardCreatorFn
+          ): ((evt: any) => void) => {
+            return (evt: any) => {
+              creatorFn(evt, history);
+            };
+          };
+
+          $scope.editItemAvailable = (item) => !!item.editUrl;
           $scope.find = (search) => {
-            return service.find(search, $scope.listingLimit);
+            const dashboardList$ = from(service.find(search, $scope.listingLimit));
+            const dashboardListItems$ = dashboardList$.pipe(
+              mergeMap((l) => l.hits),
+              map((item) => ({
+                ...item,
+                editUrl: `${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`,
+                type: 'Dashboard',
+                listingType: 'dashboard',
+              }))
+            );
+            const otherDashboardLists$ = from(deps.dashboardListSources).pipe(
+              mergeMap(({ name, listProviderFn }) => listProviderFn()) // execute each list source
+            );
+
+            const combined$ = concat(dashboardListItems$, otherDashboardLists$).pipe(
+              map((item) => item as DashboardListItem)
+            );
+
+            const searchRx = new RegExp(search, 'i');
+            const matchSearchToItem: (item: DashboardListItem) => boolean = (item) => {
+              const matchedTitle = !!item.title.match(searchRx);
+              const matchedDescription = !!item.description.match(searchRx);
+
+              return matchedTitle || matchedDescription;
+            };
+
+            const searchFiltered$ = combined$.pipe(filter(matchSearchToItem));
+
+            const dashboardDisplay$ = searchFiltered$.pipe(
+              reduce<DashboardListItem, DashboardDisplay>(
+                (acc: DashboardDisplay, item: DashboardListItem) => {
+                  return { hits: [...acc.hits, item], total: acc.total + 1 };
+                },
+                { hits: [], total: 0 }
+              )
+            );
+
+            return dashboardDisplay$.toPromise();
           };
-          $scope.editItem = ({ id }) => {
-            history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+          $scope.editItem = ({ editUrl }) => {
+            history.push(editUrl);
           };
-          $scope.getViewUrl = ({ id }) => {
-            return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
+          $scope.getViewUrl = ({ url }) => {
+            return url;
           };
           $scope.delete = (dashboards) => {
             return service.delete(dashboards.map((d) => d.id));
