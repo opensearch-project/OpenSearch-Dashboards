@@ -67,8 +67,8 @@ export class VisBuilderPlugin
     > {
   private typeService = new TypeService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private stopUrlTracking: (() => void) | undefined = undefined;
-  private currentHistory: ScopedHistory | undefined = undefined;
+  private stopUrlTracking?: () => void;
+  private currentHistory?: ScopedHistory;
 
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -77,9 +77,9 @@ export class VisBuilderPlugin
     { embeddable, visualizations, data }: VisBuilderPluginSetupDependencies
   ) {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/vis-builder'),
+      baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:vis-builder`,
+      storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -134,17 +134,16 @@ export class VisBuilderPlugin
 
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        const unlistenParentHistory = params.history.listen(() => {
+        const unlistenParentHistory = this.currentHistory.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        // Register Default Visualizations
         const services: VisBuilderServices = {
           ...coreStart,
           scopedHistory: this.currentHistory,
-          history: params.history,
+          history: this.currentHistory,
           osdUrlStateStorage: createOsdUrlStateStorage({
-            history: params.history,
+            history: this.currentHistory,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
@@ -162,8 +161,8 @@ export class VisBuilderPlugin
 
         // Instantiate the store
         const store = await getPreloadedStore(services);
-
         const unmount = renderApp(params, services, store);
+
         // Render the application
         return () => {
           unlistenParentHistory();

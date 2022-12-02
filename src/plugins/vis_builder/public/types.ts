@@ -15,7 +15,6 @@ import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../../../core/public';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { DataPublicPluginSetup } from '../../data/public';
 
 export type VisBuilderSetup = TypeServiceSetup;

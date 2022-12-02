@@ -46,7 +46,7 @@ export interface TopNavConfigParams {
   savedVisBuilderVis: VisBuilderVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
-  originatingApp: string | undefined;
+  originatingApp?: string;
 }
 
 export const getTopNavConfig = (

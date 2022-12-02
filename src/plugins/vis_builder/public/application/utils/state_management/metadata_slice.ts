@@ -35,8 +35,14 @@ const initialState: MetadataState = {
 export const getPreloadedState = async ({
   types,
   data,
+  embeddable,
+  scopedHistory,
 }: VisBuilderServices): Promise<MetadataState> => {
-  const preloadedState = { ...initialState };
+  const { originatingApp } =
+    embeddable
+      .getStateTransfer(scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+  const preloadedState = { ...initialState, originatingApp };
 
   return preloadedState;
 };
