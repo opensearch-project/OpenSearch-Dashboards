@@ -29,7 +29,6 @@
  */
 
 import { IUiSettingsClient as IUiSettingsClientPublic } from 'src/core/public';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { IUiSettingsClient as IUiSettingsClientServer } from 'src/core/server';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';

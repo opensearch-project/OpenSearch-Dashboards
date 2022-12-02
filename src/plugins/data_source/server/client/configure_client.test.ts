@@ -12,7 +12,6 @@ import { ClientMock, parseClientOptionsMock } from './configure_client.test.mock
 import { OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
 import { ClientOptions } from '@opensearch-project/opensearch';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';

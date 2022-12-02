@@ -67,8 +67,8 @@ it('patch native modules task downloads the correct platform package', async () 
           "destination": <absolute path>/.native_modules/re2/linux-arm64-83.tar.gz,
           "log": <ToolingLog>,
           "retries": 3,
-          "sha256": "f25124adc64d269a513b99abd4a5eed8d7a929db565207f8ece1f3b7b7931668",
-          "url": "https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.15.4/linux-arm64-83.tar.gz",
+          "sha256": "38ec2ac319ed7f5552d0b3c2785e9914acb40ee6ed6de2f605a22a6e6c0480ef",
+          "url": "https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.17.8/linux-arm64-83.tar.gz",
         },
       ],
     ]

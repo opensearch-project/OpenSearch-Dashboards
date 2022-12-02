@@ -29,7 +29,6 @@
  */
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
-// eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';

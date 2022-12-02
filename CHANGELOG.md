@@ -90,6 +90,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛠 Maintenance
 
 - Adding @zhongnansu as maintainer. ([#2590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2590))
+- Removes unnecessary dependency resolutions ([#2998](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2998))
 
 ### 🪛 Refactoring
 

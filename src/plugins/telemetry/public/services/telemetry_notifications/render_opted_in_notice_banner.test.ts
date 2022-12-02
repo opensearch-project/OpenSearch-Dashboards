@@ -29,7 +29,6 @@
  */
 
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { overlayServiceMock } from '../../../../../core/public/overlays/overlay_service.mock';
 
 describe('renderOptedInNoticeBanner', () => {

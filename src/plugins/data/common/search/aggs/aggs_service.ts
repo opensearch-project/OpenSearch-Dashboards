@@ -30,7 +30,6 @@
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { IUiSettingsClient as IUiSettingsClientPublic } from 'src/core/public';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { IUiSettingsClient as IUiSettingsClientServer } from 'src/core/server';
 import { UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';

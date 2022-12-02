@@ -39,7 +39,7 @@
  */
 const path = require('path');
 const resolve = require('eslint-module-utils/resolve').default;
-const mm = require('micromatch');
+const mm = require('multimatch');
 
 function isStaticRequire(node) {
   return (

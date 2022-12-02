@@ -31,7 +31,6 @@
 import { handleResponse } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
 import { SearchResponse } from 'elasticsearch';

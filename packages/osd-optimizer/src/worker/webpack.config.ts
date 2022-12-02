@@ -36,7 +36,6 @@ import webpack from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 // @ts-expect-error
 import webpackMerge from 'webpack-merge';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 
@@ -78,7 +77,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     externals: [UiSharedDeps.externals],
 
     plugins: [
-      new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],

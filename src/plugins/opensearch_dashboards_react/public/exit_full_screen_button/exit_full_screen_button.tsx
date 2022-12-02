@@ -38,7 +38,6 @@ export interface ExitFullScreenButtonProps {
 }
 
 import './index.scss';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import OpenSearchMarkDarkMode from '../../../home/public/assets/logos/opensearch_mark_darkmode.svg';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {

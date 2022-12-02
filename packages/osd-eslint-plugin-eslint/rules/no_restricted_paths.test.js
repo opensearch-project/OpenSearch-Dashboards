@@ -426,34 +426,5 @@ ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
         },
       ],
     },
-
-    {
-      // Don't use index*.
-      // It won't work with dirs that start with 'index'.
-      code: 'import { X } from "./index_patterns"',
-      filename: path.join(__dirname, './testfiles/no_restricted_paths/server/b.js'),
-      options: [
-        {
-          basePath: __dirname,
-          zones: [
-            {
-              target: ['testfiles/no_restricted_paths/(public|server)/**/*'],
-              from: [
-                'testfiles/no_restricted_paths/server/**/*',
-                '!testfiles/no_restricted_paths/server/index*',
-              ],
-              allowSameFolder: true,
-            },
-          ],
-        },
-      ],
-      errors: [
-        {
-          message: 'Unexpected path "./index_patterns" imported in restricted zone.',
-          line: 1,
-          column: 19,
-        },
-      ],
-    },
   ],
 });

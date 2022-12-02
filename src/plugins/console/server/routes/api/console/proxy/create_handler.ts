@@ -44,7 +44,6 @@ import {
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
 
 import { RouteDependencies } from '../../../';
